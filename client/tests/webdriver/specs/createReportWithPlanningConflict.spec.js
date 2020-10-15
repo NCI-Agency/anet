@@ -41,15 +41,15 @@ describe("When creating a Report with conflicts", () => {
       report01.engagementDate.format("DD-MM-YYYY HH:mm")
     )
     expect(CreateReport.duration.getValue()).to.equal(report01.duration)
-    const advisor01 = CreateReport.getAdvisor(1)
+    const advisor01 = CreateReport.getAdvisorByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
     expect(advisor01.conflictButton.isExisting()).to.equal(false)
 
-    const advisor02 = CreateReport.getAdvisor(2)
+    const advisor02 = CreateReport.getAdvisorByName(report01.advisors[0])
     expect(advisor02.name).to.equal(report01.advisors[0])
     expect(advisor02.conflictButton.isExisting()).to.equal(false)
 
-    const principal01 = CreateReport.getPrincipal(1)
+    const principal01 = CreateReport.getPrincipalByName(report01.principals[0])
     expect(principal01.name).to.equal(report01.principals[0])
     expect(principal01.conflictButton.isExisting()).to.equal(false)
 
@@ -73,23 +73,23 @@ describe("When creating a Report with conflicts", () => {
       report02.engagementDate.format("DD-MM-YYYY HH:mm")
     )
     expect(CreateReport.duration.getValue()).to.equal(report02.duration)
-    const advisor01 = CreateReport.getAdvisor(1)
+    const advisor01 = CreateReport.getAdvisorByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
     expect(advisor01.conflictButton.isExisting()).to.equal(true)
 
-    const advisor02 = CreateReport.getAdvisor(2)
+    const advisor02 = CreateReport.getAdvisorByName(report02.advisors[0])
     expect(advisor02.name).to.equal(report02.advisors[0])
     expect(advisor02.conflictButton.isExisting()).to.equal(true)
 
-    const advisor03 = CreateReport.getAdvisor(3)
+    const advisor03 = CreateReport.getAdvisorByName(report02.advisors[1])
     expect(advisor03.name).to.equal(report02.advisors[1])
     expect(advisor03.conflictButton.isExisting()).to.equal(false)
 
-    const principal01 = CreateReport.getPrincipal(1)
+    const principal01 = CreateReport.getPrincipalByName(report02.principals[0])
     expect(principal01.name).to.equal(report02.principals[0])
     expect(principal01.conflictButton.isExisting()).to.equal(true)
 
-    const principal02 = CreateReport.getPrincipal(2)
+    const principal02 = CreateReport.getPrincipalByName(report02.principals[1])
     expect(principal02.name).to.equal(report02.principals[1])
     expect(principal02.conflictButton.isExisting()).to.equal(false)
 

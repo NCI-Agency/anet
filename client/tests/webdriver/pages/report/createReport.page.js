@@ -61,36 +61,52 @@ class CreateReport extends Page {
     super.open(PAGE_URL)
   }
 
-  getAdvisor(index) {
-    const advisor = browser.$(
-      `.advisorAttendeesTable tbody tr:nth-child(${index})`
-    )
+  getAdvisorByName(name) {
+    const advisor = browser
+      .$$("#reportPeopleContainer .advisorAttendeesTable tbody tr")
+      .find(r => {
+        return (
+          r.$("td.reportPeopleName").isExisting() &&
+          r.$("td.reportPeopleName").getText() === name
+        )
+      })
 
-    // wait for conflict loader to disappear
-    advisor.$("td:nth-child(7) div.bp3-spinner").waitForExist({ reverse: true })
-
-    return {
-      name: advisor.$("td:nth-child(3)").getText(),
-      conflictButton: advisor.$("td:nth-child(7) > span"),
-      deleteButton: advisor.$("td:nth-child(8) > button")
+    if (!advisor) {
+      return null
     }
+    // wait for conflict loader to disappear
+    advisor
+      .$("td.conflictButton div.bp3-spinner")
+      .waitForExist({ reverse: true })
+
+    const result = {
+      name: advisor.$("td.reportPeopleName").getText(),
+      conflictButton: advisor.$("td.conflictButton > span")
+    }
+
+    return result
   }
 
-  getPrincipal(index) {
+  getPrincipalByName(name) {
     // principals table has an empty row at top
-    const principal = browser.$(
-      `.principalAttendeesTable tbody tr:nth-child(${index + 1})`
-    )
-
+    const principal = browser
+      .$$("#reportPeopleContainer .principalAttendeesTable tbody tr")
+      .find(
+        r =>
+          r.$("td.reportPeopleName").isExisting() &&
+          r.$("td.reportPeopleName").getText() === name
+      )
+    if (!principal) {
+      return null
+    }
     // wait for conflict loader to disappear
     principal
-      .$("td:nth-child(7) div.bp3-spinner")
+      .$("td.conflictButton div.bp3-spinner")
       .waitForExist({ reverse: true })
 
     return {
-      name: principal.$("td:nth-child(3)").getText(),
-      conflictButton: principal.$("td:nth-child(7) > span"),
-      deleteButton: principal.$("td:nth-child(8) > button")
+      name: principal.$("td.reportPeopleName").getText(),
+      conflictButton: principal.$("td.conflictButton > span")
     }
   }
 
