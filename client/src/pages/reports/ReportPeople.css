@@ -26,7 +26,9 @@ div.checkbox.primary > label > span {
   background-color: white;
   font-style: italic;
 }
-
+#reportPeopleContainer .reportPeople-fieldHeader {
+  white-space: normal;
+}
 @media print {
   .report-author {
     display: none;

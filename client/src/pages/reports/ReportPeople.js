@@ -156,34 +156,52 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const { currentUser } = useContext(AppContext)
   return (
     <div id="reportPeopleContainer">
-      <TableContainer className="advisorAttendeesTable">
-        <TableHeader showDelete={showDelete} />
-        <TableBody
-          reportPeople={report.reportPeople}
-          filterCb={person =>
-            person.role === Person.ROLE.ADVISOR && person.attendee}
-          handleAttendeeRow={renderAttendeeRow}
-        />
-      </TableContainer>
-      <TableContainer className="principalAttendeesTable">
-        <TableHeader hide showDelete={showDelete} />
-        <TableBody
-          reportPeople={report.reportPeople}
-          filterCb={person =>
-            person.role === Person.ROLE.PRINCIPAL && person.attendee}
-          handleAttendeeRow={renderAttendeeRow}
-          enableDivider
-        />
-      </TableContainer>
-      <h3>Administrative</h3>
-      <TableContainer className="reportAdministrative">
-        <TableHeader showDelete={showDelete} />
-        <TableBody
-          reportPeople={report.reportPeople}
-          filterCb={person => !person.attendee}
-          handleAttendeeRow={renderAttendeeRow}
-          enableDivider
-        />
+      <TableContainer>
+        <tbody>
+          <tr>
+            <th className="reportPeople-fieldHeader">Advisors</th>
+            <td>
+              <TableContainer className="advisorAttendeesTable">
+                <TableHeader showDelete={showDelete} />
+                <TableBody
+                  reportPeople={report.reportPeople}
+                  filterCb={person =>
+                    person.role === Person.ROLE.ADVISOR && person.attendee}
+                  handleAttendeeRow={renderAttendeeRow}
+                />
+              </TableContainer>
+            </td>
+          </tr>
+          <tr>
+            <th className="reportPeople-fieldHeader">Principals</th>
+            <td>
+              <TableContainer className="principalAttendeesTable">
+                <TableHeader hide showDelete={showDelete} />
+                <TableBody
+                  reportPeople={report.reportPeople}
+                  filterCb={person =>
+                    person.role === Person.ROLE.PRINCIPAL && person.attendee}
+                  handleAttendeeRow={renderAttendeeRow}
+                  enableDivider
+                />
+              </TableContainer>
+            </td>
+          </tr>
+          <tr>
+            <th className="reportPeople-fieldHeader">Administrative</th>
+            <td>
+              <TableContainer className="reportAdministrative">
+                <TableHeader hide showDelete={showDelete} />
+                <TableBody
+                  reportPeople={report.reportPeople}
+                  filterCb={person => !person.attendee}
+                  handleAttendeeRow={renderAttendeeRow}
+                  enableDivider
+                />
+              </TableContainer>
+            </td>
+          </tr>
+        </tbody>
       </TableContainer>
     </div>
   )
