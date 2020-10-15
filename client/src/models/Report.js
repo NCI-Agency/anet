@@ -468,7 +468,7 @@ export default class Report extends Model {
   // Report people shouldn't have any person who is both non-attending and non-author
   static checkPurposelessPeople(reportPeople) {
     if (reportPeople.some(rp => !rp.author && !rp.attendee)) {
-      return "You must remove the people who have no purpose in this engagement"
+      return "You must remove the people who have no involvement (neither attending nor author)"
     }
   }
 
