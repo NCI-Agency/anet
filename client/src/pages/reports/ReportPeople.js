@@ -74,9 +74,8 @@ function sortReportPeople(reportPeople) {
       return rp1.primary ? -1 : 1
     } else if (rp1.author !== rp2.author) {
       return rp1.author ? -1 : 1
-    } else {
-      return (rp1.name || rp1.uuid).localeCompare(rp2.name || rp2.uuid)
     }
+    return (rp1.name || rp1.uuid).localeCompare(rp2.name || rp2.uuid)
   })
 }
 
@@ -93,12 +92,12 @@ TableContainer.propTypes = {
 const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
   <Radio
     name={`primaryAttendee${person.role}`}
-    className="primary"
+    className={`primary${!person.primary ? " inActive" : ""}`}
     checked={person.primary}
     disabled={disabled || !person.attendee}
     onChange={() => !disabled && handleOnChange(person)}
   >
-    {person.primary && <Label bsStyle="primary">Primary</Label>}
+    <Label bsStyle="primary">Primary</Label>
   </Radio>
 )
 PrimaryAttendeeRadioButton.propTypes = {
@@ -157,7 +156,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const { currentUser } = useContext(AppContext)
   return (
     <div id="reportPeopleContainer">
-      <h3>Attendance</h3>
       <TableContainer className="advisorAttendeesTable">
         <TableHeader showDelete={showDelete} />
         <TableBody
@@ -202,7 +200,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             />
           </div>
         </td>
-        <td className="report-author">
+        <td className="report-attendee">
           <div style={{ minWidth: "99px" }}>
             {Person.isAdvisor(person) && (
               <ReportAttendeeCheckbox
@@ -214,7 +212,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             )}
           </div>
         </td>
-        <td className="report-attendee">
+        <td className="report-author">
           <div style={{ minWidth: "99px" }}>
             {Person.isAdvisor(person) && (
               <ReportAuthorCheckbox
@@ -279,15 +277,21 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   }
   // only advisors can be authors
   function setReportAuthor(person) {
-    // FIXME: prevent the removal of the last author
-    // const numOfAuthors = report.reportPeople.filter(rp => rp.author).length
+    // Prevent the removal of the last author
+    const anyAuthorsBesideCurrentPerson = report.reportPeople.some(
+      rp => rp.author && !Person.isEqual(rp, person)
+    )
+    // are we toggling the last author, get the authorness value before toggle
+    const isTheLastAuthorBeingRemoved =
+      !anyAuthorsBesideCurrentPerson && person.author
 
     report.reportPeople.forEach(rp => {
       if (Person.isEqual(rp, person)) {
-        // if (!numOfAuthors) {
-        //   toast("You must provide at least 1 author for the report")
-        // }
-        rp.author = !rp.author
+        if (isTheLastAuthorBeingRemoved) {
+          toast("You must provide at least 1 author for a report")
+        } else {
+          rp.author = !rp.author
+        }
       }
     })
     onChange(report.reportPeople)

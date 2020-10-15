@@ -20,6 +20,7 @@ div.checkbox.primary > label > span {
   background-color: green;
 }
 
+.inActive.radio.primary > label > span,
 .inActive.checkbox.primary > label > span {
   color: grey;
   background-color: white;

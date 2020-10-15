@@ -176,12 +176,37 @@ export default class Report extends Model {
           "primary principal error",
           // can't use arrow function here because of binding to 'this'
           function(reportPeople) {
-            const err1 = Report.checkPrimaryAttendee(
+            const err = Report.checkPrimaryAttendee(
               reportPeople,
               Person.ROLE.PRINCIPAL
             )
-            const err2 = Report.checkAttendingAuthor(reportPeople)
-            const err = err1 || err2
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "attending-author",
+          "attending author error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkAttendingAuthor(reportPeople)
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "any-author",
+          "no author error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkAnyAuthor(reportPeople)
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "purposeless-people",
+          "purposeless people error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkPurposelessPeople(reportPeople)
             return err ? this.createError({ message: err }) : true
           }
         )
@@ -408,6 +433,19 @@ export default class Report extends Model {
   static checkAttendingAuthor(reportPeople) {
     if (!reportPeople.some(rp => rp.author && rp.attendee)) {
       return "You must provide at least 1 attending author"
+    }
+  }
+
+  static checkAnyAuthor(reportPeople) {
+    if (!reportPeople.some(rp => rp.author)) {
+      return "You must provide at least 1 author"
+    }
+  }
+
+  // Report people shouldn't have any person who is both non-attending and non-author
+  static checkPurposelessPeople(reportPeople) {
+    if (!reportPeople.some(rp => rp.author || rp.attendee)) {
+      return "You must remove the people who have no purpose in this engagement"
     }
   }
 
