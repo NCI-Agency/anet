@@ -259,6 +259,7 @@ public class ReportResource {
             existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
         if (existingPerson.isPresent()) {
           if (existingPerson.get().isPrimary() != rp.isPrimary()
+              || existingPerson.get().isAttendee() != rp.isAttendee()
               || existingPerson.get().isAuthor() != rp.isAuthor()) {
             dao.updatePersonOnReport(rp, r);
           }
