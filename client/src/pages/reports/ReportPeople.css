@@ -26,6 +26,10 @@ div.checkbox.primary > label > span {
   background-color: white;
   font-style: italic;
 }
+
+.inActive.radio.disabled.primary > label > span {
+  text-decoration: line-through;
+}
 #reportPeopleContainer .reportPeople-fieldHeader {
   white-space: normal;
 }

@@ -10,30 +10,74 @@ import { Checkbox, Label, Radio, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
-const AttendeeDividerRow = () => (
+const AttendeeDividerRow = ({ showDelete }) => (
   <tr className="attendee-divider-row">
-    <td colSpan={7}>
+    <td colSpan={showDelete ? 9 : 8}>
       <hr />
     </td>
   </tr>
 )
+AttendeeDividerRow.propTypes = {
+  showDelete: PropTypes.bool
+}
+
+const Th = ({ hide, text, ...otherProps }) => {
+  return (
+    <th {...otherProps}>
+      <div style={{ minWidth: "89px" }}>{!hide && text}</div>
+    </th>
+  )
+}
+Th.propTypes = {
+  text: PropTypes.string,
+  hide: PropTypes.bool
+}
 
 const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
-      <th className="col-xs-1" style={{ textAlign: "center" }}>
-        {!hide && "Primary"}
-      </th>
-      <th className="col-xs-1" style={{ textAlign: "center" }}>
-        {!hide && "Attendees"}
-      </th>
-      <th className="col-xs-1" style={{ textAlign: "center" }}>
-        {!hide && "Authors"}
-      </th>
-      <th className="col-xs-3">{!hide && "Name"}</th>
-      <th className="col-xs-3">{!hide && "Position"}</th>
-      <th className="col-xs-1">{!hide && "Location"}</th>
-      <th className="col-xs-2">{!hide && "Organization"}</th>
+      <Th
+        text="Primary"
+        hide={hide}
+        className="col-xs-1"
+        style={{ textAlign: "center" }}
+      />
+      <Th
+        text="Attendees"
+        hide={hide}
+        className="col-xs-1"
+        style={{ textAlign: "center" }}
+      />
+      <Th
+        text="Authors"
+        hide={hide}
+        className="col-xs-1"
+        style={{ textAlign: "center" }}
+      />
+      <Th
+        text="Name"
+        hide={hide}
+        className="col-xs-3"
+        style={{ textAlign: "center" }}
+      />
+      <Th
+        text="Position"
+        hide={hide}
+        className="col-xs-3"
+        style={{ textAlign: "center" }}
+      />
+      <Th
+        text="Location"
+        hide={hide}
+        className="col-xs-1"
+        style={{ textAlign: "center" }}
+      />
+      <Th
+        text="Organization"
+        hide={hide}
+        className="col-xs-2"
+        style={{ textAlign: "center" }}
+      />
       <th className="col-xs-1" />
       {showDelete && <th className="col-xs-1" />}
     </tr>
@@ -48,10 +92,11 @@ const TableBody = ({
   reportPeople,
   handleAttendeeRow,
   filterCb,
-  enableDivider
+  enableDivider,
+  showDelete
 }) => (
   <tbody>
-    {enableDivider && <AttendeeDividerRow />}
+    {enableDivider && <AttendeeDividerRow showDelete={showDelete} />}
     {Person.map(sortReportPeople(reportPeople.filter(filterCb)), person =>
       handleAttendeeRow(person)
     )}
@@ -61,7 +106,8 @@ TableBody.propTypes = {
   reportPeople: PropTypes.array.isRequired,
   handleAttendeeRow: PropTypes.func,
   filterCb: PropTypes.func,
-  enableDivider: PropTypes.bool
+  enableDivider: PropTypes.bool,
+  showDelete: PropTypes.bool
 }
 TableBody.defaultProps = {
   reportPeople: []
@@ -129,17 +175,12 @@ ReportAuthorCheckbox.propTypes = {
   isCurrentEditor: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
-const ReportAttendeeCheckbox = ({
-  person,
-  disabled,
-  isCurrentEditor,
-  handleOnChange
-}) => (
+const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
   <Checkbox
     name={`authorAttendee${person.role}`}
     className={`primary${!person.attendee ? " inActive" : ""}`}
     checked={!!person.attendee}
-    disabled={disabled || isCurrentEditor}
+    disabled={disabled}
     onChange={() => !disabled && handleOnChange(person)}
   >
     <Label bsStyle="primary">Attendee</Label>
@@ -148,7 +189,6 @@ const ReportAttendeeCheckbox = ({
 ReportAttendeeCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
-  isCurrentEditor: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
 
@@ -168,6 +208,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
                   filterCb={person =>
                     person.role === Person.ROLE.ADVISOR && person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
+                  showDelete={showDelete}
                 />
               </TableContainer>
             </td>
@@ -183,6 +224,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
                     person.role === Person.ROLE.PRINCIPAL && person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
                   enableDivider
+                  showDelete={showDelete}
                 />
               </TableContainer>
             </td>
@@ -197,6 +239,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
                   filterCb={person => !person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
                   enableDivider
+                  showDelete={showDelete}
                 />
               </TableContainer>
             </td>
@@ -207,42 +250,36 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   )
 
   function renderAttendeeRow(person) {
+    const isCurrentEditor = Person.isEqual(person, currentUser)
     return (
       <tr key={person.uuid}>
         <td className="primary-attendee">
-          <div style={{ minWidth: "99px" }}>
-            <PrimaryAttendeeRadioButton
-              person={person}
-              handleOnChange={setPrimaryAttendee}
-              disabled={disabled}
-            />
-          </div>
+          <PrimaryAttendeeRadioButton
+            person={person}
+            handleOnChange={setPrimaryAttendee}
+            disabled={disabled}
+          />
         </td>
         <td className="report-attendee">
-          <div style={{ minWidth: "99px" }}>
-            {Person.isAdvisor(person) && (
-              <ReportAttendeeCheckbox
-                person={person}
-                handleOnChange={setReportAttendee}
-                disabled={disabled}
-                isCurrentEditor={Person.isEqual(person, currentUser)}
-              />
-            )}
-          </div>
+          {Person.isAdvisor(person) && (
+            <ReportAttendeeCheckbox
+              person={person}
+              handleOnChange={setReportAttendee}
+              disabled={disabled}
+            />
+          )}
         </td>
         <td className="report-author">
-          <div style={{ minWidth: "99px" }}>
-            {Person.isAdvisor(person) && (
-              <ReportAuthorCheckbox
-                person={person}
-                handleOnChange={setReportAuthor}
-                disabled={disabled}
-                isCurrentEditor={Person.isEqual(person, currentUser)}
-              />
-            )}
-          </div>
+          {Person.isAdvisor(person) && (
+            <ReportAuthorCheckbox
+              person={person}
+              handleOnChange={setReportAuthor}
+              disabled={disabled}
+              isCurrentEditor={isCurrentEditor}
+            />
+          )}
         </td>
-        <td>
+        <td className="reportPeopleName">
           <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
@@ -267,11 +304,14 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             whenUnspecified=""
           />
         </td>
-        <td style={{ verticalAlign: "middle" }}>
+        <td className="conflictButton" style={{ verticalAlign: "middle" }}>
           <PlanningConflictForPerson person={person} report={report} />
         </td>
-        {showDelete && (
-          <td style={{ verticalAlign: "middle" }}>
+        {showDelete && !isCurrentEditor && (
+          <td
+            className="deleteReportPeople"
+            style={{ verticalAlign: "middle" }}
+          >
             <RemoveButton
               title="Remove attendee"
               altText="Remove attendee"
