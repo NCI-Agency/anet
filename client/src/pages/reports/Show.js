@@ -632,7 +632,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-              <Fieldset title="Meeting people">
+              <Fieldset
+                title={
+                  report.isFuture()
+                    ? "People who will be involved in this planned engagement"
+                    : "People involved in this engagement"
+                }
+              >
                 <ReportPeople report={report} disabled />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>

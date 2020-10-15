@@ -58,7 +58,8 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const $attendeesTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Meeting people"]')
+    // if future "People who will be involved in this planned engagement"
+    By.xpath('//h2/span[text()="People involved in this engagement"]')
   )
   await $attendeesTitle.click()
 
@@ -606,8 +607,8 @@ test.serial(
     await assertElementText(
       t,
       $attendanceFieldsetTitle,
-      "Meeting people",
-      "Meeting people fieldset should have correct title for an uncancelled enagement"
+      "People involved in this engagement",
+      "People fieldset should have correct title for an uncancelled enagement"
     )
 
     const $cancelledCheckbox = await $(".cancelled-checkbox")
@@ -627,8 +628,8 @@ test.serial(
     await assertElementText(
       t,
       $attendanceFieldsetTitle,
-      "Planned people",
-      "Meeting people fieldset should have correct title for a cancelled enagement"
+      "People who will be involved in this planned engagement",
+      "People fieldset should have correct title for a cancelled enagement"
     )
 
     let $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
