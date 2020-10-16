@@ -597,9 +597,9 @@ export default class Model {
     Model.populateNotesCustomFields(entity)
   }
 
-  static populateEntitiesAssessmentsCustomFields(entities) {
-    entities.forEach(subEntity => {
-      Model.populateNotesCustomFields(subEntity)
+  static populateEntitiesNotesCustomFields(entities) {
+    entities.forEach(entity => {
+      Model.populateNotesCustomFields(entity)
     })
   }
 

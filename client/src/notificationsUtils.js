@@ -7,9 +7,9 @@ export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
     noteRelatedObjects {
       noteUuid
     }
-    createdAt
-    type
-    text
+  createdAt
+  type
+  text
 }
 `
 
