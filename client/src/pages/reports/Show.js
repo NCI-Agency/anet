@@ -28,7 +28,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import Tag from "components/Tag"
-import TaskTable from "components/TaskTable"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
@@ -631,7 +631,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 <AttendeesTable report={report} disabled />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
-                <TaskTable
+                <NoPaginationTaskTable
                   tasks={report.tasks}
                   showParent
                   noTasksMessage={`No ${tasksLabel} selected`}

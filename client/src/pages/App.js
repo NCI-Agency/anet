@@ -220,7 +220,7 @@ const App = ({ pageDispatchers, pageProps }) => {
     )
 
     const responsibleTasks = tempUser.position?.uuid
-      ? data.responsibleTasks
+      ? data.responsibleTasks.list
       : []
     const currentUser = new Person({ ...tempUser, responsibleTasks })
 

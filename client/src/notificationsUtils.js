@@ -31,8 +31,8 @@ export const getNotifications = currentUser => {
 }
 
 export const getMyTasksWithPendingAssessments = currentUser => {
-  if (currentUser?.responsibleTasks?.list?.length) {
-    const taskObjects = currentUser.responsibleTasks.list
+  if (currentUser?.responsibleTasks?.length) {
+    const taskObjects = currentUser.responsibleTasks
       .filter(obj => obj)
       .map(obj => new Task(obj))
     taskObjects.forEach(task => {

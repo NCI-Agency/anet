@@ -1,4 +1,4 @@
-import { DEFAULT_PAGE_PROPS, setPagination } from "actions"
+import { DEFAULT_PAGE_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -12,20 +12,14 @@ import {
   RECURSE_STRATEGY,
   SearchQueryPropType
 } from "components/SearchFilters"
+import TaskTable from "components/TaskTable"
 import { Task } from "models"
-import { FakePagination, Tasks, TasksPagination } from "pages/Search"
 import pluralize from "pluralize"
-import PropTypes from "prop-types"
 import React, { useContext, useMemo } from "react"
 import { connect } from "react-redux"
 import Settings from "settings"
 
-const MyTasks = ({
-  pageDispatchers,
-  searchQuery,
-  pagination,
-  setPagination
-}) => {
+const MyTasks = ({ pageDispatchers, searchQuery }) => {
   // Make sure we have a navigation menu
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
@@ -48,16 +42,6 @@ const MyTasks = ({
       }),
     [searchQueryParams, currentUser]
   )
-  const responsibleTasksSearchQueryParams = useMemo(
-    () =>
-      Object.assign({}, searchQueryParams, {
-        sortBy: "NAME",
-        sortOrder: "ASC",
-        status: Task.STATUS.ACTIVE,
-        responsiblePositionUuid: currentUser.position?.uuid
-      }),
-    [searchQueryParams, currentUser]
-  )
 
   const myOrgAssignedTasksTitle = (
     <>
@@ -72,34 +56,19 @@ const MyTasks = ({
   return (
     <div>
       <Fieldset id="my-org-assigned-tasks" title={myOrgAssignedTasksTitle}>
-        <Tasks
-          pageDispatchers={pageDispatchers}
-          queryParams={taskedTasksSearchQueryParams}
-          paginationKey="my_org_assigned_tasks"
-          pagination={pagination}
-          setPagination={setPagination}
-        />
+        <TaskTable queryParams={taskedTasksSearchQueryParams} />
       </Fieldset>
       <Fieldset
         id="my-responsible-tasks"
         title={`${pluralize(taskShortLabel)} I am responsible for`}
       >
-        <Tasks
-          pageDispatchers={pageDispatchers}
-          queryParams={responsibleTasksSearchQueryParams}
-          paginationKey="my_responsible_tasks"
-          pagination={pagination}
-          setPagination={setPagination}
-        />
+        <TaskTable tasks={currentUser.responsibleTasks} />
       </Fieldset>
       <Fieldset
         id="my-tasks-with-pending-assessments"
         title={`${pluralize(taskShortLabel)} that have pending assessments`}
       >
-        <FakePagination
-          allItems={notifications.myTasksWithPendingAssessments}
-          paginationComp={TasksPagination}
-        />
+        <TaskTable tasks={notifications.myTasksWithPendingAssessments} />
       </Fieldset>
     </div>
   )
@@ -107,22 +76,17 @@ const MyTasks = ({
 
 MyTasks.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired,
   searchQuery: SearchQueryPropType
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
   return {
-    setPagination: (pageKey, pageNum) =>
-      dispatch(setPagination(pageKey, pageNum)),
     ...pageDispatchers
   }
 }
 const mapStateToProps = (state, ownProps) => ({
-  searchQuery: state.searchQuery,
-  pagination: state.pagination
+  searchQuery: state.searchQuery
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(MyTasks)

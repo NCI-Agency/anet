@@ -37,7 +37,7 @@ import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
-import TaskTable from "components/TaskTable"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -814,7 +814,7 @@ const ReportForm = ({
                         placeholder={`Search for ${tasksLabel}...`}
                         value={values.tasks}
                         renderSelected={
-                          <TaskTable
+                          <NoPaginationTaskTable
                             id="tasks-tasks"
                             tasks={values.tasks}
                             showParent
