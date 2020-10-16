@@ -1,7 +1,6 @@
 import { expect } from "chai"
 import Home from "../pages/home.page"
 import MyTasks from "../pages/myTasks.page"
-import { createOnboardingNewPerson, examplePersonDetails } from "./newUserUtils"
 
 describe("Home page", () => {
   describe("When checking the navigation items", () => {
@@ -10,9 +9,9 @@ describe("Home page", () => {
       Home.myTasksLink.waitForDisplayed()
     })
   })
-  describe("When checking new user after onboarding to home page", () => {
+  describe("When checking the navigation items", () => {
     it("Should NOT see a link to my tasks page when the user does not have a position", () => {
-      createOnboardingNewPerson(examplePersonDetails, "bonny1")
+      Home.openAsPositionlessUser()
       expect(Home.myTasksLink.isExisting()).to.equal(false)
     })
   })

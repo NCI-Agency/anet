@@ -3,7 +3,8 @@ class Page {
     user: "erin",
     superUser: "rebecca",
     adminUser: "arthur",
-    onboardUser: "bonny"
+    onboardUser: "bonny",
+    noPositionUser: "nopos"
   }
 
   _buildUrl(pathName, credentials) {
@@ -34,6 +35,10 @@ class Page {
 
   openAsAdminUser(pathName = "/") {
     this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
+  }
+
+  openAsPositionlessUser(pathName = "/") {
+    this._open(pathName, Page.DEFAULT_CREDENTIALS.noPositionUser)
   }
 
   openAsOnboardUser(

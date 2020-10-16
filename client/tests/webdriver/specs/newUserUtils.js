@@ -13,10 +13,11 @@ export const examplePersonDetails = {
   country: "Albania",
   endOfTourDate: ""
 }
-// need uniqueName due to saving previous ones as normal user
-export function createOnboardingNewPerson(personDetails, uniqueName) {
-  OnboardPage.openAsOnboardUser("/", uniqueName)
-
+// need uniqueName to run tests without resetting DB
+// because previous names are saved as normal user
+export function createOnboardingNewPerson(
+  personDetails = examplePersonDetails
+) {
   OnboardPage.createYourAccountBtn.waitForExist()
   OnboardPage.createYourAccountBtn.waitForDisplayed()
   OnboardPage.createYourAccountBtn.click()
