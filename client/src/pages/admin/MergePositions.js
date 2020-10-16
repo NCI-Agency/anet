@@ -202,7 +202,7 @@ const MergePositions = ({ pageDispatchers }) => {
                         : Position.STATUS.ACTIVE
                     )
                   },
-                  "position"
+                  Position.getInstanceName
                 )}
               />
               <PositionField

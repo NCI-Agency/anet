@@ -66,7 +66,7 @@ const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.Person]: null,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
-  [MODEL_TO_OBJECT_TYPE.Task]: null
+  [MODEL_TO_OBJECT_TYPE.Task]: validTasks
 }
 // validations for every type of objects
 function validForGeneral(otherMergeable, newMergeable, mergeableType) {
@@ -74,6 +74,10 @@ function validForGeneral(otherMergeable, newMergeable, mergeableType) {
     toast(`Please select different ${mergeableType}`)
     return false
   }
+  return true
+}
+// FIXME: validation steps for tasks
+function validTasks() {
   return true
 }
 
@@ -151,15 +155,11 @@ export function getClearButton(onClear) {
   )
 }
 
-export function getActivationButton(
-  isActive,
-  onClickAction,
-  mergeableType = "value"
-) {
+export function getActivationButton(isActive, onClickAction, instanceName) {
   return (
     <Tooltip
       content={
-        isActive ? `Deactivate ${mergeableType}` : `Activate ${mergeableType}`
+        isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
       }
       intent={isActive ? "danger" : "success"}
     >
