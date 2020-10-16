@@ -521,49 +521,17 @@ export const Tasks = ({
   }
 
   const tasks = data ? data.taskList.list : []
-
-  return (
-    <TasksPagination
-      items={tasks}
-      pageNum={pageNum}
-      pageSize={taskQuery.pageSize}
-      totalCount={totalCount}
-      setPage={setPage}
-    />
-  )
-
-  function setPage(pageNum) {
-    setPagination(paginationKey, pageNum)
-    setPageNum(pageNum)
-  }
-}
-
-Tasks.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  queryParams: PropTypes.object,
-  setTotalCount: PropTypes.func,
-  paginationKey: PropTypes.string.isRequired,
-  pagination: PropTypes.object.isRequired,
-  setPagination: PropTypes.func.isRequired
-}
-
-export const TasksPagination = ({
-  items: tasks,
-  pageNum,
-  pageSize,
-  totalCount,
-  setPage
-}) => {
   if (_get(tasks, "length", 0) === 0) {
     return <em>No {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]} found</em>
   }
+
   return (
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
         className="pull-right"
         pageNum={pageNum}
-        pageSize={pageSize}
+        pageSize={taskQuery.pageSize}
         totalCount={totalCount}
         goToPage={setPage}
       >
@@ -588,40 +556,20 @@ export const TasksPagination = ({
       </UltimatePaginationTopDown>
     </div>
   )
+
+  function setPage(pageNum) {
+    setPagination(paginationKey, pageNum)
+    setPageNum(pageNum)
+  }
 }
 
-TasksPagination.propTypes = {
-  items: PropTypes.array,
-  pageNum: PropTypes.number,
-  totalCount: PropTypes.number,
-  pageSize: PropTypes.number,
-  setPage: PropTypes.func
-}
-
-export const FakePagination = ({
-  allItems,
-  paginationComp: PaginationComp,
-  pageSize = DEFAULT_PAGESIZE
-}) => {
-  const [page, setPage] = useState(0)
-  const totalCount = allItems.length
-  const itemsForPage = allItems.slice(pageSize * page, pageSize * (page + 1))
-
-  return (
-    <PaginationComp
-      items={itemsForPage}
-      pageNum={page}
-      pageSize={pageSize}
-      totalCount={totalCount}
-      setPage={setPage}
-    />
-  )
-}
-
-FakePagination.propTypes = {
-  allItems: PropTypes.array.isRequired,
-  paginationComp: PropTypes.func,
-  pageSize: PropTypes.number
+Tasks.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  queryParams: PropTypes.object,
+  setTotalCount: PropTypes.func,
+  paginationKey: PropTypes.string.isRequired,
+  pagination: PropTypes.object.isRequired,
+  setPagination: PropTypes.func.isRequired
 }
 
 const Locations = ({
