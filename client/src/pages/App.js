@@ -153,7 +153,6 @@ const App = ({ pageDispatchers, pageProps }) => {
   })
   const skip = done || error || !data
   const appState = skip ? null : processData(data)
-  const notifications = getNotifications(appState?.currentUser)
 
   if (done) {
     return result
@@ -176,7 +175,7 @@ const App = ({ pageDispatchers, pageProps }) => {
         appSettings: appState.settings,
         currentUser: appState.currentUser,
         loadAppData: refetch,
-        notifications
+        notifications: appState.notifications
       }}
     >
       <ResponsiveLayout
@@ -207,7 +206,6 @@ const App = ({ pageDispatchers, pageProps }) => {
       return organizations
     }
 
-    const tempUser = new Person(data.me)
     const advisorOrganizations = getSortedOrganizationsFromData(
       data.topLevelAdvisorOrgs
     )
@@ -219,16 +217,16 @@ const App = ({ pageDispatchers, pageProps }) => {
       setting => (settings[setting.key] = setting.value)
     )
 
-    const responsibleTasks = tempUser.position?.uuid
-      ? data.responsibleTasks.list
-      : []
-    const currentUser = new Person({ ...tempUser, responsibleTasks })
-
+    const currentUser = new Person(data.me)
+    const responsibleTasks = data.responsibleTasks?.list || []
+    currentUser.responsibleTasks = responsibleTasks
+    const notifications = getNotifications(currentUser)
     return {
       currentUser,
       settings,
       advisorOrganizations,
-      principalOrganizations
+      principalOrganizations,
+      notifications
     }
   }
 }
