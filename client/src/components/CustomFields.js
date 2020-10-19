@@ -108,7 +108,7 @@ ReadonlySpecialField.propTypes = {
     SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
   ]).isRequired,
   values: PropTypes.object,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 const TextField = fieldProps => {
@@ -438,7 +438,7 @@ ReadonlyArrayObject.propTypes = {
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
   index: PropTypes.number.isRequired,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 const AnetObjectField = ({
@@ -527,7 +527,7 @@ ReadonlyAnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -642,7 +642,7 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 const FIELD_COMPONENTS = {
@@ -944,7 +944,7 @@ ReadonlyCustomFields.propTypes = {
   parentFieldName: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 ReadonlyCustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,

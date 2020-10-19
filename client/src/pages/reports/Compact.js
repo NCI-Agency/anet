@@ -1,5 +1,4 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -262,18 +261,14 @@ const CompactReportView = ({ pageDispatchers }) => {
       initialValues={report}
     >
       {() => (
-        <React.Fragment>
+        <>
           <CompactViewHeader
             onPrintClick={printReport}
             returnToDefaultPage={returnToDefaultPage}
             optionalFields={optionalFields}
             setOptionalFields={setOptionalFields}
           />
-          <div
-            css={COMPACT_VIEW_STYLE}
-            className="compact-view"
-            data-draft={draftAttr}
-          >
+          <CompactView className="compact-view" data-draft={draftAttr}>
             <CompactReportHeaderContent report={report} />
             <CompactTable>
               <CompactRow
@@ -302,11 +297,11 @@ const CompactReportView = ({ pageDispatchers }) => {
                 <CompactRow
                   label={Settings.fields.report.atmosphere}
                   content={
-                    <React.Fragment>
+                    <>
                       {utils.sentenceCase(report.atmosphere)}
                       {report.atmosphereDetails &&
                         ` – ${report.atmosphereDetails}`}
-                    </React.Fragment>
+                    </>
                   }
                   className="reportField"
                 />
@@ -357,13 +352,13 @@ const CompactReportView = ({ pageDispatchers }) => {
                   fieldsConfig={Settings.fields.report.customFields}
                   values={report}
                   vertical
-                  compactStyle={{}}
+                  compactStyle=";" // avoid falsy empty string for compact condition checks in deeper components
                 />
               ) : null}
             </CompactTable>
             <CompactReportFooterContent report={report} />
-          </div>
-        </React.Fragment>
+          </CompactView>
+        </>
       )}
     </Formik>
   )
@@ -382,7 +377,7 @@ const CompactReportView = ({ pageDispatchers }) => {
 
   function getReportTitle() {
     return (
-      <React.Fragment>
+      <>
         Engagement of{" "}
         <LinkTo
           modelType="Person"
@@ -408,13 +403,13 @@ const CompactReportView = ({ pageDispatchers }) => {
         {report.location && (
           <LinkTo modelType="Location" model={report.location} />
         )}
-      </React.Fragment>
+      </>
     )
   }
 
   function getReportSubTitle() {
     return (
-      <React.Fragment>
+      <>
         Authored by{" "}
         {report.authors.map((author, index) => (
           <React.Fragment key={author.uuid}>
@@ -427,7 +422,7 @@ const CompactReportView = ({ pageDispatchers }) => {
           Settings.dateFormats.forms.displayShort.withTime
         )}
         [{Report.STATE_LABELS[report.state]}]
-      </React.Fragment>
+      </>
     )
   }
 
@@ -511,7 +506,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                             fieldsConfig={taskInstantAssessmentConfig}
                             values={report}
                             vertical
-                            compactStyle={{}}
+                            compactStyle=";"
                           />
                       )}
                     </tbody>
@@ -542,7 +537,7 @@ const CompactReportView = ({ pageDispatchers }) => {
               <CompactRow
                 key={attendee.uuid}
                 label={
-                  <React.Fragment>
+                  <>
                     <LinkTo modelType="Person" model={attendee} />
                     {renderOrgName && (
                       <LinkTo
@@ -553,7 +548,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                         whenUnspecified=" 'NA'"
                       />
                     )}
-                  </React.Fragment>
+                  </>
                 }
                 content={
                   isActiveField("Assessments") &&
@@ -565,13 +560,13 @@ const CompactReportView = ({ pageDispatchers }) => {
                           fieldsConfig={attendeeInstantAssessmentConfig}
                           values={report}
                           vertical
-                          compactStyle={{}}
+                          compactStyle=";"
                         />
                       </tbody>
                     </table>
                   )
                 }
-                style={css`
+                style={`
                   th {
                     line-height: 1.4;
                     width: max-content;
@@ -651,7 +646,7 @@ const OPTIONAL_FIELDS_INIT_STATUS = [
 
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
-const COMPACT_VIEW_STYLE = css`
+const CompactView = styled.div`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
@@ -697,7 +692,7 @@ const COMPACT_VIEW_STYLE = css`
   }
 `
 
-const TITLE_STYLE = css`
+const TITLE_STYLE = `
   & > th {
     font-size: 18px;
     font-style: normal;
@@ -707,7 +702,7 @@ const TITLE_STYLE = css`
   }
 `
 
-const SUBTITLE_STYLE = css`
+const SUBTITLE_STYLE = `
   & > th {
     font-style: italic;
     color: black;
@@ -715,7 +710,7 @@ const SUBTITLE_STYLE = css`
     font-weight: normal;
   }
 `
-const WORKFLOW_STYLE = css`
+const WORKFLOW_STYLE = `
   & > td {
     display: flex;
     flex-direction: row;
@@ -748,16 +743,16 @@ const CompactViewHeader = ({
   setOptionalFields
 }) => {
   return (
-    <header css={HEADER_STYLE}>
-      <h3 css={HEADER_TITLE_STYLE} value="title">
+    <Header>
+      <HeaderTitle value="title">
         {Settings.fields.report.compactView}
-      </h3>
+      </HeaderTitle>
       <SimpleMultiCheckboxDropdown
         label="Optional Fields ⇓"
         options={optionalFields}
         setOptions={setOptionalFields}
       />
-      <div css={BUTTONS_STYLE}>
+      <Buttons>
         {!noReport && (
           <Button
             value="print"
@@ -776,8 +771,8 @@ const CompactViewHeader = ({
         >
           {Settings.fields.report.detailedView}
         </Button>
-      </div>
-    </header>
+      </Buttons>
+    </Header>
   )
 }
 
@@ -793,7 +788,7 @@ CompactViewHeader.defaultProps = {
   noReport: false
 }
 
-const HEADER_STYLE = css`
+const Header = styled.header`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -801,14 +796,14 @@ const HEADER_STYLE = css`
   max-width: 21cm;
 `
 
-const HEADER_TITLE_STYLE = css`
+const HeaderTitle = styled.h3`
   margin: 0;
   @media print {
     display: none;
   }
 `
 
-const BUTTONS_STYLE = css`
+const Buttons = styled.div`
   margin-bottom: 1rem;
   display: flex;
   flex-direction: row;
@@ -823,18 +818,13 @@ const CompactReportHeaderContent = ({ report }) => {
   const location = useLocation()
   const { appSettings } = useContext(AppContext)
   return (
-    <div
-      css={css`
-        ${HEADER_CONTENT_STYLE};
-        background-color: ${appSettings[SETTING_KEY_COLOR]} !important;
-      `}
-    >
+    <HeaderContent bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBanner />
       <span style={{ fontSize: "12px" }}>
         <Link to={location.pathname}>{report.uuid}</Link>
       </span>
-    </div>
+    </HeaderContent>
   )
 }
 
@@ -845,26 +835,21 @@ CompactReportHeaderContent.propTypes = {
 const CompactReportFooterContent = () => {
   const { currentUser, appSettings } = useContext(AppContext)
   return (
-    <div
-      css={css`
-        ${FOOTER_CONTENT_STYLE};
-        background-color: ${appSettings[SETTING_KEY_COLOR]} !important;
-      `}
-    >
+    <FooterContent bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBanner />
-      <span css={PRINTED_BY_STYLE}>
+      <PrintedByBox>
         printed by{" "}
         <span>
           <LinkTo modelType="Person" model={currentUser} />
         </span>
-      </span>
-    </div>
+      </PrintedByBox>
+    </FooterContent>
   )
 }
 
 // background color of banner makes reading blue links hard. Force white color
-const HF_COMMON_STYLE = css`
+const HF_COMMON_STYLE = `
   position: absolute;
   left: 0mm;
   display: flex;
@@ -890,19 +875,20 @@ const HF_COMMON_STYLE = css`
   }
 `
 
-const HEADER_CONTENT_STYLE = css`
+const HeaderContent = styled.div`
   ${HF_COMMON_STYLE};
   top: 0mm;
   border-bottom: 1px solid black;
 `
 
-const FOOTER_CONTENT_STYLE = css`
+const FooterContent = styled.div`
   ${HF_COMMON_STYLE};
   bottom: 0mm;
   border-top: 1px solid black;
+  background-color: ${props => props.bgc};
 `
 
-const PRINTED_BY_STYLE = css`
+const PrintedByBox = styled.span`
   width: auto;
   display: flex;
   flex-direction: row;
@@ -918,17 +904,13 @@ const PRINTED_BY_STYLE = css`
 
 const ClassificationBanner = () => {
   return (
-    <div
-      css={css`
-        ${CLASSIFICATION_BANNER_STYLE}
-      `}
-    >
+    <ClassificationBannerBox>
       <CompactSecurityBanner />
-    </div>
+    </ClassificationBannerBox>
   )
 }
 
-const CLASSIFICATION_BANNER_STYLE = css`
+const ClassificationBannerBox = styled.div`
   width: auto;
   max-width: 67%;
   text-align: center;
@@ -939,19 +921,19 @@ const CLASSIFICATION_BANNER_STYLE = css`
 `
 const CompactTable = ({ children }) => {
   return (
-    <table css={TABLE_STYLE}>
+    <CompactStyledTable>
       <thead>
         <tr>
-          <td css={SPACE_STYLE} colSpan="2" />
+          <SpacedTd colSpan="2" />
         </tr>
       </thead>
       <tbody>{children}</tbody>
       <tfoot>
         <tr>
-          <td css={SPACE_STYLE} colSpan="2" />
+          <SpacedTd colSpan="2" />
         </tr>
       </tfoot>
-    </table>
+    </CompactStyledTable>
   )
 }
 
@@ -959,11 +941,11 @@ CompactTable.propTypes = {
   children: PropTypes.node
 }
 
-const TABLE_STYLE = css`
+const CompactStyledTable = styled.table`
   width: 100%;
 `
 
-const SPACE_STYLE = css`
+const SpacedTd = styled.td`
   height: 80px;
 `
 
@@ -974,44 +956,34 @@ export const ROW_TYPES = {
 
 export const CompactRow = ({ label, content, rowType, ...otherProps }) => {
   const { style, className } = otherProps
-  const customStyle = css`
-    ${ROW_STYLE};
+  const CustomStyled = styled(ROW_STYLE)`
     ${style};
   `
   if (rowType === ROW_TYPES.titleLike) {
     return (
-      <tr css={customStyle}>
-        <th css={ROW_LABEL_STYLE} colSpan="2">
-          {label}
-        </th>
-      </tr>
+      <CustomStyled>
+        <RowLabel colSpan="2">{label}</RowLabel>
+      </CustomStyled>
     )
   }
 
   if (rowType === ROW_TYPES.onlyData) {
     return (
-      <tr css={customStyle}>
-        <td css={ROW_CONTENT_STYLE} colSpan="2">
-          {content}
-        </td>
-      </tr>
+      <CustomStyled>
+        <RowContent colSpan="2">{content}</RowContent>
+      </CustomStyled>
     )
   }
 
   const lowerLabel =
     typeof label === "string" ? label.toLocaleLowerCase() : label
-  let ROW_LABEL_STYLE_CUSTOM = ROW_LABEL_STYLE
-  if (className === "reportField") {
-    ROW_LABEL_STYLE_CUSTOM = css`
-      ${ROW_LABEL_STYLE};
-      width: 15%;
-    `
-  }
+  const topHeader = className === "reportField"
+
   return (
-    <tr css={customStyle} className={className || null}>
-      <th css={ROW_LABEL_STYLE_CUSTOM}>{lowerLabel}</th>
-      <td css={ROW_CONTENT_STYLE}>{content}</td>
-    </tr>
+    <CustomStyled className={className || null}>
+      <RowLabel topHeader={topHeader}>{lowerLabel}</RowLabel>
+      <RowContent>{content}</RowContent>
+    </CustomStyled>
   )
 }
 
@@ -1021,21 +993,22 @@ CompactRow.propTypes = {
   rowType: PropTypes.string
 }
 
-const ROW_STYLE = css`
+const ROW_STYLE = styled.tr`
   vertical-align: top;
   font-family: "Times New Roman", Times, serif;
   width: 100%;
 `
 
-const ROW_LABEL_STYLE = css`
+const RowLabel = styled.th`
   padding: 4px 0;
   font-style: italic;
   color: grey;
   max-width: 50%;
   font-weight: 300;
+  width: ${props => (props.topHeader ? "15%" : "auto")};
 `
 
-const ROW_CONTENT_STYLE = css`
+const RowContent = styled.td`
   padding: 4px 1rem;
 `
 

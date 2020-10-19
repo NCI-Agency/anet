@@ -50,7 +50,7 @@ Fieldset.propTypes = {
   title: PropTypes.node,
   action: PropTypes.node,
   style: PropTypes.object,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 export default Fieldset

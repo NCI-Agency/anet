@@ -150,7 +150,7 @@ Field.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   extraAddon: PropTypes.object,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 Field.defaultProps = {
   vertical: false // default direction of label and input = horizontal
@@ -279,7 +279,7 @@ ReadonlyField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   humanValue: PropTypes.any,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 export const SpecialField = ({
@@ -321,7 +321,7 @@ SpecialField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   widget: PropTypes.any,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 export const customEnumButtons = list => {

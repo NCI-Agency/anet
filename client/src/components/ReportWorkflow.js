@@ -210,7 +210,7 @@ export const CompactRowReportWorkflow = ({ workflow, compactStyle }) => (
 
 CompactRowReportWorkflow.propTypes = {
   workflow: PropTypes.array.isRequired,
-  compactStyle: PropTypes.object
+  compactStyle: PropTypes.string
 }
 
 const CompactRowReportAction = ({ action }) => {
