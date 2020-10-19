@@ -75,7 +75,7 @@ const GQL_GET_APP_DATA = gql`
                 name
               }
             }
-          ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
+            ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
           organization {
             uuid
@@ -83,18 +83,11 @@ const GQL_GET_APP_DATA = gql`
           }
         }
       }
-    }
-
-    responsibleTasks: responsibleTaskList(
-      query: {
-        pageSize:0
-        status: ACTIVE
-      }
-    ) {
-      totalCount
-      pageNum
-      pageSize
-      list {
+      responsibleTasks(
+        query: {
+          status: ACTIVE
+        }
+      ) {
         uuid
         shortName
         longName
@@ -217,8 +210,6 @@ const App = ({ pageDispatchers, pageProps }) => {
     )
 
     const currentUser = new Person(data.me)
-    const responsibleTasks = data.responsibleTasks?.list || []
-    currentUser.responsibleTasks = responsibleTasks
     const notifications = getNotifications(currentUser)
     return {
       currentUser,

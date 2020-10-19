@@ -37,7 +37,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
         sortBy: "NAME",
         sortOrder: "ASC",
         status: Task.STATUS.ACTIVE,
-        taskedOrgUuid: currentUser.position?.organization?.uuid,
+        taskedOrgUuid: currentUser.position?.organization?.uuid || "-1",
         orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
       }),
     [searchQueryParams, currentUser]
