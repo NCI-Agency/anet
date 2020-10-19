@@ -2,6 +2,7 @@ package mil.dds.anet.beans.search;
 
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
@@ -88,6 +89,15 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
         && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy());
+  }
+
+  @Override
+  public OrganizationSearchQuery clone() throws CloneNotSupportedException {
+    final OrganizationSearchQuery clone = (OrganizationSearchQuery) super.clone();
+    if (parentOrgUuid != null) {
+      clone.setParentOrgUuid(new ArrayList<>(parentOrgUuid));
+    }
+    return clone;
   }
 
 }

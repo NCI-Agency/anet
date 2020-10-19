@@ -6,4 +6,9 @@ public class TagSearchQuery extends AbstractSearchQuery<TagSearchSortBy> {
     super(TagSearchSortBy.NAME);
   }
 
+  @Override
+  public TagSearchQuery clone() throws CloneNotSupportedException {
+    return (TagSearchQuery) super.clone();
+  }
+
 }

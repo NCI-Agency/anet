@@ -164,7 +164,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public AbstractSearchQuery<T> clone() throws CloneNotSupportedException {
     @SuppressWarnings("unchecked")
     final AbstractSearchQuery<T> clone = (AbstractSearchQuery<T>) super.clone();
     if (isBatchParamsPresent()) {

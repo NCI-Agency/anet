@@ -6,6 +6,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public abstract class AbstractBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     implements Cloneable {
+
   private List<String> batchUuids;
 
   public List<String> getBatchUuids() {
@@ -28,9 +29,11 @@ public abstract class AbstractBatchParams<B extends AbstractAnetBean, T extends 
   public abstract boolean equals(Object obj);
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
-    final AbstractBatchParams<?, ?> clone = (AbstractBatchParams<?, ?>) super.clone();
+  public AbstractBatchParams<B, T> clone() throws CloneNotSupportedException {
+    @SuppressWarnings("unchecked")
+    final AbstractBatchParams<B, T> clone = (AbstractBatchParams<B, T>) super.clone();
     clone.setBatchUuids(null);
     return clone;
   }
+
 }
