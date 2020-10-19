@@ -6,7 +6,13 @@ import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect } from "react"
-import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
+import {
+  Badge,
+  MenuItem,
+  Nav as BSNav,
+  NavDropdown,
+  NavItem
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
@@ -68,7 +74,7 @@ const Nav = ({
   resetPages,
   clearSearchQuery
 }) => {
-  const { appSettings, currentUser } = useContext(AppContext)
+  const { appSettings, currentUser, notifications } = useContext(AppContext)
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -82,7 +88,9 @@ const Nav = ({
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
 
-  const myOrg = currentUser.position ? currentUser.position.organization : null
+  const myOrg = currentUser.position?.uuid
+    ? currentUser.position?.organization
+    : null
   let orgUuid, myOrgUuid
   if (inOrg) {
     orgUuid = path.split("/")[2]
@@ -114,7 +122,7 @@ const Nav = ({
 
       <BSNav id="reports-nav" />
 
-      {isAdvisor && currentUser.position && (
+      {isAdvisor && currentUser.position?.uuid && (
         <>
           <SidebarLink
             linkTo={{ pathname: "/tasks/mine" }}
@@ -122,6 +130,11 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
+            {notifications?.myTasksWithPendingAssessments?.length ? (
+              <NotificationBadge>
+                {notifications.myTasksWithPendingAssessments.length}
+              </NotificationBadge>
+            ) : null}
           </SidebarLink>
           <SidebarLink
             linkTo={{ pathname: "/positions/counterparts" }}
@@ -129,6 +142,11 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
+            {notifications?.myCounterpartsWithPendingAssessments?.length ? (
+              <NotificationBadge>
+                {notifications.myCounterpartsWithPendingAssessments.length}
+              </NotificationBadge>
+            ) : null}
           </SidebarLink>
         </>
       )}
@@ -274,6 +292,23 @@ const mapDispatchToProps = (dispatch, ownProps) =>
     },
     dispatch
   )
+
+const NotificationBadge = ({ children }) => {
+  return (
+    <Badge
+      style={{
+        float: "right",
+        marginRight: "2px"
+      }}
+    >
+      {children}
+    </Badge>
+  )
+}
+
+NotificationBadge.propTypes = {
+  children: PropTypes.node
+}
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false

@@ -14,7 +14,7 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import TaskTable from "components/TaskTable"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { FastField, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
@@ -309,7 +309,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       className="tasks-selector"
                     >
                       {!isAdmin ? (
-                        <TaskTable tasks={values.tasks} />
+                        <NoPaginationTaskTable tasks={values.tasks} />
                       ) : (
                         <FastField
                           name="tasks"
@@ -328,7 +328,10 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                               )}...`}
                               value={values.tasks}
                               renderSelected={
-                                <TaskTable tasks={values.tasks} showDelete />
+                                <NoPaginationTaskTable
+                                  tasks={values.tasks}
+                                  showDelete
+                                />
                               }
                               overlayColumns={["Name"]}
                               overlayRenderRow={TaskSimpleOverlayRow}

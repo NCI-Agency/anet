@@ -8,7 +8,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT, NOTE_TYPE } from "components/Model"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -27,7 +27,6 @@ import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -127,7 +126,7 @@ const GQL_GET_TASK = gql`
 `
 
 const TaskShow = ({ pageDispatchers }) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
@@ -149,27 +148,13 @@ const TaskShow = ({ pageDispatchers }) => {
   }
 
   if (data) {
-    data.task[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-      data.task.customFields
-    )
-    data.task.notes.forEach(
-      note =>
-        note.type !== NOTE_TYPE.FREE_TEXT &&
-        (note.customFields = utils.parseJsonSafe(note.text))
-    ) // TODO: Maybe move this code to Task()
+    Model.populateCustomFields(data.task)
   }
   const task = new Task(data ? data.task : {})
 
-  const subTasks = []
-  data &&
-    data.subTasks.list.forEach(subTask => {
-      subTask.notes.forEach(
-        note =>
-          note.type !== NOTE_TYPE.FREE_TEXT &&
-          (note.customFields = utils.parseJsonSafe(note.text))
-      ) // TODO: Maybe move this code to Task()
-      subTasks.push(new Task(subTask))
-    })
+  data && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
+
+  const subTasks = data.subTasks.list.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
@@ -339,7 +324,10 @@ const TaskShow = ({ pageDispatchers }) => {
               entityType={Task}
               subEntities={subTasks}
               canAddAssessment={canEdit}
-              onUpdateAssessment={refetch}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
             />
 
             <Fieldset title="Responsible positions">
