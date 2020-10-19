@@ -6,6 +6,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class M2mBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends AbstractBatchParams<B, T> {
+
   private String tableName;
   private String m2mTableName;
   private String m2mLeftKey;
@@ -79,5 +80,10 @@ public class M2mBatchParams<B extends AbstractAnetBean, T extends AbstractSearch
         && Objects.equals(m2mTableName, other.getM2mTableName())
         && Objects.equals(m2mLeftKey, other.getM2mLeftKey())
         && Objects.equals(m2mRightKey, other.getM2mRightKey());
+  }
+
+  @Override
+  public M2mBatchParams<B, T> clone() throws CloneNotSupportedException {
+    return (M2mBatchParams<B, T>) super.clone();
   }
 }

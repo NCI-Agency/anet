@@ -34,4 +34,9 @@ public class AuthorizationGroupSearchQuery
     this.positionUuid = positionUuid;
   }
 
+  @Override
+  public AuthorizationGroupSearchQuery clone() throws CloneNotSupportedException {
+    return (AuthorizationGroupSearchQuery) super.clone();
+  }
+
 }
