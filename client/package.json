@@ -94,7 +94,7 @@
     "wdio-chromedriver-service": "6.0.4",
     "webdriverio": "6.6.6",
     "webpack": "4.44.2",
-    "webpack-cli": "4.0.0",
+    "webpack-cli": "4.1.0",
     "webpack-dev-server": "3.11.0",
     "webpack-merge": "5.2.0",
     "xhr2": "0.2.0"
