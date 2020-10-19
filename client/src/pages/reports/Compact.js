@@ -52,7 +52,7 @@ const GQL_GET_REPORT = gql`
         uuid
         name
       }
-      author {
+      authors {
         uuid
         name
         rank
@@ -87,6 +87,8 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         primary
+        author
+        attendee
         rank
         role
         status
@@ -413,7 +415,14 @@ const CompactReportView = ({ pageDispatchers }) => {
   function getReportSubTitle() {
     return (
       <React.Fragment>
-        Authored by <LinkTo modelType="Person" model={report.author} /> on{" "}
+        Authored by{" "}
+        {report.authors.map((author, index) => (
+          <React.Fragment key={author.uuid}>
+            <LinkTo modelType="Person" model={author} />
+            {index < report.authors.length ? ", " : ""}
+          </React.Fragment>
+        ))}{" "}
+        on{" "}
         {moment(report.releasedAt).format(
           Settings.dateFormats.forms.displayShort.withTime
         )}
