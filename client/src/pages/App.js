@@ -151,8 +151,6 @@ const App = ({ pageDispatchers, pageProps }) => {
     pageProps,
     pageDispatchers
   })
-  const skip = done || error || !data
-  const appState = skip ? null : processData(data)
 
   if (done) {
     return result
@@ -161,6 +159,7 @@ const App = ({ pageDispatchers, pageProps }) => {
   if (!data) {
     return <Messages error={{ message: "Could not load initial data" }} />
   }
+  const appState = processData(data)
 
   // if this is a new user, redirect to onboarding
   if (
