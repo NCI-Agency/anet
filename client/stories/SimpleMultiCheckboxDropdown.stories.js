@@ -9,7 +9,7 @@ const Wrapper = () => {
     },
     {
       text: "Basic text2",
-      active: false
+      active: true
     },
     {
       text: "Basic text3",

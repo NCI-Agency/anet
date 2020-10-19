@@ -620,10 +620,10 @@ const CompactReportView = ({ pageDispatchers }) => {
     return sortedAttendees
   }
 
-  function isActiveField(fieldName) {
-    const index = optionalFields.findIndex(field => field.text === fieldName)
+  function isActiveField(fieldText) {
+    const index = optionalFields.findIndex(field => field.text === fieldText)
     if (index === -1) {
-      throw new Error("No name found in the optional fields array")
+      throw new Error("No text found in the optional fields array")
     }
     return optionalFields[index].active
   }

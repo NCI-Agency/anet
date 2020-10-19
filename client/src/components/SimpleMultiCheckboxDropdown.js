@@ -1,7 +1,6 @@
-/** @jsx jsx */
-import { css, jsx } from "@emotion/core"
+import styled from "@emotion/styled"
 import PropTypes from "prop-types"
-import { useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import { useOutsideClick } from "utils"
 
 /**
@@ -18,15 +17,7 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
     id: `${o.text.replace(/ /g, "")}-tick`
   }))
   return (
-    <div
-      ref={dropDownRef}
-      css={css`
-        ${DropdownButton};
-        & > div {
-          display: ${active ? "block" : "none"};
-        }
-      `}
-    >
+    <DropdownButton ref={dropDownRef} active={active}>
       <button
         className="btn btn-primary"
         onClick={() => setActive(curr => !curr)}
@@ -41,6 +32,7 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
               <input
                 type="checkbox"
                 id={option.id}
+                checked={option.active}
                 onChange={() => {
                   setOptions(prev => {
                     const newer = [...prev]
@@ -53,36 +45,41 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
           ))}
         </div>
       </div>
-    </div>
+    </DropdownButton>
   )
 }
 
-const DropdownButton = css`
+const DropdownButton = styled.span`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   z-index: 102;
   & > div {
     position: relative;
     width: 100%;
   }
   & > div > div {
-    background-color: white;
-    width: 100%;
-    border-radius: 5px;
-    position: absolute;
-    left: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    background-color: lightblue;
+    padding: 3px 5px;
+    border-radius: 5px;
+
+    position: absolute;
+    left: 0;
 
     input {
       margin-left: 5px;
       width: 16px;
       height: 16px;
     }
+  }
+  & > div {
+    display: ${props => (props.active ? "block" : "none")};
   }
   @media print {
     display: none;
