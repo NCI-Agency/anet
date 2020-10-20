@@ -25,6 +25,7 @@ import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
+import SelectLocationFormat from "../../components/SelectLocationFormat"
 import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
@@ -44,6 +45,7 @@ const MIN_CHARS_FOR_DUPLICATES = 3
 const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
+  const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const [error, setError] = useState(null)
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
@@ -125,6 +127,10 @@ const LocationForm = ({ edit, title, initialValues }) => {
         }
         const action = (
           <div>
+            <SelectLocationFormat
+              locationFormat={locationFormat}
+              setLocationFormat={setLocationFormat}
+            />
             <Button
               key="submit"
               bsStyle="primary"
@@ -184,6 +190,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
+                  locationFormat={locationFormat}
                 />
               </Fieldset>
 

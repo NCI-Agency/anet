@@ -12,10 +12,10 @@ import {
   convertMGRSToLatLng,
   parseCoordinate
 } from "geoUtils"
+import { Location } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
-import Settings from "settings"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
   FORM_FIELD: "FORM_FIELD",
@@ -40,7 +40,7 @@ const GeoLocation = ({
 }) => {
   let label = LAT_LON_LABEL
   let CoordinatesFormField = LatLonFormField
-  if (locationFormat === "MGRS") {
+  if (locationFormat === Location.LOCATION_FORMATS.MGRS) {
     label = MGRS_LABEL
     CoordinatesFormField = MGRSFormField
   }
@@ -112,7 +112,7 @@ GeoLocation.defaultProps = {
   editable: false,
   isSubmitting: false,
   displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC,
-  locationFormat: Settings?.fields?.location?.format
+  locationFormat: Location.locationFormat
 }
 
 export default GeoLocation
