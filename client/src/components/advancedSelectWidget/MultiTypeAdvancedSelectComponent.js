@@ -59,7 +59,10 @@ const widgetPropsPeople = {
   overlayRenderRow: PersonDetailedOverlayRow,
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
-  queryParams: { status: Models.Person.STATUS.ACTIVE },
+  queryParams: {
+    status: Models.Person.STATUS.ACTIVE,
+    pendingVerification: false
+  },
   fields: Models.Person.autocompleteQueryWithNotes,
   addon: PEOPLE_ICON
 }
