@@ -119,7 +119,14 @@ const LocationShow = ({ pageDispatchers }) => {
           })
         }
         const action = (
-          <>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
             <SelectLocationFormat
               locationFormat={locationFormat}
               setLocationFormat={setLocationFormat}
@@ -135,7 +142,7 @@ const LocationShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
-          </>
+          </div>
         )
         return (
           <div>

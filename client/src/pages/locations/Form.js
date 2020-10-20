@@ -126,7 +126,14 @@ const LocationForm = ({ edit, title, initialValues }) => {
           })
         }
         const action = (
-          <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
             <SelectLocationFormat
               locationFormat={locationFormat}
               setLocationFormat={setLocationFormat}
