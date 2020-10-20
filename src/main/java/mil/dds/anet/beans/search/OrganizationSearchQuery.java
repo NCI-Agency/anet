@@ -78,7 +78,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSea
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public OrganizationSearchQuery clone() throws CloneNotSupportedException {
     final OrganizationSearchQuery clone = (OrganizationSearchQuery) super.clone();
     if (parentOrgUuid != null) {
       clone.setParentOrgUuid(new ArrayList<>(parentOrgUuid));

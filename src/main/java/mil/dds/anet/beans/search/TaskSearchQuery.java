@@ -191,7 +191,7 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public TaskSearchQuery clone() throws CloneNotSupportedException {
     final TaskSearchQuery clone = (TaskSearchQuery) super.clone();
     if (customFieldRef1Uuid != null) {
       clone.setCustomFieldRef1Uuid(new ArrayList<>(customFieldRef1Uuid));

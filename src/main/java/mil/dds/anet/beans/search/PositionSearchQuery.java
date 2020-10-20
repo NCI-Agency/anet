@@ -114,7 +114,7 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public PositionSearchQuery clone() throws CloneNotSupportedException {
     final PositionSearchQuery clone = (PositionSearchQuery) super.clone();
     if (type != null) {
       clone.setType(new ArrayList<>(type));

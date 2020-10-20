@@ -39,6 +39,18 @@ class Home extends Page {
     return browser.$("#my-counterparts-nav")
   }
 
+  get myCounterpartsNotifications() {
+    return this.myCounterpartsLink.$("span:last-child")
+  }
+
+  get myTasksNotifications() {
+    return this.myTasksLink.$("span:last-child")
+  }
+
+  get onboardingPopover() {
+    return browser.$(".hopscotch-bubble-container")
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()

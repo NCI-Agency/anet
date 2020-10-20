@@ -5,4 +5,10 @@ public class LocationSearchQuery extends AbstractSearchQuery<LocationSearchSortB
   public LocationSearchQuery() {
     super(LocationSearchSortBy.NAME);
   }
+
+  @Override
+  public LocationSearchQuery clone() throws CloneNotSupportedException {
+    return (LocationSearchQuery) super.clone();
+  }
+
 }

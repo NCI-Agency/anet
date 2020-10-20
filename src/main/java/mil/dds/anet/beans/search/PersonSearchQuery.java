@@ -143,4 +143,9 @@ public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
     this.hasBiography = hasBiography;
   }
 
+  @Override
+  public PersonSearchQuery clone() throws CloneNotSupportedException {
+    return (PersonSearchQuery) super.clone();
+  }
+
 }

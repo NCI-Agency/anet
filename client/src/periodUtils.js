@@ -3,8 +3,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { momentObj } from "react-moment-proptypes"
 
-const now = moment()
-
 export const RECURRENCE_TYPE = {
   ONCE: "once",
   DAILY: "daily",
@@ -79,11 +77,13 @@ export const getPeriodsConfig = (
   offset,
   forAssessments = false
 ) => {
+  const now = moment()
   const periods = []
-  for (var i = numberOfperiods - 1; i >= 0; i--) {
-    const periodDetails = { ...PERIOD_FACTORIES[recurrence](now, offset + i) }
+  for (let i = numberOfperiods - 1; i >= 0; i--) {
+    const periodDetails = PERIOD_FACTORIES[recurrence](now, offset + i)
     if (forAssessments) {
-      periodDetails.allowNewAssessments = offset + i !== 0
+      // don't allow assessments for current and future periods
+      periodDetails.allowNewAssessments = offset + i > 0
     }
     periods.push(periodDetails)
   }
