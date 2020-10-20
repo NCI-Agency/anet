@@ -6,6 +6,7 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import RECURSE_STRATEGY from "components/SearchFilters"
 import { FastField, Form, Formik } from "formik"
@@ -80,7 +81,7 @@ const EditAssociatedPositionsModal = ({
       ? Settings.fields.advisor.person.name
       : Settings.fields.principal.person.name
   const positionSearchQuery = {
-    status: Position.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     matchPersonName: true
   }
   if (position.type === Position.TYPE.PRINCIPAL) {

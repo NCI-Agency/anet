@@ -149,7 +149,7 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE)
+        .default(() => Model.STATUS.ACTIVE)
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)
@@ -229,8 +229,7 @@ export default class Person extends Model {
 
   hasActivePosition() {
     return (
-      this.hasAssignedPosition() &&
-      this.position.status === Position.STATUS.ACTIVE
+      this.hasAssignedPosition() && this.position.status === Model.STATUS.ACTIVE
     )
   }
 

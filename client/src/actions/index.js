@@ -1,5 +1,6 @@
 import pluralize from "pluralize"
 import Settings from "settings"
+import Model from "components/Model"
 import * as types from "../constants/ActionTypes"
 
 export const DEFAULT_PAGE_PROPS = {
@@ -51,7 +52,7 @@ export const DEFAULT_SEARCH_QUERY = {
   filters: [
     {
       key: "Status",
-      value: { value: "ACTIVE", toQuery: { status: "ACTIVE" } }
+      value: { value: Model.STATUS.ACTIVE, toQuery: { status: "ACTIVE" } }
     }
   ]
 }

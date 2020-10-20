@@ -91,7 +91,7 @@ export default class Task extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Task.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       responsiblePositions: yup
         .array()
         .nullable()

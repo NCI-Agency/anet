@@ -11,7 +11,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -64,12 +64,12 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Person.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "ACTIVE"
     },
     {
       id: "statusInactiveButton",
-      value: Person.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "INACTIVE"
     }
   ]
@@ -130,11 +130,11 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
           ? values.endOfTourDate <= Date.now()
           : false
         const willAutoKickPosition =
-          values.status === Person.STATUS.INACTIVE &&
+          values.status === Model.STATUS.INACTIVE &&
           values.position &&
           !!values.position.uuid
         const warnDomainUsername =
-          values.status === Person.STATUS.INACTIVE &&
+          values.status === Model.STATUS.INACTIVE &&
           !_isEmpty(values.domainUsername)
         const ranks = Settings.fields.person.ranks || []
         const roleButtons = isAdmin ? adminRoleButtons : userRoleButtons
@@ -145,8 +145,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
         }
         // anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
-          (initialValues.status === Person.STATUS.INACTIVE && !isAdmin) ||
-          isSelf
+          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         // admins can edit all persons, new users can be edited by super users or themselves
         const canEditName =
           isAdmin ||
@@ -224,7 +223,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       <TriggerableConfirm
                         onConfirm={async() => {
                           // Have to wait until field value is updated before we can submit the form
-                          await setFieldValue("status", Person.STATUS.INACTIVE)
+                          await setFieldValue("status", Model.STATUS.INACTIVE)
                           setOnSaveRedirectToHome(
                             wrongPersonOptionValue === "needNewAccount"
                           )

@@ -1,3 +1,4 @@
+import Model from "components/Model"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import { Position } from "models"
@@ -79,7 +80,7 @@ const userTypes = [
     frequency: 1,
     userFunction: async function(value) {
       return getRandomUser(specialUser, {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         isFilled: true,
         type: [Position.TYPE.ADVISOR]
       })
@@ -90,7 +91,7 @@ const userTypes = [
     frequency: 1,
     userFunction: async function(value) {
       return getRandomUser(specialUser, {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         isFilled: true,
         type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]
       })
@@ -101,7 +102,7 @@ const userTypes = [
     frequency: 1,
     userFunction: async function(value) {
       return getRandomUser(specialUser, {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         isFilled: true,
         type: [Position.TYPE.ADMINISTRATOR]
       })

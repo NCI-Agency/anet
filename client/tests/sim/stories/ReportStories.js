@@ -1,8 +1,9 @@
-import { Report, Person, Position, Task, Location } from "models"
+import Model from "components/Model"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
+import { Report, Person, Position } from "models"
 import { fuzzy, runGQL, populate } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
@@ -12,7 +13,7 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
       user,
       "positions",
       {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         isFilled: true,
         type: type
       },
@@ -34,7 +35,7 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
 
 async function populateReport(report, user, args) {
   const location = await getRandomObject(user, "locations", {
-    status: Location.STATUS.ACTIVE
+    status: Model.STATUS.ACTIVE
   })
   let author
   async function getAttendees() {
@@ -92,7 +93,7 @@ async function populateReport(report, user, args) {
 
     for (let i = 0; i < nbOfTasks; i++) {
       reportTasks.push(
-        await getRandomObject(user, "tasks", { status: Task.STATUS.ACTIVE })
+        await getRandomObject(user, "tasks", { status: Model.STATUS.ACTIVE })
       )
     }
 
