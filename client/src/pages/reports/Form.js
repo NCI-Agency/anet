@@ -1217,7 +1217,6 @@ const ReportForm = ({
           )
         })
         /* eslint-disable handle-callback-err */
-
         .catch(error => {
           // Show an error message
           autoSaveSettings.autoSaveTimeout.add(autoSaveSettings.autoSaveTimeout) // exponential back-off
@@ -1255,6 +1254,7 @@ const ReportForm = ({
   }
 
   function onSubmit(values, form) {
+    form.setSubmitting(true)
     return save(values, true)
       .then(response => onSubmitSuccess(response, values, form.resetForm))
       .catch(error => {
@@ -1334,6 +1334,7 @@ const ReportForm = ({
         return noteObj
       })
   }
+
   function save(values, sendEmail) {
     const report = Object.without(
       new Report(values),
