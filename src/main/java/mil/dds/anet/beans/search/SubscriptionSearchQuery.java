@@ -7,4 +7,9 @@ public class SubscriptionSearchQuery extends AbstractSearchQuery<SubscriptionSea
     this.setSortOrder(SortOrder.DESC);
   }
 
+  @Override
+  public SubscriptionSearchQuery clone() throws CloneNotSupportedException {
+    return (SubscriptionSearchQuery) super.clone();
+  }
+
 }

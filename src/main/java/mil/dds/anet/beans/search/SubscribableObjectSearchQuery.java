@@ -40,10 +40,8 @@ public abstract class SubscribableObjectSearchQuery<T extends ISortBy>
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
-    @SuppressWarnings("unchecked")
-    final SubscribableObjectSearchQuery<T> clone = (SubscribableObjectSearchQuery<T>) super.clone();
-    return clone;
+  public SubscribableObjectSearchQuery<T> clone() throws CloneNotSupportedException {
+    return (SubscribableObjectSearchQuery<T>) super.clone();
   }
 
 }

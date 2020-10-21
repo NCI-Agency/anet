@@ -8,4 +8,9 @@ public class SubscriptionUpdateSearchQuery
     this.setSortOrder(SortOrder.DESC);
   }
 
+  @Override
+  public SubscriptionUpdateSearchQuery clone() throws CloneNotSupportedException {
+    return (SubscriptionUpdateSearchQuery) super.clone();
+  }
+
 }
