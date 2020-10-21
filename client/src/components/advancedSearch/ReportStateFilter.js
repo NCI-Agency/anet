@@ -15,7 +15,9 @@ const CANCELLATION_REASON_LABELS = {
   [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES]: "Routes",
   [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT]: "Threat",
   [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS]:
-    "Availability of Interpreter(s)"
+    "Availability of Interpreter(s)",
+  [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_NETWORK_ISSUES]:
+    "Network / Connectivity Issues"
 }
 
 const ReportStateFilter = ({

@@ -27,6 +27,7 @@ import {
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -37,7 +38,6 @@ import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
-import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -238,53 +238,6 @@ const ReportForm = ({
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
-  const atmosphereButtons = [
-    {
-      id: "positiveAtmos",
-      value: Report.ATMOSPHERE.POSITIVE,
-      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
-    },
-    {
-      id: "neutralAtmos",
-      value: Report.ATMOSPHERE.NEUTRAL,
-      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
-    },
-    {
-      id: "negativeAtmos",
-      value: Report.ATMOSPHERE.NEGATIVE,
-      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
-    }
-  ]
-  const cancelledReasonOptions = [
-    {
-      value: "CANCELLED_BY_ADVISOR",
-      label: `Cancelled by ${Settings.fields.advisor.person.name}`
-    },
-    {
-      value: "CANCELLED_BY_PRINCIPAL",
-      label: `Cancelled by ${Settings.fields.principal.person.name}`
-    },
-    {
-      value: "CANCELLED_DUE_TO_TRANSPORTATION",
-      label: "Cancelled due to Transportation"
-    },
-    {
-      value: "CANCELLED_DUE_TO_FORCE_PROTECTION",
-      label: "Cancelled due to Force Protection"
-    },
-    {
-      value: "CANCELLED_DUE_TO_ROUTES",
-      label: "Cancelled due to Routes"
-    },
-    {
-      value: "CANCELLED_DUE_TO_THREAT",
-      label: "Cancelled due to Threat"
-    },
-    {
-      value: "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
-      label: "Cancelled due to Availability of Interpreter(s)"
-    }
-  ]
 
   let recents = []
   let tagSuggestions = []
@@ -1440,4 +1393,56 @@ ReportForm.defaultProps = {
   showSensitiveInfo: false
 }
 
+const atmosphereButtons = [
+  {
+    id: "positiveAtmos",
+    value: Report.ATMOSPHERE.POSITIVE,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
+  },
+  {
+    id: "neutralAtmos",
+    value: Report.ATMOSPHERE.NEUTRAL,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
+  },
+  {
+    id: "negativeAtmos",
+    value: Report.ATMOSPHERE.NEGATIVE,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
+  }
+]
+
+const cancelledReasonOptions = [
+  {
+    value: "CANCELLED_BY_ADVISOR",
+    label: `Cancelled by ${Settings.fields.advisor.person.name}`
+  },
+  {
+    value: "CANCELLED_BY_PRINCIPAL",
+    label: `Cancelled by ${Settings.fields.principal.person.name}`
+  },
+  {
+    value: "CANCELLED_DUE_TO_TRANSPORTATION",
+    label: "Cancelled due to Transportation"
+  },
+  {
+    value: "CANCELLED_DUE_TO_FORCE_PROTECTION",
+    label: "Cancelled due to Force Protection"
+  },
+  {
+    value: "CANCELLED_DUE_TO_ROUTES",
+    label: "Cancelled due to Routes"
+  },
+  {
+    value: "CANCELLED_DUE_TO_THREAT",
+    label: "Cancelled due to Threat"
+  },
+  {
+    value: "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
+    label: "Cancelled due to Availability of Interpreter(s)"
+  },
+  {
+    value: "CANCELLED_DUE_TO_NETWORK_ISSUES",
+    label: "Cancelled due to Network / Connectivity Issues"
+  }
+]
 export default connect(null, mapPageDispatchersToProps)(ReportForm)
