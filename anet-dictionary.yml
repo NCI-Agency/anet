@@ -481,7 +481,10 @@ fields:
             visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   location:
-    format: LAT_LON
+    formats:
+      LAT_LON: LAT_LON
+      MGRS: MGRS
+    defaultFormat: LAT_LON
     customFields:
       multipleButtons:
         type: enumset

@@ -25,12 +25,12 @@ export default class Location extends Model {
     Settings.fields.location.customFields
   )
 
-  static LOCATION_FORMATS = {
+  static LOCATION_FORMATS = Settings.fields.location.formats || {
     LAT_LON: "LAT_LON", // default
     MGRS: "MGRS"
   }
 
-  static locationFormat = Location.LOCATION_FORMATS.LAT_LON
+  static locationFormat = Settings.fields.location.defaultFormat // Default
 
   static yupSchema = yup
     .object()
@@ -76,10 +76,7 @@ export default class Location extends Model {
             if (_isEmpty(displayedCoordinate)) {
               return true
             }
-            if (
-              Settings?.fields?.location?.format ===
-              Location.LOCATION_FORMATS.MGRS
-            ) {
+            if (Location.locationFormat === Location.LOCATION_FORMATS.MGRS) {
               const latLngValue = convertMGRSToLatLng(displayedCoordinate)
               return !latLngValue[0] || !latLngValue[1]
                 ? this.createError({
