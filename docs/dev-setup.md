@@ -17,8 +17,8 @@ This section describes the recommended Developer Environment and how to set it u
     ```
 
 ### Possible Problems
-- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See [_Connecting to GitHub with SSH_](https://help.github.com/articles/connecting-to-github-with-ssh/) for more information on troubleshooting this step. 
-- **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code. 
+- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See [_Connecting to GitHub with SSH_](https://help.github.com/articles/connecting-to-github-with-ssh/) for more information on troubleshooting this step.
+- **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code.
 
 ## Set Up Gradle
 The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running the backend [`gradle`](https://gradle.org/) if you are only doing frontend development.
@@ -74,7 +74,8 @@ Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This
 | Arthur Dmin | arthur | ANET Admins | ANET Administrator | Administrator
 | Jack Jackson | jack | EF2.1 | EF2.1 Advisor B | Advisor
 | Henry Henderson | henry | EF2.1 | EF2.1 SuperUser | Super User
-| Steve Steveson | | MoD | Cost Adder | Principal
+| Steve Steveson |-| MoD | Cost Adder | Principal
+| Ihave Noposition| nopos |-| - | Advisor
 
 To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password. See [Users defined locally in the realm](keycloak.md#dev-users) for other possible users.
 
@@ -193,7 +194,7 @@ When all is set up, run the remote tests:
     ```
     $ ./BrowserStackLocal --key mYbRoWsErStAcKkEy
    ```
-1. Configure scripts with `TEST_ENV` envrironment variable for remote testing: 
+1. Configure scripts with `TEST_ENV` envrironment variable for remote testing:
     ```
     $ export TEST_ENV=remote
     ```
@@ -218,7 +219,7 @@ When all is set up, run the remote tests:
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
-ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.   
+ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.
 
 The simulator can be started by running './gradlew yarn_run_sim'.
 

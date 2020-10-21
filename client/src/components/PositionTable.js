@@ -2,8 +2,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RemoveButton from "components/RemoveButton"

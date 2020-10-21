@@ -3,6 +3,7 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Task.TaskStatus;
@@ -200,6 +201,15 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
         && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
         && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
+  }
+
+  @Override
+  public TaskSearchQuery clone() throws CloneNotSupportedException {
+    final TaskSearchQuery clone = (TaskSearchQuery) super.clone();
+    if (customFieldRef1Uuid != null) {
+      clone.setCustomFieldRef1Uuid(new ArrayList<>(customFieldRef1Uuid));
+    }
+    return clone;
   }
 
 }

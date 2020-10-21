@@ -6,6 +6,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class FkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends AbstractBatchParams<B, T> {
+
   private String tableName;
   private String foreignKey;
 
@@ -55,4 +56,10 @@ public class FkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQ
     return Objects.equals(tableName, other.getTableName())
         && Objects.equals(foreignKey, other.getForeignKey());
   }
+
+  @Override
+  public FkBatchParams<B, T> clone() throws CloneNotSupportedException {
+    return (FkBatchParams<B, T>) super.clone();
+  }
+
 }

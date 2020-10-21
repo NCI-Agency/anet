@@ -19,7 +19,7 @@
       "allowedVersions": "/^.*\\.jre8$/"
     },
     {
-      "packageNames": ["autoprefixer", "draft-js", "leaflet"],
+      "packageNames": ["autoprefixer", "draft-js", "leaflet", "fullcalendar"],
       "enabled": false
     }
   ],

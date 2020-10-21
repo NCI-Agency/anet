@@ -22,4 +22,9 @@ public class LocationSearchQuery extends AbstractSearchQuery<LocationSearchSortB
     this.status = status;
   }
 
+  @Override
+  public LocationSearchQuery clone() throws CloneNotSupportedException {
+    return (LocationSearchQuery) super.clone();
+  }
+
 }

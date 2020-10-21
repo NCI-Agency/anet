@@ -42,7 +42,7 @@ const AdvancedSingleSelect = props => {
 }
 AdvancedSingleSelect.propTypes = {
   ...advancedSelectPropTypes,
-  value: PropTypes.object.isRequired,
+  value: PropTypes.object,
   valueKey: PropTypes.string
 }
 AdvancedSingleSelect.defaultProps = {

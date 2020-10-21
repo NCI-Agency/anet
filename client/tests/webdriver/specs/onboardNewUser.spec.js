@@ -1,7 +1,7 @@
 import { expect } from "chai"
-import OnboardPage from "../pages/onboard.page"
-
 import CreatePerson from "../pages/createNewPerson.page"
+import OnboardPage from "../pages/onboard.page"
+import { createOnboardingNewPerson } from "./newUserUtils"
 
 const ONBOARD_USER = {
   lastName: "BONNSDOTTIR",
@@ -10,8 +10,16 @@ const ONBOARD_USER = {
 }
 
 describe("Onboard new user login", () => {
-  it("Should show onboard welcome", () => {
-    OnboardPage.openAsOnboardUser()
+  it("Should successfully create an account", () => {
+    // unique name if we want to run tests without resetting DB
+    OnboardPage.openAsOnboardUser("/", `bonny${Date.now()}`)
+    createOnboardingNewPerson()
+    OnboardPage.logout()
+  })
+
+  it('Should show onboard welcome"', () => {
+    // give unique name to avoid collision when running tests (without resetting DB)
+    OnboardPage.openAsOnboardUser("/", `bonny${Date.now()}`)
     const welcomeText = "Welcome to ANET"
     OnboardPage.waitForWelcomeMessage(welcomeText)
 

@@ -3,12 +3,16 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
 import { Organization, Person } from "models"
+import {
+  getNotifications,
+  GRAPHQL_NOTIFICATIONS_NOTE_FIELDS
+} from "notificationsUtils"
 import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
@@ -71,12 +75,26 @@ const GQL_GET_APP_DATA = gql`
                 name
               }
             }
+            ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
           organization {
             uuid
             shortName
           }
         }
+      }
+      responsibleTasks(
+        query: {
+          status: ACTIVE
+        }
+      ) {
+        uuid
+        shortName
+        longName
+        customFieldRef1 {
+          uuid
+        }
+        ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
       }
     }
 
@@ -119,22 +137,23 @@ const App = ({ pageDispatchers, pageProps }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
+
   const { done, result } = useBoilerplate({
     loading,
     error,
     pageProps,
     pageDispatchers
   })
+
   if (done) {
     return result
   }
 
-  if (error || !data) {
-    return (
-      <Messages error={error || { message: "Could not load initial data" }} />
-    )
+  if (!data) {
+    return <Messages error={{ message: "Could not load initial data" }} />
   }
   const appState = processData(data)
+
   // if this is a new user, redirect to onboarding
   if (
     appState.currentUser.isNewUser() &&
@@ -142,13 +161,13 @@ const App = ({ pageDispatchers, pageProps }) => {
   ) {
     return <Redirect to="/onboarding" />
   }
-
   return (
     <AppContext.Provider
       value={{
         appSettings: appState.settings,
         currentUser: appState.currentUser,
-        loadAppData: refetch
+        loadAppData: refetch,
+        notifications: appState.notifications
       }}
     >
       <ResponsiveLayout
@@ -179,7 +198,6 @@ const App = ({ pageDispatchers, pageProps }) => {
       return organizations
     }
 
-    const currentUser = new Person(data.me)
     const advisorOrganizations = getSortedOrganizationsFromData(
       data.topLevelAdvisorOrgs
     )
@@ -191,11 +209,14 @@ const App = ({ pageDispatchers, pageProps }) => {
       setting => (settings[setting.key] = setting.value)
     )
 
+    const currentUser = new Person(data.me)
+    const notifications = getNotifications(currentUser)
     return {
       currentUser,
       settings,
       advisorOrganizations,
-      principalOrganizations
+      principalOrganizations,
+      notifications
     }
   }
 }

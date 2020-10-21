@@ -37,7 +37,7 @@ import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
-import TaskTable from "components/TaskTable"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -346,6 +346,18 @@ const ReportForm = ({
         resetForm,
         setSubmitting
       }) => {
+        // need up-to-date copies of these in the autosave handler
+        Object.assign(autoSaveSettings, { dirty, values, touched })
+        if (!autoSaveSettings.timeoutId) {
+          // Schedule the auto-save timer
+          const autosaveHandler = () =>
+            autoSave({ setFieldValue, setFieldTouched, resetForm })
+          autoSaveSettings.timeoutId = window.setTimeout(
+            autosaveHandler,
+            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+          )
+        }
+
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
         }
@@ -445,19 +457,7 @@ const ReportForm = ({
             queryVars: {}
           }
         }
-        // need up-to-date copies of these in the autosave handler
-        autoSaveSettings.dirty = dirty
-        autoSaveSettings.values = values
-        autoSaveSettings.touched = touched
-        if (!autoSaveSettings.timeoutId) {
-          // Schedule the auto-save timer
-          const autosaveHandler = () =>
-            autoSave({ setFieldValue, setFieldTouched, resetForm })
-          autoSaveSettings.timeoutId = window.setTimeout(
-            autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
-          )
-        }
+
         // Only the author can delete a report, and only in DRAFT.
         const canDelete =
           !!values.uuid &&
@@ -814,7 +814,7 @@ const ReportForm = ({
                         placeholder={`Search for ${tasksLabel}...`}
                         value={values.tasks}
                         renderSelected={
-                          <TaskTable
+                          <NoPaginationTaskTable
                             id="tasks-tasks"
                             tasks={values.tasks}
                             showParent
@@ -976,7 +976,7 @@ const ReportForm = ({
                         onChange={value =>
                           setFieldValue(
                             "reportSensitiveInformation.text",
-                            value,
+                            value || null,
                             true
                           )}
                         widget={
@@ -1378,6 +1378,7 @@ const ReportForm = ({
         "lastName",
         "position",
         "customFields",
+        "responsibleTasks", // notifications for UI
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
     )

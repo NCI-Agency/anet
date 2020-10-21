@@ -11,8 +11,10 @@ describe("Home page", () => {
       expect(Home.myCounterpartsLink.isExisting()).to.be.true
       Home.logout()
     })
-    it("Should NOT see a link to my counterparts page when the user is not an advisor", () => {
-      Home.openAsOnboardUser()
+  })
+  describe("When checking the navigation items", () => {
+    it("Should NOT see a link to my counterparts page when the user does not have a position", () => {
+      Home.openAsPositionlessUser()
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myCounterpartsLink.isExisting()).to.be.false
       // No Logout link, so just call logout directly

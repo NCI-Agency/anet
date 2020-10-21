@@ -13,9 +13,9 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -27,9 +27,9 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import {
+  getSearchQuery,
   SearchDescription,
-  SearchQueryPropType,
-  getSearchQuery
+  SearchQueryPropType
 } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"

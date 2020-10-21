@@ -5,8 +5,8 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LikertScale from "components/graphs/LikertScale"
 import Model, {
-  CUSTOM_FIELD_TYPE,
   createYupObjectShape,
+  CUSTOM_FIELD_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   INVISIBLE_CUSTOM_FIELDS_FIELD
 } from "components/Model"
@@ -721,7 +721,7 @@ const CustomField = ({
     400
   ) // with validateField it somehow doesn't work
   const handleChange = useMemo(
-    () => (value, shouldValidate: true) => {
+    () => (value, shouldValidate = true) => {
       const val =
         value?.target?.value !== undefined ? value.target.value : value
       const sv = shouldValidate === undefined ? true : shouldValidate
