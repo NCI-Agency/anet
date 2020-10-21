@@ -246,7 +246,7 @@ Promise.prototype.log = function () {
 
 export const renderBlueprintIconAsSvg = (
   iconName,
-  iconSize: Icon.SIZE_STANDARD
+  iconSize = Icon.SIZE_STANDARD
 ) => {
   // choose which pixel grid is most appropriate for given icon size
   const pixelGridSize =

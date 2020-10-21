@@ -3,6 +3,7 @@ package mil.dds.anet.search;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -29,7 +30,6 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -177,11 +177,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         switch (es) {
           case HAPPENED:
             engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfHappened");
-            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endOfHappened", Utils.endOfToday());
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endOfHappened", Instant.now());
             break;
           case FUTURE:
             engagementStatusClauses.add(" reports.\"engagementDate\" > :startOfFuture");
-            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startOfFuture", Utils.endOfToday());
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startOfFuture", Instant.now());
             break;
           case CANCELLED:
             engagementStatusClauses.add(" reports.state = :cancelledState");

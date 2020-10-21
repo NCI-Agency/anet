@@ -3,6 +3,8 @@ development.db
 logs/*
 *.sqp
 *.swp
+# ignore personal ide settings folders
+.vscode/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

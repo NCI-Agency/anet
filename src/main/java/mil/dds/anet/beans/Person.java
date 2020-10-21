@@ -16,7 +16,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -75,6 +77,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   private Position position;
   // annotated below
   private List<PersonPositionHistory> previousPositions;
+  // annotated below
+  List<Task> tasks;
   // annotated below
   private Optional<byte[]> avatar;
   @GraphQLQuery
@@ -255,6 +259,26 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     query.setAttendeeUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
+  }
+
+  @GraphQLQuery(name = "responsibleTasks")
+  public CompletableFuture<List<Task>> loadResponsibleTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (tasks != null) {
+      return CompletableFuture.completedFuture(tasks);
+    }
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+        "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
+    final Person user = DaoUtils.getUserFromContext(context);
+    return AnetObjectEngine.getInstance().getTaskDao()
+        .getTasksBySearch(context, DaoUtils.getUuid(user.getPosition()), query).thenApply(o -> {
+          tasks = o;
+          return o;
+        });
   }
 
   @GraphQLQuery(name = "avatar")

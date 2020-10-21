@@ -68,6 +68,9 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES (lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@dds.mil', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'DVISOR, A', 0, 0, 'hunter+aDvisor@dds.mil', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- Advisor with no position for testing
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@dds.mil', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Principals
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'STEVESON, Steve', 0, 1, 'hunter+steve@dds.mil', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

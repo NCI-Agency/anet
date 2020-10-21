@@ -7,6 +7,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class RecursiveFkBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
     extends FkBatchParams<B, T> {
+
   private String recursiveTableName;
   private String recursiveForeignKey;
   private RecurseStrategy recurseStrategy;
@@ -68,4 +69,10 @@ public class RecursiveFkBatchParams<B extends AbstractAnetBean, T extends Abstra
         && Objects.equals(getRecursiveForeignKey(), other.getRecursiveForeignKey())
         && Objects.equals(getRecurseStrategy(), other.getRecurseStrategy());
   }
+
+  @Override
+  public RecursiveFkBatchParams<B, T> clone() throws CloneNotSupportedException {
+    return (RecursiveFkBatchParams<B, T>) super.clone();
+  }
+
 }

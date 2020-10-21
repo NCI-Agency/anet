@@ -17,14 +17,14 @@ public class ReportActionDao extends AnetBaseDao<ReportAction, AbstractSearchQue
 
   @Override
   public ReportAction insertInternal(ReportAction action) {
-    getDbHandle()
-        .createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
-            + "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
-            + "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
+    getDbHandle().createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
+        + "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type, planned) "
+        + "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type, :planned)")
         .bind("approvalStepUuid", action.getStepUuid()).bind("personUuid", action.getPersonUuid())
         .bind("reportUuid", action.getReportUuid())
         .bind("createdAt", DaoUtils.asLocalDateTime(action.getCreatedAt()))
-        .bind("type", DaoUtils.getEnumId(action.getType())).execute();
+        .bind("type", DaoUtils.getEnumId(action.getType())).bind("planned", action.isPlanned())
+        .execute();
     return action;
   }
 

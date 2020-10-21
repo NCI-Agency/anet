@@ -3487,6 +3487,14 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="add-reportActions-planned" author="gjvoosten">
+		<addColumn tableName="reportActions">
+			<column name="planned" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
 	<changeSet id="create-emailDeactivationWarnings-table" author="jose-west">
 		<comment>Add a table to support a robust email deactivation warning mechanism.</comment>
 		<createTable tableName="emailDeactivationWarnings">

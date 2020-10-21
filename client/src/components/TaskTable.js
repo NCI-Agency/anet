@@ -1,110 +1,148 @@
+import API from "api"
+import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
-import RemoveButton from "components/RemoveButton"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
+import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import { Task } from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 import { Table } from "react-bootstrap"
-import Settings from "settings"
+import { connect } from "react-redux"
 
-const TaskTable = ({
-  id,
-  tasks,
-  showParent,
-  showOrganization,
-  showDelete,
-  showDescription,
-  onDelete,
-  noTasksMessage
-}) => {
-  const tasksExist = _get(tasks, "length", 0) > 0
+const GQL_GET_TASK_LIST = gql`
+  query($taskQuery: TaskSearchQueryInput) {
+    taskList(query: $taskQuery) {
+      pageNum
+      pageSize
+      totalCount
+      list {
+        uuid
+        shortName
+        longName
+      }
+    }
+  }
+`
+
+const TaskTable = props => {
+  if (props.queryParams) {
+    return <PaginatedTasks {...props} />
+  }
+  return <BaseTaskTable {...props} />
+}
+
+TaskTable.propTypes = {
+  // query variables for tasks, when query & pagination wanted:
+  queryParams: PropTypes.object
+}
+
+const PaginatedTasks = ({ queryParams, pageDispatchers, ...otherProps }) => {
+  const [pageNum, setPageNum] = useState(0)
+  const taskQuery = Object.assign({}, queryParams, { pageNum })
+  const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
+    taskQuery: taskQuery
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+
+  const { pageSize, pageNum: curPage, totalCount, list: tasks } = data.taskList
 
   return (
-    <div id={id}>
-      {tasksExist ? (
-        <Table striped condensed hover responsive className="tasks_table">
+    <BaseTaskTable
+      tasks={tasks}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPageNum}
+      {...otherProps}
+    />
+  )
+}
+
+PaginatedTasks.propTypes = {
+  pageDispatchers: PageDispatchersPropType,
+  queryParams: PropTypes.object
+}
+
+const BaseTaskTable = ({
+  id,
+  showDelete,
+  onDelete,
+  tasks,
+  pageSize,
+  pageNum,
+  totalCount,
+  goToPage
+}) => {
+  if (_get(tasks, "length", 0) === 0) {
+    return <em>No tasks found</em>
+  }
+
+  return (
+    <div>
+      <UltimatePaginationTopDown
+        componentClassName="searchPagination"
+        className="pull-right"
+        pageNum={pageNum}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        goToPage={goToPage}
+      >
+        <Table
+          striped
+          condensed
+          hover
+          responsive
+          className="tasks_table"
+          id={id}
+        >
           <thead>
             <tr>
               <th>Name</th>
-              {showParent && (
-                <th>{Settings.fields.task.topLevel.shortLabel}</th>
-              )}
-              {showOrganization && <th>Tasked organizations</th>}
-              {showDescription && <th>Description</th>}
               <th />
             </tr>
           </thead>
           <tbody>
             {Task.map(tasks, task => {
-              const fieldSettings = task.fieldSettings()
               return (
                 <tr key={task.uuid}>
-                  <td className="taskName">
+                  <td>
                     <LinkTo modelType="Task" model={task}>
-                      {task.shortName}
+                      {task.shortName} {task.longName}
                     </LinkTo>
                   </td>
-                  {showParent && (
-                    <td className="parentTaskName">
-                      {task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
-                          {task.customFieldRef1.shortName}
-                        </LinkTo>
-                      )}
-                    </td>
-                  )}
-                  {showOrganization && (
-                    <td className="taskOrg">
-                      {task.taskedOrganizations.map(org => (
-                        <LinkTo
-                          modelType="Organization"
-                          model={org}
-                          key={`${task.uuid}-${org.uuid}`}
-                        />
-                      ))}
-                    </td>
-                  )}
-                  {showDescription && (
-                    <td className="taskLongName">
-                      <span>{task.longName}</span>
-                    </td>
-                  )}
-                  {showDelete && (
-                    <td id={"taskDelete_" + task.uuid}>
-                      <RemoveButton
-                        title={`Remove ${fieldSettings.shortLabel}`}
-                        altText={`Remove ${fieldSettings.shortLabel}`}
-                        onClick={() => onDelete(task)}
-                      />
-                    </td>
-                  )}
                 </tr>
               )
             })}
           </tbody>
         </Table>
-      ) : (
-        <em>{noTasksMessage}</em>
-      )}
+      </UltimatePaginationTopDown>
     </div>
   )
 }
 
-TaskTable.propTypes = {
+BaseTaskTable.propTypes = {
   id: PropTypes.string,
-  tasks: PropTypes.array,
-  showParent: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
-  showOrganization: PropTypes.bool,
-  showDescription: PropTypes.bool,
-  noTasksMessage: PropTypes.string
+  // list of tasks:
+  tasks: PropTypes.array.isRequired,
+  // fill these when pagination wanted:
+  totalCount: PropTypes.number,
+  pageNum: PropTypes.number,
+  pageSize: PropTypes.number,
+  goToPage: PropTypes.func
 }
 
-TaskTable.defaultProps = {
-  showDelete: false,
-  showOrganization: false,
-  noTasksMessage: `No ${Settings.fields.task.shortLabel} found`
-}
-
-export default TaskTable
+export default connect(null, mapPageDispatchersToProps)(TaskTable)
