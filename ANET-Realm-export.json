@@ -600,6 +600,28 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "e88f6157-61bf-4d43-96eb-f65a91d927c0",
+    "createdTimestamp" : 1603265822134,
+    "username" : "nopos",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "5d307887-8ea9-473c-a974-d4475e4d89af",
+      "type" : "password",
+      "createdDate" : 1603265833081,
+      "secretData" : "{\"value\":\"gdtqqFVbcyKWQICKpBcne/Bue8s/V/7FhwOAFNxuBkOLQlu2rEOJJKmtcOl5LNqa5MKIX2u47I8WClp2lz6zFg==\",\"salt\":\"Go+9e4rQCU8VEezraelZ9Q==\"}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "view-profile", "manage-account" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "66a0c276-528a-4ae9-81ea-90a217a0e5ee",
     "createdTimestamp" : 1589460346718,
     "username" : "not-in-anet",
