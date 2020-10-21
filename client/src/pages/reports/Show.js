@@ -370,7 +370,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       validateOnMount
       initialValues={report}
     >
-      {({ isSubmitting, setSubmitting, isValid, setFieldValue, values }) => {
+      {({ isValid, setFieldValue, values }) => {
         const action = (
           <div>
             {canEmail && (
@@ -381,10 +381,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
-            {canSubmit &&
-              renderSubmitButton(isSubmitting || !isValid, () =>
-                setSubmitting(false)
-              )}
+            {canSubmit && renderSubmitButton(!isValid)}
           </div>
         )
 
@@ -482,11 +479,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 )}
                 {canPublish && (
                   <p>
-                    You can also{" "}
-                    {renderPublishButton(isSubmitting || !isValid, () =>
-                      setSubmitting(false)
-                    )}{" "}
-                    it immediately.
+                    You can also {renderPublishButton(!isValid)} it immediately.
                   </p>
                 )}
               </Fieldset>
@@ -718,8 +711,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
                   <Col md={3}>
                     {renderSubmitButton(
-                      isSubmitting || !isValid,
-                      () => setSubmitting(false),
+                      !isValid,
                       "large",
                       "submitReportButton"
                     )}
@@ -770,16 +762,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 renderApprovalForm(
                   values,
                   !_isEmpty(validationErrors),
-                  warnApproveOwnReport,
-                  () => setSubmitting(false)
+                  warnApproveOwnReport
                 )}
               {!canApprove &&
                 canRequestChanges &&
                 renderRequestChangesForm(
                   values,
                   !_isEmpty(validationErrors),
-                  warnApproveOwnReport,
-                  () => setSubmitting(false)
+                  warnApproveOwnReport
                 )}
             </Form>
 
@@ -851,12 +841,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       })
   }
 
-  function renderApprovalForm(
-    values,
-    disabled,
-    warnApproveOwnReport,
-    cancelHandler
-  ) {
+  function renderApprovalForm(values, disabled, warnApproveOwnReport) {
     return (
       <Fieldset
         className="report-sub-form"
@@ -873,33 +858,22 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           placeholder="Type a comment here; required when requesting changes"
         />
 
-        {renderRejectButton(
-          warnApproveOwnReport,
-          "Request changes",
-          () => rejectReport(values.approvalComment),
-          cancelHandler
+        {renderRejectButton(warnApproveOwnReport, "Request changes", () =>
+          rejectReport(values.approvalComment)
         )}
         <div className="right-button">
           <LinkTo modelType="Report" model={report} edit button>
             Edit {reportType}
           </LinkTo>
-          {renderApproveButton(
-            warnApproveOwnReport,
-            disabled,
-            () => approveReport(values.approvalComment),
-            cancelHandler
+          {renderApproveButton(warnApproveOwnReport, disabled, () =>
+            approveReport(values.approvalComment)
           )}
         </div>
       </Fieldset>
     )
   }
 
-  function renderRequestChangesForm(
-    values,
-    disabled,
-    warnApproveOwnReport,
-    cancelHandler
-  ) {
+  function renderRequestChangesForm(values, disabled, warnApproveOwnReport) {
     return (
       <Fieldset className="report-sub-form" title="Request changes">
         <h5>You can request changes to this {reportType}</h5>
@@ -911,11 +885,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           placeholder="Type a comment here; required when requesting changes"
         />
 
-        {renderRejectButton(
-          warnApproveOwnReport,
-          "Request changes",
-          () => rejectReport(values.requestChangesComment),
-          cancelHandler
+        {renderRejectButton(warnApproveOwnReport, "Request changes", () =>
+          rejectReport(values.requestChangesComment)
         )}
       </Fieldset>
     )
@@ -1122,12 +1093,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     jumpToTop()
   }
 
-  function renderRejectButton(
-    warnApproveOwnReport,
-    label,
-    confirmHandler,
-    cancelHandler
-  ) {
+  function renderRejectButton(warnApproveOwnReport, label, confirmHandler) {
     const warnings = _concat(
       validationWarnings || [],
       warnApproveOwnReport
@@ -1141,7 +1107,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     ) : (
       <Confirm
         onConfirm={confirmHandler}
-        onClose={cancelHandler}
         title="Request changes?"
         body={renderValidationWarnings(warnings, "rejecting")}
         confirmText="Request changes anyway"
@@ -1156,7 +1121,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     )
   }
 
-  function renderSubmitButton(disabled, cancelHandler, size, id) {
+  function renderSubmitButton(disabled, size, id) {
     return renderValidationButton(
       false,
       disabled,
@@ -1166,7 +1131,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       "Submit anyway",
       submitDraft,
       "Cancel submit",
-      cancelHandler,
       size,
       id
     )
@@ -1176,7 +1140,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     warnApproveOwnReport,
     disabled,
     confirmHandler,
-    cancelHandler,
     size,
     id
   ) {
@@ -1189,14 +1152,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       "Approve anyway",
       confirmHandler,
       "Cancel approve",
-      cancelHandler,
       size,
       id,
       "approve-button"
     )
   }
 
-  function renderPublishButton(disabled, cancelHandler, size, id) {
+  function renderPublishButton(disabled, size, id) {
     return renderValidationButton(
       false,
       disabled,
@@ -1206,7 +1168,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       "Publish anyway",
       publishReport,
       "Cancel publish",
-      cancelHandler,
       size,
       id,
       "publish-button"
@@ -1222,7 +1183,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     confirmText,
     confirmHandler,
     cancelText,
-    cancelHandler,
     size,
     id,
     className
@@ -1246,7 +1206,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     ) : (
       <Confirm
         onConfirm={confirmHandler}
-        onClose={cancelHandler}
         title={title}
         body={renderValidationWarnings(warnings, submitType)}
         confirmText={confirmText}
