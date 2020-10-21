@@ -48,7 +48,7 @@ import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -179,15 +179,19 @@ const ReportForm = ({
   )
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
-  const autoSaveSettings = {
+  const autoSaveSettings = useRef({
     autoSaveTimeout: defaultTimeout.clone(),
     timeoutId: null,
     dirty: false,
     values: {}
-  }
+  })
+  const autoSaveActive = useRef(true)
   useEffect(() => {
+    autoSaveActive.current = true
+
+    // Stop auto-save from running/rescheduling after unmount
     return () => {
-      window.clearTimeout(autoSaveSettings.timeoutId)
+      autoSaveActive.current = false
     }
   })
 
@@ -347,14 +351,14 @@ const ReportForm = ({
         setSubmitting
       }) => {
         // need up-to-date copies of these in the autosave handler
-        Object.assign(autoSaveSettings, { dirty, values, touched })
-        if (!autoSaveSettings.timeoutId) {
+        Object.assign(autoSaveSettings.current, { dirty, values, touched })
+        if (autoSaveActive.current && !autoSaveSettings.current.timeoutId) {
           // Schedule the auto-save timer
           const autosaveHandler = () =>
             autoSave({ setFieldValue, setFieldTouched, resetForm })
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         }
 
@@ -1181,55 +1185,62 @@ const ReportForm = ({
   }
 
   function autoSave(form) {
+    if (!autoSaveActive.current) {
+      // We're done auto-saving
+      return
+    }
+
     const autosaveHandler = () => autoSave(form)
     // Only auto-save if the report has changed
-    if (!autoSaveSettings.dirty) {
+    if (!autoSaveSettings.current.dirty) {
       // Just re-schedule the auto-save timer
-      autoSaveSettings.timeoutId = window.setTimeout(
+      autoSaveSettings.current.timeoutId = window.setTimeout(
         autosaveHandler,
-        autoSaveSettings.autoSaveTimeout.asMilliseconds()
+        autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      save(autoSaveSettings.values, false)
+      save(autoSaveSettings.current.values, false)
         .then(response => {
-          const newValues = _cloneDeep(autoSaveSettings.values)
+          const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
             newValues.reportSensitiveInformation = {} // object must exist for Collapse children
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
-          const touched = _cloneDeep(autoSaveSettings.touched) // save previous touched
+          const touched = _cloneDeep(autoSaveSettings.current.touched) // save previous touched
           form.resetForm({ values: newValues })
           Object.entries(touched).forEach(([field, value]) =>
             // re-set touched so we keep messages
             form.setFieldTouched(field, value)
           )
-          autoSaveSettings.autoSaveTimeout = defaultTimeout.clone() // reset to default
+          autoSaveSettings.current.autoSaveTimeout = defaultTimeout.clone() // reset to default
           setAutoSavedAt(moment())
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
           // And re-schedule the auto-save timer
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
         /* eslint-disable handle-callback-err */
 
         .catch(error => {
           // Show an error message
-          autoSaveSettings.autoSaveTimeout.add(autoSaveSettings.autoSaveTimeout) // exponential back-off
+          autoSaveSettings.current.autoSaveTimeout.add(
+            autoSaveSettings.current.autoSaveTimeout
+          ) // exponential back-off
           toast.error(
             `There was an error autosaving your ${getReportType(
-              autoSaveSettings.values
-            )}; we'll try again in ${autoSaveSettings.autoSaveTimeout.humanize()}`
+              autoSaveSettings.current.values
+            )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
           )
           // And re-schedule the auto-save timer
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
       /* eslint-enable handle-callback-err */
