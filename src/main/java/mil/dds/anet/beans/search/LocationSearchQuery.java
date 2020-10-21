@@ -22,4 +22,9 @@ public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationS
     this.status = status;
   }
 
+  @Override
+  public LocationSearchQuery clone() throws CloneNotSupportedException {
+    return (LocationSearchQuery) super.clone();
+  }
+
 }

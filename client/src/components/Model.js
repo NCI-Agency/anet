@@ -3,7 +3,7 @@ import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
-import { RECURRENCE_TYPE } from "periodUtils"
+import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import encodeQuery from "querystring/encode"
 import utils from "utils"
@@ -470,9 +470,12 @@ export default class Model {
   }
 
   getAssessmentsConfig() {
+    const general = this.generalAssessmentsConfig()
+    const instance = this.instanceAssessmentsConfig()
     return Object.assign(
-      Model.parseAssessmentsConfig(this.generalAssessmentsConfig()),
-      Model.parseAssessmentsConfig(this.instanceAssessmentsConfig())
+      Model.parseAssessmentsConfig(general),
+      // instance config can override
+      Model.parseAssessmentsConfig(instance)
     )
   }
 
@@ -493,7 +496,7 @@ export default class Model {
     }
   }
 
-  getPeriodAssessments(recurrence, period, currentUser) {
+  getPeriodAssessments(recurrence, period) {
     return this.notes
       .filter(n => {
         return (
@@ -504,10 +507,8 @@ export default class Model {
       .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
       .filter(
         obj =>
-          // FIXME: make a nicer implementation of the check on period start
           obj.assessment.__recurrence === recurrence &&
-          obj.assessment.__periodStart ===
-            utils.parseJsonSafe(JSON.stringify(period.start))
+          moment(obj.assessment.__periodStart).isSame(period.start)
       )
   }
 
@@ -562,5 +563,51 @@ export default class Model {
           obj.__recurrence === RECURRENCE_TYPE.ONCE &&
           obj.__relatedObjectType === relatedObjectType
       )
+  }
+
+  static hasPendingAssessments(entity) {
+    const recurTypes = Object.keys(entity.getAssessmentsConfig())
+    const periodicRecurTypes = recurTypes.filter(type => PERIOD_FACTORIES[type])
+    if (_isEmpty(periodicRecurTypes)) {
+      // no periodic, no pending
+      return false
+    }
+
+    // "for loop" to break early
+    for (let i = 0; i < periodicRecurTypes.length; i++) {
+      // offset 1 so that the period is the previous (not current) period
+      const prevPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 1)
+      const prevPeriodAssessments = entity.getPeriodAssessments(
+        periodicRecurTypes[i],
+        prevPeriod
+      )
+      // if there is no assessment in the last period, we have pending assessment
+      if (prevPeriodAssessments.length === 0) {
+        return true
+      }
+    }
+    // if we didn't early return, there is no pending assessment
+    return false
+  }
+
+  static populateCustomFields(entity) {
+    entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      entity.customFields
+    )
+    Model.populateNotesCustomFields(entity)
+  }
+
+  static populateEntitiesNotesCustomFields(entities) {
+    entities.forEach(entity => {
+      Model.populateNotesCustomFields(entity)
+    })
+  }
+
+  static populateNotesCustomFields(entity) {
+    entity.notes.forEach(
+      note =>
+        note.type !== NOTE_TYPE.FREE_TEXT &&
+        (note.customFields = utils.parseJsonSafe(note.text))
+    )
   }
 }

@@ -127,7 +127,7 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public PositionSearchQuery clone() throws CloneNotSupportedException {
     final PositionSearchQuery clone = (PositionSearchQuery) super.clone();
     if (type != null) {
       clone.setType(new ArrayList<>(type));

@@ -3,9 +3,9 @@ import { IconNames } from "@blueprintjs/icons"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import { ReadonlyCustomFields } from "components/CustomFields"
-import { Formik } from "formik"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
+import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
@@ -151,13 +151,9 @@ export const PeriodicAssessmentsRows = ({
   const periodsAssessments = []
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
-    const periodAssessments = entity.getPeriodAssessments(
-      recurrence,
-      period,
-      currentUser
-    )
-    const myPeriodAssessments = periodAssessments.filter(
-      ({ note, assessment }) => Person.isEqual(currentUser, note.author)
+    const periodAssessments = entity.getPeriodAssessments(recurrence, period)
+    const myPeriodAssessments = periodAssessments.filter(({ note }) =>
+      Person.isEqual(currentUser, note.author)
     )
     periodsAssessments.push(periodAssessments)
     // Only allow adding new assessments for a period if the user has the rights

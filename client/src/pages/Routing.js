@@ -100,7 +100,9 @@ const Routing = () => {
         path={PAGE_URLS.POSITIONS}
         render={({ match: { url } }) => (
           <Switch>
-            <Route path={`${url}/counterparts`} component={MyCounterparts} />
+            {currentUser.position?.uuid && (
+              <Route path={`${url}/counterparts`} component={MyCounterparts} />
+            )}
             <Route path={`${url}/new`} component={PositionNew} />
             <Route path={`${url}/:uuid/edit`} component={PositionEdit} />
             <Route path={`${url}/:uuid`} component={PositionShow} />
@@ -111,7 +113,9 @@ const Routing = () => {
         path={PAGE_URLS.TASKS}
         render={({ match: { url } }) => (
           <Switch>
-            <Route path={`${url}/mine`} component={MyTasks} />
+            {currentUser.position?.uuid && (
+              <Route path={`${url}/mine`} component={MyTasks} />
+            )}
             <Route path={`${url}/new`} component={TaskNew} />
             <Route path={`${url}/:uuid/edit`} component={TaskEdit} />
             <Route path={`${url}/:uuid`} component={TaskShow} />

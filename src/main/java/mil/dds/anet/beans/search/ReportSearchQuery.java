@@ -419,7 +419,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public ReportSearchQuery clone() throws CloneNotSupportedException {
     final ReportSearchQuery clone = (ReportSearchQuery) super.clone();
     if (state != null) {
       clone.setState(new ArrayList<>(state));

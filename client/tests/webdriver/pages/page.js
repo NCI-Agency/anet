@@ -3,7 +3,8 @@ class Page {
     user: "erin",
     superUser: "rebecca",
     adminUser: "arthur",
-    onboardUser: "bonny"
+    onboardUser: "bonny",
+    noPositionUser: "nopos"
   }
 
   _buildUrl(pathName, credentials) {
@@ -36,8 +37,15 @@ class Page {
     this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
   }
 
-  openAsOnboardUser(pathName = "/") {
-    this._open(pathName, Page.DEFAULT_CREDENTIALS.onboardUser)
+  openAsPositionlessUser(pathName = "/") {
+    this._open(pathName, Page.DEFAULT_CREDENTIALS.noPositionUser)
+  }
+
+  openAsOnboardUser(
+    pathName = "/",
+    uniqueName = Page.DEFAULT_CREDENTIALS.onboardUser
+  ) {
+    this._open(pathName, uniqueName)
   }
 
   getRandomOption(select) {
