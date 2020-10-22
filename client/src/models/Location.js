@@ -25,7 +25,7 @@ export default class Location extends Model {
     Settings.fields.location.customFields
   )
 
-  static LOCATION_FORMATS = Settings.fields.location.formats || {
+  static LOCATION_FORMATS = {
     LAT_LON: "LAT_LON", // default
     MGRS: "MGRS"
   }
