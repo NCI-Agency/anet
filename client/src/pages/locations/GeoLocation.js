@@ -6,6 +6,7 @@ import {
 } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import * as FieldHelper from "components/FieldHelper"
+import SelectLocationFormat from "components/SelectLocationFormat"
 import { Field } from "formik"
 import {
   convertLatLngToMGRS,
@@ -14,7 +15,7 @@ import {
 } from "geoUtils"
 import { Location } from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
@@ -35,9 +36,10 @@ const GeoLocation = ({
   setFieldValue,
   setFieldTouched,
   isSubmitting,
-  displayType,
-  locationFormat
+  displayType
 }) => {
+  const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
+
   let label = LAT_LON_LABEL
   let CoordinatesFormField = LatLonFormField
   if (locationFormat === Location.LOCATION_FORMATS.MGRS) {
@@ -50,18 +52,24 @@ const GeoLocation = ({
       <div style={{ display: "flex", alignItems: "center" }}>
         <CoordinatesFormField coordinates={coordinates} />
         <AllFormatsInfo coordinates={coordinates} />
+        <SelectLocationFormat
+          locationFormat={locationFormat}
+          setLocationFormat={setLocationFormat}
+        />
       </div>
     )
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
       return (
-        <Field
-          name="location"
-          label={label}
-          component={FieldHelper.ReadonlyField}
-          humanValue={humanValue}
-          style={{ paddingTop: "2px" }}
-        />
+        <>
+          <Field
+            name="location"
+            label={label}
+            component={FieldHelper.ReadonlyField}
+            humanValue={humanValue}
+            style={{ paddingTop: "2px" }}
+          />
+        </>
       )
     }
 
@@ -75,6 +83,8 @@ const GeoLocation = ({
       setFieldValue={setFieldValue}
       setFieldTouched={setFieldTouched}
       isSubmitting={isSubmitting}
+      locationFormat={locationFormat}
+      setLocationFormat={setLocationFormat}
     />
   )
 }
@@ -103,16 +113,14 @@ GeoLocation.propTypes = {
   displayType: PropTypes.oneOf([
     GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD,
     GEO_LOCATION_DISPLAY_TYPE.GENERIC
-  ]),
-  locationFormat: PropTypes.string
+  ])
 }
 
 GeoLocation.defaultProps = {
   coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false,
-  displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC,
-  locationFormat: Location.locationFormat
+  displayType: GEO_LOCATION_DISPLAY_TYPE.GENERIC
 }
 
 export default GeoLocation
@@ -124,7 +132,9 @@ const MGRSFormField = ({
   editable,
   setFieldValue,
   setFieldTouched,
-  isSubmitting
+  isSubmitting,
+  locationFormat,
+  setLocationFormat
 }) => {
   const { displayedCoordinate } = coordinates
   if (!editable) {
@@ -158,6 +168,8 @@ const MGRSFormField = ({
             setFieldValue("lat", null, false)
             setFieldValue("lng", null, false)
           }}
+          locationFormat={locationFormat}
+          setLocationFormat={setLocationFormat}
         />
       </Col>
     </FormGroup>
@@ -182,7 +194,9 @@ MGRSFormField.propTypes = {
   editable: PropTypes.bool,
   setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
-  isSubmitting: PropTypes.bool
+  isSubmitting: PropTypes.bool,
+  locationFormat: PropTypes.string,
+  setLocationFormat: PropTypes.func
 }
 
 MGRSFormField.defaultProps = {
@@ -198,7 +212,9 @@ const LatLonFormField = ({
   editable,
   setFieldValue,
   setFieldTouched,
-  isSubmitting
+  isSubmitting,
+  locationFormat,
+  setLocationFormat
 }) => {
   const { lat, lng } = coordinates
   if (!editable) {
@@ -249,6 +265,8 @@ const LatLonFormField = ({
             setFieldValue("lat", null)
             setFieldValue("lng", null)
           }}
+          locationFormat={locationFormat}
+          setLocationFormat={setLocationFormat}
         />
       </Col>
     </FormGroup>
@@ -284,7 +302,9 @@ LatLonFormField.propTypes = {
   editable: PropTypes.bool,
   setFieldValue: fnRequiredWhenEditable,
   setFieldTouched: fnRequiredWhenEditable,
-  isSubmitting: PropTypes.bool
+  isSubmitting: PropTypes.bool,
+  locationFormat: PropTypes.string,
+  setLocationFormat: PropTypes.func
 }
 
 LatLonFormField.defaultProps = {
@@ -299,7 +319,9 @@ const CoordinateActionButtons = ({
   coordinates,
   onClear,
   isSubmitting,
-  disabled
+  disabled,
+  locationFormat,
+  setLocationFormat
 }) => {
   return (
     <Col sm={3} style={{ padding: "4px 8px" }}>
@@ -314,6 +336,10 @@ const CoordinateActionButtons = ({
         />
       </Tooltip2>
       <AllFormatsInfo coordinates={coordinates} inForm />
+      <SelectLocationFormat
+        locationFormat={locationFormat}
+        setLocationFormat={setLocationFormat}
+      />
     </Col>
   )
 }
@@ -322,7 +348,9 @@ CoordinateActionButtons.propTypes = {
   coordinates: CoordinatesPropType,
   onClear: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  locationFormat: PropTypes.string,
+  setLocationFormat: PropTypes.func
 }
 
 CoordinateActionButtons.defaultProps = {
@@ -332,7 +360,12 @@ CoordinateActionButtons.defaultProps = {
 
 /* ======================= AllFormatsInfo ============================ */
 
-const AllFormatsInfo = ({ coordinates, inForm }) => {
+const AllFormatsInfo = ({
+  coordinates,
+  inForm,
+  locationFormat,
+  setLocationFormat
+}) => {
   const { lat, lng } = coordinates
   if (!inForm && ((!lat && lat !== 0) || (!lng && lng !== 0))) {
     return null
@@ -358,13 +391,21 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>{LAT_LON_LABEL}</td>
                 <td>
-                  <LatLonFormField coordinates={coordinates} />
+                  <LatLonFormField
+                    coordinates={coordinates}
+                    locationFormat={locationFormat}
+                    setLocationFormat={setLocationFormat}
+                  />
                 </td>
               </tr>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>{MGRS_LABEL}</td>
                 <td>
-                  <MGRSFormField coordinates={coordinates} />
+                  <MGRSFormField
+                    coordinates={coordinates}
+                    locationFormat={locationFormat}
+                    setLocationFormat={setLocationFormat}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -388,7 +429,9 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
 
 AllFormatsInfo.propTypes = {
   coordinates: CoordinatesPropType,
-  inForm: PropTypes.bool
+  inForm: PropTypes.bool,
+  locationFormat: PropTypes.string,
+  setLocationFormat: PropTypes.func
 }
 
 AllFormatsInfo.defaultProps = {
