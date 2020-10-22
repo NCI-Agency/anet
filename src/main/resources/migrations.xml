@@ -3495,4 +3495,15 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-jobHistory-table" author="gjvoosten">
+		<createTable tableName="jobHistory">
+			<column name="jobName" type="nvarchar(100)">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="lastRun" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
 </databaseChangeLog>
