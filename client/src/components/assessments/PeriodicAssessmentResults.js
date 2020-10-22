@@ -144,7 +144,7 @@ export const PeriodicAssessmentsRows = ({
     assessmentConfig,
     assessmentYupSchema
   } = entity.getPeriodicAssessmentDetails(recurrence)
-  if (!assessmentConfig) {
+  if (_isEmpty(assessmentConfig)) {
     return null
   }
 

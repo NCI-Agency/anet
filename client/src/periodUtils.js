@@ -11,7 +11,8 @@ export const RECURRENCE_TYPE = {
   SEMIMONTHLY: "semimonthly",
   MONTHLY: "monthly",
   QUARTERLY: "quarterly",
-  SEMIANNUALY: "semiannualy"
+  SEMIANNUALY: "semiannualy",
+  ANNUALLY: "annually"
 }
 
 const PERIOD_FORMAT = {
@@ -68,6 +69,10 @@ export const PERIOD_FACTORIES = {
       .clone()
       .subtract(2 * offset, "quarters")
       .endOf("quarter")
+  }),
+  [RECURRENCE_TYPE.ANNUALLY]: (date, offset) => ({
+    start: date.clone().subtract(offset, "years").startOf("year"),
+    end: date.clone().subtract(offset, "years").endOf("year")
   })
 }
 
