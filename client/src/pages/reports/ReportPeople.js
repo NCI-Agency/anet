@@ -14,11 +14,11 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const { currentUser } = useContext(AppContext)
   return (
     <div id="reportPeopleContainer">
-      <TableContainer>
+      <Table condensed responsive>
         <tbody>
           <tr>
-            <th className="reportPeople-fieldHeader">Advisors</th>
-            <td>
+            <th style={{ border: "none" }}>Advisors</th>
+            <td style={{ padding: "0" }}>
               <TableContainer className="advisorAttendeesTable">
                 <TableHeader showDelete={showDelete} />
                 <TableBody
@@ -32,8 +32,8 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             </td>
           </tr>
           <tr>
-            <th className="reportPeople-fieldHeader">Principals</th>
-            <td>
+            <th>Principals</th>
+            <td style={{ padding: "0" }}>
               <TableContainer className="principalAttendeesTable">
                 <TableHeader hide showDelete={showDelete} />
                 <TableBody
@@ -48,8 +48,8 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             </td>
           </tr>
           <tr>
-            <th className="reportPeople-fieldHeader">Administrative</th>
-            <td>
+            <th>Administrative</th>
+            <td style={{ padding: "0" }}>
               <TableContainer className="reportAdministrative">
                 <TableHeader hide showDelete={showDelete} />
                 <TableBody
@@ -63,7 +63,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             </td>
           </tr>
         </tbody>
-      </TableContainer>
+      </Table>
     </div>
   )
 
@@ -102,6 +102,13 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             />
           )}
         </td>
+        <td className="conflictButton">
+          <PlanningConflictForPerson
+            person={person}
+            report={report}
+            iconOnly={!!showDelete}
+          />
+        </td>
         <td className="reportPeopleName">
           <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
@@ -127,19 +134,18 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             whenUnspecified=""
           />
         </td>
-        <td className="conflictButton" style={{ verticalAlign: "middle" }}>
-          <PlanningConflictForPerson person={person} report={report} />
-        </td>
-        {showDelete && !isCurrentEditor && (
+        {showDelete && (
           <td
             className="deleteReportPeople"
             style={{ verticalAlign: "middle" }}
           >
-            <RemoveButton
-              title="Remove person"
-              altText="Remove person"
-              onClick={() => onDelete(person)}
-            />
+            {!isCurrentEditor && (
+              <RemoveButton
+                title="Remove person"
+                altText="Remove person"
+                onClick={() => onDelete(person)}
+              />
+            )}
           </td>
         )}
       </tr>
@@ -214,7 +220,14 @@ ReportPeople.propTypes = {
 }
 
 const TableContainer = ({ className, children }) => (
-  <Table striped condensed hover responsive className={className}>
+  <Table
+    striped
+    condensed
+    hover
+    responsive
+    className={className}
+    style={{ margin: 0 }}
+  >
     {children}
   </Table>
 )
@@ -226,50 +239,44 @@ TableContainer.propTypes = {
 const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
-      <Th
-        text="Primary"
-        hide={hide}
-        className="col-xs-1"
+      <th
+        className={"col-xs-1" + (hide ? " empty-cell-header" : "")}
         style={{ textAlign: "center" }}
-      />
-      <Th
-        text="Attendees"
-        hide={hide}
-        className="col-xs-1"
+      >
+        <div style={{ minWidth: "80px" }}>{!hide && "Primary"}</div>
+      </th>
+      <th
+        className={"col-xs-1" + (hide ? " empty-cell-header" : "")}
         style={{ textAlign: "center" }}
-      />
-      <Th
-        text="Authors"
-        hide={hide}
-        className="col-xs-1"
+      >
+        <div style={{ minWidth: "80px" }}>{!hide && "Attendees"}</div>
+      </th>
+      <th
+        className={
+          "col-xs-1 report-author" + (hide ? " empty-cell-header" : "")
+        }
         style={{ textAlign: "center" }}
-      />
-      <Th
-        text="Name"
-        hide={hide}
-        className="col-xs-3"
-        style={{ textAlign: "center" }}
-      />
-      <Th
-        text="Position"
-        hide={hide}
-        className="col-xs-3"
-        style={{ textAlign: "center" }}
-      />
-      <Th
-        text="Location"
-        hide={hide}
-        className="col-xs-1"
-        style={{ textAlign: "center" }}
-      />
-      <Th
-        text="Organization"
-        hide={hide}
-        className="col-xs-2"
-        style={{ textAlign: "center" }}
-      />
-      <th className="col-xs-1" />
-      {showDelete && <th className="col-xs-1" />}
+      >
+        <div style={{ minWidth: "70px" }}>{!hide && "Authors"}</div>
+      </th>
+      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ width: showDelete ? "35px" : "120px" }} />
+      </th>
+      <th className={"col-xs-3" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "120px" }}>{!hide && "Name"}</div>
+      </th>
+      <th className={"col-xs-3" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "90px" }}>{!hide && "Position"}</div>
+      </th>
+      <th className={"col-xs-2" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "90px" }}>{!hide && "Location"}</div>
+      </th>
+      <th className={"col-xs-2" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "90px" }}>{!hide && "Organization"}</div>
+      </th>
+      {showDelete && (
+        <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")} />
+      )}
     </tr>
   </thead>
 )
@@ -382,18 +389,6 @@ const AttendeeDividerRow = ({ showDelete }) => (
 )
 AttendeeDividerRow.propTypes = {
   showDelete: PropTypes.bool
-}
-
-const Th = ({ hide, text, ...otherProps }) => {
-  return (
-    <th {...otherProps}>
-      <div style={{ minWidth: "89px" }}>{!hide && text}</div>
-    </th>
-  )
-}
-Th.propTypes = {
-  text: PropTypes.string,
-  hide: PropTypes.bool
 }
 
 export default ReportPeople

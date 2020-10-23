@@ -73,6 +73,7 @@ test.serial("Draft and submit a report", async t => {
     $principalPrimary1,
     /* eslint-disable no-unused-vars */ $principalAttendee1 /* eslint-enable no-unused-vars */,
     /* eslint-disable no-unused-vars */ $principalAuthor1 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalConflictBtn /* eslint-enable no-unused-vars */,
     $principalName1,
     $principalPosition1,
     /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
@@ -111,6 +112,7 @@ test.serial("Draft and submit a report", async t => {
     $principalPrimary2,
     /* eslint-disable no-unused-vars */ $principalAttendeeCheckbox2 /* eslint-enable no-unused-vars */,
     /* eslint-disable no-unused-vars */ $principalAuthorCheckbox2 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthorConflictBtn /* eslint-enable no-unused-vars */,
     $principalName2,
     /* eslint-disable no-unused-vars */
     $principalPosition2,
@@ -652,6 +654,7 @@ test.serial(
       $advisorPrimaryCheckbox,
       /* eslint-disable no-unused-vars */ $advisorAttendeeCheckbox /* eslint-enable no-unused-vars */,
       /* eslint-disable no-unused-vars */ $advisorAuthorCheckbox /* eslint-enable no-unused-vars */,
+      /* eslint-disable no-unused-vars */ $advisorConflictBtn /* eslint-enable no-unused-vars */,
       $advisorName,
       $advisorPosition,
       /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,

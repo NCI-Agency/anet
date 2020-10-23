@@ -2,18 +2,23 @@ div.radio.primary > label,
 div.checkbox.primary > label {
   display: flex;
   flex-direction: row-reverse;
+  align-items: stretch;
+  padding: 0;
 }
 
 div.radio.primary > label > input,
 div.checkbox.primary > label > input{
-  margin: 2px 0 0 -2px;
+  margin: 0 4px;
+  align-self: center;
+  right: 0;
 }
 
 div.radio.primary > label > span,
 div.checkbox.primary > label > span {
-  padding-right: 25px;
-  padding-top: 4px;
-  line-height: normal;
+  display: flex;
+  width: 100%;
+  padding: 0 0 0 8px;
+  align-items: center;
 }
 
 .isCurrentEditor.checkbox.primary > label > span {
@@ -30,11 +35,26 @@ div.checkbox.primary > label > span {
 .inActive.radio.disabled.primary > label > span {
   text-decoration: line-through;
 }
-#reportPeopleContainer .reportPeople-fieldHeader {
-  white-space: normal;
-}
 @media print {
   .report-author {
     display: none;
   }
+}
+.empty-cell-header{
+  padding: 0 5px !important;
+  border: 0 !important;
+  min-height: 0 !important;
+}
+.deleteReportPeople {
+  min-width: 50px;
+}
+.report-attendee {
+  text-align: center;
+}
+.primary-attendee {
+  text-align: center;
+}
+.conflictButton {
+  text-align: center;
+  padding-top: 8px !important;
 }
