@@ -153,17 +153,6 @@ export default class Location extends Model {
     return utils.sentenceCase(status)
   }
 
-  static setLocationFormat(format) {
-    if (!Location.isValidLocationFormat(format)) {
-      throw new Error("Invalid location format type")
-    }
-    Location.locationFormat = format
-  }
-
-  static isValidLocationFormat(format) {
-    return Object.values(Location.LOCATION_FORMATS).includes(format)
-  }
-
   constructor(props) {
     super(Model.fillObject(props, Location.yupSchema))
   }

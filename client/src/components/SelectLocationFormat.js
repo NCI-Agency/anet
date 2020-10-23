@@ -10,16 +10,14 @@ const SelectLocationFormat = ({ locationFormat, setLocationFormat }) => {
       name="locationFormat"
       id="locationFormat"
       onChange={e => {
-        Location.setLocationFormat(e.target.value)
         setLocationFormat(e.target.value)
       }}
     >
-      <option value={Location.LOCATION_FORMATS.LAT_LON}>
-        {Location.LOCATION_FORMATS.LAT_LON}
-      </option>
-      <option value={Location.LOCATION_FORMATS.MGRS}>
-        {Location.LOCATION_FORMATS.MGRS}
-      </option>
+      {Object.values(Location.LOCATION_FORMATS).map(format => (
+        <option value={format} key={format}>
+          {format}
+        </option>
+      ))}
     </LocationFormatSelector>
   )
 }
