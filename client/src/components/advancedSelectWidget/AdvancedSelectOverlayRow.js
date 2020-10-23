@@ -136,7 +136,15 @@ export const ReportDetailedOverlayRow = item => (
       <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
     <td>
-      <span>{item.authors ? item.authors.join(", ") : "Unknown"}</span>
+      <span>
+        {item.authors
+          ? item.authors.map(a => (
+            <div key={a.uuid} style={{ whiteSpace: "nowrap" }}>
+              {a.name}
+            </div>
+          ))
+          : "Unknown"}
+      </span>
     </td>
     <td>
       <span>

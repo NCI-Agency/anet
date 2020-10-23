@@ -218,7 +218,7 @@ export default class Report extends Model {
           "purposeless people error",
           // can't use arrow function here because of binding to 'this'
           function(reportPeople) {
-            const err = Report.checkPurposelessPeople(reportPeople)
+            const err = Report.checkUnInvolvedPeople(reportPeople)
             return err ? this.createError({ message: err }) : true
           }
         )
@@ -454,26 +454,26 @@ export default class Report extends Model {
   }
 
   static checkAttendingAuthor(reportPeople) {
-    if (!reportPeople.some(rp => rp.author && rp.attendee)) {
+    if (!reportPeople?.some(rp => rp.author && rp.attendee)) {
       return "You must provide at least 1 attending author"
     }
   }
 
   static checkAnyAuthor(reportPeople) {
-    if (!reportPeople.some(rp => rp.author)) {
+    if (!reportPeople?.some(rp => rp.author)) {
       return "You must provide at least 1 author"
     }
   }
 
   // Report people shouldn't have any person who is both non-attending and non-author
-  static checkPurposelessPeople(reportPeople) {
-    if (reportPeople.some(rp => !rp.author && !rp.attendee)) {
+  static checkUnInvolvedPeople(reportPeople) {
+    if (reportPeople?.some(rp => !rp.author && !rp.attendee)) {
       return "You must remove the people who have no involvement (neither attending nor author)"
     }
   }
 
   static getPrimaryAttendee(reportPeople, role) {
-    return reportPeople.find(
+    return reportPeople?.find(
       el => el.role === role && el.primary && el.attendee
     )
   }
