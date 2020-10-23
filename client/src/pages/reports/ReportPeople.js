@@ -12,6 +12,7 @@ import "./ReportPeople.css"
 
 const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const { currentUser } = useContext(AppContext)
+  const showNonAttending = report.reportPeople.some(rp => !rp.attendee)
   return (
     <div id="reportPeopleContainer">
       <Table condensed responsive>
@@ -47,21 +48,23 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               </TableContainer>
             </td>
           </tr>
-          <tr>
-            <th>Administrative</th>
-            <td style={{ padding: "0" }}>
-              <TableContainer className="reportAdministrative">
-                <TableHeader hide showDelete={showDelete} />
-                <TableBody
-                  reportPeople={report.reportPeople}
-                  filterCb={person => !person.attendee}
-                  handleAttendeeRow={renderAttendeeRow}
-                  enableDivider
-                  showDelete={showDelete}
-                />
-              </TableContainer>
-            </td>
-          </tr>
+          {showNonAttending ? (
+            <tr>
+              <th>Non-attending</th>
+              <td style={{ padding: "0" }}>
+                <TableContainer className="reportAdministrative">
+                  <TableHeader hide showDelete={showDelete} />
+                  <TableBody
+                    reportPeople={report.reportPeople}
+                    filterCb={person => !person.attendee}
+                    handleAttendeeRow={renderAttendeeRow}
+                    enableDivider
+                    showDelete={showDelete}
+                  />
+                </TableContainer>
+              </td>
+            </tr>
+          ) : null}
         </tbody>
       </Table>
     </div>
