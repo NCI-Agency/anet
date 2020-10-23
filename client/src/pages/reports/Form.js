@@ -681,7 +681,7 @@ const ReportForm = ({
               >
                 <Field
                   name="reportPeople"
-                  label="People involved"
+                  label="Attendees"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
                     updateReportPeople(

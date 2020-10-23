@@ -21,16 +21,25 @@ div.checkbox.primary > label > span {
   align-items: center;
 }
 
-.isCurrentEditor.checkbox.primary > label > span {
-  background-color: green;
+.report-author .isCurrentEditor.checkbox.primary > label > span {
+  outline: 2px solid green;
 }
 
-.inActive.radio.primary > label > span,
-.inActive.checkbox.primary > label > span {
+.report-attendee .checkbox.primary > label > span,
+.report-author .checkbox.primary > label > span {
+  color: #337ab7;
+  background-color: white;
+  font-style: italic;
+}
+
+.primary-attendee .inActive.radio.primary > label > span,
+.report-attendee .inActive.checkbox.primary > label > span,
+.report-author .inActive.checkbox.primary > label > span {
   color: grey;
   background-color: white;
   font-style: italic;
 }
+
 
 .inActive.radio.disabled.primary > label > span {
   text-decoration: line-through;
