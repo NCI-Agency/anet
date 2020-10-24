@@ -23,6 +23,7 @@ public abstract class AbstractWorker implements Runnable {
 
   protected abstract void runInternal(Instant now, JobHistory jobHistory);
 
+  @Override
   public final void run() {
     logger.debug(startMessage);
     try {

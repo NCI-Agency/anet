@@ -132,7 +132,6 @@ public class AnetEmailWorker extends AbstractWorker {
 
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory) {
-    final Instant staleTime = now.minus(nbOfHoursForStaleEmails, ChronoUnit.HOURS);
     // check the database for any emails we need to send.
     final List<AnetEmail> emails = dao.getAll();
 
@@ -156,14 +155,17 @@ public class AnetEmailWorker extends AbstractWorker {
         logger.error("Error sending email", t);
 
         // Process stale emails
-        if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(staleTime)) {
-          String message = "Purging stale email to ";
-          try {
-            message += email.getToAddresses();
-            message += email.getAction().getSubject(context);
-          } finally {
-            logger.info(message);
-            processedEmails.add(email.getId());
+        if (this.nbOfHoursForStaleEmails != null) {
+          final Instant staleTime = now.minus(nbOfHoursForStaleEmails, ChronoUnit.HOURS);
+          if (email.getCreatedAt().isBefore(staleTime)) {
+            String message = "Purging stale email to ";
+            try {
+              message += email.getToAddresses();
+              message += email.getAction().getSubject(context);
+            } finally {
+              logger.info(message);
+              processedEmails.add(email.getId());
+            }
           }
         }
       }
