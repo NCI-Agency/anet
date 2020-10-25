@@ -68,6 +68,8 @@ const GQL_GET_REPORT = gql`
       location {
         uuid
         name
+        lat
+        lng
       }
       author {
         uuid

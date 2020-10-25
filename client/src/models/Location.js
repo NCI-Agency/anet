@@ -1,5 +1,5 @@
 import Model from "components/Model"
-import { convertMGRSToLatLng } from "geoUtils"
+import { convertLatLngToMGRS, convertMGRSToLatLng } from "geoUtils"
 import _isEmpty from "lodash/isEmpty"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
@@ -146,6 +146,13 @@ export default class Location extends Model {
   }
 
   toString() {
+    if (this.lat && this.lng) {
+      const coordinate =
+        Settings?.fields?.location?.format === "MGRS"
+          ? convertLatLngToMGRS(this.lat, this.lng)
+          : `${this.lat},${this.lng}`
+      return `${this.name} ${coordinate}`
+    }
     return this.name
   }
 }
