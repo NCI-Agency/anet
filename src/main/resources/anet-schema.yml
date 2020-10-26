@@ -534,9 +534,9 @@ properties:
       location:
         type: object
         additionalProperties: false
-        required: [defaultFormat]
+        required: [format]
         properties:
-          defaultFormat:
+          format:
             type: string
             title: Default format for location
             enum: [LAT_LON, MGRS]

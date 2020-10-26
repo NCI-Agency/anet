@@ -30,7 +30,7 @@ export default class Location extends Model {
     MGRS: "MGRS"
   }
 
-  static locationFormat = Settings.fields.location.defaultFormat // Default
+  static locationFormat = Settings.fields.location.format // Default
 
   static yupSchema = yup
     .object()
