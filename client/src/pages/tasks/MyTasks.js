@@ -62,7 +62,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
         id="my-responsible-tasks"
         title={`${pluralize(taskShortLabel)} I am responsible for`}
       >
-        <TaskTable tasks={currentUser.responsibleTasks} />
+        <TaskTable tasks={currentUser?.position?.responsibleTasks} />
       </Fieldset>
       <Fieldset
         id="my-tasks-with-pending-assessments"
