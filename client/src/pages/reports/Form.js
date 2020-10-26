@@ -59,7 +59,9 @@ import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
-import ReportPeople from "./ReportPeople"
+import ReportPeople, {
+  forceOnlyAttendingPersonPerRoleToPrimary
+} from "./ReportPeople"
 
 const GQL_GET_RECENTS = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -1121,7 +1123,9 @@ const ReportForm = ({
   ) {
     // validation will be done by setFieldValue
     setFieldTouched(field, true, false) // onBlur doesn't work when selecting an option
-    reportPeople.forEach(rp => {
+    const newPeopleList = reportPeople.map(rp => new Person(rp))
+
+    newPeopleList.forEach(rp => {
       // After selecting a person, default to attending, unless it is intentionally set to false (by attendee checkbox)
       // Do strict equality, attendee field may be undefined
       if (rp.attendee !== false) {
@@ -1131,19 +1135,16 @@ const ReportForm = ({
       if (rp.author !== true) {
         rp.author = false
       }
-      // if no one else is primary, set that person primary if attending
-      if (
-        !reportPeople.some(a2 => rp.role === a2.role && a2.primary) &&
-        rp.attendee
-      ) {
-        rp.primary = true
-      } else {
-        // Make sure field is 'controlled' by defining a value
-        rp.primary = rp.primary || false
-      }
+
+      // Set default primary flag to false unless set
+      // Make sure field is 'controlled' by defining a value
+      rp.primary = rp.primary || false
     })
-    setFieldValue(field, reportPeople, true)
-    setReportPeople(reportPeople)
+
+    // if no one else is primary, set that person primary if attending
+    forceOnlyAttendingPersonPerRoleToPrimary(newPeopleList)
+    setFieldValue(field, newPeopleList, true)
+    setReportPeople(newPeopleList)
   }
 
   function countCharsLeft(elemId, maxChars, event) {

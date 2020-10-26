@@ -160,18 +160,54 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   }
 
   function setPrimaryAttendee(person) {
-    report.reportPeople.forEach(rp => {
-      if (Person.isEqual(rp, person)) {
-        rp.primary = true
-      } else if (rp.role === person.role) {
-        rp.primary = false
+    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+    newPeopleList.forEach(np => {
+      if (Person.isEqual(np, person)) {
+        np.primary = true
+      } else if (np.role === person.role) {
+        np.primary = false
       }
     })
-    onChange(report.reportPeople)
+    onChange(newPeopleList)
   }
 
   function setReportAuthor(person) {
-    // Prevent the removal of the last author
+    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+    if (passesAuthorValidationSteps(person)) {
+      newPeopleList.forEach(rp => {
+        if (Person.isEqual(rp, person)) {
+          rp.author = !rp.author
+        }
+      })
+      onChange(newPeopleList)
+    }
+  }
+
+  function setReportAttendee(person) {
+    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+    if (passesAttendeeValidationSteps(person)) {
+      newPeopleList.forEach(rp => {
+        if (Person.isEqual(rp, person)) {
+          rp.attendee = !rp.attendee
+        }
+      })
+      forceOnlyAttendingPersonPerRoleToPrimary(newPeopleList)
+      onChange(newPeopleList)
+    }
+  }
+
+  function passesAuthorValidationSteps(person) {
+    // 1- Prevent self removing from authors
+    const isRemovingSelfAuthor =
+      Person.isEqual(currentUser, person) && person.author
+    if (isRemovingSelfAuthor) {
+      toast("You cannot remove yourself from authors list", {
+        toastId: "removingPrimaryAttendee"
+      })
+      return false
+    }
+
+    // 2- Prevent the removal of the last author
     const anyAuthorsBesideCurrentPerson = report.reportPeople.some(
       rp => rp.author && !Person.isEqual(rp, person)
     )
@@ -179,42 +215,45 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
     const isTheLastAuthorBeingRemoved =
       !anyAuthorsBesideCurrentPerson && person.author
 
-    report.reportPeople.forEach(rp => {
-      if (Person.isEqual(rp, person)) {
-        if (isTheLastAuthorBeingRemoved) {
-          toast("You must provide at least 1 author for a report", {
-            toastId: "removingLastAuthor"
-          })
-        } else {
-          rp.author = !rp.author
-        }
-      }
-    })
-    onChange(report.reportPeople)
+    if (isTheLastAuthorBeingRemoved) {
+      toast("You must provide at least 1 author for a report", {
+        toastId: "removingLastAuthor"
+      })
+      return false
+    }
+
+    return true
   }
 
-  function setReportAttendee(person) {
-    report.reportPeople.forEach(rp => {
-      if (Person.isEqual(rp, person)) {
-        // We can't remove primary attendee without making someone else primary
-        if (rp.primary) {
-          toast("Select a primary first to remove this person", {
-            toastId: "removingPrimaryAttendee"
-          })
-        } else {
-          rp.attendee = !rp.attendee
-        }
-      }
-      // After setting attendees, check for primaries
-      // if no one else is primary in that role, set that person primary if attending
-      if (
-        !report.reportPeople.some(a2 => rp.role === a2.role && a2.primary) &&
-        rp.attendee
-      ) {
-        rp.primary = true
-      }
-    })
-    onChange(report.reportPeople)
+  function passesAttendeeValidationSteps(person) {
+    // Prevent removal of primary attendee without making someone else primary
+    if (person.attendee && person.primary) {
+      toast("Select a primary first to remove this person", {
+        toastId: "removingPrimaryAttendee"
+      })
+      return false
+    }
+    return true
+  }
+}
+
+export function forceOnlyAttendingPersonPerRoleToPrimary(peopleList) {
+  // After setting attendees, check for primaries
+  // if no one else is primary and attending in that role, set that person primary
+  const [advisors, principals] = [[], []]
+  peopleList.forEach(p => {
+    if (p.role === Person.ROLE.ADVISOR && p.attendee) {
+      advisors.push(p)
+    } else if (p.role === Person.ROLE.PRINCIPAL && p.attendee) {
+      principals.push(p)
+    }
+  })
+
+  if (advisors.length === 1) {
+    advisors[0].primary = true
+  }
+  if (principals.length === 1) {
+    principals[0].primary = true
   }
 }
 
@@ -358,7 +397,8 @@ const ReportAuthorCheckbox = ({
       !person.author ? " inActive" : ""
     }`}
     checked={!!person.author}
-    disabled={disabled || isCurrentEditor}
+    disabled={disabled}
+    readOnly={isCurrentEditor}
     onChange={() => !disabled && handleOnChange(person)}
   >
     <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EDIT} />
