@@ -22,7 +22,7 @@ public class FutureEngagementWorker extends AbstractWorker {
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory) {
+  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
     // Get a list of all reports related to upcoming engagements which have just
     // become past engagements and need to change their report status to draft.
     // When a report is for an engagement which just moved from future to past
@@ -35,7 +35,6 @@ public class FutureEngagementWorker extends AbstractWorker {
 
     // update to draft state and send emails to the authors to let them know we updated their
     // report.
-    final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     for (Report r : reports) {
       try {
         AnetEmail email = new AnetEmail();

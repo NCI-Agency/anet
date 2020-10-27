@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
@@ -33,7 +34,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory) {
+  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
     // Make sure the mechanism will be triggered, so account deactivation checking can take place
     final List<String> ignoredDomainNames = getDomainNamesToIgnore();
     final List<Integer> daysTillEndOfTourWarnings = getDaysTillEndOfTourWarnings();

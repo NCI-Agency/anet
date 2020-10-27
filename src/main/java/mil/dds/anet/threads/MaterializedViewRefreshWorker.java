@@ -1,6 +1,7 @@
 package mil.dds.anet.threads;
 
 import java.time.Instant;
+import java.util.Map;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
@@ -19,7 +20,7 @@ public class MaterializedViewRefreshWorker extends AbstractWorker {
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory) {
+  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
     for (final String materializedView : materializedViews) {
       try {
         dao.updateMaterializedView(materializedView);

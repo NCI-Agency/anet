@@ -68,7 +68,7 @@ public class AnetEmailWorker extends AbstractWorker {
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory) {
+  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
     @SuppressWarnings("unchecked")
     final List<String> activeDomainNames =
         ((List<String>) config.getDictionaryEntry("activeDomainNames")).stream()
@@ -80,16 +80,16 @@ public class AnetEmailWorker extends AbstractWorker {
     // Send the emails!
     final List<Integer> processedEmails = new LinkedList<Integer>();
     for (final AnetEmail email : emails) {
-      Map<String, Object> context = null;
+      Map<String, Object> emailContext = null;
 
       try {
-        context = buildContext(email, smtpConfig);
-        if (context != null) {
+        emailContext = buildContext(context, email);
+        if (emailContext != null) {
           logger.info("{} Sending email to {} re: {}", smtpConfig.isDisabled() ? "[Disabled] " : "",
-              email.getToAddresses(), email.getAction().getSubject(context));
+              email.getToAddresses(), email.getAction().getSubject(emailContext));
 
           if (!smtpConfig.isDisabled()) {
-            sendEmail(email, context, smtpProps, smtpAuth, activeDomainNames);
+            sendEmail(email, emailContext, smtpProps, smtpAuth, activeDomainNames);
           }
         }
         processedEmails.add(email.getId());
@@ -104,7 +104,7 @@ public class AnetEmailWorker extends AbstractWorker {
             String message = "Purging stale email to ";
             try {
               message += email.getToAddresses();
-              message += email.getAction().getSubject(context);
+              message += email.getAction().getSubject(emailContext);
             } finally {
               logger.info(message);
               processedEmails.add(email.getId());
@@ -118,40 +118,40 @@ public class AnetEmailWorker extends AbstractWorker {
     dao.deletePendingEmails(processedEmails);
   }
 
-  private Map<String, Object> buildContext(final AnetEmail email,
-      final SmtpConfiguration smtpConfig) {
+  private Map<String, Object> buildContext(final Map<String, Object> context,
+      final AnetEmail email) {
     AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    Map<String, Object> context = new HashMap<String, Object>();
-    context.put("context", engine.getContext());
-    context.put("serverUrl", serverUrl);
-    context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(),
+    Map<String, Object> emailContext = new HashMap<String, Object>();
+    emailContext.put("context", context);
+    emailContext.put("serverUrl", serverUrl);
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
-    context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-    context.put("SUPPORT_EMAIL_ADDR", config.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
-    context.put("dateFormatter",
+    emailContext.put("SUPPORT_EMAIL_ADDR", config.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
+    emailContext.put("dateFormatter",
         DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
             .withZone(DaoUtils.getDefaultZoneId()));
-    context.put("dateTimeFormatter",
+    emailContext.put("dateTimeFormatter",
         DateTimeFormatter
             .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
             .withZone(DaoUtils.getDefaultZoneId()));
     final boolean engagementsIncludeTimeAndDuration = Boolean.TRUE
         .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
-    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
+    emailContext.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
     final String edtfPattern = (String) config
         .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
-    context.put("engagementDateFormatter",
+    emailContext.put("engagementDateFormatter",
         DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId()));
     @SuppressWarnings("unchecked")
     final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
-    context.put("fields", fields);
+    emailContext.put("fields", fields);
 
-    return email.getAction().buildContext(context);
+    return email.getAction().buildContext(emailContext);
   }
 
-  private void sendEmail(final AnetEmail email, final Map<String, Object> context,
+  private void sendEmail(final AnetEmail email, final Map<String, Object> emailContext,
       final Properties smtpProps, final Authenticator smtpAuth,
       final List<String> activeDomainNames)
       throws MessagingException, IOException, TemplateException {
@@ -170,11 +170,11 @@ public class AnetEmailWorker extends AbstractWorker {
     final Template temp =
         Utils.getFreemarkerConfig(this.getClass()).getTemplate(email.getAction().getTemplateName());
     // scan:ignore — false positive, we know which template we are processing
-    temp.process(context, writer);
+    temp.process(emailContext, writer);
 
     final Session session = Session.getInstance(smtpProps, smtpAuth);
     final Email mail = EmailBuilder.startingBlank().from(new InternetAddress(fromAddr))
-        .toMultiple(email.getToAddresses()).withSubject(email.getAction().getSubject(context))
+        .toMultiple(email.getToAddresses()).withSubject(email.getAction().getSubject(emailContext))
         .withHTMLText(writer.toString()).buildEmail();
 
     try {

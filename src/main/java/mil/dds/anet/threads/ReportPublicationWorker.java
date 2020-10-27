@@ -5,7 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -25,7 +24,7 @@ public class ReportPublicationWorker extends AbstractWorker {
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory) {
+  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
     final Instant quarantineApproval =
         now.minus((Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved"),
             ChronoUnit.HOURS);
@@ -35,7 +34,6 @@ public class ReportPublicationWorker extends AbstractWorker {
     query.setState(Collections.singletonList(ReportState.APPROVED));
     query.setSystemSearch(true);
     final List<Report> reports = dao.search(query).getList();
-    final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     for (final Report r : reports) {
       final List<ReportAction> workflow = r.loadWorkflow(context).join();
       if (workflow.isEmpty()) {
