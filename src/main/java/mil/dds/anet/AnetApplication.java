@@ -207,31 +207,32 @@ public class AnetApplication extends Application<AnetConfiguration> {
     } else {
       logger.info("AnetApplication is starting scheduled workers");
       // Schedule any tasks that need to run on an ongoing basis.
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-      AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
-      FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
-      ReportPublicationWorker reportPublicationWorker =
-          new ReportPublicationWorker(engine.getReportDao(), configuration);
-      final ReportApprovalWorker reportApprovalWorker =
-          new ReportApprovalWorker(engine.getReportDao(), configuration);
+      final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
       // Check for any reports that need to be published every 5 minutes.
       // And run once in 5 seconds from boot-up. (give the server time to boot up).
+      final ReportPublicationWorker reportPublicationWorker =
+          new ReportPublicationWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(reportPublicationWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
 
       // Check for any emails that need to be sent every 5 minutes.
       // And run once in 10 seconds from boot-up. (give the server time to boot up).
+      final AnetEmailWorker emailWorker = new AnetEmailWorker(configuration, engine.getEmailDao());
       scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
 
       // Check for any future engagements every 3 hours.
       // And run once in 15 seconds from boot-up. (give the server time to boot up).
+      final FutureEngagementWorker futureWorker =
+          new FutureEngagementWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
       scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
       // Check for any reports that need to be approved every 5 minutes.
       // And run once in 20 seconds from boot-up. (give the server time to boot up).
+      final ReportApprovalWorker reportApprovalWorker =
+          new ReportApprovalWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
 
@@ -241,22 +242,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
         // Wait 60 seconds between updates of PostgreSQL materialized views,
         // starting 30 seconds after boot-up.
         final MaterializedViewRefreshWorker materializedViewRefreshWorker =
-            new MaterializedViewRefreshWorker(engine.getAdminDao());
+            new MaterializedViewRefreshWorker(configuration, engine.getAdminDao());
         scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
       }
     }
 
     // Create all of the HTTP Resources.
-    LoggingResource loggingResource = new LoggingResource();
-    PersonResource personResource = new PersonResource(engine, configuration);
-    TaskResource taskResource = new TaskResource(engine, configuration);
-    LocationResource locationResource = new LocationResource(engine);
-    OrganizationResource orgResource = new OrganizationResource(engine);
-    PositionResource positionResource = new PositionResource(engine);
-    ReportResource reportResource = new ReportResource(engine, configuration);
-    AdminResource adminResource = new AdminResource(engine, configuration);
-    HomeResource homeResource = new HomeResource(engine, configuration);
-    SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
+    final LoggingResource loggingResource = new LoggingResource();
+    final PersonResource personResource = new PersonResource(engine, configuration);
+    final TaskResource taskResource = new TaskResource(engine, configuration);
+    final LocationResource locationResource = new LocationResource(engine);
+    final OrganizationResource orgResource = new OrganizationResource(engine);
+    final PositionResource positionResource = new PositionResource(engine);
+    final ReportResource reportResource = new ReportResource(engine, configuration);
+    final AdminResource adminResource = new AdminResource(engine, configuration);
+    final HomeResource homeResource = new HomeResource(engine, configuration);
+    final SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
     final TagResource tagResource = new TagResource(engine);
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);

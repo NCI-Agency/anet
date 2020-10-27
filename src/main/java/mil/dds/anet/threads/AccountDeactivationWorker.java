@@ -1,6 +1,5 @@
 package mil.dds.anet.threads;
 
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -19,13 +18,8 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AccountDeactivationWorker extends AbstractWorker {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final PersonDao dao;
 
@@ -36,7 +30,8 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
   public AccountDeactivationWorker(AnetConfiguration config, PersonDao dao,
       int warningIntervalInSecs) {
-    super("Deactivation Warning Worker waking up to check for Future Account Deactivations");
+    super(config,
+        "Deactivation Warning Worker waking up to check for Future Account Deactivations");
     this.dao = dao;
 
     @SuppressWarnings("unchecked")

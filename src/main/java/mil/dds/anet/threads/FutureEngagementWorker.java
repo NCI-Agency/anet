@@ -1,6 +1,5 @@
 package mil.dds.anet.threads;
 
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -9,20 +8,16 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.FutureEngagementUpdated;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FutureEngagementWorker extends AbstractWorker {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
   private ReportDao dao;
 
-  public FutureEngagementWorker(ReportDao dao) {
-    super("Future Engagement Worker waking up to check for Future Engagements");
+  public FutureEngagementWorker(AnetConfiguration config, ReportDao dao) {
+    super(config, "Future Engagement Worker waking up to check for Future Engagements");
     this.dao = dao;
   }
 

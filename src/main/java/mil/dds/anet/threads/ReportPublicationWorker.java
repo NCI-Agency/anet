@@ -1,6 +1,5 @@
 package mil.dds.anet.threads;
 
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -15,19 +14,14 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.utils.AnetAuditLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ReportPublicationWorker extends AbstractWorker {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final ReportDao dao;
   private final Integer nbOfHoursQuarantineApproved;
 
-  public ReportPublicationWorker(ReportDao dao, AnetConfiguration config) {
-    super("Report Publication Worker waking up to check for reports to be published");
+  public ReportPublicationWorker(AnetConfiguration config, ReportDao dao) {
+    super(config, "Report Publication Worker waking up to check for reports to be published");
     this.dao = dao;
     this.nbOfHoursQuarantineApproved =
         (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved");

@@ -10,7 +10,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -42,13 +41,8 @@ import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AnetEmailWorker extends AbstractWorker {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static AnetEmailWorker instance;
 
@@ -70,8 +64,8 @@ public class AnetEmailWorker extends AbstractWorker {
   private final List<String> activeDomainNames;
 
   @SuppressWarnings("unchecked")
-  public AnetEmailWorker(EmailDao dao, AnetConfiguration config) {
-    super("AnetEmailWorker waking up to send emails!");
+  public AnetEmailWorker(AnetConfiguration config, EmailDao dao) {
+    super(config, "AnetEmailWorker waking up to send emails!");
     this.dao = dao;
     this.mapper = MapperUtils.getDefaultMapper();
     this.fromAddr = config.getEmailFromAddr();

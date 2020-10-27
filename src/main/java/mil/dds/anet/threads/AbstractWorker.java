@@ -4,19 +4,22 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.JobHistory;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.JobHistoryDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWorker implements Runnable {
 
-  private static final Logger logger =
+  protected static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  protected final AnetConfiguration config;
   private final String startMessage;
   private JobHistoryDao jobHistoryDao;
 
-  public AbstractWorker(String startMessage) {
+  public AbstractWorker(AnetConfiguration config, String startMessage) {
+    this.config = config;
     this.startMessage = startMessage;
     this.jobHistoryDao = AnetObjectEngine.getInstance().getJobHistoryDao();
   }

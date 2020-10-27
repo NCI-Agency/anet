@@ -67,8 +67,9 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(engine.getEmailDao(), app.getConfiguration());
-    futureEngagementWorker = new FutureEngagementWorker(engine.getReportDao());
+    emailWorker = new AnetEmailWorker(app.getConfiguration(), engine.getEmailDao());
+    futureEngagementWorker =
+        new FutureEngagementWorker(app.getConfiguration(), engine.getReportDao());
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
 
     // Flush all reports from previous tests
