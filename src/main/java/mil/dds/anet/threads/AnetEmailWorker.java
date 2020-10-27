@@ -1,16 +1,11 @@
 package mil.dds.anet.threads;
 
-import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -53,7 +48,6 @@ public class AnetEmailWorker extends AbstractWorker {
   private final SmtpConfiguration smtpConfig;
   private final Properties smtpProps;
   private final Authenticator smtpAuth;
-  private final Configuration freemarkerConfig;
 
   public AnetEmailWorker(AnetConfiguration config, EmailDao dao) {
     super(config, "AnetEmailWorker waking up to send emails!");
@@ -67,15 +61,6 @@ public class AnetEmailWorker extends AbstractWorker {
     this.smtpConfig = config.getSmtp();
     this.smtpProps = getSmtpProps(smtpConfig);
     this.smtpAuth = getSmtpAuth(smtpConfig);
-
-    freemarkerConfig = new Configuration(FREEMARKER_VERSION);
-    // auto-escape HTML in our .ftlh templates
-    freemarkerConfig.setRecognizeStandardFileExtensions(true);
-    freemarkerConfig.setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
-    freemarkerConfig.loadBuiltInEncodingMap();
-    freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
-    freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
-    freemarkerConfig.setAPIBuiltinEnabled(true);
   }
 
   public static void setInstance(AnetEmailWorker instance) {
@@ -182,7 +167,8 @@ public class AnetEmailWorker extends AbstractWorker {
     }
 
     final StringWriter writer = new StringWriter();
-    final Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
+    final Template temp =
+        Utils.getFreemarkerConfig(this.getClass()).getTemplate(email.getAction().getTemplateName());
     // scan:ignore — false positive, we know which template we are processing
     temp.process(context, writer);
 

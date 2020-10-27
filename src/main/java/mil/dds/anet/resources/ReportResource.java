@@ -1,9 +1,5 @@
 package mil.dds.anet.resources;
 
-import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
-
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -12,7 +8,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -777,21 +772,11 @@ public class ReportResource {
     addConfigToContext(context);
 
     try {
-      Configuration freemarkerConfig = new Configuration(FREEMARKER_VERSION);
-      // auto-escape HTML in our .ftlh templates
-      freemarkerConfig.setRecognizeStandardFileExtensions(true);
-      freemarkerConfig
-          .setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
-      freemarkerConfig.loadBuiltInEncodingMap();
-      freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
-      freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
-      freemarkerConfig.setAPIBuiltinEnabled(true);
-
-      Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
-      StringWriter writer = new StringWriter();
+      final Template temp =
+          Utils.getFreemarkerConfig(this.getClass()).getTemplate(action.getTemplateName());
+      final StringWriter writer = new StringWriter();
       // scan:ignore — false positive, we know which template we are processing
       temp.process(action.buildContext(context), writer);
-
       return writer.toString();
     } catch (Exception e) {
       throw new WebApplicationException(e);
