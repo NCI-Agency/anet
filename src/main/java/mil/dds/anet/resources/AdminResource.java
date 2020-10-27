@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -104,52 +105,48 @@ public class AdminResource {
    * Returns user logs in descending order of time
    */
   @GraphQLQuery(name = "userActivities")
-  public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
+  public HashMap<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    final Map<String, LinkedHashSet<Map<String, String>>> userActivities = new HashMap<>();
-    final Map<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
+    final HashMap<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
     final Cache<String, Person> domainUsersCache =
         AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
 
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       entry.getValue().getUserActivities().removeAll(Collections.singleton(null));
       entry.getValue().getUserActivities().forEach(k -> {
-        // Group all entries through user value
-        userActivities.computeIfAbsent(k.get("user"), l -> new LinkedHashSet<>()).add(k);
-        // In addition to keeping entries with the user key value,
-        // it is also necessary to hold all these entries with recentCalls key
-        // so we will have 2 result set : One is grouped by user values
-        // the other one is "recentCalls" which holds all entries without grouping them
+        // Group all entries with recentCalls key
         recentCalls.computeIfAbsent("recentCalls", l -> new LinkedHashSet<>()).add(k);
       });
     }
-    final Map<String, Object> allActivities = new HashMap<>();
-    // Sort userActivities by time
-    if (!userActivities.isEmpty()) {
-      allActivities.put("users", userActivities.values().stream().map(s -> {
-        final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
-        final List<Map<String, String>> sortedList =
-            activities.stream().sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
-                .collect(Collectors.toList());
-        return new LinkedHashSet<>(sortedList);
-      }).collect(Collectors.toMap(k -> k.iterator().next().get("user"), Function.identity())));
-    } else {
-      allActivities.put("users", "");
-    }
-    // Sort recentCalls by time
-    if (!recentCalls.isEmpty()) {
-      allActivities.put("recentCalls", recentCalls.values().stream().map(s -> {
-        final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
-        final List<Map<String, String>> sortedList =
-            activities.stream().sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
-                .collect(Collectors.toList());
-        return new LinkedHashSet<>(sortedList);
-      }).collect(Collectors.toMap(k -> k.iterator().next().get("activity"), Function.identity()))
-          .get("activity"));
-    } else {
-      allActivities.put("recentCalls", "");
-    }
+
+    if (recentCalls.size() == 0)
+      return new HashMap<>();
+
+    final HashMap<String, Object> allActivities = new HashMap<>();
+    final HashMap<String, LinkedHashSet<Map<String, String>>> recentActivities =
+        new HashMap<String, LinkedHashSet<Map<String, String>>>() {
+          {
+            // Sort recentCalls by time in descending order
+            put("recentCalls", recentCalls.values().stream().map(s -> {
+              final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
+              return activities.stream()
+                  .sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
+                  .collect(Collectors.toCollection(LinkedHashSet::new));
+            }).collect(
+                Collectors.toMap(k -> k.iterator().next().get("activity"), Function.identity()))
+                .get("activity"));
+          }
+        };
+    allActivities.put("recentCalls", recentActivities.get("recentCalls"));
+
+    // Sort recentActivities grouping by user
+    final LinkedHashMap<String, List<Map<String, String>>> recentUsers = recentActivities
+        .get("recentCalls").stream().collect(Collectors.groupingBy(item -> item.get("user"),
+            LinkedHashMap::new, Collectors.mapping(Function.identity(), Collectors.toList())));
+
+    // Put sorted users to the list
+    allActivities.put("users", recentUsers);
     return allActivities;
   }
 

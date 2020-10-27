@@ -14,6 +14,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.mail.internet.InternetAddress;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
@@ -43,7 +45,7 @@ import org.simplejavamail.mailer.MailerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AnetEmailWorker implements Runnable {
+public class AnetEmailWorker extends AbstractWorker {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -69,6 +71,7 @@ public class AnetEmailWorker implements Runnable {
 
   @SuppressWarnings("unchecked")
   public AnetEmailWorker(EmailDao dao, AnetConfiguration config) {
+    super("AnetEmailWorker waking up to send emails!");
     this.dao = dao;
     this.mapper = MapperUtils.getDefaultMapper();
     this.fromAddr = config.getEmailFromAddr();
@@ -128,18 +131,7 @@ public class AnetEmailWorker implements Runnable {
   }
 
   @Override
-  public void run() {
-    logger.debug("AnetEmailWorker waking up to send emails!");
-    try {
-      runInternal();
-    } catch (Throwable e) {
-      // Cannot let this thread die, otherwise ANET will stop sending emails until you
-      // reboot the server :(
-      logger.error("Exception in run()", e);
-    }
-  }
-
-  private void runInternal() {
+  protected void runInternal(Instant now, JobHistory jobHistory) {
     // check the database for any emails we need to send.
     final List<AnetEmail> emails = dao.getAll();
 
@@ -163,15 +155,17 @@ public class AnetEmailWorker implements Runnable {
         logger.error("Error sending email", t);
 
         // Process stale emails
-        if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(Instant.now()
-            .atZone(DaoUtils.getDefaultZoneId()).minusHours(nbOfHoursForStaleEmails).toInstant())) {
-          String message = "Purging stale email to ";
-          try {
-            message += email.getToAddresses();
-            message += email.getAction().getSubject(context);
-          } finally {
-            logger.info(message);
-            processedEmails.add(email.getId());
+        if (this.nbOfHoursForStaleEmails != null) {
+          final Instant staleTime = now.minus(nbOfHoursForStaleEmails, ChronoUnit.HOURS);
+          if (email.getCreatedAt().isBefore(staleTime)) {
+            String message = "Purging stale email to ";
+            try {
+              message += email.getToAddresses();
+              message += email.getAction().getSubject(context);
+            } finally {
+              logger.info(message);
+              processedEmails.add(email.getId());
+            }
           }
         }
       }

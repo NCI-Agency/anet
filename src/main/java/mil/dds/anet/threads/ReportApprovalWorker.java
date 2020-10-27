@@ -2,11 +2,13 @@ package mil.dds.anet.threads;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
@@ -18,7 +20,7 @@ import mil.dds.anet.utils.DaoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReportApprovalWorker implements Runnable {
+public class ReportApprovalWorker extends AbstractWorker {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -27,26 +29,15 @@ public class ReportApprovalWorker implements Runnable {
   private final Integer nbOfHoursApprovalTimeout;
 
   public ReportApprovalWorker(ReportDao dao, AnetConfiguration config) {
+    super("Report Approval Worker waking up to check for reports to be approved");
     this.dao = dao;
     this.nbOfHoursApprovalTimeout =
         (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursApprovalTimeout");
   }
 
   @Override
-  public void run() {
-    logger.debug("Report Approval Worker waking up to check for reports to be approved");
-    try {
-      runInternal();
-    } catch (Throwable e) {
-      // Cannot let this thread die. Otherwise ANET will stop checking for reports which are to be
-      // automatically approved.
-      logger.error("Exception in run()", e);
-    }
-  }
-
-  private void runInternal() {
-    final Instant now = Instant.now().atZone(DaoUtils.getDefaultZoneId())
-        .minusHours(nbOfHoursApprovalTimeout).toInstant();
+  protected void runInternal(Instant now, JobHistory jobHistory) {
+    final Instant approvalTimeout = now.minus(nbOfHoursApprovalTimeout, ChronoUnit.HOURS);
     // Get a list of all PENDING_APPROVAL reports
     final ReportSearchQuery query = new ReportSearchQuery();
     query.setPageSize(0);
@@ -66,7 +57,7 @@ public class ReportApprovalWorker implements Runnable {
             // Check previous action
             final ReportAction previousAction = workflow.get(i - 1);
             if (previousAction.getCreatedAt() != null
-                && previousAction.getCreatedAt().isBefore(now)) {
+                && previousAction.getCreatedAt().isBefore(approvalTimeout)) {
               // Approve the report
               try {
                 final ApprovalStep approvalStep = reportAction.getStep();

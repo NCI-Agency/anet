@@ -6,13 +6,14 @@ import java.util.List;
 import java.util.Map;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.FutureEngagementUpdated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FutureEngagementWorker implements Runnable {
+public class FutureEngagementWorker extends AbstractWorker {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -20,21 +21,12 @@ public class FutureEngagementWorker implements Runnable {
   private ReportDao dao;
 
   public FutureEngagementWorker(ReportDao dao) {
+    super("Future Engagement Worker waking up to check for Future Engagements");
     this.dao = dao;
   }
 
   @Override
-  public void run() {
-    logger.debug("Future Engagement Worker waking up to check for Future Engagements");
-    try {
-      runInternal();
-    } catch (Throwable e) {
-      // CAnnot let this thread die. Otherwise ANET will stop checking for future engagements.
-      logger.error("Exception in run()", e);
-    }
-  }
-
-  private void runInternal() {
+  protected void runInternal(Instant now, JobHistory jobHistory) {
     // Get a list of all reports related to upcoming engagements which have just
     // become past engagements and need to change their report status to draft.
     // When a report is for an engagement which just moved from future to past
@@ -43,7 +35,7 @@ public class FutureEngagementWorker implements Runnable {
     // afterwards this report needs to go through the approval process of past
     // engagements.
     List<Report> reports =
-        AnetObjectEngine.getInstance().getReportDao().getFutureToPastReports(Instant.now());
+        AnetObjectEngine.getInstance().getReportDao().getFutureToPastReports(now);
 
     // update to draft state and send emails to the authors to let them know we updated their
     // report.
@@ -61,7 +53,6 @@ public class FutureEngagementWorker implements Runnable {
         logger.error("Exception when updating", e);
       }
     }
-
   }
 
 }
