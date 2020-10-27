@@ -256,6 +256,9 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     Object elem = dictionary;
     for (final String key : keyPath.split("\\.")) {
       elem = ((Map<String, Object>) elem).get(key);
+      if (elem == null) {
+        break;
+      }
     }
     return elem;
   }
