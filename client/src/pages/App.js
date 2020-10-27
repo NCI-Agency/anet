@@ -82,19 +82,19 @@ const GQL_GET_APP_DATA = gql`
             shortName
           }
         }
-      }
-      responsibleTasks(
-        query: {
-          status: ACTIVE
-        }
-      ) {
-        uuid
-        shortName
-        longName
-        customFieldRef1 {
+        responsibleTasks(
+          query: {
+            status: ACTIVE
+          }
+        ) {
           uuid
+          shortName
+          longName
+          customFieldRef1 {
+            uuid
+          }
+          ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
         }
-        ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
       }
     }
 

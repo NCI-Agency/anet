@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -9,6 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -49,6 +52,8 @@ public class Position extends AbstractAnetBean implements RelatableObject {
   List<PersonPositionHistory> previousPeople;
   // annotated below
   Boolean isApprover;
+  // annotated below
+  List<Task> tasks;
 
   public String getName() {
     return name;
@@ -239,6 +244,25 @@ public class Position extends AbstractAnetBean implements RelatableObject {
       this.isApprover = AnetObjectEngine.getInstance().getPositionDao().getIsApprover(uuid);
     }
     return isApprover;
+  }
+
+  @GraphQLQuery(name = "responsibleTasks")
+  public CompletableFuture<List<Task>> loadResponsibleTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (tasks != null) {
+      return CompletableFuture.completedFuture(tasks);
+    }
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+        "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
+        .thenApply(o -> {
+          tasks = o;
+          return o;
+        });
   }
 
   @Override

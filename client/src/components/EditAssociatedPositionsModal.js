@@ -183,7 +183,11 @@ const EditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = Object.without(new Position(values), "notes")
+    const newPosition = Object.without(
+      new Position(values),
+      "notes",
+      "responsibleTasks" // Only for querying
+    )
     newPosition.associatedPositions = values.associatedPositions
     delete newPosition.previousPeople
     delete newPosition.person // prevent any changes to person.

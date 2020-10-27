@@ -595,7 +595,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       "firstName",
       "lastName",
       "customFields", // initial JSON from the db
-      "responsibleTasks", // notifications for UI
       DEFAULT_CUSTOM_FIELDS_PARENT
     )
     if (values.status === Person.STATUS.NEW_USER) {

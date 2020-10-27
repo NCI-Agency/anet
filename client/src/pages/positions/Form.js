@@ -354,7 +354,11 @@ const PositionForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const position = Object.without(new Position(values), "notes")
+    const position = Object.without(
+      new Position(values),
+      "notes",
+      "responsibleTasks" // Only for querying
+    )
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }
