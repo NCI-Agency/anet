@@ -259,6 +259,11 @@ public class Utils {
     }
   }
 
+  public static JsonNode parseJsonSafe(String inputJson) throws JsonProcessingException {
+    final String sanitizedJson = Utils.sanitizeJson(inputJson);
+    return sanitizedJson == null ? null : mapper.readTree(sanitizedJson);
+  }
+
   public static String trimStringReturnNull(String input) {
     if (input == null) {
       return null;
