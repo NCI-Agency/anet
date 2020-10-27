@@ -46,69 +46,27 @@ public class AnetEmailWorker extends AbstractWorker {
 
   private static AnetEmailWorker instance;
 
-  private EmailDao dao;
-  private ObjectMapper mapper;
-  private Properties props;
-  private Authenticator auth;
-  private String fromAddr;
-  private String serverUrl;
-  private final Map<String, Object> fields;
-  private Configuration freemarkerConfig;
-  private final String supportEmailAddr;
-  private final DateTimeFormatter dtf;
-  private final DateTimeFormatter dttf;
-  private final boolean engagementsIncludeTimeAndDuration;
-  private final DateTimeFormatter edtf;
-  private final Integer nbOfHoursForStaleEmails;
-  private final boolean disabled;
-  private final List<String> activeDomainNames;
+  private final EmailDao dao;
+  private final ObjectMapper mapper;
+  private final String fromAddr;
+  private final String serverUrl;
+  private final SmtpConfiguration smtpConfig;
+  private final Properties smtpProps;
+  private final Authenticator smtpAuth;
+  private final Configuration freemarkerConfig;
 
-  @SuppressWarnings("unchecked")
   public AnetEmailWorker(AnetConfiguration config, EmailDao dao) {
     super(config, "AnetEmailWorker waking up to send emails!");
     this.dao = dao;
     this.mapper = MapperUtils.getDefaultMapper();
-    this.fromAddr = config.getEmailFromAddr();
-    this.serverUrl = config.getServerUrl();
-    this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
-    this.dtf =
-        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
-            .withZone(DaoUtils.getDefaultZoneId());
-    this.dttf = DateTimeFormatter
-        .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
-        .withZone(DaoUtils.getDefaultZoneId());
-    engagementsIncludeTimeAndDuration = Boolean.TRUE
-        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
-    final String edtfPattern = (String) config
-        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
-            : "dateFormats.email.date");
-    this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
-    this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
-    this.activeDomainNames = ((List<String>) config.getDictionaryEntry("activeDomainNames"))
-        .stream().map(String::toLowerCase).collect(Collectors.toList());
 
     setInstance(this);
 
-    SmtpConfiguration smtpConfig = config.getSmtp();
-    props = new Properties();
-    props.put("mail.smtp.ssl.trust", smtpConfig.getSslTrust());
-    props.put("mail.smtp.starttls.enable", smtpConfig.getStartTls().toString());
-    props.put("mail.smtp.host", smtpConfig.getHostname());
-    props.put("mail.smtp.port", smtpConfig.getPort().toString());
-    auth = null;
-    this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
-
-    if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) {
-      props.put("mail.smtp.auth", "true");
-      auth = new javax.mail.Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-          return new PasswordAuthentication(smtpConfig.getUsername(), smtpConfig.getPassword());
-        }
-      };
-    }
-
-    disabled = smtpConfig.isDisabled();
+    this.fromAddr = config.getEmailFromAddr();
+    this.serverUrl = config.getServerUrl();
+    this.smtpConfig = config.getSmtp();
+    this.smtpProps = getSmtpProps(smtpConfig);
+    this.smtpAuth = getSmtpAuth(smtpConfig);
 
     freemarkerConfig = new Configuration(FREEMARKER_VERSION);
     // auto-escape HTML in our .ftlh templates
@@ -126,6 +84,11 @@ public class AnetEmailWorker extends AbstractWorker {
 
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory) {
+    @SuppressWarnings("unchecked")
+    final List<String> activeDomainNames =
+        ((List<String>) config.getDictionaryEntry("activeDomainNames")).stream()
+            .map(String::toLowerCase).collect(Collectors.toList());
+
     // check the database for any emails we need to send.
     final List<AnetEmail> emails = dao.getAll();
 
@@ -135,13 +98,13 @@ public class AnetEmailWorker extends AbstractWorker {
       Map<String, Object> context = null;
 
       try {
-        context = buildContext(email);
+        context = buildContext(email, smtpConfig);
         if (context != null) {
-          logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "",
+          logger.info("{} Sending email to {} re: {}", smtpConfig.isDisabled() ? "[Disabled] " : "",
               email.getToAddresses(), email.getAction().getSubject(context));
 
-          if (!disabled) {
-            sendEmail(email, context);
+          if (!smtpConfig.isDisabled()) {
+            sendEmail(email, context, smtpProps, smtpAuth, activeDomainNames);
           }
         }
         processedEmails.add(email.getId());
@@ -149,8 +112,9 @@ public class AnetEmailWorker extends AbstractWorker {
         logger.error("Error sending email", t);
 
         // Process stale emails
-        if (this.nbOfHoursForStaleEmails != null) {
-          final Instant staleTime = now.minus(nbOfHoursForStaleEmails, ChronoUnit.HOURS);
+        if (smtpConfig.getNbOfHoursForStaleEmails() != null) {
+          final Instant staleTime =
+              now.minus(smtpConfig.getNbOfHoursForStaleEmails(), ChronoUnit.HOURS);
           if (email.getCreatedAt().isBefore(staleTime)) {
             String message = "Purging stale email to ";
             try {
@@ -169,7 +133,8 @@ public class AnetEmailWorker extends AbstractWorker {
     dao.deletePendingEmails(processedEmails);
   }
 
-  private Map<String, Object> buildContext(final AnetEmail email) {
+  private Map<String, Object> buildContext(final AnetEmail email,
+      final SmtpConfiguration smtpConfig) {
     AnetObjectEngine engine = AnetObjectEngine.getInstance();
     Map<String, Object> context = new HashMap<String, Object>();
     context.put("context", engine.getContext());
@@ -178,17 +143,32 @@ public class AnetEmailWorker extends AbstractWorker {
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
     context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-    context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
-    context.put("dateFormatter", dtf);
-    context.put("dateTimeFormatter", dttf);
+    context.put("SUPPORT_EMAIL_ADDR", config.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
+    context.put("dateFormatter",
+        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
+            .withZone(DaoUtils.getDefaultZoneId()));
+    context.put("dateTimeFormatter",
+        DateTimeFormatter
+            .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
+            .withZone(DaoUtils.getDefaultZoneId()));
+    final boolean engagementsIncludeTimeAndDuration = Boolean.TRUE
+        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
     context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
-    context.put("engagementDateFormatter", edtf);
+    final String edtfPattern = (String) config
+        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
+            : "dateFormats.email.date");
+    context.put("engagementDateFormatter",
+        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId()));
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
     context.put("fields", fields);
 
     return email.getAction().buildContext(context);
   }
 
-  private void sendEmail(final AnetEmail email, final Map<String, Object> context)
+  private void sendEmail(final AnetEmail email, final Map<String, Object> context,
+      final Properties smtpProps, final Authenticator smtpAuth,
+      final List<String> activeDomainNames)
       throws MessagingException, IOException, TemplateException {
     // Remove any null email addresses
     email.getToAddresses().removeIf(s -> Objects.equals(s, null));
@@ -206,7 +186,7 @@ public class AnetEmailWorker extends AbstractWorker {
     // scan:ignore — false positive, we know which template we are processing
     temp.process(context, writer);
 
-    final Session session = Session.getInstance(props, auth);
+    final Session session = Session.getInstance(smtpProps, smtpAuth);
     final Email mail = EmailBuilder.startingBlank().from(new InternetAddress(fromAddr))
         .toMultiple(email.getToAddresses()).withSubject(email.getAction().getSubject(context))
         .withHTMLText(writer.toString()).buildEmail();
@@ -238,5 +218,33 @@ public class AnetEmailWorker extends AbstractWorker {
     } catch (JsonProcessingException jsonError) {
       throw new WebApplicationException(jsonError);
     }
+  }
+
+  private Properties getSmtpProps(SmtpConfiguration smtpConfig) {
+    final Properties props = new Properties();
+    props.put("mail.smtp.ssl.trust", smtpConfig.getSslTrust());
+    props.put("mail.smtp.starttls.enable", smtpConfig.getStartTls().toString());
+    props.put("mail.smtp.host", smtpConfig.getHostname());
+    props.put("mail.smtp.port", smtpConfig.getPort().toString());
+    if (hasUsername(smtpConfig)) {
+      props.put("mail.smtp.auth", "true");
+    }
+    return props;
+  }
+
+  private Authenticator getSmtpAuth(SmtpConfiguration smtpConfig) {
+    if (hasUsername(smtpConfig)) {
+      return new javax.mail.Authenticator() {
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+          return new PasswordAuthentication(smtpConfig.getUsername(), smtpConfig.getPassword());
+        }
+      };
+    }
+    return null;
+  }
+
+  private boolean hasUsername(SmtpConfiguration smtpConfig) {
+    return smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0;
   }
 }

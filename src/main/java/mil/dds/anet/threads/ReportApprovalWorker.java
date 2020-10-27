@@ -20,18 +20,17 @@ import mil.dds.anet.utils.DaoUtils;
 public class ReportApprovalWorker extends AbstractWorker {
 
   private final ReportDao dao;
-  private final Integer nbOfHoursApprovalTimeout;
 
   public ReportApprovalWorker(AnetConfiguration config, ReportDao dao) {
     super(config, "Report Approval Worker waking up to check for reports to be approved");
     this.dao = dao;
-    this.nbOfHoursApprovalTimeout =
-        (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursApprovalTimeout");
   }
 
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory) {
-    final Instant approvalTimeout = now.minus(nbOfHoursApprovalTimeout, ChronoUnit.HOURS);
+    final Instant approvalTimeout =
+        now.minus((Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursApprovalTimeout"),
+            ChronoUnit.HOURS);
     // Get a list of all PENDING_APPROVAL reports
     final ReportSearchQuery query = new ReportSearchQuery();
     query.setPageSize(0);

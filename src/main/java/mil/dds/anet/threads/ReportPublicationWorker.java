@@ -18,19 +18,17 @@ import mil.dds.anet.utils.AnetAuditLogger;
 public class ReportPublicationWorker extends AbstractWorker {
 
   private final ReportDao dao;
-  private final Integer nbOfHoursQuarantineApproved;
 
   public ReportPublicationWorker(AnetConfiguration config, ReportDao dao) {
     super(config, "Report Publication Worker waking up to check for reports to be published");
     this.dao = dao;
-    this.nbOfHoursQuarantineApproved =
-        (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved");
   }
 
   @Override
   protected void runInternal(Instant now, JobHistory jobHistory) {
     final Instant quarantineApproval =
-        now.minus(this.nbOfHoursQuarantineApproved, ChronoUnit.HOURS);
+        now.minus((Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved"),
+            ChronoUnit.HOURS);
     // Get a list of all APPROVED reports
     final ReportSearchQuery query = new ReportSearchQuery();
     query.setPageSize(0);

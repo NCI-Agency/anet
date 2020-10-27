@@ -31,13 +31,12 @@ public class TaskResource {
 
   private final AnetObjectEngine engine;
   private final TaskDao dao;
-  private final String duplicateTaskShortName;
+  private final AnetConfiguration config;
 
   public TaskResource(AnetObjectEngine engine, AnetConfiguration config) {
     this.engine = engine;
     this.dao = engine.getTaskDao();
-    final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
-    duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
+    this.config = config;
   }
 
   @GraphQLQuery(name = "task")
@@ -59,7 +58,7 @@ public class TaskResource {
     try {
       created = dao.insert(t);
     } catch (UnableToExecuteStatementException e) {
-      throw ResponseUtils.handleSqlException(e, duplicateTaskShortName);
+      throw createDuplicateException(e);
     }
     if (t.getPlanningApprovalSteps() != null) {
       // Create the planning approval steps
@@ -156,7 +155,7 @@ public class TaskResource {
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;
     } catch (UnableToExecuteStatementException e) {
-      throw ResponseUtils.handleSqlException(e, duplicateTaskShortName);
+      throw createDuplicateException(e);
     }
   }
 
@@ -165,5 +164,11 @@ public class TaskResource {
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
+  }
+
+  private WebApplicationException createDuplicateException(UnableToExecuteStatementException e) {
+    final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
+    return ResponseUtils.handleSqlException(e,
+        String.format("Duplicate %s number", taskShortLabel));
   }
 }

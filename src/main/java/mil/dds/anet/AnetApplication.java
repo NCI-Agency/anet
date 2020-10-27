@@ -278,9 +278,10 @@ public class AnetApplication extends Application<AnetConfiguration> {
   }
 
   private void runAccountDeactivationWorker(final AnetConfiguration configuration,
-      final ScheduledExecutorService scheduler, final AnetObjectEngine engine)
-      throws IllegalArgumentException {
-    // Check whether the application is configured to auto-check for account deactivation
+      final ScheduledExecutorService scheduler, final AnetObjectEngine engine) {
+    // Check whether the application is configured to auto-check for account deactivation.
+    // NOTE: if you change this, reloading the dictionary from the admin interface is *not*
+    // sufficient, you will have to restart ANET for this change to be reflected
     if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
       // Check for any accounts which are scheduled to be deactivated as they reach the end-of-tour
       // date.
@@ -289,7 +290,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
 
-      // Run the email deactivation worker at the set interval. In development run it every minute.
+      // Run the email deactivation worker at the set interval
       scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
           accountDeactivationWarningInterval, TimeUnit.SECONDS);
 
