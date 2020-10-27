@@ -197,9 +197,12 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   }
 
   @InTransaction
-  public List<Task> getTopLevelTasks() {
-    return getDbHandle()
-        .createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
+  public List<Task> getActiveTasks(boolean topLevel) {
+    final String sql = String.format(
+        "/* get%1$sTasks */ SELECT * FROM tasks WHERE status = :active"
+            + " AND \"customFieldRef1Uuid\" %2$s NULL",
+        topLevel ? "TopLevel" : "SubLevel", topLevel ? "IS" : "IS NOT");
+    return getDbHandle().createQuery(sql).bind("active", DaoUtils.getEnumId(Task.Status.ACTIVE))
         .map(new TaskMapper()).list();
   }
 
