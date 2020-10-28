@@ -3,11 +3,13 @@ package mil.dds.anet.threads;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.FutureEngagementUpdated;
@@ -35,20 +37,25 @@ public class FutureEngagementWorker extends AbstractWorker {
 
     // update to draft state and send emails to the authors to let them know we updated their
     // report.
-    for (Report r : reports) {
-      try {
-        AnetEmail email = new AnetEmail();
-        FutureEngagementUpdated action = new FutureEngagementUpdated();
-        action.setReport(r);
-        email.setAction(action);
-        email.setToAddresses(r.loadAuthors(context).join().stream().map(rp -> rp.getEmailAddress())
-            .collect(Collectors.toList()));
-        AnetEmailWorker.sendEmailAsync(email);
-        dao.updateToDraftState(r);
-      } catch (Exception e) {
-        logger.error("Exception when updating", e);
-      }
-    }
+    final CompletableFuture<?>[] allFutures = reports.stream().map(r -> {
+      final AnetEmail email = new AnetEmail();
+      final FutureEngagementUpdated action = new FutureEngagementUpdated();
+      action.setReport(r);
+      email.setAction(action);
+      return r.loadAuthors(context).thenApply(authors -> {
+        try {
+          email.setToAddresses(
+              authors.stream().map(ReportPerson::getEmailAddress).collect(Collectors.toList()));
+          AnetEmailWorker.sendEmailAsync(email);
+          dao.updateToDraftState(r);
+        } catch (Exception e) {
+          logger.error("Exception when updating", e);
+        }
+        return true;
+      });
+    }).toArray(CompletableFuture<?>[]::new);
+    // Wait for all our futures to complete before returning
+    CompletableFuture.allOf(allFutures).join();
   }
 
 }

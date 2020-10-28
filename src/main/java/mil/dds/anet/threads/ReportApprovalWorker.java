@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Report;
@@ -36,40 +37,44 @@ public class ReportApprovalWorker extends AbstractWorker {
     query.setState(Collections.singletonList(ReportState.PENDING_APPROVAL));
     query.setSystemSearch(true);
     final List<Report> reports = dao.search(query).getList();
-    for (final Report r : reports) {
-      final List<ReportAction> workflow = r.loadWorkflow(context).join();
-      if (workflow.isEmpty()) {
-        logger.error("Couldn't process report approval for report {}, it has no workflow",
-            r.getUuid());
-      } else {
-        for (int i = workflow.size() - 1; i >= 0; i--) {
-          final ReportAction reportAction = workflow.get(i);
-          if (reportAction.getCreatedAt() == null && i > 1) {
-            // Check previous action
-            final ReportAction previousAction = workflow.get(i - 1);
-            if (previousAction.getCreatedAt() != null
-                && previousAction.getCreatedAt().isBefore(approvalTimeout)) {
-              // Approve the report
-              try {
-                final ApprovalStep approvalStep = reportAction.getStep();
-                final int numRows = dao.approve(r, null, approvalStep);
-                if (numRows == 0) {
-                  logger.error("Couldn't process report approval for report {} step {}",
-                      r.getUuid(), DaoUtils.getUuid(approvalStep));
-                } else {
-                  AnetAuditLogger.log(
-                      "report {} step {} automatically approved by the ReportApprovalWorker",
-                      r.getUuid(), DaoUtils.getUuid(approvalStep));
+    final CompletableFuture<?>[] allFutures = reports.stream().map(r -> {
+      return r.loadWorkflow(context).thenApply(workflow -> {
+        if (workflow.isEmpty()) {
+          logger.error("Couldn't process report approval for report {}, it has no workflow",
+              r.getUuid());
+        } else {
+          for (int i = workflow.size() - 1; i >= 0; i--) {
+            final ReportAction reportAction = workflow.get(i);
+            if (reportAction.getCreatedAt() == null && i > 1) {
+              // Check previous action
+              final ReportAction previousAction = workflow.get(i - 1);
+              if (previousAction.getCreatedAt() != null
+                  && previousAction.getCreatedAt().isBefore(approvalTimeout)) {
+                // Approve the report
+                try {
+                  final ApprovalStep approvalStep = reportAction.getStep();
+                  final int numRows = dao.approve(r, null, approvalStep);
+                  if (numRows == 0) {
+                    logger.error("Couldn't process report approval for report {} step {}",
+                        r.getUuid(), DaoUtils.getUuid(approvalStep));
+                  } else {
+                    AnetAuditLogger.log(
+                        "report {} step {} automatically approved by the ReportApprovalWorker",
+                        r.getUuid(), DaoUtils.getUuid(approvalStep));
+                  }
+                } catch (Exception e) {
+                  logger.error("Exception when approving report", e);
                 }
-              } catch (Exception e) {
-                logger.error("Exception when approving report", e);
+                break;
               }
-              break;
             }
           }
         }
-      }
-    }
+        return true;
+      });
+    }).toArray(CompletableFuture<?>[]::new);
+    // Wait for all our futures to complete before returning
+    CompletableFuture.allOf(allFutures).join();
   }
 
 }
