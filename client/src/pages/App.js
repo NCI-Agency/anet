@@ -56,30 +56,23 @@ const GQL_GET_APP_DATA = gql`
         associatedPositions {
           uuid
           name
+          code
+          type
+          status
+          organization {
+            uuid
+            shortName
+          }
+          location {
+            uuid
+            name
+          }
           person {
             uuid
             name
             rank
             avatar(size: 32)
-            position {
-              uuid
-              name
-              code
-              type
-              organization {
-                uuid
-                shortName
-              }
-              location {
-                uuid
-                name
-              }
-            }
             ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
-          }
-          organization {
-            uuid
-            shortName
           }
         }
         responsibleTasks(
