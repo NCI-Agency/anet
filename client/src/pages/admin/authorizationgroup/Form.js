@@ -5,6 +5,7 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -36,12 +37,12 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: AuthorizationGroup.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: AuthorizationGroup.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -67,7 +68,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
           allAdvisorPositions: {
             label: "All advisor positions",
             queryVars: {
-              status: Position.STATUS.ACTIVE,
+              status: Model.STATUS.ACTIVE,
               type: [
                 Position.TYPE.ADVISOR,
                 Position.TYPE.SUPER_USER,

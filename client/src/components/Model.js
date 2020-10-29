@@ -260,6 +260,11 @@ export default class Model {
     notes: []
   }
 
+  static STATUS = {
+    ACTIVE: "ACTIVE",
+    INACTIVE: "INACTIVE"
+  }
+
   static yupSchema = yup.object().shape({
     notes: yup.array().nullable().default([])
   })

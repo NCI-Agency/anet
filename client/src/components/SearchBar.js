@@ -13,13 +13,16 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
 
-export const SearchPopover = ({ popoverContent, children }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const _handleInteraction = isOpen => setIsOpen(isOpen)
+export const SearchPopover = ({
+  popoverContent,
+  isOpen,
+  setIsOpen,
+  children
+}) => {
   return (
     <Popover
       isOpen={isOpen}
-      onInteraction={_handleInteraction}
+      onInteraction={isOpen => setIsOpen(isOpen)}
       boundary="window"
       captureDismiss
       content={popoverContent}
@@ -45,6 +48,8 @@ export const SearchPopover = ({ popoverContent, children }) => {
 
 SearchPopover.propTypes = {
   popoverContent: PropTypes.element.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired
 }
 
@@ -76,8 +81,8 @@ const SearchBar = ({
 
   const popoverContent = (
     <AdvancedSearch
-      onSearch={runAdvancedSearch}
-      onCancel={setShowAdvancedSearch}
+      onSearch={() => setShowAdvancedSearch(false)}
+      onCancel={() => setShowAdvancedSearch(false)}
       text={searchTerms}
     />
   )
@@ -100,7 +105,11 @@ const SearchBar = ({
           )}
         </InputGroup>
       </Form>
-      <SearchPopover popoverContent={popoverContent}>
+      <SearchPopover
+        popoverContent={popoverContent}
+        isOpen={showAdvancedSearch}
+        setIsOpen={setShowAdvancedSearch}
+      >
         <SearchDescription searchQuery={searchQuery} showPlaceholders />
       </SearchPopover>
     </>
@@ -121,10 +130,6 @@ const SearchBar = ({
     }
     event.preventDefault()
     event.stopPropagation()
-  }
-
-  function runAdvancedSearch() {
-    setShowAdvancedSearch(false)
   }
 }
 

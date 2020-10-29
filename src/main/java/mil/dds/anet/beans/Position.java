@@ -17,14 +17,10 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractAnetBean implements RelatableObject {
+public class Position extends AbstractAnetBean implements RelatableObject, WithStatus {
 
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
-  }
-
-  public static enum PositionStatus {
-    ACTIVE, INACTIVE
   }
 
   @GraphQLQuery
@@ -38,7 +34,7 @@ public class Position extends AbstractAnetBean implements RelatableObject {
   PositionType type;
   @GraphQLQuery
   @GraphQLInputField
-  PositionStatus status;
+  private Status status;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
@@ -79,11 +75,13 @@ public class Position extends AbstractAnetBean implements RelatableObject {
     this.type = type;
   }
 
-  public PositionStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(PositionStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -273,12 +271,13 @@ public class Position extends AbstractAnetBean implements RelatableObject {
     Position other = (Position) o;
     return Objects.equals(uuid, other.getUuid()) && Objects.equals(name, other.getName())
         && Objects.equals(code, other.getCode()) && Objects.equals(type, other.getType())
+        && Objects.equals(status, other.getStatus())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, code, type, organization);
+    return Objects.hash(uuid, name, code, type, status, organization);
   }
 
   @Override

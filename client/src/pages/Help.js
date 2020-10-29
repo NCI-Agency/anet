@@ -3,6 +3,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
+import Model from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
@@ -76,7 +77,7 @@ const HelpFetchSuperUsers = ({
   const positionQuery = {
     pageSize: 0, // retrieve all these positions
     type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
-    status: Position.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     organizationUuid: orgUuid
   }
   const queryResult = API.useApiQuery(GQL_GET_POSITION_LIST, {

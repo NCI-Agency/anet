@@ -21,6 +21,7 @@ import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -93,6 +94,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.isBatchParamsPresent()) {
       addBatchClause(query);
+    }
+
+    // We do not store status in reports as we consider them all ACTIVE. Hence, we want to return
+    // no results when querying for INACTIVE reports
+    if (query.getStatus() == WithStatus.Status.INACTIVE) {
+      qb.addWhereClause("0 = 1");
     }
 
     qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());

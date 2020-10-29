@@ -21,7 +21,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import {
+import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE
@@ -197,7 +197,7 @@ const ReportForm = ({
 
   const recentTasksVarCommon = {
     pageSize: 6,
-    status: Task.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     hasCustomFieldRef1: true,
     sortBy: "RECENT",
     sortOrder: "DESC"
@@ -216,7 +216,7 @@ const ReportForm = ({
   } else {
     recentTasksVarUser = {
       pageSize: 1,
-      status: Task.STATUS.ACTIVE,
+      status: Model.STATUS.ACTIVE,
       text: "__should_not_match_anything__" // TODO: Do this more gracefully
     }
   }
@@ -323,7 +323,7 @@ const ReportForm = ({
         const locationFilters = {
           activeLocations: {
             label: "Active locations",
-            queryVars: { status: Location.STATUS.ACTIVE }
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
 
@@ -721,7 +721,8 @@ const ReportForm = ({
                       filterDefs={attendeesFilters}
                       objectType={Person}
                       queryParams={{
-                        status: [Person.STATUS.ACTIVE]
+                        status: Model.STATUS.ACTIVE,
+                        pendingVerification: false
                       }}
                       fields={Person.autocompleteQuery}
                       addon={PEOPLE_ICON}
@@ -787,7 +788,7 @@ const ReportForm = ({
                         overlayRenderRow={TaskDetailedOverlayRow}
                         filterDefs={tasksFilters}
                         objectType={Task}
-                        queryParams={{ status: Task.STATUS.ACTIVE }}
+                        queryParams={{ status: Model.STATUS.ACTIVE }}
                         fields={Task.autocompleteQuery}
                         addon={TASKS_ICON}
                       />
@@ -975,7 +976,7 @@ const ReportForm = ({
                             filterDefs={authorizationGroupsFilters}
                             objectType={AuthorizationGroup}
                             queryParams={{
-                              status: AuthorizationGroup.STATUS.ACTIVE
+                              status: Model.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
                             addon={<Icon icon={IconNames.LOCK} />}

@@ -831,7 +831,8 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   public int hashCode() {
     return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt, location, intent, exsum,
         attendees, tasks, reportText, nextSteps, author, comments, atmosphere, atmosphereDetails,
-        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups);
+        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups,
+        customFields);
   }
 
   public static Report createWithUuid(String uuid) {

@@ -27,7 +27,9 @@ import {
   TagOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
+import _pickBy from "lodash/pickBy"
 import {
   Location,
   Organization,
@@ -82,6 +84,15 @@ export const RECURSE_STRATEGY = {
   PARENTS: "PARENTS"
 }
 
+const StatusFilter = {
+  component: SelectFilter,
+  deserializer: deserializeSelectFilter,
+  props: {
+    queryKey: "status",
+    options: [Model.STATUS.ACTIVE, Model.STATUS.INACTIVE]
+  }
+}
+
 const taskFilters = () => {
   const taskFiltersObj = {
     Organization: {
@@ -90,15 +101,6 @@ const taskFilters = () => {
       props: {
         queryKey: "taskedOrgUuid",
         queryOrgRecurseStrategyKey: "orgRecurseStrategy"
-      }
-    },
-    Status: {
-      component: SelectFilter,
-      deserializer: deserializeSelectFilter,
-      props: {
-        queryKey: "status",
-        options: [Task.STATUS.ACTIVE, Task.STATUS.INACTIVE],
-        labels: ["Active", "Inactive"]
       }
     }
   }
@@ -395,6 +397,7 @@ const searchFilters = function() {
 
   const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
   const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
+
   filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
     filters: {
       Organization: {
@@ -414,18 +417,6 @@ const searchFilters = function() {
           labels: [
             Settings.fields.advisor.person.name,
             Settings.fields.principal.person.name
-          ]
-        }
-      },
-      Status: {
-        component: SelectFilter,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "status",
-          options: [
-            Person.STATUS.ACTIVE,
-            Person.STATUS.INACTIVE,
-            Person.STATUS.NEW_USER
           ]
         }
       },
@@ -470,14 +461,6 @@ const searchFilters = function() {
 
   filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
     filters: {
-      Status: {
-        component: SelectFilter,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "status",
-          options: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]
-        }
-      },
       "Organization Type": {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
@@ -519,14 +502,6 @@ const searchFilters = function() {
           queryOrgRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
-      Status: {
-        component: SelectFilter,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "status",
-          options: [Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]
-        }
-      },
       Location: {
         component: AdvancedSelectFilter,
         deserializer: deserializeAdvancedSelectFilter,
@@ -549,21 +524,16 @@ const searchFilters = function() {
   }
 
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
-    filters: {
-      Status: {
-        component: SelectFilter,
-        deserializer: deserializeSelectFilter,
-        props: {
-          queryKey: "status",
-          options: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
-        }
-      }
-    }
+    filters: {}
   }
 
   // Task filters
   filters[SEARCH_OBJECT_TYPES.TASKS] = {
     filters: taskFilters()
+  }
+
+  for (const [, filtersForType] of Object.entries(filters)) {
+    filtersForType.filters.Status = StatusFilter
   }
 
   return filters
@@ -612,38 +582,51 @@ export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
   const filterDefs =
     searchQuery.objectType && SEARCH_OBJECT_TYPES[searchQuery.objectType]
       ? ALL_FILTERS[SEARCH_OBJECT_TYPES[searchQuery.objectType]].filters
-      : {}
-  const filters = searchQuery.filters.filter(f => filterDefs[f.key])
+      : findCommonFiltersForAllObjectTypes(
+        Object.keys(SEARCH_OBJECT_TYPES),
+        ALL_FILTERS
+      )
+  const filters = searchQuery.filters
   return (
     <span className="asLink">
-      {searchQuery.objectType ? (
-        <>
-          <b>{SEARCH_OBJECT_LABELS[searchQuery.objectType]}</b>
-          {filters.length > 0 ? (
-            <>
-              <> filtered on </>
-              {filters.map(
-                (filter, i) =>
-                  filterDefs[filter.key] && (
-                    <SearchFilterDisplay
-                      key={filter.key}
-                      filter={filter}
-                      element={filterDefs[filter.key]}
-                      showSeparator={i !== filters.length - 1}
-                    />
-                  )
-              )}
-            </>
-          ) : (
-            showPlaceholders && " - add filters"
-          )}
-        </>
-      ) : (
-        showPlaceholders && "Add filters"
-      )}
+      <>
+        <b>
+          {searchQuery.objectType
+            ? SEARCH_OBJECT_LABELS[searchQuery.objectType]
+            : "Everything"}
+        </b>
+        {filters.length > 0 ? (
+          <>
+            <> filtered on </>
+            {filters.map(
+              (filter, i) =>
+                filterDefs[filter.key] && (
+                  <SearchFilterDisplay
+                    key={filter.key}
+                    filter={filter}
+                    element={filterDefs[filter.key]}
+                    showSeparator={i !== filters.length - 1}
+                  />
+                )
+            )}
+          </>
+        ) : (
+          showPlaceholders && " - add filters"
+        )}
+      </>
     </span>
   )
 }
+
+export const findCommonFiltersForAllObjectTypes = (
+  searchObjectTypes,
+  theSearchFilters
+) =>
+  searchObjectTypes
+    .map(type => theSearchFilters[type].filters)
+    .reduce((filters1, filters2) =>
+      _pickBy(filters1, (value, key) => filters2[key])
+    )
 
 SearchDescription.propTypes = {
   searchQuery: SearchQueryPropType,

@@ -1,3 +1,4 @@
+import Model from "components/Model"
 import { Person, Organization, Report } from "models"
 import { createLocation } from "../../stories/LocationStories"
 import { createNote } from "../../stories/NoteStories"
@@ -21,7 +22,7 @@ const buildupLotsOfData = [
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
-    arguments: { role: Person.ROLE.ADVISOR, status: Person.STATUS.ACTIVE }
+    arguments: { role: Person.ROLE.ADVISOR, status: Model.STATUS.ACTIVE }
   },
   {
     name: "Create inactive advisor",
@@ -29,7 +30,7 @@ const buildupLotsOfData = [
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
-    arguments: { role: Person.ROLE.ADVISOR, status: Person.STATUS.INACTIVE }
+    arguments: { role: Person.ROLE.ADVISOR, status: Model.STATUS.INACTIVE }
   },
   {
     name: "Create active principal",
@@ -37,7 +38,7 @@ const buildupLotsOfData = [
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
-    arguments: { role: Person.ROLE.PRINCIPAL, status: Person.STATUS.ACTIVE }
+    arguments: { role: Person.ROLE.PRINCIPAL, status: Model.STATUS.ACTIVE }
   },
   {
     name: "Create inactive principal",
@@ -45,7 +46,7 @@ const buildupLotsOfData = [
     runnable: createPerson,
     preDelay: 0,
     userTypes: ["existingAdmin"],
-    arguments: { role: Person.ROLE.PRINCIPAL, status: Person.STATUS.INACTIVE }
+    arguments: { role: Person.ROLE.PRINCIPAL, status: Model.STATUS.INACTIVE }
   },
   {
     name: "Create advisor organization",
@@ -55,7 +56,7 @@ const buildupLotsOfData = [
     userTypes: ["existingAdmin"],
     arguments: {
       type: Organization.TYPE.ADVISOR_ORG,
-      status: Organization.STATUS.ACTIVE,
+      status: Model.STATUS.ACTIVE,
       subOrgs: true
     }
   },
@@ -67,7 +68,7 @@ const buildupLotsOfData = [
     userTypes: ["existingAdmin"],
     arguments: {
       type: Organization.TYPE.PRINCIPAL_ORG,
-      status: Organization.STATUS.ACTIVE,
+      status: Model.STATUS.ACTIVE,
       subOrgs: true
     }
   },

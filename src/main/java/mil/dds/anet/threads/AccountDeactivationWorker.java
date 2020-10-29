@@ -11,7 +11,6 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
@@ -92,7 +91,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
   private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
       final Integer nextWarning, final Instant now, final Instant lastRun) {
-    if (person.getStatus() == PersonStatus.INACTIVE
+    if (person.getStatus() == Person.Status.INACTIVE
         || Utils.isDomainUserNameIgnored(person.getDomainUsername(), this.ignoredDomainNames)) {
       // Skip inactive ANET users or users from ignored domains
       return;
@@ -122,7 +121,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
         "Person {} status set to {} by system because the End-of-Tour date has been reached", p,
         p.getStatus());
 
-    p.setStatus(PersonStatus.INACTIVE);
+    p.setStatus(Person.Status.INACTIVE);
 
     AnetAuditLogger.log(
         "Person {} domainUsername '{}' cleared by system because they are now inactive", p,

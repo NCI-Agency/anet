@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -54,7 +53,7 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
           person.setDomainUsername(domainUsername);
           person.setName("");
           person.setRole(Role.ADVISOR);
-          person.setStatus(PersonStatus.NEW_USER);
+          person.setPendingVerification(true);
           person = engine.getPersonDao().insert(person);
         } else {
           person = matches.get(0);

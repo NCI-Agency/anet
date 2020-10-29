@@ -23,11 +23,8 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Person extends AbstractCustomizableAnetBean implements Principal, RelatableObject {
-
-  public static enum PersonStatus {
-    ACTIVE, INACTIVE, NEW_USER
-  }
+public class Person extends AbstractCustomizableAnetBean
+    implements Principal, RelatableObject, WithStatus {
 
   public static enum Role {
     ADVISOR, PRINCIPAL
@@ -40,13 +37,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private PersonStatus status;
+  private Status status = Status.ACTIVE;
   @GraphQLQuery
   @GraphQLInputField
   private Role role;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean pendingVerification;
+  private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
   private String emailAddress;
@@ -83,10 +80,6 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
 
   private List<Map<String, String>> userActivities;
 
-  public Person() {
-    this.pendingVerification = false; // Defaults
-  }
-
   @Override
   public String getName() {
     return name;
@@ -96,11 +89,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  public PersonStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(PersonStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -337,19 +332,19 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
-        && Objects.equals(other.getUserActivities(), getUserActivities()) && (createdAt != null)
-            ? (createdAt.equals(other.getCreatedAt()))
-            : (other.getCreatedAt() == null) && (updatedAt != null)
-                ? (updatedAt.equals(other.getUpdatedAt()))
-                : (other.getUpdatedAt() == null)
-                    && Objects.equals(other.getCustomFields(), customFields);
+        && Objects.equals(other.getUserActivities(), getUserActivities())
+        && (createdAt != null ? createdAt.equals(other.getCreatedAt())
+            : (other.getCreatedAt() == null && updatedAt != null)
+                ? updatedAt.equals(other.getUpdatedAt())
+                : other.getUpdatedAt() == null)
+        && Objects.equals(other.getCustomFields(), customFields);
     return b;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        pendingVerification, avatar, code, createdAt, updatedAt);
+        pendingVerification, avatar, code, createdAt, updatedAt, customFields);
   }
 
   @Override

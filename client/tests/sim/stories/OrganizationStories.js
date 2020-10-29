@@ -1,3 +1,4 @@
+import Model from "components/Model"
 import faker from "faker"
 import { Organization } from "models"
 import utils from "utils"
@@ -65,7 +66,7 @@ async function createHierarchy(user, grow, args) {
   const longName = faker.company.companyName()
   const shortName = abbreviateCompanyName(longName)
   const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
-  const status = args.status || Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
+  const status = args.status || Model.STATUS.ACTIVE // faker.random.objectElement(Model.STATUS)
   const usedServices = []
 
   return createSubOrg(undefined, [])
@@ -194,7 +195,7 @@ const createOrganization = async function(user, parentOrg, path) {
     }
     randomOrg.shortName = path[0] + " " + path.slice(1).join(".")
   }
-  randomOrg.status = Organization.STATUS.ACTIVE
+  randomOrg.status = Model.STATUS.ACTIVE
 
   populate(org, randomOrg)
     .shortName.always()
@@ -234,7 +235,7 @@ const organizationsBuildup = async function(user, number) {
           organizationList(query: {
             pageNum: 0,
             pageSize: 1,
-            status: ${Organization.STATUS.ACTIVE}
+            status: ${Model.STATUS.ACTIVE}
           }) {
             totalCount
           }

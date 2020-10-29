@@ -17,7 +17,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import {
+import Model, {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_NOTE_FIELDS,
   NOTE_TYPE
@@ -63,12 +63,12 @@ const TaskForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Task.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Task.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -90,7 +90,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
     allAdvisorOrganizations: {
       label: "All advisor organizations",
       queryVars: {
-        status: Organization.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         type: Organization.TYPE.ADVISOR_ORG
       }
     }
@@ -106,7 +106,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
     allAdvisorPositions: {
       label: "All advisor positions",
       queryVars: {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         type: [
           Position.TYPE.ADVISOR,
           Position.TYPE.SUPER_USER,

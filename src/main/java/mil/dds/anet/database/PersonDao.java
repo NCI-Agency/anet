@@ -19,7 +19,6 @@ import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -221,7 +220,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
             + "WHERE people.\"domainUsername\" = :domainUsername "
             + "AND people.status != :inactiveStatus")
         .bind("domainUsername", domainUsername)
-        .bind("inactiveStatus", DaoUtils.getEnumId(PersonStatus.INACTIVE)).map(new PersonMapper())
+        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
         .list();
     // There should at most one match
     people.stream().forEach(p -> putInCache(p));
