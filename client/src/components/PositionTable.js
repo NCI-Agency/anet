@@ -32,6 +32,10 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           shortName
         }
+        location {
+          uuid
+          name
+        }
         person {
           uuid
           name

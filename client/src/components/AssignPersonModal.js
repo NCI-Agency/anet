@@ -4,6 +4,7 @@ import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/Advanced
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
@@ -98,7 +99,8 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   }, [person, position.uuid])
 
   const personSearchQuery = {
-    status: [Person.STATUS.ACTIVE],
+    status: Model.STATUS.ACTIVE,
+    pendingVerification: false,
     role:
       position.type === Position.TYPE.PRINCIPAL
         ? Person.ROLE.PRINCIPAL

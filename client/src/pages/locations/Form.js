@@ -6,6 +6,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
@@ -40,12 +41,12 @@ const LocationForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Location.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Location.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]

@@ -13,13 +13,11 @@ import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.test.beans.OrganizationTest;
@@ -86,7 +84,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     child.setParentOrg(createOrganizationWithUuid(created.getUuid()));
     child.setShortName("AO McChild");
     child.setLongName("Child McAo");
-    child.setStatus(OrganizationStatus.ACTIVE);
+    child.setStatus(Organization.Status.ACTIVE);
     child.setType(OrganizationType.ADVISOR_ORG);
     final String childUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
         "OrganizationInput", child, new TypeReference<GraphQlResponse<Organization>>() {});
@@ -123,7 +121,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     Task task = new Task();
     task.setShortName("TST POM1");
     task.setLongName("Verify that you can update Tasks on a Organization");
-    task.setStatus(TaskStatus.ACTIVE);
+    task.setStatus(Task.Status.ACTIVE);
     final String taskUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
         task, new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(taskUuid).isNotNull();

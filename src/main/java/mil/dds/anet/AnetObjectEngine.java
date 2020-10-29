@@ -28,6 +28,7 @@ import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -69,6 +70,7 @@ public class AnetObjectEngine {
   private final ReportSensitiveInformationDao reportSensitiveInformationDao;
   private final AuthorizationGroupDao authorizationGroupDao;
   private final NoteDao noteDao;
+  private final JobHistoryDao jobHistoryDao;
   private final SubscriptionDao subscriptionDao;
   private final SubscriptionUpdateDao subscriptionUpdateDao;
   private ThreadLocal<Map<String, Object>> context;
@@ -100,6 +102,7 @@ public class AnetObjectEngine {
     emailDao = injector.getInstance(EmailDao.class);
     authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
     noteDao = injector.getInstance(NoteDao.class);
+    jobHistoryDao = injector.getInstance(JobHistoryDao.class);
     subscriptionDao = injector.getInstance(SubscriptionDao.class);
     subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
     searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
@@ -172,6 +175,10 @@ public class AnetObjectEngine {
 
   public NoteDao getNoteDao() {
     return noteDao;
+  }
+
+  public JobHistoryDao getJobHistoryDao() {
+    return jobHistoryDao;
   }
 
   public SubscriptionDao getSubscriptionDao() {

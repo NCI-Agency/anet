@@ -6,7 +6,7 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Position, Task } from "models"
+import { Person, Task } from "models"
 import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
 import Settings from "settings"
@@ -66,7 +66,8 @@ export default class Report extends Model {
     CANCELLED_DUE_TO_ROUTES: "CANCELLED_DUE_TO_ROUTES",
     CANCELLED_DUE_TO_THREAT: "CANCELLED_DUE_TO_THREAT",
     CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS:
-      "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS"
+      "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
+    CANCELLED_DUE_TO_NETWORK_ISSUES: "CANCELLED_DUE_TO_NETWORK_ISSUES"
   }
 
   static ATMOSPHERE = {
@@ -386,7 +387,7 @@ export default class Report extends Model {
     const roleName = Person.humanNameOfRole(role)
     if (!primaryAttendee) {
       return `You must provide the primary ${roleName} for the Engagement`
-    } else if (primaryAttendee.status !== Person.STATUS.ACTIVE) {
+    } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
     } else if (
       primaryAttendee.endOfTourDate &&
@@ -395,7 +396,7 @@ export default class Report extends Model {
       return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
     } else if (!primaryAttendee.position) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
-    } else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
+    } else if (primaryAttendee.position.status !== Model.STATUS.ACTIVE) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
     }
   }

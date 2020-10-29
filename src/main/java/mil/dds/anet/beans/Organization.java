@@ -22,14 +22,11 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Organization extends AbstractAnetBean implements RelatableObject, SubscribableObject {
+public class Organization extends AbstractAnetBean
+    implements RelatableObject, SubscribableObject, WithStatus {
 
   /** Pseudo uuid to represent all/top-level organization(s). */
   public static final String DUMMY_ORG_UUID = "-1";
-
-  public static enum OrganizationStatus {
-    ACTIVE, INACTIVE
-  }
 
   public static enum OrganizationType {
     ADVISOR_ORG, PRINCIPAL_ORG
@@ -43,7 +40,7 @@ public class Organization extends AbstractAnetBean implements RelatableObject, S
   String longName;
   @GraphQLQuery
   @GraphQLInputField
-  private OrganizationStatus status;
+  private Status status;
   @GraphQLQuery
   @GraphQLInputField
   private String identificationCode;
@@ -77,11 +74,13 @@ public class Organization extends AbstractAnetBean implements RelatableObject, S
     this.longName = Utils.trimStringReturnNull(longName);
   }
 
-  public OrganizationStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(OrganizationStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 

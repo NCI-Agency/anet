@@ -19,6 +19,8 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private static SortOrder DEFAULT_SORTORDER = SortOrder.ASC;
 
   // annotated below
+  private Optional<Status> status = Optional.empty();
+  // annotated below
   private Optional<String> text = Optional.empty();
   // annotated below
   private Optional<Integer> pageNum = Optional.empty();
@@ -38,6 +40,18 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
 
   public AbstractSearchQuery(T defaultSortBy) {
     this.defaultSortBy = defaultSortBy;
+  }
+
+  @Override
+  @GraphQLQuery
+  public Status getStatus() {
+    return status.orElse(null);
+  }
+
+  @Override
+  @GraphQLInputField
+  public void setStatus(Status status) {
+    this.status = Optional.ofNullable(status);
   }
 
   @Override
@@ -149,7 +163,8 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
 
   @Override
   public int hashCode() {
-    return Objects.hash(text, pageNum, pageSize, sortOrder, sortBy, inMyReports, batchParams, user);
+    return Objects.hash(status, text, pageNum, pageSize, sortOrder, sortBy, inMyReports,
+        batchParams, user);
   }
 
   @Override
@@ -159,7 +174,8 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
     }
     @SuppressWarnings("unchecked")
     final AbstractSearchQuery<T> other = (AbstractSearchQuery<T>) obj;
-    return Objects.equals(getText(), other.getText())
+    return Objects.equals(getStatus(), other.getStatus())
+        && Objects.equals(getText(), other.getText())
         && Objects.equals(getPageNum(), other.getPageNum())
         && Objects.equals(getPageSize(), other.getPageSize())
         && Objects.equals(getSortOrder(), other.getSortOrder())

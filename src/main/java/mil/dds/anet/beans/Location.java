@@ -11,21 +11,18 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class Location extends AbstractAnetBean implements RelatableObject, SubscribableObject {
+public class Location extends AbstractAnetBean
+    implements RelatableObject, SubscribableObject, WithStatus {
 
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";
-
-  public static enum LocationStatus {
-    ACTIVE, INACTIVE
-  }
 
   @GraphQLQuery
   @GraphQLInputField
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private LocationStatus status;
+  private Status status;
   @GraphQLQuery
   @GraphQLInputField
   private Double lat;
@@ -46,11 +43,13 @@ public class Location extends AbstractAnetBean implements RelatableObject, Subsc
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  public LocationStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(LocationStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 

@@ -21,12 +21,13 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import {
+import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -37,7 +38,6 @@ import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
-import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -48,7 +48,7 @@ import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -179,21 +179,25 @@ const ReportForm = ({
   )
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
-  const autoSaveSettings = {
+  const autoSaveSettings = useRef({
     autoSaveTimeout: defaultTimeout.clone(),
     timeoutId: null,
     dirty: false,
     values: {}
-  }
+  })
+  const autoSaveActive = useRef(true)
   useEffect(() => {
+    autoSaveActive.current = true
+
+    // Stop auto-save from running/rescheduling after unmount
     return () => {
-      window.clearTimeout(autoSaveSettings.timeoutId)
+      autoSaveActive.current = false
     }
   })
 
   const recentTasksVarCommon = {
     pageSize: 6,
-    status: Task.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     hasCustomFieldRef1: true,
     sortBy: "RECENT",
     sortOrder: "DESC"
@@ -212,7 +216,7 @@ const ReportForm = ({
   } else {
     recentTasksVarUser = {
       pageSize: 1,
-      status: Task.STATUS.ACTIVE,
+      status: Model.STATUS.ACTIVE,
       text: "__should_not_match_anything__" // TODO: Do this more gracefully
     }
   }
@@ -238,53 +242,6 @@ const ReportForm = ({
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
-  const atmosphereButtons = [
-    {
-      id: "positiveAtmos",
-      value: Report.ATMOSPHERE.POSITIVE,
-      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
-    },
-    {
-      id: "neutralAtmos",
-      value: Report.ATMOSPHERE.NEUTRAL,
-      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
-    },
-    {
-      id: "negativeAtmos",
-      value: Report.ATMOSPHERE.NEGATIVE,
-      label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
-    }
-  ]
-  const cancelledReasonOptions = [
-    {
-      value: "CANCELLED_BY_ADVISOR",
-      label: `Cancelled by ${Settings.fields.advisor.person.name}`
-    },
-    {
-      value: "CANCELLED_BY_PRINCIPAL",
-      label: `Cancelled by ${Settings.fields.principal.person.name}`
-    },
-    {
-      value: "CANCELLED_DUE_TO_TRANSPORTATION",
-      label: "Cancelled due to Transportation"
-    },
-    {
-      value: "CANCELLED_DUE_TO_FORCE_PROTECTION",
-      label: "Cancelled due to Force Protection"
-    },
-    {
-      value: "CANCELLED_DUE_TO_ROUTES",
-      label: "Cancelled due to Routes"
-    },
-    {
-      value: "CANCELLED_DUE_TO_THREAT",
-      label: "Cancelled due to Threat"
-    },
-    {
-      value: "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
-      label: "Cancelled due to Availability of Interpreter(s)"
-    }
-  ]
 
   let recents = []
   let tagSuggestions = []
@@ -347,14 +304,14 @@ const ReportForm = ({
         setSubmitting
       }) => {
         // need up-to-date copies of these in the autosave handler
-        Object.assign(autoSaveSettings, { dirty, values, touched })
-        if (!autoSaveSettings.timeoutId) {
+        Object.assign(autoSaveSettings.current, { dirty, values, touched })
+        if (autoSaveActive.current && !autoSaveSettings.current.timeoutId) {
           // Schedule the auto-save timer
           const autosaveHandler = () =>
             autoSave({ setFieldValue, setFieldTouched, resetForm })
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         }
 
@@ -366,7 +323,7 @@ const ReportForm = ({
         const locationFilters = {
           activeLocations: {
             label: "Active locations",
-            queryVars: { status: Location.STATUS.ACTIVE }
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
 
@@ -764,7 +721,8 @@ const ReportForm = ({
                       filterDefs={attendeesFilters}
                       objectType={Person}
                       queryParams={{
-                        status: [Person.STATUS.ACTIVE]
+                        status: Model.STATUS.ACTIVE,
+                        pendingVerification: false
                       }}
                       fields={Person.autocompleteQuery}
                       addon={PEOPLE_ICON}
@@ -830,7 +788,7 @@ const ReportForm = ({
                         overlayRenderRow={TaskDetailedOverlayRow}
                         filterDefs={tasksFilters}
                         objectType={Task}
-                        queryParams={{ status: Task.STATUS.ACTIVE }}
+                        queryParams={{ status: Model.STATUS.ACTIVE }}
                         fields={Task.autocompleteQuery}
                         addon={TASKS_ICON}
                       />
@@ -1018,7 +976,7 @@ const ReportForm = ({
                             filterDefs={authorizationGroupsFilters}
                             objectType={AuthorizationGroup}
                             queryParams={{
-                              status: AuthorizationGroup.STATUS.ACTIVE
+                              status: Model.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
                             addon={<Icon icon={IconNames.LOCK} />}
@@ -1181,55 +1139,61 @@ const ReportForm = ({
   }
 
   function autoSave(form) {
+    if (!autoSaveActive.current) {
+      // We're done auto-saving
+      return
+    }
+
     const autosaveHandler = () => autoSave(form)
     // Only auto-save if the report has changed
-    if (!autoSaveSettings.dirty) {
+    if (!autoSaveSettings.current.dirty) {
       // Just re-schedule the auto-save timer
-      autoSaveSettings.timeoutId = window.setTimeout(
+      autoSaveSettings.current.timeoutId = window.setTimeout(
         autosaveHandler,
-        autoSaveSettings.autoSaveTimeout.asMilliseconds()
+        autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      save(autoSaveSettings.values, false)
+      save(autoSaveSettings.current.values, false)
         .then(response => {
-          const newValues = _cloneDeep(autoSaveSettings.values)
+          const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
             newValues.reportSensitiveInformation = {} // object must exist for Collapse children
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
-          const touched = _cloneDeep(autoSaveSettings.touched) // save previous touched
+          const touched = _cloneDeep(autoSaveSettings.current.touched) // save previous touched
           form.resetForm({ values: newValues })
           Object.entries(touched).forEach(([field, value]) =>
             // re-set touched so we keep messages
             form.setFieldTouched(field, value)
           )
-          autoSaveSettings.autoSaveTimeout = defaultTimeout.clone() // reset to default
+          autoSaveSettings.current.autoSaveTimeout = defaultTimeout.clone() // reset to default
           setAutoSavedAt(moment())
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
           // And re-schedule the auto-save timer
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
         /* eslint-disable handle-callback-err */
-
         .catch(error => {
           // Show an error message
-          autoSaveSettings.autoSaveTimeout.add(autoSaveSettings.autoSaveTimeout) // exponential back-off
+          autoSaveSettings.current.autoSaveTimeout.add(
+            autoSaveSettings.current.autoSaveTimeout
+          ) // exponential back-off
           toast.error(
             `There was an error autosaving your ${getReportType(
-              autoSaveSettings.values
-            )}; we'll try again in ${autoSaveSettings.autoSaveTimeout.humanize()}`
+              autoSaveSettings.current.values
+            )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
           )
           // And re-schedule the auto-save timer
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
       /* eslint-enable handle-callback-err */
@@ -1255,6 +1219,7 @@ const ReportForm = ({
   }
 
   function onSubmit(values, form) {
+    form.setSubmitting(true)
     return save(values, true)
       .then(response => onSubmitSuccess(response, values, form.resetForm))
       .catch(error => {
@@ -1334,6 +1299,7 @@ const ReportForm = ({
         return noteObj
       })
   }
+
   function save(values, sendEmail) {
     const report = Object.without(
       new Report(values),
@@ -1378,7 +1344,6 @@ const ReportForm = ({
         "lastName",
         "position",
         "customFields",
-        "responsibleTasks", // notifications for UI
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
     )
@@ -1440,4 +1405,56 @@ ReportForm.defaultProps = {
   showSensitiveInfo: false
 }
 
+const atmosphereButtons = [
+  {
+    id: "positiveAtmos",
+    value: Report.ATMOSPHERE.POSITIVE,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
+  },
+  {
+    id: "neutralAtmos",
+    value: Report.ATMOSPHERE.NEUTRAL,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
+  },
+  {
+    id: "negativeAtmos",
+    value: Report.ATMOSPHERE.NEGATIVE,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
+  }
+]
+
+const cancelledReasonOptions = [
+  {
+    value: "CANCELLED_BY_ADVISOR",
+    label: `Cancelled by ${Settings.fields.advisor.person.name}`
+  },
+  {
+    value: "CANCELLED_BY_PRINCIPAL",
+    label: `Cancelled by ${Settings.fields.principal.person.name}`
+  },
+  {
+    value: "CANCELLED_DUE_TO_TRANSPORTATION",
+    label: "Cancelled due to Transportation"
+  },
+  {
+    value: "CANCELLED_DUE_TO_FORCE_PROTECTION",
+    label: "Cancelled due to Force Protection"
+  },
+  {
+    value: "CANCELLED_DUE_TO_ROUTES",
+    label: "Cancelled due to Routes"
+  },
+  {
+    value: "CANCELLED_DUE_TO_THREAT",
+    label: "Cancelled due to Threat"
+  },
+  {
+    value: "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
+    label: "Cancelled due to Availability of Interpreter(s)"
+  },
+  {
+    value: "CANCELLED_DUE_TO_NETWORK_ISSUES",
+    label: "Cancelled due to Network / Connectivity Issues"
+  }
+]
 export default connect(null, mapPageDispatchersToProps)(ReportForm)

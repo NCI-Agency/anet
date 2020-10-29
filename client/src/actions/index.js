@@ -1,5 +1,6 @@
 import pluralize from "pluralize"
 import Settings from "settings"
+import Model from "components/Model"
 import * as types from "../constants/ActionTypes"
 
 export const DEFAULT_PAGE_PROPS = {
@@ -45,7 +46,16 @@ export const DEFAULT_SEARCH_PROPS = {
     SEARCH_OBJECT_TYPES.TASKS
   ]
 }
-export const DEFAULT_SEARCH_QUERY = { objectType: "", text: "", filters: [] }
+export const DEFAULT_SEARCH_QUERY = {
+  objectType: "",
+  text: "",
+  filters: [
+    {
+      key: "Status",
+      value: { value: Model.STATUS.ACTIVE, toQuery: { status: "ACTIVE" } }
+    }
+  ]
+}
 
 /*
  *  action constructors

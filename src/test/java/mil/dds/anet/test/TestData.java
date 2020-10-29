@@ -3,7 +3,6 @@ package mil.dds.anet.test;
 import java.util.List;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Task;
@@ -37,7 +36,7 @@ public class TestData {
   }
 
   public static Task createTask(String shortName, String longName, String category) {
-    return TestData.createTask(shortName, longName, category, null, null, Task.TaskStatus.ACTIVE);
+    return TestData.createTask(shortName, longName, category, null, null, Task.Status.ACTIVE);
   }
 
   public static Task createTask(String shortName, String longName, String category,
@@ -48,7 +47,7 @@ public class TestData {
   }
 
   public static Task createTask(String shortName, String longName, String category,
-      Task customFieldRef1, List<Organization> taskedOrganizations, Task.TaskStatus status) {
+      Task customFieldRef1, List<Organization> taskedOrganizations, Task.Status status) {
     Task p = new Task();
     p.setShortName(shortName);
     p.setLongName(longName);
@@ -68,7 +67,7 @@ public class TestData {
   public static Location createLocation(String name, Double lat, Double lng) {
     Location l = new Location();
     l.setName(name);
-    l.setStatus(LocationStatus.ACTIVE);
+    l.setStatus(Location.Status.ACTIVE);
     l.setLat(lat);
     l.setLng(lng);
     return l;

@@ -12,6 +12,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
@@ -48,12 +49,12 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Organization.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Organization.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -94,7 +95,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
           ? Settings.fields.principal.org
           : Settings.fields.advisor.org
         const orgSearchQuery = {
-          status: Organization.STATUS.ACTIVE,
+          status: Model.STATUS.ACTIVE,
           type: values.type
         }
         // Reset the parentOrg property when changing the organization type
@@ -337,7 +338,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                               overlayRenderRow={TaskSimpleOverlayRow}
                               filterDefs={tasksFilters}
                               objectType={Task}
-                              queryParams={{ status: Task.STATUS.ACTIVE }}
+                              queryParams={{ status: Model.STATUS.ACTIVE }}
                               fields={Task.autocompleteQuery}
                               addon={TASKS_ICON}
                             />

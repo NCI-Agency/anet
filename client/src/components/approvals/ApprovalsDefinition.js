@@ -5,6 +5,7 @@ import { ApproverOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, FieldArray } from "formik"
 import { Position } from "models"
@@ -212,7 +213,7 @@ const ApprovalsDefinition = ({
               filterDefs={approversFilters}
               objectType={Position}
               queryParams={{
-                status: Position.STATUS.ACTIVE,
+                status: Model.STATUS.ACTIVE,
                 type: [
                   Position.TYPE.ADVISOR,
                   Position.TYPE.SUPER_USER,

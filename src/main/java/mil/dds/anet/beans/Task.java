@@ -20,14 +20,10 @@ import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
 public class Task extends AbstractCustomizableAnetBean
-    implements RelatableObject, SubscribableObject {
+    implements RelatableObject, SubscribableObject, WithStatus {
 
   /** Pseudo uuid to represent 'no task'. */
   public static final String DUMMY_TASK_UUID = "-1";
-
-  public enum TaskStatus {
-    ACTIVE, INACTIVE
-  }
 
   @GraphQLQuery
   @GraphQLInputField
@@ -57,7 +53,7 @@ public class Task extends AbstractCustomizableAnetBean
   private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
-  TaskStatus status;
+  private Status status;
   // annotated below
   private List<Position> responsiblePositions;
   // annotated below
@@ -164,11 +160,13 @@ public class Task extends AbstractCustomizableAnetBean
     return customFieldRef1.getForeignObject();
   }
 
-  public TaskStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(TaskStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -283,12 +281,13 @@ public class Task extends AbstractCustomizableAnetBean
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
+        && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getCustomFields(), customFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, status, customFields);
   }
 
   @Override

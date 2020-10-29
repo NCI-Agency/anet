@@ -186,7 +186,7 @@ const Routing = () => {
       <Route
         path={PAGE_URLS.ONBOARDING}
         render={({ match: { url } }) =>
-          currentUser.isNewUser() ? (
+          currentUser.isPendingVerification() ? (
             <Switch>
               <Route exact path={`${url}/`} component={OnboardingShow} />
               <Route path={`${url}/edit`} component={OnboardingEdit} />

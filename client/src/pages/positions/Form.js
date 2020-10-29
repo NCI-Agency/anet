@@ -10,6 +10,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
@@ -45,12 +46,12 @@ const PositionForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Position.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Position.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -128,7 +129,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
 
-        const orgSearchQuery = { status: Organization.STATUS.ACTIVE }
+        const orgSearchQuery = { status: Model.STATUS.ACTIVE }
         if (isPrincipal) {
           orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
         } else {
@@ -153,7 +154,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
           values.organization = {}
         }
         const willAutoKickPerson =
-          values.status === Position.STATUS.INACTIVE &&
+          values.status === Model.STATUS.INACTIVE &&
           values.person &&
           values.person.uuid
         const action = (
@@ -178,7 +179,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
         const locationFilters = {
           activeLocations: {
             label: "All locations",
-            queryVars: { status: Location.STATUS.ACTIVE }
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
         return (
@@ -290,7 +291,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                       filterDefs={locationFilters}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
-                      queryParams={{ status: Location.STATUS.ACTIVE }}
+                      queryParams={{ status: Model.STATUS.ACTIVE }}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
                     />
@@ -354,7 +355,11 @@ const PositionForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const position = Object.without(new Position(values), "notes")
+    const position = Object.without(
+      new Position(values),
+      "notes",
+      "responsibleTasks" // Only for querying
+    )
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }

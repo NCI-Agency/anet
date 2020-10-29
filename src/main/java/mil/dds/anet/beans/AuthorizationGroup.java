@@ -11,11 +11,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class AuthorizationGroup extends AbstractAnetBean implements RelatableObject {
-
-  public static enum AuthorizationGroupStatus {
-    ACTIVE, INACTIVE
-  }
+public class AuthorizationGroup extends AbstractAnetBean implements RelatableObject, WithStatus {
 
   @GraphQLQuery
   @GraphQLInputField
@@ -27,7 +23,7 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
   private List<Position> positions;
   @GraphQLQuery
   @GraphQLInputField
-  private AuthorizationGroupStatus status;
+  private Status status;
 
   public String getName() {
     return name;
@@ -67,11 +63,13 @@ public class AuthorizationGroup extends AbstractAnetBean implements RelatableObj
     this.positions = positions;
   }
 
-  public AuthorizationGroupStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(AuthorizationGroupStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 

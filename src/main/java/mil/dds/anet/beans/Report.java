@@ -45,7 +45,7 @@ public class Report extends AbstractCustomizableAnetBean
   public enum ReportCancelledReason {
     CANCELLED_BY_ADVISOR, CANCELLED_BY_PRINCIPAL, CANCELLED_DUE_TO_TRANSPORTATION,
     CANCELLED_DUE_TO_FORCE_PROTECTION, CANCELLED_DUE_TO_ROUTES, CANCELLED_DUE_TO_THREAT,
-    NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
+    NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS, CANCELLED_DUE_TO_NETWORK_ISSUES
   }
 
   // annotated below
@@ -832,7 +832,8 @@ public class Report extends AbstractCustomizableAnetBean
   public int hashCode() {
     return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt, location, intent, exsum,
         attendees, tasks, reportText, nextSteps, author, comments, atmosphere, atmosphereDetails,
-        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups);
+        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups,
+        customFields);
   }
 
   public static Report createWithUuid(String uuid) {
