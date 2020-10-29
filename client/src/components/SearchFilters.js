@@ -93,6 +93,15 @@ const StatusFilter = {
   }
 }
 
+const SubscriptionFilter = {
+  component: CheckboxFilter,
+  deserializer: deserializeCheckboxFilter,
+  props: {
+    queryKey: "subscribed",
+    msg: "By me"
+  }
+}
+
 const taskFilters = () => {
   const taskFiltersObj = {
     Organization: {
@@ -185,16 +194,6 @@ const advancedSelectFilterTaskProps = {
 
 const searchFilters = function() {
   const filters = {}
-  const subscriptionFilter = {
-    Subscribed: {
-      component: CheckboxFilter,
-      deserializer: deserializeCheckboxFilter,
-      props: {
-        queryKey: "subscribed",
-        msg: "By me"
-      }
-    }
-  }
 
   const taskShortLabel = Settings.fields.task.shortLabel
   const authorWidgetFilters = {
@@ -401,8 +400,7 @@ const searchFilters = function() {
           placeholder: `Filter reports by ${taskShortLabel}...`,
           queryKey: "taskUuid"
         })
-      },
-      ...subscriptionFilter
+      }
     }
   }
 
@@ -466,8 +464,7 @@ const searchFilters = function() {
           options: ["true", "false"],
           labels: ["Yes", "No"]
         }
-      },
-      ...subscriptionFilter
+      }
     }
   }
 
@@ -487,8 +484,7 @@ const searchFilters = function() {
             Settings.fields.principal.org.name
           ]
         }
-      },
-      ...subscriptionFilter
+      }
     }
   }
 
@@ -532,25 +528,22 @@ const searchFilters = function() {
           options: ["true", "false"],
           labels: ["Yes", "No"]
         }
-      },
-      ...subscriptionFilter
+      }
     }
   }
 
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
-    filters: {
-      ...subscriptionFilter
-    }
+    filters: {}
   }
 
   // Task filters
   filters[SEARCH_OBJECT_TYPES.TASKS] = {
-    filters: taskFilters(),
-    ...subscriptionFilter
+    filters: taskFilters()
   }
 
   for (const [, filtersForType] of Object.entries(filters)) {
     filtersForType.filters.Status = StatusFilter
+    filtersForType.filters.Subscribed = SubscriptionFilter
   }
 
   return filters
