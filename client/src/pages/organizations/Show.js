@@ -8,6 +8,7 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   PageDispatchersPropType,
@@ -21,7 +22,7 @@ import ReportCollection from "components/ReportCollection"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Organization, Position, Report, Task } from "models"
+import { Organization, Position, Report } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
@@ -163,8 +164,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
 
   const superUsers = organization.positions.filter(
     pos =>
-      pos.status !== Position.STATUS.INACTIVE &&
-      (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) &&
+      pos.status !== Model.STATUS.INACTIVE &&
+      (!pos.person || pos.person.status !== Model.STATUS.INACTIVE) &&
       (pos.type === Position.TYPE.SUPER_USER ||
         pos.type === Position.TYPE.ADMINISTRATOR)
   )
@@ -379,7 +380,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 <OrganizationTasks
                   organization={organization}
                   queryParams={{
-                    status: Task.STATUS.ACTIVE,
+                    status: Model.STATUS.ACTIVE,
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}

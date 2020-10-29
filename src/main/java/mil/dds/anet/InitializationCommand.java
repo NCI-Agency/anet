@@ -12,7 +12,6 @@ import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -71,7 +70,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     Organization adminOrg = new Organization();
     adminOrg.setType(OrganizationType.ADVISOR_ORG);
     adminOrg.setShortName(scanner.nextLine());
-    adminOrg.setStatus(Organization.OrganizationStatus.ACTIVE);
+    adminOrg.setStatus(Organization.Status.ACTIVE);
     adminOrg = engine.getOrganizationDao().insert(adminOrg);
     System.out.println("... Organization " + adminOrg.getUuid() + " Saved!");
 
@@ -81,7 +80,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     adminPos.setType(PositionType.ADMINISTRATOR);
     adminPos.setOrganizationUuid(adminOrg.getUuid());
     adminPos.setName(scanner.nextLine());
-    adminPos.setStatus(Position.PositionStatus.ACTIVE);
+    adminPos.setStatus(Position.Status.ACTIVE);
     adminPos = engine.getPositionDao().insert(adminPos);
     System.out.println("... Position " + adminPos.getUuid() + " Saved!");
 
@@ -92,7 +91,6 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     System.out.print("Your Domain Username >>");
     admin.setDomainUsername(scanner.nextLine());
     admin.setRole(Role.ADVISOR);
-    admin.setStatus(PersonStatus.ACTIVE);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
     System.out.println("... Person " + admin + " Saved!");

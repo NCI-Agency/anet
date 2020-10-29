@@ -10,10 +10,11 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -145,7 +146,7 @@ const PositionShow = ({ pageDispatchers }) => {
       currentUser.isSuperUserForOrg(position.organization))
   const canDelete =
     currentUser.isAdmin() &&
-    position.status === Position.STATUS.INACTIVE &&
+    position.status === Model.STATUS.INACTIVE &&
     position.uuid &&
     (!position.person || !position.person.uuid)
 

@@ -5,6 +5,7 @@ me {
   role
   emailAddress
   status
+  pendingVerification
   avatar(size: 32)
   code
   position {

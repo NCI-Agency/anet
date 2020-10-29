@@ -3495,4 +3495,27 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-jobHistory-table" author="gjvoosten">
+		<createTable tableName="jobHistory">
+			<column name="jobName" type="nvarchar(100)">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="lastRun" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="people-pendingVerification" author="VassilIordanov">
+		<comment>We are going to use pendingVerification column instead of the NEW_USER value of the status column</comment>
+		<sql dbms="mssql">
+			UPDATE people SET "pendingVerification" = 0;
+			UPDATE people SET status = 0, "pendingVerification" = 1 WHERE status = 2;
+		</sql>
+		<sql dbms="postgresql">
+			UPDATE people SET "pendingVerification" = false;
+			UPDATE people SET status = 0, "pendingVerification" = true WHERE status = 2;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

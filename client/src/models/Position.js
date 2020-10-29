@@ -17,11 +17,6 @@ export default class Position extends Model {
   static getInstanceName = "position"
   static relatedObjectType = "positions"
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static TYPE = {
     ADVISOR: "ADVISOR",
     PRINCIPAL: "PRINCIPAL",
@@ -45,7 +40,7 @@ export default class Position extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Position.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup

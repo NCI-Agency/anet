@@ -2,6 +2,7 @@ import { DEFAULT_PAGE_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -13,7 +14,6 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
-import { Task } from "models"
 import pluralize from "pluralize"
 import React, { useContext, useMemo } from "react"
 import { connect } from "react-redux"
@@ -36,7 +36,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
       Object.assign({}, searchQueryParams, {
         sortBy: "NAME",
         sortOrder: "ASC",
-        status: Task.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         taskedOrgUuid: currentUser.position?.organization?.uuid || "-1",
         orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
       }),
@@ -62,7 +62,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
         id="my-responsible-tasks"
         title={`${pluralize(taskShortLabel)} I am responsible for`}
       >
-        <TaskTable tasks={currentUser.responsibleTasks} />
+        <TaskTable tasks={currentUser?.position?.responsibleTasks} />
       </Fieldset>
       <Fieldset
         id="my-tasks-with-pending-assessments"

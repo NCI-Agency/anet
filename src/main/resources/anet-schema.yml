@@ -224,7 +224,6 @@ $defs:
   assessmentDef:
     type: object
     additionalProperties: false
-    required: [questions]
     properties:
       recurrence:
         title: recurrence of an assessment

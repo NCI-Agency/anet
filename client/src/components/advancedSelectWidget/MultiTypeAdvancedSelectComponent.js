@@ -10,6 +10,7 @@ import {
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import Model from "components/Model"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
@@ -59,7 +60,10 @@ const widgetPropsPeople = {
   overlayRenderRow: PersonDetailedOverlayRow,
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   filterDefs: peopleFilters,
-  queryParams: { status: Models.Person.STATUS.ACTIVE },
+  queryParams: {
+    status: Model.STATUS.ACTIVE,
+    pendingVerification: false
+  },
   fields: Models.Person.autocompleteQueryWithNotes,
   addon: PEOPLE_ICON
 }
@@ -69,7 +73,7 @@ const widgetPropsOrganization = {
   overlayRenderRow: OrganizationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Models.Organization.STATUS.ACTIVE },
+  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Organization.autocompleteQuery,
   addon: ORGANIZATIONS_ICON
 }
@@ -79,7 +83,7 @@ const widgetPropsPosition = {
   overlayRenderRow: PositionOverlayRow,
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
-  queryParams: { status: Models.Position.STATUS.ACTIVE },
+  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Position.autocompleteQuery,
   addon: POSITIONS_ICON
 }
@@ -89,7 +93,7 @@ const widgetPropsLocation = {
   overlayRenderRow: LocationOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Models.Location.STATUS.ACTIVE },
+  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Location.autocompleteQuery,
   addon: LOCATIONS_ICON
 }
@@ -99,7 +103,7 @@ const widgetPropsTask = {
   overlayRenderRow: TaskSimpleOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
-  queryParams: { status: Models.Task.STATUS.ACTIVE },
+  queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Task.autocompleteQueryWithNotes,
   addon: TASKS_ICON
 }

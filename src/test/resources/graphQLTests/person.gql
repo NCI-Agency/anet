@@ -4,6 +4,7 @@ person(uuid:"${personUuid}") {
   rank
   role
   status
+  pendingVerification
   emailAddress
   phoneNumber
   domainUsername

@@ -1,10 +1,11 @@
+import Model from "components/Model"
 import faker from "faker"
 import { Location } from "models"
 import { populate, runGQL } from "../simutils"
 
 async function populateLocation(location, user) {
   const template = {
-    status: () => Location.STATUS.ACTIVE,
+    status: () => Model.STATUS.ACTIVE,
     name: () => faker.address.city(),
     lat: () => faker.address.latitude(38.4862816432, 29.318572496, 10),
     lng: () => faker.address.longitude(75.1580277851, 60.5284298033, 10)

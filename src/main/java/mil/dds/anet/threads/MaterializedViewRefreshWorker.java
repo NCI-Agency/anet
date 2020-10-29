@@ -1,11 +1,13 @@
 package mil.dds.anet.threads;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
+import mil.dds.anet.beans.JobHistory;
 import mil.dds.anet.database.AdminDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MaterializedViewRefreshWorker implements Runnable {
+public class MaterializedViewRefreshWorker extends AbstractWorker {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -17,18 +19,18 @@ public class MaterializedViewRefreshWorker implements Runnable {
   private final AdminDao dao;
 
   public MaterializedViewRefreshWorker(AdminDao dao) {
+    super("Refreshing materialized views");
     this.dao = dao;
   }
 
   @Override
-  public void run() {
-    logger.debug("Refreshing materialized views");
+  protected void runInternal(Instant now, JobHistory jobHistory) {
     for (final String materializedView : materializedViews) {
       try {
         dao.updateMaterializedView(materializedView);
       } catch (Throwable e) {
-        // Cannot let this thread die, otherwise ANET will stop this worker.
-        logger.error("Exception in run()", e);
+        // Log and continue with next view
+        logger.error("Exception in runInternal()", e);
       }
     }
   }

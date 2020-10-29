@@ -16,20 +16,15 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Person extends AbstractCustomizableAnetBean implements Principal, RelatableObject {
-
-  public static enum PersonStatus {
-    ACTIVE, INACTIVE, NEW_USER
-  }
+public class Person extends AbstractCustomizableAnetBean
+    implements Principal, RelatableObject, WithStatus {
 
   public static enum Role {
     ADVISOR, PRINCIPAL
@@ -42,13 +37,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private PersonStatus status;
+  private Status status = Status.ACTIVE;
   @GraphQLQuery
   @GraphQLInputField
   private Role role;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean pendingVerification;
+  private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
   private String emailAddress;
@@ -78,18 +73,12 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
   // annotated below
   private List<PersonPositionHistory> previousPositions;
   // annotated below
-  List<Task> tasks;
-  // annotated below
   private Optional<byte[]> avatar;
   @GraphQLQuery
   @GraphQLInputField
   private String code;
 
   private List<Map<String, String>> userActivities;
-
-  public Person() {
-    this.pendingVerification = false; // Defaults
-  }
 
   @Override
   public String getName() {
@@ -100,11 +89,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  public PersonStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(PersonStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -261,26 +252,6 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
-  @GraphQLQuery(name = "responsibleTasks")
-  public CompletableFuture<List<Task>> loadResponsibleTasks(
-      @GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "query") TaskSearchQuery query) {
-    if (tasks != null) {
-      return CompletableFuture.completedFuture(tasks);
-    }
-    if (query == null) {
-      query = new TaskSearchQuery();
-    }
-    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
-        "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
-    final Person user = DaoUtils.getUserFromContext(context);
-    return AnetObjectEngine.getInstance().getTaskDao()
-        .getTasksBySearch(context, DaoUtils.getUuid(user.getPosition()), query).thenApply(o -> {
-          tasks = o;
-          return o;
-        });
-  }
-
   @GraphQLQuery(name = "avatar")
   public CompletableFuture<String> loadAvatar(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "size", defaultValue = "256") int size) {
@@ -361,19 +332,19 @@ public class Person extends AbstractCustomizableAnetBean implements Principal, R
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
-        && Objects.equals(other.getUserActivities(), getUserActivities()) && (createdAt != null)
-            ? (createdAt.equals(other.getCreatedAt()))
-            : (other.getCreatedAt() == null) && (updatedAt != null)
-                ? (updatedAt.equals(other.getUpdatedAt()))
-                : (other.getUpdatedAt() == null)
-                    && Objects.equals(other.getCustomFields(), customFields);
+        && Objects.equals(other.getUserActivities(), getUserActivities())
+        && (createdAt != null ? createdAt.equals(other.getCreatedAt())
+            : (other.getCreatedAt() == null && updatedAt != null)
+                ? updatedAt.equals(other.getUpdatedAt())
+                : other.getUpdatedAt() == null)
+        && Objects.equals(other.getCustomFields(), customFields);
     return b;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        pendingVerification, avatar, code, createdAt, updatedAt);
+        pendingVerification, avatar, code, createdAt, updatedAt, customFields);
   }
 
   @Override

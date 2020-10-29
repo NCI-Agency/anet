@@ -19,11 +19,9 @@ import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -56,7 +54,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Position test = new Position();
     test.setName("A Test Position created by PositionResourceTest");
     test.setType(PositionType.ADVISOR);
-    test.setStatus(PositionStatus.ACTIVE);
+    test.setStatus(Position.Status.ACTIVE);
 
     // Assign to an AO
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
@@ -184,7 +182,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     prinPos.setName("A Principal Position created by PositionResourceTest");
     prinPos.setType(PositionType.PRINCIPAL);
     prinPos.setOrganization(orgs.getList().get(0));
-    prinPos.setStatus(PositionStatus.ACTIVE);
+    prinPos.setStatus(Position.Status.ACTIVE);
 
     Person principal = getRogerRogwell();
     assertThat(principal.getUuid()).isNotNull();
@@ -242,7 +240,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     } catch (BadRequestException expectedException) {
     }
 
-    tashkil.setStatus(PositionStatus.INACTIVE);
+    tashkil.setStatus(Position.Status.INACTIVE);
     nrUpdated =
         graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", tashkil);
     assertThat(nrUpdated).isEqualTo(1);
@@ -458,14 +456,14 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // search by status.
     query = new PositionSearchQuery();
-    query.setStatus(PositionStatus.INACTIVE);
+    query.setStatus(Position.Status.INACTIVE);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
             new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults.size()).isGreaterThan(0);
     assertThat(
-        searchResults.stream().filter(p -> p.getStatus().equals(PositionStatus.INACTIVE)).count())
+        searchResults.stream().filter(p -> p.getStatus().equals(Position.Status.INACTIVE)).count())
             .isEqualTo(searchResults.size());
   }
 
@@ -475,7 +473,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Person newb = new Person();
     newb.setName("PositionTest Person");
     newb.setRole(Role.PRINCIPAL);
-    newb.setStatus(PersonStatus.ACTIVE);
+    newb.setStatus(Person.Status.ACTIVE);
 
     String newbUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
         newb, new TypeReference<GraphQlResponse<Person>>() {});
@@ -496,7 +494,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     newbPosition.setName("PositionTest Position for Newb");
     newbPosition.setType(PositionType.PRINCIPAL);
     newbPosition.setOrganization(orgs.getList().get(0));
-    newbPosition.setStatus(PositionStatus.ACTIVE);
+    newbPosition.setStatus(Position.Status.ACTIVE);
     newbPosition.setPerson(newb);
 
     String newbPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
@@ -562,7 +560,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     pos2.setName("Created by PositionTest");
     pos2.setType(PositionType.PRINCIPAL);
     pos2.setOrganization(orgs.getList().get(0));
-    pos2.setStatus(PositionStatus.ACTIVE);
+    pos2.setStatus(Position.Status.ACTIVE);
     pos2.setPerson(Person.createWithUuid(prin2.getUuid()));
 
     String pos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
@@ -641,7 +639,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Position newPosition = new Position();
     newPosition.setName("A Test Position not related to the user's organization");
     newPosition.setType(PositionType.ADVISOR);
-    newPosition.setStatus(PositionStatus.ACTIVE);
+    newPosition.setStatus(Position.Status.ACTIVE);
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
         "OrganizationInput", OrganizationTest.getTestAO(true),
         new TypeReference<GraphQlResponse<Organization>>() {});
