@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetKeycloakConfiguration;
@@ -167,7 +166,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
               // First time this user has ever logged in.
               final Person person = new Person();
               person.setRole(Role.ADVISOR);
-              person.setStatus(PersonStatus.NEW_USER);
+              person.setPendingVerification(true);
               // Copy some data from the authentication token
               person.setDomainUsername(username);
               person.setName(getCombinedName(token));
