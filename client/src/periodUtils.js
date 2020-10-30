@@ -75,16 +75,20 @@ export const PERIOD_FACTORIES = {
     start: date.clone().subtract(offset, "quarters").startOf("quarter"),
     end: date.clone().subtract(offset, "quarters").endOf("quarter")
   }),
-  [RECURRENCE_TYPE.SEMIANNUALY]: (date, offset) => ({
-    start: date
-      .clone()
-      .subtract(2 * offset, "quarters")
-      .startOf("quarter"),
-    end: date
-      .clone()
-      .subtract(2 * offset, "quarters")
-      .endOf("quarter")
-  }),
+  [RECURRENCE_TYPE.SEMIANNUALY]: (date, offset) => {
+    const baseDate = date.clone().subtract(2 * offset, "quarters")
+    const isFirstHalfOfTheYear = baseDate.month() < 7
+    const baseYearStart = baseDate.clone().startOf("year")
+
+    return {
+      start: isFirstHalfOfTheYear
+        ? baseYearStart // 1 Jan
+        : baseYearStart.clone().add(6, "months"), // 1 July
+      end: isFirstHalfOfTheYear
+        ? baseYearStart.clone().endOf("month").add(5, "months") // 30 June
+        : baseYearStart.clone().endOf("year") // 31 December
+    }
+  },
   [RECURRENCE_TYPE.ANNUALLY]: (date, offset) => ({
     start: date.clone().subtract(offset, "years").startOf("year"),
     end: date.clone().subtract(offset, "years").endOf("year")
