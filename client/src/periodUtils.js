@@ -57,40 +57,42 @@ export const PERIOD_FACTORIES = {
       .subtract(2 * offset, "weeks")
       .endOf("week")
   }),
+  // for more context read: https://github.com/NCI-Agency/anet/pull/3272#discussion_r515826676
   [RECURRENCE_TYPE.SEMIMONTHLY]: (date, offset) => {
-    const isDateFirstHalf = date.date() < 15
-    let isPeriodInFirstHalf
-    let periodMonthStart
+    const isCurrentPeriodFirstHalf = date.date() < 15
+    let isTargetPeriodInFirstHalf
+    let targetPeriodMonthStart
 
     if (offset % 2 === 0) {
-      periodMonthStart = date
+      targetPeriodMonthStart = date
         .clone()
         .subtract(offset / 2, "months")
         .startOf("month")
-      isPeriodInFirstHalf = isDateFirstHalf
+      // even number offset means same half with current period
+      isTargetPeriodInFirstHalf = isCurrentPeriodFirstHalf
     } else {
       // if odd, things are more complicated
       // We can't just subtract 15 days due to corner cases like 28 day Feb, 31 day months etc
-      const diffInMonths = isDateFirstHalf
+      const diffInMonths = isCurrentPeriodFirstHalf
         ? Math.ceil(offset / 2)
         : Math.floor(offset / 2)
 
-      periodMonthStart = date
+      targetPeriodMonthStart = date
         .clone()
         .subtract(diffInMonths, "months")
         .startOf("month")
 
       // since offset is odd, opposite of the date
-      isPeriodInFirstHalf = !isDateFirstHalf
+      isTargetPeriodInFirstHalf = !isCurrentPeriodFirstHalf
     }
-    return isPeriodInFirstHalf
+    return isTargetPeriodInFirstHalf
       ? {
-        start: periodMonthStart,
-        end: periodMonthStart.clone().endOf("day").add(13, "days") // end of day 14
+        start: targetPeriodMonthStart,
+        end: targetPeriodMonthStart.clone().endOf("day").add(13, "days") // end of day 14
       }
       : {
-        start: periodMonthStart.clone().add(14, "days"), // start of day 15
-        end: periodMonthStart.clone().endOf("month")
+        start: targetPeriodMonthStart.clone().add(14, "days"), // start of day 15
+        end: targetPeriodMonthStart.clone().endOf("month")
       }
   },
   [RECURRENCE_TYPE.MONTHLY]: (date, offset) => ({
@@ -102,18 +104,19 @@ export const PERIOD_FACTORIES = {
     end: date.clone().subtract(offset, "quarters").endOf("quarter")
   }),
   [RECURRENCE_TYPE.SEMIANNUALY]: (date, offset) => {
-    const baseDate = date.clone().subtract(2 * offset, "quarters")
-    const isFirstHalfOfTheYear = baseDate.month() < 7
-    const baseYearStart = baseDate.clone().startOf("year")
+    const aDateInTargetPeriod = date.clone().subtract(2 * offset, "quarters")
+    const isTargetPeriodInFirstHalfOfTheYear = aDateInTargetPeriod.month() < 7
+    const targetPeriodYearStart = aDateInTargetPeriod.clone().startOf("year")
 
-    return {
-      start: isFirstHalfOfTheYear
-        ? baseYearStart // 1 Jan
-        : baseYearStart.clone().add(6, "months"), // 1 July
-      end: isFirstHalfOfTheYear
-        ? baseYearStart.clone().endOf("month").add(5, "months") // 30 June
-        : baseYearStart.clone().endOf("year") // 31 December
-    }
+    return isTargetPeriodInFirstHalfOfTheYear
+      ? {
+        start: targetPeriodYearStart, // 1 Jan
+        end: targetPeriodYearStart.clone().endOf("month").add(5, "months") // 30 June
+      }
+      : {
+        start: targetPeriodYearStart.clone().add(6, "months"), // 1 July
+        end: targetPeriodYearStart.clone().endOf("year") // 31 December
+      }
   },
   [RECURRENCE_TYPE.ANNUALLY]: (date, offset) => ({
     start: date.clone().subtract(offset, "years").startOf("year"),
