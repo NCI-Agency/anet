@@ -85,6 +85,7 @@ export const PERIOD_FACTORIES = {
       // since offset is odd, opposite of the date
       isTargetPeriodInFirstHalf = !isCurrentPeriodFirstHalf
     }
+
     return isTargetPeriodInFirstHalf
       ? {
         start: targetPeriodMonthStart,
@@ -104,8 +105,13 @@ export const PERIOD_FACTORIES = {
     end: date.clone().subtract(offset, "quarters").endOf("quarter")
   }),
   [RECURRENCE_TYPE.SEMIANNUALY]: (date, offset) => {
+    // months start from 0
+    const isCurrentPeriodFirstHalfOfTheYear = date.month() < 6
     const aDateInTargetPeriod = date.clone().subtract(2 * offset, "quarters")
-    const isTargetPeriodInFirstHalfOfTheYear = aDateInTargetPeriod.month() < 7
+    const isTargetPeriodInFirstHalfOfTheYear =
+      offset % 2 === 0
+        ? isCurrentPeriodFirstHalfOfTheYear
+        : !isCurrentPeriodFirstHalfOfTheYear
     const targetPeriodYearStart = aDateInTargetPeriod.clone().startOf("year")
 
     return isTargetPeriodInFirstHalfOfTheYear
