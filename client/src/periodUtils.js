@@ -26,7 +26,7 @@ export const RECURRENCE_TYPE = {
   SEMIMONTHLY: "semimonthly",
   MONTHLY: "monthly",
   QUARTERLY: "quarterly",
-  SEMIANNUALY: "semiannualy",
+  SEMIANNUALLY: "semiannually",
   ANNUALLY: "annually"
 }
 
@@ -104,7 +104,7 @@ export const PERIOD_FACTORIES = {
     start: date.clone().subtract(offset, "quarters").startOf("quarter"),
     end: date.clone().subtract(offset, "quarters").endOf("quarter")
   }),
-  [RECURRENCE_TYPE.SEMIANNUALY]: (date, offset) => {
+  [RECURRENCE_TYPE.SEMIANNUALLY]: (date, offset) => {
     // months start from 0
     const isCurrentPeriodFirstHalfOfTheYear = date.month() < 6
     const aDateInTargetPeriod = date.clone().subtract(2 * offset, "quarters")

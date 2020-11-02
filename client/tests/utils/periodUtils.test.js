@@ -13,7 +13,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2019-12-15",
         end: "2019-12-31"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2019-07-01",
         end: "2019-12-31"
       }
@@ -28,7 +28,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2019-12-01",
         end: "2019-12-14"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2018-07-01",
         end: "2018-12-31"
       }
@@ -43,7 +43,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2020-02-01",
         end: "2020-02-14"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2019-07-01",
         end: "2019-12-31"
       }
@@ -58,7 +58,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2020-03-15",
         end: "2020-03-31"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2020-07-01",
         end: "2020-12-31"
       }
@@ -73,7 +73,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2021-01-01",
         end: "2021-01-14"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2021-01-01",
         end: "2021-06-30"
       }
@@ -88,7 +88,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2020-06-01",
         end: "2020-06-14"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2019-07-01",
         end: "2019-12-31"
       }
@@ -103,7 +103,7 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
         start: "2020-08-01",
         end: "2020-08-14"
       },
-      semiAnnualy: {
+      semiAnnually: {
         start: "2021-07-01",
         end: "2021-12-31"
       }
@@ -127,17 +127,17 @@ describe("For period creation utility", () => {
       )
     })
   })
-  it("We should get the correct semiannualy periods given example input", () => {
+  it("We should get the correct semiannually periods given example input", () => {
     EXAMPLE_INPUT_DATES_AND_OFFSETS.forEach((input, index) => {
-      const period = PERIOD_FACTORIES[RECURRENCE_TYPE.SEMIANNUALY](
+      const period = PERIOD_FACTORIES[RECURRENCE_TYPE.SEMIANNUALLY](
         moment(input.date),
         input.offset
       )
       expect(prefix(index) + period.start.format(FORMAT)).toEqual(
-        prefix(index) + input.expectedPeriods.semiAnnualy.start
+        prefix(index) + input.expectedPeriods.semiAnnually.start
       )
       expect(prefix(index) + period.end.format(FORMAT)).toEqual(
-        prefix(index) + input.expectedPeriods.semiAnnualy.end
+        prefix(index) + input.expectedPeriods.semiAnnually.end
       )
     })
   })
