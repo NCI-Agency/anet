@@ -3526,4 +3526,16 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="change-periodStart-format" author="gjvoosten">
+		<comment>Convert zone-specific timestamp to zone-agnostic date in yyyy-MM-dd format</comment>
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__periodStart', FORMAT(CONVERT(datetime, JSON_VALUE(text, 'lax $.__periodStart'), 127) + 0.5, 'yyyy-MM-dd'))
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__periodStart') IS NOT NULL;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
