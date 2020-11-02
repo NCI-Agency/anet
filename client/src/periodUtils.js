@@ -2,6 +2,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { momentObj } from "react-moment-proptypes"
+import Settings from "settings"
 
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -46,17 +47,30 @@ export const PERIOD_FACTORIES = {
     start: date.clone().subtract(offset, "weeks").startOf("week"),
     end: date.clone().subtract(offset, "weeks").endOf("week")
   }),
-  // FIXME: biweekly calculation should be changed, first agree on what it means
-  [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => ({
-    start: date
+  [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
+    const originMondayStr =
+      Settings.fields.task.customFields.assessments.objectFields.recurrence
+        .choices.biweekly.selectedMonday
+    const originMonday = moment(originMondayStr)
+    const curWeekMonday = date.startOf("isoWeek")
+
+    const diffInWeeks = originMonday.diff(curWeekMonday, "weeks")
+    // current biweekly period's start has to be even number of weeks apart from origin
+    const curBiweeklyStart =
+      diffInWeeks % 2 === 0
+        ? curWeekMonday
+        : curWeekMonday.clone().subtract(1, "weeks")
+
+    const curBiweeklyEnd = curBiweeklyStart
       .clone()
-      .subtract(2 * offset, "weeks")
-      .startOf("week"),
-    end: date
-      .clone()
-      .subtract(2 * offset, "weeks")
-      .endOf("week")
-  }),
+      .endOf("isoWeek")
+      .add(1, "week")
+
+    return {
+      start: curBiweeklyStart.clone().subtract(2 * offset, "weeks"),
+      end: curBiweeklyEnd.clone().subtract(2 * offset, "weeks")
+    }
+  },
   // for more context read: https://github.com/NCI-Agency/anet/pull/3272#discussion_r515826676
   [RECURRENCE_TYPE.SEMIMONTHLY]: (date, offset) => {
     // With first half we mean first half of a month
