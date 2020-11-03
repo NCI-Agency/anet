@@ -3518,4 +3518,12 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="set-read_committed_snapshot-on" author="gjvoosten">
+		<comment>Set READ_COMMITTED_SNAPSHOT to ON to prevent hangs due to locking</comment>
+		<!-- Requires at least SQL Server 2012: -->
+		<sql dbms="mssql">
+                        ALTER DATABASE CURRENT SET READ_COMMITTED_SNAPSHOT ON;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
