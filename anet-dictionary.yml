@@ -164,6 +164,8 @@ dictionary:
                   label: daily
                 weekly:
                   label: weekly
+                  # start of the week Monday(true) or Sunday(false) ?
+                  startsWithMonday: true
                 biweekly:
                   label: biweekly
                   # There are two possible ways to arrange biweekly periods
@@ -172,7 +174,7 @@ dictionary:
                   # Second way: (8 Jan - 21 Jan ) => (22 Jan - 4 Feb)
                   # So you need to pick one of two mondays in a biweekly period, depending on your use case, pick a monday which suits your schedule
                   # Periods will be arranged based on that monday
-                  selectedMonday: "2020-06-01"
+                  referenceMonday: "2020-06-01"
                 semimonthly:
                   label: semimonthly
                 monthly:

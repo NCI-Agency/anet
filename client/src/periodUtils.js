@@ -37,6 +37,15 @@ const PERIOD_FORMAT = {
   START_LONG: "D MMMM YYYY",
   END_LONG: "D MMMM YYYY"
 }
+const weeksStartsWithMonday =
+  Settings.fields.task.customFields.assessments.objectFields.recurrence.choices
+    .weekly.startsWithMonday
+
+const weekType = weeksStartsWithMonday ? "isoWeek" : "week"
+
+const refMondayForBiweekly =
+  Settings.fields.task.customFields.assessments.objectFields.recurrence.choices
+    .biweekly.referenceMonday
 
 export const PERIOD_FACTORIES = {
   [RECURRENCE_TYPE.DAILY]: (date, offset) => ({
@@ -44,17 +53,14 @@ export const PERIOD_FACTORIES = {
     end: date.clone().subtract(offset, "days").endOf("day")
   }),
   [RECURRENCE_TYPE.WEEKLY]: (date, offset) => ({
-    start: date.clone().subtract(offset, "weeks").startOf("week"),
-    end: date.clone().subtract(offset, "weeks").endOf("week")
+    start: date.clone().subtract(offset, "weeks").startOf(weekType),
+    end: date.clone().subtract(offset, "weeks").endOf(weekType)
   }),
   [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
-    const originMondayStr =
-      Settings.fields.task.customFields.assessments.objectFields.recurrence
-        .choices.biweekly.selectedMonday
-    const originMonday = moment(originMondayStr)
-    const curWeekMonday = date.startOf("isoWeek")
+    const refMonday = moment(refMondayForBiweekly)
+    const curWeekMonday = date.startOf(weekType)
 
-    const diffInWeeks = originMonday.diff(curWeekMonday, "weeks")
+    const diffInWeeks = refMonday.diff(curWeekMonday, "weeks")
     // current biweekly period's start has to be even number of weeks apart from origin
     const curBiweeklyStart =
       diffInWeeks % 2 === 0
@@ -63,8 +69,8 @@ export const PERIOD_FACTORIES = {
 
     const curBiweeklyEnd = curBiweeklyStart
       .clone()
-      .endOf("isoWeek")
-      .add(1, "week")
+      .endOf(weekType)
+      .add(1, "weeks")
 
     return {
       start: curBiweeklyStart.clone().subtract(2 * offset, "weeks"),
