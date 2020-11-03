@@ -35,9 +35,19 @@ export default class Person extends Model {
     Settings.fields.principal.person.assessments
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createCustomFieldsSchema(
-    Settings.fields.person.customFields
+  // person custom fields are lifted up as normal fields with prefix, needs a filtering first
+  // TODO: move this to a reusable place when more models lifts custom fields
+  static customFields = Object.entries(Settings.fields.person).reduce(
+    (customFieldAccum, [key, value]) => {
+      if (key.startsWith(Settings.liftedCustomFieldPrefix)) {
+        customFieldAccum[key] = value
+      }
+      return customFieldAccum
+    },
+    {}
   )
+
+  static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
 
   static yupSchema = yup
     .object()

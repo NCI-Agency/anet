@@ -405,10 +405,10 @@ const PersonShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              {Settings.fields.person.customFields && (
+              {!_isEmpty(Person.customFields) && (
                 <Fieldset title="Person information" id="custom-fields">
                   <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.person.customFields}
+                    fieldsConfig={Person.customFields}
                     values={values}
                   />
                 </Fieldset>
