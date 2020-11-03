@@ -120,8 +120,8 @@ $defs:
                   type: string
                   enum: [sum, avg, min, max]
               required: [aggregationType]
-# TODO: The following properties should not be here as these are only dependency fields.
-# When we have proper handling of `unevaluatedProperties` this section can be removed.
+      # TODO: The following properties should not be here as these are only dependency fields.
+      # When we have proper handling of `unevaluatedProperties` this section can be removed.
       choices:
         type: object
       addButtonLabel:
@@ -246,7 +246,7 @@ $defs:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, liftedCustomFieldPrefix, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -461,7 +461,6 @@ properties:
 
       person:
         type: object
-        additionalProperties: false
         required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate]
         properties:
           firstName:
@@ -508,9 +507,7 @@ properties:
             type: string
             title: The label for a person's end of tour date
             description: Used in the UI where a person's end of tour date is shown.
-          customFields:
-            type: object
-            additionalProperties:
+          additionalProperties:
               "$ref": "#/$defs/customField"
 
       location:
@@ -735,6 +732,9 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an administrator position.
+
+  liftedCustomFieldPrefix:
+    type: string
 
   pinned_ORGs:
     type: array
