@@ -1,15 +1,18 @@
 import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import {
-  PageDispatchersPropType,
-  mapPageDispatchersToProps
+  mapPageDispatchersToProps,
+  PageDispatchersPropType
 } from "components/Page"
 import ReportCalendar from "components/ReportCalendar"
 import ReportMap from "components/ReportMap"
 import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
-import { RECURRENCE_TYPE } from "periodUtils"
+import {
+  RECURRENCE_TYPE,
+  useLessNumberOfPeriodsOnSmallScreens
+} from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -35,6 +38,8 @@ const ReportCollection = ({
   height,
   marginBottom
 }) => {
+  const [numberOfPeriods, setNumberOfPeriods] = useState(3)
+  useLessNumberOfPeriodsOnSmallScreens(setNumberOfPeriods)
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
@@ -123,7 +128,7 @@ const ReportCollection = ({
                   setTotalCount={setTotalCount}
                   periodsDetails={{
                     recurrence: recurrence,
-                    numberOfPeriods: 3
+                    numberOfPeriods
                   }}
                 />
               ))}

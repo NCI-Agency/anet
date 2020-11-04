@@ -1,6 +1,6 @@
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useLayoutEffect } from "react"
 import { momentObj } from "react-moment-proptypes"
 
 export const RECURRENCE_TYPE = {
@@ -78,13 +78,13 @@ export const PERIOD_FACTORIES = {
 
 export const getPeriodsConfig = (
   recurrence,
-  numberOfperiods,
+  numberOfPeriods,
   offset,
   forAssessments = false
 ) => {
   const now = moment()
   const periods = []
-  for (let i = numberOfperiods - 1; i >= 0; i--) {
+  for (let i = numberOfPeriods - 1; i >= 0; i--) {
     const periodDetails = PERIOD_FACTORIES[recurrence](now, offset + i)
     if (forAssessments) {
       // don't allow assessments for current and future periods
@@ -158,4 +158,14 @@ PeriodsTableHeader.propTypes = {
     AssessmentPeriodsConfigPropType,
     PeriodsConfigPropType
   ])
+}
+export const ONE_PERIOD_WIDTH_LIMIT = 560
+
+export const useLessNumberOfPeriodsOnSmallScreens = setNumberOfPeriods => {
+  useLayoutEffect(() => {
+    const viewportWidth = window.innerWidth
+    if (viewportWidth < ONE_PERIOD_WIDTH_LIMIT) {
+      setNumberOfPeriods(1)
+    }
+  }, [setNumberOfPeriods])
 }
