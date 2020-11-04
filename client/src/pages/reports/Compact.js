@@ -45,6 +45,7 @@ const GQL_GET_REPORT = gql`
       reportText
       nextSteps
       cancelledReason
+      updatedAt
       releasedAt
       state
       location {
@@ -408,20 +409,14 @@ const CompactReportView = ({ pageDispatchers }) => {
   }
 
   function getReportSubTitle() {
+    const timeToShow = report.isDraft()
+      ? moment(report.updatedAt)
+      : moment(report.releasedAt)
     return (
       <>
-        Authored by{" "}
-        {report.authors.map((author, index) => (
-          <React.Fragment key={author.uuid}>
-            <LinkTo modelType="Person" model={author} />
-            {index < report.authors.length ? ", " : ""}
-          </React.Fragment>
-        ))}{" "}
-        on{" "}
-        {moment(report.releasedAt).format(
-          Settings.dateFormats.forms.displayShort.withTime
-        )}
-        [{Report.STATE_LABELS[report.state]}]
+        Authored on{" "}
+        {timeToShow.format(Settings.dateFormats.forms.displayShort.withTime)} [
+        {Report.STATE_LABELS[report.state]}]
       </>
     )
   }
@@ -839,10 +834,10 @@ const CompactReportFooterContent = () => {
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBanner />
       <PrintedByBox>
-        printed by{" "}
-        <span>
-          <LinkTo modelType="Person" model={currentUser} />
-        </span>
+        <div>
+          printed by <LinkTo modelType="Person" model={currentUser} />
+        </div>
+        <div>{moment.utc().toString()}</div>
       </PrintedByBox>
     </FooterContent>
   )
@@ -879,23 +874,25 @@ const HeaderContent = styled.div`
   ${HF_COMMON_STYLE};
   top: 0mm;
   border-bottom: 1px solid black;
+  background-color: ${props => props.bgc} !important;
 `
 
 const FooterContent = styled.div`
   ${HF_COMMON_STYLE};
   bottom: 0mm;
   border-top: 1px solid black;
-  background-color: ${props => props.bgc};
+  background-color: ${props => props.bgc} !important;
 `
 
 const PrintedByBox = styled.span`
+  align-self: flex-start;
   width: auto;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
-  font-size: 12px;
+  font-size: 10px;
   & > span {
     display: inline-block;
     text-align: right;
