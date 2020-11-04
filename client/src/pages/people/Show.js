@@ -191,9 +191,7 @@ const PersonShow = ({ pageDispatchers }) => {
           numberOfFieldsUnderAvatar - 1
         )
         const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
-        console.dir(leftColumUnderAvatar)
-        console.dir("rightColum")
-        console.dir(rightColum)
+
         return (
           <div>
             <div className="pull-right">

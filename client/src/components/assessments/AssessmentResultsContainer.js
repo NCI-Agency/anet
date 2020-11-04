@@ -1,8 +1,11 @@
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
 import Model from "components/Model"
-import { PERIOD_FACTORIES } from "periodUtils"
+import {
+  PERIOD_FACTORIES,
+  useLessNumberOfPeriodsOnSmallScreens
+} from "periodUtils"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 
 const AssessmentResultsContainer = ({
   entity,
@@ -11,6 +14,8 @@ const AssessmentResultsContainer = ({
   canAddAssessment,
   onUpdateAssessment
 }) => {
+  const [numberOfPeriods, setNumberOfPeriods] = useState(3)
+  useLessNumberOfPeriodsOnSmallScreens(setNumberOfPeriods)
   if (!entity) {
     return null
   }
@@ -28,7 +33,7 @@ const AssessmentResultsContainer = ({
               subEntities={subEntities}
               periodsDetails={{
                 recurrence: assessmentsType,
-                numberOfPeriods: 3
+                numberOfPeriods
               }}
               canAddAssessment={canAddAssessment}
               onUpdateAssessment={onUpdateAssessment}
