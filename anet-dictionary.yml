@@ -321,7 +321,7 @@ dictionary:
               typeError: Qty must be a number
               label: Qty
           visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-  #cF_ => lifted custom fields
+    # cF_ => lifted custom fields
     person:
       firstName: First name
       lastName: Last name

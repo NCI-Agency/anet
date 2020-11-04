@@ -5,7 +5,7 @@ import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -152,6 +152,7 @@ const PersonShow = ({ pageDispatchers }) => {
     .filter(ap => ap.person)
     .map(ap => ap.person.uuid)
     .includes(person.uuid)
+
   return (
     <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
@@ -211,72 +212,9 @@ const PersonShow = ({ pageDispatchers }) => {
                   height={256}
                   width={256}
                 />
-                <Field
-                  name="rank"
-                  label={Settings.fields.person.rank}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="role"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Person.humanNameOfRole(values.role)}
-                />
-                {isAdmin && (
-                  <Field
-                    name="domainUsername"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Person.humanNameOfStatus(values.status)}
-                />
-                <Field
-                  name="phoneNumber"
-                  label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="emailAddress"
-                  label={Settings.fields.person.emailAddress.label}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={emailHumanValue}
-                />
-                <Field
-                  name="country"
-                  label={Settings.fields.person.country}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="code"
-                  label={Settings.fields.person.code}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="gender"
-                  label={Settings.fields.person.gender}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="endOfTourDate"
-                  label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    person.endOfTourDate &&
-                    moment(person.endOfTourDate).format(
-                      Settings.dateFormats.forms.displayShort.date
-                    )
-                  }
-                />
-                <Field
-                  name="biography"
-                  className="biography"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography)}
-                />
+                {/* Order the fields as they are ordered in the dictionary, normal-custom fields mixed */}
+                {orderPersonFields()}
               </Fieldset>
-
               <Fieldset title="Position">
                 <Fieldset
                   title="Current Position"
@@ -344,7 +282,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   </Fieldset>
                 )}
               </Fieldset>
-
               {person.isAdvisor() && (
                 <Fieldset title="Reports authored" id="reports-authored">
                   <ReportCollection
@@ -356,7 +293,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   />
                 </Fieldset>
               )}
-
               <Fieldset
                 title={`Reports attended by ${person.name}`}
                 id="reports-attended"
@@ -369,7 +305,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   mapId="reports-attended"
                 />
               </Fieldset>
-
               <Fieldset title="Previous positions" id="previous-positions">
                 {(_isEmpty(person.previousPositions) && (
                   <em>No positions found</em>
@@ -403,15 +338,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   </Table>
                 )}
               </Fieldset>
-
-              {!_isEmpty(Person.customFields) && (
-                <Fieldset title="Person information" id="custom-fields">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Person.customFields}
-                    values={values}
-                  />
-                </Fieldset>
-              )}
+              )
             </Form>
 
             <AssessmentResultsContainer
@@ -425,6 +352,83 @@ const PersonShow = ({ pageDispatchers }) => {
             />
           </div>
         )
+
+        function orderPersonFields() {
+          const mappedCustomFields = mapReadonlyCustomFieldsToComps({
+            fieldsConfig: Person.customFields,
+            values
+          })
+          const mappedNonCustomFields = mapNonCustomFields()
+
+          return (
+            Object.keys(Settings.fields.person)
+              // first filter if there is corresponding component
+              .filter(
+                key => mappedNonCustomFields[key] || mappedCustomFields[key]
+              )
+              // then map it to components and keys, keys for React array rendering key
+              .map(key => [
+                mappedNonCustomFields[key] || mappedCustomFields[key],
+                key
+              ])
+              .map(([el, key]) =>
+                React.cloneElement(el, { key, extraColElem: null })
+              )
+          )
+        }
+
+        function mapNonCustomFields() {
+          const exceptions = {
+            ranks: true
+          }
+          const labelExceptions = {
+            emailAddress: "emailAddress"
+          }
+
+          // map fields that have specific human values
+          const humanValuesExceptions = {
+            status: Person.humanNameOfStatus(values.status),
+            emailAddress: emailHumanValue,
+            endOfTourDate:
+              person.endOfTourDate &&
+              moment(person.endOfTourDate).format(
+                Settings.dateFormats.forms.displayShort.date
+              ),
+            role: Person.humanNameOfRole(values.role),
+            biography: parseHtmlWithLinkTo(person.biography)
+          }
+          // map fields that have privileged access check
+          const privilegedAccess = {
+            domainUsername: (
+              <>
+                {isAdmin && (
+                  <Field
+                    name="domainUsername"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                )}
+              </>
+            )
+          }
+          return Object.keys(Person.nonCustomFields).reduce((accum, key) => {
+            if (exceptions[key]) {
+              return accum
+            }
+            if (privilegedAccess[key]) {
+              accum[key] = privilegedAccess[key]
+            } else {
+              accum[key] = (
+                <Field
+                  name={key}
+                  label={labelExceptions[key] || Person.nonCustomFields[key]}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={humanValuesExceptions[key]}
+                />
+              )
+            }
+            return accum
+          }, {})
+        }
       }}
     </Formik>
   )
