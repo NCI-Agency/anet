@@ -463,6 +463,9 @@ properties:
         type: object
         required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate]
         properties:
+          numberOfFieldsUnderAvatar:
+            type: number
+            description: Number of fields to show on the Person page under avatar on big screens
           firstName:
             - "$ref": "#/$defs/labeledField"
           lastName:

@@ -323,6 +323,7 @@ dictionary:
           visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
     # cF_ => lifted custom fields
     person:
+      numberOfFieldsUnderAvatar: 7
       firstName:
         label: First name
         inShowPage: false
