@@ -395,6 +395,7 @@ dictionary:
           app6Modifier: K
       gender: Gender
       endOfTourDate: End of tour
+      biography: Biography
       cF_multipleButtons:
         type: enumset
         label: Choose one or more of the options
