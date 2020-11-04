@@ -359,12 +359,21 @@ const PersonShow = ({ pageDispatchers }) => {
             values
           })
           const mappedNonCustomFields = mapNonCustomFields()
-
+          // map fields that have privileged access check to the condition
+          const privilegedAccessedFields = {
+            domainUsername: {
+              accessCond: isAdmin
+            }
+          }
           return (
             Object.keys(Settings.fields.person)
-              // first filter if there is corresponding component
+              // first filter if there is corresponding component and privileged accessed fields have access
               .filter(
-                key => mappedNonCustomFields[key] || mappedCustomFields[key]
+                key =>
+                  (mappedNonCustomFields[key] || mappedCustomFields[key]) &&
+                  (privilegedAccessedFields[key]
+                    ? privilegedAccessedFields[key].accessCond
+                    : true)
               )
               // then map it to components and keys, keys for React array rendering key
               .map(key => [
@@ -394,34 +403,19 @@ const PersonShow = ({ pageDispatchers }) => {
             role: Person.humanNameOfRole(values.role),
             biography: parseHtmlWithLinkTo(person.biography)
           }
-          // map fields that have privileged access check
-          const privilegedAccess = {
-            domainUsername: (
-              <>
-                {isAdmin && (
-                  <Field
-                    name="domainUsername"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-              </>
-            )
-          }
+
           return Object.keys(Person.shownNonCustomFields).reduce(
             (accum, key) => {
-              if (privilegedAccess[key]) {
-                accum[key] = privilegedAccess[key]
-              } else {
-                accum[key] = (
-                  <Field
-                    name={key}
-                    label={Person.shownNonCustomFields[key].label}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={humanValuesExceptions[key]}
-                    className={classNameExceptions[key]}
-                  />
-                )
-              }
+              accum[key] = (
+                <Field
+                  name={key}
+                  label={Person.shownNonCustomFields[key].label}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={humanValuesExceptions[key]}
+                  className={classNameExceptions[key]}
+                />
+              )
+
               return accum
             },
             {}
