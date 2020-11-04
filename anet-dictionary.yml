@@ -323,16 +323,31 @@ dictionary:
           visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
     # cF_ => lifted custom fields
     person:
-      firstName: First name
-      lastName: Last name
-      domainUsername: Domain username
+      firstName:
+        label: First name
+        inShowPage: false
+      lastName:
+        label: Last name
+        inShowPage: false
+      domainUsername:
+        label: Domain username
+        inShowPage: true
       emailAddress:
         label: Email
         placeholder: Only the following email domain names are allowed. ( cmil.mil ,mission.ita ,nato.int ,dds.mil ,*.isaf.nato.int )
-      phoneNumber: Phone
-      country: Nationality
-      code: ID card number
-      rank: Rank
+        inShowPage: true
+      phoneNumber:
+        label: Phone
+        inShowPage: true
+      country:
+        label: Nationality
+        inShowPage: true
+      code:
+        label: ID card number
+        inShowPage: true
+      rank:
+        label: Rank
+        inShowPage: true
       ranks:
         - value: CIV
           description: the rank of CIV
@@ -393,9 +408,15 @@ dictionary:
         - value: OF-9
           description: the rank of OF-9
           app6Modifier: K
-      gender: Gender
-      endOfTourDate: End of tour
-      biography: Biography
+      gender:
+        label: Gender
+        inShowPage: true
+      endOfTourDate:
+        label: End of tour
+        inShowPage: true
+      biography:
+        label: Biography
+        inShowPage: true
       cF_multipleButtons:
         type: enumset
         label: Choose one or more of the options
