@@ -34,8 +34,13 @@ export default class Person extends Model {
   static principalAssessmentConfig =
     Settings.fields.principal.person.assessments
 
-  static nonCustomFields = Object.entries(Settings.fields.person)
-    .filter(([key]) => !key.startsWith(Settings.liftedCustomFieldPrefix))
+  static shownNonCustomFields = Object.entries(Settings.fields.person)
+    // filter not shown fields and custom fields
+    .filter(
+      ([key]) =>
+        Settings.fields.person[key].inShowPage &&
+        !key.startsWith(Settings.liftedCustomFieldPrefix)
+    )
     .reduce((accum, [key, value]) => {
       accum[key] = value
       return accum
@@ -68,25 +73,27 @@ export default class Person extends Model {
         .when("role", (role, schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
-              `You must provide the ${Settings.fields.person.firstName}`
+              `You must provide the ${Settings.fields.person.firstName.label}`
             )
             : schema.nullable()
         )
         .default("")
-        .label(Settings.fields.person.firstName),
+        .label(Settings.fields.person.firstName.label),
       // not actually in the database, but used for validation
       lastName: yup
         .string()
         .nullable()
         .uppercase()
-        .required(`You must provide the ${Settings.fields.person.lastName}`)
+        .required(
+          `You must provide the ${Settings.fields.person.lastName.label}`
+        )
         .default("")
-        .label(Settings.fields.person.lastName),
+        .label(Settings.fields.person.lastName.label),
       domainUsername: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.person.domainUsername),
+        .label(Settings.fields.person.domainUsername.label),
       emailAddress: yup
         .string()
         .nullable()
@@ -110,28 +117,30 @@ export default class Person extends Model {
       country: yup
         .string()
         .nullable()
-        .required(`You must provide the ${Settings.fields.person.country}`)
+        .required(
+          `You must provide the ${Settings.fields.person.country.label}`
+        )
         .default("")
-        .label(Settings.fields.person.country),
+        .label(Settings.fields.person.country.label),
       rank: yup
         .string()
         .nullable()
         .required(
-          `You must provide the ${Settings.fields.person.rank} (Military rank, CIV and CTR values are available)`
+          `You must provide the ${Settings.fields.person.rank.label} (Military rank, CIV and CTR values are available)`
         )
         .default("")
-        .label(Settings.fields.person.rank),
+        .label(Settings.fields.person.rank.label),
       gender: yup
         .string()
         .nullable()
-        .required(`You must provide the ${Settings.fields.person.gender}`)
+        .required(`You must provide the ${Settings.fields.person.gender.label}`)
         .default("")
-        .label(Settings.fields.person.gender),
+        .label(Settings.fields.person.gender.label),
       phoneNumber: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.person.phoneNumber),
+        .label(Settings.fields.person.phoneNumber.label),
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
         .nullable()
@@ -142,12 +151,12 @@ export default class Person extends Model {
               return schema
             } else {
               schema = schema.required(
-                `You must provide the ${Settings.fields.person.endOfTourDate}`
+                `You must provide the ${Settings.fields.person.endOfTourDate.label}`
               )
               if (Person.isPendingVerification({ pendingVerification })) {
                 schema = schema.test(
                   "end-of-tour-date",
-                  `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
+                  `The ${Settings.fields.person.endOfTourDate.label} date must be in the future`,
                   endOfTourDate => endOfTourDate > Date.now()
                 )
               }
@@ -156,7 +165,7 @@ export default class Person extends Model {
           }
         )
         .default(null)
-        .label(Settings.fields.person.endOfTourDate),
+        .label(Settings.fields.person.endOfTourDate.label),
       biography: yup.string().nullable().default(""),
       position: yup.object().nullable().default({}),
       pendingVerification: yup.boolean().default(false),
