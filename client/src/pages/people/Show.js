@@ -185,7 +185,8 @@ const PersonShow = ({ pageDispatchers }) => {
         )
 
         const orderedFields = orderPersonFields()
-        const numberOfFieldsUnderAvatar = 7
+        const numberOfFieldsUnderAvatar =
+          Settings.fields.person.numberOfFieldsUnderAvatar || 3
         const leftColumUnderAvatar = orderedFields.slice(
           0,
           numberOfFieldsUnderAvatar - 1
