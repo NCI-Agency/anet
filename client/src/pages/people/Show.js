@@ -384,6 +384,9 @@ const PersonShow = ({ pageDispatchers }) => {
           const labelExceptions = {
             emailAddress: "emailAddress"
           }
+          const classNameExceptions = {
+            biography: "biography"
+          }
 
           // map fields that have specific human values
           const humanValuesExceptions = {
@@ -423,6 +426,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   label={labelExceptions[key] || Person.nonCustomFields[key]}
                   component={FieldHelper.ReadonlyField}
                   humanValue={humanValuesExceptions[key]}
+                  className={classNameExceptions[key]}
                 />
               )
             }

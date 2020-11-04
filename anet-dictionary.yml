@@ -396,6 +396,7 @@ fields:
         app6Modifier: K
     gender: Gender
     endOfTourDate: End of tour
+    biography: Biography
     customFields:
       multipleButtons:
         type: enumset
