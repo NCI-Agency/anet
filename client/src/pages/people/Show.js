@@ -378,12 +378,6 @@ const PersonShow = ({ pageDispatchers }) => {
         }
 
         function mapNonCustomFields() {
-          const exceptions = {
-            ranks: true
-          }
-          const labelExceptions = {
-            emailAddress: "emailAddress"
-          }
           const classNameExceptions = {
             biography: "biography"
           }
@@ -413,25 +407,25 @@ const PersonShow = ({ pageDispatchers }) => {
               </>
             )
           }
-          return Object.keys(Person.nonCustomFields).reduce((accum, key) => {
-            if (exceptions[key]) {
+          return Object.keys(Person.shownNonCustomFields).reduce(
+            (accum, key) => {
+              if (privilegedAccess[key]) {
+                accum[key] = privilegedAccess[key]
+              } else {
+                accum[key] = (
+                  <Field
+                    name={key}
+                    label={Person.shownNonCustomFields[key].label}
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={humanValuesExceptions[key]}
+                    className={classNameExceptions[key]}
+                  />
+                )
+              }
               return accum
-            }
-            if (privilegedAccess[key]) {
-              accum[key] = privilegedAccess[key]
-            } else {
-              accum[key] = (
-                <Field
-                  name={key}
-                  label={labelExceptions[key] || Person.nonCustomFields[key]}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={humanValuesExceptions[key]}
-                  className={classNameExceptions[key]}
-                />
-              )
-            }
-            return accum
-          }, {})
+            },
+            {}
+          )
         }
       }}
     </Formik>
