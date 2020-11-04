@@ -958,6 +958,49 @@ ReadonlyCustomFields.defaultProps = {
   vertical: false
 }
 
+// To access ordered custom fields when showing in a page
+export const mapReadonlyCustomFieldsToComps = ({
+  fieldsConfig,
+  parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
+  values,
+  vertical
+}) => {
+  return Object.keys(fieldsConfig).reduce((accum, key) => {
+    const fieldName = `${parentFieldName}.${key}`
+    const fieldConfig = fieldsConfig[key]
+    const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+    const { type } = fieldConfig
+    let extraProps = {}
+    if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+      extraProps = {
+        fieldConfig
+      }
+    }
+    const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+    accum[key] = ReadonlyFieldComponent ? (
+      <ReadonlyFieldComponent
+        key={key}
+        name={fieldName}
+        values={values}
+        vertical={vertical}
+        {...fieldProps}
+        {...extraProps}
+      />
+    ) : (
+      <FastField
+        key={key}
+        name={fieldName}
+        label={fieldProps.label}
+        vertical={fieldProps.vertical}
+        component={FieldHelper.ReadonlyField}
+        humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
+      />
+    )
+
+    return accum
+  }, {})
+}
+
 // customFields should contain the JSON of all the visible custom fields.
 // When used for notes text, it should not contain the INVISIBLE_CUSTOM_FIELDS_FIELD.
 export const customFieldsJSONString = (
