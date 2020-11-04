@@ -15,6 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/setup-java@v1.3.0
+      with:
+        java-version: 15
+
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
@@ -38,6 +42,7 @@ jobs:
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: Autobuild
       uses: github/codeql-action/autobuild@v1
+
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 https://git.io/JvXDl
