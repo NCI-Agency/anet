@@ -29,7 +29,15 @@ import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  ControlLabel,
+  FormGroup,
+  Grid,
+  Row,
+  Table
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -176,6 +184,16 @@ const PersonShow = ({ pageDispatchers }) => {
           <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
         )
 
+        const orderedFields = orderPersonFields()
+        const numberOfFieldsUnderAvatar = 7
+        const leftColumUnderAvatar = orderedFields.slice(
+          0,
+          numberOfFieldsUnderAvatar - 1
+        )
+        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+        console.dir(leftColumUnderAvatar)
+        console.dir("rightColum")
+        console.dir(rightColum)
         return (
           <div>
             <div className="pull-right">
@@ -207,13 +225,19 @@ const PersonShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <AvatarDisplayComponent
-                  avatar={person.avatar}
-                  height={256}
-                  width={256}
-                />
-                {/* Order the fields as they are ordered in the dictionary, normal-custom fields mixed */}
-                {orderPersonFields()}
+                <Grid fluid>
+                  <Row>
+                    <Col md={6}>
+                      <AvatarDisplayComponent
+                        avatar={person.avatar}
+                        height={256}
+                        width={256}
+                      />
+                      {leftColumUnderAvatar}
+                    </Col>
+                    <Col md={6}>{rightColum}</Col>
+                  </Row>
+                </Grid>
               </Fieldset>
               <Fieldset title="Position">
                 <Fieldset
