@@ -9,10 +9,7 @@ import ReportMap from "components/ReportMap"
 import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
-import {
-  RECURRENCE_TYPE,
-  useLessNumberOfPeriodsOnSmallScreens
-} from "periodUtils"
+import { RECURRENCE_TYPE, useResponsiveNumberOfPeriods } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -39,7 +36,7 @@ const ReportCollection = ({
   marginBottom
 }) => {
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
-  useLessNumberOfPeriodsOnSmallScreens(setNumberOfPeriods)
+  useResponsiveNumberOfPeriods(setNumberOfPeriods)
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
