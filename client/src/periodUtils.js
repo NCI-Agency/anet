@@ -89,7 +89,7 @@ export const PERIOD_FACTORIES = {
     return isTargetPeriodInFirstHalf
       ? {
         start: targetPeriodMonthStart,
-        end: targetPeriodMonthStart.clone().endOf("day").add(13, "days") // end of day 14
+        end: targetPeriodMonthStart.clone().add(13, "days").endOf("day") // end of day 14
       }
       : {
         start: targetPeriodMonthStart.clone().add(14, "days"), // start of day 15
@@ -107,7 +107,7 @@ export const PERIOD_FACTORIES = {
   [RECURRENCE_TYPE.SEMIANNUALLY]: (date, offset) => {
     // months start from 0
     const isCurrentPeriodFirstHalfOfTheYear = date.month() < 6
-    const aDateInTargetPeriod = date.clone().subtract(2 * offset, "quarters")
+    const aDateInTargetPeriod = date.clone().subtract(6 * offset, "months")
     const isTargetPeriodInFirstHalfOfTheYear =
       offset % 2 === 0
         ? isCurrentPeriodFirstHalfOfTheYear
@@ -117,7 +117,7 @@ export const PERIOD_FACTORIES = {
     return isTargetPeriodInFirstHalfOfTheYear
       ? {
         start: targetPeriodYearStart, // 1 Jan
-        end: targetPeriodYearStart.clone().endOf("month").add(5, "months") // 30 June
+        end: targetPeriodYearStart.clone().add(5, "months").endOf("month") // 30 June
       }
       : {
         start: targetPeriodYearStart.clone().add(6, "months"), // 1 July
