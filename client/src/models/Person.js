@@ -1,3 +1,4 @@
+import API from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
@@ -38,15 +39,34 @@ export default class Person extends Model {
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
 
-  static shownCustomFields = Settings.fields.person.showPageOrderedFields
-    // filter custom fields
+  // Filter empty/wrong fields in case they are listed in the array by mistake
+  static showPageOrderedFields = Settings.fields.person.showPageOrderedFields.filter(
+    field => {
+      if (
+        Settings.fields.person[field] ||
+        Settings.fields.person.customFields[field]
+      ) {
+        return true
+      }
+      API.logOnServer(
+        "WARN",
+        "Person.js",
+        50,
+        "Wrong/empty person field in show list"
+      )
+      return false
+    }
+  )
+
+  static shownCustomFields = Person.showPageOrderedFields
+    // filter out non-custom fields
     .filter(key => Person.customFields[key])
     .reduce((accum, key) => {
       accum[key] = Person.customFields[key]
       return accum
     }, {})
 
-  static shownStandardFields = Settings.fields.person.showPageOrderedFields
+  static shownStandardFields = Person.showPageOrderedFields
     // filter out custom fields
     .filter(key => !Person.customFields[key])
 
