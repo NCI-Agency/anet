@@ -1,9 +1,6 @@
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
 import Model from "components/Model"
-import {
-  PERIOD_FACTORIES,
-  useLessNumberOfPeriodsOnSmallScreens
-} from "periodUtils"
+import { PERIOD_FACTORIES, useResponsiveNumberOfPeriods } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 
@@ -15,7 +12,7 @@ const AssessmentResultsContainer = ({
   onUpdateAssessment
 }) => {
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
-  useLessNumberOfPeriodsOnSmallScreens(setNumberOfPeriods)
+  useResponsiveNumberOfPeriods(setNumberOfPeriods)
   if (!entity) {
     return null
   }

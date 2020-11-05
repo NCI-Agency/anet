@@ -234,7 +234,6 @@ PeriodsTableHeader.propTypes = {
     PeriodsConfigPropType
   ])
 }
-export const ONE_PERIOD_WIDTH_LIMIT = 560
 
 const SCREEN_SIZES = {
   largeLowLimit: 1000,
@@ -266,7 +265,7 @@ function getPeriodNumberForScreen(width) {
   }
 }
 
-export const useLessNumberOfPeriodsOnSmallScreens = setNumberOfPeriods => {
+export const useResponsiveNumberOfPeriods = setNumberOfPeriods => {
   useLayoutEffect(() => {
     const viewportWidth = window.innerWidth
     setNumberOfPeriods(getPeriodNumberForScreen(viewportWidth))
