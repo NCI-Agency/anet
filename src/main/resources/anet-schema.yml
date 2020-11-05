@@ -246,7 +246,7 @@ $defs:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, liftedCustomFieldPrefix, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -461,27 +461,39 @@ properties:
 
       person:
         type: object
-        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate]
+        additionalProperties: false
+        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, numberOfFieldsInLeftColumn, showPageOrderedFields]
         properties:
-          numberOfFieldsUnderAvatar:
-            type: number
-            description: Number of fields to show on the Person page under avatar on big screens
           firstName:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's first name
+            description: Used in the UI where a person's first name is shown.
           lastName:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's last name
+            description: Used in the UI where a person's last name is shown.
           domainUsername:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's domain username
+            description: Used in the UI where a person's domain username is shown.
           emailAddress:
             "$ref": "#/$defs/inputField"
           phoneNumber:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's phone number
+            description: Used in the UI where a person's phone number is shown.
           country:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's country
+            description: Used in the UI where a person's country is shown.
           code:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's code
+            description: Used in the UI where a person's code is shown.
           rank:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's rank
+            description: Used in the UI where a person's rank is shown.
           ranks:
             type: array
             uniqueItems: true
@@ -489,11 +501,31 @@ properties:
             items:
               "$ref": "#/$defs/describedValue"
           gender:
-            - "$ref": "#/$defs/labeledField"
+            type: string
+            title: The label for a person's gender
+            description: Used in the UI where a person's gender is shown.
           endOfTourDate:
-            - "$ref": "#/$defs/labeledField"
-          additionalProperties:
+            type: string
+            title: The label for a person's end of tour date
+            description: Used in the UI where a person's end of tour date is shown.
+          biography:
+            type: string
+            title: The label for a person's biography
+            description: Used in the UI where a person's biography is shown.
+          customFields:
+            type: object
+            additionalProperties:
               "$ref": "#/$defs/customField"
+          showPageOrderedFields:
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
+              description: Ordered fields to show in Person Page in the Person info section
+          numberOfFieldsInLeftColumn:
+            type: number
+
 
       location:
         type: object
@@ -717,9 +749,6 @@ properties:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an administrator position.
-
-  liftedCustomFieldPrefix:
-    type: string
 
   pinned_ORGs:
     type: array

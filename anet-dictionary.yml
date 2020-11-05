@@ -321,34 +321,18 @@ dictionary:
               typeError: Qty must be a number
               label: Qty
           visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-    # cF_ => lifted custom fields
+
     person:
-      numberOfFieldsUnderAvatar: 7
-      firstName:
-        label: First name
-        inShowPage: false
-      lastName:
-        label: Last name
-        inShowPage: false
-      domainUsername:
-        label: Domain username
-        inShowPage: true
+      firstName: First name
+      lastName: Last name
+      domainUsername: Domain username
       emailAddress:
         label: Email
         placeholder: Only the following email domain names are allowed. ( cmil.mil ,mission.ita ,nato.int ,dds.mil ,*.isaf.nato.int )
-        inShowPage: true
-      phoneNumber:
-        label: Phone
-        inShowPage: true
-      country:
-        label: Nationality
-        inShowPage: true
-      code:
-        label: ID card number
-        inShowPage: true
-      rank:
-        label: Rank
-        inShowPage: true
+      phoneNumber: Phone
+      country: Nationality
+      code: ID card number
+      rank: Rank
       ranks:
         - value: CIV
           description: the rank of CIV
@@ -409,92 +393,107 @@ dictionary:
         - value: OF-9
           description: the rank of OF-9
           app6Modifier: K
-      gender:
-        label: Gender
-        inShowPage: true
-      endOfTourDate:
-        label: End of tour
-        inShowPage: true
-      biography:
-        label: Biography
-        inShowPage: true
-      cF_multipleButtons:
-        type: enumset
-        label: Choose one or more of the options
-        helpText: Help text for choosing multiple values
-        choices:
-          opt1:
-            label: Option 1
-          opt2:
-            label: Option 2
-          opt3:
-            label: Option 3
-      cF_inputFieldName:
-        type: text
-        label: Text field
-        placeholder: Placeholder text for input field
-        helpText: Help text for text field
-      cF_colourOptions:
-        type: enum
-        label: Choose one of the colours
-        helpText: Help text for choosing colours
-        choices:
-          GREEN:
-            label: Green
-            color: '#c2ffb3'
-          AMBER:
-            label: Amber
-            color: '#ffe396'
-          RED:
-            label: Red
-            color: '#ff8279'
-      cF_textareaFieldName:
-        type: text
-        label: Textarea field
-        placeholder: Placeholder text for textarea field
-        helpText: Help text for textarea field
-        componentClass: textarea
-        style:
-          height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
-      cF_numberFieldName:
-        type: number
-        typeError: Number field must be a number
-        label: Number field
-        placeholder: Placeholder text for number field
-        helpText: Help text for number field
-        validations:
-          - type: integer
-          - type: min
-            params: [5]
-          - type: max
-            params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
-      cF_nlt:
-        type: date
-        label: Not later than date
-        helpText: Help text for date field
-      cF_nlt_dt:
-        type: datetime
-        label: Not later than datetime
-        helpText: Help text for datetime field
-      cF_arrayFieldName:
-        type: array_of_objects
-        label: Array of objects
-        helpText: Here you can add as many objects as needed
-        addButtonLabel: Add an object
-        objectLabel: Object
-        objectFields:
-          textF:
-            type: text
-            label: Object text
-            placeholder: Placeholder text for object text field
-            helpText: Help text for object text field
-          dateF:
-            type: date
-            label: Object date
-            helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+      gender: Gender
+      endOfTourDate: End of tour
+      biography: Biography
+      customFields:
+        multipleButtons:
+          type: enumset
+          label: Choose one or more of the options
+          helpText: Help text for choosing multiple values
+          choices:
+            opt1:
+              label: Option 1
+            opt2:
+              label: Option 2
+            opt3:
+              label: Option 3
+        inputFieldName:
+          type: text
+          label: Text field
+          placeholder: Placeholder text for input field
+          helpText: Help text for text field
+        colourOptions:
+          type: enum
+          label: Choose one of the colours
+          helpText: Help text for choosing colours
+          choices:
+            GREEN:
+              label: Green
+              color: '#c2ffb3'
+            AMBER:
+              label: Amber
+              color: '#ffe396'
+            RED:
+              label: Red
+              color: '#ff8279'
+        textareaFieldName:
+          type: text
+          label: Textarea field
+          placeholder: Placeholder text for textarea field
+          helpText: Help text for textarea field
+          componentClass: textarea
+          style:
+            height: 200px
+          visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        numberFieldName:
+          type: number
+          typeError: Number field must be a number
+          label: Number field
+          placeholder: Placeholder text for number field
+          helpText: Help text for number field
+          validations:
+            - type: integer
+            - type: min
+              params: [5]
+            - type: max
+              params: [100]
+          visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        nlt:
+          type: date
+          label: Not later than date
+          helpText: Help text for date field
+        nlt_dt:
+          type: datetime
+          label: Not later than datetime
+          helpText: Help text for datetime field
+        arrayFieldName:
+          type: array_of_objects
+          label: Array of objects
+          helpText: Here you can add as many objects as needed
+          addButtonLabel: Add an object
+          objectLabel: Object
+          objectFields:
+            textF:
+              type: text
+              label: Object text
+              placeholder: Placeholder text for object text field
+              helpText: Help text for object text field
+            dateF:
+              type: date
+              label: Object date
+              helpText: Help text for object date field
+              visibleWhen: $[?(@.colourOptions === 'GREEN')]
+      # number of fields after Avatar in the left column for Person
+      numberOfFieldsInLeftColumn: 6
+      showPageOrderedFields:
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
 
     location:
       format: LAT_LON
@@ -662,7 +661,7 @@ dictionary:
 
       position:
         type: ANET Administrator
-  liftedCustomFieldPrefix: cF_
+
   pinned_ORGs: [Key Leader Engagement]
   non_reporting_ORGs: [ANET Administrators]
   tasking_ORGs: [EF 2.2]

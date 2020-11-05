@@ -185,15 +185,15 @@ const PersonShow = ({ pageDispatchers }) => {
 
         const orderedFields = orderPersonFields()
         const numberOfFieldsUnderAvatar =
-          Settings.fields.person.numberOfFieldsUnderAvatar || 3
+          Settings.fields.person.numberOfFieldsInLeftColumn || 6
         const leftColumUnderAvatar = orderedFields.slice(
           0,
-          numberOfFieldsUnderAvatar - 1
+          numberOfFieldsUnderAvatar
         )
-        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar - 1)
+        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
 
         return (
-          <div>
+          <div id="person-show-outer-container">
             <div className="pull-right">
               <GuidedTour
                 title="Take a guided tour of this person's page."
@@ -380,7 +380,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
         function orderPersonFields() {
           const mappedCustomFields = mapReadonlyCustomFieldsToComps({
-            fieldsConfig: Person.customFields,
+            fieldsConfig: Person.shownCustomFields,
             values
           })
           const mappedNonCustomFields = mapNonCustomFields()
@@ -391,14 +391,12 @@ const PersonShow = ({ pageDispatchers }) => {
             }
           }
           return (
-            Object.keys(Settings.fields.person)
+            Settings.fields.person.showPageOrderedFields
               // first filter if there is corresponding component and privileged accessed fields have access
-              .filter(
-                key =>
-                  (mappedNonCustomFields[key] || mappedCustomFields[key]) &&
-                  (privilegedAccessedFields[key]
-                    ? privilegedAccessedFields[key].accessCond
-                    : true)
+              .filter(key =>
+                privilegedAccessedFields[key]
+                  ? privilegedAccessedFields[key].accessCond
+                  : true
               )
               // then map it to components and keys, keys for React array rendering key
               .map(key => [
@@ -406,7 +404,11 @@ const PersonShow = ({ pageDispatchers }) => {
                 key
               ])
               .map(([el, key]) =>
-                React.cloneElement(el, { key, extraColElem: null })
+                React.cloneElement(el, {
+                  key,
+                  extraColElem: null,
+                  labelColumnWidth: 4
+                })
               )
           )
         }
@@ -428,23 +430,23 @@ const PersonShow = ({ pageDispatchers }) => {
             role: Person.humanNameOfRole(values.role),
             biography: parseHtmlWithLinkTo(person.biography)
           }
+          return Person.shownStandardFields.reduce((accum, key) => {
+            accum[key] = (
+              <Field
+                name={key}
+                label={
+                  Settings.fields.person[key]?.label ||
+                  Settings.fields.person[key] ||
+                  "! Wrong Field Name !"
+                }
+                component={FieldHelper.ReadonlyField}
+                humanValue={humanValuesExceptions[key]}
+                className={classNameExceptions[key]}
+              />
+            )
 
-          return Object.keys(Person.shownNonCustomFields).reduce(
-            (accum, key) => {
-              accum[key] = (
-                <Field
-                  name={key}
-                  label={Person.shownNonCustomFields[key].label}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={humanValuesExceptions[key]}
-                  className={classNameExceptions[key]}
-                />
-              )
-
-              return accum
-            },
-            {}
-          )
+            return accum
+          }, {})
         }
       }}
     </Formik>

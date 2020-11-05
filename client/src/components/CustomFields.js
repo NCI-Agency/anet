@@ -115,13 +115,14 @@ const TextField = fieldProps => {
 }
 
 const ReadonlyTextField = fieldProps => {
-  const { name, label, vertical, extraColElem } = fieldProps
+  const { name, label, vertical, extraColElem, labelColumnWidth } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
       vertical={vertical}
       extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       component={FieldHelper.ReadonlyField}
     />
   )
@@ -140,13 +141,21 @@ const DateField = fieldProps => {
 }
 
 const ReadonlyDateField = fieldProps => {
-  const { name, label, vertical, withTime, extraColElem } = fieldProps
+  const {
+    name,
+    label,
+    vertical,
+    withTime,
+    extraColElem,
+    labelColumnWidth
+  } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
       vertical={vertical}
       extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal =>
         fieldVal &&
@@ -230,13 +239,22 @@ const enumHumanValue = (choices, fieldVal) => {
 }
 
 const ReadonlyEnumField = fieldProps => {
-  const { name, label, vertical, values, choices, extraColElem } = fieldProps
+  const {
+    name,
+    label,
+    vertical,
+    values,
+    choices,
+    extraColElem,
+    labelColumnWidth
+  } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
       vertical={vertical}
       extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       values={values}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
