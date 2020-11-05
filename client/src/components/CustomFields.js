@@ -646,8 +646,7 @@ function getInvisibleFields(
   const turnedInvisible = []
   const turnedVisible = []
   let curInvisibleFields = []
-  Object.keys(fieldsConfig).forEach(key => {
-    const fieldConfig = fieldsConfig[key]
+  Object.entries(fieldsConfig).forEach(([key, fieldConfig]) => {
     const fieldName = `${parentFieldName}.${key}`
     const isVisible =
       !fieldConfig.visibleWhen ||
@@ -862,8 +861,7 @@ const CustomFields = ({
 
   return (
     <>
-      {Object.keys(fieldsConfig).map(key => {
-        const fieldConfig = fieldsConfig[key]
+      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
         return invisibleFields.includes(fieldName) ? null : (
           <CustomField
@@ -915,9 +913,8 @@ export const ReadonlyCustomFields = ({
 }) => {
   return (
     <>
-      {Object.keys(fieldsConfig).map(key => {
+      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
-        const fieldConfig = fieldsConfig[key]
         const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
         const { type } = fieldConfig
         let extraProps = {}
@@ -968,9 +965,8 @@ export const mapReadonlyCustomFieldsToComps = ({
   values,
   vertical
 }) => {
-  return Object.keys(fieldsConfig).reduce((accum, key) => {
+  return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
     const fieldName = `${parentFieldName}.${key}`
-    const fieldConfig = fieldsConfig[key]
     const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
     const { type } = fieldConfig
     let extraProps = {}
