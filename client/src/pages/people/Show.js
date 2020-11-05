@@ -231,6 +231,9 @@ const PersonShow = ({ pageDispatchers }) => {
                         avatar={person.avatar}
                         height={256}
                         width={256}
+                        style={{
+                          maxWidth: "100%"
+                        }}
                       />
                       {leftColumUnderAvatar}
                     </Col>
