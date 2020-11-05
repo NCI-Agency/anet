@@ -191,7 +191,7 @@ const PersonShow = ({ pageDispatchers }) => {
           0,
           numberOfFieldsUnderAvatar - 1
         )
-        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar - 1)
 
         return (
           <div>
