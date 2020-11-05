@@ -364,7 +364,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   </Table>
                 )}
               </Fieldset>
-              )
             </Form>
 
             <AssessmentResultsContainer
