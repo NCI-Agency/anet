@@ -1085,3 +1085,15 @@ header.searchPagination {
 		display: none;
 	}
 }
+
+#notes-view {
+	padding-top: 18px;
+  max-width: 35%;
+  overflow-y: auto;
+}
+
+@media screen and (max-width: 768px){
+	#notes-view {
+		max-width: 10%;
+	}
+}
