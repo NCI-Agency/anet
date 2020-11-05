@@ -436,8 +436,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 name={key}
                 label={
                   Settings.fields.person[key]?.label ||
-                  Settings.fields.person[key] ||
-                  "! Wrong Field Name !"
+                  Settings.fields.person[key]
                 }
                 component={FieldHelper.ReadonlyField}
                 humanValue={humanValuesExceptions[key]}
