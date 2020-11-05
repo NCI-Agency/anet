@@ -236,11 +236,39 @@ PeriodsTableHeader.propTypes = {
 }
 export const ONE_PERIOD_WIDTH_LIMIT = 560
 
+const SCREEN_SIZES = {
+  largeLowLimit: 1000,
+  midLowLimit: 600
+  // further lower is small, no need for a limit
+}
+
+const SCREEN_SIZE_TO_PERIOD_NUMBER = {
+  large: {
+    isMatch: width => width >= SCREEN_SIZES.largeLowLimit,
+    no: 3
+  },
+  mid: {
+    isMatch: width =>
+      width > SCREEN_SIZES.midLowLimit && width < SCREEN_SIZES.largeLowLimit,
+    no: 2
+  },
+  small: {
+    isMatch: width => width <= SCREEN_SIZES.midLowLimit,
+    no: 1
+  }
+}
+
+function getPeriodNumberForScreen(width) {
+  for (const size in SCREEN_SIZE_TO_PERIOD_NUMBER) {
+    if (SCREEN_SIZE_TO_PERIOD_NUMBER[size].isMatch(width)) {
+      return SCREEN_SIZE_TO_PERIOD_NUMBER[size].no
+    }
+  }
+}
+
 export const useLessNumberOfPeriodsOnSmallScreens = setNumberOfPeriods => {
   useLayoutEffect(() => {
     const viewportWidth = window.innerWidth
-    if (viewportWidth < ONE_PERIOD_WIDTH_LIMIT) {
-      setNumberOfPeriods(1)
-    }
+    setNumberOfPeriods(getPeriodNumberForScreen(viewportWidth))
   }, [setNumberOfPeriods])
 }
