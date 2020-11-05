@@ -403,12 +403,12 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 />
                 <FastField
                   name="phoneNumber"
-                  label={Settings.fields.person.phoneNumber.label}
+                  label={Settings.fields.person.phoneNumber}
                   component={FieldHelper.InputField}
                 />
                 <FastField
                   name="rank"
-                  label={Settings.fields.person.rank.label}
+                  label={Settings.fields.person.rank}
                   component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
@@ -424,7 +424,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 />
                 <FastField
                   name="gender"
-                  label={Settings.fields.person.gender.label}
+                  label={Settings.fields.person.gender}
                   component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
@@ -436,7 +436,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 />
                 <FastField
                   name="country"
-                  label={Settings.fields.person.country.label}
+                  label={Settings.fields.person.country}
                   component={FieldHelper.SpecialField}
                   widget={
                     <FastField component="select" className="form-control">
@@ -451,13 +451,13 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 />
                 <FastField
                   name="code"
-                  label={Settings.fields.person.code.label}
+                  label={Settings.fields.person.code}
                   component={FieldHelper.InputField}
                   disabled={!isAdmin}
                 />
                 <FastField
                   name="endOfTourDate"
-                  label={Settings.fields.person.endOfTourDate.label}
+                  label={Settings.fields.person.endOfTourDate}
                   component={FieldHelper.SpecialField}
                   value={values.endOfTourDate}
                   onChange={value => setFieldValue("endOfTourDate", value)}

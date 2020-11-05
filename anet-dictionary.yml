@@ -473,6 +473,26 @@ fields:
             label: Object date
             helpText: Help text for object date field
             visibleWhen: $[?(@.colourOptions === 'GREEN')]
+    # number of fields after Avatar in the left column for Person
+    numberOfFieldsInLeftColumn: 6
+    showPageOrderedFields:
+      - domainUsername
+      - emailAddress
+      - multipleButtons
+      - inputFieldName
+      - phoneNumber
+      - country
+      - colourOptions
+      - textareaFieldName
+      - code
+      - rank
+      - numberFieldName
+      - nlt
+      - nlt_dt
+      - gender
+      - endOfTourDate
+      - biography
+      - arrayFieldName
 
   location:
     format: LAT_LON

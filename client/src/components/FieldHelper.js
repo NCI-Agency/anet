@@ -69,7 +69,8 @@ const Field = ({
   extraColElem,
   addon,
   vertical,
-  extraAddon
+  extraAddon,
+  labelColumnWidth
 }) => {
   const id = getFieldId(field)
   const widget = useMemo(
@@ -92,7 +93,9 @@ const Field = ({
 
   // setting label or extraColElem explicitly to null will completely remove these columns!
   const widgetWidth =
-    12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
+    12 -
+    (label === null ? 0 : labelColumnWidth) -
+    (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
   return (
     <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
@@ -106,7 +109,7 @@ const Field = ({
       ) : (
         <>
           {label !== null && (
-            <Col sm={2} componentClass={ControlLabel}>
+            <Col sm={labelColumnWidth} componentClass={ControlLabel}>
               {label}
             </Col>
           )}
@@ -132,10 +135,12 @@ Field.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  extraAddon: PropTypes.object
+  extraAddon: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 Field.defaultProps = {
-  vertical: false // default direction of label and input = horizontal
+  vertical: false, // default direction of label and input = horizontal
+  labelColumnWidth: 2
 }
 
 export const InputField = ({
@@ -224,6 +229,7 @@ export const ReadonlyField = ({
   label,
   children,
   extraColElem,
+  labelColumnWidth,
   addon,
   vertical,
   humanValue,
@@ -245,6 +251,7 @@ export const ReadonlyField = ({
       widgetElem={widgetElem}
       children={children}
       extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       addon={addon}
       vertical={vertical}
     />
@@ -258,7 +265,8 @@ ReadonlyField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  humanValue: PropTypes.any
+  humanValue: PropTypes.any,
+  labelColumnWidth: PropTypes.number
 }
 
 export const SpecialField = ({

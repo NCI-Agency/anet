@@ -34,32 +34,21 @@ export default class Person extends Model {
   static principalAssessmentConfig =
     Settings.fields.principal.person.assessments
 
-  static shownNonCustomFields = Object.entries(Settings.fields.person)
-    // filter not shown fields and custom fields
-    .filter(
-      ([key]) =>
-        Settings.fields.person[key].inShowPage &&
-        !key.startsWith(Settings.liftedCustomFieldPrefix)
-    )
-    .reduce((accum, [key, value]) => {
-      accum[key] = value
+  static customFields = Settings.fields.person.customFields
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
+
+  static shownCustomFields = Settings.fields.person.showPageOrderedFields
+    // filter custom fields
+    .filter(key => Person.customFields[key])
+    .reduce((accum, key) => {
+      accum[key] = Person.customFields[key]
       return accum
     }, {})
 
-  // person custom fields are lifted up as normal fields with prefix, needs a filtering first
-  // TODO: move this to a reusable place when more models lift custom fields
-  static customFields = Object.entries(Settings.fields.person).reduce(
-    (customFieldAccum, [key, value]) => {
-      if (key.startsWith(Settings.liftedCustomFieldPrefix)) {
-        customFieldAccum[key] = value
-      }
-      return customFieldAccum
-    },
-    {}
-  )
-
-  // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
+  static shownStandardFields = Settings.fields.person.showPageOrderedFields
+    // filter out custom fields
+    .filter(key => !Person.customFields[key])
 
   static yupSchema = yup
     .object()
@@ -73,27 +62,25 @@ export default class Person extends Model {
         .when("role", (role, schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
-              `You must provide the ${Settings.fields.person.firstName.label}`
+              `You must provide the ${Settings.fields.person.firstName}`
             )
             : schema.nullable()
         )
         .default("")
-        .label(Settings.fields.person.firstName.label),
+        .label(Settings.fields.person.firstName),
       // not actually in the database, but used for validation
       lastName: yup
         .string()
         .nullable()
         .uppercase()
-        .required(
-          `You must provide the ${Settings.fields.person.lastName.label}`
-        )
+        .required(`You must provide the ${Settings.fields.person.lastName}`)
         .default("")
-        .label(Settings.fields.person.lastName.label),
+        .label(Settings.fields.person.lastName),
       domainUsername: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.person.domainUsername.label),
+        .label(Settings.fields.person.domainUsername),
       emailAddress: yup
         .string()
         .nullable()
@@ -117,30 +104,28 @@ export default class Person extends Model {
       country: yup
         .string()
         .nullable()
-        .required(
-          `You must provide the ${Settings.fields.person.country.label}`
-        )
+        .required(`You must provide the ${Settings.fields.person.country}`)
         .default("")
-        .label(Settings.fields.person.country.label),
+        .label(Settings.fields.person.country),
       rank: yup
         .string()
         .nullable()
         .required(
-          `You must provide the ${Settings.fields.person.rank.label} (Military rank, CIV and CTR values are available)`
+          `You must provide the ${Settings.fields.person.rank} (Military rank, CIV and CTR values are available)`
         )
         .default("")
-        .label(Settings.fields.person.rank.label),
+        .label(Settings.fields.person.rank),
       gender: yup
         .string()
         .nullable()
-        .required(`You must provide the ${Settings.fields.person.gender.label}`)
+        .required(`You must provide the ${Settings.fields.person.gender}`)
         .default("")
-        .label(Settings.fields.person.gender.label),
+        .label(Settings.fields.person.gender),
       phoneNumber: yup
         .string()
         .nullable()
         .default("")
-        .label(Settings.fields.person.phoneNumber.label),
+        .label(Settings.fields.person.phoneNumber),
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
         .nullable()
@@ -151,12 +136,12 @@ export default class Person extends Model {
               return schema
             } else {
               schema = schema.required(
-                `You must provide the ${Settings.fields.person.endOfTourDate.label}`
+                `You must provide the ${Settings.fields.person.endOfTourDate}`
               )
               if (Person.isPendingVerification({ pendingVerification })) {
                 schema = schema.test(
                   "end-of-tour-date",
-                  `The ${Settings.fields.person.endOfTourDate.label} date must be in the future`,
+                  `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
                   endOfTourDate => endOfTourDate > Date.now()
                 )
               }
@@ -165,7 +150,7 @@ export default class Person extends Model {
           }
         )
         .default(null)
-        .label(Settings.fields.person.endOfTourDate.label),
+        .label(Settings.fields.person.endOfTourDate),
       biography: yup.string().nullable().default(""),
       position: yup.object().nullable().default({}),
       pendingVerification: yup.boolean().default(false),
