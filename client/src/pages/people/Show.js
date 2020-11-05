@@ -251,7 +251,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   action={
                     hasPosition &&
                     canChangePosition && (
-                      <div>
+                      <>
                         <LinkTo
                           modelType="Position"
                           model={position}
@@ -266,7 +266,7 @@ const PersonShow = ({ pageDispatchers }) => {
                         >
                           Change assigned position
                         </Button>
-                      </div>
+                      </>
                     )
                   }
                 >

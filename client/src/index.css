@@ -1109,3 +1109,21 @@ header.searchPagination {
 		max-width: 10%;
 	}
 }
+
+@media screen and (max-width: 768px) {
+	.scroll-anchor-container .actionSmall {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-end;
+	}
+	.scroll-anchor-container .actionSmall > *{
+		margin: 0 ;
+		margin-top: 5px ;
+	}
+	.legend small .btn {
+		margin: 0 ;
+		margin-top: 5px ;
+	}
+
+}

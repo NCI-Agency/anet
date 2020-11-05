@@ -8,7 +8,7 @@ const Fieldset = ({ id, title, action, style, ...otherProps }) => (
     {(title || action) && (
       <h2 className="legend">
         <span className="title-text">{title}</span>
-        {action && <small>{action}</small>}
+        {action && <small className="actionSmall">{action}</small>}
       </h2>
     )}
 
