@@ -30,11 +30,6 @@ const mainViewportContainer = {
   paddingLeft: 18,
   paddingRight: 18
 }
-const notesViewportContainer = {
-  paddingTop: 18,
-  maxWidth: "35%",
-  overflowY: "auto"
-}
 const sidebarContainer = {
   position: "relative",
   flex: "0 0 auto",
@@ -119,11 +114,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
           >
             {children}
           </Element>
-          <Element
-            style={notesViewportContainer}
-            name="notesView"
-            id="notes-view"
-          />
+          <Element name="notesView" id="notes-view" />
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>
