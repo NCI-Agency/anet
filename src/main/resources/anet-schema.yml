@@ -525,6 +525,7 @@ properties:
               description: Ordered fields to show in Person Page in the Person info section
           numberOfFieldsInLeftColumn:
             type: number
+            description: Used for dividing fields into 2 columns, make sure the columns are balanced
 
 
       location:

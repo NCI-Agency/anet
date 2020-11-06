@@ -1146,6 +1146,16 @@ header.searchPagination {
   }
 }
 
+#main-viewport {
+  flex: 1 1 auto;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 15px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
 #notes-view {
   padding-top: 18px;
   max-width: 35%;
@@ -1153,6 +1163,12 @@ header.searchPagination {
 }
 
 @media screen and (max-width: 768px) {
+  #main-viewport {
+    padding-top: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
   #notes-view {
     max-width: 10%;
   }
@@ -1163,12 +1179,18 @@ header.searchPagination {
     justify-content: flex-start;
     align-items: flex-end;
   }
+
   .scroll-anchor-container .action-small > * {
     margin: 0;
     margin-top: 5px;
   }
+
   .legend small .btn {
     margin: 0;
     margin-top: 5px;
+  }
+
+  fieldset {
+    padding: 1em;
   }
 }
