@@ -215,7 +215,13 @@ const JsonField = fieldProps => {
   )
 }
 
-const ReadonlyJsonField = ({ name, label, values }) => {
+const ReadonlyJsonField = ({
+  name,
+  label,
+  values,
+  extraColElem,
+  labelColumnWidth
+}) => {
   const value = Object.get(values, name) || {}
   return (
     <FastField
@@ -223,13 +229,17 @@ const ReadonlyJsonField = ({ name, label, values }) => {
       label={label}
       component={FieldHelper.ReadonlyField}
       humanValue={JSON.stringify(value)}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
     />
   )
 }
 ReadonlyJsonField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired
+  values: PropTypes.object.isRequired,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 
 const EnumField = fieldProps => {
@@ -266,11 +276,11 @@ const ReadonlyEnumField = fieldProps => {
       name={name}
       label={label}
       vertical={vertical}
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
       values={values}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
     />
   )
 }
@@ -392,7 +402,14 @@ const addObject = (objDefault, arrayHelpers) => {
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
-  const { name, fieldConfig, values, vertical } = fieldProps
+  const {
+    name,
+    fieldConfig,
+    values,
+    vertical,
+    extraColElem,
+    labelColumnWidth
+  } = fieldProps
   const value = useMemo(() => getArrayObjectValue(values, name), [values, name])
   const fieldsetTitle = fieldConfig.label || ""
   return (
@@ -409,6 +426,8 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
                 values={values}
                 index={index}
                 vertical={vertical}
+                extraColElem={extraColElem}
+                labelColumnWidth={labelColumnWidth}
               />
             ))}
           </div>
@@ -423,7 +442,9 @@ const ReadonlyArrayObject = ({
   fieldConfig,
   values,
   vertical,
-  index
+  index,
+  extraColElem,
+  labelColumnWidth
 }) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
@@ -433,6 +454,8 @@ const ReadonlyArrayObject = ({
         parentFieldName={`${fieldName}.${index}`}
         values={values}
         vertical={vertical}
+        extraColElem={extraColElem}
+        labelColumnWidth={labelColumnWidth}
       />
     </Fieldset>
   )
@@ -442,7 +465,9 @@ ReadonlyArrayObject.propTypes = {
   fieldConfig: PropTypes.object.isRequired,
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 
 const AnetObjectField = ({
@@ -502,7 +527,13 @@ AnetObjectField.propTypes = {
   children: PropTypes.node
 }
 
-const ReadonlyAnetObjectField = ({ name, label, values }) => {
+const ReadonlyAnetObjectField = ({
+  name,
+  label,
+  values,
+  extraColElem,
+  labelColumnWidth
+}) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
     <FastField
@@ -523,13 +554,17 @@ const ReadonlyAnetObjectField = ({ name, label, values }) => {
           </Table>
         )
       }
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
     />
   )
 }
 ReadonlyAnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired
+  values: PropTypes.object.isRequired,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -609,7 +644,13 @@ ArrayOfAnetObjectsField.propTypes = {
   children: PropTypes.node
 }
 
-const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
+const ReadonlyArrayOfAnetObjectsField = ({
+  name,
+  label,
+  values,
+  extraColElem,
+  labelColumnWidth
+}) => {
   const fieldValue = Object.get(values, name) || []
   return (
     <FastField
@@ -631,13 +672,17 @@ const ReadonlyArrayOfAnetObjectsField = ({ name, label, values }) => {
           </Table>
         )
       }
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
     />
   )
 }
 ReadonlyArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired
+  values: PropTypes.object.isRequired,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 
 const FIELD_COMPONENTS = {
@@ -927,7 +972,9 @@ export const ReadonlyCustomFields = ({
   fieldsConfig,
   parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
-  vertical
+  vertical,
+  extraColElem,
+  labelColumnWidth
 }) => {
   return (
     <>
@@ -948,6 +995,8 @@ export const ReadonlyCustomFields = ({
             name={fieldName}
             values={values}
             vertical={vertical}
+            extraColElem={extraColElem}
+            labelColumnWidth={labelColumnWidth}
             {...fieldProps}
             {...extraProps}
           />
@@ -959,6 +1008,8 @@ export const ReadonlyCustomFields = ({
             vertical={fieldProps.vertical}
             component={FieldHelper.ReadonlyField}
             humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
+            extraColElem={extraColElem}
+            labelColumnWidth={labelColumnWidth}
           />
         )
       })}
@@ -969,7 +1020,9 @@ ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 ReadonlyCustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -981,7 +1034,9 @@ export const mapReadonlyCustomFieldsToComps = ({
   fieldsConfig,
   parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
-  vertical
+  vertical,
+  extraColElem,
+  labelColumnWidth
 }) => {
   return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
     const fieldName = `${parentFieldName}.${key}`
@@ -1000,6 +1055,8 @@ export const mapReadonlyCustomFieldsToComps = ({
         name={fieldName}
         values={values}
         vertical={vertical}
+        extraColElem={extraColElem}
+        labelColumnWidth={labelColumnWidth}
         {...fieldProps}
         {...extraProps}
       />
@@ -1011,6 +1068,8 @@ export const mapReadonlyCustomFieldsToComps = ({
         vertical={fieldProps.vertical}
         component={FieldHelper.ReadonlyField}
         humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
+        extraColElem={extraColElem}
+        labelColumnWidth={labelColumnWidth}
       />
     )
 
