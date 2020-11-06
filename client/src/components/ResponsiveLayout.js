@@ -21,15 +21,7 @@ const contentContainer = {
   minHeight: 0,
   overflow: "hidden"
 }
-const mainViewportContainer = {
-  flex: "1 1 auto",
-  width: "100%",
-  overflowY: "auto",
-  overflowX: "hidden",
-  paddingTop: 15,
-  paddingLeft: 18,
-  paddingRight: 18
-}
+
 const sidebarContainer = {
   position: "relative",
   flex: "0 0 auto",
@@ -107,11 +99,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
               </div>
             </div>
           )}
-          <Element
-            style={mainViewportContainer}
-            name="mainViewport"
-            id="main-viewport"
-          >
+          <Element name="mainViewport" id="main-viewport">
             {children}
           </Element>
           <Element name="notesView" id="notes-view" />
