@@ -244,23 +244,23 @@ const SCREEN_SIZES = {
 const SCREEN_SIZE_TO_PERIOD_NUMBER = {
   large: {
     isMatch: width => width >= SCREEN_SIZES.largeLowLimit,
-    no: 3
+    num: 3
   },
   mid: {
     isMatch: width =>
       width > SCREEN_SIZES.midLowLimit && width < SCREEN_SIZES.largeLowLimit,
-    no: 2
+    num: 2
   },
   small: {
     isMatch: width => width <= SCREEN_SIZES.midLowLimit,
-    no: 1
+    num: 1
   }
 }
 
 function getPeriodNumberForScreen(width) {
-  for (const size in SCREEN_SIZE_TO_PERIOD_NUMBER) {
-    if (SCREEN_SIZE_TO_PERIOD_NUMBER[size].isMatch(width)) {
-      return SCREEN_SIZE_TO_PERIOD_NUMBER[size].no
+  for (const { isMatch, num } of Object.values(SCREEN_SIZE_TO_PERIOD_NUMBER)) {
+    if (isMatch(width)) {
+      return num
     }
   }
 }
@@ -269,5 +269,7 @@ export const useResponsiveNumberOfPeriods = setNumberOfPeriods => {
   useLayoutEffect(() => {
     const viewportWidth = window.innerWidth
     setNumberOfPeriods(getPeriodNumberForScreen(viewportWidth))
+    // by design, this will not run when you resize the window
+    // needs an unmount-mount(refresh the page) or callback change(setNumberOfPeriods) to update
   }, [setNumberOfPeriods])
 }
