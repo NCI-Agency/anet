@@ -194,7 +194,7 @@ const PersonShow = ({ pageDispatchers }) => {
         const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
 
         return (
-          <div id="person-show-outer-container">
+          <div>
             <div className="pull-right">
               <GuidedTour
                 title="Take a guided tour of this person's page."
@@ -392,13 +392,13 @@ const PersonShow = ({ pageDispatchers }) => {
           }
           return (
             Settings.fields.person.showPageOrderedFields
-              // first filter if there is corresponding component and privileged accessed fields have access
+              // first filter if there is privileged accessed fields and its access condition is true
               .filter(key =>
                 privilegedAccessedFields[key]
                   ? privilegedAccessedFields[key].accessCond
                   : true
               )
-              // then map it to components and keys, keys for React array rendering key
+              // then map it to components and keys, keys used for React list rendering
               .map(key => [
                 mappedNonCustomFields[key] || mappedCustomFields[key],
                 key
