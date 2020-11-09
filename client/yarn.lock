@@ -9397,10 +9397,10 @@ human-signals@^1.1.1:
   resolved "https://registry.yarnpkg.com/human-signals/-/human-signals-1.1.1.tgz#c5b1cd14f50aeae09ab6c59fe63ba3395fe4dfa3"
   integrity sha512-SEQu7vl8KjNL2eoGBLF3+wAjpsNfA9XMlXAYj/3EdaNfAlxKthD1xjEQfGOUhllCGGJVNY34bRr6lPINhNjyZw==
 
-i18n-iso-countries@6.2.1:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/i18n-iso-countries/-/i18n-iso-countries-6.2.1.tgz#b37a337b790348f8fa5a2ade9e32ea0206dfc1b6"
-  integrity sha512-lcu9KFffcZzEKYfwzAKZ5TgwoKYoMRoHlb8s3xa0xOYnChjd76OP1gl1n158UNfax4+Oeg9RCTYWWuZpKjwbdQ==
+i18n-iso-countries@6.2.2:
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/i18n-iso-countries/-/i18n-iso-countries-6.2.2.tgz#6b63d00e90ee4022e8c159a9e688d2a8156b0e0b"
+  integrity sha512-sZJeKs5IP93Y+dq/8/NonrEdOudVVuH6BbZVd66edjxVkKVFMtvbM6EkpTbDO3B+d9qFW9XZqdgmGNgNDzciSw==
   dependencies:
     diacritics "1.3.0"
 

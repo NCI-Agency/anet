@@ -3518,4 +3518,24 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="set-read_committed_snapshot-on" author="gjvoosten" runInTransaction="false" runOnChange="true">
+		<comment>Set READ_COMMITTED_SNAPSHOT to ON to prevent hangs due to locking</comment>
+		<!-- Requires at least SQL Server 2012: -->
+		<sql dbms="mssql">
+                        ALTER DATABASE CURRENT SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+		</sql>
+	</changeSet>
+
+	<changeSet id="change-periodStart-format" author="gjvoosten">
+		<comment>Convert zone-specific timestamp to zone-agnostic date in yyyy-MM-dd format</comment>
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__periodStart', FORMAT(CONVERT(datetime, JSON_VALUE(text, 'lax $.__periodStart'), 127) + 0.5, 'yyyy-MM-dd'))
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__periodStart') IS NOT NULL;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

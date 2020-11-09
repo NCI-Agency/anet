@@ -3,15 +3,16 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
+import Messages from "components/Messages"
 import Model, {
   ENTITY_ASSESSMENT_PARENT_FIELD,
   GQL_CREATE_NOTE,
   GQL_UPDATE_NOTE
 } from "components/Model"
-import Messages from "components/Messages"
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
+import { formatPeriodBoundary } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
@@ -136,8 +137,9 @@ const AssessmentModal = ({
     // values contains the assessment fields
     const clonedValues = _cloneDeep(values)
     clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__recurrence = recurrence
-    clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__periodStart =
-      assessmentPeriod.start
+    clonedValues[
+      ENTITY_ASSESSMENT_PARENT_FIELD
+    ].__periodStart = formatPeriodBoundary(assessmentPeriod.start)
     updatedNote.text = customFieldsJSONString(
       clonedValues,
       true,
