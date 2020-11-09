@@ -59,7 +59,8 @@ export const PERIOD_FACTORIES = {
   }),
   // for more context read: https://github.com/NCI-Agency/anet/pull/3272#discussion_r515826676
   [RECURRENCE_TYPE.SEMIMONTHLY]: (date, offset) => {
-    const isCurrentPeriodFirstHalf = date.date() < 15
+    const startDateOfSecondHalf = 15
+    const isCurrentPeriodFirstHalf = date.date() < startDateOfSecondHalf
     let isTargetPeriodInFirstHalf
     let targetPeriodMonthStart
 
@@ -89,10 +90,13 @@ export const PERIOD_FACTORIES = {
     return isTargetPeriodInFirstHalf
       ? {
         start: targetPeriodMonthStart,
-        end: targetPeriodMonthStart.clone().add(13, "days").endOf("day") // end of day 14
+        end: targetPeriodMonthStart
+          .clone()
+          .date(startDateOfSecondHalf - 1)
+          .endOf("day") // end of day 14
       }
       : {
-        start: targetPeriodMonthStart.clone().add(14, "days"), // start of day 15
+        start: targetPeriodMonthStart.clone().date(startDateOfSecondHalf), // start of day 15
         end: targetPeriodMonthStart.clone().endOf("month")
       }
   },
@@ -105,9 +109,12 @@ export const PERIOD_FACTORIES = {
     end: date.clone().subtract(offset, "quarters").endOf("quarter")
   }),
   [RECURRENCE_TYPE.SEMIANNUALLY]: (date, offset) => {
+    const monthsInHalfYear = 6
     // months start from 0
-    const isCurrentPeriodFirstHalfOfTheYear = date.month() < 6
-    const aDateInTargetPeriod = date.clone().subtract(6 * offset, "months")
+    const isCurrentPeriodFirstHalfOfTheYear = date.month() < monthsInHalfYear
+    const aDateInTargetPeriod = date
+      .clone()
+      .subtract(monthsInHalfYear * offset, "months")
     const isTargetPeriodInFirstHalfOfTheYear =
       offset % 2 === 0
         ? isCurrentPeriodFirstHalfOfTheYear
@@ -117,10 +124,13 @@ export const PERIOD_FACTORIES = {
     return isTargetPeriodInFirstHalfOfTheYear
       ? {
         start: targetPeriodYearStart, // 1 Jan
-        end: targetPeriodYearStart.clone().add(5, "months").endOf("month") // 30 June
+        end: targetPeriodYearStart
+          .clone()
+          .add(monthsInHalfYear - 1, "months")
+          .endOf("month") // 30 June
       }
       : {
-        start: targetPeriodYearStart.clone().add(6, "months"), // 1 July
+        start: targetPeriodYearStart.clone().add(monthsInHalfYear, "months"), // 1 July
         end: targetPeriodYearStart.clone().endOf("year") // 31 December
       }
   },
