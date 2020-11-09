@@ -2,7 +2,6 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { momentObj } from "react-moment-proptypes"
-import Settings from "settings"
 
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -37,15 +36,10 @@ const PERIOD_FORMAT = {
   START_LONG: "D MMMM YYYY",
   END_LONG: "D MMMM YYYY"
 }
-const weeksStartsWithMonday =
-  Settings.fields.task.customFields.assessments.objectFields.recurrence.choices
-    .weekly.startsWithMonday
 
-const weekType = weeksStartsWithMonday ? "isoWeek" : "week"
+const weekType = "isoWeek"
 
-const refMondayForBiweekly =
-  Settings.fields.task.customFields.assessments.objectFields.recurrence.choices
-    .biweekly.referenceMonday
+const refMondayForBiweekly = "2021-01-04" // lets select 1st monday of 2021
 
 export const PERIOD_FACTORIES = {
   [RECURRENCE_TYPE.DAILY]: (date, offset) => ({
@@ -53,15 +47,16 @@ export const PERIOD_FACTORIES = {
     end: date.clone().subtract(offset, "days").endOf("day")
   }),
   [RECURRENCE_TYPE.WEEKLY]: (date, offset) => ({
-    start: date.clone().subtract(offset, "weeks").startOf(weekType),
-    end: date.clone().subtract(offset, "weeks").endOf(weekType)
+    start: date.clone().subtract(offset, "weeks").startOf("week"),
+    end: date.clone().subtract(offset, "weeks").endOf("week")
   }),
   [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
-    const refMonday = moment(refMondayForBiweekly)
+    // every biweekly period's start is even number of weeks apart from reference monday
+    const refMonday = moment(refMondayForBiweekly).startOf(weekType)
     const curWeekMonday = date.startOf(weekType)
 
     const diffInWeeks = refMonday.diff(curWeekMonday, "weeks")
-    // current biweekly period's start has to be even number of weeks apart from origin
+    // current biweekly period's start has to be even number of weeks apart from reference monday
     const curBiweeklyStart =
       diffInWeeks % 2 === 0
         ? curWeekMonday
