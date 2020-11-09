@@ -49,7 +49,7 @@ run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?:
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
 String keycloakContainerName = "keycloak-server"
-String keycloakVersion = "11.0.2"
+String keycloakVersion = "11.0.3"
 
 // In this section you declare where to find the dependencies of your project
 repositories {

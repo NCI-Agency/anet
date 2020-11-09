@@ -2205,6 +2205,6 @@
     "clientSessionMaxLifespan" : "0",
     "clientOfflineSessionIdleTimeout" : "0"
   },
-  "keycloakVersion" : "11.0.2",
+  "keycloakVersion" : "11.0.3",
   "userManagedAccessAllowed" : false
 }
