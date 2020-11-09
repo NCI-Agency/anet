@@ -1,11 +1,39 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, Computed, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Table, Text, text
-from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy import Boolean, Column, Computed, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint, text
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 metadata = Base.metadata
+
+
+class ApprovalStep(Base):
+    __tablename__ = 'approvalSteps'
+
+    name = Column(String(255))
+    uuid = Column(String(36), primary_key=True)
+    relatedObjectUuid = Column(String(36), nullable=False, index=True)
+    nextStepUuid = Column(ForeignKey('approvalSteps.uuid'), index=True)
+    type = Column(Integer, nullable=False)
+    restrictedApproval = Column(Boolean, server_default=text("false"))
+
+    parent = relationship('ApprovalStep', remote_side=[uuid])
+    positions = relationship('Position', secondary='approvers')
+
+
+class AuthorizationGroup(Base):
+    __tablename__ = 'authorizationGroups'
+
+    name = Column(String(100), nullable=False, index=True)
+    description = Column(String(512))
+    status = Column(Integer, nullable=False, server_default=text("0"))
+    createdAt = Column(DateTime, index=True)
+    updatedAt = Column(DateTime)
+    uuid = Column(String(36), primary_key=True)
+    full_text = Column(TSVECTOR, Computed('(setweight((to_tsvector(\'anet\'::regconfig, (COALESCE(name, \'\'::character varying))::text) || to_tsvector(\'simple\'::regconfig, (COALESCE(name, \'\'::character varying))::text)), \'A\'::"char") || setweight((to_tsvector(\'anet\'::regconfig, (COALESCE(description, \'\'::character varying))::text) || to_tsvector(\'simple\'::regconfig, (COALESCE(description, \'\'::character varying))::text)), \'B\'::"char"))', persisted=True))
+
+    positions = relationship('Position', secondary='authorizationGroupPositions')
 
 
 class Location(Base):
@@ -103,6 +131,7 @@ class Position(Base):
     person = relationship('Person')
     location = relationship('Location')
     organization = relationship('Organization')
+    tasks = relationship('Task', secondary='taskResponsiblePositions')
 
 
 t_taskTaskedOrganizations = Table(
@@ -112,10 +141,43 @@ t_taskTaskedOrganizations = Table(
 )
 
 
+t_approvers = Table(
+    'approvers', metadata,
+    Column('approvalStepUuid', ForeignKey('approvalSteps.uuid'), index=True),
+    Column('positionUuid', ForeignKey('positions.uuid'), index=True)
+)
+
+
+t_authorizationGroupPositions = Table(
+    'authorizationGroupPositions', metadata,
+    Column('authorizationGroupUuid', ForeignKey('authorizationGroups.uuid'), nullable=False, index=True),
+    Column('positionUuid', ForeignKey('positions.uuid'), nullable=False, index=True),
+    UniqueConstraint('authorizationGroupUuid', 'positionUuid')
+)
+
+
 t_peoplePositions = Table(
     'peoplePositions', metadata,
     Column('createdAt', DateTime),
     Column('personUuid', ForeignKey('people.uuid'), index=True),
     Column('positionUuid', ForeignKey('positions.uuid'), index=True),
     Column('endedAt', DateTime)
+)
+
+
+t_positionRelationships = Table(
+    'positionRelationships', metadata,
+    Column('createdAt', DateTime),
+    Column('updatedAt', DateTime),
+    Column('deleted', Boolean),
+    Column('positionUuid_a', ForeignKey('positions.uuid'), index=True),
+    Column('positionUuid_b', ForeignKey('positions.uuid'), index=True)
+)
+
+
+t_taskResponsiblePositions = Table(
+    'taskResponsiblePositions', metadata,
+    Column('taskUuid', ForeignKey('tasks.uuid'), nullable=False, index=True),
+    Column('positionUuid', ForeignKey('positions.uuid'), nullable=False, index=True),
+    UniqueConstraint('taskUuid', 'positionUuid')
 )

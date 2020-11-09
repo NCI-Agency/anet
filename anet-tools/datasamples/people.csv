@@ -1,5 +1,0 @@
-name,status,emailAddress,phoneNumber,rank,biography,createdAt,updatedAt,role,pendingVerification,domainUsername,country,gender,endOfTourDate,uuid,code,full_text,customFields,avatar
-JACKSON Jack,0,hunter+jack@dds.mil,123-456-78960,OF-9,Jack is an advisor in EF 2.1,38:02.2,38:02.2,0,false,jack,Germany,MALE,38:02.0,6a5feb85-71cd-4f7a-b66d-27688817cfc6,1,-456':7A '-78960':8A '123':6A '2.1':15B 'advisor':12B 'ef':14B 'hunter':4A 'jack':2A3A9B 'jack@dds.mil':5A 'jackson':1A,1,1
-HENDERSON Henry EXISTING UUID,1,test1@dds.mil,-19899,CIV,,38:02.2,38:02.2,1,false,,Germany,MALE,,56738be4-e6df-487c-b628-b3aed6fe6dcb,2,,2,2
-PYTHONWITHOUT UUID,1,test2@dds.mil,-19899,CIV,,38:02.2,38:02.2,1,false,,Germany,MALE,,,3,,,3
-PYTHONNOT EXISTING UUID,1,test3@dds.mil,-19899,CIV,,38:02.2,38:02.2,1,false,,Germany,MALE,,46ab86b9-62cc-4734-9eb9-026dc538e625,4,,3,4
