@@ -37,7 +37,7 @@ export const InstantAssessmentsRow = ({
           <td key={key}>
             {_isEmpty(periodsData[index]) ? (
               isFirstRow ? (
-                <em>No assessments</em>
+                <em>No engagement assessments</em>
               ) : null
             ) : (
               <AggregationWidgetContainer
