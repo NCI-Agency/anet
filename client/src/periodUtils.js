@@ -53,7 +53,7 @@ export const PERIOD_FACTORIES = {
   [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
     // every biweekly period's start is even number of weeks apart from reference monday
     const refMonday = moment(refMondayForBiweekly).startOf(weekType)
-    const curWeekMonday = date.startOf(weekType)
+    const curWeekMonday = date.clone().startOf(weekType)
 
     const diffInWeeks = refMonday.diff(curWeekMonday, "weeks")
     // current biweekly period's start has to be even number of weeks apart from reference monday
@@ -64,8 +64,8 @@ export const PERIOD_FACTORIES = {
 
     const curBiweeklyEnd = curBiweeklyStart
       .clone()
-      .endOf(weekType)
       .add(1, "weeks")
+      .endOf(weekType)
 
     return {
       start: curBiweeklyStart.clone().subtract(2 * offset, "weeks"),

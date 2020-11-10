@@ -16,6 +16,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2019-07-01",
         end: "2019-12-31"
+      },
+      biweekly: {
+        start: "2019-12-09",
+        end: "2019-12-22"
       }
     }
   },
@@ -31,6 +35,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2018-07-01",
         end: "2018-12-31"
+      },
+      biweekly: {
+        start: "2019-12-09",
+        end: "2019-12-22"
       }
     }
   },
@@ -46,6 +54,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2019-07-01",
         end: "2019-12-31"
+      },
+      biweekly: {
+        start: "2020-02-03",
+        end: "2020-02-16"
       }
     }
   },
@@ -61,6 +73,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2020-07-01",
         end: "2020-12-31"
+      },
+      biweekly: {
+        start: "2020-03-02",
+        end: "2020-03-15"
       }
     }
   },
@@ -76,6 +92,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2021-01-01",
         end: "2021-06-30"
+      },
+      biweekly: {
+        start: "2021-01-04",
+        end: "2021-01-17"
       }
     }
   },
@@ -91,6 +111,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2019-07-01",
         end: "2019-12-31"
+      },
+      biweekly: {
+        start: "2020-05-25",
+        end: "2020-06-07"
       }
     }
   },
@@ -106,6 +130,10 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
       semiAnnually: {
         start: "2021-07-01",
         end: "2021-12-31"
+      },
+      biweekly: {
+        start: "2020-07-20",
+        end: "2020-08-02"
       }
     }
   }
@@ -113,6 +141,20 @@ const EXAMPLE_INPUT_DATES_AND_OFFSETS = [
 
 // test with index so that if it fails we know which date from the array
 describe("For period creation utility", () => {
+  it("We should get the correct biweekly periods given example input", () => {
+    EXAMPLE_INPUT_DATES_AND_OFFSETS.forEach((input, index) => {
+      const period = PERIOD_FACTORIES[RECURRENCE_TYPE.BIWEEKLY](
+        moment(input.date),
+        input.offset
+      )
+      expect(prefix(index) + period.start.format(FORMAT)).toEqual(
+        prefix(index) + input.expectedPeriods.biweekly.start
+      )
+      expect(prefix(index) + period.end.format(FORMAT)).toEqual(
+        prefix(index) + input.expectedPeriods.biweekly.end
+      )
+    })
+  })
   it("We should get the correct semimonthly periods given example input", () => {
     EXAMPLE_INPUT_DATES_AND_OFFSETS.forEach((input, index) => {
       const period = PERIOD_FACTORIES[RECURRENCE_TYPE.SEMIMONTHLY](
