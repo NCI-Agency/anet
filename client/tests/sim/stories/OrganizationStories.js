@@ -84,7 +84,7 @@ async function createHierarchy(user, grow, args) {
     const distrib = childDistrib[level]
     const total = distrib.reduce((sum, val) => sum + val, 0)
     const r = Math.random() * total
-    var chance, i
+    let chance, i
     for (
       i = 1, chance = total - distrib[0];
       i < distrib.length && r < chance;
@@ -131,7 +131,7 @@ async function createHierarchy(user, grow, args) {
     // create sub organizations
     if (args.subOrgs) {
       const subOrgCount = randomSubOrgCount(level)
-      var i
+      let i
       for (i = 1; i <= subOrgCount; i++) {
         await createSubOrg(result, path.concat(i))
       }

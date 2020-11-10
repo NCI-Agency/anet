@@ -150,7 +150,7 @@ const Leaflet = ({
         crs: CRS[Settings.imagery.mapOptions.crs]
       }
     )
-    var container = DomUtil.get(mapId)
+    const container = DomUtil.get(mapId)
     /*
      * Prevent error "map container is already initialized" when mapId changed
      * for the current map (which was already initialized).

@@ -433,7 +433,7 @@ const putPersonInPosition = async function(user) {
     role === Person.ROLE.ADVISOR
       ? Position.TYPE.ADVISOR
       : Position.TYPE.PRINCIPAL
-  var persons = (
+  const persons = (
     await runGQL(user, {
       query: `
       query ($peopleQuery: PersonSearchQueryInput) {
@@ -461,7 +461,7 @@ const putPersonInPosition = async function(user) {
     isFilled: false,
     type: [type]
   })
-  var person = faker.random.arrayElement(persons)
+  const person = faker.random.arrayElement(persons)
 
   if (!position) {
     console.debug("No positions to fill available")

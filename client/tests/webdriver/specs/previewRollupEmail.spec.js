@@ -24,7 +24,9 @@ describe("Preview rollup page", () => {
       // Find new window handle; NOTE: https://w3c.github.io/webdriver/#dfn-get-window-handles
       // "The order in which the window handles are returned is arbitrary."
       let switchHandle
-      while ((switchHandle = handles.pop()) === currentHandle) {}
+      while ((switchHandle = handles.pop()) === currentHandle) {
+        // eslint-disable-line no-empty
+      }
       browser.switchToWindow(switchHandle)
 
       browser.waitUntil(

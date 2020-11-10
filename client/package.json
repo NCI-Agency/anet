@@ -284,10 +284,12 @@
       "standard"
     ],
     "rules": {
+      "default-param-last": "off",
       "eqeqeq": [
         "error",
         "always"
       ],
+      "import/no-anonymous-default-export": "off",
       "import/order": [
         "warn",
         {
@@ -327,6 +329,7 @@
         "warn",
         "prefer-double"
       ],
+      "multiline-ternary": "off",
       "quote-props": [
         "warn",
         "as-needed"
