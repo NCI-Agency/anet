@@ -11,9 +11,9 @@ import "./BarChart.css"
  * return obj[prop1][prop2][prop3]
  */
 function getPropValue(obj, prop) {
-  var getterDetails = [obj]
-  var objProps = prop.split(".")
-  for (var i = 0; i < objProps.length; i++) {
+  const getterDetails = [obj]
+  const objProps = prop.split(".")
+  for (let i = 0; i < objProps.length; i++) {
     getterDetails.push(objProps[i])
   }
   return getterDetails.reduce(function(d, v) {
@@ -47,7 +47,7 @@ const BarChart = ({
       bottom: 0 // left and bottom MARGINs are dynamic, these are extra margins
     }
     const label = xLabel || xProp
-    var xLabels = {} // dict containing x-value and corresponding tick label
+    const xLabels = {} // dict containing x-value and corresponding tick label
 
     const xScale = d3.scaleBand().domain(
       data.map(function(d) {
