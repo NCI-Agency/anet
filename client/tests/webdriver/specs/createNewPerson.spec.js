@@ -13,10 +13,17 @@ const VALID_PERSON_ADVISOR = {
 
 describe("Create new Person form page", () => {
   describe("When creating a Principle user", () => {
-    it("Should not save a principle without gender being filled in", () => {
+    beforeEach("On the create person page...", () => {
       CreatePerson.openAsSuperUser()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
+    })
+
+    afterEach("On the create person page...", () => {
+      CreatePerson.logout()
+    })
+
+    it("Should not save a principle without gender being filled in", () => {
       CreatePerson.lastName.waitForDisplayed()
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.gender.click()
@@ -40,9 +47,6 @@ describe("Create new Person form page", () => {
       expect(alertMessage).to.equal("Person saved")
     })
     it("Should save a principle without first name", () => {
-      CreatePerson.openAsSuperUser()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
       CreatePerson.lastName.waitForDisplayed()
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.rank.selectByAttribute(
@@ -59,9 +63,6 @@ describe("Create new Person form page", () => {
       expect(alertMessage).to.equal("Person saved")
     })
     it("Should not save a principle without a valid email address", () => {
-      CreatePerson.openAsSuperUser()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
       CreatePerson.lastName.waitForDisplayed()
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.rank.selectByAttribute(
@@ -106,6 +107,7 @@ describe("Create new Person form page", () => {
       expect(warningMessage.getText()).to.equal(
         "Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator."
       )
+      // Don't logout, next test continues…
     })
     it("Should not save if endOfTourDate is not filled in", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
@@ -144,6 +146,7 @@ describe("Create new Person form page", () => {
       expect(errorMessage.getText()).to.equal(
         "You must provide the End of tour"
       )
+      // Don't logout, next test continues…
     })
 
     it("Should save with a valid email address in uppercase", () => {
@@ -181,6 +184,7 @@ describe("Create new Person form page", () => {
       CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = CreatePerson.alertSuccess.getText()
       expect(alertMessage).to.equal("Person saved")
+      CreatePerson.logout()
     })
   })
 })

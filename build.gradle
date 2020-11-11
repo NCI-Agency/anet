@@ -50,6 +50,8 @@ run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?:
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
+String keycloakContainerName = "keycloak-server"
+String keycloakVersion = "11.0.3"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -87,11 +89,14 @@ dependencies {
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
-	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.1'
+	// Authentication
+	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.1.3'
+	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
+	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
@@ -102,7 +107,7 @@ dependencies {
 	implementation 'org.apache.poi:poi:4.1.2'
 	implementation 'org.apache.poi:poi-ooxml:4.1.2'
 
-	// For Java 11
+	// For Java 9+
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
 	// For parsing HTML to check for 'empty' input
@@ -364,6 +369,8 @@ task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImag
 	images = ["ncia/anet-app-server:${project.version}"]
 }
 
+// Database containers (Microsoft SQL Server and PostgreSQL)
+
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "database container"
 	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgres:latest"
@@ -410,7 +417,53 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	targetContainerId { dbContainerName }
 }
 
-// fake-smtp-server tasks
+// Keycloak container
+
+task dockerPullKeycloak(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "keycloak container"
+	image = "jboss/keycloak:${keycloakVersion}"
+	description = "Pulls a docker image for keycloak from ${image}."
+}
+
+task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "keycloak container"
+	imageId = dockerPullKeycloak.getImage()
+	containerName = keycloakContainerName
+	description = "Creates a keycloak container named " + keycloakContainerName + "."
+	hostConfig.portBindings = ["9080:8080", "9443:8443"]
+	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+        withEnvVar("KEYCLOAK_USER", "admin")
+        withEnvVar("KEYCLOAK_PASSWORD", "admin")
+        withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
+}
+
+task dockerStartKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	group = "keycloak container"
+	description = "Starts " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+}
+
+task dockerExportKeycloakRealm(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "keycloak container"
+	description = "Epxorts ANET-Realm from " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+	commands = [ ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.socket.binding.port-offset=100", "-Dkeycloak.migration.action=export", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.realmName=ANET-Realm", "-Dkeycloak.migration.file=/hostdata/ANET-Realm-export.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"] as String[] ]
+}
+
+task dockerStopKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	group = "keycloak container"
+	description = "Stops " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+}
+
+task dockerRemoveKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	group = "keycloak container"
+	description = "Removes " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+}
+
+// Fake SMTP server container
+
 task dockerPullFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "fake-smtp-server container"
 	image = "devoto13/fake-smtp-server:0.1.0" // No 'latest' available yet
@@ -491,6 +544,7 @@ distributions {
 				from('docs/INSTALL.md')
 				from('docs/TROUBLESHOOT.md')
 				from('prepare-psql.sql')
+				from('prepare-mssql.sql')
 			}
 		}
 	}
@@ -514,7 +568,7 @@ ospackage {
         release = '2'
         os = LINUX
 
-		into '/opt'
+        into '/opt'
 		from(jpackageImage.outputs.files)
 		from('anet.yml') {
 			rename('anet.yml', 'anet.yml.template')
@@ -530,10 +584,13 @@ ospackage {
 		from('prepare-psql.sql') {
 			into 'anet/docs'
 		}
+		from('prepare-mssql.sql') {
+			into 'anet/docs'
+        }
     }
 
 task distDeb(dependsOn: "jpackageImage",type: Deb) {
-		arch = 'amd64'
+        arch = 'amd64'
 }
 
 task distRpm(dependsOn: "jpackageImage",type: Rpm) {

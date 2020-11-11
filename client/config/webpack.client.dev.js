@@ -4,9 +4,9 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const common = require("./webpack.common.js")
 const paths = require("./paths")
 
-module.exports = merge.merge(common.clientConfig, {
+const clientConfig = merge.merge(common.clientConfig, {
   resolve: {
-    modules: [paths.appSrc, "node_modules", "platform/web-dev"]
+    modules: ["platform/web-dev", paths.appSrc, "node_modules"]
   },
   // not using source maps due to https://github.com/facebook/create-react-app/issues/343#issuecomment-237241875
   // switched from 'eval' to 'cheap-module-source-map' to address https://github.com/facebook/create-react-app/issues/920
@@ -43,3 +43,5 @@ module.exports = merge.merge(common.clientConfig, {
     new webpack.HotModuleReplacementPlugin()
   ]
 })
+
+module.exports = clientConfig

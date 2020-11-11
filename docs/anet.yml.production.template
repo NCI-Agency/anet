@@ -30,27 +30,25 @@ emailFromAddr: "Anet-Mail <anet-mail@m068.nato.int>"
 # Should not include an ending slash! 
 serverUrl: "http://anet.m068.nato.int"
 
-# Whether to time Waffle requests
-timeWaffleRequests: false
-
-# Configuration for Waffle. This is the system that ANET uses to perform windows authentication
-# See https://github.com/Waffle/waffle
-waffleConfig:
-  principalFormat: fqn
-  roleFormat: both
-  allowGuestLogin: false
-  impersonate: false
-  securityFilterProviders: "waffle.servlet.spi.BasicSecurityFilterProvider waffle.servlet.spi.NegotiateSecurityFilterProvider"
-  "waffle.servlet.spi.NegotiateSecurityFilterProvider/protocols": Negotiate NTLM
-  "waffle.servlet.spi.BasicSecurityFilterProvider/realm": ANET
+keycloakConfiguration:
+  realm: ANET-Realm
+  auth-server-url: /auth
+  ssl-required: none
+  register-node-at-startup: true
+  register-node-period: 600
+  resource: ANET-Client
+  show-logout-link: false
+  enable-basic-auth: false
+  credentials:
+    secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9
 
 ########################################################
 ### The below is the default Dropwizard Configuration
-### See http://www.dropwizard.io/1.0.6/docs/manual/configuration.html#man-configuration
+### See https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration
 ### For all of the possible configuration options. 
 #########################################################
 # Configuration for the database Server
-# See http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html#configuration
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#database
 
 # configuration with Windows Authentication
 database:
@@ -66,7 +64,7 @@ database:
 
 
 # Configuration for the web servers HTTP connectors. 
-# See http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#connectors
 server:
   applicationConnectors:
     - type: http
@@ -120,8 +118,6 @@ logging:
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     "io.dropwizard.assets.AssetsBundle" : INFO
     "io.dropwizard.assets.*" : INFO
-    "waffle.servlet.NegotiateSecurityFilter" : INFO
-    "mil.dds.anet.auth.AnetAuthenticationFilter" : INFO
     "mil.dds.anet.AnetEmailWorker" : INFO
     "mil.dds.anet.resources.TestingResource" :
       level: INFO

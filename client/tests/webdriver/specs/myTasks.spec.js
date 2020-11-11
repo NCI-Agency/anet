@@ -7,12 +7,18 @@ describe("Home page", () => {
     it("Should see a link to my tasks page when the user is an advisor", () => {
       Home.open()
       Home.myTasksLink.waitForDisplayed()
+      // eslint-disable-next-line no-unused-expressions
+      expect(Home.myTasksLink.isExisting()).to.be.true
+      Home.logout()
     })
   })
   describe("When checking the navigation items", () => {
     it("Should NOT see a link to my tasks page when the user does not have a position", () => {
       Home.openAsPositionlessUser()
-      expect(Home.myTasksLink.isExisting()).to.equal(false)
+      // eslint-disable-next-line no-unused-expressions
+      expect(Home.myTasksLink.isExisting()).to.be.false
+      // No Logout link, so just call logout directly
+      browser.url("/api/logout")
     })
   })
 })
@@ -20,6 +26,10 @@ describe("Home page", () => {
 describe("My tasks page", () => {
   beforeEach("Open the my tasks page", () => {
     MyTasks.open()
+  })
+
+  afterEach("On the my tasks page...", () => {
+    MyTasks.logout()
   })
 
   describe("When checking the content of the page", () => {

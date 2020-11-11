@@ -56,15 +56,13 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   private String version;
 
-  private boolean timeWaffleRequests;
-
   @Valid
   @NotNull
   @JsonProperty
   private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
   @NotNull
-  private Map<String, String> waffleConfig = new HashMap<>();
+  private AnetKeycloakConfiguration keycloakConfiguration = new AnetKeycloakConfiguration();
 
   @Valid
   @NotNull
@@ -126,20 +124,12 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     this.views = builder.build();
   }
 
-  public boolean isTimeWaffleRequests() {
-    return timeWaffleRequests;
+  public AnetKeycloakConfiguration getKeycloakConfiguration() {
+    return keycloakConfiguration;
   }
 
-  public void setTimeWaffleRequests(boolean timeWaffleRequests) {
-    this.timeWaffleRequests = timeWaffleRequests;
-  }
-
-  public Map<String, String> getWaffleConfig() {
-    return waffleConfig;
-  }
-
-  public void setWaffleConfig(Map<String, String> config) {
-    this.waffleConfig = config;
+  public void setKeycloakConfiguration(AnetKeycloakConfiguration keycloakConfiguration) {
+    this.keycloakConfiguration = keycloakConfiguration;
   }
 
   public SmtpConfiguration getSmtp() {
@@ -204,7 +194,8 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       @SuppressWarnings("unchecked")
       final Map<String, Object> objectMap = yamlMapper.readValue(inputStream, Map.class);
       @SuppressWarnings("unchecked")
-      final Map<String, Object> dictionaryMap = (Map<String, Object>) objectMap.get("dictionary");
+      final Map<String, Object> dictionaryMap =
+          addKeycloakConfiguration((Map<String, Object>) objectMap.get("dictionary"));
       // Check and then set dictionary if it is valid
       if (isValid(dictionaryMap)) {
         this.setDictionary(dictionaryMap);
@@ -351,6 +342,19 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       }
       return version;
     }
+  }
+
+  private Map<String, Object> addKeycloakConfiguration(Map<String, Object> dictionaryMap) {
+    // Add client-side Keycloak configuration to the dictionary
+    final Map<String, Object> clientConfig = new HashMap<>();
+    final AnetKeycloakConfiguration keycloakConfiguration = getKeycloakConfiguration();
+    clientConfig.put("realm", keycloakConfiguration.getRealm());
+    clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
+    clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
+    clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
+    final Map<String, Object> updatedDictionaryMap = new HashMap<>(dictionaryMap);
+    updatedDictionaryMap.put("keycloakConfiguration", clientConfig);
+    return updatedDictionaryMap;
   }
 
 }

@@ -268,6 +268,12 @@ const Nav = ({
           ))}
         </NavDropdown>
       )}
+
+      {Settings.keycloakConfiguration.showLogoutLink && (
+        <NavItem href="/api/logout" onClick={resetPages}>
+          Logout
+        </NavItem>
+      )}
     </BSNav>
   )
 }

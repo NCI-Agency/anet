@@ -12,6 +12,7 @@ describe("In my counterparts page", () => {
         "tr"
       )
       expect(myPendingCounterpartsItems).to.have.length(1)
+      MyCounterparts.logout()
     })
   })
 })
@@ -23,6 +24,7 @@ describe("In my tasks page", () => {
       MyTasks.myPendingTasks.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(MyTasks.myPendingTasksContent.isExisting()).to.be.false
+      MyTasks.logout()
     })
   })
 })

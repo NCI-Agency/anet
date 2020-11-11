@@ -3,6 +3,21 @@ import PropTypes from "prop-types"
 import React from "react"
 import { momentObj } from "react-moment-proptypes"
 
+const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
+
+export function formatPeriodBoundary(periodBoundary) {
+  return periodBoundary.format(ASSESSMENT_PERIOD_DATE_FORMAT)
+}
+
+export function dateBelongsToPeriod(date, period) {
+  const momentDate = moment(date)
+  // true when date is same as period start date or inside the period
+  return (
+    formatPeriodBoundary(momentDate) === formatPeriodBoundary(period.start) ||
+    (momentDate.isAfter(period.start) && momentDate.isBefore(period.end))
+  )
+}
+
 export const RECURRENCE_TYPE = {
   ONCE: "once",
   DAILY: "daily",

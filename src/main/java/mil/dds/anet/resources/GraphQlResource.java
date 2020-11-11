@@ -182,6 +182,12 @@ public class GraphQlResource {
   @Timed
   @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MEDIATYPE_XLSX})
   public Response graphqlPost(@Auth Person user, Map<String, Object> body) {
+    if (body == null) {
+      // Empty body, possibly after re-authentication; user will have to try again
+      return Response.status(Status.BAD_REQUEST.getStatusCode(),
+          "Request failed, please try again or refresh your browser window").build();
+    }
+
     final String operationName = (String) body.get("operationName");
     final String query = (String) body.get("query");
 

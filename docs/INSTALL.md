@@ -16,13 +16,13 @@ This document covers the steps required to deploy ANET to a server environment.
 		- fulltext module should be installed. This can be done by:
 			1. Open the Programs and Features control panel.
 			2. Select `Microsoft SQL Server 2016` and click `Change`.
-			3. When prompted to `Add/Repair/Remove`, select `Add` and provide intallation media.
+			3. When prompted to `Add/Repair/Remove`, select `Add` and provide installation media.
 			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
 and Semantic Extractions for Search`.
 	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported although performance may degrade and support will be discontinued beyond Q3 2019
 	- A service manager, such as [NSSM](https://nssm.cc/) , can be used to install ANET as a service on Windows
 - **Network Accessibility**
-	- Users will access the Application Server over HTTP/HTTPS (`443`)
+	- Users will access the Application Server over HTTPS (`443`)
 	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
 	- The Application Server will need to access an Active Directory server for authentication
 	- The Application Server will need to access an SMTP server for email sending. 
@@ -66,7 +66,7 @@ You should have the following information on hand for the installation:
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
 	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
 	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
-	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
+	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumably are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
@@ -88,13 +88,10 @@ On the ANET server:
 Alternatively, an experimental service update script is available in the `doc` folder. 
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/1.3.5/docs/manual/core.html#configuration). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
-	- Authentication: When development mode is `true`, ANET will use basic Authentication checking only that the username provided is equal to the `domainUsername` column of a valid user in the database. In the event that there is not a matching user, but the provided password is equal to the username, ANET will simulate the first-time log in of a new user (ie a user who passes windows authentication but has never logged into ANET before).
-		- ex: To Log in as `Jack Jackson` from the development data set, just type in a username of `jack` when prompted.
-		- ex: To simulate a new user type in the same name for both the username and password when prompted (ie un: `hunter`, pw: `hunter` will create a new user with Domain Username of `hunter`).
-	- GraphQL: When development mode is `true`, ANET will re-compute the GraphQL graph on every API call, this allows you to rapidly develop on changes without restarting the server.
+	- account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
 - **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). 
 - **smtp**: This section controls the configuration for how ANET sends emails.
 	- **hostname**: The Fully Qualified Domain Name of your SMTP Server
@@ -103,10 +100,11 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **password**: Your password to your SMTP server.
 	- **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
 	- **disabled**: Set to true to disable sending email completely; most useful in development context.
-	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
+	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
-- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional Instructions can be found here instructions [here](https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html) for avaiable configuration options for the database connection.
+- **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
+- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
@@ -123,28 +121,30 @@ database:
 #   date_string_format: 
 #   date_class:
 ```
-- **timeWaffleRequests**: set to `true` to report timings of Waffle request methods:
-```yaml
-timeWaffleRequests: false
+
+- **keycloakConfiguration**: ANET uses the open source Keycloak server to perform Authentication ( https://www.keycloak.org/ ). It can be configured to authenticate via Keycloak in the following manner:
+
+```
+keycloakConfiguration:
+  realm: ANET-Realm
+  auth-server-url: http://localhost:9080/auth  # for development; should point to the real Keycloak URL in production (can be relative if ANET and Keycloak and running on the same server, e.g. just /auth )
+  ssl-required: none  # for development; should be all in production
+  confidential-port: 443
+  disable-trust-manager: false  # set to true if e.g. you're using self-signed certificates (which you obviously shouldn't do in production)
+  register-node-at-startup: true
+  register-node-period: 600
+  resource: ANET-Client
+  show-logout-link: true  # for development; should be false in production when using SSO
+  enable-basic-auth: true  # for development; should be false in production
+  credentials:
+    secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9
 ```
 
-- **waffleConfig**: ANET uses the open source [WAFFLE framework](https://github.com/Waffle/waffle) to perform Windows Authentication. It can be configured to authenticate via AD in the following manner:
-```yaml
-waffleConfig:
-  principalFormat: fqn
-  roleFormat: both
-  allowGuestLogin: false
-  impersonate: false
-  securityFilterProviders: "waffle.servlet.spi.BasicSecurityFilterProvider waffle.servlet.spi.NegotiateSecurityFilterProvider"
-  "waffle.servlet.spi.NegotiateSecurityFilterProvider/protocols": NTLM
-  "waffle.servlet.spi.BasicSecurityFilterProvider/realm": ANET
-```
+ANET needs *two* clients under the Keycloak realm with the name given under the **realm** property, a *confidential* one with the name given under the **resource** property (and you should copy the **secret** from the *Credentials* tab under the client in the Keycloak realm) and a *public* one with the `-public` added at the end of the name (so for the `ANET-Client` given in the example above, it would be `ANET-Client-public`). See [Keycloak authentication server](keycloak.md) for some guidance.
 
-If needed, see [WAFFLE documentation: _Servlet Single-SignOn Security Filter_](https://github.com/Waffle/waffle/blob/master/Docs/ServletSingleSignOnSecurityFilter.md) on the available configuration options.
+- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls the protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
 
-- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls ths protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.  
-
-- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` paramters to the location that you want the logs to appear.  
+- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` parameters to the location that you want the logs to appear.
 
 Finally, you can define a deployment-specific dictionary inside the `anet.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
@@ -415,9 +415,9 @@ dictionary:
 As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
 # How to enable SSL
-Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/1.3.5/docs/manual/core.html#ssl
+Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/en/latest/manual/configuration.html#https
 
-SSL support is built into Dropwizard. You will need to provide your own java keystore, which is outside the scope of this document (keytool is the command you need, and Jetty’s documentation can get you started). There is a test keystore you can use in the Dropwizard example project.
+SSL support is built into Dropwizard. You will need to provide your own Java keystore, which is outside the scope of this document (keytool is the command you need, and Jetty’s documentation can get you started). There is a test keystore you can use in the Dropwizard example project.
 
 ```
 server:

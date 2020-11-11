@@ -1,8 +1,8 @@
-import querystring from "querystring"
 import { useQuery } from "@apollo/react-hooks"
 import ApolloClient from "apollo-boost"
 import { InMemoryCache } from "apollo-cache-inmemory"
 import _isEmpty from "lodash/isEmpty"
+import { keycloak } from "keycloak"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"
@@ -110,32 +110,9 @@ const API = {
     return results
   },
 
-  _getAuthParams: function() {
-    const { user, pass } = querystring.parse(window.location.search.slice(1))
-    if (user && pass) {
-      window.ANET_DATA.creds = {
-        user,
-        pass
-      }
-    }
-    return window.ANET_DATA.creds
-  },
-
-  addAuthParams: function(url) {
-    const creds = API._getAuthParams()
-    if (creds) {
-      url += "?" + querystring.stringify(creds)
-    }
-    return url
-  },
-
   _getAuthHeader: function() {
-    const creds = API._getAuthParams()
-    if (creds) {
-      return [
-        "Authorization",
-        "Basic " + Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
-      ]
+    if (keycloak.token) {
+      return ["Authorization", `Bearer ${keycloak.token}`]
     }
     return null
   },
