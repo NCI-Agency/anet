@@ -492,9 +492,6 @@ distributions {
 				from('docs/TROUBLESHOOT.md')
 				from('prepare-psql.sql')
 			}
-			into('lib/') {
-				from('lib/sqljdbc_auth.dll')
-			}
 		}
 	}
 }
@@ -523,7 +520,7 @@ ospackage {
 			rename('anet.yml', 'anet.yml.template')
 			into 'anet/docs'
 		}
-		from('scripts/anet.service') { into 'anet/docs' }
+		from('scripts/anet.service') { into '/etc/systemd/system' }
 		from('docs/INSTALL.md') { into 'anet/docs' }
 		from('docs/TROUBLESHOOT.md') { into 'anet/docs' }
 		from('anet-dictionary.yml') {

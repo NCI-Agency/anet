@@ -6,11 +6,10 @@ This document covers the steps required to deploy ANET to a server environment.
 ## Environment
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
-	- 1x Windows Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
-	- 1x Microsoft SQL Server (2016 or greater) Database Server. 
+	- 1x RHEL (7.6 or newer) Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
+	- 1x Microsoft SQL Server (2016 or greater) or Postgres (9.5 or greater, preferably 12 or greater) Database Server. 
 - **Software**: Software requirements: 
-	- Java JRE 1.8 installed on the Application Server
-	- Administration Privileges to run processes on restricted ports (80/443)
+	- Administration Privileges
 	- Optional: A valid SSL certificate for the domain name of the application server.
 	- Microsoft SQL Server 2016 or greater. The MS SQL database should be configured to:
 		- allow connections on a static TCP/IP port `1433`
@@ -23,7 +22,7 @@ and Semantic Extractions for Search`.
 	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported although performance may degrade and support will be discontinued beyond Q3 2019
 	- A service manager, such as [NSSM](https://nssm.cc/) , can be used to install ANET as a service on Windows
 - **Network Accessibility**
-	- Users will access the Application Server over HTTP/HTTPS (`80`/`443`)
+	- Users will access the Application Server over HTTP/HTTPS (`443`)
 	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
 	- The Application Server will need to access an Active Directory server for authentication
 	- The Application Server will need to access an SMTP server for email sending. 
@@ -38,11 +37,13 @@ There is no software to install on client computers, only a modern web browser (
 
 You should have the following information on hand for the installation:
 
-- **A Build of ANET**. This comes in the form of a `.zip` file. See BUILD.md for details on how to create this file. 
+- **A Build of ANET**. This comes in the form of a `anet-<version>.rpm` file. See BUILD.md for details on how to create this file.
 - **Microsoft SQL Server**: Your Database Administrator should be able to provide you with these settings. Just ask for an empty database. If you have access to your SQL Server directly, the command to create an empty database is `CREATE DATABASE database_name_here`. Alternatively, a database can be created using the SQL Management tool. 300Mb can be used as an initial database and logs size
 	- hostname
 	- username / password
 	- database name
+- **Postgres**:
+  - if you have just created a fresh postgres database, apply the content of `/opt/anet/doc/prepare-psql.sql`
 - **SMTP Server**
 	- hostname
 	- username / password (if necessary)
@@ -51,17 +52,15 @@ You should have the following information on hand for the installation:
 - **Information about who will Administer** your ANET instance. 
 
 ## Server Installation Procedures
-Create a folder for the application, for example: `c:\anet`. In that location: 
-
-1. Unzip anet.zip. You'll find three folders directly under the application folder:
+1. run `sudo yum localinstall anet-<version>.rpm`. This will create the following structure in `/opt/anet`:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
 	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
-2. Add an anet.yml file with appropriate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
+2. Add an anet.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
-4. Verify that your configuration file is valid with ```bin\anet.bat check anet.yml```
-5. Install Database Schema: Run ```bin\anet.bat db migrate anet.yml```
-6. Seed the Database: Run ```bin\anet.bat init anet.yml```. This will ask you the following questions:
+4. Verify that your configuration file is valid with ```bin/anet check anet.yml```
+5. Install Database Schema: Run ```bin/anet db migrate anet.yml```
+6. Seed the Database: Run ```bin/anet init anet.yml```. This will ask you the following questions:
 	* _Classification String_: This is the message that will appear in the top security banner on the screen. For demo instances you should use `FOR DEMO USE ONLY`.
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
@@ -69,37 +68,21 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
 	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
-8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
+8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
-10. You can either add a start-up task for ANET, or skip to step 11, if you wish to install it as a service:
-	* Open Task Scheduler
-	* Create task
-	* Name it "ANET"
-	* Under Security Options, select the service account
-	* Under Security Options, check "run when user is logged on or not"
-	* Add a new trigger: "at startup"
-	* Add a new "Start a Program" Action:
-		* Start a program/script: `c:\anet\bin\anet.bat`
-		* Add arguments: `server anet.yml`
-		* Start in: `c:\anet`
 11. If you have opted to install ANET as a service:
-	* Install `nssm` or other service manager
-	* Create a serive named `anet`, with:
-    *  `c:\anet` as start-up directory 
-    *  `c:\anet\bin\anet.bat` as application path
-    *  and `server anet.yml` as arguments
-    *  add the sql service as a dependency
+	* `sudo systemctl enable anet`
+	* anet can be now started/stopped with `sudo systemctl start anet` and `sudo systemctl stop anet`
 
 # ANET Upgrade Documentation
 On the ANET server: 
-- Stop the `"bin/anet" server anet.yml` process. This is typically done by killing the java process from the task manager, or if a service is installed by running `net stop anet`
+- Stop the anet with `sudo systemctl stop anet`. 
 - Take a complete backup of your SQL Database
-- Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
-- Unzip the provided ANET distribution zip. Copy the `bin`, `lib` and `doc` from the distribution into the anet application folder, typically `c:\anet`
+- install the new rpm with `sudo yum localinstall anet-<version>.rpm`
 - Make any required changes or upgrades to your `anet.yml` file
-- Run `bin/anet.bat check anet.yml` to verify that `anet.yml` is in the correct format
-- Run `bin/anet.bat db migrate anet.yml` to migrate your database
-- Start the server, if it has been installed as a service, run `net stop anet`
+- Run `bin/anet check anet.yml` to verify that `anet.yml` is in the correct format
+- Run `bin/anet db migrate anet.yml` to migrate your database
+- Start the server, if it has been installed as a service, run `sudo systemctl start anet`
 - Run through verification testing to ensure there are no issues
 
 Alternatively, an experimental service update script is available in the `doc` folder. 
@@ -454,11 +437,11 @@ Administrator should request certificates.
 ## Self signed certificates
 If needed, self-signed certificates can be created and used as follows:
 
-1. Open a command line in `c:\anet`
-2. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048`
-3. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -export -alias anetkey -file anetkey.crt -keystore keystore.jks`
-4. cd to the directory with cacerts, usually `c:\Program Files\Java\jre1.8.0_121\lib\security`
-5. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -import -trustcacerts -alias selfsigned -file c:\anet\anetkey.crt -keystore cacerts`
+1. Open a command line in `/opt/anet`
+2. run `/opt/anet/lib/runtime/bin/keytool -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048`
+3. run `/opt/anet/lib/runtime/bin/keytool -export -alias anetkey -file anetkey.crt -keystore keystore.jks`
+4. cd to the directory with cacerts, usually `/opt/anet`
+5. run `/opt/anet/lib/runtime/bin/keytool -import -trustcacerts -alias selfsigned -file /opt/anet/anetkey.crt -keystore cacerts`
 6. update `anet.yml` with keyStore and trustStore information
  
 
