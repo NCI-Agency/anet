@@ -195,7 +195,7 @@ const _createPosition = async function(user) {
     {
       role: getPersonRole(organization.type)
     },
-    "uuid",
+    "uuid domainUsername",
     randomObject =>
       randomObject?.uuid === user.uuid ||
       randomObject?.domainUsername === specialUser.name

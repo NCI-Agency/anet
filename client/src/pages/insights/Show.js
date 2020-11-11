@@ -100,6 +100,10 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     height: "100%",
     overflow: "auto"
   }
+  const fieldsetStyle = {
+    height: "100%",
+    overflow: "auto"
+  }
   const mosaicLayoutStyle = {
     display: "flex",
     flex: "1 1 auto",
@@ -164,7 +168,11 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   return (
     <div style={flexStyle}>
       {hasSearchCriteria ? (
-        <Fieldset id={insight} title={insightConfig.title} style={flexStyle}>
+        <Fieldset
+          id={insight}
+          title={insightConfig.title}
+          style={fieldsetStyle}
+        >
           <InsightComponent
             pageDispatchers={pageDispatchers}
             style={mosaicLayoutStyle}
