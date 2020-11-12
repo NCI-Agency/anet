@@ -2,7 +2,7 @@ import React from "react"
 import { Label, OverlayTrigger, Tooltip } from "react-bootstrap"
 
 const Tag = ({ tag }) => {
-  var tagDisplay
+  let tagDisplay
   tagDisplay = (
     <Label bsStyle="info" className="reportTag">
       {tag.name}

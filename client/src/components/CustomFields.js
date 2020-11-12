@@ -152,7 +152,8 @@ const ReadonlyDateField = fieldProps => {
           withTime
             ? Settings.dateFormats.forms.displayShort.withTime
             : Settings.dateFormats.forms.displayShort.date
-        )}
+        )
+      }
     />
   )
 }
@@ -435,7 +436,8 @@ const AnetObjectField = ({
             setFieldValue(name, {
               type: entityType,
               uuid: value.uuid
-            })}
+            })
+          }
         />
       }
       {...otherFieldProps}

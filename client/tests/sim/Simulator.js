@@ -96,7 +96,7 @@ async function runBuildup(scenario) {
       const grow = () => 100 // Probability = 100 (always execute)
 
       await sleep(buildup.preDelay)
-      for (var i = 0; i < buildup.number; i++) {
+      for (let i = 0; i < buildup.number; i++) {
         try {
           await buildup.runnable(user, grow, buildup.arguments)
         } catch (e) {
@@ -174,7 +174,7 @@ async function runStories(scenario, cycle, runningTime) {
         if (t > run.nextExecuteTime) {
           const delay = run.ppf(Math.random())
           const user = await userType.userFunction()
-          var jsonResult
+          let jsonResult
 
           // set next execution time
           run.nextExecuteTime = t + delay

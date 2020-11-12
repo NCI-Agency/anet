@@ -416,7 +416,6 @@ export default class Report extends Model {
       const actions = Object.assign([], this.workflow)
       const lastApprovalStep = actions.pop()
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
-    } else {
     }
   }
 

@@ -389,7 +389,8 @@ const OrganizationalChart = ({
       height={height}
       exportTitle={`${data.shortName} organization chart`}
       zoomFn={increment =>
-        setPersonnelDepth(Math.max(0, personnelDepth + increment))}
+        setPersonnelDepth(Math.max(0, personnelDepth + increment))
+      }
     >
       <g ref={canvasRef}>
         <g ref={linkRef} style={{ fill: "none", stroke: "#555" }} />

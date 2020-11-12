@@ -420,7 +420,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         value="toggle-filter"
                         className="btn btn-sm"
                         onClick={() =>
-                          setFilterPendingApproval(!filterPendingApproval)}
+                          setFilterPendingApproval(!filterPendingApproval)
+                        }
                       >
                         {filterPendingApproval
                           ? "Show all reports"
@@ -429,7 +430,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
                       <Checkbox
                         checked={includeChildrenOrgs}
                         onChange={() =>
-                          setIncludeChildrenOrgs(!includeChildrenOrgs)}
+                          setIncludeChildrenOrgs(!includeChildrenOrgs)
+                        }
                       >
                         include reports from sub-orgs
                       </Checkbox>

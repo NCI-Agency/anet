@@ -6,9 +6,9 @@ export const deserializeQueryParams = (
   callbackFunction
 ) => {
   // From query params to search filters
-  var text = queryParams.text || ""
-  var usedFilters = []
-  var promises = []
+  const text = queryParams.text || ""
+  const usedFilters = []
+  const promises = []
   if (objType) {
     const EXTRA_FILTERS = searchFilters.extraFilters()
     const extraFilterDefs = EXTRA_FILTERS[objType] || []

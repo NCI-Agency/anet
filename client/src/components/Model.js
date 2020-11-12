@@ -3,7 +3,11 @@ import { gql } from "apollo-boost"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
-import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"
+import {
+  dateBelongsToPeriod,
+  PERIOD_FACTORIES,
+  RECURRENCE_TYPE
+} from "periodUtils"
 import PropTypes from "prop-types"
 import encodeQuery from "querystring/encode"
 import utils from "utils"
@@ -513,7 +517,7 @@ export default class Model {
       .filter(
         obj =>
           obj.assessment.__recurrence === recurrence &&
-          moment(obj.assessment.__periodStart).isSame(period.start)
+          dateBelongsToPeriod(obj.assessment.__periodStart, period)
       )
   }
 

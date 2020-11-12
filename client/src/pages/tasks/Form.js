@@ -316,7 +316,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                     name="plannedCompletion"
                     component={FieldHelper.SpecialField}
                     onChange={value =>
-                      setFieldValue("plannedCompletion", value)}
+                      setFieldValue("plannedCompletion", value)
+                    }
                     onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
                     disabled={disabled}
@@ -329,7 +330,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                     name="projectedCompletion"
                     component={FieldHelper.SpecialField}
                     onChange={value =>
-                      setFieldValue("projectedCompletion", value)}
+                      setFieldValue("projectedCompletion", value)
+                    }
                     onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                     disabled={disabled}
@@ -353,7 +355,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
-                        setFieldValue("customFieldEnum1", value)}
+                        setFieldValue("customFieldEnum1", value)
+                      }
                     />
                     {edit && !disabled && (
                       <FastField
@@ -361,7 +364,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.SpecialField}
                         onChange={value =>
-                          setFieldValue("assessment_customFieldEnum1", value)}
+                          setFieldValue("assessment_customFieldEnum1", value)
+                        }
                         widget={
                           <RichTextEditor
                             className="textField"
