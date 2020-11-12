@@ -180,14 +180,11 @@
   "resolutions": {
     "leaflet": "1.6.0"
   },
-  "config": {
-    "lintFiles": "*.js config/**/*.js platform/**/*.js scripts/**/*.js src/**/*.js stories/**/*.js tests/**/*.js"
-  },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.client.prod.js",
     "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack serve --mode development --config config/webpack.client.dev.js",
-    "lint": "NODE_ENV=development eslint $npm_package_config_lintFiles",
-    "lint-fix": "prettier --write $npm_package_config_lintFiles && NODE_ENV=development eslint --fix $npm_package_config_lintFiles",
+    "lint": "NODE_ENV=development eslint '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
+    "lint-fix": "prettier --write '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js' && NODE_ENV=development eslint --fix '*.js' 'config/**/*.js' 'platform/**/*.js' 'scripts/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava --config ava.config.js",
