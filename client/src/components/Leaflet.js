@@ -1,4 +1,4 @@
-import { Control, CRS, DomUtil, Icon, Map, Marker, TileLayer } from "leaflet"
+import { Control, CRS, Icon, Map, Marker, TileLayer } from "leaflet"
 import "leaflet-defaulticon-compatibility"
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"
 import {
@@ -150,18 +150,6 @@ const Leaflet = ({
         crs: CRS[Settings.imagery.mapOptions.crs]
       }
     )
-    const container = DomUtil.get(mapId)
-    /*
-     * Prevent error "map container is already initialized" when mapId changed
-     * for the current map (which was already initialized).
-     * Note: this happens when the id of a map is not always the same but changes
-     * because of the use of _uniqueId (which we use for map aggregation widgets
-     * to make sure we don't have more maps with the same id on a page - like
-     * on the person show page for statistics of reports authored and attended)
-     */
-    if (container !== null) {
-      container._leaflet_id = null
-    }
     const newMap = new Map(mapId, mapOptions).setView(
       Settings.imagery.mapOptions.homeView.location,
       Settings.imagery.mapOptions.homeView.zoomLevel
