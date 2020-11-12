@@ -194,7 +194,8 @@ const Routing = () => {
           ) : (
             // Redirect to home if user account exists already. Some users bookmark the onboarding - the very first page they hit
             <Redirect to="/" />
-          )}
+          )
+        }
       />
       <Route path={PAGE_URLS.MISSING} component={PageMissing} />
     </Switch>

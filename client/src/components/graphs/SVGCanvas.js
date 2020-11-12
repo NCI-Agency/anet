@@ -6,14 +6,14 @@ import DOWNLOAD_ICON from "resources/download.png"
 const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
   const svgRef = useRef(null)
   const exportSvg = () => {
-    var svgBlob = new Blob(
+    const svgBlob = new Blob(
       ['<?xml version="1.0" standalone="no"?>', svgRef.current.outerHTML],
       {
         type: "image/svg+xml;charset=utf-8"
       }
     )
-    var svgUrl = URL.createObjectURL(svgBlob)
-    var downloadLink = document.createElement("a")
+    const svgUrl = URL.createObjectURL(svgBlob)
+    const downloadLink = document.createElement("a")
     downloadLink.href = svgUrl
     downloadLink.download = exportTitle
     document.body.appendChild(downloadLink)

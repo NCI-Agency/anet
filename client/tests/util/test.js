@@ -245,8 +245,9 @@ test.beforeEach(t => {
     timeoutMs
   ) => {
     const waitTimeoutMs = timeoutMs || longWaitMs
+    let elem
     try {
-      var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      elem = await t.context.$(cssSelector, waitTimeoutMs)
     } catch (e) {
       // If we got a TimeoutError because the element did not load, just swallow it here
       // and let the assertion on blow up instead. That will produce a clearer error message.
@@ -265,8 +266,9 @@ test.beforeEach(t => {
     timeoutMs
   ) => {
     const waitTimeoutMs = timeoutMs || longWaitMs
+    let elem
     try {
-      var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      elem = await t.context.$(cssSelector, waitTimeoutMs)
     } catch (e) {
       // If we got a TimeoutError because the element did not load, just swallow it here
       // and let the assertion on blow up instead. That will produce a clearer error message.

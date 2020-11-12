@@ -690,8 +690,8 @@ test.serial(
       "This is a DRAFT report and hasn't been submitted."
     )
 
-    var serverResponse = await httpRequestSmtpServer("GET")
-    var jsonResponse = JSON.parse(serverResponse)
+    const serverResponse = await httpRequestSmtpServer("GET")
+    const jsonResponse = JSON.parse(serverResponse)
     await assert.strictEqual(jsonResponse.length, 0) // No email should be sent
 
     await t.context.logout()
@@ -700,7 +700,7 @@ test.serial(
 
 function httpRequestSmtpServer(requestType) {
   return new Promise((resolve, reject) => {
-    var XMLHttpRequest = require("xhr2")
+    const XMLHttpRequest = require("xhr2")
     const xhttp = new XMLHttpRequest()
     // FIXME: Hard-coded URL
     const url = "http://localhost:1180/api/emails"
