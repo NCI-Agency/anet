@@ -38,6 +38,7 @@ const ReportCollection = ({
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
+  const idSuffix = mapId || paginationKey || "reports"
   return (
     <div className="report-collection">
       <div>
@@ -118,6 +119,7 @@ const ReportCollection = ({
               {statisticsRecurrence.map(recurrence => (
                 <ReportStatistics
                   key={`report-statistics-${recurrence}`}
+                  idSuffix={idSuffix}
                   pageDispatchers={pageDispatchers}
                   queryParams={queryParams}
                   setTotalCount={setTotalCount}

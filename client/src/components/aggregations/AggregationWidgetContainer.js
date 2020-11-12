@@ -160,7 +160,7 @@ const AggregationWidgetContainer = ({
     (aggregationWidget && AGGREGATION_WIDGET_COMPONENTS[aggregationWidget]) ||
     AGGREGATION_WIDGET_COMPONENTS.default
   if (WidgetComponent === ReportsMapWidget) {
-    otherWidgetProps.mapId = `map-${widgetId}`
+    otherWidgetProps.mapId = widgetId
   }
   const widgetElem = (
     <WidgetComponent

@@ -30,6 +30,7 @@ import { Table } from "react-bootstrap"
  */
 
 const EntityAssessmentResults = ({
+  idSuffix,
   entity,
   entityType,
   periodsConfig,
@@ -55,6 +56,7 @@ const EntityAssessmentResults = ({
       {Object.keys(instantAssessmentConfig || {}).map((key, index) => (
         <InstantAssessmentsRow
           key={key}
+          idSuffix={`${key}-${idSuffix}`}
           questionKey={key}
           questionConfig={instantAssessmentConfig[key]}
           periods={periods}
@@ -73,6 +75,7 @@ const EntityAssessmentResults = ({
   )
 }
 EntityAssessmentResults.propTypes = {
+  idSuffix: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
@@ -133,6 +136,7 @@ const AssessmentResultsTable = ({
                   {subEntities?.map(subEntity => (
                     <EntityAssessmentResults
                       key={`subassessment-${subEntity.uuid}`}
+                      idSuffix={`subassessment-${subEntity.uuid}`}
                       entity={subEntity}
                       entityType={entityType}
                       periodsConfig={periodsConfig}
@@ -142,6 +146,7 @@ const AssessmentResultsTable = ({
                   ))}
                 </>
                 <EntityAssessmentResults
+                  idSuffix={`assessment-${entity.uuid}`}
                   entity={entity}
                   entityType={entityType}
                   periodsConfig={periodsConfig}
