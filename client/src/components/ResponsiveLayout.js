@@ -102,7 +102,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
           <Element name="mainViewport" id="main-viewport">
             {children}
           </Element>
-          <Element name="notesView" id="notes-view" />
+          <Element name="notesView" id="notes-view" className="notes-hidden" />
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>
