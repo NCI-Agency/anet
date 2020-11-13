@@ -1170,8 +1170,13 @@ header.searchPagination {
     padding-right: 8px;
   }
 
-  #notes-view {
-    max-width: 10%;
+  #notes-view.notes-hidden {
+    max-width: 13%;
+  }
+
+  /* hide guide tour on small screen as it is broken */
+  .persistent-tour-launcher {
+    display: none;
   }
 
   .scroll-anchor-container .action-small {
