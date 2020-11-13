@@ -1160,6 +1160,12 @@ header.searchPagination {
     max-width: 13%;
   }
 
+  .home-tile-row .row {
+    flex-wrap: wrap;
+  }
+  .home-tile-row .row > * {
+    width: 33%;
+  }
   /* hide guide tour on small screen as it is broken */
   .persistent-tour-launcher {
     display: none;
