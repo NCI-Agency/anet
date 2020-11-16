@@ -2,6 +2,7 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useLayoutEffect } from "react"
 import { momentObj } from "react-moment-proptypes"
+import useDimensions from "react-use-dimensions"
 
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -263,13 +264,19 @@ function getPeriodNumberForScreen(width) {
       return num
     }
   }
+  throw new Error(
+    "Invalid width or screen sizes are not continious. width= ",
+    width
+  )
 }
 
 export const useResponsiveNumberOfPeriods = setNumberOfPeriods => {
+  const [contRef, dimensions] = useDimensions()
   useLayoutEffect(() => {
-    const viewportWidth = window.innerWidth
-    setNumberOfPeriods(getPeriodNumberForScreen(viewportWidth))
-    // by design, this will not run when you resize the window
-    // needs an unmount-mount(refresh the page) or callback change(setNumberOfPeriods) to update
-  }, [setNumberOfPeriods])
+    if (dimensions?.width) {
+      const containerWidth = dimensions.width
+      setNumberOfPeriods(getPeriodNumberForScreen(containerWidth))
+    }
+  }, [setNumberOfPeriods, dimensions])
+  return contRef
 }
