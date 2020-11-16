@@ -36,13 +36,13 @@ const ReportCollection = ({
   marginBottom
 }) => {
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
-  useResponsiveNumberOfPeriods(setNumberOfPeriods)
+  const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
   const idSuffix = mapId || paginationKey || "reports"
   return (
-    <div className="report-collection">
+    <div className="report-collection" ref={contRef}>
       <div>
         {showHeader && (
           <header>

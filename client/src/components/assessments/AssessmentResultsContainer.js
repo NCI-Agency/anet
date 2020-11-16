@@ -12,13 +12,14 @@ const AssessmentResultsContainer = ({
   onUpdateAssessment
 }) => {
   const [numberOfPeriods, setNumberOfPeriods] = useState(3)
-  useResponsiveNumberOfPeriods(setNumberOfPeriods)
+  const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
+
   if (!entity) {
     return null
   }
   const assessmentsTypes = Object.keys(entity.getAssessmentsConfig())
   return (
-    <>
+    <div ref={contRef}>
       {assessmentsTypes.map(
         assessmentsType =>
           PERIOD_FACTORIES[assessmentsType] && (
@@ -37,7 +38,7 @@ const AssessmentResultsContainer = ({
             />
           )
       )}
-    </>
+    </div>
   )
 }
 AssessmentResultsContainer.propTypes = {

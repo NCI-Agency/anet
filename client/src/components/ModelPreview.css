@@ -3,22 +3,37 @@
   outline: 4px solid pink;
 }
 
-/* remove guided tours from previews */
-.model-preview .persistent-tour-launcher {
-  display: none;
-}
-
-/* remove action buttons from previews */
-.model-preview .action-small {
-  display: none;
-}
 /*END general preview style END*/
 
-/* linkTo triggered preview style */
+/*START linkTo triggered preview style START*/
 .linkto-model-preview-portal .model-preview {
   outline: 4px solid green;
 }
 
+/* remove guided tours from previews */
+.linkto-model-preview-portal .model-preview .persistent-tour-launcher {
+  display: none;
+}
 
+/* remove action buttons from previews */
+.linkto-model-preview-portal .model-preview .action-small {
+  display: none;
+}
 
-/* .bp3-transition-container .bp3-popover-content */
+/* make row flex containers column */
+.linkto-model-preview-portal .model-preview .row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.linkto-model-preview-portal .model-preview .row > *{
+  width: 100%;
+}
+
+.linkto-model-preview-portal .model-preview fieldset {
+  padding: 1em;
+}
+/*END linkTo triggered preview style END*/
+
