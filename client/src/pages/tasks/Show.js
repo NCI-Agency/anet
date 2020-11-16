@@ -9,6 +9,7 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
+import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -20,6 +21,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
@@ -28,7 +30,6 @@ import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
@@ -184,6 +185,8 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
+  const isPreview = isPreviewMode(className)
+
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -194,16 +197,18 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
         )
         return (
           <div className={className || null}>
-            <RelatedObjectNotes
-              notes={task.notes}
-              relatedObject={
-                task.uuid && {
-                  relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid,
-                  relatedObject: task
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={task.notes}
+                relatedObject={
+                  task.uuid && {
+                    relatedObjectType: Task.relatedObjectType,
+                    relatedObjectUuid: task.uuid,
+                    relatedObject: task
+                  }
                 }
-              }
-            />
+              />
+            ) : null}
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset

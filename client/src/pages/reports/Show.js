@@ -16,6 +16,7 @@ import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { isPreviewMode } from "components/ModelPreview"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
@@ -381,6 +382,7 @@ const ReportShow = ({
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
   }
 
+  const isPreview = isPreviewMode(className)
   return (
     <Formik
       enableReinitialize
@@ -407,16 +409,18 @@ const ReportShow = ({
           <div className={`report-show ${className || ""}`}>
             {renderEmailModal(values, setFieldValue)}
 
-            <RelatedObjectNotes
-              notes={report.notes}
-              relatedObject={
-                uuid && {
-                  relatedObjectType: Report.relatedObjectType,
-                  relatedObjectUuid: uuid,
-                  relatedObject: report
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={report.notes}
+                relatedObject={
+                  uuid && {
+                    relatedObjectType: Report.relatedObjectType,
+                    relatedObjectUuid: uuid,
+                    relatedObject: report
+                  }
                 }
-              }
-            />
+              />
+            ) : null}
             <Messages success={saveSuccess} error={saveError} />
 
             {report.isPublished() && (

@@ -1,0 +1,24 @@
+/*START general preview style START*/
+.model-preview {
+  outline: 4px solid pink;
+}
+
+/* remove guided tours from previews */
+.model-preview .persistent-tour-launcher {
+  display: none;
+}
+
+/* remove action buttons from previews */
+.model-preview .action-small {
+  display: none;
+}
+/*END general preview style END*/
+
+/* linkTo triggered preview style */
+.linkto-model-preview-portal .model-preview {
+  outline: 4px solid green;
+}
+
+
+
+/* .bp3-transition-container .bp3-popover-content */

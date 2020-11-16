@@ -8,7 +8,7 @@ import ReportShow from "pages/reports/Show"
 import TaskShow from "pages/tasks/Show"
 import PropTypes from "prop-types"
 import React from "react"
-
+import "./ModelPreview.css"
 const MODEL_TO_COMPONENT = {
   [Models.AuthorizationGroup]: AuthorizationGroupShow,
   [Models.Location]: LocationShow,
@@ -32,3 +32,7 @@ ModelPreview.propTypes = {
 }
 
 export default ModelPreview
+// assume if class name includes 'preview', it is preview mode
+export function isPreviewMode(className) {
+  return className?.includes("preview")
+}

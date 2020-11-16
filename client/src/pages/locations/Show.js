@@ -8,6 +8,7 @@ import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -95,6 +96,7 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
+  const isPreview = isPreviewMode(className)
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -122,16 +124,18 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
         )
         return (
           <div className={className || null}>
-            <RelatedObjectNotes
-              notes={location.notes}
-              relatedObject={
-                location.uuid && {
-                  relatedObjectType: Location.relatedObjectType,
-                  relatedObjectUuid: location.uuid,
-                  relatedObject: location
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={location.notes}
+                relatedObject={
+                  location.uuid && {
+                    relatedObjectType: Location.relatedObjectType,
+                    relatedObjectUuid: location.uuid,
+                    relatedObject: location
+                  }
                 }
-              }
-            />
+              />
+            ) : null}
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Location ${location.name}`} action={action} />

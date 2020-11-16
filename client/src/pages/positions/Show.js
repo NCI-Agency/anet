@@ -11,6 +11,7 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
+import { isPreviewMode } from "components/ModelPreview"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -152,6 +153,8 @@ const PositionShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
     position.uuid &&
     (!position.person || !position.person.uuid)
 
+  const isPreview = isPreviewMode(className)
+
   return (
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
@@ -168,28 +171,32 @@ const PositionShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
         )
         return (
           <div className={className || null}>
-            <div className="pull-right">
-              <GuidedTour
-                title="Take a guided tour of this position's page."
-                tour={positionTour}
-                autostart={
-                  localStorage.newUser === "true" &&
-                  localStorage.hasSeenPositionTour !== "true"
-                }
-                onEnd={() => (localStorage.hasSeenPositionTour = "true")}
-              />
-            </div>
+            {!isPreview ? (
+              <div className="pull-right">
+                <GuidedTour
+                  title="Take a guided tour of this position's page."
+                  tour={positionTour}
+                  autostart={
+                    localStorage.newUser === "true" &&
+                    localStorage.hasSeenPositionTour !== "true"
+                  }
+                  onEnd={() => (localStorage.hasSeenPositionTour = "true")}
+                />
+              </div>
+            ) : null}
 
-            <RelatedObjectNotes
-              notes={position.notes}
-              relatedObject={
-                position.uuid && {
-                  relatedObjectType: Position.relatedObjectType,
-                  relatedObjectUuid: position.uuid,
-                  relatedObject: position
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={position.notes}
+                relatedObject={
+                  position.uuid && {
+                    relatedObjectType: Position.relatedObjectType,
+                    relatedObjectUuid: position.uuid,
+                    relatedObject: position
+                  }
                 }
-              }
-            />
+              />
+            ) : null}
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Position ${position.name}`} action={action} />

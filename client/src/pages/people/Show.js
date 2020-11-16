@@ -14,6 +14,7 @@ import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -162,6 +163,7 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
     .filter(ap => ap.person)
     .map(ap => ap.person.uuid)
     .includes(person.uuid)
+  const isPreview = isPreviewMode(className)
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -196,29 +198,33 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
 
         return (
           <div className={className || null}>
-            <div className="pull-right">
-              <GuidedTour
-                title="Take a guided tour of this person's page."
-                tour={personTour}
-                autostart={
-                  localStorage.newUser === "true" &&
-                  localStorage.hasSeenPersonTour !== "true"
-                }
-                onEnd={() => (localStorage.hasSeenPersonTour = "true")}
-              />
-            </div>
+            {!isPreview ? (
+              <div className="pull-right">
+                <GuidedTour
+                  title="Take a guided tour of this person's page."
+                  tour={personTour}
+                  autostart={
+                    localStorage.newUser === "true" &&
+                    localStorage.hasSeenPersonTour !== "true"
+                  }
+                  onEnd={() => (localStorage.hasSeenPersonTour = "true")}
+                />
+              </div>
+            ) : null}
 
-            <RelatedObjectNotes
-              notes={person.notes}
-              relatedObject={
-                person.uuid && {
-                  relatedObjectType: Person.relatedObjectType,
-                  relatedObjectUuid: person.uuid,
-                  relatedObject: person
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={person.notes}
+                relatedObject={
+                  person.uuid && {
+                    relatedObjectType: Person.relatedObjectType,
+                    relatedObjectUuid: person.uuid,
+                    relatedObject: person
+                  }
                 }
-              }
-              relatedObjectValue={person}
-            />
+                relatedObjectValue={person}
+              />
+            ) : null}
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset

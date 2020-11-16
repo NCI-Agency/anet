@@ -6,6 +6,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -91,6 +92,7 @@ const AuthorizationGroupShow = ({
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
+  const isPreview = isPreviewMode(className)
 
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>
@@ -107,16 +109,18 @@ const AuthorizationGroupShow = ({
         )
         return (
           <div className={className || null}>
-            <RelatedObjectNotes
-              notes={authorizationGroup.notes}
-              relatedObject={
-                authorizationGroup.uuid && {
-                  relatedObjectType: AuthorizationGroup.relatedObjectType,
-                  relatedObjectUuid: authorizationGroup.uuid,
-                  relatedObject: authorizationGroup
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={authorizationGroup.notes}
+                relatedObject={
+                  authorizationGroup.uuid && {
+                    relatedObjectType: AuthorizationGroup.relatedObjectType,
+                    relatedObjectUuid: authorizationGroup.uuid,
+                    relatedObject: authorizationGroup
+                  }
                 }
-              }
-            />
+              />
+            ) : null}
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset

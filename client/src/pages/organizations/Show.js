@@ -9,6 +9,7 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
+import { isPreviewMode } from "components/ModelPreview"
 import { AnchorNavItem } from "components/Nav"
 import {
   mapPageDispatchersToProps,
@@ -201,6 +202,7 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   if (includeChildrenOrgs) {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
+  const isPreview = isPreviewMode(className)
 
   return (
     <Formik enableReinitialize initialValues={organization}>
@@ -244,7 +246,7 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
               {!isMyOrg && isPrincipalOrg && orgSubNav}
             </SubNav>
 
-            {currentUser.isSuperUser() && (
+            {currentUser.isSuperUser() && !isPreview && (
               <div className="pull-right">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."
@@ -258,16 +260,18 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
               </div>
             )}
 
-            <RelatedObjectNotes
-              notes={organization.notes}
-              relatedObject={
-                organization.uuid && {
-                  relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid,
-                  relatedObject: organization
+            {!isPreview ? (
+              <RelatedObjectNotes
+                notes={organization.notes}
+                relatedObject={
+                  organization.uuid && {
+                    relatedObjectType: Organization.relatedObjectType,
+                    relatedObjectUuid: organization.uuid,
+                    relatedObject: organization
+                  }
                 }
-              }
-            />
+              />
+            ) : null}
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
