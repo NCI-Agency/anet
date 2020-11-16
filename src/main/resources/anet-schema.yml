@@ -9,7 +9,6 @@ $defs:
 # base definition for a value with a description
   describedValue:
     type: object
-    additionalProperties: true
     required: [value,description]
     properties:
       value:
@@ -20,7 +19,6 @@ $defs:
 # base definition for all Fields. Every field is assumed to have a label
   labeledField:
     type: object
-    additionalProperties: true
     required: [label]
     properties:
       label:
@@ -34,6 +32,7 @@ $defs:
 
 # definition for fields that allow free-form entry
   inputField:
+    unevaluatedProperties: false
     allOf:
     - "$ref": "#/$defs/labeledField"
     - properties:
@@ -52,6 +51,7 @@ $defs:
 
 # definition for fields that present a choice to be selected from
   choiceField:
+    unevaluatedProperties: false
     allOf:
     - "$ref": "#/$defs/labeledField"
     - properties:
@@ -66,7 +66,7 @@ $defs:
 # definition for custom fields
   customField:
     type: object
-    additionalProperties: false
+    unevaluatedProperties: false
     required: [type]
     properties:
       type:
@@ -107,7 +107,7 @@ $defs:
           widget:
             type: string
             enum: [pie, iqrBoxPlot, likertScale, default]
-        dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
+        dependentSchemas:
           widget:
             oneOf:
             - properties:
@@ -120,38 +120,8 @@ $defs:
                   type: string
                   enum: [sum, avg, min, max]
               required: [aggregationType]
-# TODO: The following properties should not be here as these are only dependency fields.
-# When we have proper handling of `unevaluatedProperties` this section can be removed.
-      choices:
-        type: object
-      addButtonLabel:
-        type: string
-      objectLabel:
-        type: string
-      objectFields:
-        type: object
-        additionalProperties:
-          "$ref": "#/$defs/customField"
-      types:
-        type: array
-      widget:
-        type: string
-        enum: [likertScale, richTextEditor, default]
-      levels:
-        type: array
-        uniqueItems: true
-        items:
-          type: object
-          title: likert scale range
-          properties:
-            color:
-              type: string
-            endValue:
-              type: number
-            label:
-              type: string
 
-    dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
+    dependentSchemas:
       type:
         oneOf:
         - properties:
@@ -193,7 +163,7 @@ $defs:
               type: string
               enum: [likertScale, richTextEditor, default]
           required: [widget]
-          dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
+          dependentSchemas:
             widget:
               oneOf:
               - properties:
@@ -223,7 +193,7 @@ $defs:
 # definition for assessment configuration
   assessmentDef:
     type: object
-    additionalProperties: false
+    unevaluatedProperties: false
     properties:
       recurrence:
         title: recurrence of an assessment
