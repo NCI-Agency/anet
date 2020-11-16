@@ -37,6 +37,10 @@ const PERIOD_FORMAT = {
   END_LONG: "D MMMM YYYY"
 }
 
+const weekType = "isoWeek"
+
+const refMondayForBiweekly = "2021-01-04" // lets select 1st monday of 2021
+
 export const PERIOD_FACTORIES = {
   [RECURRENCE_TYPE.DAILY]: (date, offset) => ({
     start: date.clone().subtract(offset, "days").startOf("day"),
@@ -46,17 +50,28 @@ export const PERIOD_FACTORIES = {
     start: date.clone().subtract(offset, "weeks").startOf("week"),
     end: date.clone().subtract(offset, "weeks").endOf("week")
   }),
-  // FIXME: biweekly calculation should be changed, first agree on what it means
-  [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => ({
-    start: date
+  [RECURRENCE_TYPE.BIWEEKLY]: (date, offset) => {
+    // every biweekly period's start is even number of weeks apart from reference monday
+    const refMonday = moment(refMondayForBiweekly).startOf(weekType)
+    const curWeekMonday = date.clone().startOf(weekType)
+
+    const diffInWeeks = refMonday.diff(curWeekMonday, "weeks")
+    // current biweekly period's start has to be even number of weeks apart from reference monday
+    const curBiweeklyStart =
+      diffInWeeks % 2 === 0
+        ? curWeekMonday
+        : curWeekMonday.clone().subtract(1, "weeks")
+
+    const curBiweeklyEnd = curBiweeklyStart
       .clone()
-      .subtract(2 * offset, "weeks")
-      .startOf("week"),
-    end: date
-      .clone()
-      .subtract(2 * offset, "weeks")
-      .endOf("week")
-  }),
+      .add(1, "weeks")
+      .endOf(weekType)
+
+    return {
+      start: curBiweeklyStart.clone().subtract(2 * offset, "weeks"),
+      end: curBiweeklyEnd.clone().subtract(2 * offset, "weeks")
+    }
+  },
   // for more context read: https://github.com/NCI-Agency/anet/pull/3272#discussion_r515826676
   [RECURRENCE_TYPE.SEMIMONTHLY]: (date, offset) => {
     // With first half we mean first half of a month
