@@ -1,5 +1,6 @@
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
+import ModelTooltip from "components/ModelTooltip"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -124,13 +125,22 @@ export default class LinkTo extends Component {
 
     const LinkToComponent = componentClass
     return (
-      <LinkToComponent to={to} style={style} {...componentProps}>
-        <>
-          {iconComponent}
-          {avatarComponent}
-          {children || modelInstance.toString()}
-        </>
-      </LinkToComponent>
+      <ModelTooltip
+        modelClass={ModelClass}
+        uuid={modelInstance.uuid}
+        popoverClassName="bp3-dark"
+        hoverCloseDelay={15000}
+        portalClassName="linkto-model-preview-portal"
+        isEdit={edit}
+      >
+        <LinkToComponent to={to} style={style} {...componentProps}>
+          <>
+            {iconComponent}
+            {avatarComponent}
+            {children || modelInstance.toString()}
+          </>
+        </LinkToComponent>
+      </ModelTooltip>
     )
   }
 }
