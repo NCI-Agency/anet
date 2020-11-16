@@ -1,18 +1,13 @@
 /*START general preview style START*/
 .model-preview {
-  outline: 4px solid pink;
+
 }
 
 /*END general preview style END*/
 
 /*START linkTo triggered preview style START*/
 .linkto-model-preview-portal .model-preview {
-  outline: 4px solid green;
-}
 
-/* remove guided tours from previews */
-.linkto-model-preview-portal .model-preview .persistent-tour-launcher {
-  display: none;
 }
 
 /* remove action buttons from previews */
@@ -36,4 +31,3 @@
   padding: 1em;
 }
 /*END linkTo triggered preview style END*/
-
