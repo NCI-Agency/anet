@@ -7,7 +7,6 @@ import {
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
-import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
@@ -51,7 +50,7 @@ const AdvisorReportsTable = ({ pageDispatchers, columnGroups, orgUuid }) => {
     <AdvisorReportsRow
       row={advisor}
       columnGroups={columnGroups}
-      key={_uniqueId(`${advisor.uuid}_`)}
+      key={`${advisor.uuid}`}
     />
   ))
 

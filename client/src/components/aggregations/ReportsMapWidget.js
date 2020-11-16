@@ -11,7 +11,7 @@ import React, { useMemo } from "react"
 
 const ReportsMapWidget = ({
   values,
-  mapId,
+  widgetId,
   width,
   height,
   whenUnspecified,
@@ -45,7 +45,7 @@ const ReportsMapWidget = ({
         markers={markers}
         width={width}
         height={height}
-        mapId={mapId}
+        mapId={widgetId}
         marginBottom={0}
       />
     </div>
@@ -53,7 +53,6 @@ const ReportsMapWidget = ({
 }
 ReportsMapWidget.propTypes = {
   ...aggregationWidgetPropTypes,
-  mapId: PropTypes.string,
   width: PropTypes.number,
   height: PropTypes.number
 }
