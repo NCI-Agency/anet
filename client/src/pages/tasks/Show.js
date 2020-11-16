@@ -62,6 +62,10 @@ const GQL_GET_TASK = gql`
           uuid
           shortName
         }
+        location {
+          uuid
+          name
+        }
         person {
           uuid
           name
