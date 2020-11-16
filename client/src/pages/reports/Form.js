@@ -414,11 +414,11 @@ const ReportForm = ({
           }
         }
 
-        // Only an author can delete a report, and only in DRAFT.
+        // Only an author can delete a report, and only in DRAFT or REJECTED state.
         const canDelete =
           !!values.uuid &&
           (Report.isDraft(values.state) || Report.isRejected(values.state)) &&
-          values.authors?.find(a => Person.isEqual(currentUser, a))
+          values.authors?.some(a => Person.isEqual(currentUser, a))
         // Skip validation on save!
         const action = (
           <div>
@@ -709,7 +709,8 @@ const ReportForm = ({
                             })
                           }
                           onChange={value =>
-                            setFieldValue("reportPeople", value, true)}
+                            setFieldValue("reportPeople", value, true)
+                          }
                           showDelete
                         />
                       }
@@ -1362,17 +1363,17 @@ const ReportForm = ({
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip reportPeople fields not in data model
-    report.reportPeople = values.reportPeople.map(a => {
+    report.reportPeople = values.reportPeople.map(reportPerson => {
       const rp = Object.without(
-        a,
+        reportPerson,
         "firstName",
         "lastName",
         "position",
         "customFields",
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
-      rp.author = !!a.author
-      rp.attendee = !!a.attendee
+      rp.author = !!reportPerson.author
+      rp.attendee = !!reportPerson.attendee
       return rp
     })
     // strip tasks fields not in data model

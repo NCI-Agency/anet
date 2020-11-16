@@ -298,7 +298,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final List<ReportPerson> o =
-              l.stream().filter(p -> p.isAttendee()).collect(Collectors.toList());
+              l.stream().filter(ReportPerson::isAttendee).collect(Collectors.toList());
           attendees = o;
           return o;
         });
@@ -360,7 +360,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final List<ReportPerson> o =
-              l.stream().filter(p -> p.isAuthor()).collect(Collectors.toList());
+              l.stream().filter(ReportPerson::isAuthor).collect(Collectors.toList());
           authors = o;
           return o;
         });

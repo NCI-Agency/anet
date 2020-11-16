@@ -605,12 +605,12 @@ test.serial(
       "Neutral atmospherics details"
     )
 
-    const $attendanceFieldsetTitle = await $(
+    const $reportPeopleFieldsetTitle = await $(
       "#reportPeople-fieldset .title-text"
     )
     await assertElementText(
       t,
-      $attendanceFieldsetTitle,
+      $reportPeopleFieldsetTitle,
       "People involved in this engagement",
       "People fieldset should have correct title for an uncancelled enagement"
     )
@@ -631,7 +631,7 @@ test.serial(
     )
     await assertElementText(
       t,
-      $attendanceFieldsetTitle,
+      $reportPeopleFieldsetTitle,
       "People who will be involved in this planned engagement",
       "People fieldset should have correct title for a cancelled enagement"
     )
