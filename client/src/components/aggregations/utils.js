@@ -7,6 +7,7 @@ import PropTypes from "prop-types"
 import Settings from "settings"
 
 export const aggregationWidgetPropTypes = {
+  widgetId: PropTypes.string.isRequired,
   values: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.arrayOf(

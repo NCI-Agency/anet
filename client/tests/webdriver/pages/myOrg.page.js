@@ -6,7 +6,7 @@ class MyOrg extends Page {
   }
 
   get locationStatistics() {
-    return browser.$("[id^=map-map-location-statistics]")
+    return browser.$("[id^=map-location-statistics]")
   }
 
   get engagementStatus() {

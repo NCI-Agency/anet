@@ -10,9 +10,9 @@ import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import _isEmpty from "lodash/isEmpty"
-import _uniqueId from "lodash/uniqueId"
 import { Report } from "models"
 import {
+  formatPeriodBoundary,
   getPeriodsConfig,
   PeriodsDetailsPropType,
   PeriodsPropType,
@@ -104,6 +104,7 @@ const GQL_GET_REPORT_LIST = gql`
 `
 
 const FieldStatisticsRow = ({
+  idSuffix,
   fieldConfig,
   fieldName,
   periods,
@@ -116,30 +117,36 @@ const FieldStatisticsRow = ({
   }
   return (
     <tr>
-      {periods.map((period, index) => (
-        <td key={index}>
-          {_isEmpty(periodsData[index]) ? (
-            isFirstRow ? (
-              <em>No reports found</em>
-            ) : null
-          ) : (
-            <AggregationWidgetContainer
-              key={`statistics-${fieldName}`}
-              fieldConfig={fieldConfig}
-              fieldName={fieldName}
-              data={periodsData[index]}
-              dataType={CALENDAR_OBJECT_TYPES.REPORT}
-              widget={aggregationWidget}
-              period={period}
-              widgetId={`${fieldName}-${_uniqueId("statistics")}`}
-            />
-          )}
-        </td>
-      ))}
+      {periods.map((period, index) => {
+        const key = `${fieldName}-statistics-${formatPeriodBoundary(
+          period.start
+        )}`
+        return (
+          <td key={key}>
+            {_isEmpty(periodsData[index]) ? (
+              isFirstRow ? (
+                <em>No reports found</em>
+              ) : null
+            ) : (
+              <AggregationWidgetContainer
+                key={key}
+                fieldConfig={fieldConfig}
+                fieldName={fieldName}
+                data={periodsData[index]}
+                dataType={CALENDAR_OBJECT_TYPES.REPORT}
+                widget={aggregationWidget}
+                period={period}
+                widgetId={`${key}-${idSuffix}`}
+              />
+            )}
+          </td>
+        )
+      })}
     </tr>
   )
 }
 FieldStatisticsRow.propTypes = {
+  idSuffix: PropTypes.string.isRequired,
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string,
   periods: PeriodsPropType.isRequired,
@@ -161,6 +168,7 @@ NoStatisticsRow.propTypes = {
 }
 
 const ReportStatistics = ({
+  idSuffix,
   pageDispatchers,
   periodsDetails,
   setTotalCount,
@@ -248,6 +256,7 @@ const ReportStatistics = ({
               Object.keys(REPORT_FIELDS_FOR_STATISTICS).map((key, index) => (
                 <FieldStatisticsRow
                   key={key}
+                  idSuffix={`${key}-${idSuffix}`}
                   fieldName={key}
                   fieldConfig={REPORT_FIELDS_FOR_STATISTICS[key]}
                   periods={periods}
@@ -259,6 +268,7 @@ const ReportStatistics = ({
               Object.keys(customFieldsConfig || {}).map((key, index) => (
                 <FieldStatisticsRow
                   key={key}
+                  idSuffix={`${key}-${idSuffix}`}
                   fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
                   fieldConfig={customFieldsConfig[key]}
                   periods={periods}
@@ -276,6 +286,7 @@ const ReportStatistics = ({
 }
 
 ReportStatistics.propTypes = {
+  idSuffix: PropTypes.string.isRequired,
   pageDispatchers: PageDispatchersPropType,
   periodsDetails: PeriodsDetailsPropType.isRequired,
   setTotalCount: PropTypes.func,
