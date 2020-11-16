@@ -422,8 +422,13 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       throw new WebApplicationException(
           "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     }
-    long maxReportAge = Long.parseLong(maxReportAgeStr);
-    return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+    try {
+      long maxReportAge = Long.parseLong(maxReportAgeStr);
+      return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+    } catch (NumberFormatException e) {
+      throw new WebApplicationException("Invalid Admin Setting for "
+          + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS + ": " + maxReportAgeStr);
+    }
   }
 
   /*
