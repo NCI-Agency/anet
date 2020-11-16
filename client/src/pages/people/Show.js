@@ -28,6 +28,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
+import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import {
   Button,
@@ -101,7 +102,7 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const PersonShow = ({ pageDispatchers }) => {
+const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
@@ -109,7 +110,8 @@ const PersonShow = ({ pageDispatchers }) => {
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -193,7 +195,7 @@ const PersonShow = ({ pageDispatchers }) => {
         const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
 
         return (
-          <div>
+          <div className={className || null}>
             <div className="pull-right">
               <GuidedTour
                 title="Take a guided tour of this person's page."
@@ -558,7 +560,9 @@ const PersonShow = ({ pageDispatchers }) => {
 }
 
 PersonShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(PersonShow)

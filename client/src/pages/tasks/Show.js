@@ -23,6 +23,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
+import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -129,9 +130,10 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const TaskShow = ({ pageDispatchers }) => {
+const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
@@ -191,7 +193,7 @@ const TaskShow = ({ pageDispatchers }) => {
           </LinkTo>
         )
         return (
-          <div>
+          <div className={className || null}>
             <RelatedObjectNotes
               notes={task.notes}
               relatedObject={
@@ -360,7 +362,9 @@ const TaskShow = ({ pageDispatchers }) => {
 }
 
 TaskShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(TaskShow)

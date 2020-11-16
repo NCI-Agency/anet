@@ -25,6 +25,7 @@ import DictionaryField from "HOC/DictionaryField"
 import { Position } from "models"
 import moment from "moment"
 import { positionTour } from "pages/HopscotchTour"
+import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -94,7 +95,7 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const PositionShow = ({ pageDispatchers }) => {
+const PositionShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
@@ -107,7 +108,8 @@ const PositionShow = ({ pageDispatchers }) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_POSITION, {
     uuid
   })
@@ -165,7 +167,7 @@ const PositionShow = ({ pageDispatchers }) => {
           </LinkTo>
         )
         return (
-          <div>
+          <div className={className || null}>
             <div className="pull-right">
               <GuidedTour
                 title="Take a guided tour of this position's page."
@@ -436,7 +438,9 @@ const PositionShow = ({ pageDispatchers }) => {
 }
 
 PositionShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionShow)

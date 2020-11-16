@@ -275,13 +275,19 @@ const GQL_APPROVE_REPORT = gql`
   }
 `
 
-const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
+const ReportShow = ({
+  setSearchQuery,
+  pageDispatchers,
+  uuid: uuidProp,
+  className
+}) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -398,7 +404,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         )
 
         return (
-          <div className="report-show">
+          <div className={`report-show ${className || ""}`}>
             {renderEmailModal(values, setFieldValue)}
 
             <RelatedObjectNotes
@@ -1304,7 +1310,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
 ReportShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  setSearchQuery: PropTypes.func.isRequired
+  setSearchQuery: PropTypes.func.isRequired,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

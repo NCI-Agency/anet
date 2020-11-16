@@ -7,8 +7,8 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -24,6 +24,7 @@ import ReportCollection, {
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
+import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -58,9 +59,14 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const AuthorizationGroupShow = ({ pageDispatchers }) => {
+const AuthorizationGroupShow = ({
+  pageDispatchers,
+  uuid: uuidProp,
+  className
+}) => {
   const { currentUser } = useContext(AppContext)
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
@@ -100,7 +106,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
           </LinkTo>
         )
         return (
-          <div>
+          <div className={className || null}>
             <RelatedObjectNotes
               notes={authorizationGroup.notes}
               relatedObject={
@@ -161,7 +167,9 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
 }
 
 AuthorizationGroupShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupShow)

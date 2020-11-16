@@ -21,6 +21,7 @@ import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
+import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -69,9 +70,10 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-const LocationShow = ({ pageDispatchers }) => {
+const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const { currentUser } = useContext(AppContext)
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
@@ -119,7 +121,7 @@ const LocationShow = ({ pageDispatchers }) => {
           </LinkTo>
         )
         return (
-          <div>
+          <div className={className || null}>
             <RelatedObjectNotes
               notes={location.notes}
               relatedObject={
@@ -175,7 +177,9 @@ const LocationShow = ({ pageDispatchers }) => {
 }
 
 LocationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(LocationShow)

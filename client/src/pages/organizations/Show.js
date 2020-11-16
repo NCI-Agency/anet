@@ -1,8 +1,8 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
+import Approvals from "components/approvals/Approvals"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -11,8 +11,8 @@ import Messages from "components/Messages"
 import Model from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -24,13 +24,14 @@ import { Field, Form, Formik } from "formik"
 import { Organization, Position, Report } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
+import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import {
+  Button,
   Checkbox,
   ListGroup,
   ListGroupItem,
-  Nav,
-  Button
+  Nav
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -126,12 +127,13 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const OrganizationShow = ({ pageDispatchers }) => {
+const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
-  const { uuid } = useParams()
+  const uuidParam = useParams().uuid
+  const uuid = uuidProp || uuidParam
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })
@@ -231,7 +233,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
           </div>
         )
         return (
-          <div>
+          <div className={className || null}>
             <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
             <SubNav subnavElemId="advisor-org-nav">
@@ -428,7 +430,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
 }
 
 OrganizationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  uuid: PropTypes.string,
+  className: PropTypes.string
 }
 
 const mapStateToProps = (state, ownProps) => ({
