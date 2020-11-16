@@ -3,13 +3,12 @@ import {
   aggregationWidgetPropTypes
 } from "components/aggregations/utils"
 import BarChart from "components/BarChart"
-import _uniqueId from "lodash/uniqueId"
 import React from "react"
 
-const ReportsByTaskWidget = ({ values, ...otherWidgetProps }) => (
+const ReportsByTaskWidget = ({ widgetId, values, ...otherWidgetProps }) => (
   <div className="non-scrollable">
     <BarChart
-      chartId={_uniqueId("ReportsByTaskWidget")}
+      chartId={`ReportsByTaskWidget-${widgetId}`}
       data={values}
       xProp="task.uuid"
       yProp="reportsCount"

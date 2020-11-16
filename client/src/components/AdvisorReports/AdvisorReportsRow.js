@@ -1,5 +1,4 @@
 import Checkbox from "components/Checkbox"
-import _uniqueId from "lodash/uniqueId"
 import PropTypes from "prop-types"
 import React from "react"
 
@@ -8,14 +7,16 @@ const _advisorStats = (columnGroups, statistics) => {
   columnGroups.forEach(group => {
     let rowCell = statistics.filter(s => s.week === group)
     rowCell = rowCell ? rowCell[0] : null
-    const keySubmitted = _uniqueId("submitted_")
-    const keyAttended = _uniqueId("attended_")
     if (rowCell) {
-      stats.push(<td key={keySubmitted}>{rowCell.nrReportsSubmitted}</td>)
-      stats.push(<td key={keyAttended}>{rowCell.nrEngagementsAttended}</td>)
+      stats.push(
+        <td key={`submitted_${group}`}>{rowCell.nrReportsSubmitted}</td>
+      )
+      stats.push(
+        <td key={`attended_${group}`}>{rowCell.nrEngagementsAttended}</td>
+      )
     } else {
-      stats.push(<td key={keySubmitted}>0</td>)
-      stats.push(<td key={keyAttended}>0</td>)
+      stats.push(<td key={`submitted_${group}`}>0</td>)
+      stats.push(<td key={`attended_${group}`}>0</td>)
     }
   })
   return stats

@@ -3,7 +3,6 @@ import {
   aggregationWidgetPropTypes
 } from "components/aggregations/utils"
 import _isEmpty from "lodash/isEmpty"
-import _uniqueId from "lodash/uniqueId"
 import React, { useState } from "react"
 import { Button, Collapse, Table } from "react-bootstrap"
 import utils from "utils"
@@ -27,14 +26,11 @@ const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
       <Collapse in={showValues}>
         <Table>
           <tbody>
-            {filteredValues.map(val => {
-              const keyValue = _uniqueId("value_")
-              return (
-                <tr key={keyValue}>
-                  <td>{JSON.stringify(val)}</td>
-                </tr>
-              )
-            })}
+            {filteredValues.map((val, index) => (
+              <tr key={index}>
+                <td>{JSON.stringify(val)}</td>
+              </tr>
+            ))}
           </tbody>
         </Table>
       </Collapse>
