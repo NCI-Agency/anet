@@ -3537,5 +3537,34 @@
 			AND JSON_VALUE(text, 'lax $.__periodStart') IS NOT NULL;
 		</sql>
 	</changeSet>
+	<changeSet id="fix-semiannually-typo" author="gjvoosten">
+		<comment>Fix typo in 'semiannually'</comment>
+		<!-- Note: the demo data has at most 3 assessment definitions for any one task
+		     and field installations have at most 2, so only update the first 3. -->
+
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__recurrence', 'semiannually')
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[0].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[0].recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[1].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[1].recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[2].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[2].recurrence') = 'semiannualy';
+		</sql>
+	</changeSet>
 
 </databaseChangeLog>
