@@ -1006,13 +1006,9 @@ const RowLabel = styled.th`
 `
 
 const RowContent = styled.td`
-  padding: 4px 1rem;
-  & > div.form-control-static {
-    padding-top: 0;
-  }
-
-  div.table-responsive > table > tbody > tr:first-of-type > td {
-    padding-top: 0;
+  padding: 0 1rem;
+  & .form-control-static {
+    margin-bottom: 0;
   }
 `
 
