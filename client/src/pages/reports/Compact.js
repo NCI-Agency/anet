@@ -309,7 +309,7 @@ const CompactReportView = ({ pageDispatchers }) => {
               ) : null}
               <CompactRow
                 label={Settings.fields.report.nextSteps}
-                content={report.intent}
+                content={report.nextSteps}
                 className="reportField"
               />
               <CompactRow
@@ -409,7 +409,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   }
 
   function getReportSubTitle() {
-    const timeToShow = report.isDraft()
+    const timeToShow = !report.isPublished()
       ? moment(report.updatedAt)
       : moment(report.releasedAt)
     return (
@@ -1007,6 +1007,13 @@ const RowLabel = styled.th`
 
 const RowContent = styled.td`
   padding: 4px 1rem;
+  & > div.form-control-static {
+    padding-top: 0;
+  }
+
+  div.table-responsive > table > tbody > tr:first-of-type > td {
+    padding-top: 0;
+  }
 `
 
 export default connect(null, mapPageDispatchersToProps)(CompactReportView)
