@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -9,19 +10,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractAnetBean implements RelatableObject {
+public class Position extends AbstractAnetBean implements RelatableObject, WithStatus {
 
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
-  }
-
-  public static enum PositionStatus {
-    ACTIVE, INACTIVE
   }
 
   @GraphQLQuery
@@ -35,7 +34,7 @@ public class Position extends AbstractAnetBean implements RelatableObject {
   PositionType type;
   @GraphQLQuery
   @GraphQLInputField
-  PositionStatus status;
+  private Status status;
   // Lazy Loaded
   // annotated below
   private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
@@ -49,6 +48,8 @@ public class Position extends AbstractAnetBean implements RelatableObject {
   List<PersonPositionHistory> previousPeople;
   // annotated below
   Boolean isApprover;
+  // annotated below
+  List<Task> tasks;
 
   public String getName() {
     return name;
@@ -74,11 +75,13 @@ public class Position extends AbstractAnetBean implements RelatableObject {
     this.type = type;
   }
 
-  public PositionStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(PositionStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -241,6 +244,25 @@ public class Position extends AbstractAnetBean implements RelatableObject {
     return isApprover;
   }
 
+  @GraphQLQuery(name = "responsibleTasks")
+  public CompletableFuture<List<Task>> loadResponsibleTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (tasks != null) {
+      return CompletableFuture.completedFuture(tasks);
+    }
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    query.setBatchParams(new M2mBatchParams<Task, TaskSearchQuery>("tasks",
+        "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
+        .thenApply(o -> {
+          tasks = o;
+          return o;
+        });
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Position)) {
@@ -249,12 +271,13 @@ public class Position extends AbstractAnetBean implements RelatableObject {
     Position other = (Position) o;
     return Objects.equals(uuid, other.getUuid()) && Objects.equals(name, other.getName())
         && Objects.equals(code, other.getCode()) && Objects.equals(type, other.getType())
+        && Objects.equals(status, other.getStatus())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, code, type, organization);
+    return Objects.hash(uuid, name, code, type, status, organization);
   }
 
   @Override

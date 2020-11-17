@@ -2,8 +2,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RemoveButton from "components/RemoveButton"
@@ -31,6 +31,10 @@ const GQL_GET_POSITION_LIST = gql`
         organization {
           uuid
           shortName
+        }
+        location {
+          uuid
+          name
         }
         person {
           uuid

@@ -13,9 +13,9 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -27,9 +27,9 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import {
+  getSearchQuery,
   SearchDescription,
-  SearchQueryPropType,
-  getSearchQuery
+  SearchQueryPropType
 } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -801,19 +801,22 @@ const Search = ({
             <Dropdown.Menu className="super-colors">
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)
+                }
               >
                 Excel (xlsx)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)
+                }
               >
                 Google Earth (kml)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)
+                }
               >
                 NATO Vector Graphics (nvg)
               </MenuItem>

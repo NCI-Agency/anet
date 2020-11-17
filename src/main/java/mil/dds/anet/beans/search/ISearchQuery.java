@@ -1,6 +1,8 @@
 package mil.dds.anet.beans.search;
 
-public interface ISearchQuery<T extends ISortBy> {
+import mil.dds.anet.beans.WithStatus;
+
+public interface ISearchQuery<T extends ISortBy> extends WithStatus {
   public enum SortOrder {
     ASC, DESC
   }

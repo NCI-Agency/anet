@@ -24,7 +24,6 @@ import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
-import _uniqueId from "lodash/uniqueId"
 import * as Models from "models"
 import moment from "moment"
 import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"
@@ -177,7 +176,7 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
                     fieldName={questionKey}
                     data={instantAssessmentResults}
                     widget={aggregationWidget}
-                    widgetId={`${questionKey}-${_uniqueId("assessment")}`}
+                    widgetId={`${questionKey}-assessment`}
                   />
                 ) : null
               })}

@@ -3,9 +3,9 @@ package mil.dds.anet.beans.search;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Task.TaskStatus;
 
 public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
@@ -18,9 +18,6 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
   @GraphQLQuery
   @GraphQLInputField
   private String category;
-  @GraphQLQuery
-  @GraphQLInputField
-  private TaskStatus status;
   @GraphQLQuery
   @GraphQLInputField
   private Instant plannedCompletionEnd;
@@ -83,14 +80,6 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   public void setCategory(String category) {
     this.category = category;
-  }
-
-  public TaskStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(TaskStatus status) {
-    this.status = status;
   }
 
   public Instant getPlannedCompletionEnd() {
@@ -175,7 +164,7 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category, status,
+    return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
         customFieldRef1Recursively, responsiblePositionUuid);
@@ -190,7 +179,6 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
     return super.equals(obj) && Objects.equals(getTaskedOrgUuid(), other.getTaskedOrgUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy())
         && Objects.equals(getCategory(), other.getCategory())
-        && Objects.equals(getStatus(), other.getStatus())
         && Objects.equals(getPlannedCompletionEnd(), other.getPlannedCompletionEnd())
         && Objects.equals(getPlannedCompletionStart(), other.getPlannedCompletionStart())
         && Objects.equals(getProjectedCompletionEnd(), other.getProjectedCompletionEnd())
@@ -200,6 +188,15 @@ public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
         && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
         && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
+  }
+
+  @Override
+  public TaskSearchQuery clone() throws CloneNotSupportedException {
+    final TaskSearchQuery clone = (TaskSearchQuery) super.clone();
+    if (customFieldRef1Uuid != null) {
+      clone.setCustomFieldRef1Uuid(new ArrayList<>(customFieldRef1Uuid));
+    }
+    return clone;
   }
 
 }

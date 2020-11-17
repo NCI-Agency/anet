@@ -18,6 +18,14 @@ class MyTasks extends Page {
   get myResponsibleTasks() {
     return browser.$("#my-responsible-tasks")
   }
+
+  get myPendingTasks() {
+    return browser.$("#my-tasks-with-pending-assessments")
+  }
+
+  get myPendingTasksContent() {
+    return browser.$("#my-tasks-with-pending-assessments").$("tbody")
+  }
 }
 
 export default new MyTasks()

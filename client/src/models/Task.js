@@ -31,11 +31,6 @@ export default class Task extends Model {
     return shortLabel
   }
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static APPROVAL_STEP_TYPE = {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
@@ -96,7 +91,7 @@ export default class Task extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Task.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       responsiblePositions: yup
         .array()
         .nullable()

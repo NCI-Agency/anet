@@ -5,6 +5,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import { RECURSE_STRATEGY } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
@@ -109,7 +110,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
 
   const newPosition = position ? new Position(position) : new Position()
 
-  const positionSearchQuery = { status: Position.STATUS.ACTIVE }
+  const positionSearchQuery = { status: Model.STATUS.ACTIVE }
   if (person.role === Person.ROLE.ADVISOR) {
     positionSearchQuery.type = [Position.TYPE.ADVISOR]
     if (currentUser.isAdmin()) {

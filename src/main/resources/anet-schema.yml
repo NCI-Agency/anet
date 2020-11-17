@@ -224,12 +224,11 @@ $defs:
   assessmentDef:
     type: object
     additionalProperties: false
-    required: [questions]
     properties:
       recurrence:
         title: recurrence of an assessment
         type: string
-        enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannualy, annually]
+        enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually]
         default: once
       relatedObjectType:
         title: object type context in which the assessment will be made

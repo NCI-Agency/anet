@@ -1,7 +1,7 @@
 import React from "react"
 
 function bannerClassName(level) {
-  var output = "general-banner"
+  let output = "general-banner"
   switch (level) {
     case "notice":
       return (output += " alert-info")

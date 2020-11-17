@@ -22,7 +22,7 @@ const bsTz = tzParts[tzParts.length - 1]
 const capabilities = {
   maxInstances: 1,
   browserName: "Chrome",
-  browser_version: "85.0",
+  browser_version: "latest",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: ["--start-maximized"]

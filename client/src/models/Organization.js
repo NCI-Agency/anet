@@ -10,11 +10,6 @@ export default class Organization extends Model {
   static getInstanceName = "organization"
   static relatedObjectType = "organizations"
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static TYPE = {
     ADVISOR_ORG: "ADVISOR_ORG",
     PRINCIPAL_ORG: "PRINCIPAL_ORG"
@@ -37,7 +32,7 @@ export default class Organization extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Organization.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       identificationCode: yup.string().nullable().default(""),
       type: yup
         .string()

@@ -90,7 +90,7 @@ const TopBar = ({
         <SecurityBanner />
         {currentUser &&
           !currentUser.hasActivePosition() &&
-          !currentUser.isNewUser() && <NoPositionBanner />}
+          !currentUser.isPendingVerification() && <NoPositionBanner />}
         <Header
           minimalHeader={minimalHeader}
           toggleMenuAction={toggleMenuAction}

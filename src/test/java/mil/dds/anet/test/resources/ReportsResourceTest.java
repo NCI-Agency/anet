@@ -28,14 +28,11 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
@@ -47,7 +44,7 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.Task.TaskStatus;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -127,21 +124,21 @@ public class ReportsResourceTest extends AbstractResourceTest {
     approver1.setEmailAddress("hunter+testApprover1@dds.mil");
     approver1.setName("Test Approver 1");
     approver1.setRole(Role.ADVISOR);
-    approver1.setStatus(PersonStatus.ACTIVE);
+    approver1.setStatus(Person.Status.ACTIVE);
     approver1 = findOrPutPersonInDb(approver1);
     Person approver2 = new Person();
     approver2.setDomainUsername("testApprover2");
     approver2.setEmailAddress("hunter+testApprover2@dds.mil");
     approver2.setName("Test Approver 2");
     approver2.setRole(Person.Role.ADVISOR);
-    approver2.setStatus(PersonStatus.ACTIVE);
+    approver2.setStatus(Person.Status.ACTIVE);
     approver2 = findOrPutPersonInDb(approver2);
 
     Position approver1Pos = new Position();
     approver1Pos.setName("Test Approver 1 Position");
     approver1Pos.setOrganization(advisorOrg);
     approver1Pos.setType(PositionType.SUPER_USER);
-    approver1Pos.setStatus(PositionStatus.ACTIVE);
+    approver1Pos.setStatus(Position.Status.ACTIVE);
     String approver1PosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", approver1Pos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(approver1PosUuid).isNotNull();
@@ -159,7 +156,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     approver2Pos.setName("Test Approver 2 Position");
     approver2Pos.setOrganization(advisorOrg);
     approver2Pos.setType(PositionType.SUPER_USER);
-    approver2Pos.setStatus(PositionStatus.ACTIVE);
+    approver2Pos.setStatus(Position.Status.ACTIVE);
     String approver2PosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", approver2Pos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(approver2PosUuid).isNotNull();
@@ -178,7 +175,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     authorBillet.setName("A report writer");
     authorBillet.setType(PositionType.ADVISOR);
     authorBillet.setOrganization(advisorOrg);
-    authorBillet.setStatus(PositionStatus.ACTIVE);
+    authorBillet.setStatus(Position.Status.ACTIVE);
     String authorBilletUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", authorBillet, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(authorBilletUuid).isNotNull();
@@ -239,13 +236,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Create some tasks for this organization
     final String topUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
         TestData.createTask("test-1", "Test Top Task", "TOP", null,
-            Collections.singletonList(advisorOrg), TaskStatus.ACTIVE),
+            Collections.singletonList(advisorOrg), Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(topUuid).isNotNull();
     final Task top = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, topUuid,
         new TypeReference<GraphQlResponse<Task>>() {});
-    final String actionUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("test-1-1", "Test Task Action", "Action", top, null, TaskStatus.ACTIVE),
+    final String actionUuid = graphQLHelper.createObject(
+        admin, "createTask", "task", "TaskInput", TestData.createTask("test-1-1",
+            "Test Task Action", "Action", top, null, Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(actionUuid).isNotNull();
     final Task action = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, actionUuid,
@@ -501,7 +499,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
     // there.
     final PersonSearchQuery queryPeople = new PersonSearchQuery();
-    queryPeople.setStatus(Collections.singletonList(PersonStatus.ACTIVE));
+    queryPeople.setStatus(Person.Status.ACTIVE);
     queryPeople.setInMyReports(true);
     queryPeople.setSortBy(PersonSearchSortBy.RECENT);
     queryPeople.setSortOrder(SortOrder.DESC);
@@ -511,7 +509,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(recentPeople.getList()).contains(principalPerson);
 
     final TaskSearchQuery queryTasks = new TaskSearchQuery();
-    queryTasks.setStatus(TaskStatus.ACTIVE);
+    queryTasks.setStatus(Task.Status.ACTIVE);
     queryTasks.setInMyReports(true);
     queryTasks.setSortBy(TaskSearchSortBy.RECENT);
     queryTasks.setSortOrder(SortOrder.DESC);
@@ -521,7 +519,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(recentTasks.getList()).contains(action);
 
     final LocationSearchQuery queryLocations = new LocationSearchQuery();
-    queryLocations.setStatus(LocationStatus.ACTIVE);
+    queryLocations.setStatus(Location.Status.ACTIVE);
     queryLocations.setInMyReports(true);
     queryLocations.setSortBy(LocationSearchSortBy.RECENT);
     queryLocations.setSortOrder(SortOrder.DESC);
@@ -553,7 +551,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Person author = new Person();
     author.setName("A New Guy");
     author.setRole(Role.ADVISOR);
-    author.setStatus(PersonStatus.ACTIVE);
+    author.setStatus(Person.Status.ACTIVE);
     author.setDomainUsername("newGuy");
     author.setEmailAddress("newGuy@dds.mil");
     String authorUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
@@ -623,7 +621,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Position billet = new Position();
     billet.setName("EF 1.1 new advisor");
     billet.setType(Position.PositionType.ADVISOR);
-    billet.setStatus(PositionStatus.ACTIVE);
+    billet.setStatus(Position.Status.ACTIVE);
 
     // Put billet in EF 1.1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
@@ -1089,6 +1087,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)).count())
             .isEqualTo(searchResults.getList().size());
+  }
+
+  @Test
+  public void searchInactiveReportsTest() {
+    // All reports are considered ACTIVE; check that none are INACTIVE
+    final ReportSearchQuery query = new ReportSearchQuery();
+    query.setStatus(WithStatus.Status.INACTIVE);
+    final AnetBeanList<Report> searchResults =
+        graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
+    assertThat(searchResults.getTotalCount()).isZero();
+    assertThat(searchResults.getList()).isEmpty();
   }
 
   @Test

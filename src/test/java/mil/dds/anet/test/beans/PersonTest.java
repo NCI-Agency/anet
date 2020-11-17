@@ -10,7 +10,6 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Objects;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.utils.DaoUtils;
@@ -29,7 +28,7 @@ public class PersonTest extends BeanTester<Person> {
     person.setEmailAddress("hunter+foobar@dds.mil");
     person.setPhoneNumber("123-456-78960");
     person.setRank("OF-9");
-    person.setStatus(PersonStatus.ACTIVE);
+    person.setStatus(Person.Status.ACTIVE);
     person.setRole(Role.ADVISOR);
     person.setBiography("this is a sample biography");
     person.setDomainUsername("jack");
@@ -46,7 +45,7 @@ public class PersonTest extends BeanTester<Person> {
     person.setEmailAddress("hunter+steve@dds.mil");
     person.setPhoneNumber("+011-258-32895");
     person.setRank("LtCol");
-    person.setStatus(PersonStatus.ACTIVE);
+    person.setStatus(Person.Status.ACTIVE);
     person.setRole(Role.PRINCIPAL);
     person.setBiography("this is a sample person who could be a Principal!");
     person.setGender("Male");
@@ -105,7 +104,7 @@ public class PersonTest extends BeanTester<Person> {
     person.setEmailAddress("hunter+roger@dds.mil");
     person.setPhoneNumber("+1-412-543-2839");
     person.setRank("Maj");
-    person.setStatus(PersonStatus.ACTIVE);
+    person.setStatus(Person.Status.ACTIVE);
     person.setRole(Role.PRINCIPAL);
     person.setBiography("roger is another test person that we have in the database. ");
     person.setGender("Male");
@@ -119,7 +118,7 @@ public class PersonTest extends BeanTester<Person> {
     person.setEmailAddress("hunter+liz@dds.mil");
     person.setPhoneNumber("+1-777-7777");
     person.setRank("Capt");
-    person.setStatus(PersonStatus.ACTIVE);
+    person.setStatus(Person.Status.ACTIVE);
     person.setRole(Role.ADVISOR);
     person.setBiography("elizabeth is another test person we have in the database");
     person.setDomainUsername("elizabeth");
@@ -136,7 +135,7 @@ public class PersonTest extends BeanTester<Person> {
     p.setEmailAddress("hunter+nick@dds.mil");
     p.setPhoneNumber("+1-202-7324");
     p.setRank("CIV");
-    p.setStatus(PersonStatus.ACTIVE);
+    p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setBiography("");
     p.setDomainUsername("nick");
@@ -153,7 +152,7 @@ public class PersonTest extends BeanTester<Person> {
     p.setEmailAddress("hunter+bob@dds.mil");
     p.setPhoneNumber("+1-444-7324");
     p.setRank("CIV");
-    p.setStatus(PersonStatus.ACTIVE);
+    p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setBiography("Bob is the EF1 Super User");
     p.setDomainUsername("bob");
@@ -170,7 +169,7 @@ public class PersonTest extends BeanTester<Person> {
     p.setEmailAddress("hunter+andrew@dds.mil");
     p.setPhoneNumber("+1-412-7324");
     p.setRank("CIV");
-    p.setStatus(PersonStatus.ACTIVE);
+    p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setBiography("Andrew is the EF1 Manager");
     p.setDomainUsername("andrew");
@@ -211,7 +210,7 @@ public class PersonTest extends BeanTester<Person> {
     Person p = new Person();
     p.setName("DMIN, Arthur");
     p.setEmailAddress("hunter+arthur@dds.mil");
-    p.setStatus(PersonStatus.ACTIVE);
+    p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setDomainUsername("arthur");
     p.setGender("Male");

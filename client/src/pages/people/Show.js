@@ -43,6 +43,7 @@ const GQL_GET_PERSON = gql`
       rank
       role
       status
+      pendingVerification
       emailAddress
       phoneNumber
       domainUsername
@@ -93,7 +94,7 @@ const GQL_GET_PERSON = gql`
 `
 
 const PersonShow = ({ pageDispatchers }) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -417,7 +418,10 @@ const PersonShow = ({ pageDispatchers }) => {
               entity={person}
               entityType={Person}
               canAddAssessment={canAddAssessment}
-              onUpdateAssessment={refetch}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
             />
           </div>
         )

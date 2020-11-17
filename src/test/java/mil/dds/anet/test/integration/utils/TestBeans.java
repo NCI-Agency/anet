@@ -7,10 +7,8 @@ import java.util.List;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
@@ -25,7 +23,7 @@ public class TestBeans {
     p.setEmailAddress("test_person@test.anet");
     p.setPhoneNumber("+0-00000");
     p.setRank("CIV");
-    p.setStatus(PersonStatus.ACTIVE);
+    p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setBiography("");
     p.setDomainUsername("test");
@@ -40,7 +38,7 @@ public class TestBeans {
     Organization o = new Organization();
     o.setShortName("test_organization");
     o.setLongName("test_organization");
-    o.setStatus(OrganizationStatus.ACTIVE);
+    o.setStatus(Organization.Status.ACTIVE);
     o.setType(OrganizationType.ADVISOR_ORG);
     return o;
   }

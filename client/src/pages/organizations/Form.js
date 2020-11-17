@@ -12,10 +12,11 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import TaskTable from "components/TaskTable"
-import { FastField, Form, Formik } from "formik"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -48,12 +49,12 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Organization.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Organization.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -94,7 +95,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
           ? Settings.fields.principal.org
           : Settings.fields.advisor.org
         const orgSearchQuery = {
-          status: Organization.STATUS.ACTIVE,
+          status: Model.STATUS.ACTIVE,
           type: values.type
         }
         // Reset the parentOrg property when changing the organization type
@@ -223,7 +224,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
-                    <FastField
+                    <Field
                       name="parentOrg"
                       label={Settings.fields.organization.parentOrg}
                       component={FieldHelper.SpecialField}
@@ -309,7 +310,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       className="tasks-selector"
                     >
                       {!isAdmin ? (
-                        <TaskTable tasks={values.tasks} />
+                        <NoPaginationTaskTable tasks={values.tasks} />
                       ) : (
                         <FastField
                           name="tasks"
@@ -328,13 +329,16 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                               )}...`}
                               value={values.tasks}
                               renderSelected={
-                                <TaskTable tasks={values.tasks} showDelete />
+                                <NoPaginationTaskTable
+                                  tasks={values.tasks}
+                                  showDelete
+                                />
                               }
                               overlayColumns={["Name"]}
                               overlayRenderRow={TaskSimpleOverlayRow}
                               filterDefs={tasksFilters}
                               objectType={Task}
-                              queryParams={{ status: Task.STATUS.ACTIVE }}
+                              queryParams={{ status: Model.STATUS.ACTIVE }}
                               fields={Task.autocompleteQuery}
                               addon={TASKS_ICON}
                             />

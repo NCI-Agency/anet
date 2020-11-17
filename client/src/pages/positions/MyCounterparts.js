@@ -16,11 +16,21 @@ const MyCounterparts = ({ pageDispatchers }) => {
     pageProps: DEFAULT_PAGE_PROPS,
     pageDispatchers
   })
-  const { currentUser } = useContext(AppContext)
+  const {
+    currentUser,
+    notifications: { myCounterpartsWithPendingAssessments }
+  } = useContext(AppContext)
+
   return (
     <div>
       <Fieldset id="my-counterparts" title="My Counterparts">
         <PositionTable positions={currentUser.position.associatedPositions} />
+      </Fieldset>
+      <Fieldset
+        id="my-counterparts-with-pending-assessments"
+        title="My Counterparts that have pending assessments"
+      >
+        <PositionTable positions={myCounterpartsWithPendingAssessments} />
       </Fieldset>
     </div>
   )

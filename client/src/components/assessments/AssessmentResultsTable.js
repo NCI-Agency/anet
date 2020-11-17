@@ -1,5 +1,6 @@
-import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
+import "components/assessments/AssessmentResultsTable.css"
 import { InstantAssessmentsRow } from "components/assessments/InstantAssessmentResults"
+import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import PeriodsNavigation from "components/PeriodsNavigation"
@@ -13,7 +14,6 @@ import {
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
-import "components/assessments/AssessmentResultsTable.css"
 
 /* The AssessmentResultsTable component displays the results of two types of
  * assessments made on a given entity and subentities:
@@ -30,9 +30,9 @@ import "components/assessments/AssessmentResultsTable.css"
  */
 
 const EntityAssessmentResults = ({
+  idSuffix,
   entity,
   entityType,
-  style,
   periodsConfig,
   canAddAssessment,
   onUpdateAssessment
@@ -56,11 +56,11 @@ const EntityAssessmentResults = ({
       {Object.keys(instantAssessmentConfig || {}).map((key, index) => (
         <InstantAssessmentsRow
           key={key}
+          idSuffix={`${key}-${idSuffix}`}
           questionKey={key}
           questionConfig={instantAssessmentConfig[key]}
           periods={periods}
           periodsData={dataPerPeriod}
-          entity={entity}
           isFirstRow={index === 0}
         />
       ))}
@@ -75,7 +75,7 @@ const EntityAssessmentResults = ({
   )
 }
 EntityAssessmentResults.propTypes = {
-  style: PropTypes.object,
+  idSuffix: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   periodsConfig: AssessmentPeriodsConfigPropType.isRequired,
@@ -107,13 +107,13 @@ const AssessmentResultsTable = ({
     return null
   }
   const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
-  const subentitiesInstantAssessmentConfig = subEntities
+  const subEntitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig())
     .filter(mc => !_isEmpty(mc))
   const { assessmentConfig } = entity.getPeriodicAssessmentDetails(recurrence)
   const showAssessmentResults =
     !_isEmpty(entityInstantAssessmentConfig) ||
-    !_isEmpty(subentitiesInstantAssessmentConfig) ||
+    !_isEmpty(subEntitiesInstantAssessmentConfig) ||
     !_isEmpty(assessmentConfig)
   return (
     <>
@@ -136,6 +136,7 @@ const AssessmentResultsTable = ({
                   {subEntities?.map(subEntity => (
                     <EntityAssessmentResults
                       key={`subassessment-${subEntity.uuid}`}
+                      idSuffix={`subassessment-${subEntity.uuid}`}
                       entity={subEntity}
                       entityType={entityType}
                       periodsConfig={periodsConfig}
@@ -145,6 +146,7 @@ const AssessmentResultsTable = ({
                   ))}
                 </>
                 <EntityAssessmentResults
+                  idSuffix={`assessment-${entity.uuid}`}
                   entity={entity}
                   entityType={entityType}
                   periodsConfig={periodsConfig}

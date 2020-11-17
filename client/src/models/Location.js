@@ -1,5 +1,5 @@
 import Model from "components/Model"
-import { convertMGRSToLatLng } from "geoUtils"
+import { convertLatLngToMGRS, convertMGRSToLatLng } from "geoUtils"
 import _isEmpty from "lodash/isEmpty"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
@@ -11,11 +11,6 @@ export default class Location extends Model {
   static listName = "locationList"
   static getInstanceName = "location"
   static relatedObjectType = "locations"
-
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
 
   static APPROVAL_STEP_TYPE = {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
@@ -29,7 +24,7 @@ export default class Location extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Location.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       lat: yup
         .number()
         .nullable()
@@ -146,6 +141,13 @@ export default class Location extends Model {
   }
 
   toString() {
+    if (this.lat && this.lng) {
+      const coordinate =
+        Settings?.fields?.location?.format === "MGRS"
+          ? convertLatLngToMGRS(this.lat, this.lng)
+          : `${this.lat},${this.lng}`
+      return `${this.name} ${coordinate}`
+    }
     return this.name
   }
 }

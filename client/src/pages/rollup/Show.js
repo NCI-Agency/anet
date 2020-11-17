@@ -309,7 +309,12 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
     display: "flex",
     flexDirection: "column",
     flex: "1 1 auto",
-    height: "100%"
+    height: "100%",
+    overflow: "auto"
+  }
+  const fieldsetStyle = {
+    height: "100%",
+    overflow: "auto"
   }
   const mosaicLayoutStyle = {
     display: "flex",
@@ -349,7 +354,8 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
                     str,
                     Settings.dateFormats.forms.input.date,
                     true
-                  ).toDate()}
+                  ).toDate()
+                }
                 placeholder={inputFormat}
                 maxDate={moment().toDate()}
                 allowSingleDayRange
@@ -393,7 +399,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
             </Button>
           </span>
         }
-        style={flexStyle}
+        style={fieldsetStyle}
       >
         <MosaicLayout
           style={mosaicLayoutStyle}

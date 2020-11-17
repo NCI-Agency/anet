@@ -3495,4 +3495,76 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-jobHistory-table" author="gjvoosten">
+		<createTable tableName="jobHistory">
+			<column name="jobName" type="nvarchar(100)">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="lastRun" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="people-pendingVerification" author="VassilIordanov">
+		<comment>We are going to use pendingVerification column instead of the NEW_USER value of the status column</comment>
+		<sql dbms="mssql">
+			UPDATE people SET "pendingVerification" = 0;
+			UPDATE people SET status = 0, "pendingVerification" = 1 WHERE status = 2;
+		</sql>
+		<sql dbms="postgresql">
+			UPDATE people SET "pendingVerification" = false;
+			UPDATE people SET status = 0, "pendingVerification" = true WHERE status = 2;
+		</sql>
+	</changeSet>
+
+	<changeSet id="set-read_committed_snapshot-on" author="gjvoosten" runInTransaction="false" runOnChange="true">
+		<comment>Set READ_COMMITTED_SNAPSHOT to ON to prevent hangs due to locking</comment>
+		<!-- Requires at least SQL Server 2012: -->
+		<sql dbms="mssql">
+                        ALTER DATABASE CURRENT SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+		</sql>
+	</changeSet>
+
+	<changeSet id="change-periodStart-format" author="gjvoosten">
+		<comment>Convert zone-specific timestamp to zone-agnostic date in yyyy-MM-dd format</comment>
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__periodStart', FORMAT(CONVERT(datetime, JSON_VALUE(text, 'lax $.__periodStart'), 127) + 0.5, 'yyyy-MM-dd'))
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__periodStart') IS NOT NULL;
+		</sql>
+	</changeSet>
+	<changeSet id="fix-semiannually-typo" author="gjvoosten">
+		<comment>Fix typo in 'semiannually'</comment>
+		<!-- Note: the demo data has at most 3 assessment definitions for any one task
+		     and field installations have at most 2, so only update the first 3. -->
+
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__recurrence', 'semiannually')
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[0].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[0].recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[1].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[1].recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[2].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[2].recurrence') = 'semiannualy';
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

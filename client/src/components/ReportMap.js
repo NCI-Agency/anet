@@ -65,6 +65,7 @@ const ReportMap = ({
       width={width}
       height={height}
       marginBottom={marginBottom}
+      whenUnspecified={<em>No reports with a location found</em>}
     />
   )
 }
