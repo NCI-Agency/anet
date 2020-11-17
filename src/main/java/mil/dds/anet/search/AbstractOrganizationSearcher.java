@@ -39,8 +39,8 @@ public abstract class AbstractOrganizationSearcher extends
       addBatchClause(query);
     }
 
-    qb.addEqualsClause("status", "organizations.status", query.getStatus());
-    qb.addEqualsClause("type", "organizations.type", query.getType());
+    qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());
+    qb.addEnumEqualsClause("type", "organizations.type", query.getType());
 
     if (query.getHasParentOrg() != null) {
       if (query.getHasParentOrg()) {

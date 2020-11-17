@@ -214,11 +214,13 @@ public class PositionResourceTest extends AbstractResourceTest {
     retPos = graphQLHelper.getObjectById(jack, "position",
         FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(),
         new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(retPos.getAssociatedPositions().size()).isEqualTo(1);
-    assertThat(retPos.getAssociatedPositions()).contains(tashkil);
+    final List<Position> associatedPositions2 = new ArrayList<>(retPos.getAssociatedPositions());
+    assertThat(associatedPositions2.size()).isEqualTo(1);
+    assertThat(associatedPositions2).contains(tashkil);
 
     // delete the tashkil from this position
-    retPos.getAssociatedPositions().remove(tashkil);
+    associatedPositions2.remove(tashkil);
+    retPos.setAssociatedPositions(associatedPositions2);
     nrUpdated = graphQLHelper.updateObject(admin, "updateAssociatedPosition", "position",
         "PositionInput", retPos);
     assertThat(nrUpdated).isEqualTo(1);
@@ -227,7 +229,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     retPos = graphQLHelper.getObjectById(jack, "position",
         FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(),
         new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(retPos.getAssociatedPositions().size()).isEqualTo(0);
+    assertThat(associatedPositions2.size()).isEqualTo(0);
 
     // remove the principal from the tashkil
     nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", tashkil.getUuid());

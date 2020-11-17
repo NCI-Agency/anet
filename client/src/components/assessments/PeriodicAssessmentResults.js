@@ -165,39 +165,37 @@ export const PeriodicAssessmentsRows = ({
         _isEmpty(myPeriodAssessments)
     )
   })
-  const hasPeriodicAssessmentsRow = !_isEmpty(
-    periodsAssessments.filter(x => !_isEmpty(x))
-  )
   const hasAddAssessmentRow = !_isEmpty(
     periodsAllowNewAssessment.filter(x => x)
   )
   return (
     <>
-      {hasPeriodicAssessmentsRow && (
-        <tr>
-          {periodsAssessments.map((periodAssessments, index) => {
-            return (
-              <td key={index}>
-                {periodAssessments &&
-                  periodAssessments.map(({ note, assessment }, i) => (
-                    <div key={note.uuid}>
-                      <PeriodicAssessment
-                        note={note}
-                        assessment={assessment}
-                        assessmentYupSchema={assessmentYupSchema}
-                        assessmentConfig={assessmentConfig}
-                        entity={entity}
-                        period={periods[index]}
-                        recurrence={recurrence}
-                        onUpdateAssessment={onUpdateAssessment}
-                      />
-                    </div>
-                  ))}
-              </td>
-            )
-          })}
-        </tr>
-      )}
+      <tr>
+        {periodsAssessments.map((periodAssessments, index) => {
+          return (
+            <td key={index}>
+              {!_isEmpty(periodAssessments) ? (
+                periodAssessments.map(({ note, assessment }, i) => (
+                  <div key={note.uuid}>
+                    <PeriodicAssessment
+                      note={note}
+                      assessment={assessment}
+                      assessmentYupSchema={assessmentYupSchema}
+                      assessmentConfig={assessmentConfig}
+                      entity={entity}
+                      period={periods[index]}
+                      recurrence={recurrence}
+                      onUpdateAssessment={onUpdateAssessment}
+                    />
+                  </div>
+                ))
+              ) : (
+                <em>No periodic assessments</em>
+              )}
+            </td>
+          )
+        })}
+      </tr>
       {hasAddAssessmentRow && (
         <tr>
           {periods.map((period, index) => {

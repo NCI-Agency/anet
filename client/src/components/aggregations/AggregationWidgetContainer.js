@@ -159,11 +159,9 @@ const AggregationWidgetContainer = ({
   const WidgetComponent =
     (aggregationWidget && AGGREGATION_WIDGET_COMPONENTS[aggregationWidget]) ||
     AGGREGATION_WIDGET_COMPONENTS.default
-  if (WidgetComponent === ReportsMapWidget) {
-    otherWidgetProps.mapId = `map-${widgetId}`
-  }
   const widgetElem = (
     <WidgetComponent
+      widgetId={widgetId}
       values={values}
       valueType={dataType}
       vertical={vertical}

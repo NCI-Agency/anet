@@ -54,7 +54,7 @@ dictionary:
           style:
             height: 400px
         assessments:
-          - recurrence: semiannualy
+          - recurrence: semiannually
             questions:
               issues:
                 type: special_field
@@ -173,7 +173,9 @@ dictionary:
                 quarterly:
                   label: quarterly
                 semiannualy:
-                  label: semiannualy
+                  label: semiannually
+                annually:
+                  label: annually
             relatedObjectType:
               type: enum
               label: Related object type

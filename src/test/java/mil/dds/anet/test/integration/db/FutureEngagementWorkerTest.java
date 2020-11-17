@@ -314,7 +314,6 @@ public class FutureEngagementWorkerTest {
     engine.getApprovalStepDao().insertAtEnd(approvalStep);
 
     final Report report = TestBeans.getTestReport(author, approvalStep, ImmutableList.of());
-    engine.getReportDao().insert(report);
-    return report;
+    return engine.getReportDao().insert(report);
   }
 }

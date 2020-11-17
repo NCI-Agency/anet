@@ -25,14 +25,15 @@ public abstract class AbstractWorker implements Runnable {
 
   @Override
   public final void run() {
-    logger.debug(startMessage);
+    final String className = this.getClass().getSimpleName();
+    logger.debug("Starting {}: {}", className, startMessage);
     try {
-      jobHistoryDao.runInTransaction(this.getClass().getSimpleName(),
-          (now, jobHistory) -> runInternal(now, jobHistory));
+      jobHistoryDao.runInTransaction(className, (now, jobHistory) -> runInternal(now, jobHistory));
     } catch (Throwable e) {
       // Cannot let this thread die. Otherwise ANET will stop checking.
       logger.error("Exception in run()", e);
     }
+    logger.debug("Ending {}", className);
   }
 
 }

@@ -16,7 +16,7 @@ import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -224,7 +224,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
-                    <FastField
+                    <Field
                       name="parentOrg"
                       label={Settings.fields.organization.parentOrg}
                       component={FieldHelper.SpecialField}

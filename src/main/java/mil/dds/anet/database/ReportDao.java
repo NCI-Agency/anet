@@ -422,8 +422,13 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       throw new WebApplicationException(
           "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     }
-    long maxReportAge = Long.parseLong(maxReportAgeStr);
-    return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+    try {
+      long maxReportAge = Long.parseLong(maxReportAgeStr);
+      return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+    } catch (NumberFormatException e) {
+      throw new WebApplicationException("Invalid Admin Setting for "
+          + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS + ": " + maxReportAgeStr);
+    }
   }
 
   /*
@@ -893,54 +898,42 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     StringBuilder sql = new StringBuilder();
 
     sql.append("/* getFutureToPastReports */");
-    sql.append(
-        " SELECT reports.uuid AS reports_uuid, reports.\"authorUuid\" AS \"reports_authorUuid\"");
-    sql.append(" FROM reports");
-    // We are not interested in draft reports, as they will remain draft.
-    // We are not interested in cancelled reports, as they will remain cancelled.
-    sql.append(
-        " WHERE reports.state IN ( :reportApproved, :reportRejected, :reportPendingApproval, :reportPublished )");
-    // Get past reports relative to the endDate argument
-    sql.append(" AND reports.\"engagementDate\" <= :endDate");
-    sql.append(" AND ((");
-    // Get reports for engagements which just became past engagements during or
-    // after the planning approval process, but which are not in the report approval process yet
-    sql.append("   reports.uuid IN (");
-    sql.append("     SELECT pr.uuid");
-    sql.append("     FROM (");
-    sql.append("       SELECT r.uuid, ra.\"approvalStepUuid\"");
-    sql.append("       FROM reports r");
+    sql.append(" SELECT r.uuid AS reports_uuid, r.\"authorUuid\" AS \"reports_authorUuid\"");
+    sql.append(" FROM reports r");
     // FIXME: Hard-coded MS SQL or PostgreSQL specific query stanza
     if (DaoUtils.isMsSql()) {
-      sql.append("     CROSS APPLY (SELECT");
-      sql.append("       TOP (1)");
+      sql.append(" OUTER APPLY (SELECT TOP (1)");
     } else {
-      sql.append("     INNER JOIN LATERAL (SELECT"); // PostgreSQL
+      sql.append(" LEFT JOIN LATERAL (SELECT"); // PostgreSQL
     }
-    sql.append("           \"reportActions\".\"reportUuid\",");
-    sql.append("           \"reportActions\".\"approvalStepUuid\",");
-    sql.append("           \"reportActions\".planned");
-    sql.append("         FROM \"reportActions\"");
-    sql.append("         WHERE \"reportActions\".\"reportUuid\" = r.uuid");
-    sql.append("         AND ( \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
-    sql.append("         OR    \"reportActions\".planned = :planned )");
-    sql.append("         ORDER BY \"reportActions\".\"createdAt\" DESC");
+    sql.append("   ra.\"approvalStepUuid\", ra.planned");
+    sql.append("   FROM \"reportActions\" ra");
+    sql.append("   WHERE ra.\"reportUuid\" = r.uuid");
+    sql.append("   ORDER BY ra.\"createdAt\" DESC");
     if (DaoUtils.isMsSql()) {
-      sql.append("     ) ra");
+      sql.append(" ) ra");
     } else {
-      sql.append("       LIMIT 1"); // PostgreSQL
-      sql.append("     ) ra ON TRUE");
+      sql.append(" LIMIT 1) ra ON TRUE"); // PostgreSQL
     }
-    sql.append("       WHERE ra.planned = :planned OR ra.\"approvalStepUuid\" IN");
-    sql.append("         ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
-    sql.append("           WHERE \"approvalSteps\".type = :planningApprovalStepType )");
-    sql.append("     ) pr");
+    // We are not interested in draft reports, as they will remain draft.
+    // We are not interested in cancelled reports, as they will remain cancelled.
+    sql.append(" WHERE r.state IN (");
+    sql.append("   :reportApproved, :reportRejected, :reportPendingApproval, :reportPublished");
+    sql.append(" )");
+    // Get past reports relative to the endDate argument
+    sql.append(" AND r.\"engagementDate\" <= :endDate");
+    sql.append(" AND (");
+    // Get reports for engagements which just became past engagements during or
+    // after the planning approval process, but which are not in the report approval process yet
+    sql.append("   ra.planned = :planned");
+    sql.append("   OR ra.\"approvalStepUuid\" IN (");
+    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
+    sql.append("     WHERE a.type = :planningApprovalStepType");
     sql.append("   )");
-    sql.append(" ) OR (");
     // Also get reports pending planning approval when the approval action was not taken yet
-    sql.append("   reports.\"approvalStepUuid\" IN");
-    sql.append("     ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
-    sql.append("       WHERE \"approvalSteps\".type = :planningApprovalStepType )");
+    sql.append("   OR r.\"approvalStepUuid\" IN (");
+    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
+    sql.append("     WHERE a.type = :planningApprovalStepType");
     sql.append(" ))");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));

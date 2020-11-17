@@ -164,7 +164,8 @@ const RelatedObjectNotes = ({
             bsStyle="primary"
             style={{ margin: "5px" }}
             onClick={() =>
-              showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)}
+              showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)
+            }
           >
             Post new note
           </Button>
@@ -173,7 +174,8 @@ const RelatedObjectNotes = ({
               bsStyle="primary"
               style={{ margin: "5px" }}
               onClick={() =>
-                showRelatedObjectNoteModal("new", NOTE_TYPE.PARTNER_ASSESSMENT)}
+                showRelatedObjectNoteModal("new", NOTE_TYPE.PARTNER_ASSESSMENT)
+              }
             >
               Assess Person
             </Button>

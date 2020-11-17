@@ -102,7 +102,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addWhereClause("0 = 1");
     }
 
-    qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
+    qb.addStringEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
     qb.addDateRangeClause("startDate", "reports.\"engagementDate\"", Comparison.AFTER,
         query.getEngagementDateStart(), "endDate", "reports.\"engagementDate\"", Comparison.BEFORE,
         query.getEngagementDateEnd());
@@ -130,7 +130,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addSqlArg("attendeeUuid", query.getAttendeeUuid());
     }
 
-    qb.addEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
+    qb.addEnumEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
 
     if (query.getTaskUuid() != null) {
       if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
@@ -164,7 +164,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
         qb.addWhereClause("reports.\"locationUuid\" IS NULL");
       } else {
-        qb.addEqualsClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
+        qb.addStringEqualsClause("locationUuid", "reports.\"locationUuid\"",
+            query.getLocationUuid());
       }
     }
 
@@ -206,7 +207,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
         qb.addWhereClause("reports.\"cancelledReason\" IS NULL");
       } else {
-        qb.addEqualsClause("cancelledReason", "reports.\"cancelledReason\"",
+        qb.addEnumEqualsClause("cancelledReason", "reports.\"cancelledReason\"",
             query.getCancelledReason());
       }
     }
@@ -318,7 +319,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
       qb.addWhereClause("reports.\"advisorOrganizationUuid\" IS NULL");
     } else if (!query.getIncludeAdvisorOrgChildren()) {
-      qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
+      qb.addStringEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
           query.getAdvisorOrgUuid());
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
@@ -334,7 +335,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
       qb.addWhereClause("reports.\"principalOrganizationUuid\" IS NULL");
     } else if (!query.getIncludePrincipalOrgChildren()) {
-      qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
+      qb.addStringEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
           query.getPrincipalOrgUuid());
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",

@@ -416,7 +416,6 @@ export default class Report extends Model {
       const actions = Object.assign([], this.workflow)
       const lastApprovalStep = actions.pop()
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
-    } else {
     }
   }
 
@@ -475,6 +474,13 @@ export default class Report extends Model {
       return false // same report is not a conflicting report
     }
 
+    // cancelled reports not counted as conflict
+    if (
+      Report.isCancelled(report01.state) ||
+      Report.isCancelled(report02.state)
+    ) {
+      return false
+    }
     let start01
     let end01
 

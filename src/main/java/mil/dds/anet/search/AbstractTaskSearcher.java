@@ -43,8 +43,8 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
       addTaskedOrgUuidQuery(query);
     }
 
-    qb.addEqualsClause("category", "tasks.category", query.getCategory());
-    qb.addEqualsClause("status", "tasks.status", query.getStatus());
+    qb.addStringEqualsClause("category", "tasks.category", query.getCategory());
+    qb.addEnumEqualsClause("status", "tasks.status", query.getStatus());
     qb.addLikeClause("projectStatus", "tasks.\"customFieldEnum1\"", query.getProjectStatus());
     qb.addDateRangeClause("plannedCompletionStart", "tasks.\"plannedCompletion\"", Comparison.AFTER,
         query.getPlannedCompletionStart(), "plannedCompletionEnd", "tasks.\"plannedCompletion\"",
@@ -98,7 +98,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
           "parent_orgs", "organizations", "\"parentOrgUuid\"", "orgUuid", query.getTaskedOrgUuid(),
           RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
     } else {
-      qb.addEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
+      qb.addStringEqualsClause("orgUuid", "\"taskTaskedOrganizations\".\"organizationUuid\"",
           query.getTaskedOrgUuid());
     }
   }
@@ -117,8 +117,8 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     qb.addFromClause(
         "LEFT JOIN \"taskResponsiblePositions\" ON tasks.uuid = \"taskResponsiblePositions\".\"taskUuid\"");
 
-    qb.addEqualsClause("responsiblePositionUuid", "\"taskResponsiblePositions\".\"positionUuid\"",
-        query.getResponsiblePositionUuid());
+    qb.addStringEqualsClause("responsiblePositionUuid",
+        "\"taskResponsiblePositions\".\"positionUuid\"", query.getResponsiblePositionUuid());
   }
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {

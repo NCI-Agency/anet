@@ -19,7 +19,7 @@ public final class GraphQlDateTimeType {
     }
 
     @Override
-    public Instant parseValue(Object input) {
+    public Instant parseValue(Object input) throws NumberFormatException {
       if (input instanceof Long) {
         return Instant.ofEpochMilli((Long) input);
       } else if (input instanceof String) {
