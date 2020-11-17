@@ -34,7 +34,7 @@ public abstract class AbstractAuthorizationGroupSearcher
       addTextQuery(query);
     }
 
-    qb.addEqualsClause("status", "\"authorizationGroups\".status", query.getStatus());
+    qb.addEnumEqualsClause("status", "\"authorizationGroups\".status", query.getStatus());
 
     if (query.getPositionUuid() != null) {
       // Search for authorization groups related to a given position

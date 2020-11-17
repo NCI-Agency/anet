@@ -4,7 +4,7 @@ import "locale-compare-polyfill"
 // fetch() polyfill for making API calls.
 import "cross-fetch/polyfill"
 
-const isIE = /* @cc_on!@ */ false || !!document.documentMode
+const isIE = /* @cc_on!@ */ false || !!document.documentMode // lgtm[js/conditional-comment]
 
 if (isIE) {
   window.addEventListener("load", function() {
