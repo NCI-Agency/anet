@@ -161,7 +161,10 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                 />
               </Fieldset>
 
-              <Leaflet markers={[marker]} />
+              <Leaflet
+                markers={[marker]}
+                mapId={`${location.uuid}-${className || ""}`}
+              />
             </Form>
 
             <Approvals relatedObject={location} />
@@ -170,7 +173,8 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
               <ReportCollection
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
-                mapId="reports"
+                // If same component rendered multiple times, new mapId should be generated
+                mapId={`reports-location-${location.uuid}${className || ""}`}
               />
             </Fieldset>
           </div>

@@ -356,7 +356,8 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                 queryParams={{
                   taskUuid: uuid
                 }}
-                mapId="reports"
+                // If same component rendered multiple times, new mapId should be generated
+                mapId={`reports-task-${task.uuid}${className || ""}`}
               />
             </Fieldset>
           </div>

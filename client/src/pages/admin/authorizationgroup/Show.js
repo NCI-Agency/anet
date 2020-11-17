@@ -152,7 +152,10 @@ const AuthorizationGroupShow = ({
                   queryParams={{
                     authorizationGroupUuid: uuid
                   }}
-                  mapId="reports"
+                  // If same component rendered multiple times, new mapId should be generated
+                  mapId={`reports-auth-group-${authorizationGroup.uuid}${
+                    className || ""
+                  }`}
                   viewFormats={[
                     FORMAT_SUMMARY,
                     FORMAT_TABLE,

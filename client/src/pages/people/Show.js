@@ -323,7 +323,8 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                     queryParams={{
                       authorUuid: uuid
                     }}
-                    mapId="reports-authored"
+                    // If same component rendered multiple times, new mapId should be generated
+                    mapId={`reports-authored-${person.uuid}${className || ""}`}
                   />
                 </Fieldset>
               )}
@@ -336,7 +337,8 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                   queryParams={{
                     attendeeUuid: uuid
                   }}
-                  mapId="reports-attended"
+                  // If same component rendered multiple times, new mapId should be generated
+                  mapId={`reports-attended-${person.uuid}${className || ""}`}
                 />
               </Fieldset>
               <Fieldset title="Previous positions" id="previous-positions">
