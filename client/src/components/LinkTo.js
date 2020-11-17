@@ -129,7 +129,7 @@ export default class LinkTo extends Component {
         modelClass={ModelClass}
         uuid={modelInstance.uuid}
         popoverClassName="bp3-dark"
-        hoverCloseDelay={1000}
+        hoverCloseDelay={1500}
         portalClassName="linkto-model-preview-portal"
         isEdit={edit}
       >
