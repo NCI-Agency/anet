@@ -61,7 +61,7 @@ const ReportMap = ({
   return (
     <ReportsMapWidget
       values={reports}
-      mapId={mapId}
+      widgetId={mapId}
       width={width}
       height={height}
       marginBottom={marginBottom}
@@ -74,10 +74,14 @@ ReportMap.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
-  mapId: PropTypes.string, // pass this when you have more than one map on a page
+  // pass mapId explicitly when you have more than one map on a page (else the default is fine):
+  mapId: PropTypes.string.isRequired,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
+ReportMap.defaultProps = {
+  mapId: "reports"
+}
 export default connect(null, mapPageDispatchersToProps)(ReportMap)
