@@ -58,6 +58,9 @@ describe("Create position page", () => {
       EditPosition.orgAdvancedSelectFirstItem.click()
       expect(EditPosition.organizationInput.getValue()).to.equal(PRINCIPAL_ORG)
       EditPosition.cancelButton.click()
+
+      // prevents "unexpected alert open" errors on BrowserStack
+      browser.acceptAlert()
     })
   })
 })
