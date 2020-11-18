@@ -91,7 +91,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Map<String, Object> dict = new HashMap<>(config.getDictionary());
     @SuppressWarnings("unchecked")
     final List<String> activeDomainNames = (List<String>) dict.get("activeDomainNames");
-    activeDomainNames.add("dds.mil");
+    activeDomainNames.add("example.com");
     config.setDictionary(dict);
     emailWorker = new AnetEmailWorker(AnetObjectEngine.getInstance().getEmailDao(), config);
     emailServer = new FakeSmtpServer(config.getSmtp());

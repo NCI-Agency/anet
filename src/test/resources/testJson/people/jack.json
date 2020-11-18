@@ -2,7 +2,7 @@
 	"name" : "JACKSON, Jack",
 	"status" : "ACTIVE",
 	"role" : "ADVISOR",
-	"emailAddress" : "hunter+foobar@dds.mil",
+	"emailAddress" : "hunter+foobar@example.com",
 	"phoneNumber" : "123-456-78960",
 	"rank" : "OF-9",
 	"biography" : "this is a sample biography",

@@ -1,4 +1,3 @@
-const assert = require("assert")
 const _includes = require("lodash/includes")
 const moment = require("moment")
 const test = require("../util/test")
@@ -19,8 +18,6 @@ test.serial("Draft and submit a report", async t => {
     shortWaitMs,
     mediumWaitMs
   } = t.context
-
-  await httpRequestSmtpServer("DELETE")
 
   await t.context.get("/", "erin")
 
@@ -242,10 +239,6 @@ test.serial("Draft and submit a report", async t => {
     "Report submitted",
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
-
-  const serverResponse = await httpRequestSmtpServer("GET")
-  const jsonResponse = JSON.parse(serverResponse)
-  await assert.strictEqual(jsonResponse.length, 0) // Domain not in active users
 })
 
 test.serial("Publish report chain", async t => {
@@ -263,8 +256,6 @@ test.serial("Publish report chain", async t => {
     mediumWaitMs,
     longWaitMs
   } = t.context
-
-  await httpRequestSmtpServer("DELETE")
 
   // First Jacob needs to approve the report, then Rebecca can approve the report
   await approveReport(t, "jacob")
@@ -366,10 +357,6 @@ test.serial("Publish report chain", async t => {
     "meeting goal",
     "Daily Rollup report list includes the recently approved report"
   )
-
-  const serverResponse = await httpRequestSmtpServer("GET")
-  const jsonResponse = JSON.parse(serverResponse)
-  await assert.strictEqual(jsonResponse.length, 0) // Domains not in active users
 })
 
 async function approveReport(t, user) {
@@ -432,8 +419,6 @@ test.serial(
       shortWaitMs,
       By
     } = t.context
-
-    await httpRequestSmtpServer("DELETE")
 
     await pageHelpers.goHomeAndThenToReportsPage()
     await assertElementText(
@@ -694,27 +679,5 @@ test.serial(
       t,
       "This is a DRAFT report and hasn't been submitted."
     )
-
-    const serverResponse = await httpRequestSmtpServer("GET")
-    const jsonResponse = JSON.parse(serverResponse)
-    await assert.strictEqual(jsonResponse.length, 0) // No email should be sent
   }
 )
-
-function httpRequestSmtpServer(requestType) {
-  return new Promise((resolve, reject) => {
-    const XMLHttpRequest = require("xhr2")
-    const xhttp = new XMLHttpRequest()
-    // FIXME: Hard-coded URL
-    const url = "http://localhost:1180/api/emails"
-    xhttp.open(requestType, url)
-    xhttp.send()
-    xhttp.onreadystatechange = e => {
-      if (xhttp.readyState === 4) {
-        if (xhttp.status === 200) {
-          resolve(xhttp.responseText)
-        }
-      }
-    }
-  })
-}

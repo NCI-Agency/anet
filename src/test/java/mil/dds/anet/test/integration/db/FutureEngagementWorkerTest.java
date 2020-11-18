@@ -4,17 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportAction;
@@ -27,6 +31,8 @@ import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
+import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import org.junit.jupiter.api.AfterAll;
@@ -35,7 +41,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TestApp.class)
-public class FutureEngagementWorkerTest {
+public class FutureEngagementWorkerTest extends AbstractResourceTest {
   private final static List<String> expectedIds = new ArrayList<>();
   private final static List<String> unexpectedIds = new ArrayList<>();
 
@@ -137,6 +143,55 @@ public class FutureEngagementWorkerTest {
 
     // Report should be draft now
     testReportDraft(report.getUuid());
+  }
+
+  @Test
+  public void testGH3304() {
+    // Create a draft report
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Person author = getRegularUser();
+    final ReportPerson advisor = PersonTest.personToPrimaryReportAuthor(author);
+    final ReportPerson principal = PersonTest.personToPrimaryReportPerson(getSteveSteveson());
+    final Report report = TestBeans.getTestReport(null, Lists.newArrayList(advisor, principal));
+    report.setState(ReportState.DRAFT);
+    report.setEngagementDate(Instant.now().plus(1, ChronoUnit.HOURS));
+    final Report draftReport = engine.getReportDao().insert(report);
+
+    // Submit the report
+    graphQLHelper.updateObject(author, "submitReport", "uuid", "uuid", "String",
+        draftReport.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    // This planned report gets approved automatically
+    final Report submittedReport = testReportState(draftReport.getUuid(), ReportState.APPROVED);
+
+    // Nothing should happen
+    testFutureEngagementWorker(0);
+
+    // Move the engagementDate from future to past to simulate time passing
+    submittedReport.setEngagementDate(Instant.now().minus(1, ChronoUnit.HOURS));
+    engine.getReportDao().update(submittedReport);
+    // State shouldn't have changed
+    final Report updatedReport = testReportState(submittedReport.getUuid(), ReportState.APPROVED);
+
+    // Report is no longer planned, so this should update it
+    testFutureEngagementWorker(1);
+    // This should send an email to the author
+    expectedIds.add("hunter+erin");
+    // State should be DRAFT now
+    final Report redraftedReport = testReportDraft(updatedReport.getUuid());
+
+    // Submit the report
+    graphQLHelper.updateObject(author, "submitReport", "uuid", "uuid", "String",
+        redraftedReport.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    // This should send an email to the approver
+    expectedIds.add("hunter+jacob");
+    // State should be PENDING_APPROVAL
+    final Report resubmittedReport =
+        testReportState(redraftedReport.getUuid(), ReportState.PENDING_APPROVAL);
+
+    // Prior to the fix for GH-3304, it changed the report back to DRAFT and sent an email
+    testFutureEngagementWorker(0);
+    // State shouldn't have changed
+    testReportState(resubmittedReport.getUuid(), ReportState.PENDING_APPROVAL);
   }
 
   @Test
@@ -274,10 +329,15 @@ public class FutureEngagementWorkerTest {
     testReportDraft(report.getUuid());
   }
 
-  private void testReportDraft(final String uuid) {
+  private Report testReportDraft(final String uuid) {
+    return testReportState(uuid, ReportState.DRAFT);
+  }
+
+  private Report testReportState(final String uuid, final ReportState state) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Report updatedReport = engine.getReportDao().getByUuid(uuid);
-    assertThat(updatedReport.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(updatedReport.getState()).isEqualTo(state);
+    return updatedReport;
   }
 
   // DB integration
@@ -301,7 +361,7 @@ public class FutureEngagementWorkerTest {
     emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
   }
 
-  private static Report createTestReport(final String toAdressId) {
+  private Report createTestReport(final String toAdressId) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
     author.setEmailAddress(toAdressId + whitelistedEmail);
@@ -317,4 +377,5 @@ public class FutureEngagementWorkerTest {
     final Report report = TestBeans.getTestReport(approvalStep, ImmutableList.of(author));
     return engine.getReportDao().insert(report);
   }
+
 }
