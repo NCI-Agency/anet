@@ -93,9 +93,12 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
           + "  SELECT \"reportPeople\".\"personUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
           + "  JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\""
-          + "  WHERE reports.\"authorUuid\" = :userUuid AND \"reportPeople\".\"personUuid\" != :userUuid"
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
+          + "  AND \"reportPeople\".\"personUuid\" != :userUuid"
           + "  GROUP BY \"reportPeople\".\"personUuid\""
           + ") \"inMyReports\" ON people.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 

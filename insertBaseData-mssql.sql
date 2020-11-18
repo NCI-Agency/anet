@@ -547,154 +547,153 @@ UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'Mo
 DECLARE @reportUuid varchar(36);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss improvements in Annual Budgeting process',
 	'Today I met with this dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
-	'Meet with the dude again next week',
-	(SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), 2, '2016-05-25', 0,
+	'Meet with the dude again next week', 2, '2016-05-25', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='General Hospital'), 'Run through FY2016 Numbers on tool usage',
 	'Today we discussed the fiscal details of how spreadsheets break down numbers into rows and columns and then text is used to fill up space on a web page, it was very interesting and other adjectives',
 	'we read over the spreadsheets for the FY17 Budget',
-	'meet with him again :(', (SELECT uuid FROM people where domainUsername='jack'), 2, '2016-06-01', 0,
+	'meet with him again :(', 2, '2016-06-01', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+roger@dds.mil'), @reportUuid, 0);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.A'), @reportUuid);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'Looked at Hospital usage of Drugs',
 	'This report needs to fill up more space',
 	'putting something in the database to take up space',
-	'to be more creative next time', (SELECT uuid FROM people where domainUsername='jack'), 2, '2016-06-03', 0,
+	'to be more creative next time', 2, '2016-06-03', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.C'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Kabul Hospital'), 'discuss enagement of Doctors with Patients',
 	'Met with Nobody in this engagement and discussed no tasks, what a waste of time',
 	'None',
-	'Head over to the MoD Headquarters buildling for the next engagement', (SELECT uuid FROM people where domainUsername='jack'), 2, '2016-06-10', 0,
+	'Head over to the MoD Headquarters buildling for the next engagement', 2, '2016-06-10', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.A'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, releasedAt, engagementDate, atmosphere, atmosphereDetails, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, releasedAt, engagementDate, atmosphere, atmosphereDetails, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='MoD Headquarters Kabul'), 'Meet with Leadership regarding monthly status update',
 	'This engagement was sooooo interesting',
-	'Meet up with Roger next week to look at the numbers on the charts', (SELECT uuid FROM people where domainUsername='jack'), 2,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 'Guy was grumpy',
+	'Meet up with Roger next week to look at the numbers on the charts', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 'Guy was grumpy',
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+bob@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, authorUuid, state, releasedAt, engagementDate, atmosphere, atmosphereDetails, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, keyOutcomes, nextSteps, state, releasedAt, engagementDate, atmosphere, atmosphereDetails, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Fort Amherst'), 'Inspect Ft Amherst Medical Budgeting Facility?',
 	'Went over to the fort to look at the beds and the spreadsheets and the numbers and the whiteboards and the planning and all of the budgets. It was GREAT!',
 	'Seeing the whiteboards firsthand',
-	'head to Cabot Tower and inspect their whiteboards next week', (SELECT uuid FROM people where domainUsername='jack'), 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, 'Very good tea',
+	'head to Cabot Tower and inspect their whiteboards next week', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, 'Very good tea',
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+roger@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.A'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select uuid from locations where name='Cabot Tower'), 'Inspect Cabot Tower Budgeting Facility',
 	'Looked over the places around Cabot Tower for all of the things that people do when they need to do math.  There were calculators, and slide rules, and paper, and computers',
-	'keep writing fake reports to fill the database!!!', (SELECT uuid FROM people where domainUsername='jack'), 1, '2016-06-20', 1,
+	'keep writing fake reports to fill the database!!!', 1, '2016-06-20', 1,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.C'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Discuss discrepancies in monthly budgets',
 	'Back to the hospital this week to test the recent locations feature of ANET, and also to look at math and numbers and budgets and things',
-	'Meet with the dude again next week',(SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), 1, '2016-06-25', 0,
+	'Meet with the dude again next week', 1, '2016-06-25', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.A'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Air Operations Capabilities',
 	'We went to the Aiport and looked at the planes, and the hangers, and the other things that airports have. ',
-	'Go over to the Airport next week to look at the helicopters',(SELECT uuid FROM people where domainUsername='elizabeth'), 2, '2016-05-20', 0,
+	'Go over to the Airport next week to look at the helicopters', 2, '2016-05-20', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 1.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+roger@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+liz@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+liz@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '2.A'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='St Johns Airport'), 'Inspect Helicopter Capabilities',
 	'Today we looked at the helicopters at the aiport and talked in depth about how they were not in good condition and the AAF needed new equipment.  I expressed my concerns to the pilots and promised to see what we can do.',
-	'Figure out what can be done about the helicopters',(SELECT uuid FROM people where domainUsername='elizabeth'), 2, '2016-05-22', 0,
+	'Figure out what can be done about the helicopters', 2, '2016-05-22', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 1.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+roger@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+liz@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+liz@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '2.A'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls',
 	'Goal of the meeting was to look for the word spreadsheet in a report and then return that in a search result about budget. Lets see what happens!!',
-	'Searching for text', 'Test Cases are good', (SELECT uuid FROM people where domainUsername='erin'), 2, '2017-01-14', 0,
+	'Searching for text', 'Test Cases are good', 2, '2017-01-14', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.2'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+christopf@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+reina@dds.mil'), @reportUuid, 0);
 INSERT INTO reportTasks (taskUuid, reportUuid)
@@ -703,47 +702,47 @@ INSERT INTO reportsSensitiveInformation (uuid, createdAt, updatedAt, text, repor
 	VALUES (lower(newid()), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Need to know only', @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Look for Budget Controls Again',
 	'The search for the spreadsheet was doomed to be successful, so we needed to generate more data in order to get a more full test of the system that really is going to have much much larger reports in it one day.',
-	'Mocking up test cases','Better test data is always better', (SELECT uuid FROM people where domainUsername='erin'), 2, '2017-01-04', 0,
+	'Mocking up test cases','Better test data is always better', 2, '2017-01-04', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.2'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+christopf@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Talk to the Interior about things',
 	'We know that we want to go to the house with the food and eat the food, but the words in the database need to be long enough to do something. What that is were not sure, but we know we cant use apostrophies or spell.  Wow, we really cant do much, right? It was decided that we would do more tomorrow.',
-	'Mocking up test cases','Looking at the telescope with our eyes', (SELECT uuid FROM people where domainUsername='erin'), 2, '2017-01-04', 0,
+	'Mocking up test cases','Looking at the telescope with our eyes', 2, '2017-01-04', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.2'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+christopf@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
 	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, authorUuid, state, engagementDate, atmosphere, cancelledReason, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, cancelledReason, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Weekly Checkin with MG Somebody',
 	'Meeting got cancelled',
-	'Reschedule Meeting','', (SELECT uuid FROM people where domainUsername='erin'), 4, CURRENT_TIMESTAMP, 0, 1,
+	'Reschedule Meeting','', 4, CURRENT_TIMESTAMP, 0, 1,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.2'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+erin@dds.mil'), @reportUuid, 1, 1);
 
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
-	'keep on testing!','have reports in organizations', (SELECT uuid FROM people where domainUsername='arthur'), 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
+	'keep on testing!','have reports in organizations', 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
 	(SELECT uuid FROM organizations where shortName = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@dds.mil'), @reportUuid, 1, 1);
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@dds.mil'), @reportUuid, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
@@ -766,7 +765,12 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 UPDATE reports SET
 approvalStepUuid = (SELECT uuid FROM approvalSteps WHERE name = 'Default Approvers')
 WHERE reports.uuid IN
-(SELECT reports.uuid FROM reports INNER JOIN (people INNER JOIN (organizations INNER JOIN positions ON positions.organizationUuid = organizations.uuid) ON people.uuid = positions.currentPersonUuid) ON reports.authorUuid = people.uuid WHERE approvalStepUuid IS NULL AND reports.state = 1);
+(SELECT reports.uuid FROM reports
+INNER JOIN reportPeople ON reports.uuid = reportPeople.reportUuid AND reportPeople.isAuthor = 1
+INNER JOIN people ON reportPeople.personUuid = people.uuid
+INNER JOIN positions ON people.uuid = positions.currentPersonUuid
+INNER JOIN organizations ON positions.organizationUuid = organizations.uuid
+WHERE approvalStepUuid IS NULL AND reports.state = 1);
 
 --Set the Admin Settings
 INSERT INTO adminSettings ([key], value)
@@ -835,16 +839,15 @@ INSERT INTO reportTags (reportUuid, tagUuid)
 
 -- Insert report with created at and updated at date for two days before current timestamp
 SET @reportUuid = lower(newid());
-INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, authorUuid, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, DATEADD (day, -2, CURRENT_TIMESTAMP), DATEADD (day, -2, CURRENT_TIMESTAMP), (SELECT uuid from locations where name='General Hospital'), 'Discuss improvements in Annual Budgeting process',
 	'Today I met with Edwin the dude to tell him all the great things that he can do to improve his budgeting process. I hope he listened to me',
-	'Meet with the dude again next week',
-	(SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), 2, '2016-05-25', 0,
+	'Meet with the dude again next week', 2, '2016-05-25', 0,
 	(SELECT uuid FROM organizations where shortName = 'EF 2.1'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+steve@dds.mil'), @reportUuid, 1);
-INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
-	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+jack@dds.mil'), @reportUuid, 1, 1);
 
 -- Authorization groups
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)

@@ -56,7 +56,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
           + " { uuid name person { uuid name rank role } }";
   private static final String REPORT_FIELDS =
       "uuid state workflow { type createdAt person { uuid } step { " + APPROVAL_STEP_FIELDS
-          + " } }";
+          + " } } reportPeople { uuid role primary author attendee }";
   private static final String TASK_FIELDS = "uuid shortName longName status"
       + " customField customFieldEnum1 customFieldEnum2 plannedCompletion projectedCompletion"
       + " taskedOrganizations { uuid shortName longName identificationCode }"
@@ -521,17 +521,15 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private Report submitReport(String text, Person author, Task task, boolean isPlanned,
       ReportState expectedState) {
     final Report r = new Report();
-    r.setAuthor(author);
     final Instant engagementDate = Instant.now().plus(isPlanned ? 14 : -14, ChronoUnit.DAYS);
     r.setEngagementDate(engagementDate);
     r.setDuration(120);
     final Person reina = getPersonFromDb("REINTON, Reina");
     final Person steve = getPersonFromDb("STEVESON, Steve");
-    final ReportPerson advisor = PersonTest.personToReportPerson(reina);
-    advisor.setPrimary(true);
-    final ReportPerson principal = PersonTest.personToReportPerson(steve);
-    principal.setPrimary(true);
-    r.setAttendees(Lists.newArrayList(advisor, principal));
+    final ReportPerson advisor = PersonTest.personToPrimaryReportPerson(reina);
+    final ReportPerson principal = PersonTest.personToPrimaryReportPerson(steve);
+    r.setReportPeople(
+        Lists.newArrayList(advisor, principal, PersonTest.personToReportAuthor(author)));
     r.setTasks(Lists.newArrayList(task));
     final Location testLocation = new Location();
     testLocation.setUuid(TEST_LOCATION_UUID);

@@ -45,12 +45,12 @@ class CreateReport extends Page {
     return browser.$("#duration")
   }
 
-  get attendees() {
-    return browser.$("#attendees")
+  get reportPeople() {
+    return browser.$("#reportPeople")
   }
 
-  get attendeesTable() {
-    return browser.$("#attendees-popover .table-responsive table")
+  get reportPeopleTable() {
+    return browser.$("#reportPeople-popover .table-responsive table")
   }
 
   get submitButton() {
@@ -61,57 +61,73 @@ class CreateReport extends Page {
     super.open(PAGE_URL)
   }
 
-  getAdvisor(index) {
-    const advisor = browser.$(
-      `.advisorAttendeesTable tbody tr:nth-child(${index})`
-    )
+  getAdvisorByName(name) {
+    const advisor = browser
+      .$$("#reportPeopleContainer .advisorAttendeesTable tbody tr")
+      .find(r => {
+        return (
+          r.$("td.reportPeopleName").isExisting() &&
+          r.$("td.reportPeopleName").getText() === name
+        )
+      })
 
-    // wait for conflict loader to disappear
-    advisor.$("td:nth-child(6) div.bp3-spinner").waitForExist({ reverse: true })
-
-    return {
-      name: advisor.$("td:nth-child(2)").getText(),
-      conflictButton: advisor.$("td:nth-child(6) > span"),
-      deleteButton: advisor.$("td:nth-child(7) > button")
+    if (!advisor) {
+      return null
     }
+    // wait for conflict loader to disappear
+    advisor
+      .$("td.conflictButton div.bp3-spinner")
+      .waitForExist({ reverse: true })
+
+    const result = {
+      name: advisor.$("td.reportPeopleName").getText(),
+      conflictButton: advisor.$("td.conflictButton > span")
+    }
+
+    return result
   }
 
-  getPrincipal(index) {
+  getPrincipalByName(name) {
     // principals table has an empty row at top
-    const principal = browser.$(
-      `.principalAttendeesTable tbody tr:nth-child(${index + 1})`
-    )
-
+    const principal = browser
+      .$$("#reportPeopleContainer .principalAttendeesTable tbody tr")
+      .find(
+        r =>
+          r.$("td.reportPeopleName").isExisting() &&
+          r.$("td.reportPeopleName").getText() === name
+      )
+    if (!principal) {
+      return null
+    }
     // wait for conflict loader to disappear
     principal
-      .$("td:nth-child(6) div.bp3-spinner")
+      .$("td.conflictButton div.bp3-spinner")
       .waitForExist({ reverse: true })
 
     return {
-      name: principal.$("td:nth-child(2)").getText(),
-      conflictButton: principal.$("td:nth-child(6) > span"),
-      deleteButton: principal.$("td:nth-child(7) > button")
+      name: principal.$("td.reportPeopleName").getText(),
+      conflictButton: principal.$("td.conflictButton > span")
     }
   }
 
   selectAttendeeByName(name) {
-    this.attendees.click()
+    this.reportPeople.click()
     // wait for attendess table loader to disappear
-    this.attendeesTable.waitForDisplayed()
+    this.reportPeopleTable.waitForDisplayed()
     let searchTerm = name
     if (searchTerm.startsWith("CIV") || searchTerm.startsWith("Maj")) {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
     browser.keys(searchTerm)
-    this.attendeesTable.waitForDisplayed()
-    const checkBox = this.attendeesTable.$(
+    this.reportPeopleTable.waitForDisplayed()
+    const checkBox = this.reportPeopleTable.$(
       "tbody tr:first-child td:first-child input.checkbox"
     )
     if (!checkBox.isSelected()) {
       checkBox.click()
     }
     this.title.click()
-    this.attendeesTable.waitForDisplayed({ reverse: true })
+    this.reportPeopleTable.waitForDisplayed({ reverse: true })
   }
 
   fillForm(fields) {

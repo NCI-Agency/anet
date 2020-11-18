@@ -168,18 +168,57 @@ export default class Report extends Model {
           }
         )
         .default({}),
-      attendees: yup
+      reportPeople: yup
         .array()
         .nullable()
         .test(
           "primary-principal",
           "primary principal error",
           // can't use arrow function here because of binding to 'this'
-          function(attendees) {
+          function(reportPeople) {
             const err = Report.checkPrimaryAttendee(
-              attendees,
+              reportPeople,
               Person.ROLE.PRINCIPAL
             )
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "primary-advisor",
+          "primary advsior error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkPrimaryAttendee(
+              reportPeople,
+              Person.ROLE.ADVISOR
+            )
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "attending-author",
+          "no attending author error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkAttendingAuthor(reportPeople)
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "no-author",
+          "no author error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkAnyAuthor(reportPeople)
+            return err ? this.createError({ message: err }) : true
+          }
+        )
+        .test(
+          "purposeless-people",
+          "purposeless people error",
+          // can't use arrow function here because of binding to 'this'
+          function(reportPeople) {
+            const err = Report.checkUnInvolvedPeople(reportPeople)
             return err ? this.createError({ message: err }) : true
           }
         )
@@ -190,11 +229,24 @@ export default class Report extends Model {
               "primary-advisor",
               "primary advisor error",
               // can't use arrow function here because of binding to 'this'
-              function(attendees) {
+              function(reportPeople) {
                 const err = Report.checkPrimaryAttendee(
-                  attendees,
+                  reportPeople,
                   Person.ROLE.ADVISOR
                 )
+                return err ? this.createError({ message: err }) : true
+              }
+            )
+        )
+        .when("cancelled", (cancelled, schema) =>
+          cancelled
+            ? schema.nullable()
+            : schema.test(
+              "attending-author",
+              "no attending author error",
+              // can't use arrow function here because of binding to 'this'
+              function(reportPeople) {
+                const err = Report.checkAttendingAuthor(reportPeople)
                 return err ? this.createError({ message: err }) : true
               }
             )
@@ -298,7 +350,7 @@ export default class Report extends Model {
       )
   })
 
-  static autocompleteQuery = "uuid, intent, author { uuid, name, rank, role }"
+  static autocompleteQuery = "uuid, intent, authors { uuid, name, rank, role }"
 
   constructor(props) {
     super(Model.fillObject(props, Report.yupSchema))
@@ -382,8 +434,8 @@ export default class Report extends Model {
     return this.intent || "None"
   }
 
-  static checkPrimaryAttendee(attendees, role) {
-    const primaryAttendee = Report.getPrimaryAttendee(attendees, role)
+  static checkPrimaryAttendee(reportPeople, role) {
+    const primaryAttendee = Report.getPrimaryAttendee(reportPeople, role)
     const roleName = Person.humanNameOfRole(role)
     if (!primaryAttendee) {
       return `You must provide the primary ${roleName} for the Engagement`
@@ -401,8 +453,29 @@ export default class Report extends Model {
     }
   }
 
-  static getPrimaryAttendee(attendees, role) {
-    return attendees.find(el => el.role === role && el.primary)
+  static checkAttendingAuthor(reportPeople) {
+    if (!reportPeople?.some(rp => rp.author && rp.attendee)) {
+      return "You must provide at least 1 attending author"
+    }
+  }
+
+  static checkAnyAuthor(reportPeople) {
+    if (!reportPeople?.some(rp => rp.author)) {
+      return "You must provide at least 1 author"
+    }
+  }
+
+  // Report people shouldn't have any person who is both non-attending and non-author
+  static checkUnInvolvedPeople(reportPeople) {
+    if (reportPeople?.some(rp => !rp.author && !rp.attendee)) {
+      return "You must remove the people who have no involvement (neither attending nor author) before submitting"
+    }
+  }
+
+  static getPrimaryAttendee(reportPeople, role) {
+    return reportPeople?.find(
+      el => el.role === role && el.primary && el.attendee
+    )
   }
 
   static getEngagementDateFormat() {

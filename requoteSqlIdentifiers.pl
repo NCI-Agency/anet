@@ -30,6 +30,7 @@ my $identifiers = qr/
   | endOfTourDate
   | engagementDate
   | isPrimary
+  | isAuthor
   | identificationCode
   | jobSpec
   | keyOutcomes

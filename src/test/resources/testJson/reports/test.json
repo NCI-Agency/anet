@@ -14,7 +14,23 @@
 		"lng": -123.4999
 	},
 	"intent": "Check up with Steve",
-	"attendees": [{
+	"reportPeople": [{
+		"uuid": null,
+		"name": "JACKSON, Jack",
+		"status": "ACTIVE",
+		"role" : "ADVISOR",
+		"emailAddress": "hunter+foobar@dds.mil",
+		"phoneNumber": "123-456-78960",
+		"rank": "OF-9",
+		"biography": "this is a sample biography",
+		"domainUsername" : "jack",
+		"gender" : "Male",
+		"country" : "United States of America",
+		"endOfTourDate" : 1498780800000,
+		"primary" : false,
+		"author" : true,
+		"attendee" : true
+	}, {
 		"uuid": null,
 		"name": "STEVESON, Steve",
 		"status": "ACTIVE",
@@ -25,7 +41,9 @@
 		"biography": "this is a sample person who could be a Principal!",
 		"gender" : "Male",
 		"country" : "Afghanistan",
-		"primary" : true
+		"primary" : true,
+		"author" : false,
+		"attendee" : true
 	}],
 	"tasks": [{
 		"uuid": null,
@@ -44,20 +62,6 @@
 	"atmosphereDetails" : "This was a great meeting!!!",
 	"reportText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
 	"nextSteps": "Go for a boat ride with Steve tomorrow",
-	"author": {
-		"uuid": null,
-		"name": "JACKSON, Jack",
-		"status": "ACTIVE",
-		"role" : "ADVISOR",
-		"emailAddress": "hunter+foobar@dds.mil",
-		"phoneNumber": "123-456-78960",
-		"rank": "OF-9",
-		"biography": "this is a sample biography",
-		"domainUsername" : "jack",
-		"gender" : "Male",
-		"country" : "United States of America",
-		"endOfTourDate" : 1498780800000
-	},
 	"comments": [{
 		"uuid": null,
 		"author": {

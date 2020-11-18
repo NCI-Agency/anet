@@ -11,7 +11,7 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
     atmosphere
     atmosphereDetails
     state
-    author {
+    authors {
       uuid
       name
       rank

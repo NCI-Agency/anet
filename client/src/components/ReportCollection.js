@@ -1,8 +1,8 @@
 import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import {
-  PageDispatchersPropType,
-  mapPageDispatchersToProps
+  mapPageDispatchersToProps,
+  PageDispatchersPropType
 } from "components/Page"
 import ReportCalendar from "components/ReportCalendar"
 import ReportMap from "components/ReportMap"
@@ -84,7 +84,6 @@ const ReportCollection = ({
           )}
           {viewFormat === FORMAT_TABLE && (
             <ReportTable
-              showAuthors
               pageDispatchers={pageDispatchers}
               paginationKey={paginationKey}
               pagination={pagination}

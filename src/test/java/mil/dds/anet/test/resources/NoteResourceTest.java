@@ -25,6 +25,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
+import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.assertj.core.util.Lists;
@@ -123,6 +124,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Create test report
     final Report testReport = new Report();
     testReport.setIntent("a test report created by testDeleteDanglingReportNote");
+    testReport.setReportPeople(Collections.singletonList(PersonTest.personToReportAuthor(admin)));
     final String testReportUuid = graphQLHelper.createObject(admin, "createReport", "report",
         "ReportInput", testReport, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(testReportUuid).isNotNull();
@@ -186,6 +188,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Create test report
     final Report testReport = new Report();
     testReport.setIntent("a test report created by testDeleteDanglingReportTaskAssessment");
+    testReport.setReportPeople(Collections.singletonList(PersonTest.personToReportAuthor(admin)));
     final String testReportUuid = graphQLHelper.createObject(admin, "createReport", "report",
         "ReportInput", testReport, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(testReportUuid).isNotNull();
@@ -264,6 +267,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Create test report
     final Report testReport = new Report();
     testReport.setIntent("a test report created by testDeleteDanglingReportAttendeeAssessment");
+    testReport.setReportPeople(Collections.singletonList(PersonTest.personToReportAuthor(admin)));
     final String testReportUuid = graphQLHelper.createObject(admin, "createReport", "report",
         "ReportInput", testReport, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(testReportUuid).isNotNull();

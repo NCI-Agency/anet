@@ -11,7 +11,7 @@ query = gql('''
       uuid
       intent
       engagementDate
-      author {
+      authors {
         uuid
         name
       }

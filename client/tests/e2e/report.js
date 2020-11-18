@@ -53,12 +53,13 @@ test.serial("Draft and submit a report", async t => {
   await $positiveAtmosphereButton.click()
 
   const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
-    "#attendees",
+    "#reportPeople",
     "topferness, christopf"
   )
 
   const $attendeesTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Meeting attendance"]')
+    // if future "People who will be involved in this planned engagement"
+    By.xpath('//h2/span[text()="People involved in this engagement"]')
   )
   await $attendeesTitle.click()
 
@@ -70,6 +71,9 @@ test.serial("Draft and submit a report", async t => {
 
   const [
     $principalPrimary1,
+    /* eslint-disable no-unused-vars */ $principalAttendee1 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthor1 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalConflictBtn /* eslint-enable no-unused-vars */,
     $principalName1,
     $principalPosition1,
     /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
@@ -93,7 +97,7 @@ test.serial("Draft and submit a report", async t => {
   await assertElementText(t, $principalOrg1, "MoD")
 
   const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
-    "#attendees",
+    "#reportPeople",
     "steveson, steve"
   )
   await $attendeesTitle.click()
@@ -106,6 +110,9 @@ test.serial("Draft and submit a report", async t => {
 
   const [
     $principalPrimary2,
+    /* eslint-disable no-unused-vars */ $principalAttendeeCheckbox2 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox2 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthorConflictBtn /* eslint-enable no-unused-vars */,
     $principalName2,
     /* eslint-disable no-unused-vars */
     $principalPosition2,
@@ -598,12 +605,14 @@ test.serial(
       "Neutral atmospherics details"
     )
 
-    const $attendanceFieldsetTitle = await $("#attendance-fieldset .title-text")
+    const $reportPeopleFieldsetTitle = await $(
+      "#reportPeople-fieldset .title-text"
+    )
     await assertElementText(
       t,
-      $attendanceFieldsetTitle,
-      "Meeting attendance",
-      "Meeting attendance fieldset should have correct title for an uncancelled enagement"
+      $reportPeopleFieldsetTitle,
+      "People involved in this engagement",
+      "People fieldset should have correct title for an uncancelled enagement"
     )
 
     const $cancelledCheckbox = await $(".cancelled-checkbox")
@@ -622,9 +631,9 @@ test.serial(
     )
     await assertElementText(
       t,
-      $attendanceFieldsetTitle,
-      "Planned attendance",
-      "Meeting attendance fieldset should have correct title for a cancelled enagement"
+      $reportPeopleFieldsetTitle,
+      "People who will be involved in this planned engagement",
+      "People fieldset should have correct title for a cancelled enagement"
     )
 
     let $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
@@ -643,6 +652,9 @@ test.serial(
 
     const [
       $advisorPrimaryCheckbox,
+      /* eslint-disable no-unused-vars */ $advisorAttendeeCheckbox /* eslint-enable no-unused-vars */,
+      /* eslint-disable no-unused-vars */ $advisorAuthorCheckbox /* eslint-enable no-unused-vars */,
+      /* eslint-disable no-unused-vars */ $advisorConflictBtn /* eslint-enable no-unused-vars */,
       $advisorName,
       $advisorPosition,
       /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
@@ -661,7 +673,7 @@ test.serial(
     await assertElementText(t, $advisorOrg, "EF 2.2")
 
     const $addAttendeeShortcutButtons = await $$(
-      "#attendees-shortcut-list button"
+      "#reportPeople-shortcut-list button"
     )
     // Add all recent attendees
     await Promise.all(
