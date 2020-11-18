@@ -318,12 +318,12 @@ public class PersonResourceTest extends AbstractResourceTest {
 
 
     // Search by email Address
-    query.setText("hunter+arthur@dds.mil");
+    query.setText("hunter+arthur@example.com");
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     matchCount = searchResults.getList().stream()
-        .filter(p -> p.getEmailAddress().equals("hunter+arthur@dds.mil")).count();
+        .filter(p -> p.getEmailAddress().equals("hunter+arthur@example.com")).count();
     assertThat(matchCount).isEqualTo(1);
     // TODO: should we enforce that this query returns ONLY arthur? I think not since we're using
     // the plus addressing for testing..
