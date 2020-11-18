@@ -218,9 +218,7 @@ const CompactReportView = ({ pageDispatchers }) => {
     uuid
   })
 
-  const [optionalFields, setOptionalFields] = useState(
-    OPTIONAL_FIELDS_INIT_STATUS
-  )
+  const [optionalFields, setOptionalFields] = useState(OPTIONAL_FIELDS_INIT)
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -334,7 +332,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                   className="reportField"
                 />
               ) : null}
-              {isActiveField("Workflow") && report.showWorkflow() ? (
+              {optionalFields.workflow.active && report.showWorkflow() ? (
                 <CompactRowReportWorkflow
                   workflow={report.workflow}
                   compactStyle={WORKFLOW_STYLE}
@@ -494,7 +492,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                           )
                         }
                       />
-                      {isActiveField("Assessments") &&
+                      {optionalFields.assessments.active &&
                         taskInstantAssessmentConfig && (
                           <ReadonlyCustomFields
                             parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
@@ -546,7 +544,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                   </>
                 }
                 content={
-                  isActiveField("Assessments") &&
+                  optionalFields.assessments.active &&
                   attendeeInstantAssessmentConfig && (
                     <table>
                       <tbody>
@@ -614,30 +612,22 @@ const CompactReportView = ({ pageDispatchers }) => {
     })
     return sortedAttendees
   }
-
-  function isActiveField(fieldText) {
-    const index = optionalFields.findIndex(field => field.text === fieldText)
-    if (index === -1) {
-      throw new Error("No text found in the optional fields array")
-    }
-    return optionalFields[index].active
-  }
 }
 
 CompactReportView.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const OPTIONAL_FIELDS_INIT_STATUS = [
-  {
+const OPTIONAL_FIELDS_INIT = {
+  assessments: {
     text: "Assessments",
     active: false
   },
-  {
+  workflow: {
     text: "Workflow",
     active: false
   }
-]
+}
 
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
@@ -775,7 +765,7 @@ CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   returnToDefaultPage: PropTypes.func,
   noReport: PropTypes.bool,
-  optionalFields: PropTypes.arrayOf(PropTypes.object),
+  optionalFields: PropTypes.object,
   setOptionalFields: PropTypes.func
 }
 

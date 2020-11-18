@@ -5,17 +5,14 @@ import { useOutsideClick } from "utils"
 
 /**
  *  @param {string} label
- *  @param {object[]} options
+ *  @param {object} options {key1: { text: string, active: boolean}, ...}
  *  @param {function} setOptions
  */
 const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
   const [active, setActive] = useState(false)
   const dropDownRef = useRef(null)
   useOutsideClick(dropDownRef, () => setActive(false))
-  const optionsWithId = options.map(o => ({
-    ...o,
-    id: `${o.text.replace(/ /g, "")}-tick`
-  }))
+
   return (
     <DropdownButton ref={dropDownRef} active={active}>
       <button
@@ -26,17 +23,22 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
       </button>
       <div>
         <div>
-          {optionsWithId.map((option, index) => (
-            <label htmlFor={option.id} key={option.text}>
+          {Object.entries(options).map(([optionKey, option]) => (
+            <label htmlFor={optionKey} key={optionKey}>
               {option.text}
               <input
                 type="checkbox"
-                id={option.id}
+                id={optionKey}
                 checked={option.active}
                 onChange={() => {
                   setOptions(prev => {
-                    const newer = [...prev]
-                    newer[index].active = !newer[index].active
+                    // since it is object of objects
+                    // we need a sort of a deep copy to not alter the prev state
+                    const newer = {
+                      ...prev,
+                      [optionKey]: { ...prev[optionKey] }
+                    }
+                    newer[optionKey].active = !newer[optionKey].active
                     return newer
                   })
                 }}
@@ -97,7 +99,7 @@ const DropdownButton = styled.span`
 
 SimpleMultiCheckboxDropdown.propTypes = {
   label: PropTypes.string,
-  options: PropTypes.array,
+  options: PropTypes.object,
   setOptions: PropTypes.func
 }
 export default SimpleMultiCheckboxDropdown
