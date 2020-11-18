@@ -102,7 +102,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **disabled**: Set to true to disable sending email completely; most useful in development context.
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
-- **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
+- **serverUrl**: The URL for the ANET server, e.g.: `"https://anet.example.com"`.
 - **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
 - **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
@@ -364,7 +364,7 @@ dictionary:
   pinned_ORGs: [Key Leader Engagement]
   non_reporting_ORGs: [ANET Administrators]
   tasking_ORGs: [EF 2.2]
-  domainNames: [cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
+  domainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
   activeDomainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
   imagery:
     mapOptions:

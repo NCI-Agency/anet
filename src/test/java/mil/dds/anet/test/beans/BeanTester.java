@@ -20,7 +20,6 @@ public abstract class BeanTester<T> {
   public void serializesToJson(T obj, String jsonPath) throws Exception {
     final String expected =
         MAPPER.writeValueAsString(MAPPER.readValue(fixture(jsonPath), obj.getClass()));
-
     assertThat(MAPPER.writeValueAsString(obj)).isEqualTo(expected);
   }
 

@@ -167,21 +167,21 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     }
   }
 
-  public final void addEqualsClause(String paramName, String fieldName, Object fieldValue) {
+  public final void addObjectEqualsClause(String paramName, String fieldName, Object fieldValue) {
     if (fieldValue != null) {
       whereClauses.add(String.format("%s = :%s", fieldName, paramName));
       sqlArgs.put(paramName, fieldValue);
     }
   }
 
-  public final void addEqualsClause(String paramName, String fieldName, Enum<?> fieldValue) {
+  public final void addEnumEqualsClause(String paramName, String fieldName, Enum<?> fieldValue) {
     if (fieldValue != null) {
       whereClauses.add(String.format("%s = :%s", fieldName, paramName));
       sqlArgs.put(paramName, DaoUtils.getEnumId(fieldValue));
     }
   }
 
-  public final void addEqualsClause(String paramName, String fieldName, String fieldValue) {
+  public final void addStringEqualsClause(String paramName, String fieldName, String fieldValue) {
     if (fieldValue != null && !fieldValue.trim().isEmpty()) {
       whereClauses.add(String.format("%s = :%s", fieldName, paramName));
       sqlArgs.put(paramName, fieldValue);

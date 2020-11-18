@@ -19,8 +19,11 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-<#assign reportAuthor = (report.loadAuthor(context).get())!>
-Hi ${reportAuthor.name},<br><br>
+Hi
+<#assign reportAuthors = (report.loadAuthors(context).get())!>
+<#list reportAuthors as reportAuthor>
+  ${reportAuthor.name},
+</#list><br><br>
 
 <p>The date of your upcoming engagement, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is today. We've changed this upcoming engagement 
 into a draft engagement report. You can find and edit it by going to the "My drafts" on the "My reports" page, 

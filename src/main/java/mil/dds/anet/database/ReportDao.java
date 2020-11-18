@@ -68,8 +68,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   public static final String[] minimalFields = {"uuid", "approvalStepUuid",
       "advisorOrganizationUuid", "createdAt", "updatedAt", "engagementDate", "releasedAt", "state"};
   public static final String[] additionalFields = {"duration", "intent", "exsum", "locationUuid",
-      "principalOrganizationUuid", "authorUuid", "atmosphere", "cancelledReason",
-      "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "customFields"};
+      "principalOrganizationUuid", "atmosphere", "cancelledReason", "atmosphereDetails", "text",
+      "keyOutcomes", "nextSteps", "customFields"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
   public static final String TABLE_NAME = "reports";
@@ -112,12 +112,12 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     // MSSQL requires explicit CAST when a datetime2 might be NULL.
     StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
         + "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
-        + "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
+        + "text, \"keyOutcomes\", \"nextSteps\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
         + "\"principalOrganizationUuid\", \"customFields\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
-        + ":exsum, :reportText, :keyOutcomes, :nextSteps, :authorUuid, ");
+        + ":exsum, :reportText, :keyOutcomes, :nextSteps, ");
     if (DaoUtils.isMsSql()) {
       sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
     } else {
@@ -144,11 +144,11 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     r.setReportSensitiveInformation(rsi);
 
     final ReportBatch rb = getDbHandle().attach(ReportBatch.class);
-    if (r.getAttendees() != null) {
-      // Setify based on attendeeUuid to prevent violations of unique key constraint.
-      Map<String, ReportPerson> attendeeMap = new HashMap<>();
-      r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getUuid(), rp));
-      rb.insertReportAttendees(r.getUuid(), new ArrayList<ReportPerson>(attendeeMap.values()));
+    if (r.getReportPeople() != null) {
+      // Setify based on uuid to prevent violations of unique key constraint.
+      Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
+      r.getReportPeople().stream().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
+      rb.insertReportPeople(r.getUuid(), new ArrayList<ReportPerson>(reportPeopleMap.values()));
     }
 
     if (r.getAuthorizationGroups() != null) {
@@ -164,8 +164,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   public interface ReportBatch {
-    @SqlBatch("INSERT INTO \"reportPeople\" (\"reportUuid\", \"personUuid\", \"isPrimary\") VALUES (:reportUuid, :uuid, :primary)")
-    void insertReportAttendees(@Bind("reportUuid") String reportUuid,
+    @SqlBatch("INSERT INTO \"reportPeople\" (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\") VALUES (:reportUuid, :uuid, :primary, :author)")
+    void insertReportPeople(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
     @SqlBatch("INSERT INTO \"reportAuthorizationGroups\" (\"reportUuid\", \"authorizationGroupUuid\") VALUES (:reportUuid, :uuid)")
@@ -260,27 +260,32 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   @InTransaction
-  public int addAttendeeToReport(ReportPerson rp, Report r) {
-    return getDbHandle().createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
-        + "(\"personUuid\", \"reportUuid\", \"isPrimary\") VALUES (:personUuid, :reportUuid, :isPrimary)")
+  public int addPersonToReport(ReportPerson rp, Report r) {
+    return getDbHandle()
+        .createUpdate("/* addReportPerson */ INSERT INTO \"reportPeople\" "
+            + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\")"
+            + " VALUES (:personUuid, :reportUuid, :isPrimary, :isAuthor, :isAttendee)")
         .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid())
-        .bind("isPrimary", rp.isPrimary()).execute();
+        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor())
+        .bind("isAttendee", rp.isAttendee()).execute();
   }
 
   @InTransaction
-  public int removeAttendeeFromReport(Person p, Report r) {
+  public int removePersonFromReport(Person p, Report r) {
     return getDbHandle()
-        .createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
+        .createUpdate("/* deleteReportPerson */ DELETE FROM \"reportPeople\" "
             + "WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
         .bind("reportUuid", r.getUuid()).bind("personUuid", p.getUuid()).execute();
   }
 
   @InTransaction
-  public int updateAttendeeOnReport(ReportPerson rp, Report r) {
-    return getDbHandle().createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
-        + "SET \"isPrimary\" = :isPrimary WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
+  public int updatePersonOnReport(ReportPerson rp, Report r) {
+    return getDbHandle().createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
+        + "SET \"isPrimary\" = :isPrimary, \"isAuthor\" = :isAuthor, \"isAttendee\" = :isAttendee"
+        + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
         .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid())
-        .bind("isPrimary", rp.isPrimary()).execute();
+        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor())
+        .bind("isAttendee", rp.isAttendee()).execute();
   }
 
   @InTransaction
@@ -333,9 +338,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("tagUuid", t.getUuid()).execute();
   }
 
-  public CompletableFuture<List<ReportPerson>> getAttendeesForReport(
+  public CompletableFuture<List<ReportPerson>> getPeopleForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_ATTENDEES,
+    return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_PEOPLE,
         reportUuid);
   }
 
@@ -389,9 +394,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         "/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?",
         reportUuid);
 
-    // Delete attendees
+    // Delete reportPeople
     getDbHandle().execute(
-        "/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?",
+        "/* deleteReport.reportPeople */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?",
         reportUuid);
 
     // Delete comments
@@ -422,8 +427,13 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       throw new WebApplicationException(
           "Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     }
-    long maxReportAge = Long.parseLong(maxReportAgeStr);
-    return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+    try {
+      long maxReportAge = Long.parseLong(maxReportAgeStr);
+      return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+    } catch (NumberFormatException e) {
+      throw new WebApplicationException("Invalid Admin Setting for "
+          + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS + ": " + maxReportAgeStr);
+    }
   }
 
   /*
@@ -501,15 +511,17 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append("%3$s");
     sql.append("%4$s");
     sql.append(" " + String.format(getWeekFormat(), "reports.\"createdAt\"") + " AS week,");
-    sql.append("COUNT(reports.\"authorUuid\") AS \"nrReportsSubmitted\"");
+    sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrReportsSubmitted\"");
 
     sql.append(" FROM ");
     sql.append("positions,");
     sql.append("reports,");
+    sql.append("\"reportPeople\",");
     sql.append("%5$s");
     sql.append("organizations");
 
-    sql.append(" WHERE positions.\"currentPersonUuid\" = reports.\"authorUuid\"");
+    sql.append(" WHERE positions.\"currentPersonUuid\" = \"reportPeople\".\"personUuid\"");
+    sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
     sql.append(" %6$s");
     sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
     sql.append(" AND positions.type = :positionAdvisor");
@@ -596,7 +608,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   /**
    * Helper method that builds and executes the daily rollup query. Searching for just all reports
    * and for reports in certain organizations.
-   * 
+   *
    * @param orgType the type of organization to be looking for
    * @param orgs the list of orgs for whose reports to find, null means all
    * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
@@ -712,21 +724,23 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   static class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
-    private static final String sql = "/* batch.getAttendeesForReport */ SELECT "
+    private static final String sql = "/* batch.getPeopleForReport */ SELECT "
         + PersonDao.PERSON_FIELDS
-        + ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
+        + ", \"reportPeople\".\"reportUuid\", \"reportPeople\".\"isPrimary\""
+        + ", \"reportPeople\".\"isAuthor\", \"reportPeople\".\"isAttendee\" FROM \"reportPeople\" "
         + "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
-        + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> )";
+        + "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> ) "
+        + "ORDER BY people.name, people.uuid";
 
     public ReportPeopleBatcher() {
       super(sql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
     }
   }
 
-  public List<List<ReportPerson>> getAttendees(List<String> foreignKeys) {
-    final ForeignKeyBatcher<ReportPerson> attendeesBatcher =
+  public List<List<ReportPerson>> getReportPeople(List<String> foreignKeys) {
+    final ForeignKeyBatcher<ReportPerson> reportPeopleBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(ReportPeopleBatcher.class);
-    return attendeesBatcher.getByForeignKeys(foreignKeys);
+    return reportPeopleBatcher.getByForeignKeys(foreignKeys);
   }
 
   static class TagsBatcher extends ForeignKeyBatcher<Tag> {
@@ -784,12 +798,14 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   public void sendApprovalNeededEmail(Report r, ApprovalStep approvalStep) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final List<Position> approvers = approvalStep.loadApprovers(engine.getContext()).join();
+    final List<ReportPerson> authors = r.loadAuthors(engine.getContext()).join();
     final AnetEmail approverEmail = new AnetEmail();
     final ApprovalNeededEmail action = new ApprovalNeededEmail();
     action.setReport(r);
     approverEmail.setAction(action);
     approverEmail.setToAddresses(approvers.stream()
-        .filter(a -> (a.getPersonUuid() != null) && !a.getPersonUuid().equals(r.getAuthorUuid()))
+        .filter(a -> (a.getPersonUuid() != null)
+            && authors.stream().noneMatch(p -> a.getPersonUuid().equals(p.getUuid())))
         .map(a -> a.loadPerson(engine.getContext()).join().getEmailAddress())
         .collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(approverEmail);
@@ -800,8 +816,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     final ReportPublishedEmail action = new ReportPublishedEmail();
     action.setReport(r);
     email.setAction(action);
-    email.addToAddress(
-        r.loadAuthor(AnetObjectEngine.getInstance().getContext()).join().getEmailAddress());
+    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -828,7 +844,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         r.setState(ReportState.APPROVED);
       }
     }
-    final int numRows = update(r, r.getAuthor());
+    final Optional<ReportPerson> firstAuthor =
+        r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream().findFirst();
+    final int numRows = update(r, firstAuthor.orElse(null));
     if (numRows != 0 && nextStep != null) {
       sendApprovalNeededEmail(r, nextStep);
     }
@@ -875,7 +893,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     // Move the report to PUBLISHED state
     r.setState(ReportState.PUBLISHED);
     r.setReleasedAt(Instant.now());
-    final int numRows = update(r, r.getAuthor());
+    final Optional<ReportPerson> firstAuthor =
+        r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream().findFirst();
+    final int numRows = update(r, firstAuthor.orElse(null));
     if (numRows != 0) {
       sendReportPublishedEmail(r);
     }
@@ -893,54 +913,42 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     StringBuilder sql = new StringBuilder();
 
     sql.append("/* getFutureToPastReports */");
-    sql.append(
-        " SELECT reports.uuid AS reports_uuid, reports.\"authorUuid\" AS \"reports_authorUuid\"");
-    sql.append(" FROM reports");
-    // We are not interested in draft reports, as they will remain draft.
-    // We are not interested in cancelled reports, as they will remain cancelled.
-    sql.append(
-        " WHERE reports.state IN ( :reportApproved, :reportRejected, :reportPendingApproval, :reportPublished )");
-    // Get past reports relative to the endDate argument
-    sql.append(" AND reports.\"engagementDate\" <= :endDate");
-    sql.append(" AND ((");
-    // Get reports for engagements which just became past engagements during or
-    // after the planning approval process, but which are not in the report approval process yet
-    sql.append("   reports.uuid IN (");
-    sql.append("     SELECT pr.uuid");
-    sql.append("     FROM (");
-    sql.append("       SELECT r.uuid, ra.\"approvalStepUuid\"");
-    sql.append("       FROM reports r");
+    sql.append(" SELECT r.uuid AS reports_uuid");
+    sql.append(" FROM reports r");
     // FIXME: Hard-coded MS SQL or PostgreSQL specific query stanza
     if (DaoUtils.isMsSql()) {
-      sql.append("     CROSS APPLY (SELECT");
-      sql.append("       TOP (1)");
+      sql.append(" OUTER APPLY (SELECT TOP (1)");
     } else {
-      sql.append("     INNER JOIN LATERAL (SELECT"); // PostgreSQL
+      sql.append(" LEFT JOIN LATERAL (SELECT"); // PostgreSQL
     }
-    sql.append("           \"reportActions\".\"reportUuid\",");
-    sql.append("           \"reportActions\".\"approvalStepUuid\",");
-    sql.append("           \"reportActions\".planned");
-    sql.append("         FROM \"reportActions\"");
-    sql.append("         WHERE \"reportActions\".\"reportUuid\" = r.uuid");
-    sql.append("         AND ( \"reportActions\".\"approvalStepUuid\" IS NOT NULL");
-    sql.append("         OR    \"reportActions\".planned = :planned )");
-    sql.append("         ORDER BY \"reportActions\".\"createdAt\" DESC");
+    sql.append("   ra.\"approvalStepUuid\", ra.planned");
+    sql.append("   FROM \"reportActions\" ra");
+    sql.append("   WHERE ra.\"reportUuid\" = r.uuid");
+    sql.append("   ORDER BY ra.\"createdAt\" DESC");
     if (DaoUtils.isMsSql()) {
-      sql.append("     ) ra");
+      sql.append(" ) ra");
     } else {
-      sql.append("       LIMIT 1"); // PostgreSQL
-      sql.append("     ) ra ON TRUE");
+      sql.append(" LIMIT 1) ra ON TRUE"); // PostgreSQL
     }
-    sql.append("       WHERE ra.planned = :planned OR ra.\"approvalStepUuid\" IN");
-    sql.append("         ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
-    sql.append("           WHERE \"approvalSteps\".type = :planningApprovalStepType )");
-    sql.append("     ) pr");
+    // We are not interested in draft reports, as they will remain draft.
+    // We are not interested in cancelled reports, as they will remain cancelled.
+    sql.append(" WHERE r.state IN (");
+    sql.append("   :reportApproved, :reportRejected, :reportPendingApproval, :reportPublished");
+    sql.append(" )");
+    // Get past reports relative to the endDate argument
+    sql.append(" AND r.\"engagementDate\" <= :endDate");
+    sql.append(" AND (");
+    // Get reports for engagements which just became past engagements during or
+    // after the planning approval process, but which are not in the report approval process yet
+    sql.append("   ra.planned = :planned");
+    sql.append("   OR ra.\"approvalStepUuid\" IN (");
+    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
+    sql.append("     WHERE a.type = :planningApprovalStepType");
     sql.append("   )");
-    sql.append(" ) OR (");
     // Also get reports pending planning approval when the approval action was not taken yet
-    sql.append("   reports.\"approvalStepUuid\" IN");
-    sql.append("     ( SELECT \"approvalSteps\".uuid FROM \"approvalSteps\"");
-    sql.append("       WHERE \"approvalSteps\".type = :planningApprovalStepType )");
+    sql.append("   OR r.\"approvalStepUuid\" IN (");
+    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
+    sql.append("     WHERE a.type = :planningApprovalStepType");
     sql.append(" ))");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));

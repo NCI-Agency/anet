@@ -51,7 +51,7 @@ public abstract class AbstractPositionSearcher
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(),
             RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
-        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
+        qb.addStringEqualsClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());
       }
     }
@@ -64,8 +64,8 @@ public abstract class AbstractPositionSearcher
       }
     }
 
-    qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
-    qb.addEqualsClause("status", "positions.status", query.getStatus());
+    qb.addStringEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    qb.addEnumEqualsClause("status", "positions.status", query.getStatus());
 
     if (query.getAuthorizationGroupUuid() != null) {
       // Search for positions related to a given authorization group

@@ -1,7 +1,7 @@
 plugins {
 	id "com.bmuschko.docker-remote-api" version "6.6.1"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.spotless" version "5.7.0"
+	id "com.diffplug.spotless" version "5.8.2"
 	id 'org.beryx.runtime' version '1.11.4'
 	id 'nebula.ospackage' version '8.4.1'
 }
@@ -78,7 +78,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.4.1.jre14'
 	implementation 'org.postgresql:postgresql:42.2.18' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.1.1'
+	implementation 'org.liquibase:liquibase-core:4.2.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.0'

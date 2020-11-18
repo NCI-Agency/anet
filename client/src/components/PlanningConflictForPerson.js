@@ -36,7 +36,7 @@ const GET_PERSON_WITH_REPORTS = gql`
   }
 `
 
-const BasePlanningConflictForPerson = ({ person, report }) => {
+const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
   const { loading, error, data } = API.useApiQuery(GET_PERSON_WITH_REPORTS, {
     uuid: person.uuid,
     attendedReportsQuery: {
@@ -101,8 +101,12 @@ const BasePlanningConflictForPerson = ({ person, report }) => {
       }
       target={
         <Button icon={IconNames.WARNING_SIGN} intent={Intent.WARNING} minimal>
-          {conflictingReports.length}&nbsp;
-          {pluralize("conflict", conflictingReports.length)}
+          {!iconOnly && (
+            <>
+              {conflictingReports.length}&nbsp;
+              {pluralize("conflict", conflictingReports.length)}
+            </>
+          )}
         </Button>
       }
       interactionKind={PopoverInteractionKind.CLICK}
@@ -112,19 +116,27 @@ const BasePlanningConflictForPerson = ({ person, report }) => {
 
 BasePlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person).isRequired,
-  report: PropTypes.instanceOf(Report).isRequired
+  report: PropTypes.instanceOf(Report).isRequired,
+  iconOnly: PropTypes.bool
 }
 
-const PlanningConflictForPerson = ({ person, report }) => {
+const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
   if (!person?.uuid || !report?.engagementDate) {
     return null
   }
-  return <BasePlanningConflictForPerson person={person} report={report} />
+  return (
+    <BasePlanningConflictForPerson
+      person={person}
+      report={report}
+      iconOnly={iconOnly}
+    />
+  )
 }
 
 PlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person),
-  report: PropTypes.instanceOf(Report)
+  report: PropTypes.instanceOf(Report),
+  iconOnly: PropTypes.bool
 }
 
 export default PlanningConflictForPerson

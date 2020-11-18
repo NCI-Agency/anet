@@ -28,7 +28,7 @@ const GQL_GET_REPORT_LIST = gql`
         atmosphere
         atmosphereDetails
         state
-        author {
+        authors {
           uuid
           name
           rank
@@ -81,7 +81,6 @@ const ReportTable = ({
   pageDispatchers,
   queryParams,
   setTotalCount,
-  showAuthors,
   showStatus,
   paginationKey,
   pagination,
@@ -143,7 +142,7 @@ const ReportTable = ({
         <Table striped>
           <thead>
             <tr>
-              {showAuthors && <th>Author</th>}
+              <th>Authors</th>
               <th>Organization</th>
               <th>Summary</th>
               {showStatus && <th>Status</th>}
@@ -154,11 +153,14 @@ const ReportTable = ({
           <tbody>
             {reports.map(report => (
               <tr key={report.uuid}>
-                {showAuthors && (
-                  <td>
-                    <LinkTo modelType="Person" model={report.author} />
-                  </td>
-                )}
+                <td>
+                  {report.authors?.map(a => (
+                    <React.Fragment key={a.uuid}>
+                      <LinkTo modelType="Person" model={a} />
+                      <br />
+                    </React.Fragment>
+                  ))}
+                </td>
                 <td>
                   <LinkTo modelType="Organization" model={report.advisorOrg} />
                 </td>
@@ -193,7 +195,6 @@ ReportTable.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
-  showAuthors: PropTypes.bool,
   showStatus: PropTypes.bool,
   paginationKey: PropTypes.string.isRequired,
   pagination: PropTypes.object.isRequired,

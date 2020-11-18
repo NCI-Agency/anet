@@ -333,8 +333,11 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <#assign reportAuthor = (report.loadAuthor(context).get())!>
-            <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
+            <#assign reportAuthors = (report.loadAuthors(context).get())!>
+            <#list reportAuthors as reportAuthor>
+              <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
+              <br>
+            </#list>
           </div>
         </div>
       </div>
@@ -367,7 +370,7 @@ ${sender.name} sent you a report from ANET:
 
   <div>
     <h2 class="legend">
-      <span class="title-text">Meeting attendees</span>
+      <span class="title-text">People involved in this engagement</span>
     </h2>
     <fieldset>
       <table class="borderless table table-condensed">

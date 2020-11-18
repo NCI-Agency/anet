@@ -35,17 +35,19 @@ const GQL_GET_REPORT = gql`
         uuid
         name
       }
-      author {
+      authors {
         uuid
         name
         rank
         role
         avatar(size: 32)
       }
-      attendees {
+      reportPeople {
         uuid
         name
+        author
         primary
+        attendee
         rank
         role
         status
@@ -132,8 +134,8 @@ const ReportEdit = ({ pageDispatchers }) => {
     report.getAttendeesEngagementAssessments()
   )
   reportInitialValues.tasks = Task.fromArray(reportInitialValues.tasks)
-  reportInitialValues.attendees = Person.fromArray(
-    reportInitialValues.attendees
+  reportInitialValues.reportPeople = Person.fromArray(
+    reportInitialValues.reportPeople
   )
 
   return (

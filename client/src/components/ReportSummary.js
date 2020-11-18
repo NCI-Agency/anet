@@ -34,12 +34,6 @@ const GQL_GET_REPORT_LIST = gql`
         atmosphere
         atmosphereDetails
         state
-        author {
-          uuid
-          name
-          rank
-          role
-        }
         primaryAdvisor {
           uuid
           name
