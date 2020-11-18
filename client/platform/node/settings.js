@@ -5,6 +5,7 @@ console.log("Using dictionary file " + process.env.ANET_DICTIONARY)
 const anetConfig = jsyaml.safeLoad(
   fs.readFileSync(process.env.ANET_DICTIONARY, "utf8")
 )
-const Settings = anetConfig.dictionary
+const Settings = anetConfig
+const Version = "Sim-Mode"
 
-export default Settings
+export { Version, Settings as default }
