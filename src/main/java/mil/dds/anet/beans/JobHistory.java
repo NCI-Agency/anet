@@ -30,4 +30,8 @@ public class JobHistory {
     this.lastRun = lastRun;
   }
 
+  public static Instant getLastRun(JobHistory jobHistory) {
+    return jobHistory == null ? null : jobHistory.getLastRun();
+  }
+
 }

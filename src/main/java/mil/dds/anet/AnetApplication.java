@@ -57,6 +57,7 @@ import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
 import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
@@ -237,6 +238,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
       scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
 
       runAccountDeactivationWorker(configuration, scheduler, engine);
+
+      // Check for any missing pending assessments every 6 hours.
+      // And run once in 25 seconds from boot-up. (give the server time to boot up).
+      final PendingAssessmentsNotificationWorker pendingAssessmentsNotificationWorker =
+          new PendingAssessmentsNotificationWorker(configuration);
+      scheduler.scheduleAtFixedRate(pendingAssessmentsNotificationWorker, 6, 6, TimeUnit.HOURS);
+      scheduler.schedule(pendingAssessmentsNotificationWorker, 25, TimeUnit.SECONDS);
 
       if (DaoUtils.isPostgresql()) {
         // Wait 60 seconds between updates of PostgreSQL materialized views,
