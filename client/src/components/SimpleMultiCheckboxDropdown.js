@@ -64,16 +64,25 @@ const DropdownButton = styled.span`
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 100%;
 
-    background-color: lightblue;
+    background-color: rgb(208, 232, 240);
     padding: 3px 5px;
-    border-radius: 5px;
+    border-radius: 0px 0px 5px 5px;
 
     position: absolute;
     left: 0;
 
+    label {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+    }
+
     input {
-      margin-left: 5px;
+      margin-left: auto;
       width: 16px;
       height: 16px;
     }
