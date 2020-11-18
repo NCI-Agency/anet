@@ -3567,4 +3567,77 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-reportPeople-attendee" author="gjvoosten">
+		<addColumn tableName="reportPeople">
+			<column name="isAttendee" type="boolean" defaultValue="true" />
+		</addColumn>
+		<!-- Set isAttendee flag to true for all previously written reports -->
+		<sql dbms="postgresql">
+			UPDATE "reportPeople"
+			SET "isAttendee" = TRUE;
+		</sql>
+		<sql dbms="mssql">
+			UPDATE "reportPeople"
+			SET "isAttendee" = 1;
+		</sql>
+	</changeSet>
+
+	<changeSet id="add-reportPeople-author" author="cemalettin-simsoft">
+		<!-- Before, we saved report's author with reports.authorUuid -->
+		<!-- since we need more authors we will save it with a flag in reportPeople.isAuthor -->
+		<addColumn tableName="reportPeople">
+			<column name="isAuthor" type="boolean" defaultValue="false" />
+		</addColumn>
+		<!-- Insert reportPeople rows for authors who were not attendees -->
+		<sql dbms="postgresql">
+			INSERT INTO "reportPeople" ("reportUuid", "personUuid", "isPrimary", "isAuthor", "isAttendee")
+				SELECT
+					r.uuid,
+					r."authorUuid",
+					FALSE,
+					TRUE,
+					FALSE
+				FROM
+					reports r
+				WHERE NOT EXISTS (
+					SELECT rp."reportUuid"
+					FROM "reportPeople" rp
+					WHERE rp."reportUuid" = r.uuid
+					AND rp."personUuid" = r."authorUuid"
+				);
+		</sql>
+		<sql dbms="mssql">
+			INSERT INTO "reportPeople" ("reportUuid", "personUuid", "isPrimary", "isAuthor", "isAttendee")
+				SELECT
+					r.uuid,
+					r."authorUuid",
+					0,
+					1,
+					0
+				FROM
+					reports r
+				WHERE NOT EXISTS (
+					SELECT rp."reportUuid"
+					FROM "reportPeople" rp
+					WHERE rp."reportUuid" = r.uuid
+					AND rp."personUuid" = r."authorUuid"
+				);
+		</sql>
+		<!-- Set isAuthor flag to true for all authors of previously written reports -->
+		<sql dbms="postgresql">
+			UPDATE "reportPeople"
+			SET "isAuthor" = TRUE
+			WHERE "personUuid" = (SELECT "authorUuid" FROM reports WHERE uuid = "reportUuid");
+		</sql>
+		<sql dbms="mssql">
+			UPDATE "reportPeople"
+			SET "isAuthor" = 1
+			WHERE "personUuid" = (SELECT "authorUuid" FROM reports WHERE uuid = "reportUuid");
+		</sql>
+		<!-- Now drop the obsolete authorUuid column -->
+		<dropIndex tableName="reports" indexName="IDX_reports_authorUuid" />
+		<dropForeignKeyConstraint baseTableName="reports" constraintName="FK_reports_author" />
+		<dropColumn tableName="reports" columnName="authorUuid" />
+	</changeSet>
+
 </databaseChangeLog>

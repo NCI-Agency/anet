@@ -157,4 +157,3 @@ logging:
       archivedLogFilenamePattern: ./logs/anet-%d.log.zip
       archivedFileCount: 2
       logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-

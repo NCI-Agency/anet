@@ -136,7 +136,7 @@ const GQL_GET_REPORT_LIST = gql`
         atmosphere
         atmosphereDetails
         state
-        author {
+        authors {
           uuid
           name
           rank

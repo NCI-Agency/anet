@@ -49,7 +49,8 @@ public class DailyRollupEmail implements AnetEmailAction {
   }
 
   @Override
-  public Map<String, Object> buildContext(Map<String, Object> context) {
+  public Map<String, Object> buildContext(Map<String, Object> context)
+      throws NumberFormatException {
     String maxReportAgeStr = AnetObjectEngine.getInstance()
         .getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     long maxReportAge = Long.parseLong(maxReportAgeStr);

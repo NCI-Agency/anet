@@ -82,7 +82,7 @@ describe("Create new Person form page", () => {
       // perform submit form to prevent warning dialog
       CreatePerson.emailAddress.setValue(
         "\uE003".repeat(CreatePerson.emailAddress.getValue().length) +
-          "test@dds.mil"
+          "test@example.com"
       )
       CreatePerson.lastName.click()
       CreatePerson.submitForm()

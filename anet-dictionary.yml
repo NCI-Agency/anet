@@ -10,9 +10,9 @@ dateFormats:
   forms:
     input:
       date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
-             DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
+              DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
       withTime: [DD-MM-YYYY HH:mm, DD-MM-YY HH:mm, DD/MM/YYYY HH:mm, DD/MM/YY HH:mm, DD MM YYYY HH:mm, DD MM YY HH:mm,
-                 DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
+                  DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
     displayShort:
       date: D MMMM YYYY
       withTime: D MMMM YYYY @ HH:mm
@@ -327,7 +327,7 @@ fields:
     domainUsername: Domain username
     emailAddress:
       label: Email
-      placeholder: Only the following email domain names are allowed. ( cmil.mil ,mission.ita ,nato.int ,dds.mil ,*.isaf.nato.int )
+      placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
     phoneNumber: Phone
     country: Nationality
     code: ID card number
@@ -643,8 +643,8 @@ fields:
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
 tasking_ORGs: [EF 2.2]
-domainNames: [cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
-activeDomainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 imagery:
   mapOptions:
     crs: EPSG3857

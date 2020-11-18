@@ -40,7 +40,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
       .put("reportText", "text").put("location", "locationUuid")
       .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
-      .put("principalOrg", "principalOrganizationUuid").put("author", "authorUuid").build();
+      .put("principalOrg", "principalOrganizationUuid").build();
 
   public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
     super(qb);
@@ -102,7 +102,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       qb.addWhereClause("0 = 1");
     }
 
-    qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
+    if (query.getAuthorUuid() != null) {
+      qb.addWhereClause("reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :authorUuid)");
+      qb.addSqlArg("isAuthor", true);
+      qb.addSqlArg("authorUuid", query.getAuthorUuid());
+    }
     qb.addDateRangeClause("startDate", "reports.\"engagementDate\"", Comparison.AFTER,
         query.getEngagementDateStart(), "endDate", "reports.\"engagementDate\"", Comparison.BEFORE,
         query.getEngagementDateEnd());
@@ -125,12 +130,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getAttendeeUuid() != null) {
-      qb.addWhereClause(
-          "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :attendeeUuid)");
+      qb.addWhereClause("reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"personUuid\" = :attendeeUuid and \"isAttendee\" = :isAttendee)");
+      qb.addSqlArg("isAttendee", true);
       qb.addSqlArg("attendeeUuid", query.getAttendeeUuid());
     }
 
-    qb.addEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
+    qb.addEnumEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
 
     if (query.getTaskUuid() != null) {
       if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
@@ -164,7 +170,8 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
         qb.addWhereClause("reports.\"locationUuid\" IS NULL");
       } else {
-        qb.addEqualsClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
+        qb.addStringEqualsClause("locationUuid", "reports.\"locationUuid\"",
+            query.getLocationUuid());
       }
     }
 
@@ -206,7 +213,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
         qb.addWhereClause("reports.\"cancelledReason\" IS NULL");
       } else {
-        qb.addEqualsClause("cancelledReason", "reports.\"cancelledReason\"",
+        qb.addEnumEqualsClause("cancelledReason", "reports.\"cancelledReason\"",
             query.getCancelledReason());
       }
     }
@@ -220,10 +227,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (query.getAuthorPositionUuid() != null) {
       // Search for reports authored by people serving in that position at the report's creation
       // date
-      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r "
-          + PositionDao.generateCurrentPositionFilter("r.\"authorUuid\"", "r.\"createdAt\"",
+      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
+          + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+          + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"createdAt\"",
               "authorPositionUuid")
-          + ")");
+          + " AND rp.\"isAuthor\" = :isAuthor)");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("authorPositionUuid", query.getAuthorPositionUuid());
     }
 
@@ -240,11 +249,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.getAttendeePositionUuid() != null) {
       // Search for reports attended by people serving in that position at the engagement date
-      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
-          + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
-          + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"engagementDate\"",
-              "attendeePositionUuid")
-          + ")");
+      qb.addWhereClause(
+          "reports.uuid IN (SELECT r.uuid FROM reports r"
+              + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+              + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"",
+                  "r.\"engagementDate\"", "attendeePositionUuid")
+              + " AND rp.\"isAttendee\" = :isAttendee)");
+      qb.addSqlArg("isAttendee", true);
       qb.addSqlArg("attendeePositionUuid", query.getAttendeePositionUuid());
     }
 
@@ -270,10 +281,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
         qb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
       } else {
-        qb.addWhereClause(
-            "((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
+        qb.addWhereClause("((reports.state != :draftState AND reports.state != :rejectedState) OR ("
+            + " reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+            + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)))");
         qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+        qb.addSqlArg("isAuthor", true);
         qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
       }
     }
@@ -318,7 +331,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
       qb.addWhereClause("reports.\"advisorOrganizationUuid\" IS NULL");
     } else if (!query.getIncludeAdvisorOrgChildren()) {
-      qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
+      qb.addStringEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
           query.getAdvisorOrgUuid());
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
@@ -334,7 +347,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
       qb.addWhereClause("reports.\"principalOrganizationUuid\" IS NULL");
     } else if (!query.getIncludePrincipalOrgChildren()) {
-      qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
+      qb.addStringEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
           query.getPrincipalOrgUuid());
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",

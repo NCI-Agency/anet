@@ -56,7 +56,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @Override
   protected void addEngagementDayOfWeekQuery(ReportSearchQuery query) {
-    qb.addEqualsClause("engagementDayOfWeek",
+    qb.addObjectEqualsClause("engagementDayOfWeek",
         String.format(this.isoDowFormat, "reports.\"engagementDate\""),
         query.getEngagementDayOfWeek());
   }
