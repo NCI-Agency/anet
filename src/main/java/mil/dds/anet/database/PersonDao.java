@@ -62,7 +62,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private static final int ACTIVITY_LOG_LIMIT = 100;
 
   private Cache<String, Person> domainUsersCache;
-  private MetricRegistry metricRegistry;
 
   public PersonDao() {
     try {
@@ -77,14 +76,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     } catch (URISyntaxException | NullPointerException e) {
       logger.warn("Caching config {} not found, proceeding without caching", EHCACHE_CONFIG);
     }
-  }
-
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
-
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
   }
 
   public Cache<String, Person> getDomainUsersCache() {
@@ -263,6 +254,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
       return null;
     }
     final Person person = domainUsersCache.get(domainUsername);
+    final MetricRegistry metricRegistry = AnetObjectEngine.getInstance().getMetricRegistry();
     if (metricRegistry != null) {
       metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "LoadCount")).inc();
       if (person == null) {

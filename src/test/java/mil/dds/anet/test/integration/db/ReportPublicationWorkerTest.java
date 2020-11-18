@@ -70,8 +70,8 @@ public class ReportPublicationWorkerTest {
         "@" + ((List<String>) configuration.getDictionaryEntry("domainNames")).get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
-    reportPublicationWorker = new ReportPublicationWorker(engine.getReportDao(), configuration);
+    emailWorker = new AnetEmailWorker(configuration, engine.getEmailDao());
+    reportPublicationWorker = new ReportPublicationWorker(configuration, engine.getReportDao());
     emailServer = new FakeSmtpServer(configuration.getSmtp());
 
     // Flush all reports from previous tests
