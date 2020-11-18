@@ -28,10 +28,9 @@ SelectLocationFormat.propTypes = {
 }
 
 const LocationFormatSelector = styled.select`
-  margin-left: 10px;
-  outline: 2px solid #337ab7;
   font-size: 14px;
   margin-left: 1rem;
+  padding: 4px;
   & > option {
     font-size: 1.4rem;
     font-weight: bold;
