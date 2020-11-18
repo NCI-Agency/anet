@@ -445,7 +445,7 @@ task dockerStartKeycloak(type: com.bmuschko.gradle.docker.tasks.container.Docker
 
 task dockerExportKeycloakRealm(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	group = "keycloak container"
-	description = "Epxorts ANET-Realm from " + keycloakContainerName + " container."
+	description = "Exports ANET-Realm from " + keycloakContainerName + " container."
 	targetContainerId { keycloakContainerName }
 	commands = [ ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.socket.binding.port-offset=100", "-Dkeycloak.migration.action=export", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.realmName=ANET-Realm", "-Dkeycloak.migration.file=/hostdata/ANET-Realm-export.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"] as String[] ]
 }
