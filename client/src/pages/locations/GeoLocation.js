@@ -18,6 +18,7 @@ import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
+import utils from "utils"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
   FORM_FIELD: "FORM_FIELD",
@@ -101,14 +102,6 @@ const ReadonlyGeoLocation = styled.div`
   }
 `
 
-function fnRequiredWhenEditable(props, propName, componentName) {
-  if (props.editable === true && typeof props[propName] !== "function") {
-    return new Error(
-      `Invalid prop '${propName}' is supplied to ${componentName}. '${propName}' isRequired when ${componentName} is editable and '${propName}' must be a function!`
-    )
-  }
-}
-
 export const CoordinatesPropType = PropTypes.shape({
   // user can input string
   lat: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -119,8 +112,8 @@ export const CoordinatesPropType = PropTypes.shape({
 GeoLocation.propTypes = {
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
-  setFieldValue: fnRequiredWhenEditable,
-  setFieldTouched: fnRequiredWhenEditable,
+  setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
+  setFieldTouched: utils.fnRequiredWhen.bind(null, "editable"),
   isSubmitting: PropTypes.bool,
   displayType: PropTypes.oneOf([
     GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD,
@@ -204,8 +197,8 @@ const MGRSFormField = ({
 MGRSFormField.propTypes = {
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
-  setFieldValue: fnRequiredWhenEditable,
-  setFieldTouched: fnRequiredWhenEditable,
+  setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
+  setFieldTouched: utils.fnRequiredWhen.bind(null, "editable"),
   isSubmitting: PropTypes.bool,
   locationFormat: PropTypes.string,
   setLocationFormat: PropTypes.func
@@ -312,8 +305,8 @@ const LatLonFormField = ({
 LatLonFormField.propTypes = {
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
-  setFieldValue: fnRequiredWhenEditable,
-  setFieldTouched: fnRequiredWhenEditable,
+  setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
+  setFieldTouched: utils.fnRequiredWhen.bind(null, "editable"),
   isSubmitting: PropTypes.bool,
   locationFormat: PropTypes.string,
   setLocationFormat: PropTypes.func
@@ -361,8 +354,8 @@ CoordinateActionButtons.propTypes = {
   onClear: PropTypes.func.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
   disabled: PropTypes.bool,
-  locationFormat: PropTypes.string,
-  setLocationFormat: PropTypes.func
+  locationFormat: PropTypes.string.isRequired,
+  setLocationFormat: PropTypes.func.isRequired
 }
 
 CoordinateActionButtons.defaultProps = {

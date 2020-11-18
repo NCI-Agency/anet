@@ -23,8 +23,8 @@ const SelectLocationFormat = ({ locationFormat, setLocationFormat }) => {
 }
 
 SelectLocationFormat.propTypes = {
-  locationFormat: PropTypes.string,
-  setLocationFormat: PropTypes.func
+  locationFormat: PropTypes.string.isRequired,
+  setLocationFormat: PropTypes.func.isRequired
 }
 
 const LocationFormatSelector = styled.select`
