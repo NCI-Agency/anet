@@ -5,6 +5,7 @@ import {
   Tooltip2
 } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+import styled from "@emotion/styled"
 import * as FieldHelper from "components/FieldHelper"
 import SelectLocationFormat from "components/SelectLocationFormat"
 import { Field } from "formik"
@@ -49,14 +50,14 @@ const GeoLocation = ({
 
   if (!editable) {
     const humanValue = (
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <ReadonlyGeoLocation>
         <CoordinatesFormField coordinates={coordinates} />
         <AllFormatsInfo coordinates={coordinates} />
         <SelectLocationFormat
           locationFormat={locationFormat}
           setLocationFormat={setLocationFormat}
         />
-      </div>
+      </ReadonlyGeoLocation>
     )
 
     if (displayType === GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD) {
@@ -88,6 +89,17 @@ const GeoLocation = ({
     />
   )
 }
+
+const ReadonlyGeoLocation = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  @media (max-width: 440px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`
 
 function fnRequiredWhenEditable(props, propName, componentName) {
   if (props.editable === true && typeof props[propName] !== "function") {
@@ -219,11 +231,11 @@ const LatLonFormField = ({
   const { lat, lng } = coordinates
   if (!editable) {
     return (
-      <>
+      <div>
         <span>{lat || lat === 0 ? lat : "?"}</span>
         <span>,&nbsp;</span>
         <span>{lng || lng === 0 ? lng : "?"}</span>
-      </>
+      </div>
     )
   }
   return (
