@@ -284,7 +284,6 @@
       "standard"
     ],
     "rules": {
-      "default-param-last": "off",
       "eqeqeq": [
         "error",
         "always"
