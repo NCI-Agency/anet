@@ -63,7 +63,8 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
 const AuthorizationGroupShow = ({
   pageDispatchers,
   uuid: uuidProp,
-  className
+  className,
+  previewId
 }) => {
   const { currentUser } = useContext(AppContext)
   const uuidParam = useParams().uuid
@@ -92,7 +93,7 @@ const AuthorizationGroupShow = ({
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
-  const isPreview = isPreviewMode(className)
+  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>
@@ -153,8 +154,8 @@ const AuthorizationGroupShow = ({
                     authorizationGroupUuid: uuid
                   }}
                   // If same component rendered multiple times, new mapId should be generated
-                  mapId={`reports-auth-group-${authorizationGroup.uuid}${
-                    className || ""
+                  mapId={`reports-${authorizationGroup.uuid}-${
+                    previewId || ""
                   }`}
                   viewFormats={[
                     FORMAT_SUMMARY,
@@ -176,7 +177,8 @@ const AuthorizationGroupShow = ({
 AuthorizationGroupShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   uuid: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  previewId: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupShow)

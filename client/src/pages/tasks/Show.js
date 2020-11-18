@@ -131,7 +131,12 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
+const TaskShow = ({
+  pageDispatchers,
+  uuid: uuidProp,
+  className,
+  previewId
+}) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const uuidParam = useParams().uuid
   const uuid = uuidProp || uuidParam
@@ -185,7 +190,7 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
-  const isPreview = isPreviewMode(className)
+  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={task}>
@@ -254,6 +259,7 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                               modelType="Organization"
                               model={org}
                               key={`${org.uuid}`}
+                              previewId="task-show-org"
                             />
                           ))}
                         </>
@@ -267,7 +273,11 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         task.customFieldRef1 && (
-                          <LinkTo modelType="Task" model={task.customFieldRef1}>
+                          <LinkTo
+                            modelType="Task"
+                            model={task.customFieldRef1}
+                            previewId="task-show-ref"
+                          >
                             {task.customFieldRef1.shortName}{" "}
                             {task.customFieldRef1.longName}
                           </LinkTo>
@@ -356,8 +366,8 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                 queryParams={{
                   taskUuid: uuid
                 }}
-                // If same component rendered multiple times, new mapId should be generated
-                mapId={`reports-task-${task.uuid}${className || ""}`}
+                // If same component rendered multiple times on the same page, new mapId should be generated
+                mapId={`reports-${task.uuid}-${previewId || ""}`}
               />
             </Fieldset>
           </div>
@@ -370,7 +380,8 @@ const TaskShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
 TaskShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   uuid: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  previewId: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(TaskShow)

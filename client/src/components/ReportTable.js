@@ -156,19 +156,28 @@ const ReportTable = ({
                 <td>
                   {report.authors?.map(a => (
                     <React.Fragment key={a.uuid}>
-                      <LinkTo modelType="Person" model={a} />
+                      <LinkTo
+                        modelType="Person"
+                        model={a}
+                        previewId="rep-table-authors"
+                      />
                       <br />
                     </React.Fragment>
                   ))}
                 </td>
                 <td>
-                  <LinkTo modelType="Organization" model={report.advisorOrg} />
+                  <LinkTo
+                    modelType="Organization"
+                    model={report.advisorOrg}
+                    previewId="rep-table-adv"
+                  />
                 </td>
                 <td>
                   <LinkTo
                     modelType="Report"
                     model={report}
                     className="read-report-button"
+                    previewId="rep-table-read"
                   />
                 </td>
                 {showStatus && <td>{report.state}</td>}

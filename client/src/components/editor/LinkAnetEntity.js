@@ -4,7 +4,7 @@ import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 
-const LinkAnetEntity = ({ type, uuid, children }) => {
+const LinkAnetEntity = ({ type, uuid, children, previewId }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
   }, [type, uuid])
 
   return (
-    <LinkTo modelType={type} model={entity}>
+    <LinkTo modelType={type} model={entity} previewId={previewId}>
       {children}
     </LinkTo>
   )
@@ -25,6 +25,7 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
 LinkAnetEntity.propTypes = {
   type: PropTypes.string.isRequired,
   uuid: PropTypes.string.isRequired,
+  previewId: PropTypes.string,
   children: PropTypes.any
 }
 

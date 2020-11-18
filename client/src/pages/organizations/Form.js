@@ -14,8 +14,8 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import { jumpToTop } from "components/Page"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
@@ -187,6 +187,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                           <LinkTo
                             modelType="Organization"
                             model={values.parentOrg}
+                            previewId="org-form-parent"
                           >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}

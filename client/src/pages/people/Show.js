@@ -103,7 +103,12 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
+const PersonShow = ({
+  pageDispatchers,
+  uuid: uuidProp,
+  className,
+  previewId
+}) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
@@ -163,7 +168,7 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
     .filter(ap => ap.person)
     .map(ap => ap.person.uuid)
     .includes(person.uuid)
-  const isPreview = isPreviewMode(className)
+  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -323,8 +328,8 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                     queryParams={{
                       authorUuid: uuid
                     }}
-                    // If same component rendered multiple times, new mapId should be generated
-                    mapId={`reports-authored-${person.uuid}${className || ""}`}
+                    // If same component rendered multiple times on the same page, new mapId should be generated
+                    mapId={`reports-authored-${person.uuid}-${previewId || ""}`}
                   />
                 </Fieldset>
               )}
@@ -337,8 +342,8 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                   queryParams={{
                     attendeeUuid: uuid
                   }}
-                  // If same component rendered multiple times, new mapId should be generated
-                  mapId={`reports-attended-${person.uuid}${className || ""}`}
+                  // If same component rendered multiple times on the same page, new mapId should be generated
+                  mapId={`reports-attended-${person.uuid}-${previewId || ""}`}
                 />
               </Fieldset>
               <Fieldset title="Previous positions" id="previous-positions">
@@ -356,7 +361,11 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                       {person.previousPositions.map((pp, idx) => (
                         <tr key={idx} id={`previousPosition_${idx}`}>
                           <td>
-                            <LinkTo modelType="Position" model={pp.position} />
+                            <LinkTo
+                              modelType="Position"
+                              model={pp.position}
+                              previewId="person-show-prev-pos"
+                            />
                           </td>
                           <td>
                             {moment(pp.startTime).format(
@@ -469,9 +478,15 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
             modelType="Position"
             model={position}
             className="position-name"
+            previewId="person-show-pos"
           />{" "}
           (
-          <LinkTo modelType="Organization" model={position.organization} />)
+          <LinkTo
+            modelType="Organization"
+            model={position.organization}
+            previewId="person-show-org"
+          />
+          )
         </h4>
       </div>
     )
@@ -499,16 +514,25 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkTo modelType="Person" model={assocPos.person} />
+                      <LinkTo
+                        modelType="Person"
+                        model={assocPos.person}
+                        previewId="person-show-assoc-person"
+                      />
                     )}
                   </td>
                   <td>
-                    <LinkTo modelType="Position" model={assocPos} />
+                    <LinkTo
+                      modelType="Position"
+                      model={assocPos}
+                      previewId="person-show-assoc-pos"
+                    />
                   </td>
                   <td>
                     <LinkTo
                       modelType="Organization"
                       model={assocPos.organization}
+                      previewId="person-show-assoc-org"
                     />
                   </td>
                 </tr>
@@ -570,7 +594,8 @@ const PersonShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
 PersonShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   uuid: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  previewId: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(PersonShow)

@@ -287,6 +287,7 @@ const RelatedObjectNotes = ({
                     modelType="Person"
                     model={note.author}
                     style={{ color: "white" }}
+                    previewId="note-updater-person"
                   />
                   {canEdit && (
                     <>

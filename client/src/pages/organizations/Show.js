@@ -128,7 +128,12 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
+const OrganizationShow = ({
+  pageDispatchers,
+  uuid: uuidProp,
+  className,
+  previewId
+}) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
@@ -202,7 +207,7 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   if (includeChildrenOrgs) {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
-  const isPreview = isPreviewMode(className)
+  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={organization}>
@@ -216,6 +221,7 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                   parentOrgUuid: organization.uuid
                 })}
                 button
+                previewId="org-show-sub-create"
               >
                 Create sub-organization
               </LinkTo>
@@ -313,6 +319,7 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                         <LinkTo
                           modelType="Organization"
                           model={organization.parentOrg}
+                          previewId="org-show-parents"
                         >
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
@@ -336,10 +343,15 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                               <LinkTo
                                 modelType="Person"
                                 model={position.person}
+                                previewId="org-show-person"
                               />
                             ) : (
                               <i>
-                                <LinkTo modelType="Position" model={position} />
+                                <LinkTo
+                                  modelType="Position"
+                                  model={position}
+                                  previewId="org-show-pos"
+                                />
                                 - (Unfilled)
                               </i>
                             )}
@@ -368,6 +380,7 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                               <LinkTo
                                 modelType="Organization"
                                 model={organization}
+                                previewId="org-show-children-orgs"
                               >
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}
@@ -400,6 +413,8 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                 <ReportCollection
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
+                  // If same component rendered multiple times on the same page, new mapId should be generated
+                  mapId={`reports-${organization.uuid}-${previewId || ""}`}
                   reportsFilter={
                     <>
                       <Button
@@ -436,7 +451,8 @@ const OrganizationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
 OrganizationShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   uuid: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  previewId: PropTypes.string
 }
 
 const mapStateToProps = (state, ownProps) => ({

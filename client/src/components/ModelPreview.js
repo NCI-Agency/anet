@@ -32,7 +32,7 @@ ModelPreview.propTypes = {
 }
 
 export default ModelPreview
-// assume if class name includes 'preview', it is preview mode
-export function isPreviewMode(className) {
-  return className?.includes("preview")
+// assume if previewId exists, it is preview mode
+export function isPreviewMode(previewId) {
+  return !!previewId
 }

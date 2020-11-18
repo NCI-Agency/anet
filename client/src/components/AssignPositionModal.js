@@ -99,8 +99,12 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkTo modelType="Person" model={position.person} />. By selecting
-          this position, they will be removed.
+          <LinkTo
+            modelType="Person"
+            model={position.person}
+            previewId="assign-modal-error"
+          />
+          . By selecting this position, they will be removed.
         </>
       )
       newError = { message: errorMessage }

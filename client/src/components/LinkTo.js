@@ -16,11 +16,11 @@ export default class LinkTo extends Component {
     ]),
     children: PropTypes.node,
     className: PropTypes.string,
-
     showIcon: PropTypes.bool,
     showAvatar: PropTypes.bool,
     isLink: PropTypes.bool,
     edit: PropTypes.bool,
+    previewId: PropTypes.string, // needed for previewing same pages multiple times
 
     // Configures this link to look like a button. Set it to true to make it a button,
     // or pass a string to set a button type
@@ -39,6 +39,7 @@ export default class LinkTo extends Component {
     showAvatar: true,
     isLink: true,
     edit: false,
+    previewId: null,
     button: false,
     whenUnspecified: "Unspecified",
     modelType: null,
@@ -59,6 +60,7 @@ export default class LinkTo extends Component {
       modelType,
       model,
       style,
+      previewId,
       ...componentProps
     } = this.props
 
@@ -128,6 +130,7 @@ export default class LinkTo extends Component {
       <ModelTooltip
         modelClass={ModelClass}
         uuid={modelInstance.uuid}
+        previewId={previewId}
         popoverClassName="bp3-dark"
         hoverCloseDelay={1500}
         portalClassName="linkto-model-preview-portal"

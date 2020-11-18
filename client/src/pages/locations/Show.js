@@ -71,7 +71,12 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
+const LocationShow = ({
+  pageDispatchers,
+  uuid: uuidProp,
+  className,
+  previewId
+}) => {
   const { currentUser } = useContext(AppContext)
   const uuidParam = useParams().uuid
   const uuid = uuidProp || uuidParam
@@ -96,7 +101,7 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
-  const isPreview = isPreviewMode(className)
+  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -163,7 +168,7 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
 
               <Leaflet
                 markers={[marker]}
-                mapId={`${location.uuid}-${className || ""}`}
+                mapId={`${location.uuid}-${previewId || ""}`}
               />
             </Form>
 
@@ -174,7 +179,7 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
                 // If same component rendered multiple times, new mapId should be generated
-                mapId={`reports-location-${location.uuid}${className || ""}`}
+                mapId={`reports-location-${location.uuid}-${previewId || ""}`}
               />
             </Fieldset>
           </div>
@@ -187,7 +192,8 @@ const LocationShow = ({ pageDispatchers, uuid: uuidProp, className }) => {
 LocationShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   uuid: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  previewId: PropTypes.string
 }
 
 export default connect(null, mapPageDispatchersToProps)(LocationShow)

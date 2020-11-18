@@ -93,6 +93,7 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
               modelType="Report"
               model={report}
               style={{ display: "block" }}
+              previewId="conflict-reports"
             >
               {Report.getFormattedEngagementDate(report)}&nbsp;({report.state})
             </LinkTo>

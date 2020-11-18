@@ -280,7 +280,8 @@ const ReportShow = ({
   setSearchQuery,
   pageDispatchers,
   uuid: uuidProp,
-  className
+  className,
+  previewId
 }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -382,7 +383,7 @@ const ReportShow = ({
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
   }
 
-  const isPreview = isPreviewMode(className)
+  const isPreview = isPreviewMode(previewId)
   return (
     <Formik
       enableReinitialize
@@ -567,7 +568,11 @@ const ReportShow = ({
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && (
-                      <LinkTo modelType="Location" model={report.location} />
+                      <LinkTo
+                        modelType="Location"
+                        model={report.location}
+                        previewId="report-show-loc"
+                      />
                     )
                   }
                 />
@@ -615,7 +620,11 @@ const ReportShow = ({
                   component={FieldHelper.ReadonlyField}
                   humanValue={report.authors?.map(a => (
                     <React.Fragment key={a.uuid}>
-                      <LinkTo modelType="Person" model={a} />
+                      <LinkTo
+                        modelType="Person"
+                        model={a}
+                        previewId="report-show-authors"
+                      />
                       <br />
                     </React.Fragment>
                   ))}
@@ -629,6 +638,7 @@ const ReportShow = ({
                     <LinkTo
                       modelType="Organization"
                       model={report.advisorOrg}
+                      previewId="report-show-adv-org"
                     />
                   }
                 />
@@ -641,6 +651,7 @@ const ReportShow = ({
                     <LinkTo
                       modelType="Organization"
                       model={report.principalOrg}
+                      previewId="report-show-pri-org"
                     />
                   }
                 />
@@ -759,7 +770,12 @@ const ReportShow = ({
                   const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
-                      <LinkTo modelType="Person" model={comment.author} />,
+                      <LinkTo
+                        modelType="Person"
+                        model={comment.author}
+                        previewId="report-show-comment-author"
+                      />
+                      ,
                       <span
                         title={createdAt.format(
                           Settings.dateFormats.forms.displayShort.withTime
@@ -1316,7 +1332,8 @@ ReportShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   setSearchQuery: PropTypes.func.isRequired,
   uuid: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
+  previewId: PropTypes.string
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

@@ -68,6 +68,7 @@ const OrganizationLaydown = ({ organization }) => {
                   organizationUuid: organization.uuid
                 })}
                 button
+                previewId="org-laydown-pos" // FIXME: is it correct?
               >
                 Create position
               </LinkTo>
@@ -151,7 +152,11 @@ const OrganizationLaydown = ({ organization }) => {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkTo modelType="Position" model={other}>
+          <LinkTo
+            modelType="Position"
+            model={other}
+            previewId="org-laydown-other-pos"
+          >
             {positionWithStatus(other)}
           </LinkTo>
         </td>
@@ -159,7 +164,11 @@ const OrganizationLaydown = ({ organization }) => {
 
       otherPersonCol = other.person ? (
         <td>
-          <LinkTo modelType="Person" model={other.person}>
+          <LinkTo
+            modelType="Person"
+            model={other.person}
+            previewId="org-laydown-other-person"
+          >
             {personWithStatus(other.person)}
           </LinkTo>
         </td>
@@ -171,7 +180,11 @@ const OrganizationLaydown = ({ organization }) => {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkTo modelType="Position" model={position}>
+          <LinkTo
+            modelType="Position"
+            model={position}
+            previewId="org-laydown-other-pos"
+          >
             {positionWithStatus(position)}
           </LinkTo>
         </td>
@@ -179,7 +192,11 @@ const OrganizationLaydown = ({ organization }) => {
       positionPersonCol =
         position.person && position.person.uuid ? (
           <td>
-            <LinkTo modelType="Person" model={position.person}>
+            <LinkTo
+              modelType="Person"
+              model={position.person}
+              previewId="org-laydown-other-person"
+            >
               {personWithStatus(position.person)}
             </LinkTo>
           </td>

@@ -215,8 +215,12 @@ const PositionForm = ({ edit, title, initialValues }) => {
                       <span className="text-danger">
                         Setting this position to inactive will automatically
                         remove{" "}
-                        <LinkTo modelType="Person" model={values.person} /> from
-                        this position.
+                        <LinkTo
+                          modelType="Person"
+                          model={values.person}
+                          previewId="pos-form-kick-person"
+                        />{" "}
+                        from this position.
                       </span>
                     </HelpBlock>
                   )}

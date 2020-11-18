@@ -76,6 +76,7 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
             modelType="Task"
             model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
+            previewId="org-tasks-create" // FIXME:
           >
             Create {taskShortLabel}
           </LinkTo>
@@ -102,7 +103,7 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo modelType="Task" model={task}>
+                  <LinkTo modelType="Task" model={task} previewId="org-tasks">
                     {task.shortName}
                   </LinkTo>
                 </td>

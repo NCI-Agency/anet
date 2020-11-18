@@ -7,9 +7,9 @@ import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
@@ -306,7 +306,11 @@ const MergePeople = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
-              <LinkTo modelType="Position" model={person.position} />
+              <LinkTo
+                modelType="Position"
+                model={person.position}
+                previewId="merge-people-pos"
+              />
             )
           }
           vertical
@@ -319,6 +323,7 @@ const MergePeople = ({ pageDispatchers }) => {
               <LinkTo
                 modelType="Organization"
                 model={person.position.organization}
+                previewId="merge-people-org"
               />
             )
           }

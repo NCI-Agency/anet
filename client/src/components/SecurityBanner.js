@@ -30,6 +30,7 @@ const SecurityBanner = () => {
         model={currentUser}
         style={aCss}
         showIcon={false}
+        previewId="secure-banner"
       >
         (edit)
       </LinkTo>

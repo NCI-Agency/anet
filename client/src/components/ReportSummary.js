@@ -254,16 +254,36 @@ const ReportSummaryRow = ({ report }) => {
       </Row>
       <Row>
         <Col md={12}>
-          <LinkTo modelType="Person" model={report.primaryAdvisor} />
+          <LinkTo
+            modelType="Person"
+            model={report.primaryAdvisor}
+            previewId="rep-sum-adv"
+          />
           <span>
             {" "}
-            (<LinkTo modelType="Organization" model={report.advisorOrg} />)
+            (
+            <LinkTo
+              modelType="Organization"
+              model={report.advisorOrg}
+              previewId="rep-sum-adv-org"
+            />
+            )
           </span>
           <span className="people-separator">&#x25B6;</span>
-          <LinkTo modelType="Person" model={report.primaryPrincipal} />
+          <LinkTo
+            modelType="Person"
+            model={report.primaryPrincipal}
+            previewId="rep-sum-pri"
+          />
           <span>
             {" "}
-            (<LinkTo modelType="Organization" model={report.principalOrg} />)
+            (
+            <LinkTo
+              modelType="Organization"
+              model={report.principalOrg}
+              previewId="rep-sum-pri-org"
+            />
+            )
           </span>
         </Col>
       </Row>
@@ -272,7 +292,11 @@ const ReportSummaryRow = ({ report }) => {
           <Col md={12}>
             <span>
               <strong>Location: </strong>
-              <LinkTo modelType="Location" model={report.location} />
+              <LinkTo
+                modelType="Location"
+                model={report.location}
+                previewId="rep-sum-loc"
+              />
             </span>
           </Col>
         </Row>
@@ -352,6 +376,7 @@ const ReportSummaryRow = ({ report }) => {
             model={report}
             button
             className="read-report-button"
+            previewId="rep-sum-read"
           >
             Read report
           </LinkTo>

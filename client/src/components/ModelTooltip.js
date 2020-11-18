@@ -7,6 +7,7 @@ import "./ModelTooltip.css"
 const ModelTooltip = ({
   modelClass,
   uuid,
+  previewId,
   isEdit,
   children,
   ...tooltipProps
@@ -17,7 +18,13 @@ const ModelTooltip = ({
   }
   return (
     <Tooltip
-      content={<ModelPreview modelClass={modelClass} uuid={uuid} />}
+      content={
+        <ModelPreview
+          modelClass={modelClass}
+          uuid={uuid}
+          previewId={previewId}
+        />
+      }
       {...tooltipProps}
     >
       {children}
@@ -29,6 +36,7 @@ ModelTooltip.propTypes = {
   children: PropTypes.node,
   modelClass: PropTypes.func,
   uuid: PropTypes.string,
+  previewId: PropTypes.string,
   isEdit: PropTypes.bool
 }
 
