@@ -144,7 +144,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     mergedLocation.setUuid(firstLocationUuid);
     mergedLocation.setLat(firstCreatedLocation.getLat());
     mergedLocation.setLng(firstCreatedLocation.getLng());
-    mergedLocation.setStatus(Location.LocationStatus.ACTIVE);
+    mergedLocation.setStatus(Location.Status.ACTIVE);
     mergedLocation.setName(secondCreatedLocation.getName());
 
     Map<String, Object> variables = new HashMap<>();
