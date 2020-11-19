@@ -659,10 +659,14 @@ function getInvisibleFields(
 export const CustomFieldsContainer = props => {
   const { parentFieldName, formikProps } = props
   const [invisibleFields, setInvisibleFields] = useState([])
+  const prevInvisibleFields = useRef(invisibleFields)
   const { setFieldValue } = formikProps
   const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
-    setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
+    if (!_isEqual(invisibleFields, prevInvisibleFields.current)) {
+      prevInvisibleFields.current = invisibleFields
+      setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
+    }
   }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
 
   return (
@@ -718,6 +722,7 @@ const CustomField = ({
   const { type, helpText } = fieldConfig
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
+  const prevVal = useRef()
   const { callback: validateFormDebounced } = useDebouncedCallback(
     validateForm,
     400
@@ -728,7 +733,10 @@ const CustomField = ({
         value?.target?.value !== undefined ? value.target.value : value
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
-      setFieldValue(fieldName, val, sv)
+      if (!_isEqual(val, prevVal.current)) {
+        prevVal.current = val
+        setFieldValue(fieldName, val, sv)
+      }
       if (!sv) {
         validateFormDebounced()
       }
