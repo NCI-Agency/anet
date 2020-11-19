@@ -765,7 +765,12 @@ CompactViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   returnToDefaultPage: PropTypes.func,
   noReport: PropTypes.bool,
-  optionalFields: PropTypes.object,
+  optionalFields: PropTypes.objectOf(
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      active: PropTypes.bool.isRequired
+    })
+  ).isRequired,
   setOptionalFields: PropTypes.func
 }
 

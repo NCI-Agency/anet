@@ -99,7 +99,12 @@ const DropdownButton = styled.span`
 
 SimpleMultiCheckboxDropdown.propTypes = {
   label: PropTypes.string,
-  options: PropTypes.object,
+  options: PropTypes.objectOf(
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      active: PropTypes.bool.isRequired
+    })
+  ).isRequired,
   setOptions: PropTypes.func
 }
 export default SimpleMultiCheckboxDropdown
