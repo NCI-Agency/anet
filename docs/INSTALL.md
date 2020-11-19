@@ -56,7 +56,7 @@ You should have the following information on hand for the installation:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
 	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
-2. Add an anet.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
+2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
 4. Verify that your configuration file is valid with ```bin/anet check anet.yml```
 5. Install Database Schema: Run ```bin/anet db migrate anet.yml```
@@ -80,7 +80,7 @@ On the ANET server:
 - Take a complete backup of your SQL Database
 - install the new rpm with `sudo yum localinstall anet-<version>.rpm`
 - Make any required changes or upgrades to your `anet.yml` file
-- Run `bin/anet check anet.yml` to verify that `anet.yml` is in the correct format
+- Run `bin/anet check anet.yml` to verify that anet is configured correctly
 - Run `bin/anet db migrate anet.yml` to migrate your database
 - Start the server, if it has been installed as a service, run `sudo systemctl start anet`
 - Run through verification testing to ensure there are no issues
@@ -146,7 +146,7 @@ ANET needs *two* clients under the Keycloak realm with the name given under the 
 
 - **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` parameters to the location that you want the logs to appear.
 
-Finally, you can define a deployment-specific dictionary inside the `anet.yml` file.
+Finally, you can define a deployment-specific dictionary inside the `anet-dictionary.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
 ```yaml
 dictionary:

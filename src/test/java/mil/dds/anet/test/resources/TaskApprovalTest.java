@@ -93,7 +93,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final List<String> activeDomainNames = (List<String>) dict.get("activeDomainNames");
     activeDomainNames.add("example.com");
     config.setDictionary(dict);
-    emailWorker = new AnetEmailWorker(AnetObjectEngine.getInstance().getEmailDao(), config);
+    emailWorker = new AnetEmailWorker(config, AnetObjectEngine.getInstance().getEmailDao());
     emailServer = new FakeSmtpServer(config.getSmtp());
   }
 

@@ -1,9 +1,5 @@
 package mil.dds.anet.resources;
 
-import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
-
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -12,7 +8,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -78,28 +73,10 @@ public class ReportResource {
   private final AnetObjectEngine engine;
   private final AnetConfiguration config;
 
-  private final RollupGraphComparator rollupGraphComparator;
-  private final DateTimeFormatter dtf;
-  private final boolean engagementsIncludeTimeAndDuration;
-  private final DateTimeFormatter edtf;
-
   public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
     this.engine = engine;
     this.dao = engine.getReportDao();
     this.config = config;
-    this.dtf = DateTimeFormatter
-        .ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.date"))
-        .withZone(DaoUtils.getDefaultZoneId());
-    engagementsIncludeTimeAndDuration = Boolean.TRUE
-        .equals((Boolean) this.config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
-    final String edtfPattern = (String) this.config
-        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
-            : "dateFormats.email.date");
-    this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
-    @SuppressWarnings("unchecked")
-    List<String> pinnedOrgNames = (List<String>) this.config.getDictionaryEntry("pinned_ORGs");
-    this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
-
   }
 
   @GraphQLQuery(name = "report")
@@ -744,7 +721,7 @@ public class ReportResource {
       dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, orgType, nonReportingOrgs);
     }
 
-    Collections.sort(dailyRollupGraph, rollupGraphComparator);
+    Collections.sort(dailyRollupGraph, getRollupGraphComparator());
 
     return dailyRollupGraph;
   }
@@ -784,10 +761,7 @@ public class ReportResource {
     action.setAdvisorOrganizationUuid(advisorOrgUuid);
     action.setPrincipalOrganizationUuid(principalOrgUuid);
 
-    @SuppressWarnings("unchecked")
-    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
-
-    Map<String, Object> context = new HashMap<String, Object>();
+    final Map<String, Object> context = new HashMap<String, Object>();
     context.put("context", engine.getContext());
     context.put("serverUrl", config.getServerUrl());
     context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(),
@@ -795,27 +769,14 @@ public class ReportResource {
     context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
-    context.put("dateFormatter", dtf);
-    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
-    context.put("engagementDateFormatter", edtf);
-    context.put("fields", fields);
+    addConfigToContext(context);
 
     try {
-      Configuration freemarkerConfig = new Configuration(FREEMARKER_VERSION);
-      // auto-escape HTML in our .ftlh templates
-      freemarkerConfig.setRecognizeStandardFileExtensions(true);
-      freemarkerConfig
-          .setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
-      freemarkerConfig.loadBuiltInEncodingMap();
-      freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
-      freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
-      freemarkerConfig.setAPIBuiltinEnabled(true);
-
-      Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
-      StringWriter writer = new StringWriter();
+      final Template temp =
+          Utils.getFreemarkerConfig(this.getClass()).getTemplate(action.getTemplateName());
+      final StringWriter writer = new StringWriter();
       // scan:ignore — false positive, we know which template we are processing
       temp.process(action.buildContext(context), writer);
-
       return writer.toString();
     } catch (Exception e) {
       throw new WebApplicationException(e);
@@ -981,5 +942,28 @@ public class ReportResource {
     if (!newAssessment.getText().equals(oldAssessment.getText())) {
       noteDao.update(newAssessment);
     }
+  }
+
+  private void addConfigToContext(Map<String, Object> context) {
+    context.put("dateFormatter",
+        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
+            .withZone(DaoUtils.getDefaultZoneId()));
+    context.put("engagementsIncludeTimeAndDuration", Boolean.TRUE
+        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
+    final String edtfPattern = (String) config.getDictionaryEntry(Boolean.TRUE
+        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
+            ? "dateFormats.email.withTime"
+            : "dateFormats.email.date");
+    context.put("engagementDateFormatter",
+        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId()));
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
+    context.put("fields", fields);
+  }
+
+  private RollupGraphComparator getRollupGraphComparator() {
+    @SuppressWarnings("unchecked")
+    final List<String> pinnedOrgNames = (List<String>) config.getDictionaryEntry("pinned_ORGs");
+    return new RollupGraphComparator(pinnedOrgNames);
   }
 }

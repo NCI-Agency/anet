@@ -1,5 +1,6 @@
 package mil.dds.anet.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -56,6 +57,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private String emailFromAddr;
   private String serverUrl;
 
+  @JsonIgnore
   private Map<String, Object> dictionary;
 
   private String anetDictionaryName;
@@ -198,10 +200,8 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     final File file = new File(System.getProperty("user.dir"), getAnetDictionaryName());
     try (final InputStream inputStream = new FileInputStream(file)) {
       @SuppressWarnings("unchecked")
-      final Map<String, Object> objectMap = yamlMapper.readValue(inputStream, Map.class);
-      @SuppressWarnings("unchecked")
       final Map<String, Object> dictionaryMap =
-          addKeycloakConfiguration((Map<String, Object>) objectMap.get("dictionary"));
+          addKeycloakConfiguration(yamlMapper.readValue(inputStream, Map.class));
       // Check and then set dictionary if it is valid
       if (isValid(dictionaryMap)) {
         this.setDictionary(dictionaryMap);
@@ -275,6 +275,9 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     Object elem = dictionary;
     for (final String key : keyPath.split("\\.")) {
       elem = ((Map<String, Object>) elem).get(key);
+      if (elem == null) {
+        break;
+      }
     }
     return elem;
   }

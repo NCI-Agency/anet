@@ -9,7 +9,7 @@ console.log("Using dictionary file " + process.env.ANET_DICTIONARY)
 const anetDictionary = jsyaml.safeLoad(
   fs.readFileSync(process.env.ANET_DICTIONARY, "utf8")
 )
-const Settings = anetDictionary.dictionary
+const Settings = anetDictionary
 const {
   realm,
   "auth-server-url": url,
@@ -22,5 +22,6 @@ Settings.keycloakConfiguration = {
   clientId,
   showLogoutLink
 }
+const Version = "Sim-Mode"
 
-export default Settings
+export { Version, Settings as default }

@@ -30,6 +30,9 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   @GraphQLQuery
   @GraphQLInputField
   private String authorizationGroupUuid;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean hasCounterparts;
 
   public PositionSearchQuery() {
     super(PositionSearchSortBy.NAME);
@@ -92,10 +95,18 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.authorizationGroupUuid = authorizationGroupUuid;
   }
 
+  public boolean getHasCounterparts() {
+    return Boolean.TRUE.equals(hasCounterparts);
+  }
+
+  public void setHasCounterparts(Boolean hasCounterparts) {
+    this.hasCounterparts = hasCounterparts;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy,
-        type, isFilled, locationUuid, authorizationGroupUuid);
+        type, isFilled, locationUuid, authorizationGroupUuid, hasCounterparts);
   }
 
   @Override
@@ -110,7 +121,8 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
         && Objects.equals(getType(), other.getType())
         && Objects.equals(getIsFilled(), other.getIsFilled())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
-        && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid());
+        && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
+        && Objects.equals(getHasCounterparts(), other.getHasCounterparts());
   }
 
   @Override

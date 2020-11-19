@@ -196,13 +196,6 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
         FkDataLoaderKey.TASK_TASKED_ORGANIZATIONS, taskUuid);
   }
 
-  @InTransaction
-  public List<Task> getTopLevelTasks() {
-    return getDbHandle()
-        .createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
-        .map(new TaskMapper()).list();
-  }
-
   @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);

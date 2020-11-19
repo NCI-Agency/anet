@@ -8,6 +8,7 @@ const anetConfig = jsyaml.safeLoad(
     "text/yaml; charset=UTF-8"
   )
 )
-const Settings = anetConfig.dictionary
+const Settings = anetConfig
+const Version = "Storybook-Mode"
 
-export default Settings
+export { Version, Settings as default }
