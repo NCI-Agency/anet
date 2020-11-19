@@ -527,7 +527,7 @@ export default class Model {
   ) {
     const assessmentsConfig = {}
     const assessmentsSchemaShape = {}
-    entities.forEach(entity => {
+    entities?.forEach(entity => {
       assessmentsConfig[entity.uuid] = entity.getInstantAssessmentConfig()
       if (!_isEmpty(assessmentsConfig[entity.uuid])) {
         assessmentsSchemaShape[entity.uuid] = createYupObjectShape(

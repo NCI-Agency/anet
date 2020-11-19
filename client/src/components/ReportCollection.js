@@ -1,8 +1,8 @@
 import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import {
-  PageDispatchersPropType,
-  mapPageDispatchersToProps
+  mapPageDispatchersToProps,
+  PageDispatchersPropType
 } from "components/Page"
 import ReportCalendar from "components/ReportCalendar"
 import ReportMap from "components/ReportMap"
@@ -38,6 +38,7 @@ const ReportCollection = ({
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
+  const idSuffix = mapId || paginationKey || "reports"
   return (
     <div className="report-collection">
       <div>
@@ -83,7 +84,6 @@ const ReportCollection = ({
           )}
           {viewFormat === FORMAT_TABLE && (
             <ReportTable
-              showAuthors
               pageDispatchers={pageDispatchers}
               paginationKey={paginationKey}
               pagination={pagination}
@@ -118,6 +118,7 @@ const ReportCollection = ({
               {statisticsRecurrence.map(recurrence => (
                 <ReportStatistics
                   key={`report-statistics-${recurrence}`}
+                  idSuffix={idSuffix}
                   pageDispatchers={pageDispatchers}
                   queryParams={queryParams}
                   setTotalCount={setTotalCount}

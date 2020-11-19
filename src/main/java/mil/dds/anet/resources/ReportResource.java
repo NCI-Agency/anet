@@ -1,9 +1,5 @@
 package mil.dds.anet.resources;
 
-import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
-
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
@@ -12,7 +8,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -22,7 +17,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -79,28 +73,10 @@ public class ReportResource {
   private final AnetObjectEngine engine;
   private final AnetConfiguration config;
 
-  private final RollupGraphComparator rollupGraphComparator;
-  private final DateTimeFormatter dtf;
-  private final boolean engagementsIncludeTimeAndDuration;
-  private final DateTimeFormatter edtf;
-
   public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
     this.engine = engine;
     this.dao = engine.getReportDao();
     this.config = config;
-    this.dtf = DateTimeFormatter
-        .ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.date"))
-        .withZone(DaoUtils.getDefaultZoneId());
-    engagementsIncludeTimeAndDuration = Boolean.TRUE
-        .equals((Boolean) this.config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
-    final String edtfPattern = (String) this.config
-        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
-            : "dateFormats.email.date");
-    this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
-    @SuppressWarnings("unchecked")
-    List<String> pinnedOrgNames = (List<String>) this.config.getDictionaryEntry("pinned_ORGs");
-    this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
-
   }
 
   @GraphQLQuery(name = "report")
@@ -120,8 +96,8 @@ public class ReportResource {
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
-    if (r.getAuthorUuid() == null) {
-      r.setAuthorUuid(author.getUuid());
+    if (r.getReportPeople() == null || r.getReportPeople().stream().noneMatch(p -> p.isAuthor())) {
+      throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
     }
 
     // FIXME: Eventually, also admins should no longer be allowed to create non-draft reports
@@ -169,8 +145,8 @@ public class ReportResource {
         action.setReport(existing);
         action.setEditor(editor);
         email.setAction(action);
-        email.setToAddresses(Collections
-            .singletonList(existing.loadAuthor(engine.getContext()).join().getEmailAddress()));
+        email.setToAddresses(existing.loadAuthors(AnetObjectEngine.getInstance().getContext())
+            .join().stream().map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
         AnetEmailWorker.sendEmailAsync(email);
       }
     }
@@ -180,37 +156,43 @@ public class ReportResource {
   }
 
   private Person findPrimaryAttendee(Report r, Role role) {
-    if (r.getAttendees() == null) {
+    if (r.getReportPeople() == null) {
       return null;
     }
-    return r.getAttendees().stream().filter(p -> p.isPrimary() && p.getRole().equals(role))
-        .findFirst().orElse(null);
+    return r.getReportPeople().stream()
+        .filter(p -> p.isAttendee() && p.isPrimary() && role.equals(p.getRole())).findFirst()
+        .orElse(null);
   }
 
   /**
    * Perform all modifications to the report and its tasks and steps, returning the original state
    * of the report. Should be wrapped in a single transaction to ensure consistency.
-   * 
+   *
    * @param editor the current user (for authorization checks)
    * @param r a Report object with the desired modifications
    * @return the report as it was stored in the database before this method was called.
    */
   private Report executeReportUpdates(Person editor, Report r) {
     // Verify this person has access to edit this report
-    // Either they are the author, or an approver for the current step.
+    // Either they are an author, or an approver for the current step.
     final Report existing = dao.getByUuid(r.getUuid());
     if (existing == null) {
       throw new WebApplicationException("Report not found", Status.NOT_FOUND);
     }
+
+    if (r.getReportPeople() == null || r.getReportPeople().stream().noneMatch(p -> p.isAuthor())) {
+      throw new WebApplicationException("Report must have at least one author", Status.BAD_REQUEST);
+    }
+
     // Certain properties may not be changed through an update request
     r.setState(existing.getState());
     r.setApprovalStepUuid(existing.getApprovalStepUuid());
-    r.setAuthorUuid(existing.getAuthorUuid());
-    assertCanUpdateReport(r, editor);
+    // Only *existing* authors can change a report!
+    final boolean isAuthor = existing.isAuthor(editor);
+    assertCanUpdateReport(r, editor, isAuthor);
 
-    boolean isAuthor = Objects.equals(r.getAuthorUuid(), editor.getUuid());
     // State should not change when report is being edited by an approver
-    // State should change to draft when the report is being edited by its author
+    // State should change to draft when the report is being edited by one of the existing authors
     if (isAuthor) {
       r.setState(ReportState.DRAFT);
       r.setApprovalStep(null);
@@ -249,27 +231,29 @@ public class ReportResource {
       throw new WebApplicationException("Couldn't process report update", Status.NOT_FOUND);
     }
 
-    // Update Attendees:
-    if (r.getAttendees() != null) {
+    // Update report people:
+    if (r.getReportPeople() != null) {
       // Fetch the people associated with this report
       final List<ReportPerson> existingPeople =
-          dao.getAttendeesForReport(engine.getContext(), r.getUuid()).join();
+          dao.getPeopleForReport(engine.getContext(), r.getUuid()).join();
       // Find any differences and fix them.
-      for (ReportPerson rp : r.getAttendees()) {
+      for (ReportPerson rp : r.getReportPeople()) {
         Optional<ReportPerson> existingPerson =
             existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
         if (existingPerson.isPresent()) {
-          if (existingPerson.get().isPrimary() != rp.isPrimary()) {
-            dao.updateAttendeeOnReport(rp, r);
+          if (existingPerson.get().isPrimary() != rp.isPrimary()
+              || existingPerson.get().isAttendee() != rp.isAttendee()
+              || existingPerson.get().isAuthor() != rp.isAuthor()) {
+            dao.updatePersonOnReport(rp, r);
           }
           existingPeople.remove(existingPerson.get());
         } else {
-          dao.addAttendeeToReport(rp, r);
+          dao.addPersonToReport(rp, r);
         }
       }
-      // Any attendees left in existingPeople needs to be removed.
+      // Any report people left in existingPeople needs to be removed.
       for (ReportPerson rp : existingPeople) {
-        dao.removeAttendeeFromReport(rp, r);
+        dao.removePersonFromReport(rp, r);
       }
     }
 
@@ -337,27 +321,26 @@ public class ReportResource {
   }
 
   @SuppressWarnings("checkstyle:MissingSwitchDefault")
-  private void assertCanUpdateReport(Report report, Person editor) {
+  private void assertCanUpdateReport(Report report, Person editor, boolean isAuthor) {
     String permError = "You do not have permission to edit this report. ";
-    boolean isAuthor = Objects.equals(report.getAuthorUuid(), editor.getUuid());
     switch (report.getState()) {
       case DRAFT:
       case REJECTED:
       case APPROVED:
       case CANCELLED:
-        // Must be the author
+        // Must be an author
         if (!isAuthor) {
-          throw new WebApplicationException(permError + "Must be the author of this report.",
+          throw new WebApplicationException(permError + "Must be an author of this report.",
               Status.FORBIDDEN);
         }
         break;
       case PENDING_APPROVAL:
-        // Must be the author or the approver
+        // Must be an author or the approver
         boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(),
             report.getApprovalStepUuid(), report.getAdvisorOrgUuid()).join();
         if (!isAuthor && !canApprove) {
           throw new WebApplicationException(
-              permError + "Must be the author of this report or the current approver.",
+              permError + "Must be an author of this report or a current approver.",
               Status.FORBIDDEN);
         }
         break;
@@ -381,11 +364,11 @@ public class ReportResource {
     logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    if (!Objects.equals(r.getAuthorUuid(), user.getUuid())
-        && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
+    final boolean isAuthor = r.isAuthor(user);
+    if (!isAuthor && !AuthUtils.isSuperUserForOrg(user, r.getAdvisorOrgUuid(), true)
         && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException(
-          "Cannot submit report unless you are the report's author, his/her super user or an admin",
+          "Cannot submit report unless you are a report's author, his/her super user or an admin",
           Status.FORBIDDEN);
     }
 
@@ -450,7 +433,7 @@ public class ReportResource {
       logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
-    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), r.getAuthorUuid());
+    AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
     // GraphQL mutations *have* to return something, we return the report
     return r;
   }
@@ -576,7 +559,8 @@ public class ReportResource {
     action.setComment(rejectionComment);
     AnetEmail email = new AnetEmail();
     email.setAction(action);
-    email.addToAddress(r.loadAuthor(engine.getContext()).join().getEmailAddress());
+    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -633,7 +617,8 @@ public class ReportResource {
     action.setReport(r);
     action.setComment(comment);
     email.setAction(action);
-    email.addToAddress(r.loadAuthor(engine.getContext()).join().getEmailAddress());
+    email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
   }
 
@@ -678,8 +663,8 @@ public class ReportResource {
     }
 
     if (report.getState() == ReportState.DRAFT || report.getState() == ReportState.REJECTED) {
-      // only the author may delete these reports
-      if (Objects.equals(report.getAuthorUuid(), user.getUuid())) {
+      // only an author may delete these reports
+      if (report.isAuthor(user)) {
         return;
       }
     }
@@ -696,7 +681,7 @@ public class ReportResource {
 
   /**
    * Get the daily rollup graph.
-   * 
+   *
    * @param start Start timestamp for the rollup period
    * @param end end timestamp for the rollup period
    * @param orgType If both advisorOrgUuid and principalOrgUuid are NULL then the type of
@@ -736,7 +721,7 @@ public class ReportResource {
       dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, orgType, nonReportingOrgs);
     }
 
-    Collections.sort(dailyRollupGraph, rollupGraphComparator);
+    Collections.sort(dailyRollupGraph, getRollupGraphComparator());
 
     return dailyRollupGraph;
   }
@@ -776,10 +761,7 @@ public class ReportResource {
     action.setAdvisorOrganizationUuid(advisorOrgUuid);
     action.setPrincipalOrganizationUuid(principalOrgUuid);
 
-    @SuppressWarnings("unchecked")
-    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
-
-    Map<String, Object> context = new HashMap<String, Object>();
+    final Map<String, Object> context = new HashMap<String, Object>();
     context.put("context", engine.getContext());
     context.put("serverUrl", config.getServerUrl());
     context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(),
@@ -787,27 +769,14 @@ public class ReportResource {
     context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
-    context.put("dateFormatter", dtf);
-    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
-    context.put("engagementDateFormatter", edtf);
-    context.put("fields", fields);
+    addConfigToContext(context);
 
     try {
-      Configuration freemarkerConfig = new Configuration(FREEMARKER_VERSION);
-      // auto-escape HTML in our .ftlh templates
-      freemarkerConfig.setRecognizeStandardFileExtensions(true);
-      freemarkerConfig
-          .setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
-      freemarkerConfig.loadBuiltInEncodingMap();
-      freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
-      freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
-      freemarkerConfig.setAPIBuiltinEnabled(true);
-
-      Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
-      StringWriter writer = new StringWriter();
+      final Template temp =
+          Utils.getFreemarkerConfig(this.getClass()).getTemplate(action.getTemplateName());
+      final StringWriter writer = new StringWriter();
       // scan:ignore — false positive, we know which template we are processing
       temp.process(action.buildContext(context), writer);
-
       return writer.toString();
     } catch (Exception e) {
       throw new WebApplicationException(e);
@@ -817,7 +786,7 @@ public class ReportResource {
   /**
    * Gets aggregated data per organization for engagements attended and reports submitted for each
    * advisor in a given organization.
-   * 
+   *
    * @param weeksAgo Weeks ago integer for the amount of weeks before the current week
    */
   @GraphQLQuery(name = "advisorReportInsights")
@@ -973,5 +942,28 @@ public class ReportResource {
     if (!newAssessment.getText().equals(oldAssessment.getText())) {
       noteDao.update(newAssessment);
     }
+  }
+
+  private void addConfigToContext(Map<String, Object> context) {
+    context.put("dateFormatter",
+        DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
+            .withZone(DaoUtils.getDefaultZoneId()));
+    context.put("engagementsIncludeTimeAndDuration", Boolean.TRUE
+        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
+    final String edtfPattern = (String) config.getDictionaryEntry(Boolean.TRUE
+        .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"))
+            ? "dateFormats.email.withTime"
+            : "dateFormats.email.date");
+    context.put("engagementDateFormatter",
+        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId()));
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
+    context.put("fields", fields);
+  }
+
+  private RollupGraphComparator getRollupGraphComparator() {
+    @SuppressWarnings("unchecked")
+    final List<String> pinnedOrgNames = (List<String>) config.getDictionaryEntry("pinned_ORGs");
+    return new RollupGraphComparator(pinnedOrgNames);
   }
 }

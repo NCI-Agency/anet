@@ -1,16 +1,21 @@
 package mil.dds.anet.utils;
 
+import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.json.JsonSanitizer;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -257,6 +262,11 @@ public class Utils {
         }
       }
     }
+  }
+
+  public static JsonNode parseJsonSafe(String inputJson) throws JsonProcessingException {
+    final String sanitizedJson = Utils.sanitizeJson(inputJson);
+    return sanitizedJson == null ? null : mapper.readTree(sanitizedJson);
   }
 
   public static String trimStringReturnNull(String input) {
@@ -585,6 +595,18 @@ public class Utils {
       throw new WebApplicationException("An approver is required for every approval step",
           Status.BAD_REQUEST);
     }
+  }
+
+  public static Configuration getFreemarkerConfig(Class<?> clazz) {
+    final Configuration freemarkerConfig = new Configuration(FREEMARKER_VERSION);
+    // auto-escape HTML in our .ftlh templates
+    freemarkerConfig.setRecognizeStandardFileExtensions(true);
+    freemarkerConfig.setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
+    freemarkerConfig.loadBuiltInEncodingMap();
+    freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
+    freemarkerConfig.setClassForTemplateLoading(clazz, "/");
+    freemarkerConfig.setAPIBuiltinEnabled(true);
+    return freemarkerConfig;
   }
 
 }

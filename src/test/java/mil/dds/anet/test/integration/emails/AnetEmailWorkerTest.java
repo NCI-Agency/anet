@@ -41,7 +41,7 @@ public class AnetEmailWorkerTest {
 
     final DropwizardAppExtension<AnetConfiguration> app = TestApp.app;
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
-    emailWorker = new AnetEmailWorker(emailDao, app.getConfiguration());
+    emailWorker = new AnetEmailWorker(app.getConfiguration(), emailDao);
 
     whitelistedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);

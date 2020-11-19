@@ -25,7 +25,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getJackJacksonStub() {
     final Person person = new Person();
     person.setName("JACKSON, Jack");
-    person.setEmailAddress("hunter+foobar@dds.mil");
+    person.setEmailAddress("hunter+foobar@example.com");
     person.setPhoneNumber("123-456-78960");
     person.setRank("OF-9");
     person.setStatus(Person.Status.ACTIVE);
@@ -42,7 +42,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getSteveStevesonStub() {
     Person person = new Person();
     person.setName("STEVESON, Steve");
-    person.setEmailAddress("hunter+steve@dds.mil");
+    person.setEmailAddress("hunter+steve@example.com");
     person.setPhoneNumber("+011-258-32895");
     person.setRank("LtCol");
     person.setStatus(Person.Status.ACTIVE);
@@ -101,7 +101,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getRogerRogwell() {
     Person person = new Person();
     person.setName("ROGWELL, Roger");
-    person.setEmailAddress("hunter+roger@dds.mil");
+    person.setEmailAddress("hunter+roger@example.com");
     person.setPhoneNumber("+1-412-543-2839");
     person.setRank("Maj");
     person.setStatus(Person.Status.ACTIVE);
@@ -115,7 +115,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getElizabethElizawell() {
     Person person = new Person();
     person.setName("ELIZAWELL, Elizabeth");
-    person.setEmailAddress("hunter+liz@dds.mil");
+    person.setEmailAddress("hunter+liz@example.com");
     person.setPhoneNumber("+1-777-7777");
     person.setRank("Capt");
     person.setStatus(Person.Status.ACTIVE);
@@ -132,7 +132,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getNickNicholson() {
     Person p = new Person();
     p.setName("NICHOLSON, Nick");
-    p.setEmailAddress("hunter+nick@dds.mil");
+    p.setEmailAddress("hunter+nick@example.com");
     p.setPhoneNumber("+1-202-7324");
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
@@ -149,7 +149,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getBobBobtown() {
     Person p = new Person();
     p.setName("BOBTOWN, Bob");
-    p.setEmailAddress("hunter+bob@dds.mil");
+    p.setEmailAddress("hunter+bob@example.com");
     p.setPhoneNumber("+1-444-7324");
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
@@ -166,7 +166,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getAndrewAnderson() {
     Person p = new Person();
     p.setName("ANDERSON, Andrew");
-    p.setEmailAddress("hunter+andrew@dds.mil");
+    p.setEmailAddress("hunter+andrew@example.com");
     p.setPhoneNumber("+1-412-7324");
     p.setRank("CIV");
     p.setStatus(Person.Status.ACTIVE);
@@ -182,6 +182,18 @@ public class PersonTest extends BeanTester<Person> {
 
   public static ReportPerson personToPrimaryReportPerson(Person p) {
     ReportPerson rp = personToReportPerson(p);
+    rp.setPrimary(true);
+    return rp;
+  }
+
+  public static ReportPerson personToReportAuthor(Person p) {
+    final ReportPerson rp = personToReportPerson(p);
+    rp.setAuthor(true);
+    return rp;
+  }
+
+  public static ReportPerson personToPrimaryReportAuthor(Person p) {
+    final ReportPerson rp = personToReportAuthor(p);
     rp.setPrimary(true);
     return rp;
   }
@@ -209,7 +221,7 @@ public class PersonTest extends BeanTester<Person> {
   public static Person getArthurDmin() {
     Person p = new Person();
     p.setName("DMIN, Arthur");
-    p.setEmailAddress("hunter+arthur@dds.mil");
+    p.setEmailAddress("hunter+arthur@example.com");
     p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setDomainUsername("arthur");

@@ -1,135 +1,421 @@
-dictionary:
-  SUPPORT_EMAIL_ADDR: support@example.com
+SUPPORT_EMAIL_ADDR: support@example.com
 
-  engagementsIncludeTimeAndDuration: true
+engagementsIncludeTimeAndDuration: true
 
-  dateFormats:
-    email:
-      date: d MMMM yyyy
-      withTime: d MMMM yyyy @ HH:mm
-    excel: d MMMM yyyy
-    forms:
-      input:
-        date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
-               DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
-        withTime: [DD-MM-YYYY HH:mm, DD-MM-YY HH:mm, DD/MM/YYYY HH:mm, DD/MM/YY HH:mm, DD MM YYYY HH:mm, DD MM YY HH:mm,
-                   DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
-      displayShort:
-        date: D MMMM YYYY
-        withTime: D MMMM YYYY @ HH:mm
-      displayLong:
-        date: dddd, D MMMM YYYY
-        withTime: dddd, D MMMM YYYY @ HH:mm
+dateFormats:
+  email:
+    date: d MMMM yyyy
+    withTime: d MMMM yyyy @ HH:mm
+  excel: d MMMM yyyy
+  forms:
+    input:
+      date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
+              DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
+      withTime: [DD-MM-YYYY HH:mm, DD-MM-YY HH:mm, DD/MM/YYYY HH:mm, DD/MM/YY HH:mm, DD MM YYYY HH:mm, DD MM YY HH:mm,
+                  DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
+    displayShort:
+      date: D MMMM YYYY
+      withTime: D MMMM YYYY @ HH:mm
+    displayLong:
+      date: dddd, D MMMM YYYY
+      withTime: dddd, D MMMM YYYY @ HH:mm
 
-  reportWorkflow:
-    nbOfHoursQuarantineApproved: 24
-    nbOfHoursApprovalTimeout: 48
+reportWorkflow:
+  nbOfHoursQuarantineApproved: 24
+  nbOfHoursApprovalTimeout: 48
 
-  maxTextFieldLength: 250
+maxTextFieldLength: 250
 
-  fields:
+fields:
 
-    task:
-      shortLabel: Objective / Effort
+  task:
+    shortLabel: Objective / Effort
+    shortName:
+      label: Objective / Effort number
+      placeholder: Enter an objective / effort name, example....
+    longLabel: Objectives and Efforts
+    longName:
+      label: Objective / Effort description
+      placeholder: Enter an objective / effort description, example ....
+      componentClass: textarea
+      style:
+        height: 400px
+    topLevel:
+      shortLabel: Objective
       shortName:
-        label: Objective / Effort number
-        placeholder: Enter an objective / effort name, example....
-      longLabel: Objectives and Efforts
+        label: Name of this Objective
+        placeholder: Enter a Name for this Objective name, example ....
+      longLabel: Objectives
       longName:
-        label: Objective / Effort description
-        placeholder: Enter an objective / effort description, example ....
+        label: Description of this Objective
+        placeholder: Enter a description for this Objective, example ....
         componentClass: textarea
         style:
           height: 400px
-      topLevel:
-        shortLabel: Objective
-        shortName:
-          label: Name of this Objective
-          placeholder: Enter a Name for this Objective name, example ....
-        longLabel: Objectives
-        longName:
-          label: Description of this Objective
-          placeholder: Enter a description for this Objective, example ....
-          componentClass: textarea
-          style:
-            height: 400px
-        assessments:
-          - recurrence: semiannualy
-            questions:
-              issues:
-                type: special_field
-                label: Top 3 issues
-                placeholder:  Enter the top 3 issues
-                widget: richTextEditor
-                style:
-                  height: 300px
-                validations:
-                  - type: required
-                    params: [You must provide the top 3 issues]
+      assessments:
+        - recurrence: semiannually
+          questions:
+            issues:
+              type: special_field
+              label: Top 3 issues
+              placeholder:  Enter the top 3 issues
+              widget: richTextEditor
+              style:
+                height: 300px
+              validations:
+                - type: required
+                  params: [You must provide the top 3 issues]
 
-      subLevel:
-        shortLabel: Effort
-        shortName:
-          label: Effort name
-          placeholder: Enter an effort name, example....
-        longLabel: Efforts
-        longName:
-          label: Effort description
-          placeholder: Enter an effort description, example ....
-          componentClass: textarea
-          style:
-            height: 400px
-        assessments:
-          - recurrence: monthly
-            questions:
-              issues:
-                type: special_field
-                label: Top 3 issues
-                placeholder:  Enter the top 3 issues
-                widget: richTextEditor
-                style:
-                  height: 300px
-                validations:
-                  - type: required
-                    params: [You must provide the top 3 issues]
-              status:
-                type: enum
-                label: Project status
-                helpText: Select an assessment status for objective
-                choices:
-                  GREEN:
-                    label: Green
-                    color: '#c2ffb3'
-                  AMBER:
-                    label: Amber
-                    color: '#ffe396'
-                  RED:
-                    label: Red
-                    color: '#ff8279'
-                validations:
-                  - type: required
-                    params: [You must provide the assessment status]
-          - recurrence: weekly
-            questions:
-              issues:
-                type: special_field
-                label: Top 3 issues
-                placeholder:  Enter the top 3 issues
-                widget: richTextEditor
-                style:
-                  height: 300px
-                validations:
-                  - type: required
-                    params: [You must provide the top 3 issues]
-      customFieldRef1:
-        label: Parent task
-        placeholder: Start typing to search for a higher level task
-      customField:
-        label: Custom field
-        placeholder: Fill in the custom field
-      customFieldEnum1:
-        label: Project status
-        enum:
+    subLevel:
+      shortLabel: Effort
+      shortName:
+        label: Effort name
+        placeholder: Enter an effort name, example....
+      longLabel: Efforts
+      longName:
+        label: Effort description
+        placeholder: Enter an effort description, example ....
+        componentClass: textarea
+        style:
+          height: 400px
+      assessments:
+        - recurrence: monthly
+          questions:
+            issues:
+              type: special_field
+              label: Top 3 issues
+              placeholder:  Enter the top 3 issues
+              widget: richTextEditor
+              style:
+                height: 300px
+              validations:
+                - type: required
+                  params: [You must provide the top 3 issues]
+            status:
+              type: enum
+              label: Project status
+              helpText: Select an assessment status for objective
+              choices:
+                GREEN:
+                  label: Green
+                  color: '#c2ffb3'
+                AMBER:
+                  label: Amber
+                  color: '#ffe396'
+                RED:
+                  label: Red
+                  color: '#ff8279'
+              validations:
+                - type: required
+                  params: [You must provide the assessment status]
+        - recurrence: weekly
+          questions:
+            issues:
+              type: special_field
+              label: Top 3 issues
+              placeholder:  Enter the top 3 issues
+              widget: richTextEditor
+              style:
+                height: 300px
+              validations:
+                - type: required
+                  params: [You must provide the top 3 issues]
+    customFieldRef1:
+      label: Parent task
+      placeholder: Start typing to search for a higher level task
+    customField:
+      label: Custom field
+      placeholder: Fill in the custom field
+    customFieldEnum1:
+      label: Project status
+      enum:
+        GREEN:
+          label: Green
+          color: '#c2ffb3'
+        AMBER:
+          label: Amber
+          color: '#ffe396'
+        RED:
+          label: Red
+          color: '#ff8279'
+    taskedOrganizations:
+      label: Tasked organizations
+      placeholder: Search for an organization...
+    responsiblePositions:
+      label: Responsible positions
+      placeholder: Search for a position...
+    customFields:
+      assessments:
+        type: array_of_objects
+        label: Assessments definition
+        helpText: Here you can add as many assessments as needed
+        addButtonLabel: Add an assessment
+        objectLabel: Assessment
+        objectFields:
+          recurrence:
+            type: enum
+            label: Recurrence
+            helpText: Select a recurrence for this periodic assessment
+            choices:
+              once:
+                label: once
+              daily:
+                label: daily
+              weekly:
+                label: weekly
+              biweekly:
+                label: biweekly
+              semimonthly:
+                label: semimonthly
+              monthly:
+                label: monthly
+              quarterly:
+                label: quarterly
+              semiannualy:
+                label: semiannually
+              annually:
+                label: annually
+          relatedObjectType:
+            type: enum
+            label: Related object type
+            helpText: object type context in which the assessment will be made
+            choices:
+              report:
+                label: Report
+              null:
+                label: None
+          questions:
+            type: json
+            label: Questions
+            helpText: JSON that defines the assessment (you need to know what you are doing)
+            placeholder: Fill in valid JSON
+            componentClass: textarea
+            style:
+              height: 200px
+
+  report:
+    intent: Engagement purpose
+    atmosphere: Atmospherics
+    atmosphereDetails: Atmospherics details
+    cancelled: ''
+    reportTags: Tags
+    nextSteps: Next steps
+    keyOutcomes: Key outcomes
+    reportText: Key details
+    customFields:
+      relatedReport:
+        type: anet_object
+        label: Related report
+        helpText: Here you can link to a related report
+        types:
+          - Report
+      additionalEngagementNeeded:
+        type: array_of_anet_objects
+        label: Additional engagement needed for
+        helpText: Here you can link to people, positions and organizations that need an additional engagement
+        types:
+          - Person
+          - Position
+          - Organization
+      multipleButtons:
+        type: enumset
+        label: Engagement types
+        helpText: Choose one or more of the engagement purposes
+        choices:
+          train:
+            label: Train
+          advise:
+            label: Advise
+          assist:
+            label: Assist
+          other:
+            label: Other
+      trainingEvent:
+        type: enum
+        label: Training event
+        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        choices:
+          YES:
+            label: "Yes"
+          NO:
+            label: "No"
+      numberTrained:
+        type: number
+        typeError: Number trained must be a number
+        label: Number trained
+        placeholder: Number of trainees
+        validations:
+          - type: integer
+          - type: min
+            params: [1]
+        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+      levelTrained:
+        type: special_field
+        widget: likertScale
+        label: Level trained
+        helpText: Basic / Intermediate / Advanced
+        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        levels:
+          - color: lightGray
+            endValue: 3
+            label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
+          - color: lightGray
+            endValue: 7
+            label: intermediate
+          - color: lightGray
+            endValue: 10
+            label: advanced advanced advanced advanced
+      trainingDate:
+        type: date
+        label: Training date
+        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+      systemProcess:
+        type: enum
+        label: System / process
+        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        choices:
+          YES:
+            label: System
+          NO:
+            label: Process
+      echelons:
+        type: text
+        label: Issue echelon to fix
+        placeholder:  Enter the issue echelon to fix
+        validations:
+          - type: required
+            params: [You must provide the text field]
+        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+      itemsAgreed:
+        type: array_of_objects
+        label: Items Agreed To
+        helpText: Here you can add as many agreed-to items as needed
+        addButtonLabel: Add an item
+        objectLabel: Item agreed
+        objectFields:
+          item:
+            type: text
+            label: Item
+            placeholder: Enter description of the item that has been agreed to
+            validations:
+              - type: required
+                params: [You must provide the text field]
+          dueDate:
+            type: date
+            label: Due date
+        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
+      assetsUsed:
+        type: array_of_objects
+        label: Assets used to assist
+        helpText: Here you can add all assets that were used
+        addButtonLabel: Add an asset
+        objectLabel: Asset used
+        objectFields:
+          asset:
+            type: text
+            label: Item
+            placeholder: Enter description of the asset
+          quantity:
+            type: number
+            typeError: Qty must be a number
+            label: Qty
+        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+
+  person:
+    firstName: First name
+    lastName: Last name
+    domainUsername: Domain username
+    emailAddress:
+      label: Email
+      placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
+    phoneNumber: Phone
+    country: Nationality
+    code: ID card number
+    rank: Rank
+    ranks:
+      - value: CIV
+        description: the rank of CIV
+      - value: CTR
+        description: the rank of CTR
+      - value: OR-1
+        description: the rank of OR-1
+      - value: OR-2
+        description: the rank of OR-2
+      - value: OR-3
+        description: the rank of OR-3
+      - value: OR-4
+        description: the rank of OR-4
+      - value: OR-5
+        description: the rank of OR-5
+      - value: OR-6
+        description: the rank of OR-6
+      - value: OR-7
+        description: the rank of OR-7
+      - value: OR-8
+        description: the rank of OR-8
+      - value: OR-9
+        description: the rank of OR-9
+      - value: WO-1
+        description: the rank of WO-1
+      - value: WO-2
+        description: the rank of WO-2
+      - value: WO-3
+        description: the rank of WO-3
+      - value: WO-4
+        description: the rank of WO-4
+      - value: WO-5
+        description: the rank of WO-5
+      - value: OF-1
+        description: the rank of OF-1
+        app6Modifier: E
+      - value: OF-2
+        description: the rank of OF-2
+        app6Modifier: E
+      - value: OF-3
+        description: the rank of OF-3
+        app6Modifier: E
+      - value: OF-4
+        description: the rank of OF-4
+        app6Modifier: F
+      - value: OF-5
+        description: the rank of OF-5
+        app6Modifier: G
+      - value: OF-6
+        description: the rank of OF-6
+        app6Modifier: H
+      - value: OF-7
+        description: the rank of OF-7
+        app6Modifier: I
+      - value: OF-8
+        description: the rank of OF-8
+        app6Modifier: J
+      - value: OF-9
+        description: the rank of OF-9
+        app6Modifier: K
+    gender: Gender
+    endOfTourDate: End of tour
+    customFields:
+      multipleButtons:
+        type: enumset
+        label: Choose one or more of the options
+        helpText: Help text for choosing multiple values
+        choices:
+          opt1:
+            label: Option 1
+          opt2:
+            label: Option 2
+          opt3:
+            label: Option 3
+      inputFieldName:
+        type: text
+        label: Text field
+        placeholder: Placeholder text for input field
+        helpText: Help text for text field
+      colourOptions:
+        type: enum
+        label: Choose one of the colours
+        helpText: Help text for choosing colours
+        choices:
           GREEN:
             label: Green
             color: '#c2ffb3'
@@ -139,559 +425,272 @@ dictionary:
           RED:
             label: Red
             color: '#ff8279'
-      taskedOrganizations:
-        label: Tasked organizations
-        placeholder: Search for an organization...
-      responsiblePositions:
-        label: Responsible positions
-        placeholder: Search for a position...
-      customFields:
-        assessments:
-          type: array_of_objects
-          label: Assessments definition
-          helpText: Here you can add as many assessments as needed
-          addButtonLabel: Add an assessment
-          objectLabel: Assessment
-          objectFields:
-            recurrence:
-              type: enum
-              label: Recurrence
-              helpText: Select a recurrence for this periodic assessment
-              choices:
-                once:
-                  label: once
-                daily:
-                  label: daily
-                weekly:
-                  label: weekly
-                biweekly:
-                  label: biweekly
-                semimonthly:
-                  label: semimonthly
-                monthly:
-                  label: monthly
-                quarterly:
-                  label: quarterly
-                semiannualy:
-                  label: semiannualy
-                annually:
-                  label: annually
-            relatedObjectType:
-              type: enum
-              label: Related object type
-              helpText: object type context in which the assessment will be made
-              choices:
-                report:
-                  label: Report
-                null:
-                  label: None
-            questions:
-              type: json
-              label: Questions
-              helpText: JSON that defines the assessment (you need to know what you are doing)
-              placeholder: Fill in valid JSON
-              componentClass: textarea
-              style:
-                height: 200px
+      textareaFieldName:
+        type: text
+        label: Textarea field
+        placeholder: Placeholder text for textarea field
+        helpText: Help text for textarea field
+        componentClass: textarea
+        style:
+          height: 200px
+        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+      numberFieldName:
+        type: number
+        typeError: Number field must be a number
+        label: Number field
+        placeholder: Placeholder text for number field
+        helpText: Help text for number field
+        validations:
+          - type: integer
+          - type: min
+            params: [5]
+          - type: max
+            params: [100]
+        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+      nlt:
+        type: date
+        label: Not later than date
+        helpText: Help text for date field
+      nlt_dt:
+        type: datetime
+        label: Not later than datetime
+        helpText: Help text for datetime field
+      arrayFieldName:
+        type: array_of_objects
+        label: Array of objects
+        helpText: Here you can add as many objects as needed
+        addButtonLabel: Add an object
+        objectLabel: Object
+        objectFields:
+          textF:
+            type: text
+            label: Object text
+            placeholder: Placeholder text for object text field
+            helpText: Help text for object text field
+          dateF:
+            type: date
+            label: Object date
+            helpText: Help text for object date field
+            visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
-    report:
-      intent: Engagement purpose
-      atmosphere: Atmospherics
-      atmosphereDetails: Atmospherics details
-      cancelled: ''
-      reportTags: Tags
-      nextSteps: Next steps
-      keyOutcomes: Key outcomes
-      reportText: Key details
-      customFields:
-        relatedReport:
-          type: anet_object
-          label: Related report
-          helpText: Here you can link to a related report
-          types:
-            - Report
-        additionalEngagementNeeded:
-          type: array_of_anet_objects
-          label: Additional engagement needed for
-          helpText: Here you can link to people, positions and organizations that need an additional engagement
-          types:
-            - Person
-            - Position
-            - Organization
-        multipleButtons:
-          type: enumset
-          label: Engagement types
-          helpText: Choose one or more of the engagement purposes
-          choices:
-            train:
-              label: Train
-            advise:
-              label: Advise
-            assist:
-              label: Assist
-            other:
-              label: Other
-        trainingEvent:
-          type: enum
-          label: Training event
-          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-          choices:
-            YES:
-              label: "Yes"
-            NO:
-              label: "No"
-        numberTrained:
-          type: number
-          typeError: Number trained must be a number
-          label: Number trained
-          placeholder: Number of trainees
-          validations:
-            - type: integer
-            - type: min
-              params: [1]
-          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-        levelTrained:
-          type: special_field
-          widget: likertScale
-          label: Level trained
-          helpText: Basic / Intermediate / Advanced
-          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-          levels:
-            - color: lightGray
-              endValue: 3
-              label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
-            - color: lightGray
-              endValue: 7
-              label: intermediate
-            - color: lightGray
-              endValue: 10
-              label: advanced advanced advanced advanced
-        trainingDate:
-          type: date
-          label: Training date
-          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-        systemProcess:
-          type: enum
-          label: System / process
-          visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-          choices:
-            YES:
-              label: System
-            NO:
-              label: Process
-        echelons:
-          type: text
-          label: Issue echelon to fix
-          placeholder:  Enter the issue echelon to fix
-          validations:
-            - type: required
-              params: [You must provide the text field]
-          visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-        itemsAgreed:
-          type: array_of_objects
-          label: Items Agreed To
-          helpText: Here you can add as many agreed-to items as needed
-          addButtonLabel: Add an item
-          objectLabel: Item agreed
-          objectFields:
-            item:
-              type: text
-              label: Item
-              placeholder: Enter description of the item that has been agreed to
-              validations:
-                - type: required
-                  params: [You must provide the text field]
-            dueDate:
-              type: date
-              label: Due date
-          visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
-        assetsUsed:
-          type: array_of_objects
-          label: Assets used to assist
-          helpText: Here you can add all assets that were used
-          addButtonLabel: Add an asset
-          objectLabel: Asset used
-          objectFields:
-            asset:
-              type: text
-              label: Item
-              placeholder: Enter description of the asset
-            quantity:
-              type: number
-              typeError: Qty must be a number
-              label: Qty
-          visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+  location:
+    format: LAT_LON
+
+  position:
+    name: 'Position Name'
+
+  organization:
+    shortName: Name
+    parentOrg: Parent Organization
+
+  advisor:
 
     person:
-      firstName: First name
-      lastName: Last name
-      domainUsername: Domain username
-      emailAddress:
-        label: Email
-        placeholder: Only the following email domain names are allowed. ( cmil.mil ,mission.ita ,nato.int ,dds.mil ,*.isaf.nato.int )
-      phoneNumber: Phone
-      country: Nationality
-      code: ID card number
-      rank: Rank
-      ranks:
-        - value: CIV
-          description: the rank of CIV
-        - value: CTR
-          description: the rank of CTR
-        - value: OR-1
-          description: the rank of OR-1
-        - value: OR-2
-          description: the rank of OR-2
-        - value: OR-3
-          description: the rank of OR-3
-        - value: OR-4
-          description: the rank of OR-4
-        - value: OR-5
-          description: the rank of OR-5
-        - value: OR-6
-          description: the rank of OR-6
-        - value: OR-7
-          description: the rank of OR-7
-        - value: OR-8
-          description: the rank of OR-8
-        - value: OR-9
-          description: the rank of OR-9
-        - value: WO-1
-          description: the rank of WO-1
-        - value: WO-2
-          description: the rank of WO-2
-        - value: WO-3
-          description: the rank of WO-3
-        - value: WO-4
-          description: the rank of WO-4
-        - value: WO-5
-          description: the rank of WO-5
-        - value: OF-1
-          description: the rank of OF-1
-          app6Modifier: E
-        - value: OF-2
-          description: the rank of OF-2
-          app6Modifier: E
-        - value: OF-3
-          description: the rank of OF-3
-          app6Modifier: E
-        - value: OF-4
-          description: the rank of OF-4
-          app6Modifier: F
-        - value: OF-5
-          description: the rank of OF-5
-          app6Modifier: G
-        - value: OF-6
-          description: the rank of OF-6
-          app6Modifier: H
-        - value: OF-7
-          description: the rank of OF-7
-          app6Modifier: I
-        - value: OF-8
-          description: the rank of OF-8
-          app6Modifier: J
-        - value: OF-9
-          description: the rank of OF-9
-          app6Modifier: K
-      gender: Gender
-      endOfTourDate: End of tour
-      customFields:
-        multipleButtons:
-          type: enumset
-          label: Choose one or more of the options
-          helpText: Help text for choosing multiple values
-          choices:
-            opt1:
-              label: Option 1
-            opt2:
-              label: Option 2
-            opt3:
-              label: Option 3
-        inputFieldName:
-          type: text
-          label: Text field
-          placeholder: Placeholder text for input field
-          helpText: Help text for text field
-        colourOptions:
-          type: enum
-          label: Choose one of the colours
-          helpText: Help text for choosing colours
-          choices:
-            GREEN:
-              label: Green
-              color: '#c2ffb3'
-            AMBER:
-              label: Amber
-              color: '#ffe396'
-            RED:
-              label: Red
-              color: '#ff8279'
-        textareaFieldName:
-          type: text
-          label: Textarea field
-          placeholder: Placeholder text for textarea field
-          helpText: Help text for textarea field
-          componentClass: textarea
-          style:
-            height: 200px
-          visibleWhen: $[?(@.colourOptions === 'GREEN')]
-        numberFieldName:
-          type: number
-          typeError: Number field must be a number
-          label: Number field
-          placeholder: Placeholder text for number field
-          helpText: Help text for number field
-          validations:
-            - type: integer
-            - type: min
-              params: [5]
-            - type: max
-              params: [100]
-          visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
-        nlt:
-          type: date
-          label: Not later than date
-          helpText: Help text for date field
-        nlt_dt:
-          type: datetime
-          label: Not later than datetime
-          helpText: Help text for datetime field
-        arrayFieldName:
-          type: array_of_objects
-          label: Array of objects
-          helpText: Here you can add as many objects as needed
-          addButtonLabel: Add an object
-          objectLabel: Object
-          objectFields:
-            textF:
-              type: text
-              label: Object text
-              placeholder: Placeholder text for object text field
-              helpText: Help text for object text field
-            dateF:
-              type: date
-              label: Object date
-              helpText: Help text for object date field
-              visibleWhen: $[?(@.colourOptions === 'GREEN')]
-
-    location:
-      format: LAT_LON
+      name: NATO Member
+      countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
+                  Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
+                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
 
     position:
-      name: 'Position Name'
+      name: NATO Billet
+      type: ANET User
+      code:
+        label: CE Post Number
+        placeholder: the CE post number for this position
 
-    organization:
-      shortName: Name
-      parentOrg: Parent Organization
+    org:
+      name: Advisor Organization
+      allOrgName: Advisor Organizations
+      longName:
+        label: Description
+        placeholder: e.g. Force Sustainment
+      identificationCode:
+        label: UIC
+        placeholder: the six character code
 
-    advisor:
+  principal:
 
-      person:
-        name: NATO Member
-        countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
-                    Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
-                    Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
-
-      position:
-        name: NATO Billet
-        type: ANET User
-        code:
-          label: CE Post Number
-          placeholder: the CE post number for this position
-
-      org:
-        name: Advisor Organization
-        allOrgName: Advisor Organizations
-        longName:
-          label: Description
-          placeholder: e.g. Force Sustainment
-        identificationCode:
-          label: UIC
-          placeholder: the six character code
-
-    principal:
-
-      person:
-        name: Afghan Partner
-        countries: [Afghanistan]
-        assessment:
+    person:
+      name: Afghan Partner
+      countries: [Afghanistan]
+      assessment:
+        questions:
+          - id: test1
+            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+            label: Test question 1
+            choice:
+              - value: "1"
+                label: one
+                color: '#c2ffb3'
+              - value: "2"
+                label: two
+                color: '#ffe396'
+              - value: "3"
+                label: three
+                color: '#ff8279'
+          - id: test2
+            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+            label: Test question 2
+            choice:
+              - value: "3"
+                label: three
+                color: '#ff8279'
+              - value: "4"
+                label: four
+                color: '#ffe396'
+              - value: "5"
+                label: five
+                color: '#c2ffb3'
+          - id: test3
+            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+            label: Test question 3
+            choice:
+              - value: "1"
+                label: one
+                color: '#c2ffb3'
+              - value: "2"
+                label: two
+                color: '#ff8279'
+              - value: "3"
+                label: three
+                color: '#ff8279'
+      assessments:
+        - recurrence: quarterly
           questions:
-            - id: test1
-              test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+            test1:
+              type: enum
               label: Test question 1
-              choice:
-                - value: "1"
+              choices:
+                "1":
                   label: one
                   color: '#c2ffb3'
-                - value: "2"
+                "2":
                   label: two
                   color: '#ffe396'
-                - value: "3"
+                "3":
                   label: three
                   color: '#ff8279'
-            - id: test2
-              test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+            test2:
+              type: enum
               label: Test question 2
-              choice:
-                - value: "3"
+              choices:
+                "3":
                   label: three
                   color: '#ff8279'
-                - value: "4"
+                "4":
                   label: four
                   color: '#ffe396'
-                - value: "5"
+                "5":
                   label: five
                   color: '#c2ffb3'
-            - id: test3
-              test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+            test3:
+              type: enum
               label: Test question 3
-              choice:
-                - value: "1"
+              choices:
+                "1":
                   label: one
                   color: '#c2ffb3'
-                - value: "2"
+                "2":
                   label: two
                   color: '#ff8279'
-                - value: "3"
+                "3":
                   label: three
                   color: '#ff8279'
-        assessments:
-          - recurrence: quarterly
-            questions:
-              test1:
-                type: enum
-                label: Test question 1
-                choices:
-                  "1":
-                    label: one
-                    color: '#c2ffb3'
-                  "2":
-                    label: two
-                    color: '#ffe396'
-                  "3":
-                    label: three
-                    color: '#ff8279'
-              test2:
-                type: enum
-                label: Test question 2
-                choices:
-                  "3":
-                    label: three
-                    color: '#ff8279'
-                  "4":
-                    label: four
-                    color: '#ffe396'
-                  "5":
-                    label: five
-                    color: '#c2ffb3'
-              test3:
-                type: enum
-                label: Test question 3
-                choices:
-                  "1":
-                    label: one
-                    color: '#c2ffb3'
-                  "2":
-                    label: two
-                    color: '#ff8279'
-                  "3":
-                    label: three
-                    color: '#ff8279'
-          - recurrence: once
-            relatedObjectType: report
-            questions:
-              question1:
-                type: enum
-                label: Attendee involvement
-                choices:
-                  "1":
-                    label: low
-                    color: '#c2ffb3'
-                  "2":
-                    label: medium
-                    color: '#ffe396'
-                  "3":
-                    label: high
-                    color: '#ff8279'
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            question1:
+              type: enum
+              label: Attendee involvement
+              choices:
+                "1":
+                  label: low
+                  color: '#c2ffb3'
+                "2":
+                  label: medium
+                  color: '#ffe396'
+                "3":
+                  label: high
+                  color: '#ff8279'
 
-      position:
-        name: Afghan Tashkil
-        type: Afghan Partner
-        code:
-          label: Tashkil
-          placeholder: the Afghan taskhil ID for this position
+    position:
+      name: Afghan Tashkil
+      type: Afghan Partner
+      code:
+        label: Tashkil
+        placeholder: the Afghan taskhil ID for this position
 
-      org:
-        name: Afghan Government Organization
-        allOrgName: Principal Organizations
-        longName:
-          label: Official Organization Name
-          placeholder: e.g. Afghan Ministry of Defense
-        identificationCode:
-          label: UIC
-          placeholder: the six character code
+    org:
+      name: Afghan Government Organization
+      allOrgName: Principal Organizations
+      longName:
+        label: Official Organization Name
+        placeholder: e.g. Afghan Ministry of Defense
+      identificationCode:
+        label: UIC
+        placeholder: the six character code
 
-    superUser:
+  superUser:
 
-      position:
-        type: ANET Super User
+    position:
+      type: ANET Super User
 
-    administrator:
+  administrator:
 
-      position:
-        type: ANET Administrator
+    position:
+      type: ANET Administrator
 
-  pinned_ORGs: [Key Leader Engagement]
-  non_reporting_ORGs: [ANET Administrators]
-  tasking_ORGs: [EF 2.2]
-  domainNames: [cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
-  activeDomainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
-  imagery:
-    mapOptions:
-      crs: EPSG3857
-      homeView:
-        location: [34.52, 69.16]
-        zoomLevel: 10
-      leafletOptions:
-        attributionControl: false
-    geoSearcher:
-      provider: ESRI
-      url: "geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
-    baseLayers:
-      - name: OSM
-        default: true
-        type: tile
-        url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
-      - name: OSM - local
-        default: false
-        type: tile
-        url: "/imagery/street/{z}/{x}/{y}.png"
-      - name: World Imagery Tiles
-        default: false
-        type: tile
-        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        options:
-          tms: false
-      - name: World WMS
-        default: false
-        type: wms
-        url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
-        options:
-          layers: GEBCO_LATEST
-          format: "image/png"
+pinned_ORGs: [Key Leader Engagement]
+non_reporting_ORGs: [ANET Administrators]
+tasking_ORGs: [EF 2.2]
+domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
+imagery:
+  mapOptions:
+    crs: EPSG3857
+    homeView:
+      location: [34.52, 69.16]
+      zoomLevel: 10
+    leafletOptions:
+      attributionControl: false
+  geoSearcher:
+    provider: ESRI
+    url: "geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
+  baseLayers:
+    - name: OSM
+      default: true
+      type: tile
+      url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
+    - name: OSM - local
+      default: false
+      type: tile
+      url: "/imagery/street/{z}/{x}/{y}.png"
+    - name: World Imagery Tiles
+      default: false
+      type: tile
+      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      options:
+        tms: false
+    - name: World WMS
+      default: false
+      type: wms
+      url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+      options:
+        layers: GEBCO_LATEST
+        format: "image/png"
 
-  automaticallyInactivateUsers:
-    emailRemindersDaysPrior: [15, 30, 45]
-    ignoredDomainNames: []
-    checkIntervalInSecs: 86400  # 60 * 60 * 24
+automaticallyInactivateUsers:
+  emailRemindersDaysPrior: [15, 30, 45]
+  ignoredDomainNames: []
+  checkIntervalInSecs: 86400  # 60 * 60 * 24
 
-  dashboards:
-    - label: dashboard0
-      data: /data/dashboards/dashboard0.json
-      type: kanban
-    - label: decisives
-      data: /data/dashboards/decisives.json
-      type: decisives
-    - label: process board
-      type: board
-      data: /data/dashboards/process.json
+dashboards:
+  - label: dashboard0
+    data: /data/dashboards/dashboard0.json
+    type: kanban
+  - label: decisives
+    data: /data/dashboards/decisives.json
+    type: decisives
+  - label: process board
+    type: board
+    data: /data/dashboards/process.json

@@ -57,7 +57,7 @@ public abstract class AbstractPositionSearcher
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(),
             RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
-        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
+        qb.addStringEqualsClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());
       }
     }
@@ -70,8 +70,8 @@ public abstract class AbstractPositionSearcher
       }
     }
 
-    qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
-    qb.addEqualsClause("status", "positions.status", query.getStatus());
+    qb.addStringEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    qb.addEnumEqualsClause("status", "positions.status", query.getStatus());
 
     if (query.getAuthorizationGroupUuid() != null) {
       // Search for positions related to a given authorization group
@@ -79,6 +79,15 @@ public abstract class AbstractPositionSearcher
           "positions.uuid IN (SELECT ap.\"positionUuid\" FROM \"authorizationGroupPositions\" ap"
               + " WHERE ap.\"authorizationGroupUuid\" = :authorizationGroupUuid)");
       qb.addSqlArg("authorizationGroupUuid", query.getAuthorizationGroupUuid());
+    }
+
+    if (query.getHasCounterparts()) {
+      qb.addWhereClause("("
+          + "positions.uuid IN (SELECT \"positionUuid_a\" FROM \"positionRelationships\""
+          + " WHERE \"positionUuid_b\" IS NOT NULL AND deleted = :deleted)"
+          + " OR positions.uuid IN (" + "SELECT \"positionUuid_b\" FROM \"positionRelationships\""
+          + " WHERE \"positionUuid_a\" IS NOT NULL AND deleted = :deleted))");
+      qb.addSqlArg("deleted", false);
     }
 
     addOrderByClauses(qb, query);

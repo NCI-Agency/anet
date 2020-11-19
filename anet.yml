@@ -44,7 +44,7 @@ smtp:
 
 # The email address that all automated emails should come from.
 # ex: "ANET <anet@example.com>"
-emailFromAddr: "Anet Testing <hunter+anet@dds.mil>"
+emailFromAddr: "Anet Testing <hunter+anet@example.com>"
 
 # The URL that should be used for links in emails
 # ex:  "http://anet.yourdomain"

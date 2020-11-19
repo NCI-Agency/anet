@@ -1,11 +1,11 @@
 package mil.dds.anet.threads;
 
-import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
@@ -19,44 +19,25 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AccountDeactivationWorker extends AbstractWorker {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
   private final PersonDao dao;
-
-  private final List<Integer> daysTillEndOfTourWarnings;
-  private final List<String> ignoredDomainNames;
-
   private final int warningIntervalInSecs;
 
   public AccountDeactivationWorker(AnetConfiguration config, PersonDao dao,
       int warningIntervalInSecs) {
-    super("Deactivation Warning Worker waking up to check for Future Account Deactivations");
+    super(config,
+        "Deactivation Warning Worker waking up to check for Future Account Deactivations");
     this.dao = dao;
-
-    @SuppressWarnings("unchecked")
-    final List<Integer> daysTillWarning = (List<Integer>) config
-        .getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior");
-    this.daysTillEndOfTourWarnings =
-        daysTillWarning.stream().filter(i -> i > 0).collect(Collectors.toList());
-
-    @SuppressWarnings("unchecked")
-    List<String> domainNamesToIgnore =
-        (List<String>) config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
-    this.ignoredDomainNames = domainNamesToIgnore == null ? domainNamesToIgnore
-        : domainNamesToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
-
     this.warningIntervalInSecs = warningIntervalInSecs;
   }
 
   @Override
-  protected void runInternal(Instant now, JobHistory jobHistory) {
+  protected void runInternal(Instant now, JobHistory jobHistory, Map<String, Object> context) {
     // Make sure the mechanism will be triggered, so account deactivation checking can take place
+    final List<String> ignoredDomainNames = getDomainNamesToIgnore();
+    final List<Integer> daysTillEndOfTourWarnings = getDaysTillEndOfTourWarnings();
     final List<Integer> warningDays =
         (daysTillEndOfTourWarnings == null || daysTillEndOfTourWarnings.isEmpty())
             ? new ArrayList<>(0)
@@ -84,15 +65,32 @@ public class AccountDeactivationWorker extends AbstractWorker {
         final Integer warning = warningDays.get(i);
         final Integer nextWarning = i == warningDays.size() - 1 ? null : warningDays.get(i + 1);
         checkDeactivationStatus(p, warning, nextWarning, now,
-            jobHistory == null ? null : jobHistory.getLastRun());
+            jobHistory == null ? null : jobHistory.getLastRun(), ignoredDomainNames,
+            warningIntervalInSecs);
       }
     });
   }
 
+  private List<Integer> getDaysTillEndOfTourWarnings() {
+    @SuppressWarnings("unchecked")
+    final List<Integer> daysTillWarning = (List<Integer>) config
+        .getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior");
+    return daysTillWarning.stream().filter(i -> i > 0).collect(Collectors.toList());
+  }
+
+  private List<String> getDomainNamesToIgnore() {
+    @SuppressWarnings("unchecked")
+    final List<String> domainNamesToIgnore =
+        (List<String>) config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
+    return domainNamesToIgnore == null ? null
+        : domainNamesToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
+  }
+
   private void checkDeactivationStatus(final Person person, final Integer daysBeforeWarning,
-      final Integer nextWarning, final Instant now, final Instant lastRun) {
+      final Integer nextWarning, final Instant now, final Instant lastRun,
+      final List<String> ignoredDomainNames, final Integer warningIntervalInSecs) {
     if (person.getStatus() == Person.Status.INACTIVE
-        || Utils.isDomainUserNameIgnored(person.getDomainUsername(), this.ignoredDomainNames)) {
+        || Utils.isDomainUserNameIgnored(person.getDomainUsername(), ignoredDomainNames)) {
       // Skip inactive ANET users or users from ignored domains
       return;
     }
@@ -105,7 +103,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
 
     final Instant warningDate = now.plus(daysBeforeWarning, ChronoUnit.DAYS);
     final Instant prevWarningDate =
-        (lastRun == null) ? warningDate.minus(this.warningIntervalInSecs, ChronoUnit.SECONDS)
+        (lastRun == null) ? warningDate.minus(warningIntervalInSecs, ChronoUnit.SECONDS)
             : lastRun.plus(daysBeforeWarning, ChronoUnit.DAYS);
     if (person.getEndOfTourDate().isBefore(warningDate)
         && person.getEndOfTourDate().isAfter(prevWarningDate)) {

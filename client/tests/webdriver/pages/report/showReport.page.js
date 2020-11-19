@@ -50,17 +50,17 @@ class ShowReport extends Page {
     return browser.$("div[name='location']").getText()
   }
 
-  get author() {
-    return browser.$("div[name='author']").getText()
+  get authors() {
+    return browser.$("div[name='authors']").getText()
   }
 
   getAttendeeByName(name) {
     const row = browser
-      .$$("#attendeesContainer tbody > tr")
+      .$$("#reportPeopleContainer tbody > tr")
       .find(
         r =>
-          r.$("td:nth-child(2)").isExisting() &&
-          r.$("td:nth-child(2)").getText() === name
+          r.$("td.reportPeopleName").isExisting() &&
+          r.$("td.reportPeopleName").getText() === name
       )
 
     if (!row) {
@@ -68,12 +68,11 @@ class ShowReport extends Page {
     }
 
     // wait for conflict loader to disappear
-    row.$("td:nth-child(6) div.bp3-spinner").waitForExist({ reverse: true })
+    row.$("td.conflictButton div.bp3-spinner").waitForExist({ reverse: true })
 
     return {
-      name: row.$("td:nth-child(2)").getText(),
-      conflictButton: row.$("td:nth-child(6) > span"),
-      deleteButton: row.$("td:nth-child(7) > button")
+      name: row.$("td.reportPeopleName").getText(),
+      conflictButton: row.$("td.conflictButton > span")
     }
   }
 

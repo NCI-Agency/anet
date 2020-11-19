@@ -57,7 +57,7 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
 	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
-2. Add an anet.yml file with appropriate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
+2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
 4. Verify that your configuration file is valid with ```bin\anet.bat check anet.yml```
 5. Install Database Schema: Run ```bin\anet.bat db migrate anet.yml```
@@ -97,7 +97,7 @@ On the ANET server:
 - Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
 - Unzip the provided ANET distribution zip. Copy the `bin`, `lib` and `doc` from the distribution into the anet application folder, typically `c:\anet`
 - Make any required changes or upgrades to your `anet.yml` file
-- Run `bin/anet.bat check anet.yml` to verify that `anet.yml` is in the correct format
+- Run `bin/anet.bat check anet.yml` to verify that anet is configured correctly
 - Run `bin/anet.bat db migrate anet.yml` to migrate your database
 - Start the server, if it has been installed as a service, run `net stop anet`
 - Run through verification testing to ensure there are no issues
@@ -122,7 +122,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **disabled**: Set to true to disable sending email completely; most useful in development context.
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
-- **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
+- **serverUrl**: The URL for the ANET server, e.g.: `"https://anet.example.com"`.
 - **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional Instructions can be found here instructions [here](https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html) for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
@@ -163,7 +163,7 @@ If needed, see [WAFFLE documentation: _Servlet Single-SignOn Security Filter_](h
 
 - **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` paramters to the location that you want the logs to appear.  
 
-Finally, you can define a deployment-specific dictionary inside the `anet.yml` file.
+Finally, you can define a deployment-specific dictionary inside the `anet-dictionary.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
 ```yaml
 dictionary:
@@ -381,7 +381,7 @@ dictionary:
   pinned_ORGs: [Key Leader Engagement]
   non_reporting_ORGs: [ANET Administrators]
   tasking_ORGs: [EF 2.2]
-  domainNames: [cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
+  domainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
   activeDomainNames: [cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
   imagery:
     mapOptions:

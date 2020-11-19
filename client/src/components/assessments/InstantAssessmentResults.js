@@ -2,8 +2,7 @@ import AggregationWidgetContainer, {
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import _isEmpty from "lodash/isEmpty"
-import _uniqueId from "lodash/uniqueId"
-import { PeriodsPropType } from "periodUtils"
+import { formatPeriodBoundary, PeriodsPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
 
@@ -17,6 +16,7 @@ import React from "react"
  */
 
 export const InstantAssessmentsRow = ({
+  idSuffix,
   questionKey,
   questionConfig,
   periods,
@@ -29,28 +29,34 @@ export const InstantAssessmentsRow = ({
   }
   return (
     <tr>
-      {periods.map((period, index) => (
-        <td key={index}>
-          {_isEmpty(periodsData[index]) ? (
-            isFirstRow ? (
-              <em>No assessments</em>
-            ) : null
-          ) : (
-            <AggregationWidgetContainer
-              key={`assessment-${questionKey}`}
-              fieldConfig={questionConfig}
-              fieldName={questionKey}
-              data={periodsData[index]}
-              widget={aggregationWidget}
-              widgetId={`${questionKey}-${_uniqueId("assessment")}`}
-            />
-          )}
-        </td>
-      ))}
+      {periods.map((period, index) => {
+        const key = `${questionKey}-assessment-${formatPeriodBoundary(
+          period.start
+        )}`
+        return (
+          <td key={key}>
+            {_isEmpty(periodsData[index]) ? (
+              isFirstRow ? (
+                <em>No engagement assessments</em>
+              ) : null
+            ) : (
+              <AggregationWidgetContainer
+                key={key}
+                fieldConfig={questionConfig}
+                fieldName={questionKey}
+                data={periodsData[index]}
+                widget={aggregationWidget}
+                widgetId={`${key}-${idSuffix}`}
+              />
+            )}
+          </td>
+        )
+      })}
     </tr>
   )
 }
 InstantAssessmentsRow.propTypes = {
+  idSuffix: PropTypes.string.isRequired,
   periods: PeriodsPropType.isRequired,
   periodsData: PropTypes.arrayOf(PropTypes.array).isRequired,
   questionKey: PropTypes.string.isRequired,

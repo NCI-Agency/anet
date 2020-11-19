@@ -73,6 +73,7 @@ public class AnetObjectEngine {
   private final JobHistoryDao jobHistoryDao;
   private final SubscriptionDao subscriptionDao;
   private final SubscriptionUpdateDao subscriptionUpdateDao;
+  private final MetricRegistry metricRegistry;
   private ThreadLocal<Map<String, Object>> context;
 
   ISearcher searcher;
@@ -86,7 +87,6 @@ public class AnetObjectEngine {
     this.dbUrl = dbUrl;
     injector = InjectorLookup.getInjector(application).get();
     personDao = injector.getInstance(PersonDao.class);
-    personDao.setMetricRegistry(metricRegistry);
     taskDao = injector.getInstance(TaskDao.class);
     locationDao = injector.getInstance(LocationDao.class);
     orgDao = injector.getInstance(OrganizationDao.class);
@@ -105,6 +105,7 @@ public class AnetObjectEngine {
     jobHistoryDao = injector.getInstance(JobHistoryDao.class);
     subscriptionDao = injector.getInstance(SubscriptionDao.class);
     subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
+    this.metricRegistry = metricRegistry;
     searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
     instance = this;
   }
@@ -191,6 +192,10 @@ public class AnetObjectEngine {
 
   public EmailDao getEmailDao() {
     return emailDao;
+  }
+
+  public MetricRegistry getMetricRegistry() {
+    return metricRegistry;
   }
 
   public ISearcher getSearcher() {

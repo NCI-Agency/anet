@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.6.1"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.spotless" version "5.7.0"
+	id "com.diffplug.spotless" version "5.8.2"
 }
 
 apply plugin: 'java'
@@ -74,7 +74,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.4.1.jre8'
 	implementation 'org.postgresql:postgresql:42.2.18' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.1.1'
+	implementation 'org.liquibase:liquibase-core:4.2.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.0'
@@ -125,7 +125,7 @@ test {
 }
 
 jacoco {
-    toolVersion = "0.8.1"
+    toolVersion = "0.8.6"
 }
 
 jacocoTestReport {

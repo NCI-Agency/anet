@@ -49,8 +49,8 @@ import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 import { parseHtmlWithLinkTo } from "utils_links"
-import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+import ReportPeople from "./ReportPeople"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -75,7 +75,7 @@ const GQL_GET_REPORT = gql`
         lat
         lng
       }
-      author {
+      authors {
         uuid
         name
         rank
@@ -106,10 +106,12 @@ const GQL_GET_REPORT = gql`
           }
         }
       }
-      attendees {
+      reportPeople {
         uuid
         name
+        author
         primary
+        attendee
         rank
         role
         status
@@ -310,7 +312,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       text: tag.name
     }))
     data.report.tasks = Task.fromArray(data.report.tasks)
-    data.report.attendees = Person.fromArray(data.report.attendees)
+    data.report.reportPeople = Person.fromArray(data.report.reportPeople)
     data.report.to = ""
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields
@@ -331,7 +333,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  const isAuthor = Person.isEqual(currentUser, report.author)
+  const isAuthor = report.authors?.find(a => Person.isEqual(currentUser, a))
+  const isAttending = report.reportPeople?.find(rp =>
+    Person.isEqual(currentUser, rp)
+  )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
@@ -348,12 +353,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
-  // Authors can edit if report is not published
-  let canEdit = isAuthor && !report.isPublished()
+  // Attending authors can edit if report is not published
+  // Non-attending authors can only edit if it is future
+  let canEdit =
+    isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers can edit
   canEdit = canEdit || canApprove
 
-  // Only the author can submit when report is in draft or rejected AND author has a position
+  // Only an author can submit when report is in draft or rejected AND author has a position
   const hasActivePosition = currentUser.hasActivePosition()
   const canSubmit =
     isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
@@ -365,7 +372,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial tasks/attendees instant assessments values
+  // Get initial tasks/people instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
 
@@ -612,11 +619,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 )}
 
                 <Field
-                  name="author"
+                  name="authors"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo modelType="Person" model={report.author} />
-                  }
+                  humanValue={report.authors?.map(a => (
+                    <React.Fragment key={a.uuid}>
+                      <LinkTo modelType="Person" model={a} />
+                      <br />
+                    </React.Fragment>
+                  ))}
                 />
 
                 <Field
@@ -643,8 +653,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-              <Fieldset title="Meeting attendees">
-                <AttendeesTable report={report} disabled />
+              <Fieldset
+                title={
+                  report.isFuture()
+                    ? "People who will be involved in this planned engagement"
+                    : "People involved in this engagement"
+                }
+              >
+                <ReportPeople report={report} disabled />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
                 <NoPaginationTaskTable
@@ -688,7 +704,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               >
                 <InstantAssessmentsContainerField
                   entityType={Person}
-                  entities={values.attendees}
+                  entities={values.reportPeople?.filter(rp => rp.attendee)}
                   parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
                   formikProps={{
                     values
@@ -721,10 +737,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         By pressing submit, this {reportType} will be sent to
                         <strong>
                           {" "}
-                          {Object.get(
-                            report,
-                            "author.position.organization.name"
-                          ) || "your organization approver"}{" "}
+                          {Object.get(report, "advisorOrg.shortName") ||
+                            "your organization approver"}{" "}
                         </strong>
                         to go through the approval workflow.
                       </p>
