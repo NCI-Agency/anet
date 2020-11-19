@@ -196,7 +196,7 @@
     "test-wdio-ie": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node ./tests/util/wdio.ie.js",
     "build-storybook": "build-storybook",
     "storybook": "export STORYBOOK_ANET_DICTIONARY=/anet-dictionary.yml ; start-storybook -s .. -p 6006",
-    "sim": "export ANET_DICTIONARY=../anet-dictionary.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
+    "sim": "export ANET_CONFIG=../anet.yml ANET_DICTIONARY=../anet-dictionary.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
   },
   "jest": {
     "moduleDirectories": [
