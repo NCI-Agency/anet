@@ -171,85 +171,61 @@ export default class Report extends Model {
       reportPeople: yup
         .array()
         .nullable()
-        .test(
-          "primary-principal",
-          "primary principal error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkPrimaryAttendee(
-              reportPeople,
-              Person.ROLE.PRINCIPAL
-            )
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "primary-advisor",
-          "primary advsior error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkPrimaryAttendee(
-              reportPeople,
-              Person.ROLE.ADVISOR
-            )
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "attending-author",
-          "no attending author error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkAttendingAuthor(reportPeople)
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "no-author",
-          "no author error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkAnyAuthor(reportPeople)
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "purposeless-people",
-          "purposeless people error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkUnInvolvedPeople(reportPeople)
-            return err ? this.createError({ message: err }) : true
-          }
-        )
         .when("cancelled", (cancelled, schema) =>
           cancelled
             ? schema.nullable()
-            : schema.test(
-              "primary-advisor",
-              "primary advisor error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportPeople) {
-                const err = Report.checkPrimaryAttendee(
-                  reportPeople,
-                  Person.ROLE.ADVISOR
-                )
-                return err ? this.createError({ message: err }) : true
-              }
-            )
-        )
-        .when("cancelled", (cancelled, schema) =>
-          cancelled
-            ? schema.nullable()
-            : schema.test(
-              "attending-author",
-              "no attending author error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportPeople) {
-                const err = Report.checkAttendingAuthor(reportPeople)
-                return err ? this.createError({ message: err }) : true
-              }
-            )
+            : schema // Only do validation warning when engagement not cancelled
+              .test(
+                "primary-principal",
+                "primary principal error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkPrimaryAttendee(
+                    reportPeople,
+                    Person.ROLE.PRINCIPAL
+                  )
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "primary-advisor",
+                "primary advisor error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkPrimaryAttendee(
+                    reportPeople,
+                    Person.ROLE.ADVISOR
+                  )
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "no-author",
+                "no author error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkAnyAuthor(reportPeople)
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "attending-author",
+                "no attending author error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkAttendingAuthor(reportPeople)
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "purposeless-people",
+                "purposeless people error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkUnInvolvedPeople(reportPeople)
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
         )
         .default([]),
       principalOrg: yup.object().nullable().default({}),
