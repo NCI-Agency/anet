@@ -565,34 +565,33 @@ node {
 }
 
 ospackage {
-        release = '2'
-        os = LINUX
-
-        into '/opt'
-		from(jpackageImage.outputs.files)
-		from('anet.yml') {
-			rename('anet.yml', 'anet.yml.template')
-			into 'anet/docs'
+	release = '2'
+	os = LINUX
+	into '/opt'
+	from(jpackageImage.outputs.files)
+	from('anet.yml') {
+		rename('anet.yml', 'anet.yml.template')
+		into 'anet/docs'
+	}
+	from('docs/INSTALL.md') { into 'anet/docs' }
+	from('docs/TROUBLESHOOT.md') { into 'anet/docs' }
+	from('anet-dictionary.yml') {
+		rename('anet-dictionary.yml', 'anet-dictionary.yml.template')
+		into 'anet/docs'
 		}
-		from('scripts/anet.service') { into '/etc/systemd/system' }
-		from('docs/INSTALL.md') { into 'anet/docs' }
-		from('docs/TROUBLESHOOT.md') { into 'anet/docs' }
-		from('anet-dictionary.yml') {
-			rename('anet-dictionary.yml', 'anet-dictionary.yml.template')
-			into 'anet/docs'
+	from('prepare-psql.sql') {
+		into 'anet/docs'
+	}
+	from('prepare-mssql.sql') {
+		into 'anet/docs'
 			}
-		from('prepare-psql.sql') {
-			into 'anet/docs'
-		}
-		from('prepare-mssql.sql') {
-			into 'anet/docs'
-        }
-    }
+	}
 
 task distDeb(dependsOn: "jpackageImage",type: Deb) {
-        arch = 'amd64'
+	arch = 'amd64'
 }
 
 task distRpm(dependsOn: "jpackageImage",type: Rpm) {
-		arch = 'x86_64'
+	prefix '/opt' // Relocations: /opt
+	arch = 'x86_64'
 }
