@@ -29,6 +29,8 @@ export const SearchPopover = ({
       interactionKind={PopoverInteractionKind.CLICK}
       position={Position.BOTTOM_LEFT}
       usePortal={false}
+      popoverClassName="search-popover"
+      targetClassName="search-popover-target"
       modifiers={{
         preventOverflow: {
           enabled: false

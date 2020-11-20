@@ -1172,7 +1172,18 @@ header.searchPagination {
 
   #notes-view.notes-hidden {
     max-width: 13%;
-  }
+	}
+
+	.advanced-search {
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	/* move advanced search popover to left on small screens */
+	.search-popover-target ~ .bp3-overlay > .bp3-transition-container  {
+		left: -26vw !important;
+		width: 95vw;
+	}
 
   .home-tile-row .row {
     flex-wrap: wrap;
