@@ -32,6 +32,7 @@ export const SearchPopover = ({
       usePortal={false}
       autoFocus={true}
       enforceFocus={false}
+      targetClassName="search-popover-target"
       modifiers={{
         preventOverflow: {
           enabled: false

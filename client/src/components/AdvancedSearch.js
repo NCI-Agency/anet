@@ -1,6 +1,7 @@
 import { Classes, Menu, MenuItem } from "@blueprintjs/core"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import RemoveButton from "components/RemoveButton"
@@ -99,22 +100,10 @@ const AdvancedSearch = ({
         <div className="advanced-search form-horizontal">
           <Form onSubmit={onSubmit}>
             <FormGroup>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  flexWrap: "nowrap",
-                  padding: "10px"
-                }}
-              >
+              <ButtonGroupContainerS>
                 <ButtonToggleGroup
                   value={objectType}
                   onChange={changeObjectType}
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flexWrap: "nowrap"
-                  }}
                 >
                   {possibleFilterTypes.map(type => (
                     <Button
@@ -142,7 +131,7 @@ const AdvancedSearch = ({
                     buttonStyle="link"
                   />
                 </div>
-              </div>
+              </ButtonGroupContainerS>
             </FormGroup>
 
             <FormControl defaultValue={text} className="hidden" />
@@ -344,10 +333,10 @@ const SearchFilter = ({
 
   return (
     <FormGroup controlId={queryKey}>
-      <Col sm={3} lg={2} componentClass={ControlLabel}>
+      <Col xs={12} sm={3} lg={2} componentClass={ControlLabel}>
         {label}
       </Col>
-      <Col sm={8} lg={9}>
+      <Col xs={10} sm={8} lg={9}>
         <div>
           <ChildComponent
             value={filter.value || ""}
@@ -357,7 +346,7 @@ const SearchFilter = ({
           />
         </div>
       </Col>
-      <Col sm={1} lg={1}>
+      <Col xs={1} sm={1} lg={1}>
         <RemoveButton
           title="Remove this filter"
           altText="Remove this filter"
@@ -387,3 +376,25 @@ SearchFilter.propTypes = {
     props: PropTypes.object
   })
 }
+
+const ButtonGroupContainerS = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: no-wrap;
+  padding: 10px;
+
+  & > .btn-group {
+    display: flex;
+    flex-direction: row;
+  }
+
+  @media (max-width: 876px) {
+    & > .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      & > * {
+        max-width: min-content;
+      }
+    }
+  }
+`
