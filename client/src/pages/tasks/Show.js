@@ -224,8 +224,8 @@ const TaskShow = ({
                 style={{
                   display: "flex",
                   flexDirection: "row",
-                  flexWrap: "nowrap",
-                  padding: "10px"
+                  padding: "10px",
+                  outline: "4px solid pink"
                 }}
               >
                 <Fieldset style={{ flex: "1 1 0" }}>

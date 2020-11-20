@@ -5,9 +5,26 @@
 
 /*END general preview style END*/
 
-/*START linkTo triggered preview style START*/
-.linkto-model-preview-portal .model-preview {
+/***********START linkTo triggered preview style START*/
 
+/* some popovers were exceeding the parent containers */
+.linkto-model-preview-portal .bp3-popover {
+  width: 100%;
+}
+.linkto-model-preview-portal .model-preview {
+}
+
+/* get rid of the large screen bootstrap ratio */
+.linkto-model-preview-portal .model-preview .form-group .col-sm-2{
+  width: 33%;
+}
+.linkto-model-preview-portal .model-preview .form-group .col-sm-7{
+  width: 67%;
+}
+ /* center the avatar */
+.linkto-model-preview-portal .model-preview img[alt*="Avatar"]{
+  display: block;
+  margin: auto;
 }
 
 /* remove action buttons from previews */
@@ -30,4 +47,4 @@
 .linkto-model-preview-portal .model-preview fieldset {
   padding: 1em;
 }
-/*END linkTo triggered preview style END*/
+/*********END linkTo triggered preview style END*/
