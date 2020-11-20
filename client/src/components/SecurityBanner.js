@@ -51,12 +51,12 @@ const VersionBox = styled.h6`
 export const CompactSecurityBanner = () => {
   const { appSettings } = useContext(AppContext)
   return (
-    <CompactBanner className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
+    <CompactBannerS className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
       {appSettings[SETTING_KEY_TEXT]}
-    </CompactBanner>
+    </CompactBannerS>
   )
 }
-const CompactBanner = styled.div`
+const CompactBannerS = styled.div`
   ${css};
 `
 

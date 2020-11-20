@@ -3,7 +3,15 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import CompactTable, {
+  CompactRow,
+  CompactRowContentS,
+  CompactRowS,
+  CompactSubTitle,
+  CompactTitle
+} from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -12,7 +20,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
-import { CompactRowReportWorkflow } from "components/ReportWorkflow"
+import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import {
   CompactSecurityBanner,
   SETTING_KEY_COLOR
@@ -246,7 +254,10 @@ const CompactReportView = ({ pageDispatchers }) => {
 
   if (_isEmpty(report)) {
     return (
-      <CompactViewHeader returnToDefaultPage={returnToDefaultPage} noReport />
+      <CompactReportViewHeader
+        returnToDefaultPage={returnToDefaultPage}
+        noReport
+      />
     )
   }
   // Get initial tasks/attendees instant assessments values
@@ -261,24 +272,17 @@ const CompactReportView = ({ pageDispatchers }) => {
     >
       {() => (
         <>
-          <CompactViewHeader
+          <CompactReportViewHeader
             onPrintClick={printReport}
             returnToDefaultPage={returnToDefaultPage}
             optionalFields={optionalFields}
             setOptionalFields={setOptionalFields}
           />
-          <CompactView className="compact-view" data-draft={draftAttr}>
+          <CompactReportViewS className="compact-view" data-draft={draftAttr}>
             <CompactReportHeaderContent report={report} />
             <CompactTable>
-              <CompactRow
-                rowType={ROW_TYPES.titleLike}
-                style={TITLE_STYLE}
-                label={getReportTitle()}
-                className="reportField"
-              />
-              <CompactRow
-                rowType={ROW_TYPES.titleLike}
-                style={SUBTITLE_STYLE}
+              <CompactTitle label={getReportTitle()} className="reportField" />
+              <CompactSubTitle
                 label={getReportSubTitle()}
                 className="reportField"
               />
@@ -335,8 +339,8 @@ const CompactReportView = ({ pageDispatchers }) => {
               {optionalFields.workflow.active && report.showWorkflow() ? (
                 <CompactRowReportWorkflow
                   workflow={report.workflow}
-                  compactStyle={WORKFLOW_STYLE}
                   className="reportField"
+                  isCompact
                 />
               ) : null}
               {report.reportText ? (
@@ -351,12 +355,12 @@ const CompactReportView = ({ pageDispatchers }) => {
                   fieldsConfig={Settings.fields.report.customFields}
                   values={report}
                   vertical
-                  compactStyle=";" // avoid falsy empty string for compact condition checks in deeper components
+                  isCompact
                 />
               ) : null}
             </CompactTable>
             <CompactReportFooterContent report={report} />
-          </CompactView>
+          </CompactReportViewS>
         </>
       )}
     </Formik>
@@ -499,7 +503,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                             fieldsConfig={taskInstantAssessmentConfig}
                             values={report}
                             vertical
-                            compactStyle=";"
+                            isCompact
                           />
                       )}
                     </tbody>
@@ -553,7 +557,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                           fieldsConfig={attendeeInstantAssessmentConfig}
                           values={report}
                           vertical
-                          compactStyle=";"
+                          isCompact
                         />
                       </tbody>
                     </table>
@@ -631,20 +635,12 @@ const OPTIONAL_FIELDS_INIT = {
 
 // color-adjust forces browsers to keep color values of the node
 // supported in most major browsers' new versions, but not in IE or some older versions
-const CompactView = styled.div`
+const CompactReportViewS = styled.div`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
   width: 21cm;
-  table,
-  tbody,
-  tr {
-    width: 100% !important;
-    background-color: transparent !important;
-  }
-  td {
-    background-color: transparent !important;
-  }
+
   &[data-draft="draft"]:before {
     content: "DRAFT";
     z-index: -1000;
@@ -653,7 +649,7 @@ const CompactView = styled.div`
     top: 300px;
     left: 20%;
     font-size: 150px;
-    color: rgba(161, 158, 158, 0.699) !important;
+    color: rgba(161, 158, 158, 0.3) !important;
     -webkit-print-color-adjust: exact;
     color-adjust: exact !important;
     transform: rotateZ(-45deg);
@@ -671,56 +667,13 @@ const CompactView = styled.div`
       -webkit-print-color-adjust: exact;
       color-adjust: exact !important;
     }
-    .workflow-action button {
-      display: inline block !important;
+    .workflow-action .btn {
+      display: inline-block !important;
     }
   }
 `
 
-const TITLE_STYLE = `
-  & > th {
-    font-size: 18px;
-    font-style: normal;
-    color: black;
-    text-align: center;
-    font-weight: bold;
-  }
-`
-
-const SUBTITLE_STYLE = `
-  & > th {
-    font-style: italic;
-    color: black;
-    text-align: center;
-    font-weight: normal;
-  }
-`
-const WORKFLOW_STYLE = `
-  & > td {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    align items: center;
-    text-align: center;
-    & > div {
-      position: relative;
-      margin-right: 18px;
-    }
-    & > div:not(:last-child):after {
-      position: absolute;
-      right: -18px;
-      top: 0;
-      content: "→";
-    }
-    & > div > button {
-      padding: 0 5px !important;
-      margin: 0;
-    }
-  }
-`
-
-const CompactViewHeader = ({
+const CompactReportViewHeader = ({
   onPrintClick,
   returnToDefaultPage,
   noReport,
@@ -761,7 +714,7 @@ const CompactViewHeader = ({
   )
 }
 
-CompactViewHeader.propTypes = {
+CompactReportViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
   returnToDefaultPage: PropTypes.func,
   noReport: PropTypes.bool,
@@ -774,7 +727,7 @@ CompactViewHeader.propTypes = {
   setOptionalFields: PropTypes.func
 }
 
-CompactViewHeader.defaultProps = {
+CompactReportViewHeader.defaultProps = {
   noReport: false
 }
 
@@ -808,13 +761,13 @@ const CompactReportHeaderContent = ({ report }) => {
   const location = useLocation()
   const { appSettings } = useContext(AppContext)
   return (
-    <HeaderContent bgc={appSettings[SETTING_KEY_COLOR]}>
+    <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBanner />
       <span style={{ fontSize: "12px" }}>
         <Link to={location.pathname}>{report.uuid}</Link>
       </span>
-    </HeaderContent>
+    </HeaderContentS>
   )
 }
 
@@ -825,16 +778,16 @@ CompactReportHeaderContent.propTypes = {
 const CompactReportFooterContent = () => {
   const { currentUser, appSettings } = useContext(AppContext)
   return (
-    <FooterContent bgc={appSettings[SETTING_KEY_COLOR]}>
+    <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBanner />
-      <PrintedByBox>
+      <PrintedByBoxS>
         <div>
           printed by <LinkTo modelType="Person" model={currentUser} />
         </div>
         <div>{moment.utc().toString()}</div>
-      </PrintedByBox>
-    </FooterContent>
+      </PrintedByBoxS>
+    </FooterContentS>
   )
 }
 
@@ -865,21 +818,21 @@ const HF_COMMON_STYLE = `
   }
 `
 
-const HeaderContent = styled.div`
+const HeaderContentS = styled.div`
   ${HF_COMMON_STYLE};
   top: 0mm;
   border-bottom: 1px solid black;
   background-color: ${props => props.bgc} !important;
 `
 
-const FooterContent = styled.div`
+const FooterContentS = styled.div`
   ${HF_COMMON_STYLE};
   bottom: 0mm;
   border-top: 1px solid black;
   background-color: ${props => props.bgc} !important;
 `
 
-const PrintedByBox = styled.span`
+const PrintedByBoxS = styled.span`
   align-self: flex-start;
   width: auto;
   display: flex;
@@ -896,13 +849,13 @@ const PrintedByBox = styled.span`
 
 const ClassificationBanner = () => {
   return (
-    <ClassificationBannerBox>
+    <ClassificationBannerS>
       <CompactSecurityBanner />
-    </ClassificationBannerBox>
+    </ClassificationBannerS>
   )
 }
 
-const ClassificationBannerBox = styled.div`
+const ClassificationBannerS = styled.div`
   width: auto;
   max-width: 67%;
   text-align: center;
@@ -911,100 +864,76 @@ const ClassificationBannerBox = styled.div`
     padding: 2px 4px;
   }
 `
-const CompactTable = ({ children }) => {
+
+export const CompactWorkflowRow = ({ content }) => {
   return (
-    <CompactStyledTable>
-      <thead>
-        <tr>
-          <SpacedTd colSpan="2" />
-        </tr>
-      </thead>
-      <tbody>{children}</tbody>
-      <tfoot>
-        <tr>
-          <SpacedTd colSpan="2" />
-        </tr>
-      </tfoot>
-    </CompactStyledTable>
+    <CompactWorkflowRowS>
+      <CompactRowContentS colSpan="2">{content}</CompactRowContentS>
+    </CompactWorkflowRowS>
   )
 }
 
-CompactTable.propTypes = {
-  children: PropTypes.node
+CompactWorkflowRow.propTypes = {
+  content: PropTypes.node
 }
 
-const CompactStyledTable = styled.table`
-  width: 100%;
-`
-
-const SpacedTd = styled.td`
-  height: 80px;
-`
-
-export const ROW_TYPES = {
-  titleLike: "titleLike",
-  onlyData: "onlyData"
-}
-
-export const CompactRow = ({ label, content, rowType, ...otherProps }) => {
-  const { style, className } = otherProps
-  const CustomStyled = styled(ROW_STYLE)`
-    ${style};
-  `
-  if (rowType === ROW_TYPES.titleLike) {
-    return (
-      <CustomStyled>
-        <RowLabel colSpan="2">{label}</RowLabel>
-      </CustomStyled>
-    )
-  }
-
-  if (rowType === ROW_TYPES.onlyData) {
-    return (
-      <CustomStyled>
-        <RowContent colSpan="2">{content}</RowContent>
-      </CustomStyled>
-    )
-  }
-
-  const lowerLabel =
-    typeof label === "string" ? label.toLocaleLowerCase() : label
-  const topHeader = className === "reportField"
-
-  return (
-    <CustomStyled className={className || null}>
-      <RowLabel topHeader={topHeader}>{lowerLabel}</RowLabel>
-      <RowContent>{content}</RowContent>
-    </CustomStyled>
-  )
-}
-
-CompactRow.propTypes = {
-  label: PropTypes.node,
-  content: PropTypes.node,
-  rowType: PropTypes.string
-}
-
-const ROW_STYLE = styled.tr`
-  vertical-align: top;
-  font-family: "Times New Roman", Times, serif;
-  width: 100%;
-`
-
-const RowLabel = styled.th`
-  padding: 4px 0;
-  font-style: italic;
-  color: grey;
-  max-width: 50%;
-  font-weight: 300;
-  width: ${props => (props.topHeader ? "15%" : "auto")};
-`
-
-const RowContent = styled.td`
-  padding: 0 1rem;
-  & .form-control-static {
-    margin-bottom: 0;
+const CompactWorkflowRowS = styled(CompactRowS)`
+  & > td {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align items: center;
+    text-align: center;
+    & > div {
+      position: relative;
+      margin-right: 18px;
+    }
+    & > div:not(:last-child):after {
+      position: absolute;
+      right: -18px;
+      top: 0;
+      content: "→";
+    }
+    & > div > button {
+      padding: 0 5px !important;
+      margin: 0;
+    }
   }
 `
 
 export default connect(null, mapPageDispatchersToProps)(CompactReportView)
+
+export const CompactRowReportWorkflow = ({ workflow, isCompact }) => (
+  <Fieldset
+    className="workflow-fieldset compact"
+    title="Workflow"
+    isCompact={isCompact}
+  >
+    <CompactWorkflowRow
+      content={workflow.map(action => {
+        const key = action.step
+          ? `${action.createdAt}-${action.step.uuid}`
+          : action.createdAt
+        return <CompactRowReportAction action={action} key={key} />
+      })}
+    />
+  </Fieldset>
+)
+
+CompactRowReportWorkflow.propTypes = {
+  workflow: PropTypes.array.isRequired,
+  isCompact: PropTypes.bool
+}
+
+const CompactRowReportAction = ({ action }) => {
+  return (
+    <div className="workflow-action">
+      <ActionStatus action={action} />
+      <ActionButton action={action} />
+    </div>
+  )
+}
+CompactRowReportAction.propTypes = {
+  action: PropTypes.object.isRequired
+}

@@ -1,17 +1,11 @@
+import { CompactRow } from "components/Compact"
 import _isEmpty from "lodash/isEmpty"
-import { CompactRow } from "pages/reports/Compact"
 import PropTypes from "prop-types"
 import React from "react"
 import { Element } from "react-scroll"
-const Fieldset = ({
-  id,
-  title,
-  action,
-  style,
-  compactStyle,
-  ...otherProps
-}) => {
-  if (compactStyle) {
+
+const Fieldset = ({ id, title, action, style, isCompact, ...otherProps }) => {
+  if (isCompact) {
     return (
       <CompactRow
         label={title}
@@ -22,7 +16,6 @@ const Fieldset = ({
             </table>
           )
         }
-        style={compactStyle}
       />
     )
   }
@@ -50,7 +43,7 @@ Fieldset.propTypes = {
   title: PropTypes.node,
   action: PropTypes.node,
   style: PropTypes.object,
-  compactStyle: PropTypes.string
+  isCompact: PropTypes.bool
 }
 
 export default Fieldset

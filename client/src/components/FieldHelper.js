@@ -1,7 +1,7 @@
+import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
-import { CompactRow } from "pages/reports/Compact"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -69,7 +69,7 @@ const Field = ({
   extraColElem,
   addon,
   vertical,
-  compactStyle,
+  isCompact,
   extraAddon
 }) => {
   const id = getFieldId(field)
@@ -95,7 +95,7 @@ const Field = ({
     12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
 
-  if (compactStyle) {
+  if (isCompact) {
     return (
       <CompactRow
         label={label}
@@ -106,7 +106,6 @@ const Field = ({
             {children}
           </>
         }
-        style={compactStyle}
       />
     )
   }
@@ -150,7 +149,7 @@ Field.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   extraAddon: PropTypes.object,
-  compactStyle: PropTypes.string
+  isCompact: PropTypes.bool
 }
 Field.defaultProps = {
   vertical: false // default direction of label and input = horizontal
@@ -245,7 +244,7 @@ export const ReadonlyField = ({
   addon,
   vertical,
   humanValue,
-  compactStyle,
+  isCompact,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -266,7 +265,7 @@ export const ReadonlyField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      compactStyle={compactStyle}
+      isCompact={isCompact}
     />
   )
 }
@@ -279,7 +278,7 @@ ReadonlyField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   humanValue: PropTypes.any,
-  compactStyle: PropTypes.string
+  isCompact: PropTypes.bool
 }
 
 export const SpecialField = ({
@@ -291,7 +290,7 @@ export const SpecialField = ({
   addon,
   vertical,
   widget,
-  compactStyle,
+  isCompact,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -308,7 +307,7 @@ export const SpecialField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      compactStyle={compactStyle}
+      isCompact={isCompact}
     />
   )
 }
@@ -321,7 +320,7 @@ SpecialField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   widget: PropTypes.any,
-  compactStyle: PropTypes.string
+  isCompact: PropTypes.bool
 }
 
 export const customEnumButtons = list => {
