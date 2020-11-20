@@ -8,7 +8,7 @@ class db:
             self.dbConnString = os.environ["DB_DRIVER"] + "://" + \
                                 os.environ["ANET_DB_USERNAME"] + ":" + \
                                 os.environ["ANET_DB_PASSWORD"] + "@" + \
-                                "192.168.1.20" + "/" + \
+                                "192.168.10.164" + "/" + \
                                 os.environ["ANET_DB_NAME"]
         else:
             if conn_json == {}:

@@ -10,34 +10,22 @@ csv_obj = csv(csv_full_path)
 csv_obj.read_csv_file()
 
 # Import libraries
-import uuid
 from src.core.anet_import import anet_import
 
-# Create new db object
+# Create new anet_import object
 anet_import = anet_import()
 
-# Update entity classes in models.py file
-anet_import.generate_entity_classes(tables=["people","positions","peoplePositions", "tasks", "organizations", "taskTaskedOrganizations"], filename="models")
-
 # Import Entity Classes
-from src.core.models import Person, Position
-
-# Create a list of erroneous and correct records object
-erroneous_records, correct_records = list(), list()
+from src.examples.models import *
 
 # Create entity_list object
-entity_list = list()
+entity_json_list = list()
 
 # Loop through dataframe
 for index, row in csv_obj.df.iterrows():
     # Write your rules to check if record is valid or not
     if row["employee name"] == "Thiel":
-        # Append erroneous record to erroneous_records list.
-        erroneous_records.append(row)
         continue
-
-    # Append correct record to correct_records list.
-    correct_records.append(row)
     
     # Create and fill entity objects with correct record.
     person = Person()
@@ -45,11 +33,7 @@ for index, row in csv_obj.df.iterrows():
     person.rank = row["tashkil rank"]
     person.role = 1
 
-    entity_list.append(person)
-
-# Save log files
-anet_import.save_log(list_row = correct_records, log_file_name = "correct_records")
-anet_import.save_log(list_row = erroneous_records, log_file_name = "erroneous_records")
+    entity_json_list.append({"entity": person, "row": row})
 
 # Print update rule object
 anet_import.print_update_rules()
@@ -71,4 +55,4 @@ anet_import.print_update_rules()
 #anet_import.clear_update_rules()
 
 # Write to DB
-anet_import.save_data(entity_list)
+anet_import.save_data(entity_json_list)
