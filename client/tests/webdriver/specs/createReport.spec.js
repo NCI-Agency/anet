@@ -63,7 +63,7 @@ describe("Create report form page", () => {
       CreateReport.testReferenceFieldAdvancedSelectFirstItem.click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testReferenceFieldLabel.getValue()).to.be.null
+      expect(CreateReport.testReferenceField.getValue()).to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
       expect(CreateReport.testReferenceFieldValue.isExisting()).to.be.true
@@ -124,7 +124,7 @@ describe("Create report form page", () => {
       CreateReport.engagementInformationTitle.click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceFieldLabel.getValue()).to.be.null
+      expect(CreateReport.testMultiReferenceField.getValue()).to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
       expect(CreateReport.testMultiReferenceFieldValue.isExisting()).to.be.true
@@ -170,7 +170,7 @@ describe("Create report form page", () => {
       CreateReport.engagementInformationTitle.click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceFieldLabel.getValue()).to.be.null
+      expect(CreateReport.testMultiReferenceField.getValue()).to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
       expect(CreateReport.testMultiReferenceFieldValue.isExisting()).to.be.true
