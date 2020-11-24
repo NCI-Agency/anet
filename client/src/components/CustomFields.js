@@ -37,7 +37,6 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: LikertScale,
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
-const RENDERERS = {}
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
@@ -210,11 +209,11 @@ ReadonlyJsonField.propTypes = {
 }
 
 const EnumField = fieldProps => {
-  const { choices, renderer, ...otherFieldProps } = fieldProps
+  const { choices, ...otherFieldProps } = fieldProps
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroupField}
+      component={FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -243,13 +242,11 @@ const ReadonlyEnumField = fieldProps => {
 }
 
 const EnumSetField = fieldProps => {
-  const { choices, renderer, ...otherFieldProps } = fieldProps
+  const { choices, ...otherFieldProps } = fieldProps
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={
-        RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroupField
-      }
+      component={FieldHelper.CheckboxButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
