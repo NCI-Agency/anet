@@ -202,8 +202,6 @@ fields:
     nextSteps: Next steps
     keyOutcomes: Key outcomes
     reportText: Key details
-    detailedView: Detailed View
-    compactView: Summary / Print
     customFields:
       relatedReport:
         type: anet_object

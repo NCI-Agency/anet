@@ -420,7 +420,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText, compactView, detailedView]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
         properties:
           intent:
             type: string
@@ -454,12 +454,6 @@ properties:
             type: string
             title: The label for report's engagement details
             description: Used in the UI where report's engagement details are shown.
-          compactView:
-            type: string
-            title: The title for compact view of report for printing etc.
-          detailedView:
-            type: string
-            title: The title for detailed, default view of report
           customFields:
             type: object
             additionalProperties:

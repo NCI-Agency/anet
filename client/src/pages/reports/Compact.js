@@ -682,9 +682,7 @@ const CompactReportViewHeader = ({
 }) => {
   return (
     <Header>
-      <HeaderTitle value="title">
-        {Settings.fields.report.compactView}
-      </HeaderTitle>
+      <HeaderTitle value="title">Summary / Print</HeaderTitle>
       <SimpleMultiCheckboxDropdown
         label="Optional Fields ⇓"
         options={optionalFields}
@@ -707,7 +705,7 @@ const CompactReportViewHeader = ({
           bsStyle="primary"
           onClick={returnToDefaultPage}
         >
-          {Settings.fields.report.detailedView}
+          Detailed View
         </Button>
       </Buttons>
     </Header>
@@ -785,7 +783,7 @@ const CompactReportFooterContent = () => {
         <div>
           printed by <LinkTo modelType="Person" model={currentUser} />
         </div>
-        <div>{moment.utc().toString()}</div>
+        <div>{moment().format(Report.getEngagementDateFormat())}</div>
       </PrintedByBoxS>
     </FooterContentS>
   )
