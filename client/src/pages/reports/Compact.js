@@ -11,6 +11,7 @@ import CompactTable, {
   CompactTitle
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -27,6 +28,7 @@ import {
 } from "components/SecurityBanner"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
+import _groupBy from "lodash/groupBy"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
@@ -38,7 +40,6 @@ import { Link, useHistory, useLocation, useParams } from "react-router-dom"
 import anetLogo from "resources/logo.png"
 import Settings from "settings"
 import utils from "utils"
-import { parseHtmlWithLinkTo } from "utils_links"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -316,12 +317,12 @@ const CompactReportView = ({ pageDispatchers }) => {
               />
               <CompactRow
                 label="principals"
-                content={getPrincipalAttendees()}
+                content={getAttendeesAndAssessments(Person.ROLE.PRINCIPAL)}
                 className="reportField"
               />
               <CompactRow
                 label="advisors"
-                content={getAdvisorAttendees()}
+                content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
                 className="reportField"
               />
               <CompactRow
@@ -423,52 +424,6 @@ const CompactReportView = ({ pageDispatchers }) => {
     )
   }
 
-  function getPrincipalAttendees() {
-    let principalAttendees = []
-    const primaryPrincipal = Report.getPrimaryAttendee(
-      report.attendees,
-      Person.ROLE.PRINCIPAL
-    )
-    if (primaryPrincipal) {
-      principalAttendees.push(primaryPrincipal)
-    }
-
-    principalAttendees = principalAttendees.concat(
-      report.attendees.filter(attendee => {
-        // filter principal attendees which are not the primary one we added above
-        return (
-          attendee.role === Person.ROLE.PRINCIPAL &&
-          attendee.uuid !== principalAttendees[0]?.uuid
-        )
-      })
-    )
-    return getAttendeesAndAssessments(
-      sortGroupByOrganization(principalAttendees)
-    )
-  }
-
-  function getAdvisorAttendees() {
-    let advisorAttendees = []
-    const primaryAdvisor = Report.getPrimaryAttendee(
-      report.attendees,
-      Person.ROLE.ADVISOR
-    )
-    if (primaryAdvisor) {
-      advisorAttendees.push(primaryAdvisor)
-    }
-
-    advisorAttendees = advisorAttendees.concat(
-      report.attendees.filter(attendee => {
-        // filter advisor attendees which are not the primary one we added above
-        return (
-          attendee.role === Person.ROLE.ADVISOR &&
-          attendee.uuid !== advisorAttendees[0]?.uuid
-        )
-      })
-    )
-    return getAttendeesAndAssessments(sortGroupByOrganization(advisorAttendees))
-  }
-
   function getTasksAndAssessments() {
     return (
       <table>
@@ -517,7 +472,9 @@ const CompactReportView = ({ pageDispatchers }) => {
     )
   }
 
-  function getAttendeesAndAssessments(attendees) {
+  function getAttendeesAndAssessments(role) {
+    const attendees = getAttendessByRole(role)
+
     // to keep track of different organization, if it is same consecutively, don't show for compactness
     let prevDiffOrgName = ""
     return (
@@ -536,7 +493,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                 label={
                   <>
                     <LinkTo modelType="Person" model={attendee} />
-                    {renderOrgName && (
+                    {(renderOrgName || !attendee.position?.organization) && (
                       <LinkTo
                         modelType="Organization"
                         model={
@@ -579,42 +536,48 @@ const CompactReportView = ({ pageDispatchers }) => {
       </table>
     )
   }
-  // first item is primary, grouped around that item
-  // people without organization at the end
-  function sortGroupByOrganization(attendees) {
-    if (attendees.length === 0) {
-      return attendees
-    }
-    const sortedAttendees = []
-    sortedAttendees.push(attendees[0])
-    // keep track of index for non-org people, primary always has org so start at 1
-    let indexWithoutOrg = 1
-    attendees.forEach((attendeeEach, index) => {
-      if (index !== 0) {
-        // if no organization, put it at the end
-        if (!attendeeEach.position?.organization) {
-          sortedAttendees.push(attendeeEach)
-        } else {
-          // check if same org exists and it is not the exact same attendee
-          const indexFound = attendees.findIndex(
-            attendeeFind =>
-              attendeeEach.uuid !== attendeeFind.uuid &&
-              attendeeEach.position?.organization?.uuid ===
-                attendeeFind.position?.organization?.uuid
-          )
-          // if found we should insert next to similar ones
-          if (indexFound > -1) {
-            sortedAttendees.splice(indexFound + 1, 0, attendeeEach)
-          } else {
-            // add new org people just before non-org peope line
-            sortedAttendees.splice(indexWithoutOrg, 0, attendeeEach)
-          }
-          // we added someone with org, index moves up
-          indexWithoutOrg++
-        }
+
+  function getAttendessByRole(role) {
+    const primaryOrgName =
+      Report.getPrimaryAttendee(report.attendees, role)?.position?.organization
+        ?.shortName || ""
+
+    const noOrgName = "__noOrg__"
+
+    const people = report.attendees.filter(ra => ra.role === role)
+
+    const peopleGroupedByOrg = _groupBy(
+      people,
+      person => person?.position?.organization?.shortName || noOrgName
+    )
+
+    // sort organizations, primary person's org first, empty orgs last
+    const sortedOrgNames = Object.keys(peopleGroupedByOrg).sort((o1, o2) => {
+      if (o1 === primaryOrgName || o2 === noOrgName) {
+        return -1
       }
+      if (o2 === primaryOrgName || o1 === noOrgName) {
+        return 1
+      }
+      return o1.localeCompare(o2)
     })
-    return sortedAttendees
+
+    // populate people list from sorted orgs
+    return sortedOrgNames.reduce(
+      (result, orgName) => [
+        ...result,
+        ...peopleGroupedByOrg[orgName].sort(compareAttendees)
+      ],
+      []
+    )
+  }
+
+  function compareAttendees(a1, a2) {
+    return a1.primary
+      ? -1
+      : a2.primary
+        ? 1
+        : a1.toString().localeCompare(a2.toString())
   }
 }
 

@@ -45,7 +45,7 @@ const EmptySpaceTdS = styled.td`
   height: 80px;
 `
 
-export const CompactRow = ({ label, content, rowType, ...otherProps }) => {
+export const CompactRow = ({ label, content, ...otherProps }) => {
   const { style, className } = otherProps
   // merge custom style
   const CustomStyled = styled(CompactRowS)`
@@ -68,8 +68,7 @@ export const CompactRow = ({ label, content, rowType, ...otherProps }) => {
 
 CompactRow.propTypes = {
   label: PropTypes.node,
-  content: PropTypes.node,
-  rowType: PropTypes.string
+  content: PropTypes.node
 }
 
 export const CompactRowS = styled.tr`
