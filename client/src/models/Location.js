@@ -89,7 +89,8 @@ export default class Location extends Model {
               .default(() => Location.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
@@ -109,7 +110,8 @@ export default class Location extends Model {
               .default(() => Location.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )

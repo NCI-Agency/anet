@@ -113,7 +113,8 @@ export default class Task extends Model {
             restrictedApproval: yup.boolean().default(false),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
@@ -134,7 +135,8 @@ export default class Task extends Model {
             restrictedApproval: yup.boolean().default(false),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
