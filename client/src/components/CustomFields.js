@@ -292,7 +292,7 @@ const ArrayOfObjectsField = fieldProps => {
   const fieldsetTitle = fieldConfig.label || ""
   const addButtonLabel = fieldConfig.addButtonLabel || "Add a new item"
   return (
-    <Fieldset title={fieldsetTitle}>
+    <Fieldset title={fieldsetTitle} id={name}>
       {children}
       <FieldArray
         name={name}

@@ -4,6 +4,24 @@ const PAGE_URL = "/reports/new"
 
 const trfId = "formCustomFields.relatedReport"
 const tmrfId = "formCustomFields.additionalEngagementNeeded"
+const engagementTypesId = "formCustomFields.multipleButtons"
+
+const trainingFields = {
+  trainingEvent: "formCustomFields.trainingEvent",
+  numberTrained: "formCustomFields.numberTrained",
+  levelTrained: "formCustomFields.levelTrained",
+  trainingDate: "formCustomFields.trainingDate"
+}
+
+const nonTrainingFields = {
+  systemProcess: "formCustomFields.systemProcess",
+  echelons: "formCustomFields.echelons"
+}
+
+const nonTrainingFieldsets = {
+  itemsAgreed: "",
+  assetsUsed: ""
+}
 
 export class CreateReport extends Page {
   get form() {
@@ -18,12 +36,16 @@ export class CreateReport extends Page {
     return browser.$("#duration")
   }
 
+  getCustomFieldFormGroup(id) {
+    return browser.$(`div[id="fg-${id}"]`)
+  }
+
   get engagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
 
   get testReferenceFieldFormGroup() {
-    return browser.$(`div[id="fg-${trfId}"]`)
+    return this.getCustomFieldFormGroup(trfId)
   }
 
   get testReferenceFieldLabel() {
@@ -51,7 +73,7 @@ export class CreateReport extends Page {
   }
 
   get testMultiReferenceFieldFormGroup() {
-    return browser.$(`div[id="fg-${tmrfId}"]`)
+    return this.getCustomFieldFormGroup(tmrfId)
   }
 
   get testMultiReferenceFieldLabel() {
@@ -69,6 +91,49 @@ export class CreateReport extends Page {
   get testMultiReferenceFieldAdvancedSelect() {
     return this.testMultiReferenceFieldFormGroup.$(
       `div[id="${tmrfId}-popover"] tbody`
+    )
+  }
+
+  get engagementTypesFieldFormGroup() {
+    return this.getCustomFieldFormGroup(engagementTypesId)
+  }
+
+  get engagementTypesFieldLabel() {
+    return this.engagementTypesFieldFormGroup.$(
+      `label[for="${engagementTypesId}"]`
+    )
+  }
+
+  getEngagementTypesButtonByName(name) {
+    return this.engagementTypesFieldFormGroup.$(`label[id="${name}"]`)
+  }
+
+  get fieldsToggledVisibilityByTrainButton() {
+    return Object.keys(trainingFields).map(fieldId => {
+      return this.getCustomFieldFormGroup(trainingFields[fieldId])
+    })
+  }
+
+  get fieldsNotToggledVisibilityByTrainButton() {
+    return Object.keys(nonTrainingFields)
+      .map(fieldId => {
+        return this.getCustomFieldFormGroup(trainingFields[fieldId])
+      })
+      .concat(
+        // fieldsets are not prepended with fg-
+        Object.keys(nonTrainingFieldsets).map(fieldsetId => {
+          return browser.$(`div[id="${nonTrainingFieldsets[fieldsetId]}"]`)
+        })
+      )
+  }
+
+  get numberTrainedFormGroup() {
+    return this.getCustomFieldFormGroup(trainingFields.numberTrained)
+  }
+
+  get numberTrainedField() {
+    return this.numberTrainedFormGroup.$(
+      `input[id="${trainingFields.numberTrained}"]`
     )
   }
 
@@ -116,6 +181,10 @@ export class CreateReport extends Page {
 
   open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
     super.open(pathName, credentials)
+  }
+
+  openAsAdminUser() {
+    super.openAsAdminUser(PAGE_URL)
   }
 
   waitForAlertToLoad() {
