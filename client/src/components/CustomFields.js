@@ -733,8 +733,10 @@ const CustomField = ({
   ) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate = true) => {
-      const val =
-        value?.target?.value !== undefined ? value.target.value : value
+      let val = value?.target?.value !== undefined ? value.target.value : value
+      if (type === "number" && val === "") {
+        val = null
+      }
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
       setFieldValue(fieldName, val, sv)
@@ -742,7 +744,7 @@ const CustomField = ({
         validateFormDebounced()
       }
     },
-    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced]
+    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(() => {
