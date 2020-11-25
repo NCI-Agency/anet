@@ -281,7 +281,7 @@ export default class Model {
           !Object.prototype.hasOwnProperty.call(obj, key) ||
           utils.isNullOrUndefined(obj[key])
         ) {
-          obj[key] = value.default()
+          obj[key] = value.getDefault()
         }
       })
       return obj
