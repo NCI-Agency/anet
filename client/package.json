@@ -57,7 +57,7 @@
     "dotenv": "8.2.0",
     "eslint": "7.13.0",
     "eslint-config-react-app": "6.0.0",
-    "eslint-config-standard": "16.0.1",
+    "eslint-config-standard": "16.0.2",
     "eslint-config-standard-react": "11.0.1",
     "eslint-loader": "4.0.2",
     "eslint-plugin-chai-expect": "2.2.0",
@@ -284,7 +284,6 @@
       "standard"
     ],
     "rules": {
-      "default-param-last": "off",
       "eqeqeq": [
         "error",
         "always"
