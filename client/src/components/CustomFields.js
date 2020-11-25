@@ -113,6 +113,18 @@ const TextField = fieldProps => {
   )
 }
 
+const NumberField = fieldProps => {
+  const { onChange, onBlur, ...otherFieldProps } = fieldProps
+  return (
+    <FastField
+      onChange={value => onChange(value, false)} // do debounced validation
+      component={FieldHelper.InputField}
+      inputType="number"
+      {...otherFieldProps}
+    />
+  )
+}
+
 const ReadonlyTextField = fieldProps => {
   const { name, label, vertical } = fieldProps
   return (
@@ -608,7 +620,7 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
 
 const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: TextField,
-  [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
+  [CUSTOM_FIELD_TYPE.NUMBER]: NumberField,
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
   [CUSTOM_FIELD_TYPE.JSON]: JsonField,
