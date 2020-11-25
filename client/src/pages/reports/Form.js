@@ -528,6 +528,7 @@ const ReportForm = ({
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
                     inputType="number"
+                    onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
                     onChange={event => {
                       const safeVal =
                         utils.preventNegativeAndLongDigits(

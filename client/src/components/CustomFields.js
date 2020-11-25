@@ -118,6 +118,7 @@ const NumberField = fieldProps => {
   return (
     <FastField
       onChange={value => onChange(value, false)} // do debounced validation
+      onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
       component={FieldHelper.InputField}
       inputType="number"
       {...otherFieldProps}
