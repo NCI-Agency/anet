@@ -9,6 +9,7 @@ from src.core.db import db
 from src.examples.models import BaseModel
 from src.core.data import txt
 from sqlalchemy import exc
+from src.core.base_methods import base_methods
 
 class anet_import(db):
     def __init__(self):
@@ -30,57 +31,9 @@ class anet_import(db):
     def append_unsuccessful_entity_list_json(self, entity_json):
         self.unsuccessful_entity_list_json.append(entity_json)
     
-    def get_new_uuid(self):
-        return str(uuid.uuid4())
-
-    def add_new_uuid(self, entity, relation="", both=False):
-        if relation == "":
-            entity.uuid = str(uuid.uuid4())
-        else:
-            if both:
-                entity.uuid = str(uuid.uuid4())
-            setattr(getattr(entity, relation), "uuid", str(uuid.uuid4()))
-        return entity
-    
     def set_base_session(self):
         BaseModel.set_session(self.session)
-      
-    def query_with_rules(self, entity):
-        query_result_list = list()
-        for update_rule in self.update_rules["tables"]:
-            if entity.__tablename__ == update_rule["name"]:
-                query_result_list = self.session.query(entity.__class__).filter(and_(getattr(entity.__class__, attr_name) == getattr(entity, attr_name) for attr_name in tuple(update_rule["columns"]))).all()
-                break
-        return query_result_list
 
-    def is_entity_update(self, entity):
-        if self.update_rules == { "tables": [] }:
-            return False
-        else:
-            query_result_list = self.query_with_rules(entity)
-            if len(query_result_list) == 1:
-                return True
-            else:
-                return False
-    
-    def is_entity_tablename(self, entity, tablename):
-        if entity.__tablename__ == tablename:
-            return True
-        else:
-            return False
-    
-    def has_entity_relation(self, entity, rel_attr):
-        if hasattr(getattr(entity, rel_attr), '__tablename__'):
-            return True
-        else:
-            return False
-    
-    def has_entity_uuid(self, entity):
-        if getattr(entity, "uuid") is None:
-            return False
-        else:
-            return True        
-   
     def sqlalc_exc(self, e, entity_json, from_relation_table):
         if from_relation_table:
             exc_reason = e
@@ -91,46 +44,23 @@ class anet_import(db):
         self.append_unsuccessful_entity_list_json(entity_json)
         print("unsuccessfull: " + str(len(self.unsuccessful_entity_list_json)))
         #print(str(e))
-        self.session.rollback()       
-    
-    def update_entity(self, entity):
-        query_result_list = self.query_with_rules(entity)
-        r = query_result_list[0]
-        for attr, value in entity.__dict__.items():
-            if attr != "_sa_instance_state":
-                setattr(r, attr, value)
-        self.session.flush()
-    
-    def insert_entity(self, entity):
-        self.session.add(entity)
-        self.session.flush()
+        self.session.rollback()#######################################################################################################################################
 
-    def is_entity_single(self, entity):
-        if entity.__tablename__ != "positions":
-            return True
-        else:
-            if self.has_entity_relation(entity, "people") or self.has_entity_relation(entity, "location") or self.has_entity_relation(entity, "organization"):
-                return False
-            else:
-                return True
-            
-    
     def write_data(self, entity_list_json):
         for entity_json in entity_list_json:
+            utc_now = datetime.datetime.now()
             try:
                 entity = entity_json["entity"]
-                if self.is_entity_single(entity):
-                    if self.is_entity_update(entity):
-                        entity.update_single_entity()
+                is_entity_update = base_methods.is_entity_update(entity, self.update_rules)
+                if base_methods.is_entity_single(entity):
+                    if is_entity_update:
+                        entity.update_entity(utc_now)
                     else:
-                        entity = self.add_new_uuid(entity)
-                        entity.insert_single_entity()
+                        entity.insert_entity(utc_now)
                 else:
-                    if self.is_entity_update(entity):
-                        entity.update_nested_entity()
-                    else:
-                        entity = self.add_new_uuid(entity)
-                        entity.insert_nested_entity()
+                    entity.insert_update_nested_entity(self.update_rules, utc_now)
+                self.append_successful_entity_list_json(entity_json)
+                print("successfull: " + str(len(self.successful_entity_list_json)))
             except exc.SQLAlchemyError as e:
                 self.sqlalc_exc(e=e, entity_json = entity_json, from_relation_table = False)
             except Exception as e:
@@ -184,8 +114,8 @@ class anet_import(db):
     def write_successful_entities_hashfile(self):
         # This line could be removed in future
         self.update_hash_list_from_file()
-        for e_t in self.successful_entity_list_json:
-            self.hash_list.append(str(hash_pandas_object(e_t[1]).sum()))
+        for entity_json in self.successful_entity_list_json:
+            self.hash_list.append(str(hash_pandas_object(entity_json["row"]).sum()))
         fullpath_hashfile = os.path.join(self.path_hashfile, "hashvalues.txt")
         self.write_hashlist_to_file(fullpath_hashfile)
         
@@ -197,8 +127,8 @@ class anet_import(db):
         self.initialize_unsuccessful_entity_list_json()
         entity_list_json_old_excluded = self.exclude_old_entity_compare_hashes(entity_list_json)
         self.write_data(entity_list_json_old_excluded)
-        self.write_unsuccessful_records_to_csv()
-        self.write_successful_entities_hashfile()
+        #self.write_unsuccessful_records_to_csv()
+        #self.write_successful_entities_hashfile()
            
     def save_log(self, list_row, log_file_name):
         path_file = os.path.join(self.path_log, log_file_name + ".csv")

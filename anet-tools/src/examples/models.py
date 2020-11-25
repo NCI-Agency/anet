@@ -6,6 +6,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_mixins import ActiveRecordMixin
 import datetime
 import uuid
+import copy
+from src.core.base_methods import base_methods
+
 Base = declarative_base()
 metadata = Base.metadata
 
@@ -16,9 +19,11 @@ class BaseModel(Base, ActiveRecordMixin):
 class anet_logic_mixin(BaseModel):
     __abstract__ = True
 
-    def insert_single_entity(self):
+    def insert_entity(self, createdAt):
         """Insert and commit a new record
         """
+        self.createdAt = createdAt
+        self.updatedAt = createdAt
         if self.__tablename__ == "people":
             utc_now = datetime.datetime.now()
             peoplePositions = PeoplePositions.create(createdAt = utc_now, person = self)
@@ -28,33 +33,37 @@ class anet_logic_mixin(BaseModel):
             self.session.flush()
             self.commit()
     
-    def update_single_entity(self):
-        """Update and commit a existing record
+    def update_entity(self, updatedAt):
+        """Update and commit an existing record
         """
-        
         obj = type(self).find(self.uuid)
-        
+        self.updatedAt = updatedAt
         for attr, value in self.__dict__.items():
             if attr != "_sa_instance_state":
                 setattr(obj, attr, value)
         self.session.flush()
         self.commit()
-    
-    # Implementing in two functions below,
-    # to check if position has person or location or organization. if it has, they must be associated.
-    # Old associations must be removed. For this reason, i will be check
-    # if position has person, does the person have the old position
-    # if position has person, does the position have the old person.
-    # if position has location, does the position have the old location.
-    # .
-    # .
-    # .    
-    def insert_nested_entity(self):
-        pass
-    
-    def update_nested_entity(self):
-        pass
-    
+
+    def insert_update_nested_entity(self, update_rules, utc_now):
+        self_c = copy.deepcopy(self)
+        
+        if base_methods.has_entity_relation(self, "person"):
+            base_methods.relation_process(self, "person", self.person, self_c, self_c.person, update_rules, PeoplePositions, utc_now)
+
+        if base_methods.has_entity_relation(self, "location"):
+            base_methods.relation_process(self, "location", self.location, self_c, self_c.location, update_rules, PeoplePositions, utc_now)
+
+        if base_methods.has_entity_relation(self, "organization"):
+            base_methods.relation_process(self, "organization", self.organization, self_c, self_c.organization, update_rules, PeoplePositions, utc_now)
+            
+        if base_methods.is_entity_update(self, update_rules):
+            base_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
+            self_c.update_entity(utc_now)
+        else:
+            self_c.insert_entity(utc_now)
+        base_methods.add_new_association(self, PeoplePositions, utc_now)
+        self.commit()
+        
     @classmethod
     def commit(cls):
         cls.session.commit()
@@ -62,11 +71,14 @@ class anet_logic_mixin(BaseModel):
         
 class PeoplePositions(anet_logic_mixin):
     __tablename__ = "peoplePositions"
-    createdAt = Column('createdAt', DateTime, primary_key=True)
+    createdAt = Column('createdAt', DateTime)
     personUuid = Column('personUuid', ForeignKey('people.uuid'), index=True)
     positionUuid = Column('positionUuid', ForeignKey('positions.uuid'), index=True)
     endedAt = Column('endedAt', DateTime)
-    
+    __mapper_args__ = {
+        "primary_key":[createdAt, personUuid, positionUuid]
+    }
+
     person = relationship("Person", back_populates="positions")
     position = relationship("Position", back_populates="people")
 
@@ -86,6 +98,8 @@ class Position(anet_logic_mixin):
     organizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
     
     person = relationship("Person")
+    location = relationship('Location')
+    organization = relationship('Organization')
     people = relationship("PeoplePositions", back_populates="position")
     
     
@@ -114,7 +128,7 @@ class Person(anet_logic_mixin):
     positions = relationship("PeoplePositions", back_populates="person")
 
     
-class Location(Base):
+class Location(anet_logic_mixin):
     __tablename__ = 'locations'
 
     name = Column(String(500), nullable=False, index=True)
@@ -126,7 +140,7 @@ class Location(Base):
     uuid = Column(String(36), primary_key=True)
 
     
-class Organization(Base):
+class Organization(anet_logic_mixin):
     __tablename__ = 'organizations'
 
     shortName = Column(String(255), index=True)
