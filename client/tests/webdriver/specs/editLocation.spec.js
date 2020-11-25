@@ -27,7 +27,7 @@ describe("When editing a location", () => {
     expect(EditLocation.lngInputField.getValue()).toEqual(LOCATION_COORDS.lng)
   })
 
-  it("Should correctly edit input fields and display the correct values in both formats in the popover window", () => {
+  it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", () => {
     editLatLngFields()
     EditLocation.allFormatsPopover.click()
     EditLocation.allFormatsPopoverLat.waitForExist()
@@ -38,13 +38,11 @@ describe("When editing a location", () => {
     expect(EditLocation.allFormatsPopoverMGRS.getText()).toEqual(
       NEW_COORDS.mgrs
     )
-  })
 
-  it("Should successfully save and saved location should have the correct values for the lat-lng fields", () => {
-    editLatLngFields()
     EditLocation.saveLocationButton.click()
     ShowLocation.successMsg.waitForExist()
     ShowLocation.successMsg.waitForDisplayed()
+
     expect(ShowLocation.latField.getText()).toEqual(NEW_COORDS.lat)
     expect(ShowLocation.lngField.getText()).toEqual(NEW_COORDS.lng)
   })
