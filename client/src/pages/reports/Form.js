@@ -527,10 +527,13 @@ const ReportForm = ({
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
+                    inputType="number"
                     onChange={event => {
                       const safeVal =
-                        (event.target.value || "").replace(/[^0-9]+/g, "") ||
-                        null
+                        utils.preventNegativeAndLongDigits(
+                          event.target.value,
+                          4
+                        ) || null
                       setFieldTouched("duration", true, false)
                       setFieldValue("duration", safeVal, false)
                       validateFieldDebounced("duration")
