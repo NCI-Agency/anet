@@ -14,6 +14,10 @@ class CreateReport extends Page {
     return browser.$(".alert")
   }
 
+  get duration() {
+    return browser.$("#duration")
+  }
+
   get engagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
