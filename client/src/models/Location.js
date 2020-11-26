@@ -26,11 +26,12 @@ export default class Location extends Model {
   )
 
   static LOCATION_FORMATS = {
-    LAT_LON: "LAT_LON", // default
+    LAT_LON: "LAT_LON",
     MGRS: "MGRS"
   }
 
-  static locationFormat = Settings.fields.location.format // Default
+  static locationFormat =
+    Settings.fields.location.format || Location.LOCATION_FORMATS.LAT_LON
 
   static yupSchema = yup
     .object()
