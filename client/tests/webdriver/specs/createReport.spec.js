@@ -5,6 +5,12 @@ const REPORT = "Interior"
 const REPORT_VALUE = "Talk to the Interior about things"
 const REPORT_COMPLETE = `${REPORT_VALUE}`
 
+const INVALID_ENGAGEMENT_DURATION_1 = "123456"
+const INVALID_ENGAGEMENT_DURATION_2 = "-1"
+// positive sliced at 4th digit, negative should turn into 0
+const VALID_ENGAGEMENT_DURATION_1 = "1234"
+const VALID_ENGAGEMENT_DURATION_2 = "0"
+
 const PERSON = "EF 2.1"
 const PERSON_VALUE_1 = "HENDERSON, Henry"
 const PERSON_VALUE_2 = "JACKSON, Jack"
@@ -27,6 +33,33 @@ describe("Create report form page", () => {
       CreateReport.open()
       CreateReport.form.waitForExist()
       CreateReport.form.waitForDisplayed()
+    })
+
+    it("Should be able to prevent invalid duration values", () => {
+      CreateReport.duration.setValue(INVALID_ENGAGEMENT_DURATION_1)
+      browser.waitUntil(
+        () => {
+          return (
+            CreateReport.duration.getValue() === VALID_ENGAGEMENT_DURATION_1
+          )
+        },
+        {
+          timeout: 3000,
+          timeoutMsg: "Large positive duration value was not sliced "
+        }
+      )
+      CreateReport.duration.setValue(INVALID_ENGAGEMENT_DURATION_2)
+      browser.waitUntil(
+        () => {
+          return (
+            CreateReport.duration.getValue() === VALID_ENGAGEMENT_DURATION_2
+          )
+        },
+        {
+          timeout: 3000,
+          timeoutMsg: "Negative duration value did not change to zero"
+        }
+      )
     })
 
     it("Should be able to select an ANET object reference", () => {

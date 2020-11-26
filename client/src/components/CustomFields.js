@@ -37,7 +37,6 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: LikertScale,
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
-const RENDERERS = {}
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
@@ -109,6 +108,19 @@ const TextField = fieldProps => {
     <FastField
       onChange={value => onChange(value, false)} // do debounced validation
       component={FieldHelper.InputField}
+      {...otherFieldProps}
+    />
+  )
+}
+
+const NumberField = fieldProps => {
+  const { onChange, onBlur, ...otherFieldProps } = fieldProps
+  return (
+    <FastField
+      onChange={value => onChange(value, false)} // do debounced validation
+      onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
+      component={FieldHelper.InputField}
+      inputType="number"
       {...otherFieldProps}
     />
   )
@@ -210,11 +222,11 @@ ReadonlyJsonField.propTypes = {
 }
 
 const EnumField = fieldProps => {
-  const { choices, renderer, ...otherFieldProps } = fieldProps
+  const { choices, ...otherFieldProps } = fieldProps
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroupField}
+      component={FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -243,13 +255,11 @@ const ReadonlyEnumField = fieldProps => {
 }
 
 const EnumSetField = fieldProps => {
-  const { choices, renderer, ...otherFieldProps } = fieldProps
+  const { choices, ...otherFieldProps } = fieldProps
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={
-        RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroupField
-      }
+      component={FieldHelper.CheckboxButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -611,7 +621,7 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
 
 const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: TextField,
-  [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
+  [CUSTOM_FIELD_TYPE.NUMBER]: NumberField,
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
   [CUSTOM_FIELD_TYPE.JSON]: JsonField,
@@ -729,8 +739,10 @@ const CustomField = ({
   ) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate = true) => {
-      const val =
-        value?.target?.value !== undefined ? value.target.value : value
+      let val = value?.target?.value !== undefined ? value.target.value : value
+      if (type === "number" && val === "") {
+        val = null
+      }
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
       if (!_isEqual(val, prevVal.current)) {
@@ -741,7 +753,7 @@ const CustomField = ({
         validateFormDebounced()
       }
     },
-    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced]
+    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(() => {
