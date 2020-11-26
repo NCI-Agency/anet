@@ -1,4 +1,5 @@
 import Nav from "components/Nav"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import TopBar from "components/TopBar"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
@@ -62,8 +63,6 @@ const glassPane = {
 const loadingBar = {
   backgroundColor: "#29d"
 }
-
-export const ResponsiveLayoutContext = React.createContext()
 
 const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
   const history = useHistory()
