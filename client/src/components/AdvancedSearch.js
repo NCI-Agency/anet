@@ -9,9 +9,10 @@ import {
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import RemoveButton from "components/RemoveButton"
-import searchFilters, {
+import {
   findCommonFiltersForAllObjectTypes,
   POSTITION_POSITION_TYPE_FILTER_KEY,
+  searchFilters,
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
@@ -64,7 +65,7 @@ const AdvancedSearch = ({
   const [orgFilterQueryParams, setOrgFilterQueryParams] = useState(
     getOrgQueryParams(null)
   )
-  const ALL_FILTERS = searchFilters.searchFilters()
+  const ALL_FILTERS = searchFilters()
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
     searchObjectTypes,
     ALL_FILTERS
