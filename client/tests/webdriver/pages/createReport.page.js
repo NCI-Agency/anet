@@ -137,6 +137,10 @@ export class CreateReport extends Page {
     )
   }
 
+  get numberTrainedHelpText() {
+    return this.numberTrainedFormGroup.$('span[class="help-block"]')
+  }
+
   getTestMultiReferenceFieldAdvancedSelectItem(n) {
     return this.testMultiReferenceFieldAdvancedSelect.$(
       `tr:nth-child(${n}) td:nth-child(2)`
