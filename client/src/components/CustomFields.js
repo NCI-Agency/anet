@@ -1,5 +1,6 @@
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -27,7 +28,6 @@ import { Button, HelpBlock, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
-import { parseHtmlWithLinkTo } from "utils_links"
 
 export const SPECIAL_WIDGET_TYPES = {
   LIKERT_SCALE: "likertScale",
