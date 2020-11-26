@@ -111,7 +111,7 @@ export default class Report extends Model {
         .nullable()
         .test(
           "duration",
-          "Duration must be defined when engagement time is set!",
+          "You must provide duration when engagement time(hour:minute) is provided",
           function(duration) {
             const { engagementDate } = this.parent
             if (

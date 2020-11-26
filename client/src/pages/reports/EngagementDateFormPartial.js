@@ -37,7 +37,7 @@ const EngagementDatePartialFormWithDuration = ({
       <Col sm={2} componentClass={ControlLabel}>
         Engagement planning
       </Col>
-      <Col lg={2} md={3} style={{ marginLeft: "15px" }}>
+      <Col sm={4} style={{ marginLeft: "15px" }}>
         <Field
           name="engagementDate"
           component={FieldHelper.SpecialField}
@@ -65,7 +65,7 @@ const EngagementDatePartialFormWithDuration = ({
           {Report.isFuture(values.engagementDate) && futureEngagementHint}
         </Field>
       </Col>
-      <Col sm={2} style={{ marginLeft: "15px" }}>
+      <Col sm={3} style={{ marginLeft: "15px" }}>
         <Field
           name="duration"
           label="Duration (minutes)"
@@ -84,7 +84,7 @@ const EngagementDatePartialFormWithDuration = ({
           disabled={isAllDay}
         />
       </Col>
-      <Col sm={2} style={{ marginTop: "2.2em" }}>
+      <Col sm={2} style={{ marginTop: "2.2em", maxWidth: "max-content" }}>
         <Checkbox
           checked={isAllDay}
           label="All Day"
