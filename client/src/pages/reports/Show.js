@@ -12,9 +12,11 @@ import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
   jumpToTop,
@@ -27,8 +29,8 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
+import { deserializeQueryParams } from "components/SearchFilters"
 import Tag from "components/Tag"
-import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
@@ -43,10 +45,8 @@ import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
-import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
-import { parseHtmlWithLinkTo } from "utils_links"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 import ReportPeople from "./ReportPeople"
 

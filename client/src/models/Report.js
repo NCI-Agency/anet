@@ -6,12 +6,13 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Task } from "models"
 import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
+import Person from "./Person"
+import Task from "./Task"
 
 export default class Report extends Model {
   static resourceName = "Report"

@@ -19,7 +19,6 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import { Organization, Position, Report } from "models"
@@ -35,6 +34,7 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"

@@ -14,7 +14,11 @@ import {
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
@@ -23,7 +27,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
-import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LISTS = gql`
