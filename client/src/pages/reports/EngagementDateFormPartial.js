@@ -84,10 +84,15 @@ const EngagementDatePartialFormWithDuration = ({
           disabled={isAllDay}
         />
       </Col>
-      <Col sm={2} style={{ marginTop: "2.2em", maxWidth: "max-content" }}>
+      <Col
+        sm={2}
+        style={{ marginTop: "2.2em", maxWidth: "max-content" }}
+        id="all-day-col"
+      >
         <Checkbox
           checked={isAllDay}
           label="All Day"
+          id="all-day"
           onChange={e => {
             setIsAllDay(e.target.checked)
             if (e.target.checked) {

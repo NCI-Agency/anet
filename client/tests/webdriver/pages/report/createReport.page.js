@@ -24,13 +24,18 @@ class CreateReport extends Page {
     return browser.$("#engagementDate")
   }
 
-  get tomorrow() {
-    const tomorrow = moment().add(1, "day").format("ddd MMM DD YYYY")
-    return browser.$(`div[aria-label="${tomorrow}"]`)
+  get datePickPopover() {
+    // check the today button
+    const today = moment().format("ddd MMM DD YYYY")
+    return browser.$(`div[aria-label="${today}"]`)
   }
 
   get duration() {
     return browser.$("#duration")
+  }
+
+  get allDayCheckbox() {
+    return browser.$("#all-day-col label")
   }
 
   get reportPeople() {
@@ -91,13 +96,17 @@ class CreateReport extends Page {
     this.intentHelpBlock.waitForExist({ reverse: true })
 
     if (moment.isMoment(fields.engagementDate)) {
+      // remove all day as it would block duration adding
+      if (!this.duration.isClickable()) {
+        this.allDayCheckbox.click()
+      }
       this.engagementDate.waitForClickable()
       this.engagementDate.click()
-      this.tomorrow.waitForDisplayed()
+      this.datePickPopover.waitForDisplayed()
       browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
 
       this.title.click()
-      this.tomorrow.waitForExist({ reverse: true, timeout: 3000 })
+      this.datePickPopover.waitForExist({ reverse: true, timeout: 3000 })
     }
 
     if (fields.duration !== undefined) {

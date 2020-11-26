@@ -40,6 +40,10 @@ export class CreateReport extends Page {
     return browser.$(`div[id="fg-${id}"]`)
   }
 
+  get allDayCheckbox() {
+    return browser.$("#all-day-col label")
+  }
+
   get engagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
