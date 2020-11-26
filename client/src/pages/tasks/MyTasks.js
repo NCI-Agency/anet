@@ -8,15 +8,12 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import {
-  getSearchQuery,
-  RECURSE_STRATEGY,
-  SearchQueryPropType
-} from "components/SearchFilters"
+import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
 import pluralize from "pluralize"
 import React, { useContext, useMemo } from "react"
 import { connect } from "react-redux"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const MyTasks = ({ pageDispatchers, searchQuery }) => {

@@ -6,7 +6,6 @@ import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
@@ -28,6 +27,7 @@ import {
   Table
 } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`

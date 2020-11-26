@@ -18,10 +18,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
-import {
-  deserializeQueryParams,
-  RECURSE_STRATEGY
-} from "components/SearchFilters"
+import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
@@ -38,6 +35,7 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 

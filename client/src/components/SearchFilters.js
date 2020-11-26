@@ -45,6 +45,7 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
 import Settings from "settings"
 
 export const SearchQueryPropType = PropTypes.shape({
@@ -74,14 +75,6 @@ export const getSearchQuery = searchQuery => {
     })
   }
   return query
-}
-
-export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
-
-export const RECURSE_STRATEGY = {
-  NONE: "NONE",
-  CHILDREN: "CHILDREN",
-  PARENTS: "PARENTS"
 }
 
 const StatusFilter = {
@@ -481,7 +474,7 @@ export const searchFilters = function() {
 
   filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
     filters: {
-      [POSTITION_POSITION_TYPE_FILTER_KEY]: {
+      [POSITION_POSITION_TYPE_FILTER_KEY]: {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         props: {
