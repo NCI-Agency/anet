@@ -4,13 +4,14 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
 import PEOPLE_ICON from "resources/people.png"
 import RS_ICON from "resources/rs_small.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
+import Organization from "./Organization"
+import Position from "./Position"
 
 export const advisorPerson = Settings.fields.advisor.person
 export const principalPerson = Settings.fields.principal.person
