@@ -23,9 +23,9 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
@@ -415,7 +415,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                       setFieldTouched,
                       setFieldValue,
                       values,
-                      validateForm
+                      validateForm,
+                      errors
                     }}
                   />
                 </Fieldset>
