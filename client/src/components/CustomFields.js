@@ -628,7 +628,11 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: ArrayOfAnetObjectsField
 }
 
-function getInvisibleFields(fieldsConfig, parentFieldName, formikValues) {
+export function getInvisibleFields(
+  fieldsConfig,
+  parentFieldName,
+  formikValues
+) {
   const curInvisibleFields = []
   Object.keys(fieldsConfig).forEach(key => {
     const fieldConfig = fieldsConfig[key]
