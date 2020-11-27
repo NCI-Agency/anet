@@ -8,9 +8,13 @@ const validNumberInput = "10"
 const TESTED_ENGAGEMENT_BUTTON = "train"
 
 const REQUIRED_PERSON_FIELDS = {
-  lastname: "customField",
+  lastname: "customPerson",
   rank: "CIV",
   gender: "MALE"
+}
+
+const REQUIRED_TASK_FIELDS = {
+  shortName: "customTask"
 }
 
 describe("When working with custom fields for different anet objects", () => {
@@ -191,6 +195,32 @@ describe("When working with custom fields for different anet objects", () => {
       CreateTask.openAsAdmin()
       CreateTask.form.waitForExist()
       CreateTask.form.waitForDisplayed()
+      // Fill other required fields so that we can test custom field validation
+      CreateTask.shortName.setValue(REQUIRED_TASK_FIELDS.shortName)
+    })
+
+    it("Should be able to see assessment fields", () => {
+      CreateTask.addObjectButton.click()
+      CreateTask.objectFields.forEach(field => {
+        field.waitForExist()
+      })
+    })
+
+    it("Should warn invalid json for questions", () => {
+      CreateTask.questionsField.setValue("invalidJsonTest")
+      // normally there is already a help block, we need other warning text
+      CreateTask.questionsFieldWarningText.waitForExist()
+    })
+
+    it("Should not warn valid json for questions", () => {
+      CreateTask.questionsField.setValue("{}")
+      // all help texts should be removed with valid json
+      CreateTask.questionsFieldHelpText.waitForExist({ reverse: true })
+    })
+
+    it("Should be able to submit valid task", () => {
+      CreateTask.submitForm()
+      CreateTask.waitForAlertSuccessToLoad()
     })
   })
 })

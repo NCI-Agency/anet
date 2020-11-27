@@ -15,6 +15,34 @@ class CreateTask extends Page {
     return browser.$("#formBottomSubmit")
   }
 
+  get shortName() {
+    return browser.$('input[id="shortName"]')
+  }
+
+  get addObjectButton() {
+    return browser.$('button[id="addObjectButton"]')
+  }
+
+  get objectFields() {
+    return browser
+      .$("#custom-fields")
+      .$$("//div[starts-with(@id,'fg-formCustomFields')]")
+  }
+
+  get questionsField() {
+    return browser
+      .$("#custom-fields")
+      .$("//textarea[contains(@id,'questions')]")
+  }
+
+  get questionsFieldWarningText() {
+    return this.questionsField.$("//span[contains(text(), 'Invalid')]")
+  }
+
+  get questionsFieldHelpText() {
+    return this.questionsField.$(".help-block")
+  }
+
   openAsSuperUser() {
     super.openAsSuperUser(PAGE_URL)
   }
