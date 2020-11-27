@@ -3,9 +3,15 @@ import CreatePerson from "../pages/createNewPerson.page"
 import CreateTask from "../pages/createNewTask.page"
 import CreateReport from "../pages/createReport.page"
 
-const inValidInput = "-10"
-const validInput = "10"
-const TESTED_BUTTON_NAME = "train"
+const inValidNumberInput = "-10"
+const validNumberInput = "10"
+const TESTED_ENGAGEMENT_BUTTON = "train"
+
+const REQUIRED_PERSON_FIELDS = {
+  lastname: "customField",
+  rank: "CIV",
+  gender: "MALE"
+}
 
 describe("When working with custom fields for different anet objects", () => {
   describe("For report's custom fields", () => {
@@ -17,7 +23,7 @@ describe("When working with custom fields for different anet objects", () => {
 
     it("Should toggle the correct invisible fields", () => {
       const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_BUTTON_NAME
+        TESTED_ENGAGEMENT_BUTTON
       )
       button.waitForExist()
       button.waitForDisplayed()
@@ -37,43 +43,47 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous valid data when toggling field's visibility", () => {
-      CreateReport.numberTrainedField.setValue(validInput)
+      CreateReport.numberTrainedField.setValue(validNumberInput)
       const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_BUTTON_NAME
+        TESTED_ENGAGEMENT_BUTTON
       )
+      // make invisible
       button.click()
       CreateReport.numberTrainedFormGroup.waitForExist({ reverse: true })
-
+      // make visible
       button.click()
       CreateReport.numberTrainedFormGroup.waitForExist()
 
-      expect(CreateReport.numberTrainedField.getValue()).to.equal(validInput)
+      expect(CreateReport.numberTrainedField.getValue()).to.equal(
+        validNumberInput
+      )
     })
 
     it("Should not persist previous invalid data when toggling field's visibility", () => {
-      CreateReport.numberTrainedField.setValue(inValidInput)
+      CreateReport.numberTrainedField.setValue(inValidNumberInput)
       CreateReport.numberTrainedHelpText.waitForExist()
       // Actually see the validation warning
       expect(CreateReport.numberTrainedHelpText.getText()).to.equal(
         "Number trained must be greater than or equal to 1"
       )
       const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_BUTTON_NAME
+        TESTED_ENGAGEMENT_BUTTON
       )
+      // make invisible
       button.click()
       CreateReport.numberTrainedFormGroup.waitForExist({ reverse: true })
-
+      // make visible
       button.click()
       CreateReport.numberTrainedFormGroup.waitForExist()
 
       expect(CreateReport.numberTrainedField.getValue()).not.be.equal(
-        inValidInput
+        inValidNumberInput
       )
       expect(CreateReport.numberTrainedField.getValue()).to.be.equal("")
     })
 
     it("Should validate visible field", () => {
-      CreateReport.numberTrainedField.setValue(inValidInput)
+      CreateReport.numberTrainedField.setValue(inValidNumberInput)
       CreateReport.numberTrainedHelpText.waitForExist()
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
@@ -89,7 +99,7 @@ describe("When working with custom fields for different anet objects", () => {
       CreateReport.form.waitForDisplayed()
 
       const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_BUTTON_NAME
+        TESTED_ENGAGEMENT_BUTTON
       )
       // make the trained number field invisible
       button.click()
@@ -102,18 +112,83 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
   })
-
+  // ------------------------------ PERSON CUSTOM FIELDS -----------------------------------------
   describe("For person's custom fields", () => {
     it("Should open create new person page", () => {
-      CreatePerson.openAsAdminUser()
+      CreatePerson.openAsAdmin()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
+      // fill other required fields at the beginning
+      CreatePerson.lastName.setValue(REQUIRED_PERSON_FIELDS.lastname)
+      CreatePerson.rank.selectByAttribute("value", REQUIRED_PERSON_FIELDS.rank)
+      CreatePerson.gender.selectByAttribute(
+        "value",
+        REQUIRED_PERSON_FIELDS.gender
+      )
+    })
+
+    it("Should not show default invisible fields", () => {
+      CreatePerson.defaultInvisibleCustomFields.forEach(field => {
+        expect(field.isExisting()).to.eq(false)
+      })
+    })
+
+    it("Should toggle correct invisible fields", () => {
+      // green toggles every invisible field to visible
+      CreatePerson.greenButton.click()
+      CreatePerson.defaultInvisibleCustomFields.forEach(field => {
+        field.waitForExist()
+      })
+    })
+
+    it("Should persist previous valid data when toggling field's visibility", () => {
+      CreatePerson.numberCustomField.setValue(validNumberInput)
+      // make default invisible fields invisible again, amber color does that
+      CreatePerson.amberButton.click()
+      CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
+      // make visible
+      CreatePerson.greenButton.click()
+      CreatePerson.numberCustomFieldContainer.waitForExist()
+
+      expect(CreatePerson.numberCustomField.getValue()).be.equal(
+        validNumberInput
+      )
+    })
+
+    it("Should not persist previous invalid data when toggling field's visibility", () => {
+      CreatePerson.numberCustomField.setValue(inValidNumberInput)
+      // Actually see the validation warning
+      CreatePerson.numberCustomFieldHelpText.waitForExist()
+      // make invisible
+      CreatePerson.amberButton.click()
+      CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
+      // make visible
+      CreatePerson.greenButton.click()
+      CreatePerson.numberCustomFieldContainer.waitForExist()
+
+      expect(CreatePerson.numberCustomField.getValue()).not.be.equal(
+        inValidNumberInput
+      )
+      expect(CreatePerson.numberCustomField.getValue()).to.equal("")
+    })
+
+    it("Should validate visible field", () => {
+      CreatePerson.numberCustomField.setValue(inValidNumberInput)
+      CreatePerson.numberCustomFieldHelpText.waitForExist()
+    })
+
+    it("Should not validate invisible field so we can submit the form", () => {
+      // make invisible
+      CreatePerson.amberButton.click()
+      CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
+      CreatePerson.submitForm()
+      CreatePerson.waitForAlertSuccessToLoad()
     })
   })
 
   describe("For task's custom fields", () => {
     it("Should open create new task page", () => {
-      CreateTask.openAsAdminUser()
+      CreateTask.openAsAdmin()
       CreateTask.form.waitForExist()
       CreateTask.form.waitForDisplayed()
     })
