@@ -1197,7 +1197,8 @@ const ReportForm = ({
           const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
-            newValues.reportSensitiveInformation = {} // object must exist for Collapse children
+            // object must exist for Collapse children
+            newValues.reportSensitiveInformation = { uuid: null, text: null }
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
