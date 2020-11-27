@@ -16,6 +16,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _set from "lodash/set"
@@ -648,10 +649,18 @@ export function getInvisibleFields(
   return curInvisibleFields
 }
 
+function resetInvalidInvisibleFields(invisibleFields, setFieldValue, errors) {
+  invisibleFields?.forEach(fieldName => {
+    if (_get(errors, fieldName)) {
+      setFieldValue(fieldName, null)
+    }
+  })
+}
+
 export const CustomFieldsContainer = props => {
   const {
     parentFieldName,
-    formikProps: { values, setFieldValue },
+    formikProps: { values, errors, setFieldValue },
     fieldsConfig
   } = props
   const invisibleFields = useMemo(
@@ -665,9 +674,10 @@ export const CustomFieldsContainer = props => {
   useEffect(() => {
     if (!_isEqual(prevInvisibleFields.current, invisibleFields)) {
       prevInvisibleFields.current = invisibleFields
+      resetInvalidInvisibleFields(invisibleFields, setFieldValue, errors)
       setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
     }
-  }, [invisibleFields, invisibleFieldsFieldName, setFieldValue])
+  }, [invisibleFields, invisibleFieldsFieldName, setFieldValue, errors])
 
   return (
     <>
