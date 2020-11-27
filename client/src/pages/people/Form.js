@@ -494,7 +494,8 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       setFieldTouched,
                       setFieldValue,
                       values,
-                      validateForm
+                      validateForm,
+                      errors
                     }}
                   />
                 </Fieldset>
