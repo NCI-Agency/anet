@@ -69,7 +69,37 @@ describe("When working with custom fields for different anet objects", () => {
       expect(CreateReport.numberTrainedField.getValue()).not.be.equal(
         inValidInput
       )
-      expect(CreateReport.numberTrainedField.getValue()).not.be.equal("")
+      expect(CreateReport.numberTrainedField.getValue()).to.be.equal("")
+    })
+
+    it("Should validate visible field", () => {
+      CreateReport.numberTrainedField.setValue(inValidInput)
+      CreateReport.numberTrainedHelpText.waitForExist()
+      CreateReport.submitForm()
+      CreateReport.waitForAlertToLoad()
+
+      expect(CreateReport.alert.getText()).to.include(
+        "Number trained must be greater than or equal to 1"
+      )
+    })
+
+    it("Should not validate invisible field", () => {
+      CreateReport.editButton.click()
+      CreateReport.form.waitForExist()
+      CreateReport.form.waitForDisplayed()
+
+      const button = CreateReport.getEngagementTypesButtonByName(
+        TESTED_BUTTON_NAME
+      )
+      // make the trained number field invisible
+      button.click()
+
+      CreateReport.submitForm()
+      CreateReport.waitForAlertToLoad()
+
+      expect(CreateReport.alert.getText()).to.not.include(
+        "Number trained must be greater than or equal to 1"
+      )
     })
   })
 
