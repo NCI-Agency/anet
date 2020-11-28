@@ -632,18 +632,40 @@ const FIELD_COMPONENTS = {
 export function getInvisibleFields(
   fieldsConfig,
   parentFieldName,
-  formikValues
+  formikValues,
+  isArrayOfObjects = false
 ) {
   const curInvisibleFields = []
-  Object.keys(fieldsConfig).forEach(key => {
-    const fieldConfig = fieldsConfig[key]
-    const fieldName = `${parentFieldName}.${key}`
+  // loop through fields of the config to check for visibility field
+  Object.entries(fieldsConfig).forEach(([key, fieldConfig]) => {
+    const visibleWhenPath = fieldConfig.visibleWhen
     const isVisible =
-      !fieldConfig.visibleWhen ||
-      (fieldConfig.visibleWhen &&
-        !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikValues)))
+      !visibleWhenPath ||
+      (visibleWhenPath && !_isEmpty(JSONPath(visibleWhenPath, formikValues)))
+
+    const fieldName = `${parentFieldName}.${key}`
+
+    // recursively get invisible fields in case of array of objects
+    if (fieldConfig.type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+      curInvisibleFields.push(
+        ...getInvisibleFields(
+          fieldConfig.objectFields,
+          fieldName,
+          formikValues,
+          true
+        )
+      )
+    }
     if (!isVisible) {
-      curInvisibleFields.push(fieldName)
+      if (isArrayOfObjects) {
+        // insert index to fieldName
+        // so that we can acces array items with _set, _get methods
+        _get(formikValues, parentFieldName).forEach((obj, index) => {
+          curInvisibleFields.push(`${parentFieldName}.${index}.${key}`)
+        })
+      } else {
+        curInvisibleFields.push(fieldName)
+      }
     }
   })
   return curInvisibleFields
@@ -663,6 +685,7 @@ export const CustomFieldsContainer = props => {
     formikProps: { values, errors, setFieldValue },
     fieldsConfig
   } = props
+
   const invisibleFields = useMemo(
     () => getInvisibleFields(fieldsConfig, parentFieldName, values),
     [fieldsConfig, parentFieldName, values]
@@ -727,7 +750,6 @@ const CustomField = ({
   const { type, helpText } = fieldConfig
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
-  const prevVal = useRef()
   const { callback: validateFormDebounced } = useDebouncedCallback(
     validateForm,
     400
@@ -740,10 +762,7 @@ const CustomField = ({
       }
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
-      if (!_isEqual(val, prevVal.current)) {
-        prevVal.current = val
-        setFieldValue(fieldName, val, sv)
-      }
+      setFieldValue(fieldName, val, sv)
       if (!sv) {
         validateFormDebounced()
       }
