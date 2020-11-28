@@ -285,7 +285,11 @@ const ArrayOfObjectsField = fieldProps => {
   ])
   const objDefault = useMemo(() => {
     const objDefault = {}
-    const objSchema = createYupObjectShape(fieldConfig.objectFields)
+    const objSchema = createYupObjectShape(
+      fieldConfig.objectFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      false
+    )
     return Model.fillObject(objDefault, objSchema)
   }, [fieldConfig.objectFields])
 
