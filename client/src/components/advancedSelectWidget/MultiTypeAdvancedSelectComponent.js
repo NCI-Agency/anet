@@ -1,4 +1,5 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   LocationOverlayRow,
   OrganizationOverlayRow,
@@ -7,7 +8,6 @@ import {
   ReportDetailedOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Model from "components/Model"
@@ -154,7 +154,7 @@ const MultiTypeAdvancedSelectComponent = ({
         <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
           {Object.entries(ENTITY_TYPES)
             .filter(([, et]) => entityTypes.includes(et))
-            .map(([key, entityName], value) => {
+            .map(([key, entityName]) => {
               const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
               return (
                 <Button key={entityName} value={entityName}>

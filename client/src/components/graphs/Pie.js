@@ -17,7 +17,7 @@ const Pie = ({ label, segmentFill, segmentLabel, data, width, height }) => {
     const canvas = d3.select(canvasRef.current)
     const radius = Math.min(width, height) / 2 - 2
     const arcs = pie.current(
-      Array.from(Object.entries(data), ([key, value]) => ({
+      Object.entries(data).map(([key, value]) => ({
         key,
         value
       }))

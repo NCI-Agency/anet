@@ -53,17 +53,19 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.keys(instantAssessmentConfig || {}).map((key, index) => (
-        <InstantAssessmentsRow
-          key={key}
-          idSuffix={`${key}-${idSuffix}`}
-          questionKey={key}
-          questionConfig={instantAssessmentConfig[key]}
-          periods={periods}
-          periodsData={dataPerPeriod}
-          isFirstRow={index === 0}
-        />
-      ))}
+      {Object.entries(instantAssessmentConfig || {}).map(
+        ([key, config], index) => (
+          <InstantAssessmentsRow
+            key={key}
+            idSuffix={`${key}-${idSuffix}`}
+            questionKey={key}
+            questionConfig={config}
+            periods={periods}
+            periodsData={dataPerPeriod}
+            isFirstRow={index === 0}
+          />
+        )
+      )}
       <PeriodicAssessmentsRows
         entity={entity}
         entityType={entityType}

@@ -73,9 +73,9 @@ const ReportStateFilter = ({
           onChange={handleChangeState}
           multiple
         >
-          {Object.keys(Report.STATE_LABELS).map(key => (
+          {Object.entries(Report.STATE_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
-              {Report.STATE_LABELS[key]}
+              {label}
             </option>
           ))}
         </select>
@@ -88,9 +88,9 @@ const ReportStateFilter = ({
               onChange={handleChangeCancelledReason}
             >
               <option value="">Everything</option>
-              {Object.keys(CANCELLATION_REASON_LABELS).map(key => (
+              {Object.entries(CANCELLATION_REASON_LABELS).map((key, label) => (
                 <option key={key} value={key}>
-                  {CANCELLATION_REASON_LABELS[key]}
+                  {label}
                 </option>
               ))}
             </select>

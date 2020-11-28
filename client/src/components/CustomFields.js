@@ -838,8 +838,7 @@ const CustomFields = ({
 }) => {
   return (
     <>
-      {Object.keys(fieldsConfig).map(key => {
-        const fieldConfig = fieldsConfig[key]
+      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
         return invisibleFields.includes(fieldName) ? null : (
           <CustomField
@@ -889,9 +888,8 @@ export const ReadonlyCustomFields = ({
 }) => {
   return (
     <>
-      {Object.keys(fieldsConfig).map(key => {
+      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
-        const fieldConfig = fieldsConfig[key]
         const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
         const { type } = fieldConfig
         let extraProps = {}

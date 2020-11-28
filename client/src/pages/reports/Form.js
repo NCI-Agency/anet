@@ -1304,16 +1304,14 @@ const ReportForm = ({
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
     const entitiesAssessments = values[asessmentsFieldName]
-    return Object.keys(entitiesAssessments)
+    return Object.entries(entitiesAssessments)
       .filter(
-        key =>
-          entitiesUuids.includes(key) &&
-          !isEmptyAssessment(entitiesAssessments[key])
+        ([key, assessment]) =>
+          entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
-      .map(key => {
-        entitiesAssessments[key].__recurrence = RECURRENCE_TYPE.ONCE
-        entitiesAssessments[key].__relatedObjectType =
-          ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+      .map(([key, assessment]) => {
+        assessment.__recurrence = RECURRENCE_TYPE.ONCE
+        assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
