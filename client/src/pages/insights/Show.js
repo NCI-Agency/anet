@@ -19,7 +19,11 @@ import {
 import PendingApprovalReports from "components/PendingApprovalReports"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
@@ -27,7 +31,6 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
-import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"

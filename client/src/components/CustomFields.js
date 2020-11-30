@@ -1,5 +1,6 @@
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -27,7 +28,6 @@ import { Button, HelpBlock, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
-import { parseHtmlWithLinkTo } from "utils_links"
 
 export const SPECIAL_WIDGET_TYPES = {
   LIKERT_SCALE: "likertScale",
@@ -37,7 +37,6 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: LikertScale,
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
-const RENDERERS = {}
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
@@ -109,6 +108,19 @@ const TextField = fieldProps => {
     <FastField
       onChange={value => onChange(value, false)} // do debounced validation
       component={FieldHelper.InputField}
+      {...otherFieldProps}
+    />
+  )
+}
+
+const NumberField = fieldProps => {
+  const { onChange, onBlur, ...otherFieldProps } = fieldProps
+  return (
+    <FastField
+      onChange={value => onChange(value, false)} // do debounced validation
+      onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
+      component={FieldHelper.InputField}
+      inputType="number"
       {...otherFieldProps}
     />
   )
@@ -210,11 +222,11 @@ ReadonlyJsonField.propTypes = {
 }
 
 const EnumField = fieldProps => {
-  const { choices, renderer, ...otherFieldProps } = fieldProps
+  const { choices, ...otherFieldProps } = fieldProps
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={RENDERERS[renderer] || FieldHelper.RadioButtonToggleGroupField}
+      component={FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -243,13 +255,11 @@ const ReadonlyEnumField = fieldProps => {
 }
 
 const EnumSetField = fieldProps => {
-  const { choices, renderer, ...otherFieldProps } = fieldProps
+  const { choices, ...otherFieldProps } = fieldProps
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
-      component={
-        RENDERERS[renderer] || FieldHelper.CheckboxButtonToggleGroupField
-      }
+      component={FieldHelper.CheckboxButtonToggleGroupField}
       {...otherFieldProps}
     />
   )
@@ -611,7 +621,7 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
 
 const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: TextField,
-  [CUSTOM_FIELD_TYPE.NUMBER]: TextField,
+  [CUSTOM_FIELD_TYPE.NUMBER]: NumberField,
   [CUSTOM_FIELD_TYPE.DATE]: DateField,
   [CUSTOM_FIELD_TYPE.DATETIME]: DateTimeField,
   [CUSTOM_FIELD_TYPE.JSON]: JsonField,
@@ -659,10 +669,14 @@ function getInvisibleFields(
 export const CustomFieldsContainer = props => {
   const { parentFieldName, formikProps } = props
   const [invisibleFields, setInvisibleFields] = useState([])
+  const prevInvisibleFields = useRef(invisibleFields)
   const { setFieldValue } = formikProps
   const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
-    setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
+    if (!_isEqual(invisibleFields, prevInvisibleFields.current)) {
+      prevInvisibleFields.current = invisibleFields
+      setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
+    }
   }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
 
   return (
@@ -718,22 +732,28 @@ const CustomField = ({
   const { type, helpText } = fieldConfig
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
+  const prevVal = useRef()
   const { callback: validateFormDebounced } = useDebouncedCallback(
     validateForm,
     400
   ) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate = true) => {
-      const val =
-        value?.target?.value !== undefined ? value.target.value : value
+      let val = value?.target?.value !== undefined ? value.target.value : value
+      if (type === "number" && val === "") {
+        val = null
+      }
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
-      setFieldValue(fieldName, val, sv)
+      if (!_isEqual(val, prevVal.current)) {
+        prevVal.current = val
+        setFieldValue(fieldName, val, sv)
+      }
       if (!sv) {
         validateFormDebounced()
       }
     },
-    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced]
+    [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
   const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(() => {

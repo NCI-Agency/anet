@@ -142,6 +142,7 @@ export const InputField = ({
   field, // { name, value, onChange, onBlur }
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
+  inputType,
   children,
   extraColElem,
   addon,
@@ -152,12 +153,13 @@ export const InputField = ({
   const widgetElem = useMemo(
     () => (
       <FormControl
+        type={inputType}
         {...Object.without(field, "value")}
         value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
       />
     ),
-    [field, otherProps]
+    [field, otherProps, inputType]
   )
   return (
     <Field
@@ -177,6 +179,7 @@ InputField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object,
   label: PropTypes.string,
+  inputType: PropTypes.string,
   children: PropTypes.any,
   extraColElem: PropTypes.object,
   addon: PropTypes.object,

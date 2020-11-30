@@ -37,7 +37,6 @@ import {
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -56,6 +55,7 @@ import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
@@ -433,6 +433,7 @@ const ReportForm = ({
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
+        const hasAssessments = values.engagementDate && !isFutureEngagement
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty} />
@@ -527,10 +528,14 @@ const ReportForm = ({
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
+                    inputType="number"
+                    onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
                     onChange={event => {
                       const safeVal =
-                        (event.target.value || "").replace(/[^0-9]+/g, "") ||
-                        null
+                        utils.preventNegativeAndLongDigits(
+                          event.target.value,
+                          4
+                        ) || null
                       setFieldTouched("duration", true, false)
                       setFieldValue("duration", safeVal, false)
                       validateFieldDebounced("duration")
@@ -1021,45 +1026,51 @@ const ReportForm = ({
                 </Collapse>
               </Fieldset>
 
-              <Fieldset
-                title="Attendees engagement assessments"
-                id="attendees-engagement-assessments"
-              >
-                <InstantAssessmentsContainerField
-                  entityType={Person}
-                  entities={values.reportPeople?.filter(rp => rp.attendee)}
-                  entitiesInstantAssessmentsConfig={
-                    attendeesInstantAssessmentsConfig
-                  }
-                  parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
-                  formikProps={{
-                    setFieldTouched,
-                    setFieldValue,
-                    values,
-                    validateForm
-                  }}
-                />
-              </Fieldset>
+              {hasAssessments && (
+                <>
+                  <Fieldset
+                    title="Attendees engagement assessments"
+                    id="attendees-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Person}
+                      entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      entitiesInstantAssessmentsConfig={
+                        attendeesInstantAssessmentsConfig
+                      }
+                      parentFieldName={
+                        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                      }
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
 
-              <Fieldset
-                title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
-                id="tasks-engagement-assessments"
-              >
-                <InstantAssessmentsContainerField
-                  entityType={Task}
-                  entities={values.tasks}
-                  entitiesInstantAssessmentsConfig={
-                    tasksInstantAssessmentsConfig
-                  }
-                  parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
-                  formikProps={{
-                    setFieldTouched,
-                    setFieldValue,
-                    values,
-                    validateForm
-                  }}
-                />
-              </Fieldset>
+                  <Fieldset
+                    title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                    id="tasks-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Task}
+                      entities={values.tasks}
+                      entitiesInstantAssessmentsConfig={
+                        tasksInstantAssessmentsConfig
+                      }
+                      parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
+                </>
+              )}
 
               <div className="submit-buttons">
                 <div>
@@ -1083,6 +1094,7 @@ const ReportForm = ({
                       objectDisplay={values.uuid}
                       bsStyle="warning"
                       buttonLabel={`Delete this ${getReportType(values)}`}
+                      disabled={isSubmitting}
                     />
                   )}
                   {/* Skip validation on save! */}
@@ -1230,7 +1242,7 @@ const ReportForm = ({
       .then(data => {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
-        resetForm()
+        resetForm({ isSubmitting: true })
         history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
@@ -1258,7 +1270,7 @@ const ReportForm = ({
     const edit = isEditMode(values)
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
-    resetForm()
+    resetForm({ isSubmitting: true })
     if (!edit) {
       history.replace(Report.pathForEdit(report))
     }

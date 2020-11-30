@@ -197,6 +197,19 @@ export default {
       arr &&
       arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
     )
+  },
+
+  preventNegativeAndLongDigits: function(valueStr, maxLen) {
+    let safeVal
+    const dangerVal = Number(valueStr)
+    if (!isNaN(dangerVal) && dangerVal < 0) {
+      safeVal = "0"
+    } else {
+      const nonDigitsRemoved = valueStr.replace(/\D/g, "")
+      safeVal =
+        maxLen <= 0 ? nonDigitsRemoved : nonDigitsRemoved.slice(0, maxLen)
+    }
+    return safeVal
   }
 }
 

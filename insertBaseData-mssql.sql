@@ -63,6 +63,8 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@example.com', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'SOLENOID, Selena', 0, 0, 'hunter+selena@example.com', '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', 'selena', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@example.com', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', 'erin', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -130,6 +132,8 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, u
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 1.1 SuperUser', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
+	VALUES (lower(newid()), 'EF 1.2 Advisor', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 2.1 Advisor B', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 2.1 Advisor for Accounting', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -196,6 +200,11 @@ INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), (SELECT uuid from people where emailAddress = 'hunter+liz@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+liz@example.com') WHERE name = 'EF 1.1 Advisor A';
 
+-- Put Selena into the EF 1.2 Advisor Billet
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where emailAddress = 'hunter+selena@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+selena@example.com') WHERE name = 'EF 1.2 Advisor';
+
 -- Put Reina into the EF 2.2 Advisor C Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor C'), (SELECT uuid from people where emailAddress = 'hunter+reina@example.com'), CURRENT_TIMESTAMP);
@@ -227,7 +236,9 @@ INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 1', 'Planning Programming, Budgeting and Execution', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
-		VALUES (lower(newid()), 'EF 1.1', '',0, (SELECT uuid from organizations WHERE shortName ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		VALUES (lower(newid()), 'EF 1.1', '', 0, (SELECT uuid from organizations WHERE shortName ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
+		VALUES (lower(newid()), 'EF 1.2', '', 0, (SELECT uuid from organizations WHERE shortName ='EF 1'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 2', '',0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
@@ -283,6 +294,7 @@ INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 1') WHERE name LIKE 'EF 1 %';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 1.1') WHERE name LIKE 'EF 1.1%';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 1.2') WHERE name LIKE 'EF 1.2%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 2.1') WHERE name LIKE 'EF 2.1%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 2.2') WHERE name LIKE 'EF 2.2%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 3') WHERE name LIKE 'EF 3%';
@@ -366,10 +378,10 @@ INSERT INTO taskTaskedOrganizations (taskUuid, organizationUuid)
 		((SELECT uuid from tasks where shortName = '1.1.A'), (SELECT uuid from organizations where shortName='EF 1.1')),
 		((SELECT uuid from tasks where shortName = '1.1.B'), (SELECT uuid from organizations where shortName='EF 1.1')),
 		((SELECT uuid from tasks where shortName = '1.1.C'), (SELECT uuid from organizations where shortName='EF 1.1')),
-		-- ((SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations WHERE shortName='EF 1.2')),
-		-- ((SELECT uuid from tasks where shortName = '1.2.A'), (SELECT uuid from organizations where shortName='EF 1.2')),
-		-- ((SELECT uuid from tasks where shortName = '1.2.B'), (SELECT uuid from organizations where shortName='EF 1.2')),
-		-- ((SELECT uuid from tasks where shortName = '1.2.C'), (SELECT uuid from organizations where shortName='EF 1.2')),
+		((SELECT uuid from tasks where shortName = 'EF 1.2'), (SELECT uuid from organizations WHERE shortName='EF 1.2')),
+		((SELECT uuid from tasks where shortName = '1.2.A'), (SELECT uuid from organizations where shortName='EF 1.2')),
+		((SELECT uuid from tasks where shortName = '1.2.B'), (SELECT uuid from organizations where shortName='EF 1.2')),
+		((SELECT uuid from tasks where shortName = '1.2.C'), (SELECT uuid from organizations where shortName='EF 1.2')),
 		-- ((SELECT uuid from tasks where shortName = 'EF 1.3'), (SELECT uuid FROM organizations WHERE shortName='EF 1.3')),
 		-- ((SELECT uuid from tasks where shortName = '1.3.A'), (SELECT uuid from organizations where shortName='EF 1.3')),
 		-- ((SELECT uuid from tasks where shortName = '1.3.B'), (SELECT uuid from organizations where shortName='EF 1.3')),

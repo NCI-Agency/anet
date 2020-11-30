@@ -5,13 +5,17 @@ const PAGE_URL = "/reports/new"
 const trfId = "formCustomFields.relatedReport"
 const tmrfId = "formCustomFields.additionalEngagementNeeded"
 
-class CreateReport extends Page {
+export class CreateReport extends Page {
   get form() {
     return browser.$("form")
   }
 
   get alert() {
     return browser.$(".alert")
+  }
+
+  get duration() {
+    return browser.$("#duration")
   }
 
   get engagementInformationTitle() {
@@ -110,8 +114,8 @@ class CreateReport extends Page {
     )
   }
 
-  open() {
-    super.open(PAGE_URL)
+  open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
+    super.open(pathName, credentials)
   }
 
   waitForAlertToLoad() {

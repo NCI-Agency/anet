@@ -9,9 +9,9 @@ import {
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import RemoveButton from "components/RemoveButton"
-import searchFilters, {
+import {
   findCommonFiltersForAllObjectTypes,
-  POSTITION_POSITION_TYPE_FILTER_KEY,
+  searchFilters,
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
@@ -28,6 +28,7 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
+import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
 
 const ORG_QUERY_PARAM_TYPES = {
   NONE: {},
@@ -64,7 +65,7 @@ const AdvancedSearch = ({
   const [orgFilterQueryParams, setOrgFilterQueryParams] = useState(
     getOrgQueryParams(null)
   )
-  const ALL_FILTERS = searchFilters.searchFilters()
+  const ALL_FILTERS = searchFilters()
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
     searchObjectTypes,
     ALL_FILTERS
@@ -269,7 +270,7 @@ const AdvancedSearch = ({
     newFilters.splice(newFilters.indexOf(filter), 1)
     setFilters(newFilters)
 
-    if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
+    if (filter.key === POSITION_POSITION_TYPE_FILTER_KEY) {
       setOrgFilterQueryParams(getOrgQueryParams(null))
     }
   }
@@ -361,7 +362,7 @@ const SearchFilter = ({
 
   function onChange(value) {
     filter.value = value
-    if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
+    if (filter.key === POSITION_POSITION_TYPE_FILTER_KEY) {
       const positionType = filter.value.value || ""
       updateOrgFilterQueryParams(getOrgQueryParams(positionType))
     }

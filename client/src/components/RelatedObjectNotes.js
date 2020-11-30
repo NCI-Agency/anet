@@ -6,6 +6,7 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import Pie from "components/graphs/Pie"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
@@ -26,7 +27,6 @@ import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 import utils from "utils"
-import { parseHtmlWithLinkTo } from "utils_links"
 import "./BlueprintOverrides.css"
 
 const GQL_DELETE_NOTE = gql`
