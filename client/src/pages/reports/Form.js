@@ -41,6 +41,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
 import moment from "moment"
@@ -915,7 +916,11 @@ const ReportForm = ({
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("reportText", value, true)}
+                  onChange={value => {
+                    if (!_isEqual(values.reportText, value)) {
+                      setFieldValue("reportText", value, true)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -943,13 +948,21 @@ const ReportForm = ({
                         name="reportSensitiveInformation.text"
                         component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
-                        onChange={value =>
-                          setFieldValue(
-                            "reportSensitiveInformation.text",
-                            value || null,
-                            true
-                          )
-                        }
+                        onChange={value => {
+                          const safeVal = value || null
+                          if (
+                            !_isEqual(
+                              values.reportSensitiveInformation.text,
+                              safeVal
+                            )
+                          ) {
+                            setFieldValue(
+                              "reportSensitiveInformation.text",
+                              value,
+                              true
+                            )
+                          }
+                        }}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
