@@ -490,7 +490,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
     })
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    form.resetForm({ values, isSubmitting: true })
     history.replace(Task.pathForEdit(task))
     if (!edit) {
       history.replace(Task.pathForEdit(task))

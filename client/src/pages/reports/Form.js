@@ -1102,9 +1102,7 @@ const ReportForm = ({
                   )}
                   {canDelete && (
                     <ConfirmDelete
-                      onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)
-                      }
+                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
@@ -1253,12 +1251,12 @@ const ReportForm = ({
     }
   }
 
-  function onConfirmDelete(uuid, resetForm) {
-    API.mutation(GQL_DELETE_REPORT, { uuid })
+  function onConfirmDelete(values, resetForm) {
+    API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
         // After successful delete, reset the form in order to make sure the dirty
         // prop is also reset (otherwise we would get a blocking navigation warning)
-        resetForm({ isSubmitting: true })
+        resetForm({ values, isSubmitting: true })
         history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
@@ -1286,7 +1284,7 @@ const ReportForm = ({
     const edit = isEditMode(values)
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
-    resetForm({ isSubmitting: true })
+    resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Report.pathForEdit(report))
     }

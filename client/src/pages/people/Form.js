@@ -564,7 +564,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
   function onSubmitSuccess(response, values, form) {
     // After successful submit, reset the form in order to make sure the dirty
     // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    form.resetForm({ values })
     if (onSaveRedirectToHome) {
       localStorage.clear()
       localStorage.newUser = "true"
