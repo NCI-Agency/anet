@@ -688,6 +688,28 @@
     "notBefore" : 0,
     "groups" : [ ]
   }, {
+    "id" : "ce1df48e-fd6e-4dc4-bc00-9bb65a0d6910",
+    "createdTimestamp" : 1606729635844,
+    "username" : "selena",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "f1f1a8b9-4e9c-4826-af1a-7235ebcd68ca",
+      "type" : "password",
+      "createdDate" : 1606729648930,
+      "secretData" : "{\"value\":\"99FBGchMgK20xUDmdw90SnEaE5duCsEIAqbslpswAsKbQuSYtirZtiX41e18qEjoglzVnd3jtX0Xbuojg7Gxuw==\",\"salt\":\"COq9KZs6xAjaULHMw3YK+A==\"}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\"}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "offline_access", "uma_authorization" ],
+    "clientRoles" : {
+      "account" : [ "view-profile", "manage-account" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "44d22980-a05b-4aef-9d8d-eb0daf5a6136",
     "createdTimestamp" : 1589798640356,
     "username" : "service-account-anet-client",
