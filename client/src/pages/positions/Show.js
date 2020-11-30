@@ -11,7 +11,6 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
-import { isPreviewMode } from "components/ModelPreview"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -26,7 +25,6 @@ import DictionaryField from "HOC/DictionaryField"
 import { Position } from "models"
 import moment from "moment"
 import { positionTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -96,12 +94,7 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const PositionShow = ({
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const PositionShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
@@ -114,8 +107,7 @@ const PositionShow = ({
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_POSITION, {
     uuid
   })
@@ -158,8 +150,6 @@ const PositionShow = ({
     position.uuid &&
     (!position.person || !position.person.uuid)
 
-  const isPreview = isPreviewMode(previewId)
-
   return (
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
@@ -175,33 +165,29 @@ const PositionShow = ({
           </LinkTo>
         )
         return (
-          <div className={className || null}>
-            {!isPreview ? (
-              <div className="pull-right">
-                <GuidedTour
-                  title="Take a guided tour of this position's page."
-                  tour={positionTour}
-                  autostart={
-                    localStorage.newUser === "true" &&
-                    localStorage.hasSeenPositionTour !== "true"
-                  }
-                  onEnd={() => (localStorage.hasSeenPositionTour = "true")}
-                />
-              </div>
-            ) : null}
-
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={position.notes}
-                relatedObject={
-                  position.uuid && {
-                    relatedObjectType: Position.relatedObjectType,
-                    relatedObjectUuid: position.uuid,
-                    relatedObject: position
-                  }
+          <div>
+            <div className="pull-right">
+              <GuidedTour
+                title="Take a guided tour of this position's page."
+                tour={positionTour}
+                autostart={
+                  localStorage.newUser === "true" &&
+                  localStorage.hasSeenPositionTour !== "true"
                 }
+                onEnd={() => (localStorage.hasSeenPositionTour = "true")}
               />
-            ) : null}
+            </div>
+
+            <RelatedObjectNotes
+              notes={position.notes}
+              relatedObject={
+                position.uuid && {
+                  relatedObjectType: Position.relatedObjectType,
+                  relatedObjectUuid: position.uuid,
+                  relatedObject: position
+                }
+              }
+            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Position ${position.name}`} action={action} />
@@ -473,10 +459,7 @@ const PositionShow = ({
 }
 
 PositionShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionShow)

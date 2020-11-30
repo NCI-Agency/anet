@@ -8,7 +8,6 @@ import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -22,7 +21,6 @@ import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
-import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -71,15 +69,9 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-const LocationShow = ({
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const LocationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
@@ -101,7 +93,6 @@ const LocationShow = ({
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
-  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -128,19 +119,17 @@ const LocationShow = ({
           </LinkTo>
         )
         return (
-          <div className={className || null}>
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={location.notes}
-                relatedObject={
-                  location.uuid && {
-                    relatedObjectType: Location.relatedObjectType,
-                    relatedObjectUuid: location.uuid,
-                    relatedObject: location
-                  }
+          <div>
+            <RelatedObjectNotes
+              notes={location.notes}
+              relatedObject={
+                location.uuid && {
+                  relatedObjectType: Location.relatedObjectType,
+                  relatedObjectUuid: location.uuid,
+                  relatedObject: location
                 }
-              />
-            ) : null}
+              }
+            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Location ${location.name}`} action={action} />
@@ -166,10 +155,7 @@ const LocationShow = ({
                 />
               </Fieldset>
 
-              <Leaflet
-                markers={[marker]}
-                mapId={`${location.uuid}-${previewId || ""}`}
-              />
+              <Leaflet markers={[marker]} />
             </Form>
 
             <Approvals relatedObject={location} />
@@ -178,8 +164,7 @@ const LocationShow = ({
               <ReportCollection
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
-                // If same component rendered multiple times, new mapId should be generated
-                mapId={`reports-location-${location.uuid}-${previewId || ""}`}
+                mapId="reports"
               />
             </Fieldset>
           </div>
@@ -190,10 +175,7 @@ const LocationShow = ({
 }
 
 LocationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(LocationShow)

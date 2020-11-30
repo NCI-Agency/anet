@@ -9,7 +9,6 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
-import { isPreviewMode } from "components/ModelPreview"
 import { AnchorNavItem } from "components/Nav"
 import {
   mapPageDispatchersToProps,
@@ -25,7 +24,6 @@ import { Field, Form, Formik } from "formik"
 import { Organization, Position, Report } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
-import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import {
   Button,
@@ -128,18 +126,12 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const OrganizationShow = ({
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const OrganizationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })
@@ -207,7 +199,6 @@ const OrganizationShow = ({
   if (includeChildrenOrgs) {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
-  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={organization}>
@@ -241,7 +232,7 @@ const OrganizationShow = ({
           </div>
         )
         return (
-          <div className={className || null}>
+          <div>
             <SubNav subnavElemId="myorg-nav">{isMyOrg && orgSubNav}</SubNav>
 
             <SubNav subnavElemId="advisor-org-nav">
@@ -252,7 +243,7 @@ const OrganizationShow = ({
               {!isMyOrg && isPrincipalOrg && orgSubNav}
             </SubNav>
 
-            {currentUser.isSuperUser() && !isPreview && (
+            {currentUser.isSuperUser() && (
               <div className="pull-right">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."
@@ -266,18 +257,16 @@ const OrganizationShow = ({
               </div>
             )}
 
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={organization.notes}
-                relatedObject={
-                  organization.uuid && {
-                    relatedObjectType: Organization.relatedObjectType,
-                    relatedObjectUuid: organization.uuid,
-                    relatedObject: organization
-                  }
+            <RelatedObjectNotes
+              notes={organization.notes}
+              relatedObject={
+                organization.uuid && {
+                  relatedObjectType: Organization.relatedObjectType,
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
                 }
-              />
-            ) : null}
+              }
+            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -413,8 +402,6 @@ const OrganizationShow = ({
                 <ReportCollection
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
-                  // If same component rendered multiple times on the same page, new mapId should be generated
-                  mapId={`reports-${organization.uuid}-${previewId || ""}`}
                   reportsFilter={
                     <>
                       <Button
@@ -449,10 +436,7 @@ const OrganizationShow = ({
 }
 
 OrganizationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  pageDispatchers: PageDispatchersPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({

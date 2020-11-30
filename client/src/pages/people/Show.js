@@ -5,16 +5,15 @@ import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
-import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -29,17 +28,8 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import {
-  Button,
-  Col,
-  ControlLabel,
-  FormGroup,
-  Grid,
-  Row,
-  Table
-} from "react-bootstrap"
+import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -103,12 +93,7 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const PersonShow = ({
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
@@ -116,8 +101,7 @@ const PersonShow = ({
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -168,8 +152,6 @@ const PersonShow = ({
     .filter(ap => ap.person)
     .map(ap => ap.person.uuid)
     .includes(person.uuid)
-  const isPreview = isPreviewMode(previewId)
-
   return (
     <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
@@ -192,44 +174,31 @@ const PersonShow = ({
           <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
         )
 
-        const orderedFields = orderPersonFields()
-        const numberOfFieldsUnderAvatar =
-          Settings.fields.person.numberOfFieldsInLeftColumn || 6
-        const leftColumUnderAvatar = orderedFields.slice(
-          0,
-          numberOfFieldsUnderAvatar
-        )
-        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
-
         return (
-          <div className={className || null}>
-            {!isPreview ? (
-              <div className="pull-right">
-                <GuidedTour
-                  title="Take a guided tour of this person's page."
-                  tour={personTour}
-                  autostart={
-                    localStorage.newUser === "true" &&
-                    localStorage.hasSeenPersonTour !== "true"
-                  }
-                  onEnd={() => (localStorage.hasSeenPersonTour = "true")}
-                />
-              </div>
-            ) : null}
-
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={person.notes}
-                relatedObject={
-                  person.uuid && {
-                    relatedObjectType: Person.relatedObjectType,
-                    relatedObjectUuid: person.uuid,
-                    relatedObject: person
-                  }
+          <div>
+            <div className="pull-right">
+              <GuidedTour
+                title="Take a guided tour of this person's page."
+                tour={personTour}
+                autostart={
+                  localStorage.newUser === "true" &&
+                  localStorage.hasSeenPersonTour !== "true"
                 }
-                relatedObjectValue={person}
+                onEnd={() => (localStorage.hasSeenPersonTour = "true")}
               />
-            ) : null}
+            </div>
+
+            <RelatedObjectNotes
+              notes={person.notes}
+              relatedObject={
+                person.uuid && {
+                  relatedObjectType: Person.relatedObjectType,
+                  relatedObjectUuid: person.uuid,
+                  relatedObject: person
+                }
+              }
+              relatedObjectValue={person}
+            />
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -237,23 +206,77 @@ const PersonShow = ({
                 action={action}
               />
               <Fieldset>
-                <Grid fluid>
-                  <Row>
-                    <Col md={6}>
-                      <AvatarDisplayComponent
-                        avatar={person.avatar}
-                        height={256}
-                        width={256}
-                        style={{
-                          maxWidth: "100%"
-                        }}
-                      />
-                      {leftColumUnderAvatar}
-                    </Col>
-                    <Col md={6}>{rightColum}</Col>
-                  </Row>
-                </Grid>
+                <AvatarDisplayComponent
+                  avatar={person.avatar}
+                  height={256}
+                  width={256}
+                />
+                <Field
+                  name="rank"
+                  label={Settings.fields.person.rank}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="role"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Person.humanNameOfRole(values.role)}
+                />
+                {isAdmin && (
+                  <Field
+                    name="domainUsername"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                )}
+                <Field
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Person.humanNameOfStatus(values.status)}
+                />
+                <Field
+                  name="phoneNumber"
+                  label={Settings.fields.person.phoneNumber}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="emailAddress"
+                  label={Settings.fields.person.emailAddress.label}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={emailHumanValue}
+                />
+                <Field
+                  name="country"
+                  label={Settings.fields.person.country}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="gender"
+                  label={Settings.fields.person.gender}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="endOfTourDate"
+                  label={Settings.fields.person.endOfTourDate}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    person.endOfTourDate &&
+                    moment(person.endOfTourDate).format(
+                      Settings.dateFormats.forms.displayShort.date
+                    )
+                  }
+                />
+                <Field
+                  name="biography"
+                  className="biography"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={parseHtmlWithLinkTo(person.biography)}
+                />
               </Fieldset>
+
               <Fieldset title="Position">
                 <Fieldset
                   title="Current Position"
@@ -264,7 +287,7 @@ const PersonShow = ({
                   action={
                     hasPosition &&
                     canChangePosition && (
-                      <>
+                      <div>
                         <LinkTo
                           modelType="Position"
                           model={position}
@@ -279,7 +302,7 @@ const PersonShow = ({
                         >
                           Change assigned position
                         </Button>
-                      </>
+                      </div>
                     )
                   }
                 >
@@ -321,6 +344,7 @@ const PersonShow = ({
                   </Fieldset>
                 )}
               </Fieldset>
+
               {person.isAdvisor() && (
                 <Fieldset title="Reports authored" id="reports-authored">
                   <ReportCollection
@@ -328,11 +352,11 @@ const PersonShow = ({
                     queryParams={{
                       authorUuid: uuid
                     }}
-                    // If same component rendered multiple times on the same page, new mapId should be generated
-                    mapId={`reports-authored-${person.uuid}-${previewId || ""}`}
+                    mapId="reports-authored"
                   />
                 </Fieldset>
               )}
+
               <Fieldset
                 title={`Reports attended by ${person.name}`}
                 id="reports-attended"
@@ -342,10 +366,10 @@ const PersonShow = ({
                   queryParams={{
                     attendeeUuid: uuid
                   }}
-                  // If same component rendered multiple times on the same page, new mapId should be generated
-                  mapId={`reports-attended-${person.uuid}-${previewId || ""}`}
+                  mapId="reports-attended"
                 />
               </Fieldset>
+
               <Fieldset title="Previous positions" id="previous-positions">
                 {(_isEmpty(person.previousPositions) && (
                   <em>No positions found</em>
@@ -383,6 +407,15 @@ const PersonShow = ({
                   </Table>
                 )}
               </Fieldset>
+
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.person.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             <AssessmentResultsContainer
@@ -396,76 +429,6 @@ const PersonShow = ({
             />
           </div>
         )
-
-        function orderPersonFields() {
-          const mappedCustomFields = mapReadonlyCustomFieldsToComps({
-            fieldsConfig: Person.shownCustomFields,
-            values
-          })
-          const mappedNonCustomFields = mapNonCustomFields()
-          // map fields that have privileged access check to the condition
-          const privilegedAccessedFields = {
-            domainUsername: {
-              accessCond: isAdmin
-            }
-          }
-          return (
-            Settings.fields.person.showPageOrderedFields
-              // first filter if there is privileged accessed fields and its access condition is true
-              .filter(key =>
-                privilegedAccessedFields[key]
-                  ? privilegedAccessedFields[key].accessCond
-                  : true
-              )
-              // then map it to components and keys, keys used for React list rendering
-              .map(key => [
-                mappedNonCustomFields[key] || mappedCustomFields[key],
-                key
-              ])
-              .map(([el, key]) =>
-                React.cloneElement(el, {
-                  key,
-                  extraColElem: null,
-                  labelColumnWidth: 4
-                })
-              )
-          )
-        }
-
-        function mapNonCustomFields() {
-          const classNameExceptions = {
-            biography: "biography"
-          }
-
-          // map fields that have specific human values
-          const humanValuesExceptions = {
-            status: Person.humanNameOfStatus(values.status),
-            emailAddress: emailHumanValue,
-            endOfTourDate:
-              person.endOfTourDate &&
-              moment(person.endOfTourDate).format(
-                Settings.dateFormats.forms.displayShort.date
-              ),
-            role: Person.humanNameOfRole(values.role),
-            biography: parseHtmlWithLinkTo(person.biography)
-          }
-          return Person.shownStandardFields.reduce((accum, key) => {
-            accum[key] = (
-              <Field
-                name={key}
-                label={
-                  Settings.fields.person[key]?.label ||
-                  Settings.fields.person[key]
-                }
-                component={FieldHelper.ReadonlyField}
-                humanValue={humanValuesExceptions[key]}
-                className={classNameExceptions[key]}
-              />
-            )
-
-            return accum
-          }, {})
-        }
       }}
     </Formik>
   )
@@ -532,7 +495,6 @@ const PersonShow = ({
                     <LinkTo
                       modelType="Organization"
                       model={assocPos.organization}
-                      previewId="person-show-assoc-org"
                     />
                   </td>
                 </tr>
@@ -592,10 +554,7 @@ const PersonShow = ({
 }
 
 PersonShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(PersonShow)

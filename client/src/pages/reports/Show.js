@@ -10,13 +10,12 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
-import { isPreviewMode } from "components/ModelPreview"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
@@ -276,20 +275,13 @@ const GQL_APPROVE_REPORT = gql`
   }
 `
 
-const ReportShow = ({
-  setSearchQuery,
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -383,7 +375,6 @@ const ReportShow = ({
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
   }
 
-  const isPreview = isPreviewMode(previewId)
   return (
     <Formik
       enableReinitialize
@@ -407,21 +398,19 @@ const ReportShow = ({
         )
 
         return (
-          <div className={`report-show ${className || ""}`}>
+          <div className="report-show">
             {renderEmailModal(values, setFieldValue)}
 
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={report.notes}
-                relatedObject={
-                  uuid && {
-                    relatedObjectType: Report.relatedObjectType,
-                    relatedObjectUuid: uuid,
-                    relatedObject: report
-                  }
+            <RelatedObjectNotes
+              notes={report.notes}
+              relatedObject={
+                uuid && {
+                  relatedObjectType: Report.relatedObjectType,
+                  relatedObjectUuid: uuid,
+                  relatedObject: report
                 }
-              />
-            ) : null}
+              }
+            />
             <Messages success={saveSuccess} error={saveError} />
 
             {report.isPublished() && (
@@ -1330,10 +1319,7 @@ const ReportShow = ({
 
 ReportShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  setSearchQuery: PropTypes.func.isRequired,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

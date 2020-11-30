@@ -9,7 +9,6 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
-import { isPreviewMode } from "components/ModelPreview"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -21,15 +20,14 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
-import DictionaryField from "HOC/DictionaryField"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
-import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
@@ -131,15 +129,9 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const TaskShow = ({
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const TaskShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
@@ -190,8 +182,6 @@ const TaskShow = ({
           position => currentUser.position.uuid === position.uuid
         )
       ))
-  const isPreview = isPreviewMode(previewId)
-
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -201,19 +191,17 @@ const TaskShow = ({
           </LinkTo>
         )
         return (
-          <div className={className || null}>
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={task.notes}
-                relatedObject={
-                  task.uuid && {
-                    relatedObjectType: Task.relatedObjectType,
-                    relatedObjectUuid: task.uuid,
-                    relatedObject: task
-                  }
+          <div>
+            <RelatedObjectNotes
+              notes={task.notes}
+              relatedObject={
+                task.uuid && {
+                  relatedObjectType: Task.relatedObjectType,
+                  relatedObjectUuid: task.uuid,
+                  relatedObject: task
                 }
-              />
-            ) : null}
+              }
+            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -224,8 +212,8 @@ const TaskShow = ({
                 style={{
                   display: "flex",
                   flexDirection: "row",
-                  padding: "10px",
-                  outline: "4px solid pink"
+                  flexWrap: "nowrap",
+                  padding: "10px"
                 }}
               >
                 <Fieldset style={{ flex: "1 1 0" }}>
@@ -366,8 +354,7 @@ const TaskShow = ({
                 queryParams={{
                   taskUuid: uuid
                 }}
-                // If same component rendered multiple times on the same page, new mapId should be generated
-                mapId={`reports-${task.uuid}-${previewId || ""}`}
+                mapId="reports"
               />
             </Fieldset>
           </div>
@@ -378,10 +365,7 @@ const TaskShow = ({
 }
 
 TaskShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(TaskShow)

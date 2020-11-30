@@ -6,10 +6,9 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { isPreviewMode } from "components/ModelPreview"
 import {
-  mapPageDispatchersToProps,
   PageDispatchersPropType,
+  mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -25,7 +24,6 @@ import ReportCollection, {
 } from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
-import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -60,15 +58,9 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const AuthorizationGroupShow = ({
-  pageDispatchers,
-  uuid: uuidProp,
-  className,
-  previewId
-}) => {
+const AuthorizationGroupShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const uuidParam = useParams().uuid
-  const uuid = uuidProp || uuidParam
+  const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_AUTHORIZATION_GROUP,
@@ -93,7 +85,6 @@ const AuthorizationGroupShow = ({
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
-  const isPreview = isPreviewMode(previewId)
 
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>
@@ -109,19 +100,17 @@ const AuthorizationGroupShow = ({
           </LinkTo>
         )
         return (
-          <div className={className || null}>
-            {!isPreview ? (
-              <RelatedObjectNotes
-                notes={authorizationGroup.notes}
-                relatedObject={
-                  authorizationGroup.uuid && {
-                    relatedObjectType: AuthorizationGroup.relatedObjectType,
-                    relatedObjectUuid: authorizationGroup.uuid,
-                    relatedObject: authorizationGroup
-                  }
+          <div>
+            <RelatedObjectNotes
+              notes={authorizationGroup.notes}
+              relatedObject={
+                authorizationGroup.uuid && {
+                  relatedObjectType: AuthorizationGroup.relatedObjectType,
+                  relatedObjectUuid: authorizationGroup.uuid,
+                  relatedObject: authorizationGroup
                 }
-              />
-            ) : null}
+              }
+            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -153,10 +142,7 @@ const AuthorizationGroupShow = ({
                   queryParams={{
                     authorizationGroupUuid: uuid
                   }}
-                  // If same component rendered multiple times, new mapId should be generated
-                  mapId={`reports-${authorizationGroup.uuid}-${
-                    previewId || ""
-                  }`}
+                  mapId="reports"
                   viewFormats={[
                     FORMAT_SUMMARY,
                     FORMAT_TABLE,
@@ -175,10 +161,7 @@ const AuthorizationGroupShow = ({
 }
 
 AuthorizationGroupShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  uuid: PropTypes.string,
-  className: PropTypes.string,
-  previewId: PropTypes.string
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(AuthorizationGroupShow)

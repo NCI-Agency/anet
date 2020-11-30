@@ -1,22 +1,16 @@
+import ReportPreview from "components/previews/ReportPreview"
 import * as Models from "models"
-import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
-import LocationShow from "pages/locations/Show"
-import OrganizationShow from "pages/organizations/Show"
-import PersonShow from "pages/people/Show"
-import PositionShow from "pages/positions/Show"
-import ReportShow from "pages/reports/Show"
-import TaskShow from "pages/tasks/Show"
 import PropTypes from "prop-types"
 import React from "react"
 import "./ModelPreview.css"
 const MODEL_TO_COMPONENT = {
-  [Models.AuthorizationGroup]: AuthorizationGroupShow,
-  [Models.Location]: LocationShow,
-  [Models.Organization]: OrganizationShow,
-  [Models.Person]: PersonShow,
-  [Models.Position]: PositionShow,
-  [Models.Report]: ReportShow,
-  [Models.Task]: TaskShow
+  [Models.AuthorizationGroup]: ReportPreview,
+  [Models.Location]: ReportPreview,
+  [Models.Organization]: ReportPreview,
+  [Models.Person]: ReportPreview,
+  [Models.Position]: ReportPreview,
+  [Models.Report]: ReportPreview,
+  [Models.Task]: ReportPreview
 }
 
 const ModelPreview = ({ modelClass, ...props }) => {
