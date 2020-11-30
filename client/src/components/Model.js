@@ -218,7 +218,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
 export const createYupObjectShape = (
   config,
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
-  isTopLevel = true
+  isTopLevel = true // only add invisible fields field to the top level object
 ) => {
   let objShape = {}
   if (config) {

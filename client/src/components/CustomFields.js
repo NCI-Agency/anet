@@ -640,16 +640,16 @@ export function getInvisibleFields(
   isArrayOfObjects = false
 ) {
   const curInvisibleFields = []
-  // loop through fields of the config to check for visibility field
+  // loop through fields of the config to check for visibility of a field
   Object.entries(fieldsConfig).forEach(([key, fieldConfig]) => {
     const visibleWhenPath = fieldConfig.visibleWhen
     const isVisible =
-      !visibleWhenPath ||
-      (visibleWhenPath && !_isEmpty(JSONPath(visibleWhenPath, formikValues)))
+      !visibleWhenPath || !_isEmpty(JSONPath(visibleWhenPath, formikValues))
 
     const fieldName = `${parentFieldName}.${key}`
 
-    // recursively get invisible fields in case of array of objects
+    // recursively append invisible fields in case of array of objects
+    // we can have customFields.array_of_objects.objectFields.array_of_objects.objectFields...
     if (fieldConfig.type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
       curInvisibleFields.push(
         ...getInvisibleFields(
