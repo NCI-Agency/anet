@@ -23,7 +23,7 @@ import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useMemo, useRef } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Button, HelpBlock, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
@@ -695,16 +695,13 @@ export const CustomFieldsContainer = props => {
     [fieldsConfig, parentFieldName, values]
   )
 
-  const prevInvisibleFields = useRef(invisibleFields)
-
   const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
-    if (!_isEqual(prevInvisibleFields.current, invisibleFields)) {
-      prevInvisibleFields.current = invisibleFields
+    if (!_isEqual(_get(values, invisibleFieldsFieldName), invisibleFields)) {
       resetInvalidInvisibleFields(invisibleFields, setFieldValue, errors)
       setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
     }
-  }, [invisibleFields, invisibleFieldsFieldName, setFieldValue, errors])
+  }, [invisibleFields, values, invisibleFieldsFieldName, setFieldValue, errors])
 
   return (
     <>
