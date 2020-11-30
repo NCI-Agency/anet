@@ -111,6 +111,13 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
+    it("Should show valid visible field", () => {
+      // we are already at show page
+      expect(CreateReport.numberTrainedFieldShowed.getText()).to.include(
+        validNumberInput.toString()
+      )
+    })
+
     it("Should not validate invisible field", () => {
       CreateReport.editButton.click()
       CreateReport.form.waitForExist()
@@ -127,6 +134,28 @@ describe("When working with custom fields for different anet objects", () => {
 
       expect(CreateReport.alert.getText()).to.not.include(
         "Number trained must be greater than or equal to 1"
+      )
+    })
+
+    it("Should discard invisible fields even if it is valid", () => {
+      CreateReport.editButton.click()
+      CreateReport.form.waitForExist()
+      CreateReport.form.waitForDisplayed()
+
+      const button = CreateReport.getEngagementTypesButtonByName(
+        TESTED_ENGAGEMENT_BUTTON
+      )
+      // make the trained number field visible
+      button.click()
+      // give valid input before making invisible
+      CreateReport.numberTrainedField.setValue(validNumberInput)
+      // goes invisible
+      button.click()
+      CreateReport.submitForm()
+      CreateReport.waitForAlertToLoad()
+
+      expect(CreateReport.numberTrainedFieldShowed.getText()).to.not.include(
+        validNumberInput.toString()
       )
     })
   })

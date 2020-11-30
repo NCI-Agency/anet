@@ -137,6 +137,10 @@ export class CreateReport extends Page {
     )
   }
 
+  get numberTrainedFieldShowed() {
+    return this.numberTrainedFormGroup.$("div.form-control-static")
+  }
+
   get numberTrainedHelpText() {
     return this.numberTrainedFormGroup.$('span[class="help-block"]')
   }
