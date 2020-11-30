@@ -100,6 +100,16 @@ class CreatePerson extends Page {
     return this.customFieldsContainer.$('label[id="AMBER"]')
   }
 
+  get addObjectButton() {
+    return this.customFieldsContainer.$('button[id="addObjectButton"]')
+  }
+
+  get objectDateField() {
+    return this.customFieldsContainer.$(
+      'input[id="formCustomFields.arrayFieldName.0.dateF"]'
+    )
+  }
+
   getCustomFieldContainerByName(name) {
     return this.customFieldsContainer.$(`div[id="fg-${name}"]`)
   }

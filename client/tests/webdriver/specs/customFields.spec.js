@@ -143,6 +143,9 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.defaultInvisibleCustomFields.forEach(field => {
         field.waitForExist()
       })
+      // Also it toggles array_of_objects date field
+      CreatePerson.addObjectButton.click()
+      CreatePerson.objectDateField.waitForExist()
     })
 
     it("Should persist previous valid data when toggling field's visibility", () => {
