@@ -209,9 +209,9 @@ public class AnetEmailWorker extends AbstractWorker {
   private Properties getSmtpProps(SmtpConfiguration smtpConfig) {
     final Properties props = new Properties();
     props.put("mail.smtp.ssl.trust", smtpConfig.getSslTrust());
-    props.put("mail.smtp.starttls.enable", smtpConfig.getStartTls().toString());
+    props.put("mail.smtp.starttls.enable", Boolean.toString(smtpConfig.getStartTls()));
     props.put("mail.smtp.host", smtpConfig.getHostname());
-    props.put("mail.smtp.port", smtpConfig.getPort().toString());
+    props.put("mail.smtp.port", Integer.toString(smtpConfig.getPort()));
     if (hasUsername(smtpConfig)) {
       props.put("mail.smtp.auth", "true");
     }

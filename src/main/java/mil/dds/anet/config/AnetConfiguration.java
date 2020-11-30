@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
@@ -266,11 +267,12 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   public static class SmtpConfiguration {
     @NotNull
     private String hostname;
-    private Integer port = 587;
+    @Positive
+    private int port = 587;
     private String username;
     private String password;
-    private Boolean startTls = true;
-    private boolean disabled = false;
+    private boolean startTls = true;
+    private boolean disabled;
     private Integer nbOfHoursForStaleEmails;
     private String sslTrust;
 
@@ -282,11 +284,11 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       this.hostname = hostname;
     }
 
-    public Integer getPort() {
+    public int getPort() {
       return port;
     }
 
-    public void setPort(Integer port) {
+    public void setPort(int port) {
       this.port = port;
     }
 
@@ -306,11 +308,11 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       this.password = password;
     }
 
-    public Boolean getStartTls() {
+    public boolean getStartTls() {
       return startTls;
     }
 
-    public void setStartTls(Boolean startTls) {
+    public void setStartTls(boolean startTls) {
       this.startTls = startTls;
     }
 
