@@ -1,18 +1,25 @@
 import { setSearchQuery } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import { Form, Formik } from "formik"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
+import Tag from "components/Tag"
+import { Field, Form, Formik } from "formik"
 import { Person, Report, Task } from "models"
+import moment from "moment"
+import ReportPeople from "pages/reports/ReportPeople"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_REPORT = gql`
@@ -203,7 +210,161 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
               </Fieldset>
             )}
 
-            <Form className="form-horizontal" method="post"></Form>
+            <Form className="form-horizontal">
+              <Fieldset title={`Report #${uuid}`} />
+              <Fieldset className="show-report-overview">
+                <Field
+                  name="intent"
+                  label="Summary"
+                  component={FieldHelper.SpecialField}
+                  widget={
+                    <div id="intent" className="form-control-static">
+                      <p>
+                        <strong>{Settings.fields.report.intent}:</strong>{" "}
+                        {report.intent}
+                      </p>
+                      {report.keyOutcomes && (
+                        <p>
+                          <span>
+                            <strong>
+                              {Settings.fields.report.keyOutcomes ||
+                                "Key outcomes"}
+                              :
+                            </strong>{" "}
+                            {report.keyOutcomes}&nbsp;
+                          </span>
+                        </p>
+                      )}
+                      <p>
+                        <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
+                        {report.nextSteps}
+                      </p>
+                    </div>
+                  }
+                />
+
+                <Field
+                  name="engagementDate"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <>
+                      {report.engagementDate &&
+                        moment(report.engagementDate).format(
+                          Report.getEngagementDateFormat()
+                        )}
+                      <PlanningConflictForReport report={report} largeIcon />
+                    </>
+                  }
+                />
+
+                {Settings.engagementsIncludeTimeAndDuration && (
+                  <Field
+                    name="duration"
+                    label="Duration (minutes)"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                )}
+
+                <Field
+                  name="location"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    report.location && (
+                      <LinkToNotPreviewed
+                        modelType="Location"
+                        model={report.location}
+                      />
+                    )
+                  }
+                />
+
+                {report.cancelled && (
+                  <Field
+                    name="cancelledReason"
+                    label="Cancelled Reason"
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={utils.sentenceCase(report.cancelledReason)}
+                  />
+                )}
+
+                {!report.cancelled && (
+                  <Field
+                    name="atmosphere"
+                    label={Settings.fields.report.atmosphere}
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <>
+                        {utils.sentenceCase(report.atmosphere)}
+                        {report.atmosphereDetails &&
+                          ` – ${report.atmosphereDetails}`}
+                      </>
+                    }
+                  />
+                )}
+
+                {Settings.fields.report.reportTags && (
+                  <Field
+                    name="reportTags"
+                    label={Settings.fields.report.reportTags}
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      report.tags &&
+                      report.tags.map((tag, i) => (
+                        <Tag key={tag.uuid} tag={tag} />
+                      ))
+                    }
+                  />
+                )}
+
+                <Field
+                  name="authors"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={report.authors?.map(a => (
+                    <React.Fragment key={a.uuid}>
+                      <LinkToNotPreviewed modelType="Person" model={a} />
+                      <br />
+                    </React.Fragment>
+                  ))}
+                />
+
+                <Field
+                  name="advisorOrg"
+                  label={Settings.fields.advisor.org.name}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <LinkToNotPreviewed
+                      modelType="Organization"
+                      model={report.advisorOrg}
+                    />
+                  }
+                />
+
+                <Field
+                  name="principalOrg"
+                  label={Settings.fields.principal.org.name}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <LinkToNotPreviewed
+                      modelType="Organization"
+                      model={report.principalOrg}
+                    />
+                  }
+                />
+              </Fieldset>
+              <Fieldset
+                title={
+                  report.isFuture()
+                    ? "People who will be involved in this planned engagement"
+                    : "People involved in this engagement"
+                }
+              >
+                <ReportPeople
+                  report={report}
+                  linkToComp={LinkToNotPreviewed}
+                  disabled
+                />
+              </Fieldset>
+            </Form>
           </div>
         )
       }}

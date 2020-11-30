@@ -11,7 +11,6 @@ import {
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
 import Person from "models/Person"
 import Report from "models/Report"
 import moment from "moment"
@@ -36,7 +35,12 @@ const GET_PERSON_WITH_REPORTS = gql`
   }
 `
 
-const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
+const BasePlanningConflictForPerson = ({
+  person,
+  linkToComp: LinkToComp,
+  report,
+  iconOnly
+}) => {
   const { loading, error, data } = API.useApiQuery(GET_PERSON_WITH_REPORTS, {
     uuid: person.uuid,
     attendedReportsQuery: {
@@ -88,7 +92,7 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
           intent={Intent.WARNING}
         >
           {conflictingReports.map(report => (
-            <LinkTo
+            <LinkToComp
               key={report.uuid}
               modelType="Report"
               model={report}
@@ -96,7 +100,7 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
               previewId="conflict-reports"
             >
               {Report.getFormattedEngagementDate(report)}&nbsp;({report.state})
-            </LinkTo>
+            </LinkToComp>
           ))}
         </Callout>
       }
@@ -118,10 +122,16 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
 BasePlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person).isRequired,
   report: PropTypes.instanceOf(Report).isRequired,
+  linkToComp: PropTypes.func.isRequired,
   iconOnly: PropTypes.bool
 }
 
-const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
+const PlanningConflictForPerson = ({
+  person,
+  report,
+  linkToComp,
+  iconOnly
+}) => {
   if (!person?.uuid || !report?.engagementDate) {
     return null
   }
@@ -129,6 +139,7 @@ const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
     <BasePlanningConflictForPerson
       person={person}
       report={report}
+      linkToComp={linkToComp}
       iconOnly={iconOnly}
     />
   )
@@ -137,6 +148,7 @@ const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
 PlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person),
   report: PropTypes.instanceOf(Report),
+  linkToComp: PropTypes.func.isRequired,
   iconOnly: PropTypes.bool
 }
 
