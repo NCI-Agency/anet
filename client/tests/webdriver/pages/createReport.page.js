@@ -19,8 +19,8 @@ const nonTrainingFields = {
 }
 
 const nonTrainingFieldsets = {
-  itemsAgreed: "",
-  assetsUsed: ""
+  itemsAgreed: "formCustomFields.itemsAgreed",
+  assetsUsed: "formCustomFields.assetsUsed"
 }
 
 export class CreateReport extends Page {

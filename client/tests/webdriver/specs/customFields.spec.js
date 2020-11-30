@@ -18,11 +18,25 @@ const REQUIRED_TASK_FIELDS = {
 }
 
 describe("When working with custom fields for different anet objects", () => {
+  // ------------------------------ REPORT CUSTOM FIELDS -----------------------------------------
   describe("For report's custom fields", () => {
     it("Should open a create new report page", () => {
       CreateReport.openAsAdminUser()
       CreateReport.form.waitForExist()
       CreateReport.form.waitForDisplayed()
+    })
+
+    it("Should not show default invisible fields", () => {
+      // both of these fields invisible at first
+      CreateReport.fieldsToggledVisibilityByTrainButton.forEach(invisField => {
+        expect(invisField.isExisting()).to.equal(false)
+      })
+
+      CreateReport.fieldsNotToggledVisibilityByTrainButton.forEach(
+        invisField => {
+          expect(invisField.isExisting()).to.equal(false)
+        }
+      )
     })
 
     it("Should toggle the correct invisible fields", () => {
@@ -135,6 +149,9 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.defaultInvisibleCustomFields.forEach(field => {
         expect(field.isExisting()).to.eq(false)
       })
+      // Date field is invisible by default
+      CreatePerson.addObjectButton.click()
+      CreatePerson.objectDateField.waitForExist({ reverse: true })
     })
 
     it("Should toggle correct invisible fields", () => {
@@ -144,7 +161,6 @@ describe("When working with custom fields for different anet objects", () => {
         field.waitForExist()
       })
       // Also it toggles array_of_objects date field
-      CreatePerson.addObjectButton.click()
       CreatePerson.objectDateField.waitForExist()
     })
 
@@ -192,7 +208,7 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.waitForAlertSuccessToLoad()
     })
   })
-
+  // ------------------------------ TASK CUSTOM FIELDS -----------------------------------------
   describe("For task's custom fields", () => {
     it("Should open create new task page", () => {
       CreateTask.openAsAdmin()
