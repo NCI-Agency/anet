@@ -122,7 +122,8 @@ export default class LinkTo extends Component {
     } else {
       to = model
     }
-
+    console.dir("componentProps")
+    console.dir(componentProps)
     const LinkToComponent = componentClass
     return (
       <LinkToComponent to={to} style={style} {...componentProps}>

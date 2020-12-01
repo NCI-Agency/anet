@@ -11,7 +11,9 @@
 .linkto-model-preview-portal .bp3-popover {
   width: 100%;
 }
-.linkto-model-preview-portal .model-preview {
+.linkto-model-preview-portal .model-preview fieldset{
+  margin-bottom: 1rem;
+  padding: 0.5rem;
 }
 
 /* get rid of the large screen bootstrap ratio */
@@ -22,7 +24,7 @@
   width: 67%;
 }
  /* center the avatar */
-.linkto-model-preview-portal .model-preview img[alt*="Avatar"]{
+.linkto-model-preview-portal .model-preview fieldset > img[alt*="Avatar"]{
   display: block;
   margin: auto;
 }
@@ -44,7 +46,5 @@
   width: 100%;
 }
 
-.linkto-model-preview-portal .model-preview fieldset {
-  padding: 1em;
-}
+
 /*********END linkTo triggered preview style END*/

@@ -1,3 +1,4 @@
+import PersonPreview from "components/previews/PersonPreview"
 import ReportPreview from "components/previews/ReportPreview"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -7,7 +8,7 @@ const MODEL_TO_COMPONENT = {
   [Models.AuthorizationGroup]: ReportPreview,
   [Models.Location]: ReportPreview,
   [Models.Organization]: ReportPreview,
-  [Models.Person]: ReportPreview,
+  [Models.Person]: PersonPreview,
   [Models.Position]: ReportPreview,
   [Models.Report]: ReportPreview,
   [Models.Task]: ReportPreview

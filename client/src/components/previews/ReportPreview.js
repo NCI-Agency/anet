@@ -4,7 +4,6 @@ import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -15,7 +14,7 @@ import Tag from "components/Tag"
 import { Field, Form, Formik } from "formik"
 import { Person, Report, Task } from "models"
 import moment from "moment"
-import ReportPeople from "pages/reports/ReportPeople"
+import { CompactReadonlyReportPeople } from "pages/reports/ReportPeople"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
@@ -32,7 +31,6 @@ const GQL_GET_REPORT = gql`
       atmosphere
       atmosphereDetails
       keyOutcomes
-      reportText
       nextSteps
       cancelledReason
       releasedAt
@@ -49,14 +47,6 @@ const GQL_GET_REPORT = gql`
         rank
         role
         avatar(size: 32)
-        position {
-          uuid
-          organization {
-            uuid
-            shortName
-            longName
-          }
-        }
       }
       reportPeople {
         uuid
@@ -72,39 +62,8 @@ const GQL_GET_REPORT = gql`
           uuid
           name
           type
-          code
-          status
-          organization {
-            uuid
-            shortName
-          }
-          location {
-            uuid
-            name
-          }
         }
       }
-      primaryAdvisor {
-        uuid
-      }
-      primaryPrincipal {
-        uuid
-      }
-      tasks {
-        uuid
-        shortName
-        longName
-        customFieldRef1 {
-          uuid
-          shortName
-        }
-        taskedOrganizations {
-          uuid
-          shortName
-        }
-        customFields
-      }
-
       principalOrg {
         uuid
         shortName
@@ -150,9 +109,6 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
     data.report.tasks = Task.fromArray(data.report.tasks)
     data.report.reportPeople = Person.fromArray(data.report.reportPeople)
     data.report.to = ""
-    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-      data.report.customFields
-    )
     report = new Report(data.report)
   }
   const reportType = report.isFuture() ? "planned engagement" : "report"
@@ -257,12 +213,13 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
                   }
                 />
 
-                {Settings.engagementsIncludeTimeAndDuration && (
-                  <Field
-                    name="duration"
-                    label="Duration (minutes)"
-                    component={FieldHelper.ReadonlyField}
-                  />
+                {Settings.engagementsIncludeTimeAndDuration &&
+                  report.duration && (
+                    <Field
+                      name="duration"
+                      label="Duration (minutes)"
+                      component={FieldHelper.ReadonlyField}
+                    />
                 )}
 
                 <Field
@@ -319,10 +276,10 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
                 <Field
                   name="authors"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={report.authors?.map(a => (
+                  humanValue={report.authors?.map((a, index) => (
                     <React.Fragment key={a.uuid}>
                       <LinkToNotPreviewed modelType="Person" model={a} />
-                      <br />
+                      {index !== report.authors.length - 1 ? ", " : ""}
                     </React.Fragment>
                   ))}
                 />
@@ -354,14 +311,13 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
               <Fieldset
                 title={
                   report.isFuture()
-                    ? "People who will be involved in this planned engagement"
-                    : "People involved in this engagement"
+                    ? "People who will attend to this planned engagement"
+                    : "People attended in this engagement"
                 }
               >
-                <ReportPeople
-                  report={report}
+                <CompactReadonlyReportPeople
+                  reportPeople={report.reportPeople}
                   linkToComp={LinkToNotPreviewed}
-                  disabled
                 />
               </Fieldset>
             </Form>

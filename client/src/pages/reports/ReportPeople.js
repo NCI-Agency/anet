@@ -447,5 +447,93 @@ const AttendeeDividerRow = ({ showDelete }) => (
 AttendeeDividerRow.propTypes = {
   showDelete: PropTypes.bool
 }
+// Only attending people for preview mode
+export const CompactReadonlyReportPeople = ({
+  reportPeople,
+  linkToComp: LinkToComp
+}) => {
+  return (
+    <TableContainer>
+      <tbody>
+        <tr>
+          <td>
+            <TableContainer>
+              <thead>
+                <tr>
+                  <th colSpan={4} style={{ textAlign: "center" }}>
+                    Advisors
+                  </th>
+                </tr>
+              </thead>
+              <TableBody
+                reportPeople={reportPeople}
+                handleAttendeeRow={renderCompactAttendeRow}
+                filterCb={person =>
+                  person.role === Person.ROLE.ADVISOR && person.attendee
+                }
+                enableDivider
+              />
+            </TableContainer>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <TableContainer>
+              <thead>
+                <tr>
+                  <th colSpan={4} style={{ textAlign: "center" }}>
+                    Principals
+                  </th>
+                </tr>
+              </thead>
+              <TableBody
+                reportPeople={reportPeople}
+                handleAttendeeRow={renderCompactAttendeRow}
+                filterCb={person =>
+                  person.role === Person.ROLE.PRINCIPAL && person.attendee
+                }
+                enableDivider
+              />
+            </TableContainer>
+          </td>
+        </tr>
+      </tbody>
+    </TableContainer>
+  )
+
+  function renderCompactAttendeRow(attendee) {
+    return (
+      <tr style={{ width: "100%" }} key={attendee.uuid}>
+        <td style={{ width: "40%" }}>
+          <LinkToComp modelType="Person" model={attendee} showIcon={false} />
+        </td>
+        <td style={{ width: "30%" }}>
+          <LinkToComp modelType="Position" model={attendee.position} />
+        </td>
+        <td className="primary-attendee" style={{ width: "20%" }}>
+          <PrimaryAttendeeRadioButton person={attendee} disabled />
+        </td>
+        <td className="report-author" style={{ width: "10%" }}>
+          {attendee.role === Person.ROLE.ADVISOR && (
+            <ReportAuthorCheckbox person={attendee} disabled />
+          )}
+        </td>
+      </tr>
+    )
+  }
+}
+
+CompactReadonlyReportPeople.propTypes = {
+  reportPeople: PropTypes.array,
+  linkToComp: PropTypes.func
+}
+
+/**
+ * --- Advisors ----
+ * LinkToPerson Position Primary Author
+ * --- Principals --
+ *
+ * ---
+ */
 
 export default ReportPeople
