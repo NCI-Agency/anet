@@ -14,7 +14,7 @@ const ModelTooltip = ({
 }) => {
   // edit links would show the same page, don't preview
   if (isEdit) {
-    return <> {children}</>
+    return <>{children}</>
   }
   return (
     <Tooltip

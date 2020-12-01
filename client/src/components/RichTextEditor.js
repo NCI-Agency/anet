@@ -1,6 +1,8 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import "components/RichTextEditor.css"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertFromRaw, convertToRaw } from "draft-js"
 import {
@@ -14,15 +16,13 @@ import {
   UnorderedListButton
 } from "draft-js-buttons"
 import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
+import "draft-js-side-toolbar-plugin/lib/plugin.css"
+import "draft-js/dist/Draft.css"
 import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+import "draftail/dist/draftail.css"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-
-import "draft-js/dist/Draft.css"
-import "draftail/dist/draftail.css"
-import "draft-js-side-toolbar-plugin/lib/plugin.css"
-import "components/RichTextEditor.css"
 
 const newlinePlugin = createNewlinePlugin()
 
@@ -75,7 +75,7 @@ const ENTITY_CONTROL = {
     // React component providing the UI to manage entities of this type.
     source: LinkSourceAnet,
     // React component to display inline entities.
-    decorator: LinkAnet,
+    decorator: props => <LinkAnet {...props} linkToComp={LinkToNotPreviewed} />,
     // React component to display block-level entities.
     block: PropTypes.func,
     // Array of attributes the entity uses, to preserve when filtering entities on paste. If undefined, all entity data is preserved.

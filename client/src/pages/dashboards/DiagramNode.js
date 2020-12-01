@@ -20,10 +20,10 @@ import AggregationWidgetContainer, {
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import { SPECIAL_WIDGET_TYPES } from "customFieldsUtils"
 import * as Models from "models"
 import moment from "moment"
 import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"

@@ -2,7 +2,7 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFieldsReadonly"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import { Formik } from "formik"
@@ -106,6 +106,7 @@ const PeriodicAssessment = ({
                   parentFieldName={parentFieldName}
                   fieldsConfig={assessmentConfig}
                   values={values}
+                  linkToComp={LinkTo}
                   vertical
                 />
               )

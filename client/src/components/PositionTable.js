@@ -173,7 +173,7 @@ const BasePositionTable = ({
                       <LinkTo
                         modelType="Organization"
                         model={pos.organization}
-                        previewId="post-table-org"
+                        previewId="pos-table-org"
                       />
                     )}
                   </td>

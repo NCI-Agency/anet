@@ -9,7 +9,7 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFieldsReadonly"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -663,14 +663,15 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               </Fieldset>
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
-                  {parseHtmlWithLinkTo(report.reportText)}
+                  {parseHtmlWithLinkTo(report.reportText, LinkTo)}
                 </Fieldset>
               )}
               {report.reportSensitiveInformation &&
                 report.reportSensitiveInformation.text && (
                   <Fieldset title="Sensitive information">
                     {parseHtmlWithLinkTo(
-                      report.reportSensitiveInformation.text
+                      report.reportSensitiveInformation.text,
+                      LinkTo
                     )}
                     {(hasAuthorizationGroups && (
                       <div>
@@ -687,6 +688,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
                     values={values}
+                    linkToComp={LinkTo}
                   />
                 </Fieldset>
               )}

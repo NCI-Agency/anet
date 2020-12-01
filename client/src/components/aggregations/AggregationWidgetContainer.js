@@ -13,13 +13,13 @@ import {
   reportsByTaskAggregation,
   valuesListAggregation
 } from "components/aggregations/utils"
-import {
-  getFieldPropsFromFieldConfig,
-  SPECIAL_WIDGET_TYPES
-} from "components/CustomFields"
 import IqrBoxPlot from "components/graphs/IqrBoxPlot"
 import LikertScale from "components/graphs/LikertScale"
 import { CUSTOM_FIELD_TYPE } from "components/Model"
+import {
+  getFieldPropsFromFieldConfig,
+  SPECIAL_WIDGET_TYPES
+} from "customFieldsUtils"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"

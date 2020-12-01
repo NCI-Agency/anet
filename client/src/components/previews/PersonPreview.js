@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import { mapReadonlyCustomFieldsToComps } from "components/CustomFieldsReadonly"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -17,10 +17,10 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
+import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Col, ControlLabel, FormGroup, Grid, Row, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -81,10 +81,9 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const PersonPreview = ({ pageDispatchers }) => {
+const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
   const { currentUser } = useContext(AppContext)
 
-  const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -134,7 +133,7 @@ const PersonPreview = ({ pageDispatchers }) => {
         const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
 
         return (
-          <div>
+          <div className={className}>
             <Form className="form-horizontal" method="post">
               <Fieldset title={`${person.rank} ${person.name}`} />
               <Fieldset>
@@ -265,7 +264,7 @@ const PersonPreview = ({ pageDispatchers }) => {
                 Settings.dateFormats.forms.displayShort.date
               ),
             role: Person.humanNameOfRole(values.role),
-            biography: parseHtmlWithLinkTo(person.biography)
+            biography: parseHtmlWithLinkTo(person.biography, LinkToNotPreviewed)
           }
           return Person.shownStandardFields.reduce((accum, key) => {
             accum[key] = (
@@ -379,7 +378,9 @@ const PersonPreview = ({ pageDispatchers }) => {
 }
 
 PersonPreview.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  className: PropTypes.string,
+  previewId: PropTypes.string,
+  uuid: PropTypes.string
 }
-
 export default connect(null, mapPageDispatchersToProps)(PersonPreview)

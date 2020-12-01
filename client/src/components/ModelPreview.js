@@ -4,6 +4,7 @@ import * as Models from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import "./ModelPreview.css"
+
 const MODEL_TO_COMPONENT = {
   [Models.AuthorizationGroup]: ReportPreview,
   [Models.Location]: ReportPreview,

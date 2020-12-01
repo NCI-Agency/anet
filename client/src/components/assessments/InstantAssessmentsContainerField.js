@@ -1,7 +1,5 @@
-import {
-  CustomFieldsContainer,
-  ReadonlyCustomFields
-} from "components/CustomFields"
+import { CustomFieldsContainer } from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFieldsReadonly"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -48,6 +46,7 @@ const InstantAssessmentsContainerField = ({
                       parentFieldName={`${parentFieldName}.${entity.uuid}`}
                       fieldsConfig={entityInstantAssessmentConfig}
                       values={values}
+                      linkToComp={LinkTo}
                     />
                   ) : (
                     <CustomFieldsContainer

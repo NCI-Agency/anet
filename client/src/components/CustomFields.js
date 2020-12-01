@@ -1,10 +1,9 @@
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LikertScale from "components/graphs/LikertScale"
+import LinkTo from "components/LinkTo"
 import Model, {
   createYupObjectShape,
   CUSTOM_FIELD_TYPE,
@@ -12,7 +11,12 @@ import Model, {
   INVISIBLE_CUSTOM_FIELDS_FIELD
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
-import RichTextEditor from "components/RichTextEditor"
+import {
+  getArrayObjectValue,
+  getFieldPropsFromFieldConfig,
+  SPECIAL_WIDGET_COMPONENTS,
+  SPECIAL_WIDGET_TYPES
+} from "customFieldsUtils"
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
@@ -21,22 +25,11 @@ import _isEqual from "lodash/isEqual"
 import _isEqualWith from "lodash/isEqualWith"
 import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
-import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Button, HelpBlock, Table } from "react-bootstrap"
-import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
-
-export const SPECIAL_WIDGET_TYPES = {
-  LIKERT_SCALE: "likertScale",
-  RICH_TEXT_EDITOR: "richTextEditor"
-}
-const SPECIAL_WIDGET_COMPONENTS = {
-  [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: LikertScale,
-  [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
-}
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
@@ -69,39 +62,6 @@ SpecialField.propTypes = {
   formikProps: PropTypes.object
 }
 
-const ReadonlySpecialField = ({ name, widget, values, ...otherFieldProps }) => {
-  if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
-    const fieldValue = Object.get(values, name) || "" // name might be a path for a nested prop
-    return (
-      <FastField
-        name={name}
-        component={FieldHelper.ReadonlyField}
-        humanValue={parseHtmlWithLinkTo(fieldValue)}
-        {...Object.without(otherFieldProps, "style")}
-      />
-    )
-  } else {
-    const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
-    return (
-      <FastField
-        name={name}
-        component={FieldHelper.SpecialField}
-        widget={<WidgetComponent />}
-        readonly
-        {...otherFieldProps}
-      />
-    )
-  }
-}
-ReadonlySpecialField.propTypes = {
-  name: PropTypes.string.isRequired,
-  widget: PropTypes.oneOf([
-    SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
-    SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
-  ]).isRequired,
-  values: PropTypes.object
-}
-
 const TextField = fieldProps => {
   const { onChange, onBlur, ...otherFieldProps } = fieldProps
   return (
@@ -126,20 +86,6 @@ const NumberField = fieldProps => {
   )
 }
 
-const ReadonlyTextField = fieldProps => {
-  const { name, label, vertical, extraColElem, labelColumnWidth } = fieldProps
-  return (
-    <FastField
-      name={name}
-      label={label}
-      vertical={vertical}
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
-      component={FieldHelper.ReadonlyField}
-    />
-  )
-}
-
 const DateField = fieldProps => {
   const { name, withTime, ...otherFieldProps } = fieldProps
   return (
@@ -152,38 +98,7 @@ const DateField = fieldProps => {
   )
 }
 
-const ReadonlyDateField = fieldProps => {
-  const {
-    name,
-    label,
-    vertical,
-    withTime,
-    extraColElem,
-    labelColumnWidth
-  } = fieldProps
-  return (
-    <FastField
-      name={name}
-      label={label}
-      vertical={vertical}
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
-      component={FieldHelper.ReadonlyField}
-      humanValue={fieldVal =>
-        fieldVal &&
-        moment(fieldVal).format(
-          withTime
-            ? Settings.dateFormats.forms.displayShort.withTime
-            : Settings.dateFormats.forms.displayShort.date
-        )
-      }
-    />
-  )
-}
-
 const DateTimeField = props => <DateField {...props} withTime />
-
-const ReadonlyDateTimeField = props => <ReadonlyDateField {...props} withTime />
 
 const JsonField = fieldProps => {
   const { name, onChange, fieldConfig, formikProps, ...otherProps } = fieldProps
@@ -215,33 +130,6 @@ const JsonField = fieldProps => {
   )
 }
 
-const ReadonlyJsonField = ({
-  name,
-  label,
-  values,
-  extraColElem,
-  labelColumnWidth
-}) => {
-  const value = Object.get(values, name) || {}
-  return (
-    <FastField
-      name={name}
-      label={label}
-      component={FieldHelper.ReadonlyField}
-      humanValue={JSON.stringify(value)}
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
-    />
-  )
-}
-ReadonlyJsonField.propTypes = {
-  name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired,
-  extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
-}
-
 const EnumField = fieldProps => {
   const { choices, ...otherFieldProps } = fieldProps
   return (
@@ -249,38 +137,6 @@ const EnumField = fieldProps => {
       buttons={FieldHelper.customEnumButtons(choices)}
       component={FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
-    />
-  )
-}
-
-const enumHumanValue = (choices, fieldVal) => {
-  if (Array.isArray(fieldVal)) {
-    return fieldVal && fieldVal.map(k => choices[k]?.label).join(", ")
-  } else {
-    return fieldVal && choices[fieldVal]?.label
-  }
-}
-
-const ReadonlyEnumField = fieldProps => {
-  const {
-    name,
-    label,
-    vertical,
-    values,
-    choices,
-    extraColElem,
-    labelColumnWidth
-  } = fieldProps
-  return (
-    <FastField
-      name={name}
-      label={label}
-      vertical={vertical}
-      values={values}
-      component={FieldHelper.ReadonlyField}
-      humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
     />
   )
 }
@@ -294,11 +150,6 @@ const EnumSetField = fieldProps => {
       {...otherFieldProps}
     />
   )
-}
-
-const getArrayObjectValue = (values, fieldName) => {
-  const nameKeys = fieldName.split(".")
-  return nameKeys.reduce((v, key) => (v && v[key] ? v[key] : []), values)
 }
 
 const ArrayOfObjectsField = fieldProps => {
@@ -401,75 +252,6 @@ const addObject = (objDefault, arrayHelpers) => {
   arrayHelpers.push(objDefault)
 }
 
-const ReadonlyArrayOfObjectsField = fieldProps => {
-  const {
-    name,
-    fieldConfig,
-    values,
-    vertical,
-    extraColElem,
-    labelColumnWidth
-  } = fieldProps
-  const value = useMemo(() => getArrayObjectValue(values, name), [values, name])
-  const fieldsetTitle = fieldConfig.label || ""
-  return (
-    <Fieldset title={fieldsetTitle}>
-      <FieldArray
-        name={name}
-        render={arrayHelpers => (
-          <div>
-            {value.map((obj, index) => (
-              <ReadonlyArrayObject
-                key={index}
-                fieldName={name}
-                fieldConfig={fieldConfig}
-                values={values}
-                index={index}
-                vertical={vertical}
-                extraColElem={extraColElem}
-                labelColumnWidth={labelColumnWidth}
-              />
-            ))}
-          </div>
-        )}
-      />
-    </Fieldset>
-  )
-}
-
-const ReadonlyArrayObject = ({
-  fieldName,
-  fieldConfig,
-  values,
-  vertical,
-  index,
-  extraColElem,
-  labelColumnWidth
-}) => {
-  const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
-  return (
-    <Fieldset title={`${objLabel} ${index + 1}`}>
-      <ReadonlyCustomFields
-        fieldsConfig={fieldConfig.objectFields}
-        parentFieldName={`${fieldName}.${index}`}
-        values={values}
-        vertical={vertical}
-        extraColElem={extraColElem}
-        labelColumnWidth={labelColumnWidth}
-      />
-    </Fieldset>
-  )
-}
-ReadonlyArrayObject.propTypes = {
-  fieldName: PropTypes.string.isRequired,
-  fieldConfig: PropTypes.object.isRequired,
-  values: PropTypes.object.isRequired,
-  vertical: PropTypes.bool,
-  index: PropTypes.number.isRequired,
-  extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
-}
-
 const AnetObjectField = ({
   name,
   types,
@@ -504,7 +286,11 @@ const AnetObjectField = ({
           <tbody>
             <tr>
               <td>
-                <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
+                <LinkAnetEntity
+                  type={fieldValue.type}
+                  uuid={fieldValue.uuid}
+                  linkToComp={LinkTo}
+                />
               </td>
               <td className="col-xs-1">
                 <RemoveButton
@@ -525,46 +311,6 @@ AnetObjectField.propTypes = {
   types: PropTypes.arrayOf(PropTypes.string),
   formikProps: PropTypes.object,
   children: PropTypes.node
-}
-
-const ReadonlyAnetObjectField = ({
-  name,
-  label,
-  values,
-  extraColElem,
-  labelColumnWidth
-}) => {
-  const { type, uuid } = Object.get(values, name) || {}
-  return (
-    <FastField
-      name={name}
-      label={label}
-      component={FieldHelper.ReadonlyField}
-      humanValue={
-        type &&
-        uuid && (
-          <Table id={`${name}-value`} striped condensed hover responsive>
-            <tbody>
-              <tr>
-                <td>
-                  <LinkAnetEntity type={type} uuid={uuid} />
-                </td>
-              </tr>
-            </tbody>
-          </Table>
-        )
-      }
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
-    />
-  )
-}
-ReadonlyAnetObjectField.propTypes = {
-  name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired,
-  extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -608,7 +354,11 @@ const ArrayOfAnetObjectsField = ({
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
                 <td>
-                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  <LinkAnetEntity
+                    type={entity.type}
+                    uuid={entity.uuid}
+                    linkToComp={LinkTo}
+                  />
                 </td>
                 <td className="col-xs-1">
                   <RemoveButton
@@ -642,47 +392,6 @@ ArrayOfAnetObjectsField.propTypes = {
   types: PropTypes.arrayOf(PropTypes.string),
   formikProps: PropTypes.object,
   children: PropTypes.node
-}
-
-const ReadonlyArrayOfAnetObjectsField = ({
-  name,
-  label,
-  values,
-  extraColElem,
-  labelColumnWidth
-}) => {
-  const fieldValue = Object.get(values, name) || []
-  return (
-    <FastField
-      name={name}
-      label={label}
-      component={FieldHelper.ReadonlyField}
-      humanValue={
-        !_isEmpty(fieldValue) && (
-          <Table id={`${name}-value`} striped condensed hover responsive>
-            <tbody>
-              {fieldValue.map(entity => (
-                <tr key={entity.uuid}>
-                  <td>
-                    <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )
-      }
-      extraColElem={extraColElem}
-      labelColumnWidth={labelColumnWidth}
-    />
-  )
-}
-ReadonlyArrayOfAnetObjectsField.propTypes = {
-  name: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired,
-  extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
 }
 
 const FIELD_COMPONENTS = {
@@ -769,21 +478,6 @@ CustomFieldsContainer.propTypes = {
 CustomFieldsContainer.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical: false
-}
-
-export const getFieldPropsFromFieldConfig = fieldConfig => {
-  const {
-    aggregations,
-    type,
-    typeError,
-    placeholder,
-    helpText,
-    validations,
-    visibleWhen,
-    objectFields,
-    ...fieldProps
-  } = fieldConfig
-  return fieldProps
 }
 
 const CustomField = ({
@@ -952,129 +646,6 @@ CustomFields.propTypes = {
 CustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical: false
-}
-
-const READONLY_FIELD_COMPONENTS = {
-  [CUSTOM_FIELD_TYPE.TEXT]: ReadonlyTextField,
-  [CUSTOM_FIELD_TYPE.NUMBER]: ReadonlyTextField,
-  [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
-  [CUSTOM_FIELD_TYPE.DATETIME]: ReadonlyDateTimeField,
-  [CUSTOM_FIELD_TYPE.JSON]: ReadonlyJsonField,
-  [CUSTOM_FIELD_TYPE.ENUM]: ReadonlyEnumField,
-  [CUSTOM_FIELD_TYPE.ENUMSET]: ReadonlyEnumField,
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: ReadonlyArrayOfObjectsField,
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: ReadonlySpecialField,
-  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: ReadonlyAnetObjectField,
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: ReadonlyArrayOfAnetObjectsField
-}
-
-export const ReadonlyCustomFields = ({
-  fieldsConfig,
-  parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
-  values,
-  vertical,
-  extraColElem,
-  labelColumnWidth
-}) => {
-  return (
-    <>
-      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
-        const fieldName = `${parentFieldName}.${key}`
-        const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
-        const { type } = fieldConfig
-        let extraProps = {}
-        if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-          extraProps = {
-            fieldConfig
-          }
-        }
-        const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
-        return ReadonlyFieldComponent ? (
-          <ReadonlyFieldComponent
-            key={key}
-            name={fieldName}
-            values={values}
-            vertical={vertical}
-            extraColElem={extraColElem}
-            labelColumnWidth={labelColumnWidth}
-            {...fieldProps}
-            {...extraProps}
-          />
-        ) : (
-          <FastField
-            key={key}
-            name={fieldName}
-            label={fieldProps.label}
-            vertical={fieldProps.vertical}
-            component={FieldHelper.ReadonlyField}
-            humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
-            extraColElem={extraColElem}
-            labelColumnWidth={labelColumnWidth}
-          />
-        )
-      })}
-    </>
-  )
-}
-ReadonlyCustomFields.propTypes = {
-  fieldsConfig: PropTypes.object,
-  parentFieldName: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired,
-  vertical: PropTypes.bool,
-  extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
-}
-ReadonlyCustomFields.defaultProps = {
-  parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false
-}
-
-// To access ordered custom fields when showing in a page
-export const mapReadonlyCustomFieldsToComps = ({
-  fieldsConfig,
-  parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
-  values,
-  vertical,
-  extraColElem,
-  labelColumnWidth
-}) => {
-  return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
-    const fieldName = `${parentFieldName}.${key}`
-    const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
-    const { type } = fieldConfig
-    let extraProps = {}
-    if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
-      extraProps = {
-        fieldConfig
-      }
-    }
-    const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
-    accum[key] = ReadonlyFieldComponent ? (
-      <ReadonlyFieldComponent
-        key={key}
-        name={fieldName}
-        values={values}
-        vertical={vertical}
-        extraColElem={extraColElem}
-        labelColumnWidth={labelColumnWidth}
-        {...fieldProps}
-        {...extraProps}
-      />
-    ) : (
-      <FastField
-        key={key}
-        name={fieldName}
-        label={fieldProps.label}
-        vertical={fieldProps.vertical}
-        component={FieldHelper.ReadonlyField}
-        humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
-        extraColElem={extraColElem}
-        labelColumnWidth={labelColumnWidth}
-      />
-    )
-
-    return accum
-  }, {})
 }
 
 // customFields should contain the JSON of all the visible custom fields.

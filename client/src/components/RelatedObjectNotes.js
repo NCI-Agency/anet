@@ -5,8 +5,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
-import Pie from "components/graphs/Pie"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
+import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
@@ -262,7 +262,7 @@ const RelatedObjectNotes = ({
               isJson && note.text ? utils.parseJsonSafe(note.text) : {}
             const noteText = isJson
               ? jsonFields.text
-              : parseHtmlWithLinkTo(note.text)
+              : parseHtmlWithLinkTo(note.text, LinkTo)
             return (
               <Panel
                 key={note.uuid}
