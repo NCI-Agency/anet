@@ -51,8 +51,6 @@ public class AccountDeactivationWorkerTest {
 
     when(config.getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior"))
         .thenReturn(Arrays.asList(15, 30, 45));
-    when(config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames"))
-        .thenReturn(Arrays.asList("ignored_domain", "*.ignored", "ignored.domain"));
     when(config.getDictionaryEntry("automaticallyInactivateUsers.checkIntervalInSecs"))
         .thenReturn("60");
 
