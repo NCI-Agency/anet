@@ -1,9 +1,10 @@
+import PropTypes from "prop-types"
 import React from "react"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
-import PropTypes from "prop-types"
 
 const AvatarDisplayComponent = ({ avatar, height, width, style }) => (
   <img
+    className="avatar-display"
     src={avatar || DEFAULT_AVATAR}
     height={height}
     width={width}

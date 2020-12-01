@@ -24,7 +24,7 @@
   width: 67%;
 }
  /* center the avatar */
-.linkto-model-preview-portal .model-preview fieldset > img[alt*="Avatar"]{
+.linkto-model-preview-portal .model-preview .avatar-display{
   display: block;
   margin: auto;
 }

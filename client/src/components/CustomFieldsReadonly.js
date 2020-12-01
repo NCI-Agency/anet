@@ -1,4 +1,5 @@
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
+import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import {
@@ -241,7 +242,7 @@ const ReadonlyAnetObjectField = ({
   label,
   values,
   extraColElem,
-  linkToComp: LinkToComp,
+  linkToComp,
   labelColumnWidth
 }) => {
   const { type, uuid } = Object.get(values, name) || {}
@@ -257,7 +258,11 @@ const ReadonlyAnetObjectField = ({
             <tbody>
               <tr>
                 <td>
-                  <LinkToComp type={type} uuid={uuid} />
+                  <LinkAnetEntity
+                    type={type}
+                    uuid={uuid}
+                    linkToComp={linkToComp}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -283,7 +288,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
   label,
   values,
   extraColElem,
-  linkToComp: LinkToComp,
+  linkToComp,
   labelColumnWidth
 }) => {
   const fieldValue = Object.get(values, name) || []
@@ -299,7 +304,11 @@ const ReadonlyArrayOfAnetObjectsField = ({
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
                   <td>
-                    <LinkToComp type={entity.type} uuid={entity.uuid} />
+                    <LinkAnetEntity
+                      type={entity.type}
+                      uuid={entity.uuid}
+                      linkToComp={linkToComp}
+                    />
                   </td>
                 </tr>
               ))}
