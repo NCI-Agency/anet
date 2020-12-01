@@ -958,7 +958,7 @@ const ReportForm = ({
                           ) {
                             setFieldValue(
                               "reportSensitiveInformation.text",
-                              value,
+                              safeVal,
                               true
                             )
                           }
@@ -1254,8 +1254,8 @@ const ReportForm = ({
   function onConfirmDelete(values, resetForm) {
     API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
-        // After successful delete, reset the form in order to make sure the dirty
-        // prop is also reset (otherwise we would get a blocking navigation warning)
+        // reset the form to latest values
+        // to avoid unsaved changes propmt if it somehow becomes dirty
         resetForm({ values, isSubmitting: true })
         history.push("/", { success: "Report deleted" })
       })

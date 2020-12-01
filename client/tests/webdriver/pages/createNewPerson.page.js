@@ -9,7 +9,7 @@ const INVISIBLE_CUSTOM_FIELDS = {
 
 class CreatePerson extends Page {
   get form() {
-    return browser.$("form")
+    return browser.$("form.form-horizontal")
   }
 
   get alertSuccess() {
@@ -17,7 +17,7 @@ class CreatePerson extends Page {
   }
 
   get lastName() {
-    return browser.$("#lastName")
+    return this.form.$("#lastName")
   }
 
   get firstName() {
@@ -100,8 +100,10 @@ class CreatePerson extends Page {
     return this.customFieldsContainer.$('label[id="AMBER"]')
   }
 
-  get addObjectButton() {
-    return this.customFieldsContainer.$('button[id="addObjectButton"]')
+  get addArrayObjectButton() {
+    return this.customFieldsContainer.$(
+      'button[id="add-formCustomFields.arrayFieldName"]'
+    )
   }
 
   get objectDateField() {

@@ -3,9 +3,9 @@ import CreatePerson from "../pages/createNewPerson.page"
 import CreateTask from "../pages/createNewTask.page"
 import CreateReport from "../pages/createReport.page"
 
-const inValidNumberInput = "-10"
-const validNumberInput = "10"
-const TESTED_ENGAGEMENT_BUTTON = "train"
+const INVALID_NUMBER_INPUT = "-10"
+const VALID_NUMBER_INPUT = "10"
+const TRAIN_ENGAGEMENT_BUTTON = "train"
 
 const REQUIRED_PERSON_FIELDS = {
   lastname: "customPerson",
@@ -20,14 +20,13 @@ const REQUIRED_TASK_FIELDS = {
 describe("When working with custom fields for different anet objects", () => {
   // ------------------------------ REPORT CUSTOM FIELDS -----------------------------------------
   describe("For report's custom fields", () => {
-    it("Should open a create new report page", () => {
+    it("Should be able load a new report form", () => {
       CreateReport.openAsAdminUser()
       CreateReport.form.waitForExist()
       CreateReport.form.waitForDisplayed()
     })
 
-    it("Should not show default invisible fields", () => {
-      // both of these fields invisible at first
+    it("When the engagement type is not defined, it should not display fields only visible when a certain engagement type is selected", () => {
       CreateReport.fieldsToggledVisibilityByTrainButton.forEach(invisField => {
         expect(invisField.isExisting()).to.equal(false)
       })
@@ -39,19 +38,20 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should toggle the correct invisible fields", () => {
-      const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_ENGAGEMENT_BUTTON
+    it("Selecting the train engagement type should toggle the correct invisible fields", () => {
+      const trainButton = CreateReport.getEngagementTypesButtonByName(
+        TRAIN_ENGAGEMENT_BUTTON
       )
-      button.waitForExist()
-      button.waitForDisplayed()
-      button.click()
+      trainButton.waitForExist()
+      trainButton.waitForDisplayed()
+      trainButton.click()
       CreateReport.fieldsToggledVisibilityByTrainButton.forEach(
-        nowVisisbleField => {
-          nowVisisbleField.waitForExist()
-          nowVisisbleField.waitForDisplayed()
+        nowVisibleField => {
+          nowVisibleField.waitForExist()
+          nowVisibleField.waitForDisplayed()
         }
       )
+      // train button active here so numberField will be visible
 
       CreateReport.fieldsNotToggledVisibilityByTrainButton.forEach(
         stillInvisField => {
@@ -61,48 +61,51 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous valid data when toggling field's visibility", () => {
-      CreateReport.numberTrainedField.setValue(validNumberInput)
-      const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_ENGAGEMENT_BUTTON
+      CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
+      const trainButton = CreateReport.getEngagementTypesButtonByName(
+        TRAIN_ENGAGEMENT_BUTTON
       )
-      // make invisible
-      button.click()
+      // turn off train option to make numberField invisible
+      trainButton.click()
       CreateReport.numberTrainedFormGroup.waitForExist({ reverse: true })
-      // make visible
-      button.click()
+      // turn on train option to make numberField visible
+      trainButton.click()
       CreateReport.numberTrainedFormGroup.waitForExist()
 
       expect(CreateReport.numberTrainedField.getValue()).to.equal(
-        validNumberInput
+        VALID_NUMBER_INPUT
       )
     })
 
     it("Should not persist previous invalid data when toggling field's visibility", () => {
-      CreateReport.numberTrainedField.setValue(inValidNumberInput)
+      CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
       CreateReport.numberTrainedHelpText.waitForExist()
       // Actually see the validation warning
       expect(CreateReport.numberTrainedHelpText.getText()).to.equal(
         "Number trained must be greater than or equal to 1"
       )
-      const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_ENGAGEMENT_BUTTON
+      const trainButton = CreateReport.getEngagementTypesButtonByName(
+        TRAIN_ENGAGEMENT_BUTTON
       )
-      // make invisible
-      button.click()
+      // turn off train option to make numberField invisible
+      trainButton.click()
       CreateReport.numberTrainedFormGroup.waitForExist({ reverse: true })
-      // make visible
-      button.click()
+      // turn on train option to make numberField visible
+      trainButton.click()
       CreateReport.numberTrainedFormGroup.waitForExist()
 
       expect(CreateReport.numberTrainedField.getValue()).not.be.equal(
-        inValidNumberInput
+        INVALID_NUMBER_INPUT
       )
       expect(CreateReport.numberTrainedField.getValue()).to.be.equal("")
     })
 
     it("Should validate visible field", () => {
-      CreateReport.numberTrainedField.setValue(inValidNumberInput)
+      CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
       CreateReport.numberTrainedHelpText.waitForExist()
+      expect(CreateReport.numberTrainedHelpText.getText()).to.include(
+        "Number trained must be greater than or equal to 1"
+      )
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
 
@@ -111,23 +114,17 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should show valid visible field", () => {
-      // we are already at show page
-      expect(CreateReport.numberTrainedFieldShowed.getText()).to.include(
-        validNumberInput.toString()
-      )
-    })
-
     it("Should not validate invisible field", () => {
       CreateReport.editButton.click()
       CreateReport.form.waitForExist()
       CreateReport.form.waitForDisplayed()
 
-      const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_ENGAGEMENT_BUTTON
+      const trainButton = CreateReport.getEngagementTypesButtonByName(
+        TRAIN_ENGAGEMENT_BUTTON
       )
-      // make the trained number field invisible
-      button.click()
+      // turn off train option to make numberField invisible
+      // It was invalid from previous test case
+      trainButton.click()
 
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
@@ -137,31 +134,51 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should discard invisible fields even if it is valid", () => {
+    it("Should show valid visible field after saving", () => {
+      // we are on show page after submitting
       CreateReport.editButton.click()
       CreateReport.form.waitForExist()
       CreateReport.form.waitForDisplayed()
 
-      const button = CreateReport.getEngagementTypesButtonByName(
-        TESTED_ENGAGEMENT_BUTTON
+      const trainButton = CreateReport.getEngagementTypesButtonByName(
+        TRAIN_ENGAGEMENT_BUTTON
       )
-      // make the trained number field visible
-      button.click()
+      // turn on train option to make numberField visible
+      trainButton.click()
+      CreateReport.numberTrainedFormGroup.waitForExist()
+      CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
+
+      CreateReport.submitForm()
+      CreateReport.waitForAlertToLoad()
+
+      expect(CreateReport.numberTrainedFieldShowed.getText()).to.include(
+        VALID_NUMBER_INPUT.toString()
+      )
+    })
+
+    it("Should discard invisible fields after saving even if it is valid", () => {
+      CreateReport.editButton.click()
+      CreateReport.form.waitForExist()
+      CreateReport.form.waitForDisplayed()
+
+      const trainButton = CreateReport.getEngagementTypesButtonByName(
+        TRAIN_ENGAGEMENT_BUTTON
+      )
       // give valid input before making invisible
-      CreateReport.numberTrainedField.setValue(validNumberInput)
+      CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
       // goes invisible
-      button.click()
+      trainButton.click()
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
 
       expect(CreateReport.numberTrainedFieldShowed.getText()).to.not.include(
-        validNumberInput.toString()
+        VALID_NUMBER_INPUT.toString()
       )
     })
   })
   // ------------------------------ PERSON CUSTOM FIELDS -----------------------------------------
   describe("For person's custom fields", () => {
-    it("Should open create new person page", () => {
+    it("Should be able load a new person form and fill normal required fields", () => {
       CreatePerson.openAsAdmin()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
@@ -179,7 +196,7 @@ describe("When working with custom fields for different anet objects", () => {
         expect(field.isExisting()).to.eq(false)
       })
       // Date field is invisible by default
-      CreatePerson.addObjectButton.click()
+      CreatePerson.addArrayObjectButton.click()
       CreatePerson.objectDateField.waitForExist({ reverse: true })
     })
 
@@ -194,7 +211,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous valid data when toggling field's visibility", () => {
-      CreatePerson.numberCustomField.setValue(validNumberInput)
+      CreatePerson.numberCustomField.setValue(VALID_NUMBER_INPUT)
       // make default invisible fields invisible again, amber color does that
       CreatePerson.amberButton.click()
       CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
@@ -203,12 +220,12 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.numberCustomFieldContainer.waitForExist()
 
       expect(CreatePerson.numberCustomField.getValue()).be.equal(
-        validNumberInput
+        VALID_NUMBER_INPUT
       )
     })
 
     it("Should not persist previous invalid data when toggling field's visibility", () => {
-      CreatePerson.numberCustomField.setValue(inValidNumberInput)
+      CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
       // Actually see the validation warning
       CreatePerson.numberCustomFieldHelpText.waitForExist()
       // make invisible
@@ -219,14 +236,17 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.numberCustomFieldContainer.waitForExist()
 
       expect(CreatePerson.numberCustomField.getValue()).not.be.equal(
-        inValidNumberInput
+        INVALID_NUMBER_INPUT
       )
       expect(CreatePerson.numberCustomField.getValue()).to.equal("")
     })
 
     it("Should validate visible field", () => {
-      CreatePerson.numberCustomField.setValue(inValidNumberInput)
+      CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
       CreatePerson.numberCustomFieldHelpText.waitForExist()
+      expect(CreatePerson.numberCustomFieldHelpText.getText()).to.include(
+        "greater than"
+      )
     })
 
     it("Should not validate invisible field so we can submit the form", () => {
@@ -239,7 +259,7 @@ describe("When working with custom fields for different anet objects", () => {
   })
   // ------------------------------ TASK CUSTOM FIELDS -----------------------------------------
   describe("For task's custom fields", () => {
-    it("Should open create new task page", () => {
+    it("Should be able load a new task form and fill normal required fields", () => {
       CreateTask.openAsAdmin()
       CreateTask.form.waitForExist()
       CreateTask.form.waitForDisplayed()
@@ -248,22 +268,22 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should be able to see assessment fields", () => {
-      CreateTask.addObjectButton.click()
-      CreateTask.objectFields.forEach(field => {
+      CreateTask.addAssessmentButton.click()
+      CreateTask.assessmentFields.forEach(field => {
         field.waitForExist()
       })
     })
 
     it("Should warn invalid json for questions", () => {
       CreateTask.questionsField.setValue("invalidJsonTest")
-      // normally there is already a help block, we need other warning text
+      // normally there is already a help block, we need the other warning text
       CreateTask.questionsFieldWarningText.waitForExist()
     })
 
     it("Should not warn valid json for questions", () => {
       CreateTask.questionsField.setValue("{}")
-      // all help texts should be removed with valid json
-      CreateTask.questionsFieldHelpText.waitForExist({ reverse: true })
+      // only the warning help text should be removed with valid json
+      CreateTask.questionsFieldWarningText.waitForExist({ reverse: true })
     })
 
     it("Should be able to submit valid task", () => {

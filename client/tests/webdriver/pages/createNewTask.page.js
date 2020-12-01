@@ -19,28 +19,41 @@ class CreateTask extends Page {
     return browser.$('input[id="shortName"]')
   }
 
-  get addObjectButton() {
-    return browser.$('button[id="addObjectButton"]')
+  get customFieldsContainer() {
+    return browser.$("#custom-fields")
   }
 
-  get objectFields() {
-    return browser
-      .$("#custom-fields")
-      .$$("//div[starts-with(@id,'fg-formCustomFields')]")
+  get assessmentFields() {
+    // since only custom field is assessments
+    return this.customFieldsContainer.$$(
+      '//div[starts-with(@id,"fg-formCustomFields")]'
+    )
+  }
+
+  get firstQuestionsFieldContainer() {
+    return this.customFieldsContainer.$(
+      'div[id="fg-formCustomFields.assessments.0.questions"]'
+    )
   }
 
   get questionsField() {
-    return browser
-      .$("#custom-fields")
-      .$("//textarea[contains(@id,'questions')]")
+    return this.firstQuestionsFieldContainer.$(
+      'textarea[id="formCustomFields.assessments.0.questions"]'
+    )
   }
 
   get questionsFieldWarningText() {
-    return this.questionsField.$("//span[contains(text(), 'Invalid')]")
+    return this.firstQuestionsFieldContainer.$(
+      '//span[contains(text(), "Invalid")]'
+    )
   }
 
   get questionsFieldHelpText() {
-    return this.questionsField.$(".help-block")
+    return this.firstQuestionsFieldContainer.$(".help-block")
+  }
+
+  get addAssessmentButton() {
+    return browser.$('button[id="add-formCustomFields.assessments"]')
   }
 
   openAsSuperUser() {

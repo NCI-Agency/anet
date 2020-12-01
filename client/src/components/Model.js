@@ -218,7 +218,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
 export const createYupObjectShape = (
   config,
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
-  isTopLevel = true // only add invisible fields field to the top level object
+  isTopLevel = true
 ) => {
   let objShape = {}
   if (config) {
@@ -227,8 +227,7 @@ export const createYupObjectShape = (
         .map(([k, v]) => [k, createFieldYupSchema(k, v, parentFieldName)])
         .filter(([k, v]) => v !== null)
     )
-    // do not include invisibleFields field to a inner objects
-    // as it won't be used
+    // only the top level config objects keep hold of the invisible fields info
     if (isTopLevel) {
       objShape[INVISIBLE_CUSTOM_FIELDS_FIELD] = yup
         .mixed()

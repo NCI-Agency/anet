@@ -306,7 +306,7 @@ const ArrayOfObjectsField = fieldProps => {
               className="pull-right"
               onClick={() => addObject(objDefault, arrayHelpers)}
               bsStyle="primary"
-              id="addObjectButton"
+              id={`add-${name}`}
             >
               {addButtonLabel}
             </Button>
