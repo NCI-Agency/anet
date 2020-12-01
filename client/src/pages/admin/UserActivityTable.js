@@ -1,6 +1,9 @@
+import LinkTo from "components/LinkTo"
+import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { Alert, Table } from "react-bootstrap"
+import Settings from "settings"
 import "./UserActivityTable.css"
 
 const UserActivityTable = ({ text, values }) => {
@@ -37,8 +40,14 @@ const UserActivityTable = ({ text, values }) => {
             return (
               <tr key={ua.listKey}>
                 <td>{idx + 1}</td>
-                <td className="nobr">{ua.time}</td>
-                <td className="nobr">{ua.user}</td>
+                <td className="nobr">
+                  {moment(ua.time).format(
+                    Settings.dateFormats.forms.displayShort.withTime
+                  )}
+                </td>
+                <td className="nobr">
+                  <LinkTo modelType="Person" model={ua.user} />
+                </td>
                 <td>{ua.ip}</td>
                 <td>{ua.request}</td>
               </tr>
