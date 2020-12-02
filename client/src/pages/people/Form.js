@@ -20,6 +20,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -473,7 +474,11 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 <FastField
                   name="biography"
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("biography", value)}
+                  onChange={value => {
+                    if (!_isEqual(value, values.biography)) {
+                      setFieldValue("biography", value)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="biography"
