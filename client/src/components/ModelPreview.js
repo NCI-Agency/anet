@@ -1,3 +1,4 @@
+import LocationPreview from "components/previews/LocationPreview"
 import PersonPreview from "components/previews/PersonPreview"
 import ReportPreview from "components/previews/ReportPreview"
 import * as Models from "models"
@@ -7,7 +8,7 @@ import "./ModelPreview.css"
 
 const MODEL_TO_COMPONENT = {
   [Models.AuthorizationGroup]: ReportPreview,
-  [Models.Location]: ReportPreview,
+  [Models.Location]: LocationPreview,
   [Models.Organization]: ReportPreview,
   [Models.Person]: PersonPreview,
   [Models.Position]: ReportPreview,
