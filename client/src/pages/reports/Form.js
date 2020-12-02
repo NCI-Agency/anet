@@ -1282,8 +1282,8 @@ const ReportForm = ({
 
   function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
     resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Report.pathForEdit(report))
