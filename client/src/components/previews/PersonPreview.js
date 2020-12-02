@@ -8,11 +8,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
-import {
-  mapPageDispatchersToProps,
-  PageDispatchersPropType,
-  useBoilerplate
-} from "components/Page"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -20,7 +15,6 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Col, ControlLabel, FormGroup, Grid, Row, Table } from "react-bootstrap"
-import { connect } from "react-redux"
 import Settings from "settings"
 import utils from "utils"
 
@@ -81,21 +75,15 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
+const PersonPreview = ({ className, uuid, previewId }) => {
   const { currentUser } = useContext(AppContext)
 
-  const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
+  const { data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    modelName: "User",
-    uuid,
-    pageDispatchers
-  })
-  if (done) {
-    return result
+
+  if (!data) {
+    return null
   }
   if (data) {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
@@ -142,6 +130,7 @@ const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
                     <Col md={6}>
                       <AvatarDisplayComponent
                         avatar={person.avatar}
+                        className="large-person-avatar"
                         height={256}
                         width={256}
                         style={{
@@ -157,7 +146,7 @@ const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
               <Fieldset title="Position">
                 <Fieldset
                   title="Current Position"
-                  id="current-position"
+                  id={`current-position-${previewId}`}
                   className={
                     !position || !position.uuid ? "warning" : undefined
                   }
@@ -174,7 +163,10 @@ const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
                 )}
               </Fieldset>
 
-              <Fieldset title="Previous positions" id="previous-positions">
+              <Fieldset
+                title="Previous positions"
+                id={`previous-positions-${previewId}`}
+              >
                 {(_isEmpty(person.previousPositions) && (
                   <em>No positions found</em>
                 )) || (
@@ -187,7 +179,10 @@ const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
                     </thead>
                     <tbody>
                       {person.previousPositions.map((pp, idx) => (
-                        <tr key={idx} id={`previousPosition_${idx}`}>
+                        <tr
+                          key={idx}
+                          id={`previousPosition_${idx}-${previewId}`}
+                        >
                           <td>
                             <LinkToNotPreviewed
                               modelType="Position"
@@ -378,9 +373,8 @@ const PersonPreview = ({ pageDispatchers, className, uuid, previewId }) => {
 }
 
 PersonPreview.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
   className: PropTypes.string,
   previewId: PropTypes.string,
   uuid: PropTypes.string
 }
-export default connect(null, mapPageDispatchersToProps)(PersonPreview)
+export default PersonPreview

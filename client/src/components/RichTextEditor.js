@@ -74,7 +74,7 @@ const ENTITY_CONTROL = {
     ],
     // React component providing the UI to manage entities of this type.
     source: LinkSourceAnet,
-    // React component to display inline entities.
+    // React component to display inline entities. FIXME: temporary fix, we should eventually have linkToComp prop
     decorator: props => <LinkAnet {...props} linkToComp={LinkToNotPreviewed} />,
     // React component to display block-level entities.
     block: PropTypes.func,

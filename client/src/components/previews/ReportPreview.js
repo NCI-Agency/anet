@@ -1,14 +1,8 @@
-import { setSearchQuery } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
-import {
-  mapPageDispatchersToProps,
-  PageDispatchersPropType,
-  useBoilerplate
-} from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import Tag from "components/Tag"
 import { Field, Form, Formik } from "formik"
@@ -17,7 +11,6 @@ import moment from "moment"
 import { CompactReadonlyReportPeople } from "pages/reports/ReportPeople"
 import PropTypes from "prop-types"
 import React from "react"
-import { connect } from "react-redux"
 import Settings from "settings"
 import utils from "utils"
 
@@ -82,19 +75,13 @@ const GQL_GET_REPORT = gql`
   }
 `
 
-const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
-  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
+const ReportPreview = ({ className, uuid, previewId }) => {
+  const { data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    modelName: "Report",
-    uuid,
-    pageDispatchers
-  })
-  if (done) {
-    return result
+
+  if (!data) {
+    return null
   }
 
   let report
@@ -174,7 +161,10 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
                   label="Summary"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <div id="intent" className="form-control-static">
+                    <div
+                      id={`${previewId}-intent`}
+                      className="form-control-static"
+                    >
                       <p>
                         <strong>{Settings.fields.report.intent}:</strong>{" "}
                         {report.intent}
@@ -329,18 +319,9 @@ const ReportPreview = ({ pageDispatchers, className, uuid, previewId }) => {
 }
 
 ReportPreview.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
   className: PropTypes.string,
   previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
-  return {
-    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
-    ...pageDispatchers
-  }
-}
-
-export default connect(null, mapDispatchToProps)(ReportPreview)
+export default ReportPreview

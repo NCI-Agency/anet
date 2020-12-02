@@ -14,6 +14,7 @@
 .linkto-model-preview-portal .model-preview fieldset{
   margin-bottom: 1rem;
   padding: 0.5rem;
+  border-radius: 4px;
 }
 
 /* get rid of the large screen bootstrap ratio */
@@ -24,7 +25,7 @@
   width: 67%;
 }
  /* center the avatar */
-.linkto-model-preview-portal .model-preview .avatar-display{
+.linkto-model-preview-portal .model-preview .large-person-avatar{
   display: block;
   margin: auto;
 }
