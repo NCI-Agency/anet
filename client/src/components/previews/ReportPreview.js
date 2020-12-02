@@ -85,19 +85,16 @@ const ReportPreview = ({ className, uuid, previewId }) => {
   }
 
   let report
-  if (!data) {
-    report = new Report()
-  } else {
-    data.report.cancelled = !!data.report.cancelledReason
-    data.report.reportTags = (data.report.tags || []).map(tag => ({
-      id: tag.uuid.toString(),
-      text: tag.name
-    }))
-    data.report.tasks = Task.fromArray(data.report.tasks)
-    data.report.reportPeople = Person.fromArray(data.report.reportPeople)
-    data.report.to = ""
-    report = new Report(data.report)
-  }
+
+  data.report.cancelled = !!data.report.cancelledReason
+  data.report.reportTags = (data.report.tags || []).map(tag => ({
+    id: tag.uuid.toString(),
+    text: tag.name
+  }))
+  data.report.tasks = Task.fromArray(data.report.tasks)
+  data.report.reportPeople = Person.fromArray(data.report.reportPeople)
+  data.report.to = ""
+  report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
 
   // Get initial tasks/people instant assessments values

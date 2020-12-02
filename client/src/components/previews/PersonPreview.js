@@ -85,12 +85,11 @@ const PersonPreview = ({ className, uuid, previewId }) => {
   if (!data) {
     return null
   }
-  if (data) {
-    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
-      data.person.customFields
-    )
-  }
-  const person = new Person(data ? data.person : {})
+  data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+    data.person.customFields
+  )
+
+  const person = new Person(data.person ? data.person : {})
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
