@@ -16,6 +16,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -23,9 +24,9 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
@@ -255,6 +256,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         <PositionTable
                           positions={values.responsiblePositions}
                           showDelete
+                          linkToComp={LinkTo}
                         />
                       }
                       overlayColumns={[

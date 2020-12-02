@@ -3,6 +3,7 @@ import OrganizationPreview from "components/previews/OrganizationPreview"
 import PersonPreview from "components/previews/PersonPreview"
 import PositionPreview from "components/previews/PositionPreview"
 import ReportPreview from "components/previews/ReportPreview"
+import TaskPreview from "components/previews/TaskPreview"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -15,7 +16,7 @@ const MODEL_TO_COMPONENT = {
   [Models.Person]: PersonPreview,
   [Models.Position]: PositionPreview,
   [Models.Report]: ReportPreview,
-  [Models.Task]: ReportPreview
+  [Models.Task]: TaskPreview
 }
 
 const ModelPreview = ({ modelClass, ...props }) => {

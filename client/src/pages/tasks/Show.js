@@ -340,7 +340,10 @@ const TaskShow = ({ pageDispatchers }) => {
             />
 
             <Fieldset title="Responsible positions">
-              <PositionTable positions={task.responsiblePositions} />
+              <PositionTable
+                positions={task.responsiblePositions}
+                linkToComp={LinkTo}
+              />
             </Fieldset>
 
             <Approvals

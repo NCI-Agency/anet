@@ -1,6 +1,7 @@
 import { DEFAULT_PAGE_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -24,13 +25,19 @@ const MyCounterparts = ({ pageDispatchers }) => {
   return (
     <div>
       <Fieldset id="my-counterparts" title="My Counterparts">
-        <PositionTable positions={currentUser.position.associatedPositions} />
+        <PositionTable
+          positions={currentUser.position.associatedPositions}
+          linkToComp={LinkTo}
+        />
       </Fieldset>
       <Fieldset
         id="my-counterparts-with-pending-assessments"
         title="My Counterparts that have pending assessments"
       >
-        <PositionTable positions={myCounterpartsWithPendingAssessments} />
+        <PositionTable
+          positions={myCounterpartsWithPendingAssessments}
+          linkToComp={LinkTo}
+        />
       </Fieldset>
     </div>
   )

@@ -1,6 +1,5 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -57,6 +56,7 @@ const PositionTable = props => {
 
 PositionTable.propTypes = {
   // query variables for positions, when query & pagination wanted:
+  linkToComp: PropTypes.func.isRequired,
   queryParams: PropTypes.object
 }
 
@@ -111,7 +111,8 @@ const BasePositionTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage
+  goToPage,
+  linkToComp: LinkToComp
 }) => {
   if (_get(positions, "length", 0) === 0) {
     return <em>No positions found</em>
@@ -153,16 +154,16 @@ const BasePositionTable = ({
               return (
                 <tr key={pos.uuid}>
                   <td>
-                    <LinkTo
+                    <LinkToComp
                       modelType="Position"
                       model={pos}
                       previewId="pos-table"
                     >
                       {nameComponents.join(" - ")}
-                    </LinkTo>
+                    </LinkToComp>
                   </td>
                   <td>
-                    <LinkTo
+                    <LinkToComp
                       modelType="Location"
                       model={pos.location}
                       previewId="pos-table-loc"
@@ -170,7 +171,7 @@ const BasePositionTable = ({
                   </td>
                   <td>
                     {pos.organization && (
-                      <LinkTo
+                      <LinkToComp
                         modelType="Organization"
                         model={pos.organization}
                         previewId="pos-table-org"
@@ -179,7 +180,7 @@ const BasePositionTable = ({
                   </td>
                   <td>
                     {pos.person && (
-                      <LinkTo
+                      <LinkToComp
                         modelType="Person"
                         model={pos.person}
                         previewId="pos-table-person"
@@ -212,6 +213,7 @@ BasePositionTable.propTypes = {
   onDelete: PropTypes.func,
   // list of positions:
   positions: PropTypes.array.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   // fill these when pagination wanted:
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,

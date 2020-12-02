@@ -471,6 +471,7 @@ const Positions = ({
       totalCount={totalCount}
       goToPage={setPage}
       id="positions-search-results"
+      linkToComp={LinkTo}
     />
   )
 
