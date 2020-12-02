@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.cache.Cache;
@@ -105,10 +106,10 @@ public class AdminResource {
    * Returns user logs in descending order of time
    */
   @GraphQLQuery(name = "userActivities")
-  public HashMap<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
+  public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    final HashMap<String, LinkedHashSet<Map<String, String>>> recentCalls = new HashMap<>();
+    final Map<String, Set<Map<String, Object>>> recentCalls = new HashMap<>();
     final Cache<String, Person> domainUsersCache =
         AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
 
@@ -123,15 +124,16 @@ public class AdminResource {
     if (recentCalls.size() == 0)
       return new HashMap<>();
 
-    final HashMap<String, Object> allActivities = new HashMap<>();
-    final HashMap<String, LinkedHashSet<Map<String, String>>> recentActivities =
-        new HashMap<String, LinkedHashSet<Map<String, String>>>() {
+    final Map<String, Object> allActivities = new HashMap<>();
+    @SuppressWarnings("serial")
+    final Map<String, Set<Map<String, Object>>> recentActivities =
+        new HashMap<String, Set<Map<String, Object>>>() {
           {
             // Sort recentCalls by time in descending order
             put("recentCalls", recentCalls.values().stream().map(s -> {
-              final ArrayList<Map<String, String>> activities = new ArrayList<>(s);
+              final List<Map<String, Object>> activities = new ArrayList<>(s);
               return activities.stream()
-                  .sorted((o1, o2) -> o2.get("time").compareTo(o1.get("time")))
+                  .sorted((o1, o2) -> ((Long) o2.get("time")).compareTo((Long) o1.get("time")))
                   .collect(Collectors.toCollection(LinkedHashSet::new));
             }).collect(
                 Collectors.toMap(k -> k.iterator().next().get("activity"), Function.identity()))
@@ -141,9 +143,9 @@ public class AdminResource {
     allActivities.put("recentCalls", recentActivities.get("recentCalls"));
 
     // Sort recentActivities grouping by user
-    final LinkedHashMap<String, List<Map<String, String>>> recentUsers = recentActivities
-        .get("recentCalls").stream().collect(Collectors.groupingBy(item -> item.get("user"),
-            LinkedHashMap::new, Collectors.mapping(Function.identity(), Collectors.toList())));
+    final Map<Object, List<Map<String, Object>>> recentUsers = recentActivities.get("recentCalls")
+        .stream().collect(Collectors.groupingBy(item -> item.get("user"), LinkedHashMap::new,
+            Collectors.mapping(Function.identity(), Collectors.toList())));
 
     // Put sorted users to the list
     allActivities.put("users", recentUsers);
