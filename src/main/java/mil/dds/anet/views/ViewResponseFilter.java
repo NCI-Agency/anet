@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HttpMethod;
@@ -19,6 +21,7 @@ import javax.ws.rs.core.SecurityContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.utils.DaoUtils;
 import org.eclipse.jetty.security.DefaultUserIdentity;
 import org.eclipse.jetty.security.UserAuthentication;
 import org.eclipse.jetty.server.Request;
@@ -69,21 +72,21 @@ public class ViewResponseFilter implements ContainerResponseFilter {
         // Store user activities in Person bean
         if (requestContext.getSecurityContext().getUserPrincipal() instanceof Person) {
           final Person person = (Person) requestContext.getSecurityContext().getUserPrincipal();
-          AnetObjectEngine.getInstance().getPersonDao().logActivitiesByDomainUsername(
-              person.getDomainUsername(), new HashMap<String, String>() {
-                {
-                  put("ip", request.getRemoteAddr() == null ? "-" : request.getRemoteAddr());
-                  put("user",
-                      person.getDomainUsername() != null ? person.getDomainUsername() : "-");
-                  put("request",
-                      requestContext.getHeaderString("referer") != null
-                          ? requestContext.getHeaderString("referer")
-                          : "-");
-                  put("time", LocalDateTime.now()
-                      .format((DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
-                  put("activity", "activity");
-                }
-              });
+          @SuppressWarnings("serial")
+          final HashMap<String, Object> activity = new HashMap<String, Object>() {
+            {
+              put("ip", request.getRemoteAddr() == null ? "-" : request.getRemoteAddr());
+              put("user", copyMinimalPerson(person));
+              put("request",
+                  requestContext.getHeaderString("referer") != null
+                      ? requestContext.getHeaderString("referer")
+                      : "-");
+              put("time", getCurrentMinute()); // log only one request per minute
+              put("activity", "activity");
+            }
+          };
+          AnetObjectEngine.getInstance().getPersonDao()
+              .logActivitiesByDomainUsername(person.getDomainUsername(), activity);
         }
       }
     } else {
@@ -92,4 +95,19 @@ public class ViewResponseFilter implements ContainerResponseFilter {
     }
   }
 
+  // Copy a minimal number of fields from a Person, enough for a LinkTo
+  private Map<String, String> copyMinimalPerson(Person person) {
+    final Map<String, String> result = new HashMap<>();
+    result.put("uuid", person.getUuid());
+    result.put("rank", person.getRank());
+    result.put("name", person.getName());
+    result.put("domainUsername", person.getDomainUsername());
+    return result;
+  }
+
+  private Long getCurrentMinute() {
+    final ZonedDateTime now = Instant.now().atZone(DaoUtils.getDefaultZoneId());
+    final ZonedDateTime bom = now.truncatedTo(ChronoUnit.MINUTES);
+    return bom.toInstant().toEpochMilli();
+  }
 }

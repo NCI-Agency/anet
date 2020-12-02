@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,7 +60,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
   private static final String DOMAIN_USERS_CACHE = "domainUsersCache";
-  private static final int ACTIVITY_LOG_LIMIT = 100;
+  private static final int ACTIVITY_LOG_LIMIT = 10;
 
   private Cache<String, Person> domainUsersCache;
 
@@ -218,14 +219,14 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return people;
   }
 
-  public void logActivitiesByDomainUsername(String domainUsername, Map<String, String> activity) {
+  public void logActivitiesByDomainUsername(String domainUsername, Map<String, Object> activity) {
     final Person person = domainUsersCache.get(domainUsername);
     if (person != null) {
-      final List<Map<String, String>> activities = person.getUserActivities();
-      if (activities.size() >= ACTIVITY_LOG_LIMIT) {
-        activities.clear();
+      final LinkedList<Map<String, Object>> activities = person.getUserActivities();
+      while (activities.size() >= ACTIVITY_LOG_LIMIT) {
+        activities.removeLast();
       }
-      activities.add(activity);
+      activities.addFirst(activity);
       person.setUserActivities(activities);
       domainUsersCache.replace(domainUsername, person);
     }
