@@ -4,7 +4,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import PositionTable from "components/PositionTable"
-import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
@@ -39,7 +38,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const AuthorizationGroupShow = ({ className, uuid, previewId }) => {
+const AuthorizationGroupPreview = ({ className, uuid, previewId }) => {
   const { data } = API.useApiQuery(GQL_GET_AUTHORIZATION_GROUP, { uuid })
 
   if (!data) {
@@ -55,16 +54,6 @@ const AuthorizationGroupShow = ({ className, uuid, previewId }) => {
       {() => {
         return (
           <div className={className}>
-            <RelatedObjectNotes
-              notes={authorizationGroup.notes}
-              relatedObject={
-                authorizationGroup.uuid && {
-                  relatedObjectType: AuthorizationGroup.relatedObjectType,
-                  relatedObjectUuid: authorizationGroup.uuid,
-                  relatedObject: authorizationGroup
-                }
-              }
-            />
             <Form className="form-horizontal" method="post">
               <Fieldset
                 title={`Authorization Group ${authorizationGroup.name}`}
@@ -96,10 +85,10 @@ const AuthorizationGroupShow = ({ className, uuid, previewId }) => {
   )
 }
 
-AuthorizationGroupShow.propTypes = {
+AuthorizationGroupPreview.propTypes = {
   className: PropTypes.string,
   previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 
-export default AuthorizationGroupShow
+export default AuthorizationGroupPreview

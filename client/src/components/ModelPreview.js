@@ -1,3 +1,4 @@
+import AuthorizationGroupPreview from "components/previews/AuthorizationGroupPreview"
 import LocationPreview from "components/previews/LocationPreview"
 import OrganizationPreview from "components/previews/OrganizationPreview"
 import PersonPreview from "components/previews/PersonPreview"
@@ -10,7 +11,7 @@ import React from "react"
 import "./ModelPreview.css"
 
 const MODEL_TO_COMPONENT = {
-  [Models.AuthorizationGroup]: ReportPreview,
+  [Models.AuthorizationGroup]: AuthorizationGroupPreview,
   [Models.Location]: LocationPreview,
   [Models.Organization]: OrganizationPreview,
   [Models.Person]: PersonPreview,
@@ -18,6 +19,13 @@ const MODEL_TO_COMPONENT = {
   [Models.Report]: ReportPreview,
   [Models.Task]: TaskPreview
 }
+
+Object.entries(MODEL_TO_COMPONENT).forEach(([model, preview]) => {
+  console.dir("model")
+  console.dir(model)
+  console.dir("preview")
+  console.dir(preview)
+})
 
 const ModelPreview = ({ modelClass, ...props }) => {
   const ModelComp = MODEL_TO_COMPONENT[modelClass]
