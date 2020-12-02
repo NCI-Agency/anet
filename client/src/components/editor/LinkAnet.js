@@ -31,10 +31,6 @@ const LinkAnet = ({
     url || (contentState && contentState.getEntity(entityKey).getData().url)
 
   const isAnetEntityLink = getEntityInfoFromUrl(urlLink)
-  console.log("urlLink")
-  console.log(urlLink)
-  console.log("isAnetEntityLink")
-  console.log(isAnetEntityLink)
   if (isAnetEntityLink) {
     return (
       <LinkAnetEntity

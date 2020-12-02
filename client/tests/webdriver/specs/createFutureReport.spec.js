@@ -100,15 +100,17 @@ describe("Create report form page", () => {
       CreateFutureReport.attendeesFieldLabel.waitForExist()
       CreateFutureReport.attendeesFieldLabel.waitForDisplayed()
 
+      CreateFutureReport.engagementDate.click()
+      CreateFutureReport.datePicker.waitForExist()
+      CreateFutureReport.datePicker.waitForDisplayed()
       // Set engagement date to today
-      CreateFutureReport.engagementDate.setValue(
-        moment().format(ENGAGEMENT_DATE_FORMAT)
-      )
+      CreateFutureReport.todayButton.click()
       // Click outside the overlay
       CreateFutureReport.engagementInformationTitle.click()
 
       /* eslint-disable no-unused-expressions */
       // Attendee assessments should be shown in the form
+
       expect(CreateFutureReport.attendeesAssessments.isExisting()).to.be.true
       expect(
         CreateFutureReport.getAttendeeAssessment(PRINCIPAL_VALUE).isExisting()

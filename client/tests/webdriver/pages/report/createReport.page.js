@@ -51,7 +51,7 @@ class CreateReport extends Page {
 
   getPersonByName(name) {
     const personRow = browser.$$(
-      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and ./a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
+      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
     )
     personRow[0].$("div.bp3-spinner").waitForExist({ reverse: true })
 

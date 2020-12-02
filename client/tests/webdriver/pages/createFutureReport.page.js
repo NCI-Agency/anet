@@ -10,6 +10,14 @@ class CreateFutureReport extends CreateReport {
     return browser.$('input[id="engagementDate"]')
   }
 
+  get datePicker() {
+    return browser.$('div[class="bp3-datepicker"]')
+  }
+
+  get todayButton() {
+    return this.datePicker.$('//span[text()="Today"]')
+  }
+
   get attendeesFieldFormGroup() {
     return browser.$(`div[id="fg-${attId}"]`)
   }
@@ -43,7 +51,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   getAttendeeAssessment(name) {
-    return this.attendeesAssessments.$(`//td/a[text()="${name}"]`)
+    return this.attendeesAssessments.$(`//a[text()="${name}"]`)
   }
 
   get tasksFieldFormGroup() {
@@ -77,7 +85,7 @@ class CreateFutureReport extends CreateReport {
   }
 
   getTaskAssessment(shortName) {
-    return this.tasksAssessments.$(`//td/a[text()="${shortName}"]`)
+    return this.tasksAssessments.$(`//a[text()="${shortName}"]`)
   }
 
   get deleteButton() {
