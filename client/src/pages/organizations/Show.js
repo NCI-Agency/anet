@@ -382,7 +382,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              <OrganizationLaydown organization={organization} />
+              <OrganizationLaydown
+                organization={organization}
+                linkToComp={LinkTo}
+              />
               {!isPrincipalOrg && <Approvals relatedObject={organization} />}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
@@ -392,6 +395,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}
+                  linkToComp={LinkTo}
                 />
               )}
 

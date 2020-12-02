@@ -34,11 +34,11 @@ const LocationShow = ({ className, uuid, previewId }) => {
     return null
   }
 
-  const location = new Location(data ? data.location : {})
+  const location = new Location(data.location ? data.location : {})
 
   return (
     <Formik enableReinitialize initialValues={location}>
-      {({ values }) => {
+      {() => {
         const marker = {
           id: location.uuid || 0,
           name: _escape(location.name) || "" // escape HTML in location name!
