@@ -139,7 +139,6 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                         <LinkToNotPreviewed
                           modelType="Organization"
                           model={organization.parentOrg}
-                          previewId="org-show-parents"
                         >
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
@@ -163,14 +162,12 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                               <LinkToNotPreviewed
                                 modelType="Person"
                                 model={position.person}
-                                previewId="org-show-person"
                               />
                             ) : (
                               <i>
                                 <LinkToNotPreviewed
                                   modelType="Position"
                                   model={position}
-                                  previewId="org-show-pos"
                                 />
                                 - (Unfilled)
                               </i>
@@ -200,7 +197,6 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                               <LinkToNotPreviewed
                                 modelType="Organization"
                                 model={organization}
-                                previewId="org-show-children-orgs"
                               >
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}

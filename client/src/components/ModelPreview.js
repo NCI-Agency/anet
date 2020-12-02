@@ -1,6 +1,7 @@
 import LocationPreview from "components/previews/LocationPreview"
 import OrganizationPreview from "components/previews/OrganizationPreview"
 import PersonPreview from "components/previews/PersonPreview"
+import PositionPreview from "components/previews/PositionPreview"
 import ReportPreview from "components/previews/ReportPreview"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -12,7 +13,7 @@ const MODEL_TO_COMPONENT = {
   [Models.Location]: LocationPreview,
   [Models.Organization]: OrganizationPreview,
   [Models.Person]: PersonPreview,
-  [Models.Position]: ReportPreview,
+  [Models.Position]: PositionPreview,
   [Models.Report]: ReportPreview,
   [Models.Task]: ReportPreview
 }
