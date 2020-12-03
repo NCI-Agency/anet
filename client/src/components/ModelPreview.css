@@ -1,0 +1,51 @@
+/*START general preview style START*/
+.model-preview {
+
+}
+
+/*END general preview style END*/
+
+/***********START linkTo triggered preview style START*/
+
+/* some popovers were exceeding the parent containers */
+.linkto-model-preview-portal .bp3-popover {
+  width: 100%;
+}
+.linkto-model-preview-portal .model-preview fieldset{
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+/* get rid of the large screen bootstrap ratio */
+.linkto-model-preview-portal .model-preview .form-group .col-sm-2{
+  width: 33%;
+}
+.linkto-model-preview-portal .model-preview .form-group .col-sm-7{
+  width: 67%;
+}
+ /* center the avatar */
+.linkto-model-preview-portal .model-preview .large-person-avatar{
+  display: block;
+  margin: auto;
+}
+
+/* remove action buttons from previews */
+.linkto-model-preview-portal .model-preview .action-small {
+  display: none;
+}
+
+/* make row flex containers column */
+.linkto-model-preview-portal .model-preview .row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.linkto-model-preview-portal .model-preview .row > *{
+  width: 100%;
+}
+
+
+/*********END linkTo triggered preview style END*/
