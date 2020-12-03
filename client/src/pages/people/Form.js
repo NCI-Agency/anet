@@ -113,10 +113,8 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
@@ -500,8 +498,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       setFieldTouched,
                       setFieldValue,
                       values,
-                      validateForm,
-                      errors
+                      validateForm
                     }}
                   />
                 </Fieldset>

@@ -300,7 +300,6 @@ const ReportForm = ({
         validateField,
         validateForm,
         touched,
-        errors,
         resetForm,
         setSubmitting
       }) => {
@@ -833,8 +832,7 @@ const ReportForm = ({
                       setFieldTouched,
                       setFieldValue,
                       values,
-                      validateForm,
-                      errors
+                      validateForm
                     }}
                   />
                 </Fieldset>

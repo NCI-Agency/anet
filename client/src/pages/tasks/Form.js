@@ -415,8 +415,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                       setFieldTouched,
                       setFieldValue,
                       values,
-                      validateForm,
-                      errors
+                      validateForm
                     }}
                   />
                 </Fieldset>

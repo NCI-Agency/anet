@@ -77,7 +77,7 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should not persist previous invalid data when toggling field's visibility", () => {
+    it("Should persist previous invalid data when toggling field's visibility", () => {
       CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
       CreateReport.numberTrainedHelpText.waitForExist()
       // Actually see the validation warning
@@ -94,10 +94,9 @@ describe("When working with custom fields for different anet objects", () => {
       trainButton.click()
       CreateReport.numberTrainedFormGroup.waitForExist()
 
-      expect(CreateReport.numberTrainedField.getValue()).not.be.equal(
+      expect(CreateReport.numberTrainedField.getValue()).to.equal(
         INVALID_NUMBER_INPUT
       )
-      expect(CreateReport.numberTrainedField.getValue()).to.be.equal("")
     })
 
     it("Should validate visible field", () => {
@@ -224,7 +223,7 @@ describe("When working with custom fields for different anet objects", () => {
       )
     })
 
-    it("Should not persist previous invalid data when toggling field's visibility", () => {
+    it("Should persist previous invalid data when toggling field's visibility", () => {
       CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
       // Actually see the validation warning
       CreatePerson.numberCustomFieldHelpText.waitForExist()
@@ -235,10 +234,9 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.greenButton.click()
       CreatePerson.numberCustomFieldContainer.waitForExist()
 
-      expect(CreatePerson.numberCustomField.getValue()).not.be.equal(
+      expect(CreatePerson.numberCustomField.getValue()).to.equal(
         INVALID_NUMBER_INPUT
       )
-      expect(CreatePerson.numberCustomField.getValue()).to.equal("")
     })
 
     it("Should validate visible field", () => {

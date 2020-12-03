@@ -675,18 +675,10 @@ export function getInvisibleFields(
   return curInvisibleFields
 }
 
-function resetInvalidInvisibleFields(invisibleFields, setFieldValue, errors) {
-  invisibleFields?.forEach(fieldName => {
-    if (_get(errors, fieldName)) {
-      setFieldValue(fieldName, null)
-    }
-  })
-}
-
 export const CustomFieldsContainer = props => {
   const {
     parentFieldName,
-    formikProps: { values, errors, setFieldValue },
+    formikProps: { values, setFieldValue },
     fieldsConfig
   } = props
 
@@ -698,10 +690,9 @@ export const CustomFieldsContainer = props => {
   const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
     if (!_isEqual(_get(values, invisibleFieldsFieldName), invisibleFields)) {
-      resetInvalidInvisibleFields(invisibleFields, setFieldValue, errors)
       setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
     }
-  }, [invisibleFields, values, invisibleFieldsFieldName, setFieldValue, errors])
+  }, [invisibleFields, values, invisibleFieldsFieldName, setFieldValue])
 
   return (
     <>
