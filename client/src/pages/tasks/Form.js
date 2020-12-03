@@ -16,6 +16,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -255,6 +256,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         <PositionTable
                           positions={values.responsiblePositions}
                           showDelete
+                          linkToComp={LinkTo}
                         />
                       }
                       overlayColumns={[

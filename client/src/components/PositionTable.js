@@ -1,6 +1,5 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -57,7 +56,8 @@ const PositionTable = props => {
 
 PositionTable.propTypes = {
   // query variables for positions, when query & pagination wanted:
-  queryParams: PropTypes.object
+  queryParams: PropTypes.object,
+  linkToComp: PropTypes.func.isRequired
 }
 
 const PaginatedPositions = ({
@@ -111,7 +111,8 @@ const BasePositionTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage
+  goToPage,
+  linkToComp: LinkToComp
 }) => {
   if (_get(positions, "length", 0) === 0) {
     return <em>No positions found</em>
@@ -153,16 +154,16 @@ const BasePositionTable = ({
               return (
                 <tr key={pos.uuid}>
                   <td>
-                    <LinkTo modelType="Position" model={pos}>
+                    <LinkToComp modelType="Position" model={pos}>
                       {nameComponents.join(" - ")}
-                    </LinkTo>
+                    </LinkToComp>
                   </td>
                   <td>
-                    <LinkTo modelType="Location" model={pos.location} />
+                    <LinkToComp modelType="Location" model={pos.location} />
                   </td>
                   <td>
                     {pos.organization && (
-                      <LinkTo
+                      <LinkToComp
                         modelType="Organization"
                         model={pos.organization}
                       />
@@ -170,7 +171,7 @@ const BasePositionTable = ({
                   </td>
                   <td>
                     {pos.person && (
-                      <LinkTo modelType="Person" model={pos.person} />
+                      <LinkToComp modelType="Person" model={pos.person} />
                     )}
                   </td>
                   <td>{utils.sentenceCase(pos.status)}</td>
@@ -203,7 +204,8 @@ BasePositionTable.propTypes = {
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
-  goToPage: PropTypes.func
+  goToPage: PropTypes.func,
+  linkToComp: PropTypes.func.isRequired
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionTable)
