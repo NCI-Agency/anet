@@ -1,5 +1,6 @@
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
+import ModelTooltip from "components/ModelTooltip"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -12,6 +13,7 @@ const LinkTo = ({
   edit,
   button,
   showIcon,
+  previewId,
   showAvatar,
   isLink,
   whenUnspecified,
@@ -84,13 +86,23 @@ const LinkTo = ({
 
   const LinkToComponent = componentClass
   return (
-    <LinkToComponent to={to} style={style} {...componentProps}>
-      <>
-        {iconComponent}
-        {avatarComponent}
-        {children || modelInstance.toString()}
-      </>
-    </LinkToComponent>
+    <ModelTooltip
+      modelClass={ModelClass}
+      uuid={modelInstance.uuid}
+      previewId={previewId}
+      popoverClassName="bp3-dark"
+      hoverCloseDelay={51500}
+      portalClassName="linkto-model-preview-portal"
+      isEdit={edit}
+    >
+      <LinkToComponent to={to} style={style} {...componentProps}>
+        <>
+          {iconComponent}
+          {avatarComponent}
+          {children || modelInstance.toString()}
+        </>
+      </LinkToComponent>
+    </ModelTooltip>
   )
 }
 
@@ -107,6 +119,7 @@ LinkTo.propTypes = {
   showAvatar: PropTypes.bool,
   isLink: PropTypes.bool,
   edit: PropTypes.bool,
+  previewId: PropTypes.string, // needed for previewing same pages multiple times
 
   // Configures this link to look like a button. Set it to true to make it a button,
   // or pass a string to set a button type
@@ -125,6 +138,7 @@ LinkTo.defaultProps = {
   showAvatar: true,
   isLink: true,
   edit: false,
+  previewId: null,
   button: false,
   whenUnspecified: "Unspecified",
   modelType: null,
