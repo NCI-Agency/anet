@@ -1,7 +1,6 @@
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
-import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -11,7 +10,7 @@ import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 import Settings from "settings"
 
-const OrganizationLaydown = ({ organization }) => {
+const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
@@ -61,7 +60,7 @@ const OrganizationLaydown = ({ organization }) => {
         action={
           <div>
             {isSuperUser && (
-              <LinkTo
+              <LinkToComp
                 modelType="Position"
                 model={Position.pathForNew({
                   organizationUuid: organization.uuid
@@ -69,7 +68,7 @@ const OrganizationLaydown = ({ organization }) => {
                 button
               >
                 Create position
-              </LinkTo>
+              </LinkToComp>
             )}
           </div>
         }
@@ -150,17 +149,17 @@ const OrganizationLaydown = ({ organization }) => {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkTo modelType="Position" model={other}>
+          <LinkToComp modelType="Position" model={other}>
             {positionWithStatus(other)}
-          </LinkTo>
+          </LinkToComp>
         </td>
       )
 
       otherPersonCol = other.person ? (
         <td>
-          <LinkTo modelType="Person" model={other.person}>
+          <LinkToComp modelType="Person" model={other.person}>
             {personWithStatus(other.person)}
-          </LinkTo>
+          </LinkToComp>
         </td>
       ) : (
         <td className="text-danger">Unfilled</td>
@@ -170,17 +169,17 @@ const OrganizationLaydown = ({ organization }) => {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkTo modelType="Position" model={position}>
+          <LinkToComp modelType="Position" model={position}>
             {positionWithStatus(position)}
-          </LinkTo>
+          </LinkToComp>
         </td>
       )
       positionPersonCol =
         position.person && position.person.uuid ? (
           <td>
-            <LinkTo modelType="Person" model={position.person}>
+            <LinkToComp modelType="Person" model={position.person}>
               {personWithStatus(position.person)}
-            </LinkTo>
+            </LinkToComp>
           </td>
         ) : (
           <td className="text-danger">Unfilled</td>
@@ -226,7 +225,8 @@ const OrganizationLaydown = ({ organization }) => {
 }
 
 OrganizationLaydown.propTypes = {
-  organization: PropTypes.instanceOf(Organization).isRequired
+  organization: PropTypes.instanceOf(Organization).isRequired,
+  linkToComp: PropTypes.func.isRequired
 }
 
 export default OrganizationLaydown

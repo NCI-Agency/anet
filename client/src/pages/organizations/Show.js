@@ -381,7 +381,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              <OrganizationLaydown organization={organization} />
+              <OrganizationLaydown
+                organization={organization}
+                linkToComp={LinkTo}
+              />
               {!isPrincipalOrg && <Approvals relatedObject={organization} />}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
