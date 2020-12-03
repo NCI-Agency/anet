@@ -90,7 +90,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
       final Integer nextWarning, final Instant now, final Instant lastRun,
       final List<String> ignoredDomainNames, final Integer warningIntervalInSecs) {
     if (person.getStatus() == Person.Status.INACTIVE
-        || Utils.isDomainUserNameIgnored(person.getDomainUsername(), ignoredDomainNames)) {
+        || Utils.isEmailIgnored(person.getEmailAddress(), ignoredDomainNames)) {
       // Skip inactive ANET users or users from ignored domains
       return;
     }

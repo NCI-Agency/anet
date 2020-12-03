@@ -387,7 +387,7 @@ public class Utils {
   public static boolean isEmailWhitelisted(final String email,
       final List<String> whitelistDomainNames) {
     try {
-      return isLogonDomainInList(email, whitelistDomainNames);
+      return isEmailDomainInList(email, whitelistDomainNames);
     } catch (IllegalArgumentException e) {
       logger.error("Failed to process email: {}", email);
       return false;
@@ -395,60 +395,44 @@ public class Utils {
   }
 
   /**
-   * Checks whether a domain user name is allowed according to a list of whitelisted domains.
+   * Checks whether an email address is ignored according to a list of ignored domains.
    * 
-   * More info: https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats
-   * 
-   * @param domainUserName The domain user name to check
-   * @param ignoredDomainNames The list of ignored domain user names (wildcards allowed)
-   * @return Whether the domain user name is ignored
+   * @param email The email address to check
+   * @param ignoredDomainNames The list of ignored domain names (wildcards allowed)
+   * @return Whether the email is ignored
    */
-  public static boolean isDomainUserNameIgnored(final String domainUserName,
-      final List<String> ignoredDomainNames) {
+  public static boolean isEmailIgnored(final String email, final List<String> ignoredDomainNames) {
     try {
-      return isLogonDomainInList(domainUserName, ignoredDomainNames);
+      return isEmailDomainInList(email, ignoredDomainNames);
     } catch (IllegalArgumentException e) {
-      logger.error("Failed to process domain user name: {}", domainUserName);
+      logger.error("Failed to process email: {}", email);
       return true;
     }
   }
 
-  private static boolean isLogonDomainInList(final String logon, final List<String> list)
+  private static boolean isEmailDomainInList(final String email, final List<String> list)
       throws IllegalArgumentException {
-
-    final String wildcard = "*";
-
-    // Separator for 'User Principal Name' format
-    final String upnSeparator = "@";
-
-    // Separator for 'Down-Level Logon Name' format
-    final String dlSeparator = "\\";
-
-    if (isEmptyOrNull(logon) || isEmptyOrNull(list)) {
+    if (isEmptyOrNull(email) || isEmptyOrNull(list)) {
       return false;
     }
 
-    // Logon has no domain
-    if (!logon.contains(upnSeparator) && !logon.contains(dlSeparator)) {
+    final String domainSeparator = "@";
+    if (!email.contains(domainSeparator)) {
+      // Email has no domain
       return false;
     }
 
-    // Find out the format
-    boolean isDownLevelFormat = logon.contains(dlSeparator);
-
-    final String[] splittedLogon =
-        logon.trim().split(isDownLevelFormat ? dlSeparator + "\\" : upnSeparator);
-
-    // A logon (domain user name or email) is expected to have two parts: username<separator>domain
-    if (splittedLogon.length != 2) {
-      throw new IllegalArgumentException("Malformed logon: " + logon);
+    final String[] splittedEmail = email.trim().split(domainSeparator);
+    if (splittedEmail.length != 2) {
+      // Email is expected to have two parts: username@domain
+      throw new IllegalArgumentException("Malformed email: " + email);
     }
 
-    // Find the domain name depending on the format
-    final String domainName =
-        (isDownLevelFormat ? splittedLogon[0] : splittedLogon[1]).toLowerCase();
+    // Find the domain name
+    final String domainName = splittedEmail[1].toLowerCase();
 
     // Compile a list of regex patterns we want to use to filter and then find any match
+    final String wildcard = "*";
     return list.stream().map(domain -> domainToRegexPattern(domain, wildcard))
         .anyMatch(domainPattern -> domainPattern.matcher(domainName).matches());
   }
