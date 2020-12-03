@@ -394,6 +394,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}
+                  linkToComp={LinkTo}
                 />
               )}
 

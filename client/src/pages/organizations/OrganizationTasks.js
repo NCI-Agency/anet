@@ -2,7 +2,6 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -33,7 +32,12 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
+const OrganizationTasks = ({
+  pageDispatchers,
+  queryParams,
+  organization,
+  linkToComp: LinkToComp
+}) => {
   const { currentUser } = useContext(AppContext)
   const [pageNum, setPageNum] = useState(0)
   const taskQuery = Object.assign({}, queryParams, { pageNum })
@@ -72,13 +76,13 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
       title={pluralize(taskShortLabel)}
       action={
         isAdminUser && (
-          <LinkTo
+          <LinkToComp
             modelType="Task"
             model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
           >
             Create {taskShortLabel}
-          </LinkTo>
+          </LinkToComp>
         )
       }
     >
@@ -102,9 +106,9 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo modelType="Task" model={task}>
+                  <LinkToComp modelType="Task" model={task}>
                     {task.shortName}
-                  </LinkTo>
+                  </LinkToComp>
                 </td>
                 <td>{task.longName}</td>
               </tr>
@@ -119,7 +123,8 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
 OrganizationTasks.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   organization: PropTypes.object.isRequired,
-  queryParams: PropTypes.object
+  queryParams: PropTypes.object,
+  linkToComp: PropTypes.func.isRequired
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationTasks)
