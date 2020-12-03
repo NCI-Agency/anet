@@ -48,10 +48,6 @@ class CreateTask extends Page {
     )
   }
 
-  get questionsFieldHelpText() {
-    return this.firstQuestionsFieldContainer.$(".help-block")
-  }
-
   get addAssessmentButton() {
     return browser.$('button[id="add-formCustomFields.assessments"]')
   }

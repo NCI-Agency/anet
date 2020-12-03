@@ -167,10 +167,7 @@ const ReportEdit = ({ pageDispatchers }) => {
         edit
         initialValues={reportInitialValues}
         title={`Report #${report.uuid}`}
-        showSensitiveInfo={
-          !!report.reportSensitiveInformation &&
-          !!report.reportSensitiveInformation.text
-        }
+        showSensitiveInfo={!!report.reportSensitiveInformation?.text}
       />
     </div>
   )
