@@ -1,5 +1,6 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
@@ -26,6 +27,7 @@ const GQL_GET_REPORT = gql`
       keyOutcomes
       nextSteps
       cancelledReason
+      reportText
       releasedAt
       state
       location {
@@ -307,6 +309,11 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   linkToComp={LinkToNotPreviewed}
                 />
               </Fieldset>
+              {report.reportText && (
+                <Fieldset title={Settings.fields.report.reportText}>
+                  {parseHtmlWithLinkTo(report.reportText, LinkToNotPreviewed)}
+                </Fieldset>
+              )}
             </Form>
           </div>
         )

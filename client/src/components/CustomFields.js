@@ -74,6 +74,7 @@ const ReadonlySpecialField = ({
   widget,
   values,
   isCompact,
+  linkToComp,
   ...otherFieldProps
 }) => {
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
@@ -83,7 +84,7 @@ const ReadonlySpecialField = ({
         name={name}
         isCompact={isCompact}
         component={FieldHelper.ReadonlyField}
-        humanValue={parseHtmlWithLinkTo(fieldValue)}
+        humanValue={parseHtmlWithLinkTo(fieldValue, linkToComp)}
         {...Object.without(otherFieldProps, "style")}
       />
     )
@@ -103,6 +104,7 @@ const ReadonlySpecialField = ({
 }
 ReadonlySpecialField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   widget: PropTypes.oneOf([
     SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
     SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
@@ -447,6 +449,7 @@ const AnetObjectField = ({
   types,
   formikProps,
   children,
+  linkToComp,
   ...otherFieldProps
 }) => {
   const { values, setFieldValue } = formikProps
@@ -476,7 +479,11 @@ const AnetObjectField = ({
           <tbody>
             <tr>
               <td>
-                <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
+                <LinkAnetEntity
+                  type={fieldValue.type}
+                  uuid={fieldValue.uuid}
+                  linkToComp={linkToComp}
+                />
               </td>
               <td className="col-xs-1">
                 <RemoveButton
@@ -494,12 +501,19 @@ const AnetObjectField = ({
 }
 AnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   types: PropTypes.arrayOf(PropTypes.string),
   formikProps: PropTypes.object,
   children: PropTypes.node
 }
 
-const ReadonlyAnetObjectField = ({ name, label, values, isCompact }) => {
+const ReadonlyAnetObjectField = ({
+  name,
+  label,
+  values,
+  isCompact,
+  linkToComp
+}) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
     <FastField
@@ -514,7 +528,11 @@ const ReadonlyAnetObjectField = ({ name, label, values, isCompact }) => {
             <tbody>
               <tr>
                 <td>
-                  <LinkAnetEntity type={type} uuid={uuid} />
+                  <LinkAnetEntity
+                    type={type}
+                    uuid={uuid}
+                    linkToComp={linkToComp}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -528,6 +546,7 @@ ReadonlyAnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   isCompact: PropTypes.bool
 }
 
@@ -536,6 +555,7 @@ const ArrayOfAnetObjectsField = ({
   types,
   formikProps,
   children,
+  linkToComp,
   ...otherFieldProps
 }) => {
   const { values, setFieldValue } = formikProps
@@ -572,7 +592,11 @@ const ArrayOfAnetObjectsField = ({
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
                 <td>
-                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  <LinkAnetEntity
+                    type={entity.type}
+                    uuid={entity.uuid}
+                    linkToComp={linkToComp}
+                  />
                 </td>
                 <td className="col-xs-1">
                   <RemoveButton
@@ -603,6 +627,7 @@ const ArrayOfAnetObjectsField = ({
 }
 ArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   types: PropTypes.arrayOf(PropTypes.string),
   formikProps: PropTypes.object,
   children: PropTypes.node
@@ -612,7 +637,8 @@ const ReadonlyArrayOfAnetObjectsField = ({
   name,
   label,
   values,
-  isCompact
+  isCompact,
+  linkToComp
 }) => {
   const fieldValue = Object.get(values, name) || []
   return (
@@ -628,7 +654,11 @@ const ReadonlyArrayOfAnetObjectsField = ({
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
                   <td>
-                    <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                    <LinkAnetEntity
+                      type={entity.type}
+                      uuid={entity.uuid}
+                      linkToComp={linkToComp}
+                    />
                   </td>
                 </tr>
               ))}
@@ -641,6 +671,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
 }
 ReadonlyArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   isCompact: PropTypes.bool

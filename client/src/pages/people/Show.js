@@ -274,7 +274,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography)}
+                  humanValue={parseHtmlWithLinkTo(person.biography, LinkTo)}
                 />
               </Fieldset>
 

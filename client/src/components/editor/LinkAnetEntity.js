@@ -1,10 +1,9 @@
-import LinkTo from "components/LinkTo"
 import { GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 
-const LinkAnetEntity = ({ type, uuid, children }) => {
+const LinkAnetEntity = ({ type, uuid, children, linkToComp: LinkToComp }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {
@@ -20,15 +19,16 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
   }, [type, uuid])
 
   return (
-    <LinkTo modelType={type} model={entity}>
+    <LinkToComp modelType={type} model={entity}>
       {children}
-    </LinkTo>
+    </LinkToComp>
   )
 }
 
 LinkAnetEntity.propTypes = {
   type: PropTypes.string.isRequired,
   uuid: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   children: PropTypes.any
 }
 
