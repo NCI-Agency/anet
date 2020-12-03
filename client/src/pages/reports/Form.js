@@ -917,6 +917,7 @@ const ReportForm = ({
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
                   onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
                     if (!_isEqual(values.reportText, value)) {
                       setFieldValue("reportText", value, true)
                     }
@@ -950,6 +951,7 @@ const ReportForm = ({
                         label="Report sensitive information text"
                         onChange={value => {
                           const safeVal = value || null
+                          // prevent initial unnecessary render of RichTextEditor
                           if (
                             !_isEqual(
                               values.reportSensitiveInformation.text,

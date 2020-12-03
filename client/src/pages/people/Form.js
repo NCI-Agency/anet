@@ -475,6 +475,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   name="biography"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
                     if (!_isEqual(value, values.biography)) {
                       setFieldValue("biography", value)
                     }
