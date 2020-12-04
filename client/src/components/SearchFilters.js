@@ -525,7 +525,7 @@ export const searchFilters = function() {
     filters: taskFilters()
   }
 
-  for (const [, filtersForType] of Object.entries(filters)) {
+  for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter
   }
 
@@ -646,8 +646,7 @@ export const deserializeQueryParams = (
     })
     const ALL_FILTERS = searchFilters()
     const filterDefs = ALL_FILTERS[objType].filters
-    Object.keys(filterDefs).map(filterKey => {
-      const filterDef = filterDefs[filterKey]
+    Object.entries(filterDefs).map(([filterKey, filterDef]) => {
       const deser = filterDef.deserializer(
         filterDef.props,
         queryParams,

@@ -10,9 +10,9 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -656,21 +656,18 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
-              {report.reportSensitiveInformation &&
-                report.reportSensitiveInformation.text && (
-                  <Fieldset title="Sensitive information">
-                    {parseHtmlWithLinkTo(
-                      report.reportSensitiveInformation.text
-                    )}
-                    {(hasAuthorizationGroups && (
-                      <div>
-                        <h5>Authorized groups:</h5>
-                        <AuthorizationGroupTable
-                          authorizationGroups={values.authorizationGroups}
-                        />
-                      </div>
-                    )) || <h5>No groups are authorized!</h5>}
-                  </Fieldset>
+              {report.reportSensitiveInformation?.text && (
+                <Fieldset title="Sensitive information">
+                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
+                  {(hasAuthorizationGroups && (
+                    <div>
+                      <h5>Authorized groups:</h5>
+                      <AuthorizationGroupTable
+                        authorizationGroups={values.authorizationGroups}
+                      />
+                    </div>
+                  )) || <h5>No groups are authorized!</h5>}
+                </Fieldset>
               )}
               {Settings.fields.report.customFields && (
                 <Fieldset title="Engagement information" id="custom-fields">

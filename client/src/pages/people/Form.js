@@ -20,6 +20,7 @@ import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -112,10 +113,8 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
@@ -473,7 +472,12 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 <FastField
                   name="biography"
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("biography", value)}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(value, values.biography)) {
+                      setFieldValue("biography", value)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="biography"
@@ -561,9 +565,9 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (onSaveRedirectToHome) {
       localStorage.clear()
       localStorage.newUser = "true"

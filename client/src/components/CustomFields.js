@@ -16,14 +16,14 @@ import RichTextEditor from "components/RichTextEditor"
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import _isEqualWith from "lodash/isEqualWith"
 import _set from "lodash/set"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useEffect, useMemo } from "react"
 import { Button, HelpBlock, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
@@ -276,7 +276,6 @@ const ArrayOfObjectsField = fieldProps => {
     fieldConfig,
     formikProps,
     invisibleFields,
-    updateInvisibleFields,
     vertical,
     children
   } = fieldProps
@@ -286,13 +285,18 @@ const ArrayOfObjectsField = fieldProps => {
   ])
   const objDefault = useMemo(() => {
     const objDefault = {}
-    const objSchema = createYupObjectShape(fieldConfig.objectFields)
+    const objSchema = createYupObjectShape(
+      fieldConfig.objectFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      false
+    )
     return Model.fillObject(objDefault, objSchema)
   }, [fieldConfig.objectFields])
+
   const fieldsetTitle = fieldConfig.label || ""
   const addButtonLabel = fieldConfig.addButtonLabel || "Add a new item"
   return (
-    <Fieldset title={fieldsetTitle}>
+    <Fieldset title={fieldsetTitle} id={name}>
       {children}
       <FieldArray
         name={name}
@@ -302,7 +306,7 @@ const ArrayOfObjectsField = fieldProps => {
               className="pull-right"
               onClick={() => addObject(objDefault, arrayHelpers)}
               bsStyle="primary"
-              id="addObjectButton"
+              id={`add-${name}`}
             >
               {addButtonLabel}
             </Button>
@@ -313,7 +317,6 @@ const ArrayOfObjectsField = fieldProps => {
                 fieldConfig={fieldConfig}
                 formikProps={formikProps}
                 invisibleFields={invisibleFields}
-                updateInvisibleFields={updateInvisibleFields}
                 vertical={vertical}
                 arrayHelpers={arrayHelpers}
                 index={index}
@@ -331,7 +334,6 @@ const ArrayObject = ({
   fieldConfig,
   formikProps,
   invisibleFields,
-  updateInvisibleFields,
   vertical,
   arrayHelpers,
   index
@@ -348,7 +350,6 @@ const ArrayObject = ({
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         invisibleFields={invisibleFields}
-        updateInvisibleFields={updateInvisibleFields}
         vertical={vertical}
         parentFieldName={`${fieldName}.${index}`}
       />
@@ -360,7 +361,6 @@ ArrayObject.propTypes = {
   fieldConfig: PropTypes.object.isRequired,
   formikProps: PropTypes.object.isRequired,
   invisibleFields: PropTypes.array.isRequired,
-  updateInvisibleFields: PropTypes.func.isRequired,
   vertical: PropTypes.bool,
   arrayHelpers: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired
@@ -633,51 +633,66 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: ArrayOfAnetObjectsField
 }
 
-function getInvisibleFields(
-  invisibleFields,
+export function getInvisibleFields(
   fieldsConfig,
   parentFieldName,
-  formikValues
+  formikValues,
+  isArrayOfObjects = false
 ) {
-  const prevInvisibleFields = _cloneDeep(invisibleFields)
-  const turnedInvisible = []
-  const turnedVisible = []
-  let curInvisibleFields = []
-  Object.keys(fieldsConfig).forEach(key => {
-    const fieldConfig = fieldsConfig[key]
-    const fieldName = `${parentFieldName}.${key}`
+  const curInvisibleFields = []
+  // loop through fields of the config to check for visibility of a field
+  Object.entries(fieldsConfig).forEach(([key, fieldConfig]) => {
+    const visibleWhenPath = fieldConfig.visibleWhen
     const isVisible =
-      !fieldConfig.visibleWhen ||
-      (fieldConfig.visibleWhen &&
-        !_isEmpty(JSONPath(fieldConfig.visibleWhen, formikValues)))
-    if (!isVisible && !prevInvisibleFields.includes(fieldName)) {
-      turnedInvisible.push(fieldName)
-    } else if (isVisible && prevInvisibleFields.includes(fieldName)) {
-      turnedVisible.push(fieldName)
+      !visibleWhenPath || !_isEmpty(JSONPath(visibleWhenPath, formikValues))
+
+    const fieldName = `${parentFieldName}.${key}`
+
+    // recursively append invisible fields in case of array of objects
+    // we can have customFields.array_of_objects.objectFields.array_of_objects.objectFields...
+    if (fieldConfig.type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+      curInvisibleFields.push(
+        ...getInvisibleFields(
+          fieldConfig.objectFields,
+          fieldName,
+          formikValues,
+          true
+        )
+      )
+    }
+    if (!isVisible) {
+      if (isArrayOfObjects) {
+        // insert index to fieldName
+        // so that we can acces array items with _set, _get methods
+        _get(formikValues, parentFieldName).forEach((obj, index) => {
+          curInvisibleFields.push(`${parentFieldName}.${index}.${key}`)
+        })
+      } else {
+        curInvisibleFields.push(fieldName)
+      }
     }
   })
-  if (turnedVisible.length || turnedInvisible.length) {
-    curInvisibleFields = prevInvisibleFields.filter(
-      x => !turnedVisible.includes(x)
-    )
-    turnedInvisible.forEach(x => curInvisibleFields.push(x))
-    return curInvisibleFields
-  }
-  return invisibleFields
+  return curInvisibleFields
 }
 
 export const CustomFieldsContainer = props => {
-  const { parentFieldName, formikProps } = props
-  const [invisibleFields, setInvisibleFields] = useState([])
-  const prevInvisibleFields = useRef(invisibleFields)
-  const { setFieldValue } = formikProps
+  const {
+    parentFieldName,
+    formikProps: { values, setFieldValue },
+    fieldsConfig
+  } = props
+
+  const invisibleFields = useMemo(
+    () => getInvisibleFields(fieldsConfig, parentFieldName, values),
+    [fieldsConfig, parentFieldName, values]
+  )
+
   const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
-    if (!_isEqual(invisibleFields, prevInvisibleFields.current)) {
-      prevInvisibleFields.current = invisibleFields
+    if (!_isEqual(_get(values, invisibleFieldsFieldName), invisibleFields)) {
       setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
     }
-  }, [invisibleFieldsFieldName, invisibleFields, setFieldValue])
+  }, [invisibleFields, values, invisibleFieldsFieldName, setFieldValue])
 
   return (
     <>
@@ -687,11 +702,7 @@ export const CustomFieldsContainer = props => {
         name={invisibleFieldsFieldName}
         className="hidden"
       />
-      <CustomFields
-        invisibleFields={invisibleFields}
-        updateInvisibleFields={setInvisibleFields}
-        {...props}
-      />
+      <CustomFields invisibleFields={invisibleFields} {...props} />
     </>
   )
 }
@@ -726,13 +737,11 @@ const CustomField = ({
   fieldName,
   formikProps,
   invisibleFields,
-  updateInvisibleFields,
   vertical
 }) => {
   const { type, helpText } = fieldConfig
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
-  const prevVal = useRef()
   const { callback: validateFormDebounced } = useDebouncedCallback(
     validateForm,
     400
@@ -745,10 +754,7 @@ const CustomField = ({
       }
       const sv = shouldValidate === undefined ? true : shouldValidate
       setFieldTouched(fieldName, true, false)
-      if (!_isEqual(val, prevVal.current)) {
-        prevVal.current = val
-        setFieldValue(fieldName, val, sv)
-      }
+      setFieldValue(fieldName, val, sv)
       if (!sv) {
         validateFormDebounced()
       }
@@ -767,8 +773,7 @@ const CustomField = ({
         return {
           fieldConfig,
           formikProps,
-          invisibleFields,
-          updateInvisibleFields
+          invisibleFields
         }
       case CUSTOM_FIELD_TYPE.JSON:
         return {
@@ -783,7 +788,7 @@ const CustomField = ({
       default:
         return {}
     }
-  }, [fieldConfig, formikProps, invisibleFields, type, updateInvisibleFields])
+  }, [fieldConfig, formikProps, invisibleFields, type])
   return FieldComponent ? (
     <FieldComponent
       name={fieldName}
@@ -809,7 +814,6 @@ CustomField.propTypes = {
   fieldName: PropTypes.string.isRequired,
   formikProps: PropTypes.object,
   invisibleFields: PropTypes.array,
-  updateInvisibleFields: PropTypes.func,
   vertical: PropTypes.bool
 }
 
@@ -818,49 +822,11 @@ const CustomFields = ({
   formikProps,
   parentFieldName,
   invisibleFields,
-  updateInvisibleFields,
   vertical
 }) => {
-  const formikValues = formikProps.values
-  const latestInvisibleFieldsProp = useRef(invisibleFields)
-  const invisibleFieldsPropUnchanged = _isEqualWith(
-    latestInvisibleFieldsProp.current,
-    invisibleFields,
-    utils.treatFunctionsAsEqual
-  )
-
-  const curInvisibleFields = useMemo(
-    () =>
-      getInvisibleFields(
-        invisibleFields,
-        fieldsConfig,
-        parentFieldName,
-        formikValues
-      ),
-    [invisibleFields, fieldsConfig, parentFieldName, formikValues]
-  )
-  const invisibleFieldsUnchanged = _isEqualWith(
-    latestInvisibleFieldsProp.current,
-    curInvisibleFields,
-    utils.treatFunctionsAsEqual
-  )
-
-  useEffect(() => {
-    if (!invisibleFieldsPropUnchanged) {
-      latestInvisibleFieldsProp.current = invisibleFields
-    }
-  }, [invisibleFieldsPropUnchanged, invisibleFields])
-
-  useEffect(() => {
-    if (!invisibleFieldsUnchanged) {
-      updateInvisibleFields(curInvisibleFields)
-    }
-  }, [invisibleFieldsUnchanged, curInvisibleFields, updateInvisibleFields])
-
   return (
     <>
-      {Object.keys(fieldsConfig).map(key => {
-        const fieldConfig = fieldsConfig[key]
+      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
         return invisibleFields.includes(fieldName) ? null : (
           <CustomField
@@ -869,7 +835,6 @@ const CustomFields = ({
             fieldName={fieldName}
             formikProps={formikProps}
             invisibleFields={invisibleFields}
-            updateInvisibleFields={updateInvisibleFields}
             vertical={vertical}
           />
         )
@@ -882,7 +847,6 @@ CustomFields.propTypes = {
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
   invisibleFields: PropTypes.array,
-  updateInvisibleFields: PropTypes.func,
   vertical: PropTypes.bool
 }
 CustomFields.defaultProps = {
@@ -912,9 +876,8 @@ export const ReadonlyCustomFields = ({
 }) => {
   return (
     <>
-      {Object.keys(fieldsConfig).map(key => {
+      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
-        const fieldConfig = fieldsConfig[key]
         const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
         const { type } = fieldConfig
         let extraProps = {}

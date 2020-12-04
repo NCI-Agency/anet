@@ -1,7 +1,11 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { getInvisibleFields } from "components/CustomFields"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  INVISIBLE_CUSTOM_FIELDS_FIELD
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -15,6 +19,7 @@ import moment from "moment"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 import PersonForm from "./Form"
 
@@ -88,6 +93,15 @@ const PersonEdit = ({ pageDispatchers }) => {
   const saveText = person.isPendingVerification()
     ? "Update profile"
     : "Save Person"
+
+  // set initial invisible custom fields
+  person[DEFAULT_CUSTOM_FIELDS_PARENT][
+    INVISIBLE_CUSTOM_FIELDS_FIELD
+  ] = getInvisibleFields(
+    Settings.fields.person.customFields,
+    DEFAULT_CUSTOM_FIELDS_PARENT,
+    person
+  )
 
   return (
     <div>

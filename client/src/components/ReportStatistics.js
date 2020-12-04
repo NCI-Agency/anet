@@ -253,24 +253,28 @@ const ReportStatistics = ({
           <>
             {!hasStatistics && <NoStatisticsRow periods={periods} />}
             {hasStatistics &&
-              Object.keys(REPORT_FIELDS_FOR_STATISTICS).map((key, index) => (
+              Object.entries(
+                REPORT_FIELDS_FOR_STATISTICS
+              ).map(([key, field], index) => (
                 <FieldStatisticsRow
                   key={key}
                   idSuffix={`${key}-${idSuffix}`}
                   fieldName={key}
-                  fieldConfig={REPORT_FIELDS_FOR_STATISTICS[key]}
+                  fieldConfig={field}
                   periods={periods}
                   periodsData={dataPerPeriod}
                   isFirstRow={index === 0}
                 />
               ))}
             {hasStatistics &&
-              Object.keys(customFieldsConfig || {}).map((key, index) => (
+              Object.entries(
+                customFieldsConfig || {}
+              ).map(([key, field], index) => (
                 <FieldStatisticsRow
                   key={key}
                   idSuffix={`${key}-${idSuffix}`}
                   fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
-                  fieldConfig={customFieldsConfig[key]}
+                  fieldConfig={field}
                   periods={periods}
                   periodsData={dataPerPeriod}
                   isFirstRow={

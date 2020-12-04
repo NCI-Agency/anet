@@ -89,13 +89,13 @@ export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
   const legendColors = _clone(CHART_COLORS)
   const legend = fieldConfig?.choices || {}
   const legendKeys = !_isEmpty(legend)
-    ? Object.keys(legend)
-    : Object.keys(counters)
+    ? Object.entries(legend)
+    : Object.entries(counters)
   legendKeys.forEach(
-    key =>
+    ([key, val]) =>
       (legend[key] = {
-        label: legend[key]?.label || key,
-        color: legend[key]?.color || legendColors.shift()
+        label: val?.label || key,
+        color: val?.color || legendColors.shift()
       })
   )
   legend.null = { label: "Unspecified", color: "#bbbbbb" }

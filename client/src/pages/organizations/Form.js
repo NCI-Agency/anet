@@ -14,8 +14,8 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
-import { jumpToTop } from "components/Page"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
+import { jumpToTop } from "components/Page"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
@@ -396,9 +396,9 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Organization.pathForEdit(organization))
     }

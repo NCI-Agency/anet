@@ -23,9 +23,9 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
@@ -487,9 +487,9 @@ const TaskForm = ({ edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     history.replace(Task.pathForEdit(task))
     if (!edit) {
       history.replace(Task.pathForEdit(task))
