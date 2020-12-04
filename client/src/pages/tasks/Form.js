@@ -379,6 +379,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                                 false
                               )
                             }}
+                            linkToComp={LinkTo}
                           />
                         }
                       />
@@ -419,6 +420,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                       values,
                       validateForm
                     }}
+                    linkToComp={LinkTo}
                   />
                 </Fieldset>
               )}

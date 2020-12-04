@@ -1,6 +1,7 @@
 import API from "api"
 import ConfirmDelete from "components/ConfirmDelete"
 import * as FieldHelper from "components/FieldHelper"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
   GQL_CREATE_NOTE,
@@ -89,6 +90,7 @@ const RelatedObjectNoteModal = ({
                           // validation will be done by setFieldValue
                           setFieldTouched("text", true, false)
                         }}
+                        linkToComp={LinkTo}
                       />
                     }
                     vertical

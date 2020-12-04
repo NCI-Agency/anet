@@ -55,6 +55,7 @@ const InstantAssessmentsContainerField = ({
                       parentFieldName={`${parentFieldName}.${entity.uuid}`}
                       fieldsConfig={entityInstantAssessmentConfig}
                       formikProps={formikProps}
+                      linkToComp={LinkTo}
                     />
                   )}
                 </td>
