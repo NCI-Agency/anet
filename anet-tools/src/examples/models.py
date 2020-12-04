@@ -14,55 +14,56 @@ metadata = Base.metadata
 
 class BaseModel(Base, ActiveRecordMixin):
     __abstract__ = True
-    pass
-   
+
 class anet_logic_mixin(BaseModel):
     __abstract__ = True
 
     def insert_entity(self, createdAt):
-        """Insert and commit a new record
+        """Insert and flush a new record
         """
         self.createdAt = createdAt
         self.updatedAt = createdAt
         if self.__tablename__ == "people":
             utc_now = datetime.datetime.now()
-            peoplePositions = PeoplePositions.create(createdAt = utc_now, person = self)
-            peoplePositions.commit()
+            PeoplePositions.create(createdAt = utc_now, person = self)
         else:
-            self.session.add(self)
-            self.session.flush()
-            self.commit()
+            BaseModel.session.add(self)
+            BaseModel.session.flush()
     
     def update_entity(self, updatedAt):
-        """Update and commit an existing record
+        """Update and flush an existing record
         """
         obj = type(self).find(self.uuid)
+        
         self.updatedAt = updatedAt
         for attr, value in self.__dict__.items():
             if attr != "_sa_instance_state":
                 setattr(obj, attr, value)
-        self.session.flush()
-        self.commit()
+        BaseModel.session.flush()
 
     def insert_update_nested_entity(self, update_rules, utc_now):
         self_c = copy.deepcopy(self)
         
         if base_methods.has_entity_relation(self, "person"):
-            base_methods.relation_process(self, "person", self.person, self_c, self_c.person, update_rules, PeoplePositions, utc_now)
+            base_methods.relation_process(self, "person", self_c, update_rules, PeoplePositions, utc_now)
 
         if base_methods.has_entity_relation(self, "location"):
-            base_methods.relation_process(self, "location", self.location, self_c, self_c.location, update_rules, PeoplePositions, utc_now)
+            base_methods.relation_process(self, "location", self_c, update_rules, PeoplePositions, utc_now)
 
         if base_methods.has_entity_relation(self, "organization"):
-            base_methods.relation_process(self, "organization", self.organization, self_c, self_c.organization, update_rules, PeoplePositions, utc_now)
+            base_methods.relation_process(self, "organization", self_c, update_rules, PeoplePositions, utc_now)
             
         if base_methods.is_entity_update(self, update_rules):
-            base_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
+            if base_methods.has_entity_relation(self, "person"):
+                base_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
             self_c.update_entity(utc_now)
         else:
             self_c.insert_entity(utc_now)
-        base_methods.add_new_association(self, PeoplePositions, utc_now)
-        self.commit()
+        
+        if base_methods.has_entity_relation(self, "person"):
+            base_methods.add_new_association(self, PeoplePositions, utc_now)
+        
+        BaseModel.session.flush()
         
     @classmethod
     def commit(cls):

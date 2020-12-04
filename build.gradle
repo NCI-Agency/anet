@@ -193,6 +193,15 @@ processResources {
 }
 processResources.outputs.upToDateWhen{ false }
 
+def getIpAddress() {
+	for (NetworkInterface iface : NetworkInterface.getNetworkInterfaces()) {
+		for (InterfaceAddress address : iface.getInterfaceAddresses()) {
+			final String ip = address.getAddress().getHostAddress()
+			if (ip.length() < 15) return ip
+		}
+	}
+}
+
 def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
 projectBranch.waitFor();
 projectBranch = projectBranch.text.trim();
@@ -555,6 +564,7 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	withEnvVar('GRANT_SUDO', "yes")
 	withEnvVar('JUPYTER_TOKEN', "anet")
 	withEnvVar('PYTHONPATH', "/home/jovyan/work")
+	withEnvVar('LOCAL_IP', getIpAddress())
 	hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
 	user = "root"
 	workingDir = "/home/jovyan/work"

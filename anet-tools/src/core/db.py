@@ -3,12 +3,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 
 class db:
-    def __init__(self, use_env=False, conn_json={}):
+    def __init__(self, use_env = False, conn_json = {}):
         if use_env:
+            os.environ["ANET_DB_SERVER"] = os.environ["LOCAL_IP"] if os.environ["ANET_DB_SERVER"] == "localhost" else os.environ["ANET_DB_SERVER"]
             self.dbConnString = os.environ["DB_DRIVER"] + "://" + \
                                 os.environ["ANET_DB_USERNAME"] + ":" + \
                                 os.environ["ANET_DB_PASSWORD"] + "@" + \
-                                "192.168.10.164" + "/" + \
+                                os.environ["ANET_DB_SERVER"] + ":"  + os.environ["ANET_DB_EXPOSED_PORT"] + "/" + \
                                 os.environ["ANET_DB_NAME"]
         else:
             if conn_json == {}:
@@ -20,7 +21,7 @@ class db:
                                     conn_json["DB_SERVER"] + "/" + \
                                     os.environ["ANET_DB_NAME"]
         print("db object created")
-    
+
     def print_db_env_vars(self):
         # Print db connection info from os.environ
         print("ANET_DB_EXPOSED_PORT\t:", os.environ["ANET_DB_EXPOSED_PORT"], "\n"\
@@ -34,13 +35,13 @@ class db:
         # Print db connection string
         print(self.dbConnString)
     
+    def create_engine(self):
+        self.engine = create_engine(self.dbConnString)
+        #print("db engine created")
+        
     def connect(self):
-        try:
-            self.engine = create_engine(self.dbConnString)
-            #print("db engine created")
-            self.session = Session(self.engine)
-            #print("db session created")
-            self.conn = self.engine.connect()
-            print("Successfully connected to the database with conn_str: " + self.dbConnString)
-        except Exception as e:
-            print("EXCEPTION WHILE CONNECTING TO DATABASE: ", str(e))
+        self.create_engine()
+        self.session = Session(self.engine)
+        #print("db session created")
+        self.conn = self.engine.connect()
+        print("Successfully connected to the database with conn_str: " + self.dbConnString)

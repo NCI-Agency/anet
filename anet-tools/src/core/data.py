@@ -63,5 +63,5 @@ class txt(data):
         if self.file_extension != "txt":
             raise Exception("File extension should be 'txt'")
         # read .txt file
-        with open(self.file_path, "w+") as f:
+        with open(self.file_path, "r") as f:
             self.content = f.readlines()

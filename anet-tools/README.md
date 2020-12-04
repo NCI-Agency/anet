@@ -15,8 +15,34 @@ Create entity objects using classes in src/core/models.py. Make a list of object
 
 ## Functionalities
 
-### Add update rule method
+### Updating Data
+The data import framework checks whether all incoming entities and associated entities are corresponds to new records or existing ones. There are two ways to decide whether an entity is update or insert.
+
+#### Providing Uuid
+If you assign a uuid to an entity, the import framework will query the database with that uuid and if a record is returned in response it will treat that entity as an update. It will then update the returned record with that entity.
+<br />
+For example
+<br />
+    ```
+    import people
+    ```
+    <br />
+    ```
+    people.uuid = "f93f94c1-4a2b-4910-b7ca-93a74d346ebc"
+    ```
+#### Add update rule method
 This method adds an update rule each time it is called. With the update rules defined by this method, it is determined whether the incoming entity objects and their associated objects will be inserted or updated. Multiple update rules can be added for multiple columns of many tables. The tablename property determines for which table the update rule will be added. The col_names property determines which columns of the specified table will be checked for updating. For example, when tablename = people and col_name = ["name", "rank"] a query is sent according to the name and rank column in the people table in the database for each entity object and if a single record returns, that record is updated, if no record is returned, entity is inserted as new record.
+<br />
+For example
+<br />
+    ```
+import anet_import
+    ```
+<br />
+    ```
+anet_import.add_update_rule(tablename="people", col_names=["name"])
+    ```
+
 
 ### Remember hash of input
 Data Import Framework can also remember a hash of the imported data to determine a change in the content. It stores and checks hashes from /datasamples/hashvalues.txt file.
@@ -46,23 +72,27 @@ The framework saves the data samples encountered with errors during import into 
 
 
 ## Business Logic Rules
-6 main business logic rules(10 in total) related to People, Positions and peoplePositions tables were applied in framework. <br />
+Import framework can perform all transactions related to position table and its relations.
 
-These are,
+For example,
 
 - UpdatePosition -> Update record in positions table. <br />
 - UpdatePerson -> Update record in people table. <br />    
-
 - InsertPosition -> Insert record to positions table. <br />
 - InsertPerson -> Insert record to people and peoplePositions tables. <br />
 
-- UpdatePositionUpdatePerson -> Insert and update records to people and peoplePositions tables.
+- UpdatePositionUpdatePerson -> Update position and person and associate them
   - Position has no person and person has no position. 
   - Position has person and person has no position.
   - Position has no person and person has position.
   - Position has person and person has position.
   
 - InsertPositionInsertPerson -> Insert records to people positions and peoplePositions table.
+- InsertPositionUpdatePerson
+- UpdatePositionInsertPerson
 
-
+- UpdatePositionInsertPersonInsertLocationUpdateOrganization
+- .
+- .
+- .
 
