@@ -9,7 +9,7 @@ import Tag from "components/Tag"
 import { Field, Form, Formik } from "formik"
 import { Person, Report, Task } from "models"
 import moment from "moment"
-import { CompactReadonlyReportPeople } from "pages/reports/ReportPeople"
+import ReportPeople from "pages/reports/ReportPeople"
 import PropTypes from "prop-types"
 import React from "react"
 import Settings from "settings"
@@ -304,9 +304,10 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                     : "People attended in this engagement"
                 }
               >
-                <CompactReadonlyReportPeople
-                  reportPeople={report.reportPeople}
+                <ReportPeople
+                  report={report}
                   linkToComp={LinkToNotPreviewed}
+                  disabled
                 />
               </Fieldset>
               {report.reportText && (

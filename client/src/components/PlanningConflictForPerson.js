@@ -8,7 +8,6 @@ import {
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
 import Person from "models/Person"
 import Report from "models/Report"
 import moment from "moment"
@@ -33,7 +32,12 @@ const GET_PERSON_WITH_REPORTS = gql`
   }
 `
 
-const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
+const BasePlanningConflictForPerson = ({
+  person,
+  report,
+  iconOnly,
+  linkToComp: LinkToComp
+}) => {
   const { loading, error, data } = API.useApiQuery(GET_PERSON_WITH_REPORTS, {
     uuid: person.uuid,
     attendedReportsQuery: {
@@ -89,14 +93,14 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
           intent={Intent.WARNING}
         >
           {conflictingReports.map(report => (
-            <LinkTo
+            <LinkToComp
               key={report.uuid}
               modelType="Report"
               model={report}
               style={{ display: "block" }}
             >
               {Report.getFormattedEngagementDate(report)}&nbsp;({report.state})
-            </LinkTo>
+            </LinkToComp>
           ))}
         </Callout>
       }
@@ -115,11 +119,17 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
 
 BasePlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person).isRequired,
+  linkToComp: PropTypes.func.isRequired,
   report: PropTypes.instanceOf(Report).isRequired,
   iconOnly: PropTypes.bool
 }
 
-const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
+const PlanningConflictForPerson = ({
+  person,
+  report,
+  iconOnly,
+  linkToComp
+}) => {
   if (!person?.uuid || !report?.engagementDate) {
     return null
   }
@@ -128,12 +138,14 @@ const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
       person={person}
       report={report}
       iconOnly={iconOnly}
+      linkToComp={linkToComp}
     />
   )
 }
 
 PlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person),
+  linkToComp: PropTypes.func.isRequired,
   report: PropTypes.instanceOf(Report),
   iconOnly: PropTypes.bool
 }

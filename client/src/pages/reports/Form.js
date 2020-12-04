@@ -21,6 +21,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import FieldShortcuts from "components/FieldShortcuts"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
@@ -698,6 +699,7 @@ const ReportForm = ({
                             setFieldValue("reportPeople", value, true)
                           }
                           showDelete
+                          linkToComp={LinkTo}
                         />
                       }
                       overlayColumns={[

@@ -629,7 +629,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     : "People involved in this engagement"
                 }
               >
-                <ReportPeople report={report} disabled />
+                <ReportPeople report={report} disabled linkToComp={LinkTo} />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
                 <NoPaginationTaskTable
