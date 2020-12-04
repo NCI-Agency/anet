@@ -8,11 +8,15 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {
+    let mounted = true
     const modelClass = Models[type]
     modelClass &&
       modelClass
         .fetchByUuid(uuid, GRAPHQL_ENTITY_FIELDS)
-        .then(data => setEntity(data))
+        .then(data => mounted && setEntity(data))
+    return () => {
+      mounted = false
+    }
   }, [type, uuid])
 
   return (
