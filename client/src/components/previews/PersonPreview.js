@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -14,7 +14,7 @@ import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Col, ControlLabel, FormGroup, Grid, Row, Table } from "react-bootstrap"
+import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -110,37 +110,92 @@ const PersonPreview = ({ className, uuid, previewId }) => {
           <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
         )
 
-        const orderedFields = orderPersonFields()
-        const numberOfFieldsUnderAvatar =
-          Settings.fields.person.numberOfFieldsInLeftColumn || 6
-        const leftColumUnderAvatar = orderedFields.slice(
-          0,
-          numberOfFieldsUnderAvatar
-        )
-        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
-
         return (
           <div className={className}>
             <Form className="form-horizontal" method="post">
               <Fieldset title={`${person.rank} ${person.name}`} />
               <Fieldset>
-                <Grid fluid>
-                  <Row>
-                    <Col md={6}>
-                      <AvatarDisplayComponent
-                        avatar={person.avatar}
-                        className="large-person-avatar"
-                        height={256}
-                        width={256}
-                        style={{
-                          maxWidth: "100%"
-                        }}
-                      />
-                      {leftColumUnderAvatar}
-                    </Col>
-                    <Col md={6}>{rightColum}</Col>
-                  </Row>
-                </Grid>
+                <AvatarDisplayComponent
+                  avatar={person.avatar}
+                  className="large-person-avatar"
+                  height={256}
+                  width={256}
+                  style={{
+                    maxWidth: "100%"
+                  }}
+                />
+                <AvatarDisplayComponent
+                  avatar={person.avatar}
+                  height={256}
+                  width={256}
+                />
+                <Field
+                  name="rank"
+                  label={Settings.fields.person.rank}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="role"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Person.humanNameOfRole(values.role)}
+                />
+                {isAdmin && (
+                  <Field
+                    name="domainUsername"
+                    component={FieldHelper.ReadonlyField}
+                  />
+                )}
+                <Field
+                  name="status"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Person.humanNameOfStatus(values.status)}
+                />
+                <Field
+                  name="phoneNumber"
+                  label={Settings.fields.person.phoneNumber}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="emailAddress"
+                  label={Settings.fields.person.emailAddress.label}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={emailHumanValue}
+                />
+                <Field
+                  name="country"
+                  label={Settings.fields.person.country}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="code"
+                  label={Settings.fields.person.code}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="gender"
+                  label={Settings.fields.person.gender}
+                  component={FieldHelper.ReadonlyField}
+                />
+                <Field
+                  name="endOfTourDate"
+                  label={Settings.fields.person.endOfTourDate}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    person.endOfTourDate &&
+                    moment(person.endOfTourDate).format(
+                      Settings.dateFormats.forms.displayShort.date
+                    )
+                  }
+                />
+                <Field
+                  name="biography"
+                  className="biography"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={parseHtmlWithLinkTo(
+                    person.biography,
+                    LinkToNotPreviewed
+                  )}
+                />
               </Fieldset>
               <Fieldset title="Position">
                 <Fieldset
@@ -161,7 +216,14 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   </Fieldset>
                 )}
               </Fieldset>
-
+              {Settings.fields.person.customFields && (
+                <Fieldset title="Person information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.person.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
               <Fieldset
                 title="Previous positions"
                 id={`previous-positions-${previewId}`}
@@ -207,76 +269,6 @@ const PersonPreview = ({ className, uuid, previewId }) => {
             </Form>
           </div>
         )
-
-        function orderPersonFields() {
-          const mappedCustomFields = mapReadonlyCustomFieldsToComps({
-            fieldsConfig: Person.shownCustomFields,
-            values
-          })
-          const mappedNonCustomFields = mapNonCustomFields()
-          // map fields that have privileged access check to the condition
-          const privilegedAccessedFields = {
-            domainUsername: {
-              accessCond: isAdmin
-            }
-          }
-          return (
-            Settings.fields.person.showPageOrderedFields
-              // first filter if there is privileged accessed fields and its access condition is true
-              .filter(key =>
-                privilegedAccessedFields[key]
-                  ? privilegedAccessedFields[key].accessCond
-                  : true
-              )
-              // then map it to components and keys, keys used for React list rendering
-              .map(key => [
-                mappedNonCustomFields[key] || mappedCustomFields[key],
-                key
-              ])
-              .map(([el, key]) =>
-                React.cloneElement(el, {
-                  key,
-                  extraColElem: null,
-                  labelColumnWidth: 4
-                })
-              )
-          )
-        }
-
-        function mapNonCustomFields() {
-          const classNameExceptions = {
-            biography: "biography"
-          }
-
-          // map fields that have specific human values
-          const humanValuesExceptions = {
-            status: Person.humanNameOfStatus(values.status),
-            emailAddress: emailHumanValue,
-            endOfTourDate:
-              person.endOfTourDate &&
-              moment(person.endOfTourDate).format(
-                Settings.dateFormats.forms.displayShort.date
-              ),
-            role: Person.humanNameOfRole(values.role),
-            biography: parseHtmlWithLinkTo(person.biography, LinkToNotPreviewed)
-          }
-          return Person.shownStandardFields.reduce((accum, key) => {
-            accum[key] = (
-              <Field
-                name={key}
-                label={
-                  Settings.fields.person[key]?.label ||
-                  Settings.fields.person[key]
-                }
-                component={FieldHelper.ReadonlyField}
-                humanValue={humanValuesExceptions[key]}
-                className={classNameExceptions[key]}
-              />
-            )
-
-            return accum
-          }, {})
-        }
       }}
     </Formik>
   )
