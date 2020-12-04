@@ -5,7 +5,7 @@ import React from "react"
 import "./ModelTooltip.css"
 
 const ModelTooltip = ({
-  modelClass,
+  modelType,
   uuid,
   previewId,
   isEdit,
@@ -19,11 +19,7 @@ const ModelTooltip = ({
   return (
     <Tooltip
       content={
-        <ModelPreview
-          modelClass={modelClass}
-          uuid={uuid}
-          previewId={previewId}
-        />
+        <ModelPreview modelType={modelType} uuid={uuid} previewId={previewId} />
       }
       {...tooltipProps}
     >
@@ -34,7 +30,7 @@ const ModelTooltip = ({
 
 ModelTooltip.propTypes = {
   children: PropTypes.node,
-  modelClass: PropTypes.func,
+  modelType: PropTypes.string.isRequired,
   uuid: PropTypes.string,
   previewId: PropTypes.string,
   isEdit: PropTypes.bool

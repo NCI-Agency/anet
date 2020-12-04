@@ -124,11 +124,6 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                     maxWidth: "100%"
                   }}
                 />
-                <AvatarDisplayComponent
-                  avatar={person.avatar}
-                  height={256}
-                  width={256}
-                />
                 <Field
                   name="rank"
                   label={Settings.fields.person.rank}
