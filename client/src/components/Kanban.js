@@ -1,5 +1,6 @@
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import { EngagementTrends } from "components/Trends"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -170,7 +171,7 @@ const Card = ({ task }) => {
                   <td>
                     {" "}
                     {this.props.task.taskedOrganizations.map(org => (
-                      <LinkTo
+                      <LinkToNotPreviewed
                         modelType="Organization"
                         model={org}
                         isLink={false}

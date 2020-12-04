@@ -3,7 +3,7 @@ import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -99,8 +99,8 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkTo modelType="Person" model={position.person} />. By selecting
-          this position, they will be removed.
+          <LinkToNotPreviewed modelType="Person" model={position.person} />. By
+          selecting this position, they will be removed.
         </>
       )
       newError = { message: errorMessage }
@@ -140,7 +140,11 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       <Modal.Header closeButton>
         <Modal.Title>
           Set Position for{" "}
-          <LinkTo modelType="Person" model={person} isLink={false} />
+          <LinkToNotPreviewed
+            modelType="Person"
+            model={person}
+            isLink={false}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -154,9 +158,14 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
               }}
               className="remove-person-from-position"
             >
-              Remove <LinkTo modelType="Person" model={person} isLink={false} />{" "}
+              Remove{" "}
+              <LinkToNotPreviewed
+                modelType="Person"
+                model={person}
+                isLink={false}
+              />{" "}
               from{" "}
-              <LinkTo
+              <LinkToNotPreviewed
                 modelType="Position"
                 model={person.position}
                 isLink={false}

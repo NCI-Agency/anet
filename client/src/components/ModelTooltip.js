@@ -8,14 +8,9 @@ const ModelTooltip = ({
   modelType,
   uuid,
   previewId,
-  isEdit,
   children,
   ...tooltipProps
 }) => {
-  // edit links would show the same page, don't preview
-  if (isEdit) {
-    return <>{children}</>
-  }
   return (
     <Tooltip
       content={
@@ -32,8 +27,7 @@ ModelTooltip.propTypes = {
   children: PropTypes.node,
   modelType: PropTypes.string.isRequired,
   uuid: PropTypes.string,
-  previewId: PropTypes.string,
-  isEdit: PropTypes.bool
+  previewId: PropTypes.string
 }
 
 export default ModelTooltip

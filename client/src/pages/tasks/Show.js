@@ -7,6 +7,7 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
@@ -186,9 +187,14 @@ const TaskShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkTo modelType="Task" model={task} edit button="primary">
+          <LinkToNotPreviewed
+            modelType="Task"
+            model={task}
+            edit
+            button="primary"
+          >
             Edit
-          </LinkTo>
+          </LinkToNotPreviewed>
         )
         return (
           <div>

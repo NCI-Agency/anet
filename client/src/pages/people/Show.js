@@ -12,6 +12,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -160,7 +161,7 @@ const PersonShow = ({ pageDispatchers }) => {
         const action = (
           <div>
             {canEdit && (
-              <LinkTo
+              <LinkToNotPreviewed
                 modelType="Person"
                 model={person}
                 edit
@@ -168,7 +169,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 className="edit-person"
               >
                 Edit
-              </LinkTo>
+              </LinkToNotPreviewed>
             )}
           </div>
         )
@@ -289,14 +290,14 @@ const PersonShow = ({ pageDispatchers }) => {
                     hasPosition &&
                     canChangePosition && (
                       <div>
-                        <LinkTo
+                        <LinkToNotPreviewed
                           modelType="Position"
                           model={position}
                           edit
                           button="default"
                         >
                           Edit position details
-                        </LinkTo>
+                        </LinkToNotPreviewed>
                         <Button
                           onClick={() => setShowAssignPositionModal(true)}
                           className="change-assigned-position"

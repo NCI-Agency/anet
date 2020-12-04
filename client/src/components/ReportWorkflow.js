@@ -1,5 +1,6 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -23,7 +24,7 @@ const ApprovalStepModalStatus = ({ action }) => {
     return (
       <span className={cssClass}>
         {actionType.text} by{" "}
-        <LinkTo
+        <LinkToNotPreviewed
           modelType="Person"
           model={action.person}
           whenUnspecified="system"
@@ -103,7 +104,11 @@ export const ActionButton = ({ action }) => {
   ) : (
     <Button className={actionType.cssClass + " btn-sm"} disabled>
       <span>
-        <LinkTo modelType="Person" model={action.person} isLink={false} />
+        <LinkToNotPreviewed
+          modelType="Person"
+          model={action.person}
+          isLink={false}
+        />
       </span>
     </Button>
   )

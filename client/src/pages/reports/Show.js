@@ -14,6 +14,7 @@ import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
@@ -390,9 +391,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               Summary / Print
             </Button>
             {canEdit && (
-              <LinkTo modelType="Report" model={report} edit button="primary">
+              <LinkToNotPreviewed
+                modelType="Report"
+                model={report}
+                edit
+                button="primary"
+              >
                 Edit
-              </LinkTo>
+              </LinkToNotPreviewed>
             )}
             {canSubmit && renderSubmitButton(!isValid)}
           </div>
@@ -878,9 +884,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           rejectReport(values.approvalComment)
         )}
         <div className="right-button">
-          <LinkTo modelType="Report" model={report} edit button>
+          <LinkToNotPreviewed modelType="Report" model={report} edit button>
             Edit {reportType}
-          </LinkTo>
+          </LinkToNotPreviewed>
           {renderApproveButton(warnApproveOwnReport, disabled, () =>
             approveReport(values.approvalComment)
           )}

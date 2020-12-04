@@ -91,9 +91,8 @@ const LinkTo = ({
       uuid={modelInstance.uuid}
       previewId={previewId}
       popoverClassName="bp3-dark"
-      hoverCloseDelay={51500}
+      hoverCloseDelay={1500}
       portalClassName="linkto-model-preview-portal"
-      isEdit={edit}
     >
       <LinkToComponent to={to} style={style} {...componentProps}>
         <>

@@ -1,9 +1,11 @@
 import { CompactRow } from "components/Compact"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
+  Button,
   Col,
   ControlLabel,
   FormControl,
@@ -495,4 +497,45 @@ export function handleSingleSelectAddItem(newItem, onChange, curValue) {
 
 export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
+}
+
+export const FieldShortcuts = ({
+  shortcuts,
+  fieldName,
+  objectType,
+  curValue,
+  onChange,
+  handleAddItem,
+  title
+}) =>
+  shortcuts &&
+  shortcuts.length > 0 && (
+    <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
+      <h5>{title}</h5>
+      {objectType.map(shortcuts, (shortcut, idx) => (
+        <Button
+          key={shortcut.uuid}
+          bsStyle="link"
+          onClick={() => handleAddItem(shortcut, onChange, curValue)}
+        >
+          Add{" "}
+          <LinkToNotPreviewed
+            modelType={objectType.resourceName}
+            model={shortcut}
+            isLink={false}
+            forShortcut
+          />
+        </Button>
+      ))}
+    </div>
+  )
+
+FieldShortcuts.propTypes = {
+  shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),
+  fieldName: PropTypes.string.isRequired,
+  objectType: PropTypes.func.isRequired,
+  curValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  onChange: PropTypes.func,
+  handleAddItem: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired
 }

@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -118,7 +118,11 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       <Modal.Header closeButton>
         <Modal.Title>
           Set Person for{" "}
-          <LinkTo modelType="Position" model={position} isLink={false} />
+          <LinkToNotPreviewed
+            modelType="Position"
+            model={position}
+            isLink={false}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -132,13 +136,17 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
               }}
             >
               Remove{" "}
-              <LinkTo
+              <LinkToNotPreviewed
                 modelType="Person"
                 model={position.person}
                 isLink={false}
               />{" "}
               from{" "}
-              <LinkTo modelType="Position" model={position} isLink={false} />
+              <LinkToNotPreviewed
+                modelType="Position"
+                model={position}
+                isLink={false}
+              />
             </Button>
             <hr className="assignModalSplit" />
           </div>

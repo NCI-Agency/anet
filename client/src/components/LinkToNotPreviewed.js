@@ -6,7 +6,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Link } from "react-router-dom"
 
-export default class LinkTo extends Component {
+export default class LinkToNotPreviewed extends Component {
   static propTypes = {
     componentClass: PropTypes.oneOfType([
       PropTypes.string,

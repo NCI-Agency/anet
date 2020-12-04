@@ -10,6 +10,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -163,7 +164,7 @@ const PositionShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkTo
+          <LinkToNotPreviewed
             modelType="Position"
             model={position}
             edit
@@ -171,7 +172,7 @@ const PositionShow = ({ pageDispatchers }) => {
             className="edit-position"
           >
             Edit
-          </LinkTo>
+          </LinkToNotPreviewed>
         )
         return (
           <div>

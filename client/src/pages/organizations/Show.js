@@ -8,6 +8,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
@@ -225,7 +226,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
             )}
 
             {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
-              <LinkTo
+              <LinkToNotPreviewed
                 modelType="Organization"
                 model={organization}
                 edit
@@ -233,7 +234,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 id="editButton"
               >
                 Edit
-              </LinkTo>
+              </LinkToNotPreviewed>
             )}
           </div>
         )
