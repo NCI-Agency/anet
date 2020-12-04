@@ -397,6 +397,9 @@ const PersonShow = ({ pageDispatchers }) => {
                 privilegedAccessedFields[key]
                   ? privilegedAccessedFields[key].accessCond
                   : true
+              ) // Also filter if somehow there is no field in both maps
+              .filter(
+                key => mappedNonCustomFields[key] || mappedCustomFields[key]
               )
               // then map it to components and keys, keys used for React list rendering
               .map(key => [

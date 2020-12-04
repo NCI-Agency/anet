@@ -52,7 +52,7 @@ export default class Person extends Model {
         "WARN",
         "Person.js",
         50,
-        "Wrong/empty person field in show list"
+        `Wrong field name in dictionary.fields.person.showPageOrderedFields, field name: ${field}`
       )
       return false
     }
