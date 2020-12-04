@@ -63,6 +63,7 @@ const PeriodicAssessment = ({
             modelType="Person"
             model={note.author}
             style={{ color: "white" }}
+            previewId="per-assess-person"
           />
           {canEditAssessment && (
             <>

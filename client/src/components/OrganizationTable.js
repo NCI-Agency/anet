@@ -2,8 +2,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RemoveButton from "components/RemoveButton"
@@ -134,7 +134,11 @@ const BaseOrganizationTable = ({
               return (
                 <tr key={org.uuid}>
                   <td>
-                    <LinkTo modelType="Organization" model={org}>
+                    <LinkTo
+                      modelType="Organization"
+                      model={org}
+                      previewId="org-table-org"
+                    >
                       {nameComponents.join(" - ")}
                     </LinkTo>
                   </td>

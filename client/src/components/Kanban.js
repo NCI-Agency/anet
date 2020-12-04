@@ -123,7 +123,7 @@ const Card = ({ task }) => {
       }}
     >
       <div>
-        <LinkTo modelType="Task" model={task}>
+        <LinkTo modelType="Task" model={task} previewId="kanban-task">
           <strong>{task.shortName}</strong>
         </LinkTo>
         <br />

@@ -254,7 +254,11 @@ const Organizations = ({
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 <td>
-                  <LinkTo modelType="Organization" model={org} />
+                  <LinkTo
+                    modelType="Organization"
+                    model={org}
+                    previewId="search-org"
+                  />
                 </td>
                 <td>{org.longName}</td>
                 <td>{org.identificationCode}</td>
@@ -355,10 +359,18 @@ const People = ({
             {Person.map(people, person => (
               <tr key={person.uuid}>
                 <td>
-                  <LinkTo modelType="Person" model={person} />
+                  <LinkTo
+                    modelType="Person"
+                    model={person}
+                    previewId="search-people-person"
+                  />
                 </td>
                 <td>
-                  <LinkTo modelType="Position" model={person.position} />
+                  <LinkTo
+                    modelType="Position"
+                    model={person.position}
+                    previewId="search-people-pos"
+                  />
                   {person.position && person.position.code
                     ? `, ${person.position.code}`
                     : ""}
@@ -368,6 +380,7 @@ const People = ({
                     modelType="Location"
                     model={person.position && person.position.location}
                     whenUnspecified=""
+                    previewId="search-people-loc"
                   />
                 </td>
                 <td>
@@ -375,6 +388,7 @@ const People = ({
                     <LinkTo
                       modelType="Organization"
                       model={person.position.organization}
+                      previewId="search-people-org"
                     />
                   )}
                 </td>
@@ -546,7 +560,7 @@ export const Tasks = ({
             {Task.map(tasks, task => (
               <tr key={task.uuid}>
                 <td>
-                  <LinkTo modelType="Task" model={task}>
+                  <LinkTo modelType="Task" model={task} previewId="search-task">
                     {task.shortName} {task.longName}
                   </LinkTo>
                 </td>
@@ -643,7 +657,11 @@ const Locations = ({
             {locations.map(loc => (
               <tr key={loc.uuid}>
                 <td>
-                  <LinkTo modelType="Location" model={loc} />
+                  <LinkTo
+                    modelType="Location"
+                    model={loc}
+                    previewId="search-loc"
+                  />
                 </td>
               </tr>
             ))}

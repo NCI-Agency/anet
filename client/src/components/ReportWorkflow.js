@@ -72,8 +72,17 @@ const ApprovalStepModal = ({ action }) => {
             {(noApprovers && "This step has no approvers!") ||
               step.approvers.map(position => (
                 <li key={position.uuid}>
-                  <LinkTo modelType="Position" model={position} /> -{" "}
-                  <LinkTo modelType="Person" model={position.person} />
+                  <LinkTo
+                    modelType="Position"
+                    model={position}
+                    previewId="rep-wf-pos"
+                  />{" "}
+                  -{" "}
+                  <LinkTo
+                    modelType="Person"
+                    model={position.person}
+                    previewId="rep-wf-person"
+                  />
                 </li>
               ))}
           </ul>
@@ -127,6 +136,7 @@ const ActionDetails = ({ action }) => {
             modelType="Person"
             model={action.person}
             whenUnspecified="system"
+            previewId="rep-wf-action"
           />
         </span>
         <br />

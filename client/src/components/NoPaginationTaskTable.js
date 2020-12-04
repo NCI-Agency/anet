@@ -40,14 +40,22 @@ const NoPaginationTaskTable = ({
               return (
                 <tr key={task.uuid}>
                   <td className="taskName">
-                    <LinkTo modelType="Task" model={task}>
+                    <LinkTo
+                      modelType="Task"
+                      model={task}
+                      previewId="no-pag-task"
+                    >
                       {task.shortName}
                     </LinkTo>
                   </td>
                   {showParent && (
                     <td className="parentTaskName">
                       {task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
+                        <LinkTo
+                          modelType="Task"
+                          model={task.customFieldRef1}
+                          previewId="no-pag-pTask"
+                        >
                           {task.customFieldRef1.shortName}
                         </LinkTo>
                       )}
@@ -60,6 +68,7 @@ const NoPaginationTaskTable = ({
                           modelType="Organization"
                           model={org}
                           key={`${task.uuid}-${org.uuid}`}
+                          previewId="no-pag-tasked-org"
                         />
                       ))}
                     </td>

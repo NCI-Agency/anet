@@ -195,6 +195,7 @@ const RelatedObjectNotes = ({
                     modelType="Person"
                     model={note.author}
                     style={{ color: "white" }}
+                    previewId="rel-obj-person"
                   />
                   {canEdit && (
                     <>

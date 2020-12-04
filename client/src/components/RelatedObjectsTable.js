@@ -1,6 +1,6 @@
+import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import LinkTo from "components/LinkTo"
 import Model, { MODEL_TO_OBJECT_TYPE } from "components/Model"
-import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import RemoveButton from "components/RemoveButton"
 import PropTypes from "prop-types"
 import React from "react"
@@ -68,6 +68,7 @@ const RelatedObjectsTable = ({
                       uuid: nro.relatedObjectUuid,
                       ...nro.relatedObject
                     }}
+                    previewId="rel-obj"
                   />
                 </td>
                 {showDelete &&

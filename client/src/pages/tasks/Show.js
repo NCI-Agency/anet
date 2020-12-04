@@ -253,6 +253,7 @@ const TaskShow = ({ pageDispatchers }) => {
                               modelType="Organization"
                               model={org}
                               key={`${org.uuid}`}
+                              previewId="task-show-org"
                             />
                           ))}
                         </>
@@ -266,7 +267,11 @@ const TaskShow = ({ pageDispatchers }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         task.customFieldRef1 && (
-                          <LinkTo modelType="Task" model={task.customFieldRef1}>
+                          <LinkTo
+                            modelType="Task"
+                            model={task.customFieldRef1}
+                            previewId="task-show-parent-task"
+                          >
                             {task.customFieldRef1.shortName}{" "}
                             {task.customFieldRef1.longName}
                           </LinkTo>

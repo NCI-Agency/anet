@@ -387,7 +387,11 @@ const PersonShow = ({ pageDispatchers }) => {
                       {person.previousPositions.map((pp, idx) => (
                         <tr key={idx} id={`previousPosition_${idx}`}>
                           <td>
-                            <LinkTo modelType="Position" model={pp.position} />
+                            <LinkTo
+                              modelType="Position"
+                              model={pp.position}
+                              previewId="people-show-prev-pos"
+                            />
                           </td>
                           <td>
                             {moment(pp.startTime).format(
@@ -440,9 +444,15 @@ const PersonShow = ({ pageDispatchers }) => {
             modelType="Position"
             model={position}
             className="position-name"
+            previewId="people-show-pos"
           />{" "}
           (
-          <LinkTo modelType="Organization" model={position.organization} />)
+          <LinkTo
+            modelType="Organization"
+            model={position.organization}
+            previewId="people-show-org"
+          />
+          )
         </h4>
       </div>
     )
@@ -470,16 +480,25 @@ const PersonShow = ({ pageDispatchers }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkTo modelType="Person" model={assocPos.person} />
+                      <LinkTo
+                        modelType="Person"
+                        model={assocPos.person}
+                        previewId="people-show-asc-person"
+                      />
                     )}
                   </td>
                   <td>
-                    <LinkTo modelType="Position" model={assocPos} />
+                    <LinkTo
+                      modelType="Position"
+                      model={assocPos}
+                      previewId="people-show-asc-pos"
+                    />
                   </td>
                   <td>
                     <LinkTo
                       modelType="Organization"
                       model={assocPos.organization}
+                      previewId="people-show-asc-org"
                     />
                   </td>
                 </tr>

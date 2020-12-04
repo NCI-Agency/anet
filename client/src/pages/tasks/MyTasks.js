@@ -46,6 +46,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
       <LinkTo
         modelType="Organization"
         model={currentUser.position?.organization}
+        previewId="my-tasks-org"
       />
     </>
   )

@@ -51,7 +51,11 @@ const EntityAssessmentResults = ({
     <>
       <tr>
         <td colSpan={periods.length} className="entity-title-row">
-          <LinkTo modelType={entityType.resourceName} model={entity} />
+          <LinkTo
+            modelType={entityType.resourceName}
+            model={entity}
+            previewId="assess-table-entity"
+          />
         </td>
       </tr>
       {Object.entries(instantAssessmentConfig || {}).map(

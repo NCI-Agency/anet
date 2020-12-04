@@ -126,11 +126,20 @@ const ReportPeople = ({
           />
         </td>
         <td className="reportPeopleName">
-          <LinkToComp modelType="Person" model={person} showIcon={false} />
+          <LinkToComp
+            modelType="Person"
+            model={person}
+            showIcon={false}
+            previewId="rep-people-person"
+          />
         </td>
         <td>
           {person.position && person.position.uuid && (
-            <LinkToComp modelType="Position" model={person.position} />
+            <LinkToComp
+              modelType="Position"
+              model={person.position}
+              previewId="rep-people-pos"
+            />
           )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
@@ -141,6 +150,7 @@ const ReportPeople = ({
             modelType="Location"
             model={person.position && person.position.location}
             whenUnspecified=""
+            previewId="rep-people-loc"
           />
         </td>
         <td>
@@ -148,6 +158,7 @@ const ReportPeople = ({
             modelType="Organization"
             model={person.position && person.position.organization}
             whenUnspecified=""
+            previewId="rep-people-org"
           />
         </td>
         {showDelete && (

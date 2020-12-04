@@ -19,7 +19,7 @@ const LinkAnetEntity = ({ type, uuid, children, linkToComp: LinkToComp }) => {
   }, [type, uuid])
 
   return (
-    <LinkToComp modelType={type} model={entity}>
+    <LinkToComp modelType={type} model={entity} previewId="anet-entity">
       {children}
     </LinkToComp>
   )

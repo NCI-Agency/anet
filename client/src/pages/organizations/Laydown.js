@@ -1,6 +1,7 @@
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Model from "components/Model"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -60,7 +61,7 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
         action={
           <div>
             {isSuperUser && (
-              <LinkToComp
+              <LinkToNotPreviewed
                 modelType="Position"
                 model={Position.pathForNew({
                   organizationUuid: organization.uuid
@@ -68,7 +69,7 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
                 button
               >
                 Create position
-              </LinkToComp>
+              </LinkToNotPreviewed>
             )}
           </div>
         }
@@ -149,7 +150,11 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkToComp modelType="Position" model={other}>
+          <LinkToComp
+            modelType="Position"
+            model={other}
+            previewId="org-lay-pos"
+          >
             {positionWithStatus(other)}
           </LinkToComp>
         </td>
@@ -157,7 +162,11 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
 
       otherPersonCol = other.person ? (
         <td>
-          <LinkToComp modelType="Person" model={other.person}>
+          <LinkToComp
+            modelType="Person"
+            model={other.person}
+            previewId="org-lay-person"
+          >
             {personWithStatus(other.person)}
           </LinkToComp>
         </td>
@@ -169,7 +178,11 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkToComp modelType="Position" model={position}>
+          <LinkToComp
+            modelType="Position"
+            model={position}
+            previewId="org-lay-pos-0"
+          >
             {positionWithStatus(position)}
           </LinkToComp>
         </td>
@@ -177,7 +190,11 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
       positionPersonCol =
         position.person && position.person.uuid ? (
           <td>
-            <LinkToComp modelType="Person" model={position.person}>
+            <LinkToComp
+              modelType="Person"
+              model={position.person}
+              previewId="org-lay-person-0"
+            >
               {personWithStatus(position.person)}
             </LinkToComp>
           </td>

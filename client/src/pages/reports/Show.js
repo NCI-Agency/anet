@@ -564,7 +564,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && (
-                      <LinkTo modelType="Location" model={report.location} />
+                      <LinkTo
+                        modelType="Location"
+                        model={report.location}
+                        previewId="rep-show-loc"
+                      />
                     )
                   }
                 />
@@ -598,7 +602,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={report.authors?.map(a => (
                     <React.Fragment key={a.uuid}>
-                      <LinkTo modelType="Person" model={a} />
+                      <LinkTo
+                        modelType="Person"
+                        model={a}
+                        previewId="rep-show-authors"
+                      />
                       <br />
                     </React.Fragment>
                   ))}
@@ -612,6 +620,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <LinkTo
                       modelType="Organization"
                       model={report.advisorOrg}
+                      previewId="rep-show-adv-org"
                     />
                   }
                 />
@@ -624,6 +633,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <LinkTo
                       modelType="Organization"
                       model={report.principalOrg}
+                      previewId="rep-show-pri-org"
                     />
                   }
                 />
@@ -745,7 +755,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   const createdAt = moment(comment.createdAt)
                   return (
                     <p key={comment.uuid}>
-                      <LinkTo modelType="Person" model={comment.author} />,
+                      <LinkTo
+                        modelType="Person"
+                        model={comment.author}
+                        previewId="rep-show-comment-author"
+                      />
+                      ,
                       <span
                         title={createdAt.format(
                           Settings.dateFormats.forms.displayShort.withTime

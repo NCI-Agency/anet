@@ -315,6 +315,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         <LinkTo
                           modelType="Organization"
                           model={organization.parentOrg}
+                          previewId="org-show-org"
                         >
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
@@ -338,10 +339,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
                               <LinkTo
                                 modelType="Person"
                                 model={position.person}
+                                previewId="org-show-person"
                               />
                             ) : (
                               <i>
-                                <LinkTo modelType="Position" model={position} />
+                                <LinkTo
+                                  modelType="Position"
+                                  model={position}
+                                  previewId="org-show-pos"
+                                />
                                 - (Unfilled)
                               </i>
                             )}
@@ -370,6 +376,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                               <LinkTo
                                 modelType="Organization"
                                 model={organization}
+                                previewId="org-show-child-org"
                               >
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}

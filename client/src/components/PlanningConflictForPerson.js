@@ -98,6 +98,7 @@ const BasePlanningConflictForPerson = ({
               modelType="Report"
               model={report}
               style={{ display: "block" }}
+              previewId="conf-person-rep"
             >
               {Report.getFormattedEngagementDate(report)}&nbsp;({report.state})
             </LinkToComp>

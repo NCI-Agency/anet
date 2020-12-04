@@ -192,6 +192,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                           <LinkTo
                             modelType="Organization"
                             model={values.parentOrg}
+                            previewId="org-form-org"
                           >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}
