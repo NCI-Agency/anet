@@ -43,7 +43,7 @@ const LinkTo = ({
   const modelInstance = new ModelClass(isModel ? model : {})
 
   // Icon
-  const iconComponent = showIcon && !button && modelInstance.iconUrl() && (
+  const iconComponent = showIcon && modelInstance.iconUrl() && (
     <img
       src={modelInstance.iconUrl()}
       alt=""
@@ -53,7 +53,6 @@ const LinkTo = ({
 
   // Avatar
   const avatarComponent = showAvatar &&
-    !button &&
     Object.prototype.hasOwnProperty.call(model, "avatar") && (
       <AvatarDisplayComponent
         avatar={modelInstance.avatar}
@@ -123,7 +122,6 @@ LinkTo.propTypes = {
   // Configures this link to look like a button. Set it to true to make it a button,
   // or pass a string to set a button type
   button: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
-
   target: PropTypes.string,
   whenUnspecified: PropTypes.string,
   modelType: PropTypes.string.isRequired,

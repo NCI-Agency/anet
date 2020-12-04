@@ -122,6 +122,7 @@ const PeriodicAssessment = ({
                   parentFieldName={parentFieldName}
                   fieldsConfig={assessmentConfig}
                   values={values}
+                  linkToComp={LinkTo}
                   vertical
                 />
               )

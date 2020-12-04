@@ -411,6 +411,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
                     values={values}
+                    linkToComp={LinkTo}
                   />
                 </Fieldset>
               )}

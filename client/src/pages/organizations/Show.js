@@ -214,7 +214,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
         const action = (
           <div>
             {isAdmin && (
-              <LinkTo
+              <LinkToNotPreviewed
                 modelType="Organization"
                 model={Organization.pathForNew({
                   parentOrgUuid: organization.uuid
@@ -222,7 +222,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 button
               >
                 Create sub-organization
-              </LinkTo>
+              </LinkToNotPreviewed>
             )}
 
             {(isAdmin || (isSuperUser && isAdvisorOrg)) && (

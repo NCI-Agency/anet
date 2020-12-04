@@ -44,6 +44,7 @@ const InstantAssessmentsContainerField = ({
                       parentFieldName={`${parentFieldName}.${entity.uuid}`}
                       fieldsConfig={entityInstantAssessmentConfig}
                       values={values}
+                      linkToComp={LinkTo}
                     />
                   ) : (
                     <CustomFieldsContainer

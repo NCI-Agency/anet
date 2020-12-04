@@ -1,6 +1,7 @@
 import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
+import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -328,14 +329,14 @@ const ReportSummaryRow = ({ report }) => {
       </Row>
       <Row className="hide-for-print">
         <Col className="read-report-actions" md={12}>
-          <LinkTo
+          <LinkToNotPreviewed
             modelType="Report"
             model={report}
             button
             className="read-report-button"
           >
             Read report
-          </LinkTo>
+          </LinkToNotPreviewed>
         </Col>
       </Row>
     </Grid>

@@ -670,6 +670,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
                     values={values}
+                    linkToComp={LinkTo}
                   />
                 </Fieldset>
               )}

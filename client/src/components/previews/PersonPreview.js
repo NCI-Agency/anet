@@ -216,6 +216,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
                     values={values}
+                    linkToComp={LinkToNotPreviewed}
                   />
                 </Fieldset>
               )}
