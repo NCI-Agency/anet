@@ -1052,7 +1052,7 @@ ReadonlyCustomFields.defaultProps = {
 // To access ordered custom fields when showing in a page
 export const mapReadonlyCustomFieldsToComps = ({
   fieldsConfig,
-  parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
   extraColElem,
