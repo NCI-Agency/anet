@@ -88,11 +88,13 @@ const ReportStateFilter = ({
               onChange={handleChangeCancelledReason}
             >
               <option value="">Everything</option>
-              {Object.entries(CANCELLATION_REASON_LABELS).map((key, label) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
+              {Object.entries(CANCELLATION_REASON_LABELS).map(
+                ([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                )
+              )}
             </select>
           </div>
         )}
