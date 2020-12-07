@@ -1,7 +1,6 @@
 import { Button, Tooltip } from "@blueprintjs/core"
 import Leaflet from "components/Leaflet"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
-import * as L from "leaflet"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
@@ -132,7 +131,7 @@ export function unassignedPerson(position1, position2, mergedPosition) {
 
 export function areAllSet(...args) {
   return args.every(item => {
-    if (typeof item === "boolean") {
+    if (typeof item !== "object") {
       return item
     }
     return !_isEmpty(item)
@@ -195,19 +194,8 @@ export function getActionButton(
     </small>
   )
 }
-// A workaround for "Map container is already initialized" error
-// Don't wait leaflet to set its id to null, do it here
-// FIXME: is there a better way?
-export function removePrevMapEarly(mapId) {
-  mapId = "map-" + mapId // to get map's real id, extra "map-" is added in the Leaflet
-  const map = L.DomUtil.get(mapId)
-  if (map) {
-    map._leaflet_id = null
-  }
-}
 
 export function getLeafletMap(mapId, location) {
-  removePrevMapEarly(mapId)
   return (
     <Leaflet
       mapId={mapId}

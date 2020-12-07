@@ -341,6 +341,7 @@ const MidColTitle = styled.div`
   display: flex;
   height: 39px;
   margin-top: 25px;
+  margin-bottom: 15px;
   border-bottom: 1px solid #cccccc;
   border-top: 1px solid #cccccc;
   justify-content: space-between;
@@ -356,10 +357,10 @@ const PositionColumn = ({
 }) => {
   return (
     <PositionCol>
-      <label htmlFor={label.replace(/ /g, "")} style={{ textAlign: align }}>
+      <label htmlFor={label.replace(/\s+/g, "")} style={{ textAlign: align }}>
         {label}
       </label>
-      <FormGroup controlId={label.replace(/ /g, "")}>
+      <FormGroup controlId={label.replace(/\s+/g, "")}>
         <AdvancedSingleSelect
           fieldName="position"
           fieldLabel="Select a position"
@@ -368,9 +369,7 @@ const PositionColumn = ({
           overlayColumns={["Position", "Organization", "Current Occupant"]}
           overlayRenderRow={PositionOverlayRow}
           filterDefs={positionsFilters}
-          onChange={value => {
-            return setPosition(value)
-          }}
+          onChange={value => setPosition(value)}
           objectType={Position}
           valueKey="name"
           fields={POSITION_FIELDS}
@@ -485,7 +484,7 @@ const PositionColumn = ({
               setFieldValue("location", position.location)
             }, align)}
           />
-          {getLeafletMap(position.uuid, position.location)}
+          {getLeafletMap(`merge-positions-map-${align}`, position.location)}
         </>
       )}
     </PositionCol>
@@ -502,7 +501,7 @@ PositionColumn.propTypes = {
   position: PropTypes.object,
   setPosition: PropTypes.func.isRequired,
   setFieldValue: PropTypes.func.isRequired,
-  align: PropTypes.string.isRequired,
+  align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
   label: PropTypes.string.isRequired
 }
 

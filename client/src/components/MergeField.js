@@ -8,7 +8,7 @@ const MergeField = ({ label, value, align, action }) => {
     <MergeFieldBox fDir={fDir}>
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>
-        <div style={{ textAlign: align }}>{value}</div>
+        <ValueBox align={align}>{value}</ValueBox>
       </div>
       {action}
     </MergeFieldBox>
@@ -21,6 +21,7 @@ const MergeFieldBox = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
+  height: 50px;
 `
 
 const LabelBox = styled.div`
@@ -28,11 +29,23 @@ const LabelBox = styled.div`
   font-weight: bold;
   text-decoration: underline;
 `
+const ALIGN_TO_JUSTIFY = {
+  center: "center",
+  left: "flex-start",
+  right: "flex-end"
+}
+
+const ValueBox = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: ${props => ALIGN_TO_JUSTIFY[props.align]};
+  align-items: center;
+`
 
 MergeField.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.node,
-  align: PropTypes.string.isRequired,
+  align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
   action: PropTypes.node
 }
 
