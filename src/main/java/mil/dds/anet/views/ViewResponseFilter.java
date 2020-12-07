@@ -86,7 +86,7 @@ public class ViewResponseFilter implements ContainerResponseFilter {
             }
           };
           AnetObjectEngine.getInstance().getPersonDao()
-              .logActivitiesByDomainUsername(person.getDomainUsername(), activity);
+              .logActivitiesByOpenIdSubject(person.getOpenIdSubject(), activity);
         }
       }
     } else {

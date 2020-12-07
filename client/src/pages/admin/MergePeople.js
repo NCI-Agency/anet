@@ -85,8 +85,8 @@ const MergePeople = ({ pageDispatchers }) => {
     pageDispatchers
   })
 
-  const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
-    position { uuid, name, type, organization { uuid, shortName, longName, identificationCode }},
+  const personFields = `uuid name emailAddress domainUsername openIdSubject createdAt role status rank
+    position { uuid name type organization { uuid shortName longName identificationCode }}
     authoredReports(query: {pageSize: 1}) { totalCount }
     attendedReports(query: {pageSize: 1}) { totalCount }`
 
@@ -288,6 +288,13 @@ const MergePeople = ({ pageDispatchers }) => {
           name="domainUsername"
           component={FieldHelper.ReadonlyField}
           humanValue={person.domainUsername}
+          vertical
+        />
+        <Field
+          name="openIdSubject"
+          label="OpenID subject"
+          component={FieldHelper.ReadonlyField}
+          humanValue={person.openIdSubject}
           vertical
         />
         <Field

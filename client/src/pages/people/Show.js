@@ -47,6 +47,7 @@ const GQL_GET_PERSON = gql`
       emailAddress
       phoneNumber
       domainUsername
+      openIdSubject
       biography
       country
       gender
@@ -223,10 +224,17 @@ const PersonShow = ({ pageDispatchers }) => {
                   humanValue={Person.humanNameOfRole(values.role)}
                 />
                 {isAdmin && (
-                  <Field
-                    name="domainUsername"
-                    component={FieldHelper.ReadonlyField}
-                  />
+                  <>
+                    <Field
+                      name="domainUsername"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                    <Field
+                      name="openIdSubject"
+                      label="OpenID subject"
+                      component={FieldHelper.ReadonlyField}
+                    />
+                  </>
                 )}
                 <Field
                   name="status"

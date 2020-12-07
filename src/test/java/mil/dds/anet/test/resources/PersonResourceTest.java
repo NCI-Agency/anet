@@ -43,7 +43,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
-          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
+          + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
           + " customFields";
   private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
 
@@ -507,6 +507,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person retPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS,
         retPerson.getUuid(), new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson2.getDomainUsername()).isNull();
+    assertThat(retPerson2.getOpenIdSubject()).isNull();
     assertThat(retPerson2.getPosition()).isNull();
   }
 

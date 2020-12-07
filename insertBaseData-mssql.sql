@@ -58,50 +58,32 @@ DELETE FROM authorizationGroups;
 DELETE FROM notes;
 
 --Advisors
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'JACKSON, Jack', 0, 0, 'hunter+jack@example.com', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', 'jack', 'Germany', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@example.com', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'SOLENOID, Selena', 0, 0, 'hunter+selena@example.com', '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', 'selena', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@example.com', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', 'erin', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'DVISOR, A', 0, 0, 'hunter+aDvisor@example.com', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, openIdSubject, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES
+		(lower(newid()), 'JACKSON, Jack', 0, 0, 'hunter+jack@example.com', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', 'jack', '89003390-168e-4dc3-a582-5b38ae264bdd', 'Germany', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@example.com', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', '06547ee2-dcc3-420c-96cb-5f3bb3793b4d', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'SOLENOID, Selena', 0, 0, 'hunter+selena@example.com', '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', 'selena', 'ce1df48e-fd6e-4dc4-bc00-9bb65a0d6910', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@example.com', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', 'erin', '04c29bab-7b20-4ff2-8583-8ad3dbcff4d6', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', '5b585887-1c3d-4f47-bccb-cdfebfd6e919', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'DVISOR, A', 0, 0, 'hunter+aDvisor@example.com', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'd09a55cf-6aa4-4bbf-8bf3-055ddcb4d27c', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Advisor with no position for testing
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(lower(newid()), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Principals
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'STEVESON, Steve', 0, 1, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ROGWELL, Roger', 0, 1, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(lower(newid()), 'STEVESON, Steve', 0, 1, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'ROGWELL, Roger', 0, 1, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Super Users
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'HENDERSON, Henry', 0, 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', 'Italy', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', 'Germany', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'HENDERSON, Henry', 0, 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', '9eb4b898-6fe4-40f8-abca-e893424d75d1', 'Germany', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Administrator
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', 'arthur', 'Albania', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
+		(lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', 'arthur', 'abc72322-1452-4222-bb71-a0b3db435175', 'Albania', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 --People
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, 'United States of America', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, 'nick', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, 'Italy', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(lower(newid()), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANET Administrator', 3, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

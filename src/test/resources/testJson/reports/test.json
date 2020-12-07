@@ -24,6 +24,7 @@
 		"rank": "OF-9",
 		"biography": "this is a sample biography",
 		"domainUsername" : "jack",
+		"openIdSubject": null,
 		"gender" : "Male",
 		"country" : "United States of America",
 		"endOfTourDate" : 1498780800000,
@@ -74,6 +75,7 @@
 			"rank": "OF-9",
 			"biography": "this is a sample biography",
 			"domainUsername" : "jack",
+			"openIdSubject": null,
 			"gender" : "Male",
 			"country" : "United States of America",
 			"endOfTourDate" : 1498780800000

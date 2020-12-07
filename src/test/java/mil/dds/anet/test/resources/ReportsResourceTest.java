@@ -78,7 +78,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
       "uuid shortName longName status identificationCode type";
   private static final String PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country"
-          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
+          + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt";
   private static final String POSITION_FIELDS = "uuid";
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"

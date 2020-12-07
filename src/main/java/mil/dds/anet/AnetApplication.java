@@ -161,25 +161,58 @@ public class AnetApplication extends Application<AnetConfiguration> {
               HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
             final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
             final AccessToken token = securityContext.getToken();
-            final String username = token.getPreferredUsername();
-            final List<Person> p = dao.findByDomainUsername(username);
-            if (p.isEmpty()) {
-              // First time this user has ever logged in.
-              final Person person = new Person();
-              person.setRole(Role.ADVISOR);
-              person.setPendingVerification(true);
-              // Copy some data from the authentication token
-              person.setDomainUsername(username);
-              person.setName(getCombinedName(token));
-              person.setEmailAddress(token.getEmail());
-              /*
-               * Note: there's also token.getGender(), but that's not generally available in
-               * AD/LDAP, and token.getPhoneNumber(), but that requires scope="openid phone" on the
-               * authentication request, which is hard to accomplish with current Keycloak code.
-               */
-              return dao.insert(person);
+            final String openIdSubject = token.getSubject();
+            List<Person> p = dao.findByOpenIdSubject(openIdSubject);
+            if (!p.isEmpty()) {
+              final Person existingPerson = p.get(0);
+              logger.trace("found existing user={} by openIdSubject={}", existingPerson,
+                  openIdSubject);
+              return existingPerson;
             }
-            return p.get(0);
+
+            // Might be user from before Keycloak integration, try username
+            final String username = token.getPreferredUsername();
+            p = dao.findByDomainUsername(username);
+            if (!p.isEmpty()) {
+              final Person existingPerson = p.get(0);
+              logger.trace(
+                  "found existing user={} by domainUsername={}; setting openIdSubject={} (was {})",
+                  existingPerson, username, openIdSubject, existingPerson.getOpenIdSubject());
+              existingPerson.setOpenIdSubject(openIdSubject);
+              dao.update(existingPerson);
+              return existingPerson;
+            }
+
+            // Fall back to email
+            final String email = token.getEmail();
+            p = dao.findByEmailAddress(email);
+            if (!p.isEmpty()) {
+              final Person existingPerson = p.get(0);
+              logger.trace(
+                  "found existing user={} by emailAddress={}; setting openIdSubject={} (was {})",
+                  existingPerson, email, openIdSubject, existingPerson.getOpenIdSubject());
+              existingPerson.setOpenIdSubject(openIdSubject);
+              dao.update(existingPerson);
+              return existingPerson;
+            }
+
+            // Not found, first time this user has ever logged in
+            final Person person = new Person();
+            logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
+                username, email, openIdSubject);
+            person.setRole(Role.ADVISOR);
+            person.setPendingVerification(true);
+            // Copy some data from the authentication token
+            person.setOpenIdSubject(openIdSubject);
+            person.setDomainUsername(username);
+            person.setEmailAddress(email);
+            person.setName(getCombinedName(token));
+            /*
+             * Note: there's also token.getGender(), but that's not generally available in AD/LDAP,
+             * and token.getPhoneNumber(), but that requires scope="openid phone" on the
+             * authentication request, which is hard to accomplish with current Keycloak code.
+             */
+            return dao.insert(person);
           }
         };
       }

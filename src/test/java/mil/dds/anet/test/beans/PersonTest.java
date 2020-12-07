@@ -245,6 +245,7 @@ public class PersonTest extends BeanTester<Person> {
     rp.setEmailAddress(p.getEmailAddress());
     rp.setBiography(p.getBiography());
     rp.setDomainUsername(p.getDomainUsername());
+    rp.setOpenIdSubject(p.getOpenIdSubject());
     rp.setCreatedAt(p.getCreatedAt());
     rp.setUpdatedAt(p.getUpdatedAt());
     rp.setRank(p.getRank());
