@@ -1149,6 +1149,12 @@ header.searchPagination {
   overflow-y: auto;
 }
 
+.rollup-date-range-container {
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
 @media screen and (max-width: 768px) {
   #main-viewport {
     padding-top: 8px;
@@ -1158,18 +1164,28 @@ header.searchPagination {
 
   #notes-view.notes-hidden {
     max-width: 13%;
-	}
+  }
 
-	.advanced-search {
-		padding-left: 8px;
-		padding-right: 8px;
-	}
+  .advanced-search {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 
-	/* move advanced search popover to left on small screens */
-	.search-popover-target ~ .bp3-overlay > .bp3-transition-container  {
-		left: -26vw !important;
-		width: 95vw;
-	}
+  /* move advanced search popover to left on small screens */
+
+  .search-popover-target {
+    max-height: 200px;
+    overflow-y: scroll;
+  }
+
+  .search-popover-target ~ .bp3-overlay > .bp3-transition-container {
+    left: -26vw !important;
+    width: 95vw;
+  }
+
+  .rollup-date-range-container {
+    flex-direction: column;
+  }
 
   .home-tile-row .row {
     flex-wrap: wrap;
