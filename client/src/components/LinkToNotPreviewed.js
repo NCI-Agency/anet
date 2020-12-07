@@ -58,6 +58,8 @@ export default class LinkToNotPreviewed extends Component {
       style,
       ...componentProps
     } = this.props
+    // remove previewId from this component's props as it will not be used
+    delete componentProps.previewId
 
     if (button) {
       componentProps.className = [

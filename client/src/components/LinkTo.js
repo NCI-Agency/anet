@@ -1,3 +1,4 @@
+import { PopoverInteractionKind } from "@blueprintjs/core"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
 import ModelPreview from "components/ModelPreview"
@@ -95,8 +96,10 @@ const LinkTo = ({
         />
       }
       popoverClassName="bp3-dark"
-      hoverCloseDelay={1500}
+      hoverCloseDelay={400}
       portalClassName="linkto-model-preview-portal"
+      interactionKind={PopoverInteractionKind.HOVER}
+      boundary="viewport"
     >
       <LinkToComponent to={to} style={style} {...componentProps}>
         <>

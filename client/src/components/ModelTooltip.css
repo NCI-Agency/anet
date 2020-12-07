@@ -1,4 +1,9 @@
 /* set tooltips container style */
+/* make it above header*/
+.bp3-portal {
+  z-index: 1101;
+}
+
 .linkto-model-preview-portal .bp3-transition-container {
   border: 2px solid black;
   box-shadow: 4px 4px 4px rgba(0,0,0,.5);
