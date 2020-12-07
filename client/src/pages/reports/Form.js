@@ -41,6 +41,7 @@ import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
 import moment from "moment"
@@ -913,7 +914,12 @@ const ReportForm = ({
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("reportText", value, true)}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.reportText, value)) {
+                      setFieldValue("reportText", value, true)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -941,13 +947,22 @@ const ReportForm = ({
                         name="reportSensitiveInformation.text"
                         component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
-                        onChange={value =>
-                          setFieldValue(
-                            "reportSensitiveInformation.text",
-                            value || null,
-                            true
-                          )
-                        }
+                        onChange={value => {
+                          const safeVal = value || null
+                          // prevent initial unnecessary render of RichTextEditor
+                          if (
+                            !_isEqual(
+                              values.reportSensitiveInformation.text,
+                              safeVal
+                            )
+                          ) {
+                            setFieldValue(
+                              "reportSensitiveInformation.text",
+                              safeVal,
+                              true
+                            )
+                          }
+                        }}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -1087,9 +1102,7 @@ const ReportForm = ({
                   )}
                   {canDelete && (
                     <ConfirmDelete
-                      onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)
-                      }
+                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
@@ -1195,7 +1208,8 @@ const ReportForm = ({
           const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
-            newValues.reportSensitiveInformation = {} // object must exist for Collapse children
+            // object must exist for Collapse children
+            newValues.reportSensitiveInformation = { uuid: null, text: null }
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -1237,12 +1251,12 @@ const ReportForm = ({
     }
   }
 
-  function onConfirmDelete(uuid, resetForm) {
-    API.mutation(GQL_DELETE_REPORT, { uuid })
+  function onConfirmDelete(values, resetForm) {
+    API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
-        // After successful delete, reset the form in order to make sure the dirty
-        // prop is also reset (otherwise we would get a blocking navigation warning)
-        resetForm({ isSubmitting: true })
+        // reset the form to latest values
+        // to avoid unsaved changes propmt if it somehow becomes dirty
+        resetForm({ values, isSubmitting: true })
         history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
@@ -1268,9 +1282,9 @@ const ReportForm = ({
 
   function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    resetForm({ isSubmitting: true })
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Report.pathForEdit(report))
     }
@@ -1301,16 +1315,14 @@ const ReportForm = ({
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
     const entitiesAssessments = values[asessmentsFieldName]
-    return Object.keys(entitiesAssessments)
+    return Object.entries(entitiesAssessments)
       .filter(
-        key =>
-          entitiesUuids.includes(key) &&
-          !isEmptyAssessment(entitiesAssessments[key])
+        ([key, assessment]) =>
+          entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
-      .map(key => {
-        entitiesAssessments[key].__recurrence = RECURRENCE_TYPE.ONCE
-        entitiesAssessments[key].__relatedObjectType =
-          ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+      .map(([key, assessment]) => {
+        assessment.__recurrence = RECURRENCE_TYPE.ONCE
+        assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
