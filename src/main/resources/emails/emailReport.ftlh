@@ -276,7 +276,7 @@ ${sender.name} sent you a report from ANET:
           <label for="duration" class="col-sm-2 control-label">Duration (minutes)</label>
           <div class="col-sm-7">
             <div id="duration" class="form-control-static">
-              ${duration!}
+              ${(report.duration)!}
             </div>
           </div>
         </div>
