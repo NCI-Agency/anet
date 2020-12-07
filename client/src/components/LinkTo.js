@@ -1,5 +1,6 @@
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
+import ModelPreview from "components/ModelPreview"
 import ModelTooltip from "components/ModelTooltip"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
@@ -86,9 +87,13 @@ const LinkTo = ({
   const LinkToComponent = componentClass
   return (
     <ModelTooltip
-      modelType={modelType}
-      uuid={modelInstance.uuid}
-      previewId={previewId}
+      tooltipContent={
+        <ModelPreview
+          modelType={modelType}
+          uuid={modelInstance.uuid}
+          previewId={previewId}
+        />
+      }
       popoverClassName="bp3-dark"
       hoverCloseDelay={1500}
       portalClassName="linkto-model-preview-portal"

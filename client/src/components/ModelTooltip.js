@@ -1,23 +1,11 @@
 import { Tooltip } from "@blueprintjs/core"
-import ModelPreview from "components/ModelPreview"
 import PropTypes from "prop-types"
 import React from "react"
 import "./ModelTooltip.css"
 
-const ModelTooltip = ({
-  modelType,
-  uuid,
-  previewId,
-  children,
-  ...tooltipProps
-}) => {
+const ModelTooltip = ({ tooltipContent, children, ...tooltipProps }) => {
   return (
-    <Tooltip
-      content={
-        <ModelPreview modelType={modelType} uuid={uuid} previewId={previewId} />
-      }
-      {...tooltipProps}
-    >
+    <Tooltip content={tooltipContent} {...tooltipProps}>
       {children}
     </Tooltip>
   )
@@ -25,9 +13,7 @@ const ModelTooltip = ({
 
 ModelTooltip.propTypes = {
   children: PropTypes.node,
-  modelType: PropTypes.string.isRequired,
-  uuid: PropTypes.string,
-  previewId: PropTypes.string
+  tooltipContent: PropTypes.node
 }
 
 export default ModelTooltip

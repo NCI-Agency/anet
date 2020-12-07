@@ -19,8 +19,6 @@ export default class LinkToNotPreviewed extends Component {
     showAvatar: PropTypes.bool,
     isLink: PropTypes.bool,
     edit: PropTypes.bool,
-    previewId: PropTypes.string, // needed for previewing same pages multiple times
-
     // Configures this link to look like a button. Set it to true to make it a button,
     // or pass a string to set a button type
     button: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
@@ -58,7 +56,6 @@ export default class LinkToNotPreviewed extends Component {
       modelType,
       model,
       style,
-      previewId,
       ...componentProps
     } = this.props
 
