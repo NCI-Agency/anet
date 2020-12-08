@@ -1,4 +1,5 @@
 import _clone from "lodash/clone"
+import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
 import moment from "moment"
@@ -87,15 +88,15 @@ export const countPerValueAggregation = (fieldName, fieldConfig, data) => {
     return counter
   }, {})
   const legendColors = _clone(CHART_COLORS)
-  const legend = fieldConfig?.choices || {}
+  const legend = _cloneDeep(fieldConfig?.choices || {})
   const legendKeys = !_isEmpty(legend)
-    ? Object.entries(legend)
-    : Object.entries(counters)
+    ? Object.keys(legend)
+    : Object.keys(counters)
   legendKeys.forEach(
-    ([key, val]) =>
+    key =>
       (legend[key] = {
-        label: val?.label || key,
-        color: val?.color || legendColors.shift()
+        label: legend[key]?.label || key,
+        color: legend[key]?.color || legendColors.shift()
       })
   )
   legend.null = { label: "Unspecified", color: "#bbbbbb" }
