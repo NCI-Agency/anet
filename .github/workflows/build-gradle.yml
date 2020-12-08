@@ -31,14 +31,14 @@ jobs:
         java-version: 1.8
     - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
     - name: cache gradle
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: cache node
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ./client/node_modules/.cache
         key: ${{ runner.os }}-node
@@ -49,7 +49,7 @@ jobs:
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
     - name: cache yarn
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
@@ -110,13 +110,13 @@ jobs:
       with:
         java-version: 1.8
     - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       with:
         path: ./client/node_modules/.cache
         key: ${{ runner.os }}-node
@@ -126,7 +126,7 @@ jobs:
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
