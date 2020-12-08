@@ -84,7 +84,7 @@
     "json-loader": "0.5.7",
     "moment-timezone": "0.5.32",
     "postcss": "8.2.0",
-    "postcss-flexbugs-fixes": "4.2.1",
+    "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "4.1.0",
     "prettier": "2.2.1",
     "react-is": "16.13.1",
