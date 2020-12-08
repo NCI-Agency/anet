@@ -11,3 +11,5 @@ CREATE OR REPLACE AGGREGATE tsvector_agg (tsvector) (
 
 -- make sure the preconditions for UUID prefix search are met
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE EXTENSION IF NOT EXISTS postgis;

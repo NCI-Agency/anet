@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.AbstractReportSearcher;
@@ -41,6 +42,11 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   @Override
   protected void addTextQuery(ReportSearchQuery query) {
     addFullTextSearch("reports", query.getText(), query.isSortByPresent());
+  }
+
+  @Override
+  protected void addWithinPolygon(ReportSearchQuery query) {
+    addWithinPolygonPsql("locationUuid", query.getWithinPolygon());
   }
 
   @Override

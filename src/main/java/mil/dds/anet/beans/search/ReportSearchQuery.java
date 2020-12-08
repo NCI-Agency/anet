@@ -110,6 +110,10 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   @GraphQLQuery
   @GraphQLInputField
   private Boolean sensitiveInfo;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String withinPolygon;
+
   // internal search parameter:
   private boolean systemSearch;
 
@@ -356,6 +360,14 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
 
   public void setSensitiveInfo(Boolean sensitiveInfo) {
     this.sensitiveInfo = sensitiveInfo;
+  }
+
+  public String getWithinPolygon() {
+    return withinPolygon;
+  }
+
+  public void setWithinPolygon(String withinPolygon) {
+    this.withinPolygon = withinPolygon;
   }
 
   @JsonIgnore

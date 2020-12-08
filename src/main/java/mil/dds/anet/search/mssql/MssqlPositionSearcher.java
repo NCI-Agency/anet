@@ -3,6 +3,7 @@ package mil.dds.anet.search.mssql;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
+import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.search.AbstractPositionSearcher;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 
@@ -37,6 +38,11 @@ public class MssqlPositionSearcher extends AbstractPositionSearcher {
     final String text = query.getText();
     qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
     qb.addSqlArg("likeQuery", qb.getLikeQuery(text));
+  }
+
+  @Override
+  protected void addWithinPolygon(PositionSearchQuery query) {
+    addWithinPolygonMssql("locationUuid", query.getWithinPolygon());
   }
 
   @Override

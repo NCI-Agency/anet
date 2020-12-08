@@ -84,8 +84,14 @@ public abstract class AbstractPositionSearcher
       qb.addSqlArg("deleted", false);
     }
 
+    if (query.getWithinPolygon() != null) {
+      addWithinPolygon(query);
+    }
+
     addOrderByClauses(qb, query);
   }
+
+  protected abstract void addWithinPolygon(PositionSearchQuery query);
 
   @SuppressWarnings("unchecked")
   protected void addBatchClause(PositionSearchQuery query) {

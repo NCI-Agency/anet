@@ -72,6 +72,11 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   }
 
   @Override
+  protected void addWithinPolygon(ReportSearchQuery query) {
+    addWithinPolygonMssql("locationUuid", query.getWithinPolygon());
+  }
+
+  @Override
   protected void addBatchClause(ReportSearchQuery query) {
     addBatchClause(outerQb, query);
   }

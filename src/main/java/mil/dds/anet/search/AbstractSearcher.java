@@ -97,6 +97,18 @@ public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends Abs
     return String.format("(%1$s || %2$s)", tsQueryAnet, tsQuerySimple);
   }
 
+  protected void addWithinPolygonMssql(String locationUuidColumn, String queryText) {
+    qb.addWhereClause(String.format(
+        "\"%1$s\" IN (SELECT \"uuid\" FROM locations WHERE \"geometry\".STWithin(geometry::STGeomFromText('%2$s', 3857)) = 1)",
+        locationUuidColumn, queryText));
+  }
+
+  protected void addWithinPolygonPsql(String locationUuidColumn, String queryText) {
+    qb.addWhereClause(String.format(
+        "\"%1$s\" IN (SELECT \"uuid\" FROM locations WHERE ST_Within(\"geometry\", ST_GeomFromText('%2$s', 3857)))",
+        locationUuidColumn, queryText));
+  }
+
   protected List<String> getOrderBy(SortOrder sortOrder, String table, String... columns) {
     final List<String> clauses = new ArrayList<>();
     for (final String column : columns) {
