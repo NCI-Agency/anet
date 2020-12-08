@@ -1048,6 +1048,10 @@ header.searchPagination {
 	transform: translate(0, 150px);
 }
 
+@page {
+  margin: 0;
+}
+
 @media print {
 	.only-show-for-print {
 		display: inherit;
@@ -1096,5 +1100,9 @@ header.searchPagination {
 	#main-viewport, .anet, .content-container {
 		display: block !important;
 		height: 100% !important;
+	}
+	/* adds random characters at the end of document which causes printed pdf to have empty pages*/
+	svg > text#__react_svg_text_measurement_id {
+		display: none;
 	}
 }

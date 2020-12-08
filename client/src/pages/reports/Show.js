@@ -388,6 +388,14 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {canEmail && (
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
+            <Button
+              value="compactView"
+              type="button"
+              bsStyle="primary"
+              onClick={onCompactClick}
+            >
+              Summary / Print
+            </Button>
             {canEdit && (
               <LinkTo modelType="Report" model={report} edit button="primary">
                 Edit
@@ -962,6 +970,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function toggleEmailModal() {
     setShowEmailModal(!showEmailModal)
+  }
+
+  function onCompactClick() {
+    if (!_isEmpty(report)) {
+      history.push(`${report.uuid}/compact`)
+    }
   }
 
   function handleEmailValidation(value) {

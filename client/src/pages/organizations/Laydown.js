@@ -44,7 +44,6 @@ const OrganizationLaydown = ({ organization }) => {
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart
-                  label="test"
                   org={organization}
                   exportTitle={`Organization diagram for ${organization}`}
                   width={width}

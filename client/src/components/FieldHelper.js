@@ -1,3 +1,4 @@
+import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
@@ -15,7 +16,6 @@ import {
   ToggleButtonGroup
 } from "react-bootstrap"
 import utils from "utils"
-
 const getFieldId = field => field.id || field.name // name property is required
 
 const getHumanValue = (field, humanValue) => {
@@ -69,6 +69,7 @@ const Field = ({
   extraColElem,
   addon,
   vertical,
+  isCompact,
   extraAddon
 }) => {
   const id = getFieldId(field)
@@ -89,11 +90,26 @@ const Field = ({
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
-
   // setting label or extraColElem explicitly to null will completely remove these columns!
   const widgetWidth =
     12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
+
+  if (isCompact) {
+    return (
+      <CompactRow
+        label={label}
+        content={
+          <>
+            {widget}
+            {getHelpBlock(field, form)}
+            {children}
+          </>
+        }
+      />
+    )
+  }
+
   return (
     <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
       {vertical ? (
@@ -132,7 +148,8 @@ Field.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  extraAddon: PropTypes.object
+  extraAddon: PropTypes.object,
+  isCompact: PropTypes.bool
 }
 Field.defaultProps = {
   vertical: false // default direction of label and input = horizontal
@@ -227,6 +244,7 @@ export const ReadonlyField = ({
   addon,
   vertical,
   humanValue,
+  isCompact,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -247,6 +265,7 @@ export const ReadonlyField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
+      isCompact={isCompact}
     />
   )
 }
@@ -258,7 +277,8 @@ ReadonlyField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  humanValue: PropTypes.any
+  humanValue: PropTypes.any,
+  isCompact: PropTypes.bool
 }
 
 export const SpecialField = ({
@@ -270,6 +290,7 @@ export const SpecialField = ({
   addon,
   vertical,
   widget,
+  isCompact,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -286,6 +307,7 @@ export const SpecialField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
+      isCompact={isCompact}
     />
   )
 }
@@ -297,7 +319,8 @@ SpecialField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  widget: PropTypes.any
+  widget: PropTypes.any,
+  isCompact: PropTypes.bool
 }
 
 export const customEnumButtons = list => {

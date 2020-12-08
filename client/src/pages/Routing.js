@@ -28,6 +28,7 @@ import PositionEdit from "pages/positions/Edit"
 import MyCounterparts from "pages/positions/MyCounterparts"
 import PositionNew from "pages/positions/New"
 import PositionShow from "pages/positions/Show"
+import ReportCompact from "pages/reports/Compact"
 import ReportEdit from "pages/reports/Edit"
 import MyReports from "pages/reports/MyReports"
 import ReportNew from "pages/reports/New"
@@ -41,7 +42,6 @@ import TaskShow from "pages/tasks/Show"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Redirect, Route, Switch } from "react-router-dom"
-
 const Routing = () => {
   const { currentUser } = useContext(AppContext)
   return (
@@ -56,6 +56,7 @@ const Routing = () => {
           <Switch>
             <Route path={`${url}/mine`} component={MyReports} />
             <Route path={`${url}/new`} component={ReportNew} />
+            <Route path={`${url}/:uuid/compact`} component={ReportCompact} />
             <Route path={`${url}/:uuid/edit`} component={ReportEdit} />
             {/* TODO: Backwards-compatibility; this route can be removed at some point */}
             <Route path={`${url}/:uuid/min`} component={ReportShow} />
