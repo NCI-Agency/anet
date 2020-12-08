@@ -197,14 +197,8 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   }
 
   @InTransaction
-  public List<Task> getTopLevelTasks() {
-    return getDbHandle()
-        .createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
-        .map(new TaskMapper()).list();
-  }
-
-  @InTransaction
   public int mergeTask(Task loser, Task winnerTask) {
+    // Move notes of loser task to winner task
     getDbHandle().createUpdate(
         "UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
             + " AND \"noteUuid\" NOT IN ("
@@ -212,6 +206,7 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
             + ")")
         .bind("winnerUuid", winnerTask.getUuid()).bind("loserUuid", loser.getUuid()).execute();
 
+    // Update task information of reportTask object with winner task which related to loser task
     getDbHandle()
         .createUpdate(
             "UPDATE \"reportTasks\" SET \"taskUuid\" = :winnerUuid WHERE \"taskUuid\" = :loserUuid")
