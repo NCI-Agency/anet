@@ -104,7 +104,7 @@
     "@apollo/react-hooks": "3.1.5",
     "@blueprintjs/core": "3.36.0",
     "@blueprintjs/datetime": "3.20.0",
-    "@emotion/react": "11.0.0",
+    "@emotion/react": "11.1.2",
     "@emotion/styled": "11.0.0",
     "@fullcalendar/core": "4.4.2",
     "@fullcalendar/daygrid": "4.4.2",
