@@ -20,7 +20,7 @@
     },
     {
       "packageNames": ["autoprefixer", "draft-js", "leaflet", "react-tooltip"],
-      "packagePatterns": ["^@fullcalendar/*"],
+      "packagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],
