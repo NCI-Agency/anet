@@ -162,37 +162,33 @@ const PersonShow = ({ pageDispatchers }) => {
       .filter(ap => ap.person)
       .map(ap => ap.person.uuid)
       .includes(person.uuid)
+
+  const action = (
+    <div>
+      {canEdit && (
+        <LinkTo
+          modelType="Person"
+          model={person}
+          edit
+          button="primary"
+          className="edit-person"
+        >
+          Edit
+        </LinkTo>
+      )}
+    </div>
+  )
+  const emailHumanValue = (
+    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
+  )
+
+  const orderedFields = orderPersonFields()
+  const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
+  const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
+  const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
   return (
     <Formik enableReinitialize initialValues={person}>
-      {({ values }) => {
-        const action = (
-          <div>
-            {canEdit && (
-              <LinkTo
-                modelType="Person"
-                model={person}
-                edit
-                button="primary"
-                className="edit-person"
-              >
-                Edit
-              </LinkTo>
-            )}
-          </div>
-        )
-        const emailHumanValue = (
-          <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-        )
-
-        const orderedFields = orderPersonFields()
-        const numberOfFieldsUnderAvatar =
-          Settings.fields.person.numberOfFieldsInLeftColumn || 6
-        const leftColumUnderAvatar = orderedFields.slice(
-          0,
-          numberOfFieldsUnderAvatar
-        )
-        const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
-
+      {() => {
         return (
           <div>
             <div className="pull-right">
@@ -377,82 +373,81 @@ const PersonShow = ({ pageDispatchers }) => {
             />
           </div>
         )
-
-        function orderPersonFields() {
-          const mappedCustomFields = mapReadonlyCustomFieldsToComps({
-            fieldsConfig: Person.shownCustomFields,
-            values
-          })
-          const mappedNonCustomFields = mapNonCustomFields()
-          // map fields that have privileged access check to the condition
-          const privilegedAccessedFields = {
-            domainUsername: {
-              accessCond: isAdmin
-            }
-          }
-          return (
-            Settings.fields.person.showPageOrderedFields
-              // first filter if there is privileged accessed fields and its access condition is true
-              .filter(key =>
-                privilegedAccessedFields[key]
-                  ? privilegedAccessedFields[key].accessCond
-                  : true
-              ) // Also filter if somehow there is no field in both maps
-              .filter(
-                key => mappedNonCustomFields[key] || mappedCustomFields[key]
-              )
-              // then map it to components and keys, keys used for React list rendering
-              .map(key => [
-                mappedNonCustomFields[key] || mappedCustomFields[key],
-                key
-              ])
-              .map(([el, key]) =>
-                React.cloneElement(el, {
-                  key,
-                  extraColElem: null,
-                  labelColumnWidth: 4
-                })
-              )
-          )
-        }
-
-        function mapNonCustomFields() {
-          const classNameExceptions = {
-            biography: "biography"
-          }
-
-          // map fields that have specific human values
-          const humanValuesExceptions = {
-            status: Person.humanNameOfStatus(values.status),
-            emailAddress: emailHumanValue,
-            endOfTourDate:
-              person.endOfTourDate &&
-              moment(person.endOfTourDate).format(
-                Settings.dateFormats.forms.displayShort.date
-              ),
-            role: Person.humanNameOfRole(values.role),
-            biography: parseHtmlWithLinkTo(person.biography)
-          }
-          return Person.shownStandardFields.reduce((accum, key) => {
-            accum[key] = (
-              <Field
-                name={key}
-                label={
-                  Settings.fields.person[key]?.label ||
-                  Settings.fields.person[key]
-                }
-                component={FieldHelper.ReadonlyField}
-                humanValue={humanValuesExceptions[key]}
-                className={classNameExceptions[key]}
-              />
-            )
-
-            return accum
-          }, {})
-        }
       }}
     </Formik>
   )
+
+  function orderPersonFields() {
+    const mappedCustomFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getCustomFieldsOrderedAsObject(),
+      values: person
+    })
+    const mappedNonCustomFields = mapNonCustomFields()
+    // map fields that have privileged access check to the condition
+    const privilegedAccessedFields = {
+      domainUsername: {
+        accessCond: isAdmin
+      }
+    }
+    return (
+      person
+        .getShowPageFieldsOrdered()
+        // first filter if there is privileged accessed fields and its access condition is true
+        .filter(key =>
+          privilegedAccessedFields[key]
+            ? privilegedAccessedFields[key].accessCond
+            : true
+        )
+        // Also filter if somehow there is no field in both maps
+        .filter(key => mappedNonCustomFields[key] || mappedCustomFields[key])
+        // then map it to components and keys, keys used for React list rendering
+        .map(key => [
+          mappedNonCustomFields[key] || mappedCustomFields[key],
+          key
+        ])
+        .map(([el, key]) =>
+          React.cloneElement(el, {
+            key,
+            extraColElem: null,
+            labelColumnWidth: 4
+          })
+        )
+    )
+  }
+
+  function mapNonCustomFields() {
+    const classNameExceptions = {
+      biography: "biography"
+    }
+
+    // map fields that have specific human person
+    const humanValuesExceptions = {
+      status: Person.humanNameOfStatus(person.status),
+      emailAddress: emailHumanValue,
+      endOfTourDate:
+        person.endOfTourDate &&
+        moment(person.endOfTourDate).format(
+          Settings.dateFormats.forms.displayShort.date
+        ),
+      role: Person.humanNameOfRole(person.role),
+      biography: parseHtmlWithLinkTo(person.biography)
+    }
+    return person.getNormalFieldsOrdered().reduce((accum, key) => {
+      accum[key] = (
+        <Field
+          name={key}
+          label={
+            Settings.fields.person[key]?.label || Settings.fields.person[key]
+          }
+          component={FieldHelper.ReadonlyField}
+          humanValue={humanValuesExceptions[key]}
+          className={classNameExceptions[key]}
+        />
+      )
+
+      return accum
+    }, {})
+  }
 
   function renderPosition(position) {
     return (

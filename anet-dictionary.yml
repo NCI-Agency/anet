@@ -475,26 +475,7 @@ fields:
             label: Object date
             helpText: Help text for object date field
             visibleWhen: $[?(@.colourOptions === 'GREEN')]
-    # number of fields after Avatar in the left column for Person
-    numberOfFieldsInLeftColumn: 6
-    showPageOrderedFields:
-      - domainUsername
-      - emailAddress
-      - multipleButtons
-      - inputFieldName
-      - phoneNumber
-      - country
-      - colourOptions
-      - textareaFieldName
-      - code
-      - rank
-      - numberFieldName
-      - nlt
-      - nlt_dt
-      - gender
-      - endOfTourDate
-      - biography
-      - arrayFieldName
+
 
   location:
     format: LAT_LON
@@ -747,7 +728,26 @@ fields:
       countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
                   Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
                   Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
-
+      # number of fields after Avatar in the left column for Person
+      numberOfFieldsInLeftColumn: 6
+      showPageOrderedFields:
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: NATO Billet
       type: ANET User
@@ -862,6 +862,27 @@ fields:
                   label: 👍
                   color: '#0000ff'
 
+      # number of fields after Avatar in the left column for Person
+      # Select the number so that the two columns are balanced in production
+      numberOfFieldsInLeftColumn: 6
+      showPageOrderedFields:
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: Afghan Tashkil
       type: Afghan Partner

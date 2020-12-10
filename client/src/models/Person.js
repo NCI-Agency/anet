@@ -39,37 +39,6 @@ export default class Person extends Model {
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
 
-  // Filter empty/wrong fields in case they are listed in the array by mistake
-  static showPageOrderedFields = Settings.fields.person.showPageOrderedFields.filter(
-    field => {
-      if (
-        Settings.fields.person[field] ||
-        Settings.fields.person.customFields[field]
-      ) {
-        return true
-      }
-      API.logOnServer(
-        "WARN",
-        "Person.js",
-        50,
-        `Wrong field name in dictionary.fields.person.showPageOrderedFields, field name: ${field}`
-      )
-      return false
-    }
-  )
-
-  static shownCustomFields = Person.showPageOrderedFields
-    // filter out non-custom fields
-    .filter(key => Person.customFields[key])
-    .reduce((accum, key) => {
-      accum[key] = Person.customFields[key]
-      return accum
-    }, {})
-
-  static shownStandardFields = Person.showPageOrderedFields
-    // filter out custom fields
-    .filter(key => !Person.customFields[key])
-
   static yupSchema = yup
     .object()
     .shape({
@@ -355,6 +324,59 @@ export default class Person extends Model {
       lastName: lastName.trim().toUpperCase(),
       firstName: firstName.trim()
     }
+  }
+
+  static filterShowPageFields(fieldsArrayFromConfig) {
+    return fieldsArrayFromConfig.filter(field => {
+      if (
+        Settings.fields.person[field] ||
+        Settings.fields.person.customFields[field]
+      ) {
+        return true
+      }
+      API.logOnServer(
+        "WARN",
+        "Person.js",
+        356,
+        `Wrong field name in dictionary.fields.${this.role.toLowerCase()}.showPageOrderedFields, field name: ${field}`
+      )
+      return false
+    })
+  }
+
+  getNumberOfFieldsInLeftColumn() {
+    return this.isPrincipal()
+      ? Settings.fields.principal.person.numberOfFieldsInLeftColumn
+      : Settings.fields.advisor.person.numberOfFieldsInLeftColumn
+  }
+
+  getShowPageFieldsOrdered() {
+    const fieldsArrayFromConfig = this.isPrincipal()
+      ? Settings.fields.principal.person.showPageOrderedFields
+      : Settings.fields.advisor.person.showPageOrderedFields
+
+    return Person.filterShowPageFields(fieldsArrayFromConfig)
+  }
+
+  getNormalFieldsOrdered() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out custom fields
+        .filter(key => !Person.customFields[key])
+    )
+  }
+
+  // we want custom fields as an object not array so we can parse it using existing code
+  getCustomFieldsOrderedAsObject() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out non-custom fields
+        .filter(key => Person.customFields[key])
+        .reduce((accum, key) => {
+          accum[key] = Person.customFields[key]
+          return accum
+        }, {})
+    )
   }
 
   generalAssessmentsConfig() {
