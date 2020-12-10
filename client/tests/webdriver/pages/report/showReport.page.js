@@ -81,10 +81,11 @@ class ShowReport extends Page {
   }
 
   waitForShowReportToLoad() {
-    if (!this.reportStatus.isDisplayed()) {
-      this.reportStatus.waitForExist()
-      this.reportStatus.waitForDisplayed()
-    }
+    browser.waitUntil(() =>
+      /^.*\/reports\/[a-z0-9-]{36}/.test(browser.getUrl())
+    )
+    this.reportStatus.waitForExist()
+    this.reportStatus.waitForDisplayed()
   }
 }
 

@@ -7,8 +7,8 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,7 +78,7 @@ public class Person extends AbstractCustomizableAnetBean
   @GraphQLInputField
   private String code;
 
-  private List<Map<String, String>> userActivities;
+  private LinkedList<Map<String, Object>> userActivities;
 
   @Override
   public String getName() {
@@ -307,15 +307,15 @@ public class Person extends AbstractCustomizableAnetBean
   }
 
   @JsonIgnore
-  public List<Map<String, String>> getUserActivities() {
+  public LinkedList<Map<String, Object>> getUserActivities() {
     if (userActivities == null) {
-      return new ArrayList<>();
+      return new LinkedList<>();
     }
-    return new ArrayList<>(userActivities);
+    return new LinkedList<>(userActivities);
   }
 
   @JsonIgnore
-  public void setUserActivities(List<Map<String, String>> userActivities) {
+  public void setUserActivities(LinkedList<Map<String, Object>> userActivities) {
     this.userActivities = userActivities;
   }
 

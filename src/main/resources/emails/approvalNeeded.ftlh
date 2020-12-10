@@ -126,6 +126,12 @@ Dear ${approvalStepName},
   <strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
 
+<#if engagementsIncludeTimeAndDuration>
+  <div>
+    <strong>Duration (minutes):</strong> ${(report.duration)!}
+  </div>
+</#if>
+
 <#assign tasks = (report.loadTasks(context).get())!>
 <#list tasks as task>
 <div class="row">

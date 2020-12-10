@@ -5,7 +5,7 @@ import React, { useContext } from "react"
 import { Version } from "settings"
 
 const SETTING_KEY_TEXT = "SECURITY_BANNER_TEXT"
-const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
+export const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
 
 const css = {
   zIndex: 101,
@@ -46,6 +46,18 @@ const VersionBox = styled.h6`
   @media (max-width: 768px) {
     display: none;
   }
+`
+
+export const CompactSecurityBanner = () => {
+  const { appSettings } = useContext(AppContext)
+  return (
+    <CompactBannerS className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
+      {appSettings[SETTING_KEY_TEXT]}
+    </CompactBannerS>
+  )
+}
+const CompactBannerS = styled.div`
+  ${css};
 `
 
 export default SecurityBanner

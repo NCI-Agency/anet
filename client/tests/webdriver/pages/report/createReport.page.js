@@ -24,21 +24,9 @@ class CreateReport extends Page {
     return browser.$("#engagementDate")
   }
 
-  get today() {
-    return browser.$(".bp3-datepicker-footer > button:first-child")
-  }
-
   get tomorrow() {
     const tomorrow = moment().add(1, "day").format("ddd MMM DD YYYY")
     return browser.$(`div[aria-label="${tomorrow}"]`)
-  }
-
-  get hour() {
-    return browser.$("input.bp3-timepicker-input.bp3-timepicker-hour")
-  }
-
-  get minute() {
-    return browser.$("input.bp3-timepicker-input.bp3-timepicker-minute")
   }
 
   get duration() {
@@ -61,52 +49,15 @@ class CreateReport extends Page {
     super.open(PAGE_URL)
   }
 
-  getAdvisorByName(name) {
-    const advisor = browser
-      .$$("#reportPeopleContainer .advisorAttendeesTable tbody tr")
-      .find(r => {
-        return (
-          r.$("td.reportPeopleName").isExisting() &&
-          r.$("td.reportPeopleName").getText() === name
-        )
-      })
-
-    if (!advisor) {
-      return null
-    }
-    // wait for conflict loader to disappear
-    advisor
-      .$("td.conflictButton div.bp3-spinner")
-      .waitForExist({ reverse: true })
-
-    const result = {
-      name: advisor.$("td.reportPeopleName").getText(),
-      conflictButton: advisor.$("td.conflictButton > span")
-    }
-
-    return result
-  }
-
-  getPrincipalByName(name) {
-    // principals table has an empty row at top
-    const principal = browser
-      .$$("#reportPeopleContainer .principalAttendeesTable tbody tr")
-      .find(
-        r =>
-          r.$("td.reportPeopleName").isExisting() &&
-          r.$("td.reportPeopleName").getText() === name
-      )
-    if (!principal) {
-      return null
-    }
-    // wait for conflict loader to disappear
-    principal
-      .$("td.conflictButton div.bp3-spinner")
-      .waitForExist({ reverse: true })
+  getPersonByName(name) {
+    const personRow = browser.$$(
+      `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and ./a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
+    )
+    personRow[0].$("div.bp3-spinner").waitForExist({ reverse: true })
 
     return {
-      name: principal.$("td.reportPeopleName").getText(),
-      conflictButton: principal.$("td.conflictButton > span")
+      name: personRow[1].getText(),
+      conflictButton: personRow[0].$("./span")
     }
   }
 
@@ -127,7 +78,7 @@ class CreateReport extends Page {
       checkBox.click()
     }
     this.title.click()
-    this.reportPeopleTable.waitForDisplayed({ reverse: true })
+    this.reportPeopleTable.waitForExist({ reverse: true, timeout: 3000 })
   }
 
   fillForm(fields) {
@@ -143,22 +94,10 @@ class CreateReport extends Page {
       this.engagementDate.waitForClickable()
       this.engagementDate.click()
       this.tomorrow.waitForDisplayed()
-      this.tomorrow.waitForClickable()
-      browser.pause(300) // wait for calendar popup animation
-      this.tomorrow.click()
-      browser.waitUntil(() => !!browser.$("#engagementDate").getValue())
-      this.hour.waitForDisplayed()
-      this.hour.waitForClickable()
-      this.hour.click()
-      browser.keys(fields.engagementDate.format("HH"))
-      this.minute.waitForDisplayed()
-      this.minute.waitForClickable()
-      this.minute.click()
-      browser.keys(fields.engagementDate.format("mm"))
-      this.engagementDate.click()
+      browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
 
       this.title.click()
-      this.tomorrow.waitForDisplayed({ reverse: true })
+      this.tomorrow.waitForExist({ reverse: true, timeout: 3000 })
     }
 
     if (fields.duration !== undefined) {
@@ -175,7 +114,9 @@ class CreateReport extends Page {
   }
 
   submitForm() {
+    this.submitButton.waitForClickable()
     this.submitButton.click()
+    this.submitButton.waitForExist({ reverse: true })
   }
 }
 

@@ -25,20 +25,22 @@ jobs:
         channel: anet-notifications
         status: STARTED
         color: warning
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
     - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
     - name: cache gradle
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: cache node
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ./client/node_modules/.cache
         key: ${{ runner.os }}-node
@@ -49,7 +51,7 @@ jobs:
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
     - name: cache yarn
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
@@ -105,18 +107,22 @@ jobs:
         channel: anet-notifications
         status: STARTED
         color: warning
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
     - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
-    - uses: actions/cache@v1
+    - name: cache gradle
+      uses: actions/cache@v2
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - uses: actions/cache@v1
+    - name: cache node
+      uses: actions/cache@v2
       with:
         path: ./client/node_modules/.cache
         key: ${{ runner.os }}-node
@@ -126,7 +132,8 @@ jobs:
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
-    - uses: actions/cache@v1
+    - name: cache yarn
+      uses: actions/cache@v2
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}

@@ -45,6 +45,7 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
 import Settings from "settings"
 
 export const SearchQueryPropType = PropTypes.shape({
@@ -74,14 +75,6 @@ export const getSearchQuery = searchQuery => {
     })
   }
   return query
-}
-
-export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
-
-export const RECURSE_STRATEGY = {
-  NONE: "NONE",
-  CHILDREN: "CHILDREN",
-  PARENTS: "PARENTS"
 }
 
 const StatusFilter = {
@@ -192,7 +185,7 @@ const advancedSelectFilterTaskProps = {
   addon: TASKS_ICON
 }
 
-const searchFilters = function() {
+export const searchFilters = function() {
   const filters = {}
 
   const taskShortLabel = Settings.fields.task.shortLabel
@@ -490,7 +483,7 @@ const searchFilters = function() {
 
   filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
     filters: {
-      [POSTITION_POSITION_TYPE_FILTER_KEY]: {
+      [POSITION_POSITION_TYPE_FILTER_KEY]: {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         props: {
@@ -541,7 +534,7 @@ const searchFilters = function() {
     filters: taskFilters()
   }
 
-  for (const [, filtersForType] of Object.entries(filters)) {
+  for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter
     filtersForType.filters.Subscribed = SubscriptionFilter
   }
@@ -628,6 +621,11 @@ export const SearchDescription = ({ searchQuery, showPlaceholders }) => {
   )
 }
 
+SearchDescription.propTypes = {
+  searchQuery: SearchQueryPropType,
+  showPlaceholders: PropTypes.bool
+}
+
 export const findCommonFiltersForAllObjectTypes = (
   searchObjectTypes,
   theSearchFilters
@@ -638,9 +636,47 @@ export const findCommonFiltersForAllObjectTypes = (
       _pickBy(filters1, (value, key) => filters2[key])
     )
 
-SearchDescription.propTypes = {
-  searchQuery: SearchQueryPropType,
-  showPlaceholders: PropTypes.bool
+export const deserializeQueryParams = (
+  objType,
+  queryParams,
+  callbackFunction
+) => {
+  // From query params to search filters
+  const text = queryParams.text || ""
+  const usedFilters = []
+  const promises = []
+  if (objType) {
+    const EXTRA_FILTERS = extraFilters()
+    const extraFilterDefs = EXTRA_FILTERS[objType] || []
+    extraFilterDefs.map(filterKey => {
+      if (Object.prototype.hasOwnProperty.call(queryParams, filterKey)) {
+        usedFilters.push({ key: filterKey, value: queryParams[filterKey] })
+      }
+      return null
+    })
+    const ALL_FILTERS = searchFilters()
+    const filterDefs = ALL_FILTERS[objType].filters
+    Object.entries(filterDefs).map(([filterKey, filterDef]) => {
+      const deser = filterDef.deserializer(
+        filterDef.props,
+        queryParams,
+        filterKey
+      )
+      if (deser && deser.then instanceof Function) {
+        // deserialize returns a Promise
+        promises.push(deser)
+      } else if (deser) {
+        // deserialize returns filter data
+        usedFilters.push(deser)
+      }
+      return null
+    })
+  }
+  Promise.all(promises).then(dataList => {
+    dataList.forEach((filterData, index) => {
+      // update filters
+      usedFilters.push(filterData)
+    })
+    callbackFunction(objType, usedFilters, text)
+  })
 }
-
-export default { searchFilters, extraFilters }

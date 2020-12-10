@@ -2,8 +2,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import * as d3 from "d3"
@@ -97,7 +97,6 @@ const OrganizationalChart = ({
   const tree = useRef(d3.tree())
   const [root, setRoot] = useState(null)
   const [height, setHeight] = useState(initialHeight)
-  const nodeSize = [200, 100 + 11 * personnelDepth]
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: org.uuid
   })
@@ -129,6 +128,7 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
+    const nodeSize = [200, 100 + 11 * personnelDepth]
 
     const calculateBounds = rootArg => {
       const boundingBox = rootArg.descendants().reduce(
@@ -174,7 +174,7 @@ const OrganizationalChart = ({
     )
 
     setHeight(scale * bounds.size[1] + 50)
-  }, [nodeSize, canvas, data, height, width, root])
+  }, [personnelDepth, canvas, data, height, width, root])
 
   useEffect(() => {
     data && setExpanded([data.organization.uuid])

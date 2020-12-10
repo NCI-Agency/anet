@@ -6,12 +6,13 @@ import Model, {
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Task } from "models"
 import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
+import Person from "./Person"
+import Task from "./Task"
 
 export default class Report extends Model {
   static resourceName = "Report"
@@ -171,85 +172,61 @@ export default class Report extends Model {
       reportPeople: yup
         .array()
         .nullable()
-        .test(
-          "primary-principal",
-          "primary principal error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkPrimaryAttendee(
-              reportPeople,
-              Person.ROLE.PRINCIPAL
-            )
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "primary-advisor",
-          "primary advsior error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkPrimaryAttendee(
-              reportPeople,
-              Person.ROLE.ADVISOR
-            )
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "attending-author",
-          "no attending author error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkAttendingAuthor(reportPeople)
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "no-author",
-          "no author error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkAnyAuthor(reportPeople)
-            return err ? this.createError({ message: err }) : true
-          }
-        )
-        .test(
-          "purposeless-people",
-          "purposeless people error",
-          // can't use arrow function here because of binding to 'this'
-          function(reportPeople) {
-            const err = Report.checkUnInvolvedPeople(reportPeople)
-            return err ? this.createError({ message: err }) : true
-          }
-        )
         .when("cancelled", (cancelled, schema) =>
           cancelled
             ? schema.nullable()
-            : schema.test(
-              "primary-advisor",
-              "primary advisor error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportPeople) {
-                const err = Report.checkPrimaryAttendee(
-                  reportPeople,
-                  Person.ROLE.ADVISOR
-                )
-                return err ? this.createError({ message: err }) : true
-              }
-            )
-        )
-        .when("cancelled", (cancelled, schema) =>
-          cancelled
-            ? schema.nullable()
-            : schema.test(
-              "attending-author",
-              "no attending author error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportPeople) {
-                const err = Report.checkAttendingAuthor(reportPeople)
-                return err ? this.createError({ message: err }) : true
-              }
-            )
+            : schema // Only do validation warning when engagement not cancelled
+              .test(
+                "primary-principal",
+                "primary principal error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkPrimaryAttendee(
+                    reportPeople,
+                    Person.ROLE.PRINCIPAL
+                  )
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "primary-advisor",
+                "primary advisor error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkPrimaryAttendee(
+                    reportPeople,
+                    Person.ROLE.ADVISOR
+                  )
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "no-author",
+                "no author error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkAnyAuthor(reportPeople)
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "attending-author",
+                "no attending author error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkAttendingAuthor(reportPeople)
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
+              .test(
+                "purposeless-people",
+                "purposeless people error",
+                // can't use arrow function here because of binding to 'this'
+                function(reportPeople) {
+                  const err = Report.checkUnInvolvedPeople(reportPeople)
+                  return err ? this.createError({ message: err }) : true
+                }
+              )
         )
         .default([]),
       principalOrg: yup.object().nullable().default({}),
@@ -327,7 +304,10 @@ export default class Report extends Model {
         .nullable()
         .default([])
         .label(Settings.fields.report.reportTags),
-      reportSensitiveInformation: yup.object().nullable().default({}), // null?
+      reportSensitiveInformation: yup
+        .object()
+        .nullable()
+        .default({ uuid: null, text: null }),
       authorizationGroups: yup.array().nullable().default([])
     })
     // not actually in the database, the database contains the JSON customFields

@@ -1,8 +1,5 @@
-import LinkAnet from "components/editor/LinkAnet"
-import parse from "html-react-parser"
 import * as Models from "models"
 import { PAGE_URLS } from "pages/util"
-import React from "react"
 
 const UUID_REGEX =
   "^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$"
@@ -41,18 +38,4 @@ export function getEntityInfoFromUrl(url) {
   }
 
   return null
-}
-
-// Enhanced HTML so that links will be converted to LinkTo components
-export function parseHtmlWithLinkTo(html) {
-  if (!html) {
-    return null
-  }
-  return parse(html, {
-    replace: domNode => {
-      if (domNode.attribs && domNode.attribs.href) {
-        return <LinkAnet url={domNode.attribs.href} />
-      }
-    }
-  })
 }

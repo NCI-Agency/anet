@@ -184,7 +184,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
     fieldTypeYupSchema = fieldTypeYupSchema.typeError(typeError)
   }
   if (!_isEmpty(objectFields)) {
-    const objSchema = createYupObjectShape(objectFields, parentFieldName)
+    const objSchema = createYupObjectShape(objectFields, parentFieldName, false)
     fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
   }
   if (!_isEmpty(validations)) {
@@ -217,22 +217,23 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
 
 export const createYupObjectShape = (
   config,
-  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
+  isTopLevel = true
 ) => {
   let objShape = {}
   if (config) {
     objShape = Object.fromEntries(
       Object.entries(config)
-        .map(([k, v]) => [
-          k,
-          createFieldYupSchema(k, config[k], parentFieldName)
-        ])
+        .map(([k, v]) => [k, createFieldYupSchema(k, v, parentFieldName)])
         .filter(([k, v]) => v !== null)
     )
-    objShape[INVISIBLE_CUSTOM_FIELDS_FIELD] = yup
-      .mixed()
-      .nullable()
-      .default(null)
+    // only the top level config objects keep hold of the invisible fields info
+    if (isTopLevel) {
+      objShape[INVISIBLE_CUSTOM_FIELDS_FIELD] = yup
+        .mixed()
+        .nullable()
+        .default(null)
+    }
   }
   return yup.object().shape(objShape)
 }
@@ -281,7 +282,7 @@ export default class Model {
           !Object.prototype.hasOwnProperty.call(obj, key) ||
           utils.isNullOrUndefined(obj[key])
         ) {
-          obj[key] = value.default()
+          obj[key] = value.getDefault()
         }
       })
       return obj

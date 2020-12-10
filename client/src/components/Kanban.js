@@ -65,8 +65,8 @@ const Column = ({ name, tasks }) => {
           segmentFill={entity => {
             const matching = Object.entries(
               Settings.fields.task.customFieldEnum1.enum
-            ).filter(candidate => {
-              return candidate[0] === entity.data.key
+            ).filter(([key, val]) => {
+              return key === entity.data.key
             })
             return matching.length > 0 ? matching[0][1].color : "#bbbbbb"
           }}

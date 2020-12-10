@@ -1,6 +1,6 @@
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
-import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"

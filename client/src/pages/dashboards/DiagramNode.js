@@ -1,4 +1,4 @@
-import { css, keyframes } from "@emotion/core"
+import { css, keyframes } from "@emotion/react"
 import styled from "@emotion/styled"
 import {
   AbstractModelFactory,
@@ -161,25 +161,26 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
           />
           <>
             {instantAssessmentConfig &&
-              Object.keys(instantAssessmentConfig || {}).map(questionKey => {
-                const questionConfig = instantAssessmentConfig[questionKey]
-                const aggregationWidget = getAggregationWidget(
-                  questionConfig,
-                  DIAGRAM_AGGREGATION_WIDGET_PER_FIELD_TYPE,
-                  true
-                )
-                questionConfig.showLegend = false
-                return aggregationWidget ? (
-                  <AggregationWidgetContainer
-                    key={`assessment-${questionKey}`}
-                    fieldConfig={questionConfig}
-                    fieldName={questionKey}
-                    data={instantAssessmentResults}
-                    widget={aggregationWidget}
-                    widgetId={`${questionKey}-assessment`}
-                  />
-                ) : null
-              })}
+              Object.entries(instantAssessmentConfig || {}).map(
+                ([questionKey, questionConfig]) => {
+                  const aggregationWidget = getAggregationWidget(
+                    questionConfig,
+                    DIAGRAM_AGGREGATION_WIDGET_PER_FIELD_TYPE,
+                    true
+                  )
+                  questionConfig.showLegend = false
+                  return aggregationWidget ? (
+                    <AggregationWidgetContainer
+                      key={`assessment-${questionKey}`}
+                      fieldConfig={questionConfig}
+                      fieldName={questionKey}
+                      data={instantAssessmentResults}
+                      widget={aggregationWidget}
+                      widgetId={`${questionKey}-assessment`}
+                    />
+                  ) : null
+                }
+              )}
           </>
         </div>
       )}

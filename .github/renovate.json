@@ -19,7 +19,8 @@
       "allowedVersions": "/^.*\\.jre8$/"
     },
     {
-      "packageNames": ["autoprefixer", "draft-js", "leaflet", "fullcalendar"],
+      "packageNames": ["autoprefixer", "draft-js", "leaflet", "react-tooltip"],
+      "packagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],

@@ -37,11 +37,11 @@ import {
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
 import moment from "moment"
@@ -56,6 +56,7 @@ import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
@@ -433,6 +434,7 @@ const ReportForm = ({
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
+        const hasAssessments = values.engagementDate && !isFutureEngagement
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty} />
@@ -527,10 +529,14 @@ const ReportForm = ({
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
+                    inputType="number"
+                    onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
                     onChange={event => {
                       const safeVal =
-                        (event.target.value || "").replace(/[^0-9]+/g, "") ||
-                        null
+                        utils.preventNegativeAndLongDigits(
+                          event.target.value,
+                          4
+                        ) || null
                       setFieldTouched("duration", true, false)
                       setFieldValue("duration", safeVal, false)
                       validateFieldDebounced("duration")
@@ -908,7 +914,12 @@ const ReportForm = ({
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("reportText", value, true)}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.reportText, value)) {
+                      setFieldValue("reportText", value, true)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -936,13 +947,22 @@ const ReportForm = ({
                         name="reportSensitiveInformation.text"
                         component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
-                        onChange={value =>
-                          setFieldValue(
-                            "reportSensitiveInformation.text",
-                            value || null,
-                            true
-                          )
-                        }
+                        onChange={value => {
+                          const safeVal = value || null
+                          // prevent initial unnecessary render of RichTextEditor
+                          if (
+                            !_isEqual(
+                              values.reportSensitiveInformation.text,
+                              safeVal
+                            )
+                          ) {
+                            setFieldValue(
+                              "reportSensitiveInformation.text",
+                              safeVal,
+                              true
+                            )
+                          }
+                        }}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -1021,45 +1041,51 @@ const ReportForm = ({
                 </Collapse>
               </Fieldset>
 
-              <Fieldset
-                title="Attendees engagement assessments"
-                id="attendees-engagement-assessments"
-              >
-                <InstantAssessmentsContainerField
-                  entityType={Person}
-                  entities={values.reportPeople?.filter(rp => rp.attendee)}
-                  entitiesInstantAssessmentsConfig={
-                    attendeesInstantAssessmentsConfig
-                  }
-                  parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
-                  formikProps={{
-                    setFieldTouched,
-                    setFieldValue,
-                    values,
-                    validateForm
-                  }}
-                />
-              </Fieldset>
+              {hasAssessments && (
+                <>
+                  <Fieldset
+                    title="Attendees engagement assessments"
+                    id="attendees-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Person}
+                      entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      entitiesInstantAssessmentsConfig={
+                        attendeesInstantAssessmentsConfig
+                      }
+                      parentFieldName={
+                        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                      }
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
 
-              <Fieldset
-                title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
-                id="tasks-engagement-assessments"
-              >
-                <InstantAssessmentsContainerField
-                  entityType={Task}
-                  entities={values.tasks}
-                  entitiesInstantAssessmentsConfig={
-                    tasksInstantAssessmentsConfig
-                  }
-                  parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
-                  formikProps={{
-                    setFieldTouched,
-                    setFieldValue,
-                    values,
-                    validateForm
-                  }}
-                />
-              </Fieldset>
+                  <Fieldset
+                    title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                    id="tasks-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Task}
+                      entities={values.tasks}
+                      entitiesInstantAssessmentsConfig={
+                        tasksInstantAssessmentsConfig
+                      }
+                      parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
+                </>
+              )}
 
               <div className="submit-buttons">
                 <div>
@@ -1076,13 +1102,12 @@ const ReportForm = ({
                   )}
                   {canDelete && (
                     <ConfirmDelete
-                      onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)
-                      }
+                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
                       buttonLabel={`Delete this ${getReportType(values)}`}
+                      disabled={isSubmitting}
                     />
                   )}
                   {/* Skip validation on save! */}
@@ -1183,7 +1208,8 @@ const ReportForm = ({
           const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
-            newValues.reportSensitiveInformation = {} // object must exist for Collapse children
+            // object must exist for Collapse children
+            newValues.reportSensitiveInformation = { uuid: null, text: null }
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
@@ -1225,12 +1251,12 @@ const ReportForm = ({
     }
   }
 
-  function onConfirmDelete(uuid, resetForm) {
-    API.mutation(GQL_DELETE_REPORT, { uuid })
+  function onConfirmDelete(values, resetForm) {
+    API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
-        // After successful delete, reset the form in order to make sure the dirty
-        // prop is also reset (otherwise we would get a blocking navigation warning)
-        resetForm()
+        // reset the form to latest values
+        // to avoid unsaved changes propmt if it somehow becomes dirty
+        resetForm({ values, isSubmitting: true })
         history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
@@ -1256,9 +1282,9 @@ const ReportForm = ({
 
   function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Report.pathForEdit(report))
     }
@@ -1289,16 +1315,14 @@ const ReportForm = ({
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
     const entitiesAssessments = values[asessmentsFieldName]
-    return Object.keys(entitiesAssessments)
+    return Object.entries(entitiesAssessments)
       .filter(
-        key =>
-          entitiesUuids.includes(key) &&
-          !isEmptyAssessment(entitiesAssessments[key])
+        ([key, assessment]) =>
+          entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
-      .map(key => {
-        entitiesAssessments[key].__recurrence = RECURRENCE_TYPE.ONCE
-        entitiesAssessments[key].__relatedObjectType =
-          ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+      .map(([key, assessment]) => {
+        assessment.__recurrence = RECURRENCE_TYPE.ONCE
+        assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [

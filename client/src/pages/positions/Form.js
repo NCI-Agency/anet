@@ -13,7 +13,6 @@ import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
@@ -23,6 +22,7 @@ import { Button, HelpBlock } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
@@ -343,9 +343,9 @@ const PositionForm = ({ edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Position.pathForEdit(position))
     }

@@ -6,7 +6,7 @@ import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
-import React from "react"
+import React, { useCallback, useEffect } from "react"
 import Settings from "settings"
 
 const WILDCARD = "*"
@@ -197,6 +197,19 @@ export default {
       arr &&
       arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
     )
+  },
+
+  preventNegativeAndLongDigits: function(valueStr, maxLen) {
+    let safeVal
+    const dangerVal = Number(valueStr)
+    if (!isNaN(dangerVal) && dangerVal < 0) {
+      safeVal = "0"
+    } else {
+      const nonDigitsRemoved = valueStr.replace(/\D/g, "")
+      safeVal =
+        maxLen <= 0 ? nonDigitsRemoved : nonDigitsRemoved.slice(0, maxLen)
+    }
+    return safeVal
   }
 }
 
@@ -267,4 +280,29 @@ export const renderBlueprintIconAsSvg = (
         ${paths.join("")}
       </g>` // we use a rect to simulate pointer-events: bounding-box
   }
+}
+
+export const useOutsideClick = (ref, cb) => {
+  const nodeExists = ref && ref.current
+
+  const callback = useCallback(
+    event => {
+      if (nodeExists && !ref.current.contains(event.target)) {
+        cb(event)
+      }
+    },
+    // arrow functions will retrigger this every call, but we can introduce bugs if we omit
+    [ref, nodeExists, cb]
+  )
+
+  useEffect(() => {
+    if (nodeExists) {
+      document.addEventListener("click", callback)
+      document.addEventListener("ontouchstart", callback)
+      return () => {
+        document.removeEventListener("click", callback)
+        document.removeEventListener("ontouchstart", callback)
+      }
+    }
+  }, [nodeExists, callback])
 }

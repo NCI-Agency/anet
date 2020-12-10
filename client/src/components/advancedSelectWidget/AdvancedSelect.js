@@ -33,13 +33,13 @@ const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
     <Col md={2} xsHidden smHidden>
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
-        {Object.keys(items).map(filterType => (
+        {Object.entries(items).map(([filterType, filter]) => (
           <li
             key={filterType}
             className={currentFilter === filterType ? "active" : null}
           >
             <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
-              {items[filterType].label}
+              {filter.label}
             </Button>
           </li>
         ))}
@@ -58,9 +58,9 @@ const FilterAsDropdown = ({ items, handleOnChange }) =>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
-          {Object.keys(items).map(filterType => (
+          {Object.entries(items).map(([filterType, filter]) => (
             <option key={filterType} value={filterType}>
-              {items[filterType].label}
+              {filter.label}
             </option>
           ))}
         </select>

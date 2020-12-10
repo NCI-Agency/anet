@@ -204,9 +204,9 @@ const AdminIndex = ({ pageDispatchers }) => {
   }
 
   function onSubmitSuccess(response, values, form) {
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess("Admin settings saved")
     jumpToTop()
@@ -217,7 +217,9 @@ const AdminIndex = ({ pageDispatchers }) => {
   function clearCache() {
     setActionLoading(true)
     return API.query(CLEAR_CACHE, {})
-      .then(result => toast.success(result?.clearCache))
+      .then(result =>
+        toast.success(result?.clearCache, { toastId: "success-clear-cache" })
+      )
       .catch(handleError)
       .finally(() => setActionLoading(false))
   }
@@ -225,7 +227,11 @@ const AdminIndex = ({ pageDispatchers }) => {
   function reloadDictionary() {
     setActionLoading(true)
     return API.query(RELOAD_DICTIONARY, {})
-      .then(result => toast.success(result?.reloadDictionary))
+      .then(result =>
+        toast.success(result?.reloadDictionary, {
+          toastId: "success-reload-dictionary"
+        })
+      )
       .catch(handleError)
       .finally(() => setActionLoading(false))
   }
@@ -251,7 +257,9 @@ const AdminIndex = ({ pageDispatchers }) => {
         }))
         setRecentUsers(users)
         setLastLoaded(moment())
-        toast.success("User activities & recent users are loaded succesfully")
+        toast.success("User activities & recent users are loaded succesfully", {
+          toastId: "success-load-recent"
+        })
       })
       .catch(handleError)
       .finally(() => setActionLoading(false))

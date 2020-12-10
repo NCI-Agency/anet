@@ -2,10 +2,28 @@ import Page from "./page"
 
 const PAGE_URL = "/reports/new"
 
-const trfId = "formCustomFields.relatedReport"
-const tmrfId = "formCustomFields.additionalEngagementNeeded"
+const RELATED_REPORT_ID = "formCustomFields.relatedReport"
+const ADDITIONAL_ENGAGEMENTS_ID = "formCustomFields.additionalEngagementNeeded"
+const ENGAGEMENT_TYPES_ID = "formCustomFields.multipleButtons"
 
-class CreateReport extends Page {
+const TRAINING_TOGGLED_FIELDS = {
+  trainingEvent: "formCustomFields.trainingEvent",
+  numberTrained: "formCustomFields.numberTrained",
+  levelTrained: "formCustomFields.levelTrained",
+  trainingDate: "formCustomFields.trainingDate"
+}
+
+const ADVISE_FIELDS = {
+  systemProcess: "formCustomFields.systemProcess",
+  itemsAgreed: "formCustomFields.itemsAgreed",
+  echelons: "formCustomFields.echelons"
+}
+
+const OTHER_FIELDS = {
+  assetsUsed: "formCustomFields.assetsUsed"
+}
+
+export class CreateReport extends Page {
   get form() {
     return browser.$("form")
   }
@@ -14,16 +32,26 @@ class CreateReport extends Page {
     return browser.$(".alert")
   }
 
+  get duration() {
+    return browser.$("#duration")
+  }
+
+  getCustomFieldFormGroup(id) {
+    return browser.$(`div[id="fg-${id}"]`)
+  }
+
   get engagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
 
   get testReferenceFieldFormGroup() {
-    return browser.$(`div[id="fg-${trfId}"]`)
+    return this.getCustomFieldFormGroup(RELATED_REPORT_ID)
   }
 
   get testReferenceFieldLabel() {
-    return this.testReferenceFieldFormGroup.$(`label[for="${trfId}"]`)
+    return this.testReferenceFieldFormGroup.$(
+      `label[for="${RELATED_REPORT_ID}"]`
+    )
   }
 
   get testReferenceFieldHelpText() {
@@ -31,27 +59,31 @@ class CreateReport extends Page {
   }
 
   get testReferenceField() {
-    return this.testReferenceFieldFormGroup.$(`input[id="${trfId}"]`)
+    return this.testReferenceFieldFormGroup.$(
+      `input[id="${RELATED_REPORT_ID}"]`
+    )
   }
 
   get testReferenceFieldAdvancedSelectFirstItem() {
     return this.testReferenceFieldFormGroup.$(
-      `div[id="${trfId}-popover"] tbody tr:first-child td:nth-child(2)`
+      `div[id="${RELATED_REPORT_ID}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
 
   get testReferenceFieldValue() {
     return this.testReferenceFieldFormGroup.$(
-      `table[id="${trfId}-value"] tbody tr:first-child`
+      `table[id="${RELATED_REPORT_ID}-value"] tbody tr:first-child`
     )
   }
 
   get testMultiReferenceFieldFormGroup() {
-    return browser.$(`div[id="fg-${tmrfId}"]`)
+    return this.getCustomFieldFormGroup(ADDITIONAL_ENGAGEMENTS_ID)
   }
 
   get testMultiReferenceFieldLabel() {
-    return this.testMultiReferenceFieldFormGroup.$(`label[for="${tmrfId}"]`)
+    return this.testMultiReferenceFieldFormGroup.$(
+      `label[for="${ADDITIONAL_ENGAGEMENTS_ID}"]`
+    )
   }
 
   get testMultiReferenceFieldHelpText() {
@@ -59,13 +91,66 @@ class CreateReport extends Page {
   }
 
   get testMultiReferenceField() {
-    return this.testMultiReferenceFieldFormGroup.$(`input[id="${tmrfId}"]`)
+    return this.testMultiReferenceFieldFormGroup.$(
+      `input[id="${ADDITIONAL_ENGAGEMENTS_ID}"]`
+    )
   }
 
   get testMultiReferenceFieldAdvancedSelect() {
     return this.testMultiReferenceFieldFormGroup.$(
-      `div[id="${tmrfId}-popover"] tbody`
+      `div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`
     )
+  }
+
+  get engagementTypesFieldFormGroup() {
+    return this.getCustomFieldFormGroup(ENGAGEMENT_TYPES_ID)
+  }
+
+  get engagementTypesFieldLabel() {
+    return this.engagementTypesFieldFormGroup.$(
+      `label[for="${ENGAGEMENT_TYPES_ID}"]`
+    )
+  }
+
+  getEngagementTypesButtonByName(name) {
+    return this.engagementTypesFieldFormGroup.$(`label[id="${name}"]`)
+  }
+
+  get fieldsToggledVisibilityByTrainButton() {
+    return Object.keys(TRAINING_TOGGLED_FIELDS).map(fieldId => {
+      return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS[fieldId])
+    })
+  }
+
+  get fieldsNotToggledVisibilityByTrainButton() {
+    return Object.keys(ADVISE_FIELDS)
+      .map(fieldId => {
+        return this.getCustomFieldFormGroup(ADVISE_FIELDS[fieldId])
+      })
+      .concat(
+        // fieldsets are not prepended with fg-
+        Object.keys(OTHER_FIELDS).map(fieldsetId => {
+          return browser.$(`div[id="${OTHER_FIELDS[fieldsetId]}"]`)
+        })
+      )
+  }
+
+  get numberTrainedFormGroup() {
+    return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS.numberTrained)
+  }
+
+  get numberTrainedField() {
+    return this.numberTrainedFormGroup.$(
+      `input[id="${TRAINING_TOGGLED_FIELDS.numberTrained}"]`
+    )
+  }
+
+  get numberTrainedFieldShowed() {
+    return this.numberTrainedFormGroup.$("div.form-control-static")
+  }
+
+  get numberTrainedHelpText() {
+    return this.numberTrainedFormGroup.$('span[class="help-block"]')
   }
 
   getTestMultiReferenceFieldAdvancedSelectItem(n) {
@@ -80,7 +165,7 @@ class CreateReport extends Page {
 
   get testMultiReferenceFieldValue() {
     return this.testMultiReferenceFieldFormGroup.$(
-      `table[id="${tmrfId}-value"]`
+      `table[id="${ADDITIONAL_ENGAGEMENTS_ID}-value"]`
     )
   }
 
@@ -110,8 +195,12 @@ class CreateReport extends Page {
     )
   }
 
-  open() {
-    super.open(PAGE_URL)
+  open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
+    super.open(pathName, credentials)
+  }
+
+  openAsAdminUser() {
+    super.openAsAdminUser(PAGE_URL)
   }
 
   waitForAlertToLoad() {

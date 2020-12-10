@@ -14,7 +14,7 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import { Report } from "models"
 import React, { useContext } from "react"
@@ -50,9 +50,7 @@ const MyReports = ({ pageDispatchers, searchQuery }) => {
       state: [Report.STATE.CANCELLED]
     }
   }
-  Object.keys(sectionQueryParams).forEach(
-    key => (sectionQueryParams[key].authorUuid = uuid)
-  )
+  Object.values(sectionQueryParams).forEach(val => (val.authorUuid = uuid))
 
   return (
     <div>
