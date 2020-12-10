@@ -514,51 +514,11 @@ fields:
     person:
       name: Afghan Partner
       countries: [Afghanistan]
-      assessment:
-        questions:
-          - id: test1
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 1
-            choice:
-              - value: "1"
-                label: one
-                color: '#c2ffb3'
-              - value: "2"
-                label: two
-                color: '#ffe396'
-              - value: "3"
-                label: three
-                color: '#ff8279'
-          - id: test2
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 2
-            choice:
-              - value: "3"
-                label: three
-                color: '#ff8279'
-              - value: "4"
-                label: four
-                color: '#ffe396'
-              - value: "5"
-                label: five
-                color: '#c2ffb3'
-          - id: test3
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 3
-            choice:
-              - value: "1"
-                label: one
-                color: '#c2ffb3'
-              - value: "2"
-                label: two
-                color: '#ff8279'
-              - value: "3"
-                label: three
-                color: '#ff8279'
       assessments:
         - recurrence: quarterly
           questions:
             test1:
+              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               type: enum
               label: Test question 1
               choices:
@@ -572,6 +532,7 @@ fields:
                   label: three
                   color: '#ff8279'
             test2:
+              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               type: enum
               label: Test question 2
               choices:
@@ -585,6 +546,7 @@ fields:
                   label: five
                   color: '#c2ffb3'
             test3:
+              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               type: enum
               label: Test question 3
               choices:
@@ -597,6 +559,13 @@ fields:
                 "3":
                   label: three
                   color: '#ff8279'
+            text:
+              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+              type: special_field
+              label: Text
+              widget: richTextEditor
+              style:
+                height: 100px
         - recurrence: once
           relatedObjectType: report
           questions:

@@ -23,8 +23,7 @@ const RelatedObjectNoteModal = ({
   showModal,
   onCancel,
   onSuccess,
-  onDelete,
-  questions
+  onDelete
 }) => {
   const yupSchema = yup.object().shape({
     type: yup.string().required(),
@@ -78,26 +77,6 @@ const RelatedObjectNoteModal = ({
                   }}
                 >
                   <Messages error={error} />
-                  {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
-                    <>
-                      {questions.map(question => (
-                        <React.Fragment key={question.id}>
-                          <p>{question.label}</p>
-                          <Field
-                            name={question.id}
-                            label=""
-                            component={FieldHelper.RadioButtonToggleGroupField}
-                            buttons={question.choice}
-                            onChange={value => {
-                              setFieldValue(question.id, value)
-                            }}
-                          />
-                          <br />
-                          <br />
-                        </React.Fragment>
-                      ))}
-                    </>
-                  )}
                   <Field
                     name="text"
                     value={noteText}
@@ -201,8 +180,7 @@ RelatedObjectNoteModal.propTypes = {
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired,
-  onDelete: PropTypes.func,
-  questions: PropTypes.array
+  onDelete: PropTypes.func
 }
 
 export default RelatedObjectNoteModal

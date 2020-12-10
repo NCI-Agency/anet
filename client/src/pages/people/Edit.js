@@ -116,7 +116,6 @@ const PersonEdit = ({ pageDispatchers }) => {
             relatedObject: person
           }
         }
-        relatedObjectValue={person}
       />
       <PersonForm
         initialValues={person}
