@@ -466,7 +466,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography]
+        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, position]
         properties:
           firstName:
             type: string
@@ -476,6 +476,10 @@ properties:
             type: string
             title: The label for a person's last name
             description: Used in the UI where a person's last name is shown.
+          position:
+            type: string
+            title: The label for person's current position
+            description: Used in Person page UI where a person's position is shown.
           domainUsername:
             type: string
             title: The label for a person's domain username

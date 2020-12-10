@@ -1,3 +1,5 @@
+import { Icon, Tooltip } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -202,7 +204,6 @@ const PersonShow = ({ pageDispatchers }) => {
                 onEnd={() => (localStorage.hasSeenPersonTour = "true")}
               />
             </div>
-
             <RelatedObjectNotes
               notes={person.notes}
               relatedObject={
@@ -237,73 +238,39 @@ const PersonShow = ({ pageDispatchers }) => {
                   </Row>
                 </Grid>
               </Fieldset>
-              <Fieldset title="Position">
+              {canChangePosition && (
+                <AssignPositionModal
+                  showModal={showAssignPositionModal}
+                  person={person}
+                  onCancel={() => hideAssignPositionModal(false)}
+                  onSuccess={() => hideAssignPositionModal(true)}
+                />
+              )}
+
+              {hasPosition && (
                 <Fieldset
-                  title="Current Position"
-                  id="current-position"
-                  className={
-                    !position || !position.uuid ? "warning" : undefined
-                  }
+                  title={`Assigned ${assignedRole}`}
                   action={
-                    hasPosition &&
                     canChangePosition && (
-                      <>
-                        <LinkTo
-                          modelType="Position"
-                          model={position}
-                          edit
-                          button="default"
-                        >
-                          Edit position details
-                        </LinkTo>
-                        <Button
-                          onClick={() => setShowAssignPositionModal(true)}
-                          className="change-assigned-position"
-                        >
-                          Change assigned position
-                        </Button>
-                      </>
+                      <Button
+                        onClick={() => setShowAssociatedPositionsModal(true)}
+                      >
+                        Change assigned {assignedRole}
+                      </Button>
                     )
                   }
                 >
-                  {hasPosition
-                    ? renderPosition(position)
-                    : renderPositionBlankSlate(person)}
+                  {renderCounterparts(position)}
                   {canChangePosition && (
-                    <AssignPositionModal
-                      showModal={showAssignPositionModal}
-                      person={person}
-                      onCancel={() => hideAssignPositionModal(false)}
-                      onSuccess={() => hideAssignPositionModal(true)}
+                    <EditAssociatedPositionsModal
+                      position={position}
+                      showModal={showAssociatedPositionsModal}
+                      onCancel={() => hideAssociatedPositionsModal(false)}
+                      onSuccess={() => hideAssociatedPositionsModal(true)}
                     />
                   )}
                 </Fieldset>
-
-                {hasPosition && (
-                  <Fieldset
-                    title={`Assigned ${assignedRole}`}
-                    action={
-                      canChangePosition && (
-                        <Button
-                          onClick={() => setShowAssociatedPositionsModal(true)}
-                        >
-                          Change assigned {assignedRole}
-                        </Button>
-                      )
-                    }
-                  >
-                    {renderCounterparts(position)}
-                    {canChangePosition && (
-                      <EditAssociatedPositionsModal
-                        position={position}
-                        showModal={showAssociatedPositionsModal}
-                        onCancel={() => hideAssociatedPositionsModal(false)}
-                        onSuccess={() => hideAssociatedPositionsModal(true)}
-                      />
-                    )}
-                  </Fieldset>
-                )}
-              </Fieldset>
+              )}
               {person.isAdvisor() && (
                 <Fieldset title="Reports authored" id="reports-authored">
                   <ReportCollection
@@ -361,7 +328,6 @@ const PersonShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
             </Form>
-
             <AssessmentResultsContainer
               entity={person}
               entityType={Person}
@@ -389,6 +355,11 @@ const PersonShow = ({ pageDispatchers }) => {
         accessCond: isAdmin
       }
     }
+
+    const extraColElems = {
+      position: getPositionActions()
+    }
+
     return (
       person
         .getShowPageFieldsOrdered()
@@ -408,7 +379,7 @@ const PersonShow = ({ pageDispatchers }) => {
         .map(([el, key]) =>
           React.cloneElement(el, {
             key,
-            extraColElem: null,
+            extraColElem: extraColElems[key] || null, // null needed for empty space
             labelColumnWidth: 4
           })
         )
@@ -420,17 +391,21 @@ const PersonShow = ({ pageDispatchers }) => {
       biography: "biography"
     }
 
+    const idExceptions = {
+      position: "current-position"
+    }
     // map fields that have specific human person
     const humanValuesExceptions = {
-      status: Person.humanNameOfStatus(person.status),
+      biography: parseHtmlWithLinkTo(person.biography),
       emailAddress: emailHumanValue,
       endOfTourDate:
         person.endOfTourDate &&
         moment(person.endOfTourDate).format(
           Settings.dateFormats.forms.displayShort.date
         ),
+      position: getPositionHumanValue(person.position),
       role: Person.humanNameOfRole(person.role),
-      biography: parseHtmlWithLinkTo(person.biography)
+      status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
       accum[key] = (
@@ -442,6 +417,7 @@ const PersonShow = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}
+          id={idExceptions[key]}
         />
       )
 
@@ -449,19 +425,72 @@ const PersonShow = ({ pageDispatchers }) => {
     }, {})
   }
 
-  function renderPosition(position) {
-    return (
-      <div style={{ textAlign: "center" }}>
-        <h4>
+  function getPositionHumanValue(position) {
+    return hasPosition ? (
+      <>
+        <LinkTo
+          modelType="Position"
+          model={position}
+          className="position-name"
+        />{" "}
+        (
+        <LinkTo modelType="Organization" model={position.organization} />)
+      </>
+    ) : (
+      "<none>"
+    )
+  }
+
+  function getPositionActions() {
+    const editPositionButton =
+      hasPosition && canChangePosition ? (
+        <Tooltip content="Edit position" position="top">
           <LinkTo
             modelType="Position"
             model={position}
-            className="position-name"
-          />{" "}
-          (
-          <LinkTo modelType="Organization" model={position.organization} />)
-        </h4>
-      </div>
+            edit
+            button="primary"
+            showIcon={false}
+            showAvatar={false}
+          >
+            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EDIT} />
+          </LinkTo>
+        </Tooltip>
+      ) : null
+
+    const changePositionButton =
+      hasPosition && canChangePosition ? (
+        <Tooltip content="Change position" position="top">
+          <Button
+            onClick={() => setShowAssignPositionModal(true)}
+            bsStyle="primary"
+          >
+            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EXCHANGE} />
+          </Button>
+        </Tooltip>
+      ) : null
+
+    // when the person is not in a position, any super user can assign them.
+    const canAssignPosition = currentUser.isSuperUser()
+
+    const assignPositionButton =
+      !hasPosition & canAssignPosition ? (
+        <Tooltip content="Assign a position" position="top">
+          <Button
+            onClick={() => setShowAssignPositionModal(true)}
+            bsStyle="primary"
+          >
+            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.INSERT} />
+          </Button>
+        </Tooltip>
+      ) : null
+
+    return (
+      <>
+        {editPositionButton}
+        {changePositionButton}
+        {assignPositionButton}
+      </>
     )
   }
 
@@ -509,35 +538,6 @@ const PersonShow = ({ pageDispatchers }) => {
         </Col>
       </FormGroup>
     )
-  }
-
-  function renderPositionBlankSlate(person) {
-    // when the person is not in a position, any super user can assign them.
-    const canChangePosition = currentUser.isSuperUser()
-
-    if (Person.isEqual(currentUser, person)) {
-      return (
-        <em>
-          You are not assigned to a position. Contact your organization's super
-          user to be added.
-        </em>
-      )
-    } else {
-      return (
-        <div style={{ textAlign: "center" }}>
-          <p className="not-assigned-to-position-message">
-            <em>{person.name} is not assigned to a position.</em>
-          </p>
-          {canChangePosition && (
-            <p>
-              <Button onClick={() => setShowAssignPositionModal(true)}>
-                Assign position
-              </Button>
-            </p>
-          )}
-        </div>
-      )
-    }
   }
 
   function hideAssignPositionModal(success) {

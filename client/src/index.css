@@ -1155,6 +1155,17 @@ header.searchPagination {
   align-items: center;
 }
 
+#fg-position > .col-sm-3{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+#fg-position > .col-sm-3 > * {
+  margin-left: 10px;
+}
+
 @media screen and (max-width: 768px) {
   #main-viewport {
     padding-top: 8px;
@@ -1164,6 +1175,10 @@ header.searchPagination {
 
   #notes-view.notes-hidden {
     max-width: 13%;
+  }
+
+  #fg-position > .col-sm-3{
+    margin-top: 6px;
   }
 
   .advanced-search {
