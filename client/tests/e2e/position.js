@@ -49,16 +49,12 @@ test("Move someone in and out of a position", async t => {
   )
   await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
 
-  const $notAssignedMsg = await $("p.not-assigned-to-position-message")
+  const $notAssignedMsg = await $("div#current-position")
   await t.context.driver.wait(
     until.elementIsVisible($notAssignedMsg),
     mediumWaitMs
   )
-  await assertElementText(
-    t,
-    $notAssignedMsg,
-    `${person} is not assigned to a position.`
-  )
+  await assertElementText(t, $notAssignedMsg, "<none>")
 
   await t.context.pageHelpers.clickMyOrgLink()
 
