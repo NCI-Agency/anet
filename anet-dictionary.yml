@@ -328,6 +328,7 @@ fields:
     lastName: Last name
     domainUsername: Domain username
     position: Current Position
+    prevPositions: Previous Positions
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
@@ -733,6 +734,7 @@ fields:
       numberOfFieldsInLeftColumn: 6
       showPageOrderedFields:
         - position
+        - prevPositions
         - domainUsername
         - emailAddress
         - multipleButtons
@@ -869,6 +871,7 @@ fields:
       numberOfFieldsInLeftColumn: 6
       showPageOrderedFields:
         - position
+        - prevPositions
         - phoneNumber
         - country
         - colourOptions

@@ -294,39 +294,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   mapId="reports-attended"
                 />
               </Fieldset>
-              <Fieldset title="Previous positions" id="previous-positions">
-                {(_isEmpty(person.previousPositions) && (
-                  <em>No positions found</em>
-                )) || (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>Position</th>
-                        <th>Dates</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {person.previousPositions.map((pp, idx) => (
-                        <tr key={idx} id={`previousPosition_${idx}`}>
-                          <td>
-                            <LinkTo modelType="Position" model={pp.position} />
-                          </td>
-                          <td>
-                            {moment(pp.startTime).format(
-                              Settings.dateFormats.forms.displayShort.date
-                            )}{" "}
-                            - &nbsp;
-                            {pp.endTime &&
-                              moment(pp.endTime).format(
-                                Settings.dateFormats.forms.displayShort.date
-                              )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              </Fieldset>
             </Form>
             <AssessmentResultsContainer
               entity={person}
@@ -403,7 +370,8 @@ const PersonShow = ({ pageDispatchers }) => {
         moment(person.endOfTourDate).format(
           Settings.dateFormats.forms.displayShort.date
         ),
-      position: getPositionHumanValue(person.position),
+      position: getPositionHumanValue(),
+      prevPositions: getPrevPositionsHumanValue(),
       role: Person.humanNameOfRole(person.role),
       status: Person.humanNameOfStatus(person.status)
     }
@@ -425,7 +393,7 @@ const PersonShow = ({ pageDispatchers }) => {
     }, {})
   }
 
-  function getPositionHumanValue(position) {
+  function getPositionHumanValue() {
     return hasPosition ? (
       <>
         <LinkTo
@@ -492,6 +460,40 @@ const PersonShow = ({ pageDispatchers }) => {
         {changePositionButton}
         {assignPositionButton}
       </>
+    )
+  }
+
+  function getPrevPositionsHumanValue() {
+    return _isEmpty(person.previousPositions) ? (
+      <em>No positions found</em>
+    ) : (
+      <Table id="previous-positions">
+        <thead>
+          <tr>
+            <th>Position</th>
+            <th>Dates</th>
+          </tr>
+        </thead>
+        <tbody>
+          {person.previousPositions.map((pp, idx) => (
+            <tr key={idx} id={`previousPosition_${idx}`}>
+              <td>
+                <LinkTo modelType="Position" model={pp.position} />
+              </td>
+              <td>
+                {moment(pp.startTime).format(
+                  Settings.dateFormats.forms.displayShort.date
+                )}{" "}
+                - &nbsp;
+                {pp.endTime &&
+                  moment(pp.endTime).format(
+                    Settings.dateFormats.forms.displayShort.date
+                  )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     )
   }
 

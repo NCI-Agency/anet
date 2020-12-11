@@ -132,7 +132,7 @@ test("Move someone in and out of a position", async t => {
   await assertElementText(t, await $(".position-name"), positionName)
 
   // The change in position is also visible in the Previous positions
-  const $previousPositionsRows = await $$("#previous-positions table tbody tr")
+  const $previousPositionsRows = await $$("#previous-positions tbody tr")
   const $lastRow = $previousPositionsRows.pop()
   const [
     /* eslint-disable no-unused-vars */ $positionCell1 /* eslint-enable no-unused-vars */,
