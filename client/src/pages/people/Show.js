@@ -454,6 +454,11 @@ const PersonShow = ({ pageDispatchers }) => {
         </Tooltip>
       ) : null
 
+    // if current user has no access for position actions return null so extraColElem will disappear
+    if (!(editPositionButton || changePositionButton || assignPositionButton)) {
+      return null
+    }
+
     return (
       <>
         {editPositionButton}
