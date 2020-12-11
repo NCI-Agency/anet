@@ -32,6 +32,8 @@ const PeriodicAssessment = ({
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
 
   const byMe = Person.isEqual(currentUser, note.author)
+  const isAdmin = currentUser.isAdmin()
+  const canEdit = byMe || isAdmin
   const parentFieldName = `assessment-${note.uuid}`
   const periodDisplay = periodToString(period)
 
@@ -57,7 +59,7 @@ const PeriodicAssessment = ({
             model={note.author}
             style={{ color: "white" }}
           />
-          {byMe && (
+          {canEdit && (
             <>
               <Button
                 title="Edit assessment"
