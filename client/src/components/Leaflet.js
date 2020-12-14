@@ -279,7 +279,6 @@ const BaseLeaflet = ({
           })
           .bindPopup(popupContent)
           .on("popupopen", e => {
-            // TODO LinkTo component will be utilized here to provide routing
             ReactDOM.render(
               <>
                 <b>{location.name}</b> @{" "}
