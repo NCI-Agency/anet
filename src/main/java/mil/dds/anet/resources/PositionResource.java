@@ -244,13 +244,16 @@ public class PositionResource {
     // Delete loser position's code information
     int rowNums = dao.cleanLoserPositionCode(loserUuid);
     if (rowNums == 0) {
-      throw new WebApplicationException("Couldn't process merge operation", Status.NOT_FOUND);
+      throw new WebApplicationException(
+          "Couldn't process merge operation, loser position code cannot be deleted.",
+          Status.NOT_FOUND);
     }
 
     // Update winner position.
     final int nr = dao.update(winnerPosition);
     if (nr == 0) {
-      throw new WebApplicationException("Couldn't process merge operation", Status.NOT_FOUND);
+      throw new WebApplicationException(
+          "Couldn't process merge operation, winner position update failed.", Status.NOT_FOUND);
     }
     final Position position = dao.getByUuid(winnerPosition.getUuid());
     if (winnerPosition.getPersonUuid() != null) {
@@ -258,7 +261,9 @@ public class PositionResource {
     }
     int numRows = dao.mergePositions(existingPos, position);
     if (numRows == 0) {
-      throw new WebApplicationException("Couldn't process merge operation", Status.NOT_FOUND);
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged position relation information.",
+          Status.NOT_FOUND);
     }
     AnetAuditLogger.log("Position {} merged on {} by {}", existingPos, position, user);
     return position;

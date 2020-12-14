@@ -778,7 +778,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     testPerson.setRole(Role.PRINCIPAL);
     testPerson.setStatus(Person.Status.ACTIVE);
 
-    String testPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
+    final String testPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", testPerson, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(testPersonUuid).isNotNull();
     testPerson = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, testPersonUuid,
@@ -800,7 +800,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     firstPosition.setStatus(Position.Status.ACTIVE);
     firstPosition.setPerson(testPerson);
 
-    String firstPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
+    final String firstPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", firstPosition, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(firstPositionUuid).isNotNull();
     firstPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, firstPositionUuid,
@@ -813,8 +813,9 @@ public class PositionResourceTest extends AbstractResourceTest {
     secondPosition.setOrganization(orgs.getList().get(0));
     secondPosition.setStatus(Position.Status.ACTIVE);
 
-    String secondPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", secondPosition, new TypeReference<GraphQlResponse<Position>>() {});
+    final String secondPositionUuid =
+        graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+            secondPosition, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(secondPositionUuid).isNotNull();
     secondPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, secondPositionUuid,
         new TypeReference<GraphQlResponse<Position>>() {});
