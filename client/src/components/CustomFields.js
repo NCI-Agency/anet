@@ -661,7 +661,7 @@ const FIELD_COMPONENTS = {
 }
 
 export function getInvisibleFields(
-  fieldsConfig,
+  fieldsConfig = {},
   parentFieldName,
   formikValues,
   isArrayOfObjects = false
