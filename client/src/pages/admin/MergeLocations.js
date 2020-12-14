@@ -433,9 +433,15 @@ const MergeLocations = ({ pageDispatchers }) => {
 
   function mergeLocation(location01, location02, mergedLocation) {
     mergedLocation.uuid = location01.uuid
+
+    const mergedFiltered = Object.without(
+      new Location(mergedLocation),
+      "notes",
+      "displayedCoordinate"
+    )
     API.mutation(GQL_MERGE_LOCATION, {
       loserUuid: location02.uuid,
-      winnerLocation: mergedLocation
+      winnerLocation: mergedFiltered
     })
       .then(res => {
         if (res.mergeLocation) {
