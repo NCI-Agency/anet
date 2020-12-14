@@ -9,7 +9,7 @@ const INVALID_ENGAGEMENT_DURATION_1 = "123456"
 const INVALID_ENGAGEMENT_DURATION_2 = "-1"
 // positive sliced at 4th digit, negative should turn into 0
 const VALID_ENGAGEMENT_DURATION_1 = "1234"
-const VALID_ENGAGEMENT_DURATION_2 = "0"
+const VALID_ENGAGEMENT_DURATION_2 = ""
 
 const PERSON = "EF 2.1"
 const PERSON_VALUE_1 = "HENDERSON, Henry"

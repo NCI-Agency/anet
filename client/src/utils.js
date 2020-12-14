@@ -199,11 +199,11 @@ export default {
     )
   },
 
-  preventNegativeAndLongDigits: function(valueStr, maxLen) {
+  preventNonPositiveAndLongDigits: function(valueStr, maxLen) {
     let safeVal
     const dangerVal = Number(valueStr)
-    if (!isNaN(dangerVal) && dangerVal < 0) {
-      safeVal = "0"
+    if (!isNaN(dangerVal) && dangerVal <= 0) {
+      safeVal = null
     } else {
       const nonDigitsRemoved = valueStr.replace(/\D/g, "")
       safeVal =

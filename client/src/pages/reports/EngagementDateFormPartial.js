@@ -74,7 +74,8 @@ const EngagementDatePartialFormWithDuration = ({
           onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
           onChange={event => {
             const safeVal =
-              utils.preventNegativeAndLongDigits(event.target.value, 4) || null
+              utils.preventNonPositiveAndLongDigits(event.target.value, 4) ||
+              null
             setFieldTouched("duration", true, false)
             setFieldValue("duration", safeVal, false)
             validateFieldDebounced("duration")
