@@ -148,11 +148,11 @@ public class LocationResourceTest extends AbstractResourceTest {
     mergedLocation.setName(secondCreatedLocation.getName());
 
     Map<String, Object> variables = new HashMap<>();
-    variables.put("looserUuid", secondCreatedLocation.getUuid());
+    variables.put("loserUuid", secondCreatedLocation.getUuid());
     variables.put("winnerLocation", mergedLocation);
     final Location createdLocation = graphQLHelper.updateObject(admin,
-        "mutation ($looserUuid: String!, $winnerLocation: LocationInput!) { payload: mergeLocation "
-            + "(looserUuid: $looserUuid, winnerLocation: $winnerLocation) { uuid } }",
+        "mutation ($loserUuid: String!, $winnerLocation: LocationInput!) { payload: mergeLocation "
+            + "(loserUuid: $loserUuid, winnerLocation: $winnerLocation) { uuid } }",
         variables, new TypeReference<GraphQlResponse<Location>>() {});
 
     assertThat(createdLocation).isNotNull();

@@ -35,8 +35,8 @@ const locationFilters = {
 }
 
 const GQL_MERGE_LOCATION = gql`
-  mutation($looserUuid: String!, $winnerLocation: LocationInput!) {
-    mergeLocation(looserUuid: $looserUuid, winnerLocation: $winnerLocation) {
+  mutation($loserUuid: String!, $winnerLocation: LocationInput!) {
+    mergeLocation(loserUuid: $loserUuid, winnerLocation: $winnerLocation) {
       uuid
     }
   }
@@ -434,7 +434,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   function mergeLocation(location01, location02, mergedLocation) {
     mergedLocation.uuid = location01.uuid
     API.mutation(GQL_MERGE_LOCATION, {
-      looserUuid: location02.uuid,
+      loserUuid: location02.uuid,
       winnerLocation: mergedLocation
     })
       .then(res => {
