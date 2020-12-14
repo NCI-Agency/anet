@@ -34,10 +34,10 @@ const EngagementDatePartialFormWithDuration = ({
 
   return (
     <FormGroup>
-      <Col sm={2} componentClass={ControlLabel}>
+      <Col xsHidden sm={2} componentClass={ControlLabel}>
         Engagement planning
       </Col>
-      <Col sm={4} style={{ marginLeft: "15px" }}>
+      <Col sm={3} style={{ marginLeft: "15px" }}>
         <Field
           name="engagementDate"
           component={FieldHelper.SpecialField}
@@ -65,7 +65,7 @@ const EngagementDatePartialFormWithDuration = ({
           {Report.isFuture(values.engagementDate) && futureEngagementHint}
         </Field>
       </Col>
-      <Col sm={3} style={{ marginLeft: "15px" }}>
+      <Col sm={2} style={{ marginLeft: "15px", whiteSpace: "nowrap" }}>
         <Field
           name="duration"
           label="Duration (minutes)"
@@ -86,8 +86,14 @@ const EngagementDatePartialFormWithDuration = ({
         />
       </Col>
       <Col
-        sm={2}
-        style={{ marginTop: "2.2em", maxWidth: "max-content" }}
+        sm={1}
+        style={{
+          marginTop: "2.2em",
+          maxWidth: "max-content",
+          display: "flex",
+          alignItems: "center",
+          whiteSpace: "nowrap"
+        }}
         id="all-day-col"
       >
         <Checkbox
