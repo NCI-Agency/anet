@@ -1,13 +1,11 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import AppContext from "components/AppContext"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person } from "models"
 import moment from "moment"
 import {
   AssessmentPeriodPropType,
@@ -15,7 +13,7 @@ import {
   periodToString
 } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import { Button, Panel } from "react-bootstrap"
 
 const PeriodicAssessment = ({
@@ -26,14 +24,10 @@ const PeriodicAssessment = ({
   entity,
   period,
   recurrence,
+  canEditAssessment,
   onUpdateAssessment
 }) => {
-  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
-
-  const byMe = Person.isEqual(currentUser, note.author)
-  const isAdmin = currentUser.isAdmin()
-  const canEdit = byMe || isAdmin
   const parentFieldName = `assessment-${note.uuid}`
   const periodDisplay = periodToString(period)
 
@@ -59,7 +53,7 @@ const PeriodicAssessment = ({
             model={note.author}
             style={{ color: "white" }}
           />
-          {canEdit && (
+          {canEditAssessment && (
             <>
               <Button
                 title="Edit assessment"
@@ -125,6 +119,7 @@ PeriodicAssessment.propTypes = {
   entity: PropTypes.object.isRequired,
   period: AssessmentPeriodPropType.isRequired,
   recurrence: PropTypes.string.isRequired,
+  canEditAssessment: PropTypes.bool,
   onUpdateAssessment: PropTypes.func.isRequired
 }
 
@@ -135,7 +130,6 @@ export const PeriodicAssessmentsRows = ({
   canAddAssessment,
   onUpdateAssessment
 }) => {
-  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
   const { recurrence, periods } = periodsConfig
   if (_isEmpty(periods)) {
@@ -154,17 +148,15 @@ export const PeriodicAssessmentsRows = ({
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
     const periodAssessments = entity.getPeriodAssessments(recurrence, period)
-    const myPeriodAssessments = periodAssessments.filter(({ note }) =>
-      Person.isEqual(currentUser, note.author)
-    )
+
     periodsAssessments.push(periodAssessments)
     // Only allow adding new assessments for a period if the user has the rights
-    // for it, if the period is configured to allow adding new assessments and
-    // if the current user didn't already made an assessment for the period
+    // for it, if the period is configured to allow adding new assessments
+    // If there is already an assessment, don't allow to create a new one
     periodsAllowNewAssessment.push(
       canAddAssessment &&
         period.allowNewAssessments &&
-        _isEmpty(myPeriodAssessments)
+        _isEmpty(periodAssessments)
     )
   })
   const hasAddAssessmentRow = !_isEmpty(
@@ -187,6 +179,7 @@ export const PeriodicAssessmentsRows = ({
                       entity={entity}
                       period={periods[index]}
                       recurrence={recurrence}
+                      canEditAssessment={canAddAssessment}
                       onUpdateAssessment={onUpdateAssessment}
                     />
                   </div>
