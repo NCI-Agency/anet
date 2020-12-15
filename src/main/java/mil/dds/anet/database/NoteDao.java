@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
@@ -68,6 +69,14 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         .createUpdate("/* updateNote */ UPDATE notes "
             + "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
         .bindBean(n).bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt())).execute();
+  }
+
+  @InTransaction
+  public int updateNoteTypeAndText(Note n) {
+    return getDbHandle()
+        .createUpdate(
+            "/* updateNote */ UPDATE notes SET type = :type, text = :text WHERE uuid = :uuid")
+        .bindBean(n).bind("type", DaoUtils.getEnumId(n.getType())).execute();
   }
 
   @Override
@@ -177,4 +186,9 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     logger.info("Deleted {} dangling notes", nrNotesDeleted);
   }
 
+  @InTransaction
+  public List<Note> getNotesByType(NoteType type) {
+    return getDbHandle().createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
+        .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
+  }
 }
