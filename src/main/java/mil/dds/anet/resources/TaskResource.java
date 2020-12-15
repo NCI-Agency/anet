@@ -178,6 +178,7 @@ public class TaskResource {
       @GraphQLArgument(name = "winnerTask") Task winnerTask) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Task loser = dao.getByUuid(loserUuid);
+    final Task winnerBeforeUpdate = dao.getByUuid(winnerTask.getUuid());
 
     final Map<String, Task> children =
         AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(winnerTask));
@@ -241,12 +242,12 @@ public class TaskResource {
       final List<ApprovalStep> existingPlanningApprovalSteps =
           loser.loadPlanningApprovalSteps(engine.getContext()).join();
       final List<ApprovalStep> existing2PlanningApprovalSteps =
-          winnerTask.loadPlanningApprovalSteps(engine.getContext()).join();
+          winnerBeforeUpdate.loadPlanningApprovalSteps(engine.getContext()).join();
       existingPlanningApprovalSteps.addAll(existing2PlanningApprovalSteps);
       final List<ApprovalStep> existingApprovalSteps =
           loser.loadApprovalSteps(engine.getContext()).join();
       final List<ApprovalStep> existingApprovalSteps2 =
-          winnerTask.loadApprovalSteps(engine.getContext()).join();
+          winnerBeforeUpdate.loadApprovalSteps(engine.getContext()).join();
       existingApprovalSteps.addAll(existingApprovalSteps2);
       Utils.updateApprovalSteps(winnerTask, winnerTask.getPlanningApprovalSteps(),
           existingPlanningApprovalSteps, winnerTask.getApprovalSteps(), existingApprovalSteps);
