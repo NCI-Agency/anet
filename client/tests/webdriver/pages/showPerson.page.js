@@ -23,8 +23,7 @@ class ShowPerson extends Page {
   }
 
   get shownAssessmentDetails() {
-    // again with the value 3
-    return this.assessmentsTable.$$("td panel-primary div.form-control-static")
+    return this.assessmentsTable.$$("td .panel-primary div.form-control-static")
   }
 
   get quarterlyAssessmentContainer() {
@@ -34,15 +33,15 @@ class ShowPerson extends Page {
   fillAssessmentQuestion(valuesArr) {
     // Use the value 3 it is in all of them
     this.assessmentModalForm
-      .$$(".form-group btn-group")
+      .$$(".form-group .btn-group")
       .forEach((btnGroup, index) => {
-        btnGroup.$(`input[value="${valuesArr[index]}"]`).click()
+        btnGroup.$(`label[id="${valuesArr[index]}"]`).click()
       })
   }
 
   saveAssessmentAndWaitForModalClose() {
     this.saveAssessmentButton.click()
-    this.assessmentModalForm.waitForExist({ reverse: true })
+    this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
   }
 }
 
