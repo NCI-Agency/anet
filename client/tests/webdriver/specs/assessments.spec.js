@@ -131,6 +131,15 @@ describe("When dealing with assessments", () => {
           )
         })
       })
+
+      it("Should allow an admin to delete the assessment", () => {
+        ShowPerson.deleteAssessmentButton.click()
+        ShowPerson.deleteConfirmButton.waitForExist()
+        ShowPerson.deleteConfirmButton.waitForDisplayed()
+        ShowPerson.deleteConfirmButton.click()
+        ShowPerson.successfulDeleteMessage.waitForExist()
+        ShowPerson.successfulDeleteMessage.waitForDisplayed()
+      })
     })
   })
 
@@ -290,6 +299,15 @@ describe("When dealing with assessments", () => {
                 ADMIN_TASK_EDIT_DETAILS[index])
           )
         })
+      })
+
+      it("Should allow an admin to delete the assessment", () => {
+        ShowTask.deleteAssessmentButton.click()
+        ShowTask.deleteConfirmButton.waitForExist()
+        ShowTask.deleteConfirmButton.waitForDisplayed()
+        ShowTask.deleteConfirmButton.click()
+        ShowTask.successfulDeleteMessage.waitForExist()
+        ShowTask.successfulDeleteMessage.waitForDisplayed()
       })
     })
   })

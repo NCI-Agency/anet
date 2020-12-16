@@ -15,13 +15,25 @@ class ShowTask extends Page {
 
   get addPeriodicAssessmentButton() {
     // get the add assessment button for first period on the table
-    return this.monthlyAssessmentsTable
-      .$$("tbody tr:last-child td")[0]
-      .$("button")
+    return this.monthlyAssessmentsTable.$(
+      '//tbody//tr[3]//td[1]//button[contains(text(),"Make a new")]'
+    )
   }
 
   get editAssessmentButton() {
     return browser.$('div.panel-primary button[title="Edit assessment"]')
+  }
+
+  get deleteAssessmentButton() {
+    return browser.$('div.panel-primary button[title="Delete assessment"]')
+  }
+
+  get deleteConfirmButton() {
+    return browser.$('//button[contains(text(), "I am sure")]')
+  }
+
+  get successfulDeleteMessage() {
+    return browser.$('//div[@role="alert" and text()="Successfully deleted"]')
   }
 
   get assessmentModalForm() {
