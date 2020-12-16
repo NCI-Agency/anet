@@ -1,6 +1,9 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import API from "api"
+import { gql } from "apollo-boost"
 import AssessmentModal from "components/assessments/AssessmentModal"
+import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
@@ -15,6 +18,14 @@ import {
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Panel } from "react-bootstrap"
+import { toast } from "react-toastify"
+import REMOVE_ICON from "resources/delete.png"
+
+const GQL_DELETE_NOTE = gql`
+  mutation($uuid: String!) {
+    deleteNote(uuid: $uuid)
+  }
+`
 
 const PeriodicAssessment = ({
   assessment,
@@ -63,6 +74,16 @@ const PeriodicAssessment = ({
               >
                 <Icon icon={IconNames.EDIT} />
               </Button>
+              <ConfirmDelete
+                onConfirmDelete={() => deleteNote(note.uuid)}
+                objectType="note"
+                objectDisplay={"#" + note.uuid}
+                title="Delete assessment"
+                bsSize="xsmall"
+                bsStyle="primary"
+              >
+                <img src={REMOVE_ICON} height={14} alt="Delete" />
+              </ConfirmDelete>
               <AssessmentModal
                 showModal={showAssessmentModalKey === note.uuid}
                 note={note}
@@ -110,6 +131,17 @@ const PeriodicAssessment = ({
       </Panel.Body>
     </Panel>
   )
+
+  function deleteNote(uuid) {
+    API.mutation(GQL_DELETE_NOTE, { uuid })
+      .then(() => {
+        onUpdateAssessment()
+        toast("Successfully deleted")
+      })
+      .catch(error => {
+        toast.error(error.message.split(":").pop())
+      })
+  }
 }
 PeriodicAssessment.propTypes = {
   assessment: PropTypes.object.isRequired,
