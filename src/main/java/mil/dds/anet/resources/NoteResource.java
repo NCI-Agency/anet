@@ -44,17 +44,6 @@ public class NoteResource {
     return n;
   }
 
-  @GraphQLMutation(name = "createNotes")
-  public int createNotes(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "notes") List<Note> notes) {
-    int n = 0;
-    for (final Note note : notes) {
-      createNote(context, note);
-      n++;
-    }
-    return n;
-  }
-
   @GraphQLMutation(name = "updateNote")
   public Note updateNote(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "note") Note n) {
