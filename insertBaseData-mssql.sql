@@ -971,7 +971,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ANDERSON, Andrew');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
-  VALUES (@noteUuid, @authorUuid, 3, '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' + FORMAT(DATEADD(month, DATEDIFF(month, 0, CURRENT_TIMESTAMP), 0), 'yyyy-MM-dd') + '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  VALUES (@noteUuid, @authorUuid, 3, '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' + FORMAT(DATEADD(month, -1, DATEADD(month, DATEDIFF(month, 0, CURRENT_TIMESTAMP), 0)), 'yyyy-MM-dd') + '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
   SELECT @noteUuid, 'tasks', t.uuid
   FROM tasks t
@@ -981,7 +981,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'JACKSON, Jack');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
-  VALUES (@noteUuid, @authorUuid, 3, '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' + FORMAT(DATEADD(quarter, DATEDIFF(quarter, 0, CURRENT_TIMESTAMP), 0), 'yyyy-MM-dd') + '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  VALUES (@noteUuid, @authorUuid, 3, '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' + FORMAT(DATEADD(quarter, -1, DATEADD(quarter, DATEDIFF(quarter, 0, CURRENT_TIMESTAMP), 0)), 'yyyy-MM-dd') + '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
   SELECT @noteUuid, 'people', p.uuid
   FROM people p
