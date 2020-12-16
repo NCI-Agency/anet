@@ -77,7 +77,10 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
       migratePartnerAssessments(engine, configuration);
     }
 
-    System.exit(0);
+    if (!configuration.isTestMode()) {
+      // Only exit when not in testMode, or the Command tests won't run
+      System.exit(0);
+    }
   }
 
   private void clearEmptyBiographies(AnetObjectEngine engine) {
