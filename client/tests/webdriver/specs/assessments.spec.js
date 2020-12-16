@@ -55,12 +55,12 @@ describe("When dealing with assessments", () => {
 
         // NOTE: assuming assessment question content here, may change in future
         ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
-        ShowPerson.saveAssessmentAndWaitForModalClose()
+        ShowPerson.saveAssessmentAndWaitForModalClose(
+          VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[0]]
+        )
       })
 
       it("Should show the same assessment details with the details just created", () => {
-        ShowPerson.assessmentsTable.waitForExist()
-        ShowPerson.assessmentsTable.waitForDisplayed()
         ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +
@@ -78,12 +78,12 @@ describe("When dealing with assessments", () => {
         ShowPerson.assessmentModalForm.waitForDisplayed()
 
         ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_EDIT_DETAILS)
-        ShowPerson.saveAssessmentAndWaitForModalClose()
+        ShowPerson.saveAssessmentAndWaitForModalClose(
+          VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[0]]
+        )
       })
 
       it("Should show the same assessment details with the details just edited", () => {
-        ShowPerson.assessmentsTable.waitForExist()
-        ShowPerson.assessmentsTable.waitForDisplayed()
         ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +
@@ -118,12 +118,12 @@ describe("When dealing with assessments", () => {
         ShowPerson.assessmentModalForm.waitForDisplayed()
 
         ShowPerson.fillAssessmentQuestion(ADMIN_PERSON_EDIT_DETAILS)
-        ShowPerson.saveAssessmentAndWaitForModalClose()
+        ShowPerson.saveAssessmentAndWaitForModalClose(
+          VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[0]]
+        )
       })
 
       it("Should show the same assessment details with the details just edited", () => {
-        ShowPerson.assessmentsTable.waitForExist()
-        ShowPerson.assessmentsTable.waitForDisplayed()
         ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +
@@ -156,12 +156,12 @@ describe("When dealing with assessments", () => {
 
         // NOTE: assuming assessment question content here, may change in future
         ShowTask.fillAssessmentQuestion(ADVISOR_1_TASK_CREATE_DETAILS)
-        ShowTask.saveAssessmentAndWaitForModalClose()
+        ShowTask.saveAssessmentAndWaitForModalClose(
+          ADVISOR_1_TASK_CREATE_DETAILS[0]
+        )
       })
 
       it("Should show the same assessment details with the details just created", () => {
-        ShowTask.monthlyAssessmentsTable.waitForExist()
-        ShowTask.monthlyAssessmentsTable.waitForDisplayed()
         ShowTask.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +
@@ -184,12 +184,12 @@ describe("When dealing with assessments", () => {
           ADVISOR_1_TASK_EDIT_DETAILS,
           ADVISOR_1_TASK_CREATE_DETAILS[0]
         )
-        ShowTask.saveAssessmentAndWaitForModalClose()
+        ShowTask.saveAssessmentAndWaitForModalClose(
+          ADVISOR_1_TASK_EDIT_DETAILS[0]
+        )
       })
 
       it("Should show the same assessment details with the details just edited", () => {
-        ShowTask.monthlyAssessmentsTable.waitForExist()
-        ShowTask.monthlyAssessmentsTable.waitForDisplayed()
         ShowTask.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +
@@ -231,12 +231,12 @@ describe("When dealing with assessments", () => {
           ADVISOR_2_TASK_EDIT_DETAILS,
           ADVISOR_1_TASK_EDIT_DETAILS[0]
         )
-        ShowTask.saveAssessmentAndWaitForModalClose()
+        ShowTask.saveAssessmentAndWaitForModalClose(
+          ADVISOR_2_TASK_EDIT_DETAILS[0]
+        )
       })
 
       it("Should show the same assessment details with the details just edited", () => {
-        ShowTask.monthlyAssessmentsTable.waitForExist()
-        ShowTask.monthlyAssessmentsTable.waitForDisplayed()
         ShowTask.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +
@@ -278,12 +278,10 @@ describe("When dealing with assessments", () => {
           ADMIN_TASK_EDIT_DETAILS,
           ADVISOR_2_TASK_EDIT_DETAILS[0]
         )
-        ShowTask.saveAssessmentAndWaitForModalClose()
+        ShowTask.saveAssessmentAndWaitForModalClose(ADMIN_TASK_EDIT_DETAILS[0])
       })
 
       it("Should show the same assessment details with the details just edited", () => {
-        ShowTask.monthlyAssessmentsTable.waitForExist()
-        ShowTask.monthlyAssessmentsTable.waitForDisplayed()
         ShowTask.shownAssessmentDetails.forEach((detail, index) => {
           expect(prefix(index) + detail.getText()).to.equal(
             prefix(index) +

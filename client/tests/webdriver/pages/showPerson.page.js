@@ -44,9 +44,19 @@ class ShowPerson extends Page {
       })
   }
 
-  saveAssessmentAndWaitForModalClose() {
+  saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
     this.saveAssessmentButton.click()
     this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
+    // wait until details to change, can take some time to update show page
+    browser.waitUntil(
+      () => {
+        return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
+      },
+      {
+        timeout: 10000,
+        timeoutMsg: "Expected change after save"
+      }
+    )
   }
 }
 

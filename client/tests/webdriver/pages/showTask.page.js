@@ -57,9 +57,19 @@ class ShowTask extends Page {
       .click({ x: 10, y: 10 })
   }
 
-  saveAssessmentAndWaitForModalClose() {
+  saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
     this.saveAssessmentButton.click()
     this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
+    // wait until details to change, can take some time to update show page
+    browser.waitUntil(
+      () => {
+        return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: "Expected change after save"
+      }
+    )
   }
 }
 
