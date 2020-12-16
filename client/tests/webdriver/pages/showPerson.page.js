@@ -7,7 +7,7 @@ class ShowPerson extends Page {
 
   get addPeriodicAssessmentButton() {
     // get the add assessment button for latest assessable period (previous period)
-    return this.assessmentsTable.$$("tbody tr:last-child td")[1]
+    return this.assessmentsTable.$$("tbody tr:last-child td")[1].$("button")
   }
 
   get editAssessmentButton() {
@@ -23,7 +23,9 @@ class ShowPerson extends Page {
   }
 
   get shownAssessmentDetails() {
-    return this.assessmentsTable.$$("td .panel-primary div.form-control-static")
+    return this.assessmentsTable.$$(
+      "td:nth-child(2) .panel-primary div.form-control-static"
+    )
   }
 
   get quarterlyAssessmentContainer() {
@@ -31,11 +33,14 @@ class ShowPerson extends Page {
   }
 
   fillAssessmentQuestion(valuesArr) {
-    // Use the value 3 it is in all of them
     this.assessmentModalForm
       .$$(".form-group .btn-group")
       .forEach((btnGroup, index) => {
-        btnGroup.$(`label[id="${valuesArr[index]}"]`).click()
+        const button = btnGroup.$(`label[id="${valuesArr[index]}"]`)
+        // sometimes misfires, lets wait a bit
+        button.waitForExist()
+        button.waitForDisplayed()
+        button.click({ x: 10, y: 10 })
       })
   }
 

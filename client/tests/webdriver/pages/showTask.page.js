@@ -14,8 +14,10 @@ class ShowTask extends Page {
   }
 
   get addPeriodicAssessmentButton() {
-    // get the add assessment button for latest assessable period (previous period)
-    return this.monthlyAssessmentsTable.$$("tbody tr:last-child td")[1]
+    // get the add assessment button for first period on the table
+    return this.monthlyAssessmentsTable
+      .$$("tbody tr:last-child td")[0]
+      .$("button")
   }
 
   get editAssessmentButton() {
@@ -32,7 +34,7 @@ class ShowTask extends Page {
 
   get shownAssessmentDetails() {
     return this.monthlyAssessmentsTable.$$(
-      "td .panel-primary div.form-control-static"
+      "td:first-child .panel-primary div.form-control-static"
     )
   }
 
@@ -41,15 +43,18 @@ class ShowTask extends Page {
     // first focus on the text editor input
     this.assessmentModalForm.$(".DraftEditor-editorContainer").click()
     if (prevTextToClear) {
-      const chars = prevTextToClear.split("")
+      // remove previous text by deleting characters one by one
+      const chars = [...prevTextToClear]
       browser.keys(chars.map(char => "Backspace"))
+      // maybe we clicked at the beginning of the text, Backspace doesn't clear
+      browser.keys(chars.map(char => "Delete"))
     }
     browser.keys(valuesArr[0])
 
     this.assessmentModalForm
       .$(".form-group .btn-group")
       .$(`label[id="${valuesArr[1]}"]`)
-      .click()
+      .click({ x: 10, y: 10 })
   }
 
   saveAssessmentAndWaitForModalClose() {
