@@ -13,18 +13,20 @@ class ShowTask extends Page {
     return this.assessmentResultsMonthly.$("table.assessments-table")
   }
 
-  get addPeriodicAssessmentButton() {
+  get addMonthlyAssessmentButton() {
     // get the add assessment button for first period on the table
     return this.monthlyAssessmentsTable.$(
-      '//tbody//tr[3]//td[1]//button[contains(text(),"Make a new")]'
+      "tbody > tr > td:first-child > button"
     )
   }
 
-  get editAssessmentButton() {
-    return browser.$('div.panel-primary button[title="Edit assessment"]')
+  get editMonthlyAssessmentButton() {
+    return this.monthlyAssessmentsTable.$(
+      'div.panel-primary button[title="Edit assessment"]'
+    )
   }
 
-  get deleteAssessmentButton() {
+  get deleteMonthlyAssessmentButton() {
     return browser.$('div.panel-primary button[title="Delete assessment"]')
   }
 

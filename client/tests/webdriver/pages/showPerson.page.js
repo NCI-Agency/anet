@@ -8,7 +8,7 @@ class ShowPerson extends Page {
   get addPeriodicAssessmentButton() {
     // get the add assessment button for latest assessable period (previous period)
     return this.assessmentsTable.$(
-      '//tbody//tr[4]//td[2]//button[contains(text(), "Make a new")]'
+      "tbody > tr:nth-child(4) > td:nth-child(2) > button"
     )
   }
 
@@ -67,7 +67,7 @@ class ShowPerson extends Page {
         return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
       },
       {
-        timeout: 10000,
+        timeout: 20000,
         timeoutMsg: "Expected change after save"
       }
     )
