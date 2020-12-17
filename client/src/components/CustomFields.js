@@ -298,6 +298,7 @@ const ArrayOfObjectsField = fieldProps => {
     fieldConfig,
     formikProps,
     invisibleFields,
+    linkToComp,
     vertical,
     children
   } = fieldProps
@@ -339,6 +340,7 @@ const ArrayOfObjectsField = fieldProps => {
                 fieldConfig={fieldConfig}
                 formikProps={formikProps}
                 invisibleFields={invisibleFields}
+                linkToComp={linkToComp}
                 vertical={vertical}
                 arrayHelpers={arrayHelpers}
                 index={index}
@@ -358,6 +360,7 @@ const ArrayObject = ({
   invisibleFields,
   vertical,
   arrayHelpers,
+  linkToComp,
   index
 }) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
@@ -372,6 +375,7 @@ const ArrayObject = ({
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         invisibleFields={invisibleFields}
+        linkToComp={linkToComp}
         vertical={vertical}
         parentFieldName={`${fieldName}.${index}`}
       />
@@ -381,6 +385,7 @@ const ArrayObject = ({
 ArrayObject.propTypes = {
   fieldName: PropTypes.string.isRequired,
   fieldConfig: PropTypes.object.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   formikProps: PropTypes.object.isRequired,
   invisibleFields: PropTypes.array.isRequired,
   vertical: PropTypes.bool,
@@ -869,7 +874,8 @@ const CustomField = ({
         return {
           fieldConfig,
           formikProps,
-          invisibleFields
+          invisibleFields,
+          linkToComp
         }
       case CUSTOM_FIELD_TYPE.JSON:
         return {

@@ -11,5 +11,5 @@
   max-width: 600px;
   max-height: 800px;
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
 }

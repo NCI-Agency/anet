@@ -170,7 +170,7 @@ const Card = ({ task }) => {
                   <td>tasked organizations:</td>
                   <td>
                     {" "}
-                    {this.props.task.taskedOrganizations.map(org => (
+                    {task.taskedOrganizations.map(org => (
                       <LinkToNotPreviewed
                         modelType="Organization"
                         model={org}

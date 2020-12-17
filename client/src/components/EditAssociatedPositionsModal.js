@@ -47,7 +47,7 @@ const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
             </td>
             <td>
               <LinkToNotPreviewed
-                modelType="Person"
+                modelType="Position"
                 model={relPos}
                 isLink={false}
               />
