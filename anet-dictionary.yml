@@ -518,7 +518,7 @@ fields:
         - recurrence: quarterly
           questions:
             test1:
-              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 1
               choices:
@@ -532,7 +532,7 @@ fields:
                   label: three
                   color: '#ff8279'
             test2:
-              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 2
               choices:
@@ -546,7 +546,7 @@ fields:
                   label: five
                   color: '#c2ffb3'
             test3:
-              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 3
               choices:
@@ -560,7 +560,6 @@ fields:
                   label: three
                   color: '#ff8279'
             text:
-              # TODO: test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
               type: special_field
               label: Text
               widget: richTextEditor

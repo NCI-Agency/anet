@@ -69,6 +69,8 @@ $defs:
     additionalProperties: false
     required: [type]
     properties:
+      test:
+        type: string
       type:
         title: value type field
         type: string

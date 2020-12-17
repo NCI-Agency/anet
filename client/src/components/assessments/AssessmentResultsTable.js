@@ -3,6 +3,7 @@ import { InstantAssessmentsRow } from "components/assessments/InstantAssessmentR
 import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import _isEmpty from "lodash/isEmpty"
 import {
@@ -113,10 +114,14 @@ const AssessmentResultsTable = ({
     ?.map(s => s.getInstantAssessmentConfig())
     .filter(mc => !_isEmpty(mc))
   const { assessmentConfig } = entity.getPeriodicAssessmentDetails(recurrence)
+  const filteredAssessmentConfig = Model.filterAssessmentConfig(
+    assessmentConfig,
+    entity
+  )
   const showAssessmentResults =
     !_isEmpty(entityInstantAssessmentConfig) ||
     !_isEmpty(subEntitiesInstantAssessmentConfig) ||
-    !_isEmpty(assessmentConfig)
+    !_isEmpty(filteredAssessmentConfig)
   return (
     <>
       {showAssessmentResults && (

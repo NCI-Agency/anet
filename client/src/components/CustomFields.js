@@ -753,6 +753,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     helpText,
     validations,
     visibleWhen,
+    test,
     objectFields,
     ...fieldProps
   } = fieldConfig
