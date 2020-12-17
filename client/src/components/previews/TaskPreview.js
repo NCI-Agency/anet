@@ -114,11 +114,14 @@ const GQL_GET_TASK = gql`
 `
 
 const TaskPreview = ({ className, uuid, previewId }) => {
-  const { data } = API.useApiQuery(GQL_GET_TASK, {
+  const { data, error } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
 
   if (!data) {
+    if (error) {
+      return <p>Could not load the preview</p>
+    }
     return null
   }
 

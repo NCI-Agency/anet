@@ -26,11 +26,14 @@ const GQL_GET_LOCATION = gql`
 `
 
 const LocationShow = ({ className, uuid, previewId }) => {
-  const { data } = API.useApiQuery(GQL_GET_LOCATION, {
+  const { data, error } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
 
   if (!data) {
+    if (error) {
+      return <p>Could not load the preview</p>
+    }
     return null
   }
 

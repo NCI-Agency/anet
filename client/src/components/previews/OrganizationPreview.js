@@ -70,11 +70,14 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const OrganizationPreview = ({ className, uuid, previewId }) => {
-  const { data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
+  const { data, error } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })
 
   if (!data) {
+    if (error) {
+      return <p>Could not load the preview</p>
+    }
     return null
   }
 

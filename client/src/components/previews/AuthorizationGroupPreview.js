@@ -39,9 +39,12 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
 `
 
 const AuthorizationGroupPreview = ({ className, uuid, previewId }) => {
-  const { data } = API.useApiQuery(GQL_GET_AUTHORIZATION_GROUP, { uuid })
+  const { data, error } = API.useApiQuery(GQL_GET_AUTHORIZATION_GROUP, { uuid })
 
   if (!data) {
+    if (error) {
+      return <p>Could not load the preview</p>
+    }
     return null
   }
 

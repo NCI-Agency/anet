@@ -78,13 +78,17 @@ const GQL_GET_PERSON = gql`
 const PersonPreview = ({ className, uuid, previewId }) => {
   const { currentUser } = useContext(AppContext)
 
-  const { data } = API.useApiQuery(GQL_GET_PERSON, {
+  const { data, error } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
 
   if (!data) {
+    if (error) {
+      return <p>Could not load the preview</p>
+    }
     return null
   }
+
   data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
     data.person.customFields
   )

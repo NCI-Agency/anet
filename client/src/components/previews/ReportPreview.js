@@ -78,11 +78,14 @@ const GQL_GET_REPORT = gql`
 `
 
 const ReportPreview = ({ className, uuid, previewId }) => {
-  const { data } = API.useApiQuery(GQL_GET_REPORT, {
+  const { data, error } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
 
   if (!data) {
+    if (error) {
+      return <p>Could not load the preview</p>
+    }
     return null
   }
 
