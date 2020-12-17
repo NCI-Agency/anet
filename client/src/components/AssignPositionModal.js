@@ -3,6 +3,7 @@ import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import LinkTo from "components/LinkTo"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
@@ -99,14 +100,18 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkToNotPreviewed modelType="Person" model={position.person} />. By
-          selecting this position, they will be removed.
+          <LinkTo
+            modelType="Person"
+            model={position.person}
+            onClick={onCancel}
+          />
+          . By selecting this position, they will be removed.
         </>
       )
       newError = { message: errorMessage }
     }
     setError(newError)
-  }, [position, person.uuid])
+  }, [position, person.uuid, onCancel])
 
   const newPosition = position ? new Position(position) : new Position()
 
