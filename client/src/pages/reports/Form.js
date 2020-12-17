@@ -1050,9 +1050,7 @@ const ReportForm = ({
                     <InstantAssessmentsContainerField
                       entityType={Person}
                       entities={values.reportPeople?.filter(rp => rp.attendee)}
-                      entitiesInstantAssessmentsConfig={
-                        attendeesInstantAssessmentsConfig
-                      }
+                      relatedObject={values}
                       parentFieldName={
                         Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
                       }
@@ -1072,9 +1070,7 @@ const ReportForm = ({
                     <InstantAssessmentsContainerField
                       entityType={Task}
                       entities={values.tasks}
-                      entitiesInstantAssessmentsConfig={
-                        tasksInstantAssessmentsConfig
-                      }
+                      relatedObject={values}
                       parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
                       formikProps={{
                         setFieldTouched,

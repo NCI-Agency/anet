@@ -14,7 +14,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -429,7 +429,11 @@ const CompactReportView = ({ pageDispatchers }) => {
       <table>
         <tbody>
           {report.tasks.map(task => {
-            const taskInstantAssessmentConfig = task.getInstantAssessmentConfig()
+            const taskInstantAssessmentConfig = Model.filterAssessmentConfig(
+              task.getInstantAssessmentConfig(),
+              task,
+              report
+            )
             // return only name and objective if no assessment
             return (
               <CompactRow
@@ -481,7 +485,11 @@ const CompactReportView = ({ pageDispatchers }) => {
       <table>
         <tbody>
           {attendees.map(attendee => {
-            const attendeeInstantAssessmentConfig = attendee.getInstantAssessmentConfig()
+            const attendeeInstantAssessmentConfig = Model.filterAssessmentConfig(
+              attendee.getInstantAssessmentConfig(),
+              attendee,
+              report
+            )
             const renderOrgName =
               prevDiffOrgName !== attendee.position?.organization?.shortName
             prevDiffOrgName = renderOrgName

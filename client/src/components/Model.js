@@ -602,8 +602,8 @@ export default class Model {
     return false
   }
 
-  static filterAssessmentConfig(assessmentConfig, subject) {
-    const testValue = { subject }
+  static filterAssessmentConfig(assessmentConfig, subject, relatedObject) {
+    const testValue = { subject, relatedObject }
     const filteredAssessmentConfig = {}
     if (!_isEmpty(assessmentConfig)) {
       Object.entries(assessmentConfig)

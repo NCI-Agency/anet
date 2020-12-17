@@ -581,6 +581,30 @@ fields:
                 "3":
                   label: high
                   color: '#ff8279'
+            question2:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^P/i))]
+              type: enumset
+              label: Attendee from P org
+              choices:
+                yes:
+                  label: P
+                  color: '#ff0000'
+            question3:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
+              type: enumset
+              label: Attendee from Z org
+              choices:
+                yes:
+                  label: Z
+                  color: '#00ff00'
+            question4:
+              test: $.relatedObject.[?(@property === "atmosphere" && @ === "POSITIVE")]
+              type: enumset
+              label: Report had POSITIVE atmosphere
+              choices:
+                yes:
+                  label: 👍
+                  color: '#0000ff'
 
     position:
       name: Afghan Tashkil

@@ -41,7 +41,10 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const instantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const instantAssessmentConfig = Model.filterAssessmentConfig(
+    entity.getInstantAssessmentConfig(),
+    entity // TODO: add relatedObject?
+  )
   const { periods } = periodsConfig
   const dataPerPeriod = []
   periods.forEach(period =>
@@ -109,9 +112,17 @@ const AssessmentResultsTable = ({
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
-  const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
+    entity.getInstantAssessmentConfig(),
+    entity // TODO: add relatedObject?
+  )
   const subEntitiesInstantAssessmentConfig = subEntities
-    ?.map(s => s.getInstantAssessmentConfig())
+    ?.map(s =>
+      Model.filterAssessmentConfig(
+        s.getInstantAssessmentConfig(),
+        s // TODO: add relatedObject?
+      )
+    )
     .filter(mc => !_isEmpty(mc))
   const { assessmentConfig } = entity.getPeriodicAssessmentDetails(recurrence)
   const filteredAssessmentConfig = Model.filterAssessmentConfig(

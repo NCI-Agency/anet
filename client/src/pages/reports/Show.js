@@ -694,6 +694,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <InstantAssessmentsContainerField
                       entityType={Person}
                       entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      relatedObject={report}
                       parentFieldName={
                         Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
                       }
@@ -711,6 +712,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <InstantAssessmentsContainerField
                       entityType={Task}
                       entities={values.tasks}
+                      relatedObject={report}
                       parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
                       formikProps={{
                         values
