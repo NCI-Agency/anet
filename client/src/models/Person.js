@@ -157,7 +157,7 @@ export default class Person extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, name, rank, role, status, endOfTourDate, avatar(size: 32), position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
+    "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type code status organization { uuid shortName identificationCode } location { uuid name } }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 

@@ -67,6 +67,7 @@ const GQL_GET_REPORT = gql`
           organization {
             uuid
             shortName
+            identificationCode
           }
           location {
             uuid
