@@ -34,10 +34,6 @@ class ShowTask extends Page {
     return browser.$('//button[contains(text(), "I am sure")]')
   }
 
-  get successfulDeleteMessage() {
-    return browser.$('//div[@role="alert" and text()="Successfully deleted"]')
-  }
-
   get assessmentModalForm() {
     return browser.$(".modal-content form")
   }
@@ -46,10 +42,12 @@ class ShowTask extends Page {
     return this.assessmentModalForm.$('//button[text()="Save"]')
   }
 
+  get shownAssessmentPanel() {
+    return this.monthlyAssessmentsTable.$("td:first-child .panel-primary")
+  }
+
   get shownAssessmentDetails() {
-    return this.monthlyAssessmentsTable.$$(
-      "td:first-child .panel-primary div.form-control-static"
-    )
+    return this.shownAssessmentPanel.$$("div.form-control-static")
   }
 
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
@@ -65,10 +63,14 @@ class ShowTask extends Page {
     }
     browser.keys(valuesArr[0])
 
-    this.assessmentModalForm
+    const button = this.assessmentModalForm
       .$(".form-group .btn-group")
       .$(`label[id="${valuesArr[1]}"]`)
-      .click({ x: 10, y: 10 })
+    // wait for a bit, clicks and do double click, sometimes it does not go through
+    browser.pause(300)
+    button.click({ x: 10, y: 10 })
+    button.click({ x: 10, y: 10 })
+    browser.pause(300)
   }
 
   saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {

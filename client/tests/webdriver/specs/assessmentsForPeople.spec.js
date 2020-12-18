@@ -3,7 +3,7 @@ import Home from "../pages/home.page"
 import Search from "../pages/search.page"
 import ShowPerson from "../pages/showPerson.page"
 
-const PERSON_SEARCH_STRING = "steve"
+const PERSON_SEARCH_STRING = "Steve"
 const ADVISOR1_CREDENTIALS = "elizabeth"
 const ADVISOR_1_PERSON_CREATE_DETAILS = ["1", "3", "1"]
 const ADVISOR_1_PERSON_EDIT_DETAILS = ["2", "4", "2"]
@@ -25,7 +25,7 @@ describe("For the periodic person assessments", () => {
       Home.submitSearch.click()
       Search.foundPeopleTable.waitForExist({ timeout: 20000 })
       Search.foundPeopleTable.waitForDisplayed()
-      Search.linkOfFirstPersonFound.click()
+      Search.linkOfPersonFound(PERSON_SEARCH_STRING).click()
     })
 
     it("Should allow advisor to successfully add an assessment", () => {
@@ -84,7 +84,7 @@ describe("For the periodic person assessments", () => {
       Home.submitSearch.click()
       Search.foundPeopleTable.waitForExist({ timeout: 20000 })
       Search.foundPeopleTable.waitForDisplayed()
-      Search.linkOfFirstPersonFound.click()
+      Search.linkOfPersonFound(PERSON_SEARCH_STRING).click()
     })
 
     it("Should not show make assessment button when there is an assessment on that period", () => {
@@ -121,8 +121,10 @@ describe("For the periodic person assessments", () => {
       ShowPerson.deleteConfirmButton.waitForExist()
       ShowPerson.deleteConfirmButton.waitForDisplayed()
       ShowPerson.deleteConfirmButton.click()
-      ShowPerson.successfulDeleteMessage.waitForExist()
-      ShowPerson.successfulDeleteMessage.waitForDisplayed()
+      ShowPerson.shownAssessmentPanel.waitForExist({
+        reverse: true,
+        timeout: 10000
+      })
     })
   })
 })

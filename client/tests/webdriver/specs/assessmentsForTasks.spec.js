@@ -3,7 +3,7 @@ import Home from "../pages/home.page"
 import Search from "../pages/search.page"
 import ShowTask from "../pages/showTask.page"
 
-const TASK_SEARCH_STRING = "1.1.A Milestone"
+const TASK_SEARCH_STRING = "1.1.A"
 // both are responsible from '1.1.A Milestone' task
 const ADVISOR1_CREDENTIALS = "elizabeth"
 const ADVISOR2_CREDENTIALS = "andrew"
@@ -26,7 +26,7 @@ describe("For the periodic task assessments", () => {
       Home.submitSearch.click()
       Search.foundTaskTable.waitForExist({ timeout: 20000 })
       Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfFirstTaskFound.click()
+      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
     })
 
     it("Should allow advisor to successfully add an assessment", () => {
@@ -91,14 +91,14 @@ describe("For the periodic task assessments", () => {
       Home.submitSearch.click()
       Search.foundTaskTable.waitForExist({ timeout: 20000 })
       Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfFirstTaskFound.click()
+      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
     })
 
     it("Should not show make assessment button when there is an assessment on that period", () => {
       expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assesment", () => {
+    it("Should allow other advisor to successfully edit existing assesment", () => {
       ShowTask.monthlyAssessmentsTable.waitForExist()
       ShowTask.monthlyAssessmentsTable.waitForDisplayed()
 
@@ -135,7 +135,7 @@ describe("For the periodic task assessments", () => {
       Home.submitSearch.click()
       Search.foundTaskTable.waitForExist({ timeout: 20000 })
       Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfFirstTaskFound.click()
+      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
     })
 
     it("Should not show make assessment button when there is an assessment on that period", () => {
@@ -175,8 +175,10 @@ describe("For the periodic task assessments", () => {
       ShowTask.deleteConfirmButton.waitForExist()
       ShowTask.deleteConfirmButton.waitForDisplayed()
       ShowTask.deleteConfirmButton.click()
-      ShowTask.successfulDeleteMessage.waitForExist()
-      ShowTask.successfulDeleteMessage.waitForDisplayed()
+      ShowTask.shownAssessmentPanel.waitForExist({
+        reverse: true,
+        timeout: 10000
+      })
     })
   })
 })

@@ -9,12 +9,12 @@ class Search extends Page {
     return browser.$("div#tasks #tasks-search-results")
   }
 
-  get linkOfFirstPersonFound() {
-    return this.foundPeopleTable.$("tbody tr:first-child a")
+  linkOfPersonFound(name) {
+    return this.foundPeopleTable.$(`//tbody/tr//a[contains(text(), "${name}")]`)
   }
 
-  get linkOfFirstTaskFound() {
-    return this.foundTaskTable.$("tbody tr:first-child a")
+  linkOfTaskFound(name) {
+    return this.foundTaskTable.$(`//tbody/tr//a[contains(text(), "${name}")]`)
   }
 }
 

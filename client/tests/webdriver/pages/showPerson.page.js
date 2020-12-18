@@ -24,10 +24,6 @@ class ShowPerson extends Page {
     return browser.$('//button[contains(text(), "I am sure")]')
   }
 
-  get successfulDeleteMessage() {
-    return browser.$('//div[@role="alert" and text()="Successfully deleted"]')
-  }
-
   get assessmentModalForm() {
     return browser.$(".modal-content form")
   }
@@ -36,10 +32,12 @@ class ShowPerson extends Page {
     return this.assessmentModalForm.$('//button[text()="Save"]')
   }
 
+  get shownAssessmentPanel() {
+    return this.assessmentsTable.$("td:nth-child(2) .panel-primary")
+  }
+
   get shownAssessmentDetails() {
-    return this.assessmentsTable.$$(
-      "td:nth-child(2) .panel-primary div.form-control-static"
-    )
+    return this.shownAssessmentPanel.$$("div.form-control-static")
   }
 
   get quarterlyAssessmentContainer() {
@@ -51,10 +49,11 @@ class ShowPerson extends Page {
       .$$(".form-group .btn-group")
       .forEach((btnGroup, index) => {
         const button = btnGroup.$(`label[id="${valuesArr[index]}"]`)
-        // sometimes misfires, lets wait a bit
-        button.waitForExist()
-        button.waitForDisplayed()
+        // wait for a bit, clicks and do double click, sometimes it does not go through
+        browser.pause(300)
         button.click({ x: 10, y: 10 })
+        button.click({ x: 10, y: 10 })
+        browser.pause(300)
       })
   }
 
