@@ -112,27 +112,27 @@ public class LocationResource {
     if (nr == 0) {
       throw new WebApplicationException("Couldn't process location merge", Status.NOT_FOUND);
     }
-    final Location mergedLocation = dao.getByUuid(loserUuid);
+    final Location locationBeforeMerge = dao.getByUuid(winnerLocation.getUuid());
     final List<ApprovalStep> existingPlanningApprovalSteps =
         existing.loadPlanningApprovalSteps(engine.getContext()).join();
     final List<ApprovalStep> existing2PlanningApprovalSteps =
-        winnerLocation.loadPlanningApprovalSteps(engine.getContext()).join();
+        locationBeforeMerge.loadPlanningApprovalSteps(engine.getContext()).join();
     existingPlanningApprovalSteps.addAll(existing2PlanningApprovalSteps);
     final List<ApprovalStep> existingApprovalSteps =
         existing.loadApprovalSteps(engine.getContext()).join();
     final List<ApprovalStep> existingApprovalSteps2 =
-        winnerLocation.loadApprovalSteps(engine.getContext()).join();
+        locationBeforeMerge.loadApprovalSteps(engine.getContext()).join();
     existingApprovalSteps.addAll(existingApprovalSteps2);
-    Utils.updateApprovalSteps(mergedLocation, mergedLocation.getPlanningApprovalSteps(),
-        existingPlanningApprovalSteps, mergedLocation.getApprovalSteps(), existingApprovalSteps);
+    Utils.updateApprovalSteps(winnerLocation, winnerLocation.getPlanningApprovalSteps(),
+        existingPlanningApprovalSteps, winnerLocation.getApprovalSteps(), existingApprovalSteps);
 
-    final int numRow = dao.mergeLocation(existing, mergedLocation);
+    final int numRow = dao.mergeLocation(existing, winnerLocation);
     if (numRow == 0) {
       throw new WebApplicationException("Couldn't process location merge", Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Location {} merged on {} by {}", existing, mergedLocation, user);
+    AnetAuditLogger.log("Location {} merged on {} by {}", existing, winnerLocation, user);
     // Return merged location uuid because of navigate that location.
-    return mergedLocation;
+    return winnerLocation;
   }
 
 }
