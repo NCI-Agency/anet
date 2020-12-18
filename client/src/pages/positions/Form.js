@@ -151,7 +151,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
           values.organization.type &&
           values.organization.type !== orgSearchQuery.type
         ) {
-          values.organization = {}
+          values.organization = null
         }
         const willAutoKickPerson =
           values.status === Model.STATUS.INACTIVE &&
