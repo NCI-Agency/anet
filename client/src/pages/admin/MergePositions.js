@@ -26,7 +26,6 @@ import useMergeValidation, {
   unassignedPerson
 } from "mergeUtils"
 import { Position } from "models"
-import GeoLocation from "pages/locations/GeoLocation"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Col, FormGroup, Grid, Row } from "react-bootstrap"
@@ -173,12 +172,21 @@ const MergePositions = ({ pageDispatchers }) => {
                 action={getInfoButton("Name is required.")}
               />
               <PositionField
+                label="Organization"
+                value={
+                  <LinkTo
+                    modelType="Organization"
+                    model={mergedPosition.organization}
+                  />
+                }
+                align="center"
+                action={getInfoButton("Organization is required.")}
+              />
+              <PositionField
                 label="Type"
                 value={mergedPosition.type}
                 align="center"
-                action={getClearButton(() => {
-                  setFieldValue("type", Position.TYPE.ADVISOR)
-                })}
+                action={getInfoButton("Type is required.")}
               />
               <PositionField
                 label="Code"
@@ -225,29 +233,25 @@ const MergePositions = ({ pageDispatchers }) => {
                 label="Previous People"
                 value={
                   <>
-                    {mergedPosition.previousPeople.map(person => (
-                      <React.Fragment key={`${person.uuid}`}>
-                        <LinkTo modelType="Person" model={person} />{" "}
+                    {mergedPosition.previousPeople.map((pp, idx) => (
+                      // can be same people, uuid not enough
+                      <React.Fragment key={`${pp.person.uuid}-${idx}`}>
+                        <LinkTo modelType="Person" model={pp.person} />{" "}
                       </React.Fragment>
                     ))}
                   </>
                 }
                 align="center"
+                customStyle="height: 100px;"
                 action={getClearButton(() => {
                   setFieldValue("previousPeople", "")
                 })}
               />
               <PositionField
-                label="Organization"
-                value={mergedPosition.organization.shortName}
-                align="center"
-                action={getClearButton(() => {
-                  setFieldValue("organization", {})
-                })}
-              />
-              <PositionField
                 label="Person"
-                value={mergedPosition.person.name}
+                value={
+                  <LinkTo modelType="Person" model={mergedPosition.person} />
+                }
                 align="center"
                 action={getClearButton(() => {
                   setFieldValue("person", "")
@@ -256,9 +260,9 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Location"
                 value={
-                  <GeoLocation
-                    lat={mergedPosition.location.lat}
-                    lng={mergedPosition.location.lng}
+                  <LinkTo
+                    modelType="Location"
+                    model={mergedPosition.location}
                   />
                 }
                 align="center"
@@ -388,6 +392,17 @@ const PositionColumn = ({
             }, align)}
           />
           <PositionField
+            label="Organization"
+            value={
+              <LinkTo modelType="Organization" model={position.organization} />
+            }
+            align={align}
+            action={getActionButton(
+              () => setFieldValue("organization", position.organization),
+              align
+            )}
+          />
+          <PositionField
             label="Type"
             value={position.type}
             align={align}
@@ -416,6 +431,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Associated Positions"
+            customStyle="height: 80px;"
             value={
               <>
                 {position.associatedPositions.map(pos => (
@@ -437,11 +453,12 @@ const PositionColumn = ({
           />
           <PositionField
             label="Previous People"
+            customStyle="height: 80px;"
             value={
               <>
-                {position.previousPeople.map(person => (
-                  <React.Fragment key={`${person.uuid}`}>
-                    <LinkTo modelType="Person" model={person} />{" "}
+                {position.previousPeople.map((pp, idx) => (
+                  <React.Fragment key={`${pp.person.uuid}-${idx}`}>
+                    <LinkTo modelType="Person" model={pp.person} />{" "}
                   </React.Fragment>
                 ))}
               </>
@@ -453,17 +470,9 @@ const PositionColumn = ({
             )}
           />
           <PositionField
-            label="Organization"
-            value={position.organization?.shortName}
-            align={align}
-            action={getActionButton(
-              () => setFieldValue("organization", position.organization),
-              align
-            )}
-          />
-          <PositionField
             label="Person"
-            value={position.person?.name}
+            customStyle="height: 80px;"
+            value={<LinkTo modelType="Person" model={position.person} />}
             align={align}
             action={getActionButton(() => {
               setFieldValue("person", position.person)
@@ -473,18 +482,13 @@ const PositionColumn = ({
           />
           <PositionField
             label="Location"
-            value={
-              <GeoLocation
-                lat={position.location?.lat}
-                lng={position.location?.lng}
-              />
-            }
+            value={<LinkTo modelType="Location" model={position.location} />}
             align={align}
             action={getActionButton(() => {
               setFieldValue("location", position.location)
             }, align)}
           />
-          {getLeafletMap(`merge-positions-map-${align}`, position.location)}
+          {getLeafletMap(`merge-position-map-${align}`, position.location)}
         </>
       )}
     </PositionCol>
