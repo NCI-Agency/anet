@@ -46,10 +46,6 @@ public class PositionResource {
     if (pos.getType() == null) {
       throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST);
     }
-    if (pos.getOrganizationUuid() == null) {
-      throw new WebApplicationException("A Position must belong to an organization",
-          Status.BAD_REQUEST);
-    }
     // only admins can make super user positions
     if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPER_USER)) {
       final Position existingPos = dao.getByUuid(pos.getUuid());
@@ -63,6 +59,10 @@ public class PositionResource {
   private void assertCanUpdatePosition(Person user, Position pos) {
     if (pos.getType() == PositionType.ADMINISTRATOR) {
       AuthUtils.assertAdministrator(user);
+    }
+    if (pos.getOrganizationUuid() == null) {
+      throw new WebApplicationException("A Position must belong to an organization",
+          Status.BAD_REQUEST);
     }
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
   }
