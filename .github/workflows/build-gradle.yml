@@ -165,6 +165,15 @@ jobs:
         BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
         NODE_OPTIONS: '--max-old-space-size=8192 --throw-deprecation'
+    # TODO:  kill previous server and restart with different dictionary
+    # - run : ./gradlew -PtestEnv run --args="server testDictionaries/no-custom-fields.yml"  &
+    #     sleep 15
+    # - uses: olegtarasov/get-tag@v2
+    #   id: tagName
+    # - run: ./gradlew yarn_run_test-noCF-all
+    #   env:
+    #     GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}
+    #     NODE_OPTIONS: '--max-old-space-size=8192 --throw-deprecation'
     - run: head -1000 logs/clientLog.log
       if: always()
     - name: Notify slack success

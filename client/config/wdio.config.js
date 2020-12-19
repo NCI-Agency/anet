@@ -17,7 +17,11 @@ const config = {
   // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
-  specs: ["./tests/webdriver/**/*.spec.js"],
+  specs: ["./tests/webdriver/baseSpecs/*.spec.js"],
+
+  suites: {
+    noCustomFields: ["./tests/webdriver/noCustomFieldsSpecs/*.spec.js"]
+  },
   // IE tests are excluded by default. They are exclusively included in IE dedicated config.
   // Please see `wdio.config.ie.js` for details.
   exclude: ["./tests/webdriver/specs/ie/*.spec.js"],
