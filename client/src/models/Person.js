@@ -326,24 +326,6 @@ export default class Person extends Model {
     }
   }
 
-  static filterShowPageFields(fieldsArrayFromConfig) {
-    return fieldsArrayFromConfig.filter(field => {
-      if (
-        Settings.fields.person[field] ||
-        Settings.fields.person.customFields[field]
-      ) {
-        return true
-      }
-      API.logOnServer(
-        "WARN",
-        "Person.js",
-        356,
-        `Wrong field name in dictionary.fields.${this.role.toLowerCase()}.showPageOrderedFields, field name: ${field}`
-      )
-      return false
-    })
-  }
-
   getNumberOfFieldsInLeftColumn() {
     return this.isPrincipal()
       ? Settings.fields.principal.person.numberOfFieldsInLeftColumn
@@ -355,14 +337,35 @@ export default class Person extends Model {
       ? Settings.fields.principal.person.showPageOrderedFields
       : Settings.fields.advisor.person.showPageOrderedFields
 
-    return Person.filterShowPageFields(fieldsArrayFromConfig)
+    return Person.filterInvalidShowPageFields(
+      fieldsArrayFromConfig || [],
+      this.role
+    )
+  }
+
+  static filterInvalidShowPageFields(fieldsArrayFromConfig, role) {
+    return fieldsArrayFromConfig.filter(field => {
+      if (
+        Settings.fields.person[field] ||
+        Settings.fields.person?.customFields?.[field]
+      ) {
+        return true
+      }
+      API.logOnServer(
+        "WARN",
+        "Person.js",
+        356,
+        `Wrong field name in dictionary.fields.${role.toLowerCase()}.showPageOrderedFields, field name: ${field}`
+      )
+      return false
+    })
   }
 
   getNormalFieldsOrdered() {
     return (
       this.getShowPageFieldsOrdered()
         // filter out custom fields
-        .filter(key => !Person.customFields[key])
+        .filter(key => !Person?.customFields?.[key])
     )
   }
 
@@ -371,7 +374,7 @@ export default class Person extends Model {
     return (
       this.getShowPageFieldsOrdered()
         // filter out non-custom fields
-        .filter(key => Person.customFields[key])
+        .filter(key => Person?.customFields?.[key])
         .reduce((accum, key) => {
           accum[key] = Person.customFields[key]
           return accum
