@@ -22,10 +22,10 @@ describe("Create position page", () => {
       CreatePosition.organizationHelpBlock.waitForDisplayed()
 
       expect(CreatePosition.positionNameHelpBlock.getText()).to.equal(
-        "Position Name is a required field"
+        "Position name is required"
       )
       expect(CreatePosition.organizationHelpBlock.getText()).to.equal(
-        "Organization is a required field"
+        "Organization is required"
       )
     })
 

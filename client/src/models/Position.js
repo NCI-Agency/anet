@@ -29,7 +29,7 @@ export default class Position extends Model {
     .shape({
       name: yup
         .string()
-        .required()
+        .required("Position name is required")
         .default("")
         .label(Settings.fields.position.name),
       type: yup
@@ -51,7 +51,7 @@ export default class Position extends Model {
         .test(
           "required-object",
           // eslint-disable-next-line no-template-curly-in-string
-          "${path} is a required field",
+          "${path} is required",
           org => org && org.uuid
         ),
       person: yup.object().nullable().default({}),
