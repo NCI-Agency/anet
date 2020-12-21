@@ -4,7 +4,7 @@ import CreateOrganization from "../pages/createNewOrganization.page"
 import CreatePerson from "../pages/createNewPerson.page"
 import CreateTask from "../pages/createNewTask.page"
 import CreateReport from "../pages/createReport.page"
-import EditPosition from "../pages/editPosition.page"
+import CreatePosition from "../pages/createNewPosition.page"
 import CreateNewLocation from "../pages/location/createNewLocation.page"
 
 // Forms should work just fine without custom fields
@@ -37,9 +37,9 @@ describe("When looking at anet object forms with dictionary that doesn't include
     CreateNewLocation.nameRequiredError.waitForDisplayed()
   })
   it("Should see that position form successfully loads", () => {
-    EditPosition.open()
-    EditPosition.form.waitForExist()
-    EditPosition.form.waitForDisplayed()
+    CreatePosition.open()
+    CreatePosition.form.waitForExist()
+    CreatePosition.form.waitForDisplayed()
   })
   it("Should see that organization form successfully loads", () => {
     CreateOrganization.openAsAdmin()
