@@ -131,11 +131,11 @@ public class AnetEmailWorker extends AbstractWorker {
     emailContext.put("SUPPORT_EMAIL_ADDR", config.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));
     emailContext.put("dateFormatter",
         DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
-            .withZone(DaoUtils.getDefaultZoneId()));
+            .withZone(DaoUtils.getServerLocalZoneId()));
     emailContext.put("dateTimeFormatter",
         DateTimeFormatter
             .ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime"))
-            .withZone(DaoUtils.getDefaultZoneId()));
+            .withZone(DaoUtils.getServerLocalZoneId()));
     final boolean engagementsIncludeTimeAndDuration = Boolean.TRUE
         .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
     emailContext.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
@@ -143,7 +143,7 @@ public class AnetEmailWorker extends AbstractWorker {
         .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
     emailContext.put("engagementDateFormatter",
-        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId()));
+        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getServerLocalZoneId()));
     @SuppressWarnings("unchecked")
     final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
     emailContext.put("fields", fields);
