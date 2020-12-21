@@ -125,14 +125,16 @@ const TaskEdit = ({ pageDispatchers }) => {
   }
   const task = new Task(data ? data.task : {})
 
-  // set initial invisible custom fields
-  task[DEFAULT_CUSTOM_FIELDS_PARENT][
-    INVISIBLE_CUSTOM_FIELDS_FIELD
-  ] = getInvisibleFields(
-    Settings.fields.task.customFields,
-    DEFAULT_CUSTOM_FIELDS_PARENT,
-    task
-  )
+  if (task[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    // set initial invisible custom fields
+    task[DEFAULT_CUSTOM_FIELDS_PARENT][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(
+      Settings.fields.task.customFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      task
+    )
+  }
 
   return (
     <div>

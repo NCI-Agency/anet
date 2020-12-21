@@ -82,20 +82,24 @@ jobs:
 
   test:
     needs: build
-    name: Test with ${{ matrix.database.DB_DRIVER }}
+    name: Test with ${{ matrix.database.DB_DRIVER }} and ${{ matrix.dictionary.DICTIONARY_NAME }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         database:
         - DB_DRIVER: sqlserver
-          CONTAINER: anet-mssql-test-server
         - DB_DRIVER: postgresql
-          CONTAINER: anet-psql-test-server
+        dictionary:
+        - DICTIONARY_NAME: anet-dictionary.yml
+          CLIENT_TESTS: test-all
+        - DICTIONARY_NAME: testDictionaries/no-custom-fields.yml
+          CLIENT_TESTS: test-all-noCF
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
       DB_DRIVER: ${{ matrix.database.DB_DRIVER }}
-      CONTAINER: ${{ matrix.database.CONTAINER }}
+      ANET_DICTIONARY_NAME: ${{ matrix.dictionary.DICTIONARY_NAME }}
+      CLIENT_TESTS: ${{ matrix.dictionary.CLIENT_TESTS }}
 
     steps:
     - name: Notify slack start
@@ -151,14 +155,14 @@ jobs:
       id: tagName
     - name: Set local identifier for BrowserStack
       id: browserstack-local
-      run: echo ::set-output name=identifier::github-${GITHUB_RUN_ID}-${{ matrix.database.DB_DRIVER }}
+      run: echo ::set-output name=identifier::github-${GITHUB_RUN_ID}-${DB_DRIVER}
     - name: Start BrowserStackLocal if needed
       run: |
         curl -qso bsl.zip https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
         unzip -q bsl.zip
         ./BrowserStackLocal --local-identifier ${{ steps.browserstack-local.outputs.identifier }} --key ${{ secrets.BROWSERSTACK_ACCESS_KEY }} &
       if: steps.tagName.outputs.tag != ''
-    - run: ./gradlew yarn_run_test-all
+    - run: ./gradlew yarn_run_${CLIENT_TESTS}
       env:
         GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}
         BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
