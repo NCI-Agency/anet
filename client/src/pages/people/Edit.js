@@ -94,14 +94,16 @@ const PersonEdit = ({ pageDispatchers }) => {
     ? "Update profile"
     : "Save Person"
 
-  // set initial invisible custom fields
-  person[DEFAULT_CUSTOM_FIELDS_PARENT][
-    INVISIBLE_CUSTOM_FIELDS_FIELD
-  ] = getInvisibleFields(
-    Settings.fields.person.customFields,
-    DEFAULT_CUSTOM_FIELDS_PARENT,
-    person
-  )
+  if (person[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    // set initial invisible custom fields
+    person[DEFAULT_CUSTOM_FIELDS_PARENT][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(
+      Settings.fields.person.customFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      person
+    )
+  }
 
   return (
     <div>
