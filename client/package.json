@@ -188,11 +188,11 @@
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava --config ava.config.js",
-    "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js",
+    "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js --suite base --suite withCustomFields",
     "test-jest": "export ANET_DICTIONARY=../anet-dictionary.yml ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models|utils)'",
     "test-wdio-ie": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node ./tests/util/wdio.ie.js",
     "test-noCF-all": "yarn run test-noCF-wdio",
-    "test-noCF-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js --suite noCustomFields",
+    "test-noCF-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js --suite base --suite noCustomFields",
     "build-storybook": "build-storybook",
     "storybook": "export STORYBOOK_ANET_DICTIONARY=/anet-dictionary.yml ; start-storybook -s .. -p 6006",
     "sim": "export ANET_DICTIONARY=../anet-dictionary.yml SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
