@@ -452,7 +452,7 @@ export const searchFilters = function() {
           labels: ["Yes", "No"]
         }
       },
-      "Pending Verificiation": {
+      "Pending Verification": {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         isDefault: true,
