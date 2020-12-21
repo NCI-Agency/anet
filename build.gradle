@@ -45,6 +45,7 @@ run.environment("ANET_SMTP_PORT", run.environment["ANET_SMTP_PORT"] ?: isTestEnv
 run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "true")
 run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
+run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
