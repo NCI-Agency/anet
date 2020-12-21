@@ -1,8 +1,17 @@
 import Page from "./page"
 
-class EditPosition extends Page {
+const PAGE_URL = "/positions/new"
+class CreatePosition extends Page {
   get form() {
     return browser.$("form")
+  }
+
+  get positionNameInput() {
+    return browser.$("#name")
+  }
+
+  get positionNameHelpBlock() {
+    return browser.$("#fg-name .help-block")
   }
 
   get typeAdvisorButton() {
@@ -15,6 +24,10 @@ class EditPosition extends Page {
 
   get organizationInput() {
     return browser.$("#organization")
+  }
+
+  get organizationHelpBlock() {
+    return browser.$("#fg-organization .help-block")
   }
 
   get orgAdvancedSelectFirstItem() {
@@ -36,7 +49,11 @@ class EditPosition extends Page {
   }
 
   open() {
-    super.openAsSuperUser("/positions/new")
+    super.openAsSuperUser(PAGE_URL)
+  }
+
+  openAsAdminUser() {
+    super.openAsAdminUser(PAGE_URL)
   }
 
   waitForAlertSuccessToLoad() {
@@ -67,4 +84,4 @@ class EditPosition extends Page {
   }
 }
 
-export default new EditPosition()
+export default new CreatePosition()

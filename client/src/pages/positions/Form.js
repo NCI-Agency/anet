@@ -151,7 +151,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
           values.organization.type &&
           values.organization.type !== orgSearchQuery.type
         ) {
-          values.organization = {}
+          setFieldValue("organization", null)
         }
         const willAutoKickPerson =
           values.status === Model.STATUS.INACTIVE &&
@@ -222,7 +222,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   )}
                 </FastField>
 
-                <FastField
+                <Field
                   name="organization"
                   label="Organization"
                   component={FieldHelper.SpecialField}
