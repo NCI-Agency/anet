@@ -451,6 +451,16 @@ export const searchFilters = function() {
           options: ["true", "false"],
           labels: ["Yes", "No"]
         }
+      },
+      "Pending Verificiation": {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        isDefault: true,
+        props: {
+          queryKey: "pendingVerification",
+          options: ["false", "true"],
+          labels: ["No", "Yes"]
+        }
       }
     }
   }
