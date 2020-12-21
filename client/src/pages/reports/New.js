@@ -28,14 +28,16 @@ const ReportNew = ({ pageDispatchers }) => {
 
   const report = new Report()
 
-  // set initial invisible custom fields
-  report[DEFAULT_CUSTOM_FIELDS_PARENT][
-    INVISIBLE_CUSTOM_FIELDS_FIELD
-  ] = getInvisibleFields(
-    Settings.fields.report.customFields,
-    DEFAULT_CUSTOM_FIELDS_PARENT,
-    report
-  )
+  if (report[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    // set initial invisible custom fields
+    report[DEFAULT_CUSTOM_FIELDS_PARENT][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(
+      Settings.fields.report.customFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      report
+    )
+  }
 
   if (currentUser && currentUser.uuid) {
     const person = new Person(currentUser)
