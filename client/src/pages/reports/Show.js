@@ -652,6 +652,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   tasks={report.tasks}
                   showParent
                   noTasksMessage={`No ${tasksLabel} selected`}
+                  linkToComp={LinkTo}
                 />
               </Fieldset>
               {report.reportText && (

@@ -316,7 +316,10 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       className="tasks-selector"
                     >
                       {!isAdmin ? (
-                        <NoPaginationTaskTable tasks={values.tasks} />
+                        <NoPaginationTaskTable
+                          tasks={values.tasks}
+                          linkToComp={LinkTo}
+                        />
                       ) : (
                         <FastField
                           name="tasks"
@@ -338,6 +341,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                                 <NoPaginationTaskTable
                                   tasks={values.tasks}
                                   showDelete
+                                  linkToComp={LinkTo}
                                 />
                               }
                               overlayColumns={["Name"]}

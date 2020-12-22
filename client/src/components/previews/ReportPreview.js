@@ -4,12 +4,13 @@ import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
-import Tag from "components/Tag"
 import { Field, Form, Formik } from "formik"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
 import Settings from "settings"
@@ -59,6 +60,20 @@ const GQL_GET_REPORT = gql`
           type
         }
       }
+      tasks {
+        uuid
+        shortName
+        longName
+        customFieldRef1 {
+          uuid
+          shortName
+        }
+        taskedOrganizations {
+          uuid
+          shortName
+        }
+        customFields
+      }
       principalOrg {
         uuid
         shortName
@@ -92,14 +107,11 @@ const ReportPreview = ({ className, uuid, previewId }) => {
   let report
 
   data.report.cancelled = !!data.report.cancelledReason
-  data.report.reportTags = (data.report.tags || []).map(tag => ({
-    id: tag.uuid.toString(),
-    text: tag.name
-  }))
   data.report.tasks = Task.fromArray(data.report.tasks)
   data.report.reportPeople = Person.fromArray(data.report.reportPeople)
   report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
+  const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // Get initial tasks/people instant assessments values
   const hasAssessments = report.engagementDate && !report.isFuture()
@@ -250,20 +262,6 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   />
                 )}
 
-                {Settings.fields.report.reportTags && (
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
-                )}
-
                 <Field
                   name="authors"
                   component={FieldHelper.ReadonlyField}
@@ -317,6 +315,14 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   {parseHtmlWithLinkTo(report.reportText, LinkToNotPreviewed)}
                 </Fieldset>
               )}
+              <Fieldset title={Settings.fields.task.subLevel.longLabel}>
+                <NoPaginationTaskTable
+                  tasks={report.tasks}
+                  showParent
+                  noTasksMessage={`No ${tasksLabel} selected`}
+                  linkToComp={LinkToNotPreviewed}
+                />
+              </Fieldset>
             </Form>
           </div>
         )

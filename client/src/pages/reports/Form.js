@@ -769,6 +769,7 @@ const ReportForm = ({
                             showDelete
                             showDescription
                             noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
+                            linkToComp={LinkTo}
                           />
                         }
                         overlayColumns={[
