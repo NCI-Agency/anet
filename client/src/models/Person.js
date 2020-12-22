@@ -39,6 +39,9 @@ export default class Person extends Model {
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
 
+  static principalShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
+  static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
+
   static yupSchema = yup
     .object()
     .shape({
@@ -161,6 +164,10 @@ export default class Person extends Model {
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
+  constructor(props) {
+    super(Model.fillObject(props, Person.yupSchema))
+  }
+
   static humanNameOfRole(role) {
     if (role === Person.ROLE.ADVISOR) {
       return Settings.fields.advisor.person.name
@@ -173,10 +180,6 @@ export default class Person extends Model {
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
-  }
-
-  constructor(props) {
-    super(Model.fillObject(props, Person.yupSchema))
   }
 
   humanNameOfRole() {
@@ -333,17 +336,23 @@ export default class Person extends Model {
   }
 
   getShowPageFieldsOrdered() {
-    const fieldsArrayFromConfig = this.isPrincipal()
+    return this.isPrincipal()
+      ? Person.principalShowPageOrderedFields
+      : Person.advisorShowPageOrderedFields
+  }
+
+  static initShowPageFieldsOrdered(isPrincipal) {
+    const fieldsArrayFromConfig = isPrincipal
       ? Settings.fields.principal.person.showPageOrderedFields
       : Settings.fields.advisor.person.showPageOrderedFields
 
     return Person.filterInvalidShowPageFields(
       fieldsArrayFromConfig || [],
-      this.role
+      isPrincipal
     )
   }
 
-  static filterInvalidShowPageFields(fieldsArrayFromConfig, role) {
+  static filterInvalidShowPageFields(fieldsArrayFromConfig, isPrincipal) {
     return fieldsArrayFromConfig.filter(field => {
       if (
         Settings.fields.person[field] ||
@@ -354,8 +363,10 @@ export default class Person extends Model {
       API.logOnServer(
         "WARN",
         "Person.js",
-        356,
-        `Wrong field name in dictionary.fields.${role.toLowerCase()}.showPageOrderedFields, field name: ${field}`
+        366,
+        `Wrong field name in dictionary.fields.${
+          isPrincipal ? "principal" : "advisor"
+        }.showPageOrderedFields, field name: ${field}`
       )
       return false
     })
