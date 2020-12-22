@@ -121,7 +121,7 @@ views:
 # please do not forget to update this parameter!
 # For example: If you wish to place dictionary file under a folder named as "config" then update anetDictionaryName as :
 # anetDictionaryName: "config/anet-dictionary.yml"
-anetDictionaryName: "anet-dictionary.yml"
+anetDictionaryName: ${ANET_DICTIONARY_NAME}
 
 logging:
   level: INFO

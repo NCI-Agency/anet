@@ -10,17 +10,21 @@ const config = {
 
   //
   // ==================
-  // Specify Test Files
+  // Specify Test Suites
   // ==================
   // Define which test specs should run. The pattern is relative to the directory
   // from which `wdio` was called. Notice that, if you are calling `wdio` from an
   // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
   // directory is where your package.json resides, so `wdio` will be called from there.
   //
-  specs: ["./tests/webdriver/**/*.spec.js"],
-  // IE tests are excluded by default. They are exclusively included in IE dedicated config.
-  // Please see `wdio.config.ie.js` for details.
-  exclude: ["./tests/webdriver/specs/ie/*.spec.js"],
+  suites: {
+    // tests that <don't> depend on custom fields from dictionary
+    base: ["./tests/webdriver/baseSpecs/**/*.spec.js"],
+    // tests that depend on custom fields from dictionary
+    withCustomFields: ["./tests/webdriver/customFieldsSpecs/**/*.spec.js"],
+    // Specifically for testing when there is no custom field in dictionary
+    noCustomFields: ["./tests/webdriver/noCustomFieldsSpecs/**/*.spec.js"]
+  },
   //
   // ============
   // Capabilities

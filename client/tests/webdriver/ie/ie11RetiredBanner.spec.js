@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import Home from "../../pages/home.page"
+import Home from "../pages/home.page"
 
 describe("Anet home page on IE 11", () => {
   it("should have the correct title", () => {

@@ -157,6 +157,9 @@ const advancedSelectFilterPersonProps = {
   overlayRenderRow: PersonDetailedOverlayRow,
   objectType: Person,
   valueKey: "name",
+  queryParams: {
+    pendingVerification: false
+  },
   fields: Person.autocompleteQuery,
   addon: PEOPLE_ICON
 }

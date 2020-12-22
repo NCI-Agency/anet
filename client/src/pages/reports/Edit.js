@@ -138,14 +138,18 @@ const ReportEdit = ({ pageDispatchers }) => {
     report.getTasksEngagementAssessments(),
     report.getAttendeesEngagementAssessments()
   )
-  // set initial invisible custom fields
-  reportInitialValues[DEFAULT_CUSTOM_FIELDS_PARENT][
-    INVISIBLE_CUSTOM_FIELDS_FIELD
-  ] = getInvisibleFields(
-    Settings.fields.report.customFields,
-    DEFAULT_CUSTOM_FIELDS_PARENT,
-    report
-  )
+
+  if (reportInitialValues[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    // set initial invisible custom fields
+    reportInitialValues[DEFAULT_CUSTOM_FIELDS_PARENT][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(
+      Settings.fields.report.customFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      report
+    )
+  }
+
   reportInitialValues.tasks = Task.fromArray(reportInitialValues.tasks)
   reportInitialValues.reportPeople = Person.fromArray(
     reportInitialValues.reportPeople
