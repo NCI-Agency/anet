@@ -298,10 +298,10 @@ const PersonPreview = ({ className, uuid, previewId }) => {
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
-        <Col sm={2} componentClass={ControlLabel}>
+        <Col sm={1} componentClass={ControlLabel}>
           {assocTitle}
         </Col>
-        <Col sm={10}>
+        <Col sm={9}>
           <Table>
             <thead>
               <tr>

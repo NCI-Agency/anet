@@ -128,16 +128,14 @@ const PositionPreview = ({ className, uuid, previewId }) => {
                     name="organization"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      position.organization && (
-                        <LinkToNotPreviewed
-                          modelType="Organization"
-                          model={position.organization}
-                        >
-                          {position.organization.shortName}{" "}
-                          {position.organization.longName}{" "}
-                          {position.organization.identificationCode}
-                        </LinkToNotPreviewed>
-                      )
+                      <LinkToNotPreviewed
+                        modelType="Organization"
+                        model={position.organization}
+                      >
+                        {position.organization.shortName}{" "}
+                        {position.organization.longName}{" "}
+                        {position.organization.identificationCode}
+                      </LinkToNotPreviewed>
                     }
                   />
                 )}

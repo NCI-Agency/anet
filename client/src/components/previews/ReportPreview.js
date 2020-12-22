@@ -98,7 +98,6 @@ const ReportPreview = ({ className, uuid, previewId }) => {
   }))
   data.report.tasks = Task.fromArray(data.report.tasks)
   data.report.reportPeople = Person.fromArray(data.report.reportPeople)
-  data.report.to = ""
   report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
 

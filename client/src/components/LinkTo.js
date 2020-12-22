@@ -97,6 +97,7 @@ const LinkTo = ({
       }
       popoverClassName="bp3-dark"
       hoverCloseDelay={400}
+      hoverOpenDelay={500}
       portalClassName="linkto-model-preview-portal"
       interactionKind={PopoverInteractionKind.HOVER}
       boundary="viewport"

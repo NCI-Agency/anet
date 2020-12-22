@@ -132,22 +132,20 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                   component={FieldHelper.ReadonlyField}
                 />
 
-                {organization.parentOrg && organization.parentOrg.uuid && (
+                {organization?.parentOrg?.uuid && (
                   <Field
                     name="parentOrg"
                     component={FieldHelper.ReadonlyField}
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
-                      organization.parentOrg && (
-                        <LinkToNotPreviewed
-                          modelType="Organization"
-                          model={organization.parentOrg}
-                        >
-                          {organization.parentOrg.shortName}{" "}
-                          {organization.parentOrg.longName}{" "}
-                          {organization.parentOrg.identificationCode}
-                        </LinkToNotPreviewed>
-                      )
+                      <LinkToNotPreviewed
+                        modelType="Organization"
+                        model={organization.parentOrg}
+                      >
+                        {organization.parentOrg.shortName}{" "}
+                        {organization.parentOrg.longName}{" "}
+                        {organization.parentOrg.identificationCode}
+                      </LinkToNotPreviewed>
                     }
                   />
                 )}
@@ -187,28 +185,27 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                   />
                 )}
 
-                {organization.childrenOrgs &&
-                  organization.childrenOrgs.length > 0 && (
-                    <Field
-                      name="childrenOrgs"
-                      component={FieldHelper.ReadonlyField}
-                      label="Sub organizations"
-                      humanValue={
-                        <ListGroup>
-                          {organization.childrenOrgs.map(organization => (
-                            <ListGroupItem key={organization.uuid}>
-                              <LinkToNotPreviewed
-                                modelType="Organization"
-                                model={organization}
-                              >
-                                {organization.shortName} {organization.longName}{" "}
-                                {organization.identificationCode}
-                              </LinkToNotPreviewed>
-                            </ListGroupItem>
-                          ))}
-                        </ListGroup>
-                      }
-                    />
+                {organization?.childrenOrgs?.length > 0 && (
+                  <Field
+                    name="childrenOrgs"
+                    component={FieldHelper.ReadonlyField}
+                    label="Sub organizations"
+                    humanValue={
+                      <ListGroup>
+                        {organization.childrenOrgs.map(organization => (
+                          <ListGroupItem key={organization.uuid}>
+                            <LinkToNotPreviewed
+                              modelType="Organization"
+                              model={organization}
+                            >
+                              {organization.shortName} {organization.longName}{" "}
+                              {organization.identificationCode}
+                            </LinkToNotPreviewed>
+                          </ListGroupItem>
+                        ))}
+                      </ListGroup>
+                    }
+                  />
                 )}
               </Fieldset>
 

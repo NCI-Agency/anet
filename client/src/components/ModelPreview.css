@@ -8,7 +8,7 @@
 /***********START linkTo triggered preview style START*/
 
 /* some popovers were exceeding the parent containers */
-.linkto-model-preview-portal .bp3-popover {
+.linkto-model-preview-portal > div > .bp3-popover {
   width: 100%;
 }
 .linkto-model-preview-portal .model-preview fieldset{
@@ -45,6 +45,11 @@
 
 .linkto-model-preview-portal .model-preview .row > *{
   width: 100%;
+}
+
+.model-preview label[for="counterparts"] {
+  padding: 30px;
+  margin-right: 20px;
 }
 
 
