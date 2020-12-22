@@ -36,6 +36,10 @@ export class CreateReport extends Page {
     return browser.$("#duration")
   }
 
+  get positiveAtmosphere() {
+    return browser.$("#positiveAtmos")
+  }
+
   getCustomFieldFormGroup(id) {
     return browser.$(`div[id="fg-${id}"]`)
   }
@@ -177,12 +181,40 @@ export class CreateReport extends Page {
     return this.testMultiReferenceFieldValue.$(`tbody tr:nth-child(${n})`)
   }
 
+  get attendeesAssessments() {
+    return browser.$("#attendees-engagement-assessments")
+  }
+
+  get attendeeAssessmentRows() {
+    return this.attendeesAssessments.$$("tr")
+  }
+
+  getAttendeeAssessment(name) {
+    return this.attendeesAssessments.$(`//td/a[text()="${name}"]`)
+  }
+
+  get tasksAssessments() {
+    return browser.$("#tasks-engagement-assessments")
+  }
+
+  get taskAssessmentRows() {
+    return this.tasksAssessments.$$("tr")
+  }
+
+  getTaskAssessment(shortName) {
+    return this.tasksAssessments.$(`//td/a[text()="${shortName}"]`)
+  }
+
   get submitButton() {
     return browser.$("#formBottomSubmit")
   }
 
   get editButton() {
     return browser.$('//a[text()="Edit"]')
+  }
+
+  get cancelButton() {
+    return browser.$('//button[text()="Cancel"]')
   }
 
   get deleteButton() {
@@ -197,6 +229,10 @@ export class CreateReport extends Page {
 
   open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
     super.open(pathName, credentials)
+  }
+
+  openAs(user) {
+    super.open(PAGE_URL, user)
   }
 
   openAsAdminUser() {
@@ -222,7 +258,9 @@ export class CreateReport extends Page {
   }
 
   submitForm() {
+    this.submitButton.waitForClickable()
     this.submitButton.click()
+    this.submitButton.waitForExist({ reverse: true })
   }
 }
 
