@@ -3640,4 +3640,9 @@
 		<dropColumn tableName="reports" columnName="authorUuid" />
 	</changeSet>
 
+	<changeSet id="add-custom-fields-to-positions" author="cemalettin-simsoft">
+		<addColumn tableName="positions">
+			<column name="customFields" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

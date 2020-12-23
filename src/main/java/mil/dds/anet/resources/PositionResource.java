@@ -70,6 +70,7 @@ public class PositionResource {
   @GraphQLMutation(name = "createPosition")
   public Position createPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
+    pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
@@ -114,6 +115,7 @@ public class PositionResource {
   @GraphQLMutation(name = "updatePosition")
   public Integer updatePosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
+    pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
