@@ -106,7 +106,7 @@ public class ViewResponseFilter implements ContainerResponseFilter {
   }
 
   private Long getCurrentMinute() {
-    final ZonedDateTime now = Instant.now().atZone(DaoUtils.getDefaultZoneId());
+    final ZonedDateTime now = Instant.now().atZone(DaoUtils.getServerNativeZoneId());
     final ZonedDateTime bom = now.truncatedTo(ChronoUnit.MINUTES);
     return bom.toInstant().toEpochMilli();
   }

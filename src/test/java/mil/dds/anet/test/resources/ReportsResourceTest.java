@@ -487,7 +487,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Verify this report shows up in the daily rollup
     ReportSearchQuery query = new ReportSearchQuery();
     query.setReleasedAtStart(
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant());
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant());
     AnetBeanList<Report> rollup =
         graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -828,9 +828,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Search by Author with Date Filtering
     query.setEngagementDateStart(
-        ZonedDateTime.of(2016, 6, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2016, 6, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     query.setEngagementDateEnd(
-        ZonedDateTime.of(2016, 6, 15, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2016, 6, 15, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     searchResults =
         graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -1136,9 +1136,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // insertBaseData has 1 report that is updatedAt 2 days before current timestamp
     final ReportSearchQuery query = new ReportSearchQuery();
     final Instant startDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(3).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(3).toInstant();
     final Instant endDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
 
     // Greater than startDate and smaller than endDate
     query.setUpdatedAtStart(startDate);
@@ -1172,7 +1172,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(results.getList().size()).isEqualTo(1);
 
     // A day before the startDate and startDate (no results expected)
-    query.setUpdatedAtStart(startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant());
+    query.setUpdatedAtStart(
+        startDate.atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant());
     query.setUpdatedAtEnd(startDate);
     query.setPageSize(0);
     results = graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput",
@@ -1332,8 +1333,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
 
     // Pull the daily rollup graph
-    Instant startDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant();
-    Instant endDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).plusDays(1).toInstant();
+    Instant startDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
+    Instant endDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final Map<String, Object> variables = new HashMap<>();
     variables.put("startDate", startDate.toEpochMilli());
     variables.put("endDate", endDate.toEpochMilli());
@@ -1425,8 +1428,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
 
     // Pull the daily rollup graph
-    Instant startDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant();
-    Instant endDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).plusDays(1).toInstant();
+    Instant startDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
+    Instant endDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final Map<String, Object> variables = new HashMap<>();
     variables.put("startDate", startDate.toEpochMilli());
     variables.put("endDate", endDate.toEpochMilli());
@@ -1754,7 +1759,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setNextSteps("Retrieve the advisor reports insight");
     r.setLocation(getLocation(author, "General Hospital"));
     final Instant engagementDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
     r.setEngagementDate(engagementDate);
     r.setReportPeople(Lists.newArrayList(reportPerson));
     r.setAdvisorOrg(advisorOrganization);
@@ -1791,7 +1796,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Location loc = getLocation(author, "Portugal Cove Ferry Terminal");
     r.setLocation(loc);
     final Instant engagementDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
     r.setEngagementDate(engagementDate);
 
     // Reference task 1.1.A

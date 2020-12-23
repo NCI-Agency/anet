@@ -5,8 +5,8 @@ engagementsIncludeTimeAndDuration: true
 
 dateFormats:
   email:
-    date: d MMMM yyyy
-    withTime: d MMMM yyyy @ HH:mm
+    date: d MMMM yyyy Z
+    withTime: d MMMM yyyy @ HH:mm Z
   excel: d MMMM yyyy
   forms:
     input:

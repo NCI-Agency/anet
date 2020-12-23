@@ -72,7 +72,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setCountry("Canada");
     newPerson.setCode("123456");
     newPerson.setEndOfTourDate(
-        ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newPersonUuid).isNotNull();

@@ -247,8 +247,17 @@ const AdvancedSearch = ({
 
   function changeObjectType(objectType) {
     setObjectType(objectType)
+    const defaultFiltersForObjectType = objectType
+      ? Object.entries(ALL_FILTERS[objectType].filters)
+        .filter(([key, filter]) => filter.isDefault)
+        .map(([k, f]) => ({ key: k }))
+      : []
+
     setFilters(
-      filters.filter(value => commonFiltersForAllObjectTypes[value.key])
+      filters
+        .filter(value => commonFiltersForAllObjectTypes[value.key])
+        // Add defaults as well
+        .concat(defaultFiltersForObjectType)
     )
     setOrgFilterQueryParams(getOrgQueryParams(null))
   }

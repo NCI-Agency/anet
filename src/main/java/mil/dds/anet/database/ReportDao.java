@@ -429,7 +429,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     }
     try {
       long maxReportAge = Long.parseLong(maxReportAgeStr);
-      return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+      return start.atZone(DaoUtils.getServerNativeZoneId()).minusDays(maxReportAge).toInstant();
     } catch (NumberFormatException e) {
       throw new WebApplicationException("Invalid Admin Setting for "
           + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS + ": " + maxReportAgeStr);
