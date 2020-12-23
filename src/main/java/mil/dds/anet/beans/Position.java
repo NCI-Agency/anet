@@ -49,7 +49,7 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
   // annotated below
   Boolean isApprover;
   // annotated below
-  List<Task> tasks;
+  List<Task> responsibleTasks;
 
   public String getName() {
     return name;
@@ -248,8 +248,8 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
   public CompletableFuture<List<Task>> loadResponsibleTasks(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
-    if (tasks != null) {
-      return CompletableFuture.completedFuture(tasks);
+    if (responsibleTasks != null) {
+      return CompletableFuture.completedFuture(responsibleTasks);
     }
     if (query == null) {
       query = new TaskSearchQuery();
@@ -258,7 +258,7 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
         "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
         .thenApply(o -> {
-          tasks = o;
+          responsibleTasks = o;
           return o;
         });
   }
