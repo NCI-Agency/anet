@@ -1,9 +1,14 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { getInvisibleFields } from "components/CustomFields"
 import {
-  PageDispatchersPropType,
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  INVISIBLE_CUSTOM_FIELDS_FIELD
+} from "components/Model"
+import {
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Organization, Position } from "models"
@@ -11,6 +16,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 import PositionForm from "./Form"
 
@@ -91,6 +97,17 @@ const PositionNewConditional = ({
     position.type = organization.isAdvisorOrg()
       ? Position.TYPE.ADVISOR
       : Position.TYPE.PRINCIPAL
+  }
+
+  if (position[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    // set initial invisible custom fields
+    position[DEFAULT_CUSTOM_FIELDS_PARENT][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(
+      Settings.fields.position.customFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      position
+    )
   }
 
   return <PositionForm initialValues={position} title="Create a new Position" />

@@ -533,6 +533,10 @@ properties:
             type: string
             title: The label for a position's name
             description: Used in the UI where a position's name is shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/customField"
 
       organization:
         type: object

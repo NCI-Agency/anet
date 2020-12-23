@@ -84,7 +84,7 @@ const widgetPropsPosition = {
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Position.autocompleteQuery,
+  fields: Models.Position.autocompleteQueryWithNotes,
   addon: POSITIONS_ICON
 }
 

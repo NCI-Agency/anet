@@ -1,4 +1,7 @@
-import Model from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
 import AFG_ICON from "resources/afg_small.png"
 import POSITIONS_ICON from "resources/positions.png"
 import RS_ICON from "resources/rs_small.png"
@@ -23,6 +26,11 @@ export default class Position extends Model {
     SUPER_USER: "SUPER_USER",
     ADMINISTRATOR: "ADMINISTRATOR"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(
+    Settings.fields.position.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -57,10 +65,14 @@ export default class Position extends Model {
       person: yup.object().nullable().default({}),
       location: yup.object().nullable().default({})
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Position.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

@@ -1,9 +1,14 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { getInvisibleFields } from "components/CustomFields"
 import {
-  PageDispatchersPropType,
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  INVISIBLE_CUSTOM_FIELDS_FIELD
+} from "components/Model"
+import {
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -13,6 +18,8 @@ import { Position } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import Settings from "settings"
+import utils from "utils"
 import PositionForm from "./Form"
 
 const GQL_GET_POSITION = gql`
@@ -53,6 +60,7 @@ const GQL_GET_POSITION = gql`
         role
         avatar(size: 32)
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -76,8 +84,23 @@ const PositionEdit = ({ pageDispatchers }) => {
     return result
   }
 
-  const position = new Position(data ? data.position : {})
+  if (data) {
+    data.position[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.position.customFields
+    )
+  }
 
+  const position = new Position(data ? data.position : {})
+  if (position[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    // set initial invisible custom fields
+    position[DEFAULT_CUSTOM_FIELDS_PARENT][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(
+      Settings.fields.position.customFields,
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      position
+    )
+  }
   return (
     <div>
       <RelatedObjectNotes

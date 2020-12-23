@@ -6,11 +6,15 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Field, Form, Formik } from "formik"
@@ -110,13 +114,12 @@ const PositionForm = ({ edit, title, initialValues }) => {
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
         const isPrincipal = values.type === Position.TYPE.PRINCIPAL
@@ -298,7 +301,19 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   }
                 />
               </Fieldset>
-
+              {Settings.fields.position.customFields && (
+                <Fieldset title="Position information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.position.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -358,7 +373,9 @@ const PositionForm = ({ edit, title, initialValues }) => {
     const position = Object.without(
       new Position(values),
       "notes",
-      "responsibleTasks" // Only for querying
+      "customFields", // initial JSON from the db
+      "responsibleTasks", // Only for querying
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
@@ -370,6 +387,8 @@ const PositionForm = ({ edit, title, initialValues }) => {
     position.organization = utils.getReference(position.organization)
     position.person = utils.getReference(position.person)
     position.code = position.code || null // Need to null out empty position codes
+    position.customFields = customFieldsJSONString(values)
+
     return API.mutation(edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION, {
       position
     })
