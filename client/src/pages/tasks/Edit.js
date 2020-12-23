@@ -1,11 +1,8 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import { getInvisibleFields } from "components/CustomFields"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD
-} from "components/Model"
+import { initInvisibleFields } from "components/CustomFields"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -125,16 +122,8 @@ const TaskEdit = ({ pageDispatchers }) => {
   }
   const task = new Task(data ? data.task : {})
 
-  if (task[DEFAULT_CUSTOM_FIELDS_PARENT]) {
-    // set initial invisible custom fields
-    task[DEFAULT_CUSTOM_FIELDS_PARENT][
-      INVISIBLE_CUSTOM_FIELDS_FIELD
-    ] = getInvisibleFields(
-      Settings.fields.task.customFields,
-      DEFAULT_CUSTOM_FIELDS_PARENT,
-      task
-    )
-  }
+  // mutates the object
+  initInvisibleFields(task, Settings.fields.task.customFields)
 
   return (
     <div>

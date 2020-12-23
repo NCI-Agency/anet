@@ -1,11 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import { getInvisibleFields } from "components/CustomFields"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD
-} from "components/Model"
+import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -99,16 +95,8 @@ const PositionNewConditional = ({
       : Position.TYPE.PRINCIPAL
   }
 
-  if (position[DEFAULT_CUSTOM_FIELDS_PARENT]) {
-    // set initial invisible custom fields
-    position[DEFAULT_CUSTOM_FIELDS_PARENT][
-      INVISIBLE_CUSTOM_FIELDS_FIELD
-    ] = getInvisibleFields(
-      Settings.fields.position.customFields,
-      DEFAULT_CUSTOM_FIELDS_PARENT,
-      position
-    )
-  }
+  // mutates the object
+  initInvisibleFields(position, Settings.fields.position.customFields)
 
   return <PositionForm initialValues={position} title="Create a new Position" />
 }
