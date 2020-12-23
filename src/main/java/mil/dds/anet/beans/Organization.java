@@ -19,10 +19,11 @@ import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Organization extends AbstractAnetBean implements RelatableObject, WithStatus {
+public class Organization extends AbstractCustomizableAnetBean
+    implements RelatableObject, WithStatus {
 
   /** Pseudo uuid to represent all/top-level organization(s). */
   public static final String DUMMY_ORG_UUID = "-1";
@@ -266,13 +267,14 @@ public class Organization extends AbstractAnetBean implements RelatableObject, W
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
-        && Objects.equals(other.getType(), type);
+        && Objects.equals(other.getType(), type)
+        && Objects.equals(other.getCustomFields(), customFields);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(uuid, shortName, longName, status, identificationCode, type, createdAt,
-        updatedAt);
+        updatedAt, customFields);
   }
 
   @Override

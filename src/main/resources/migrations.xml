@@ -3645,4 +3645,9 @@
 			<column name="customFields" type="${long_text_type}" />
 		</addColumn>
 	</changeSet>
+	<changeSet id="add-custom-fields-to-organizations" author="cemalettin-simsoft">
+		<addColumn tableName="organizations">
+			<column name="customFields" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>
