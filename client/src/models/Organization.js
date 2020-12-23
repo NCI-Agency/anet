@@ -1,4 +1,7 @@
-import Model from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
 import utils from "utils"
@@ -19,6 +22,11 @@ export default class Organization extends Model {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(
+    Settings.fields.organization.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -89,10 +97,14 @@ export default class Organization extends Model {
       positions: yup.array().nullable().default([]),
       tasks: yup.array().nullable().default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid, shortName, longName, identificationCode, type"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

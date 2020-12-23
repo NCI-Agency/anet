@@ -74,7 +74,7 @@ const widgetPropsOrganization = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Organization.autocompleteQuery,
+  fields: Models.Organization.autocompleteQueryWithNotes,
   addon: ORGANIZATIONS_ICON
 }
 

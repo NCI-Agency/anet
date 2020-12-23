@@ -1,18 +1,19 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
+import Approvals from "components/approvals/Approvals"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -26,16 +27,17 @@ import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import {
+  Button,
   Checkbox,
   ListGroup,
   ListGroupItem,
-  Nav,
-  Button
+  Nav
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
@@ -121,6 +123,7 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -147,7 +150,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.organization[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.organization.customFields
+    )
+  }
   const organization = new Organization(data ? data.organization : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -419,6 +426,14 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   }
                 />
               </Fieldset>
+              {Settings.fields.organization.customFields && (
+                <Fieldset title="Organization information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.organization.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
           </div>
         )
