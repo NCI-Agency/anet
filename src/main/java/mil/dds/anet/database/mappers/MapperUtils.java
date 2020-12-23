@@ -140,7 +140,7 @@ public class MapperUtils {
     // However, as of the 7.1.0 preview, at least java.time.LocalDateTime *is* supported.
     final LocalDateTime result = rs.getObject(columnName, LocalDateTime.class);
     if (result != null) {
-      return result.toInstant(DaoUtils.getDefaultZoneOffset());
+      return result.toInstant(DaoUtils.getServerNativeZoneOffset());
     }
     return null;
   }

@@ -799,10 +799,10 @@ public class ReportResource {
     AuthUtils.assertSuperUser(user);
 
     Instant now = Instant.now();
-    Instant weekStart = now.atZone(DaoUtils.getDefaultZoneId()).with(DayOfWeek.MONDAY).withHour(0)
-        .withMinute(0).withSecond(0).withNano(0).toInstant();
+    Instant weekStart = now.atZone(DaoUtils.getServerNativeZoneId()).with(DayOfWeek.MONDAY)
+        .withHour(0).withMinute(0).withSecond(0).withNano(0).toInstant();
     Instant startDate =
-        weekStart.atZone(DaoUtils.getDefaultZoneId()).minusWeeks(weeksAgo).toInstant();
+        weekStart.atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(weeksAgo).toInstant();
     final List<Map<String, Object>> list =
         dao.getAdvisorReportInsights(startDate, weekStart, orgUuid);
 
@@ -947,7 +947,7 @@ public class ReportResource {
   private void addConfigToContext(Map<String, Object> context) {
     context.put("dateFormatter",
         DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.date"))
-            .withZone(DaoUtils.getDefaultZoneId()));
+            .withZone(DaoUtils.getServerNativeZoneId()));
     context.put("engagementsIncludeTimeAndDuration", Boolean.TRUE
         .equals((Boolean) config.getDictionaryEntry("engagementsIncludeTimeAndDuration")));
     final String edtfPattern = (String) config.getDictionaryEntry(Boolean.TRUE
@@ -955,7 +955,7 @@ public class ReportResource {
             ? "dateFormats.email.withTime"
             : "dateFormats.email.date");
     context.put("engagementDateFormatter",
-        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId()));
+        DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getServerNativeZoneId()));
     @SuppressWarnings("unchecked")
     final Map<String, Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
     context.put("fields", fields);

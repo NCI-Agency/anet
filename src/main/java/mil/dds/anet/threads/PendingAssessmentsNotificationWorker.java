@@ -82,16 +82,17 @@ public class PendingAssessmentsNotificationWorker extends AbstractWorker {
 
     public AssessmentDates(final Instant referenceDate, final Recurrence recurrence) {
       // Compute some period boundaries
-      final ZonedDateTime zonefulReferenceDate = referenceDate.atZone(DaoUtils.getDefaultZoneId());
+      final ZonedDateTime zonefulReferenceDate =
+          referenceDate.atZone(DaoUtils.getServerNativeZoneId());
       final ZonedDateTime bod = zonefulReferenceDate.truncatedTo(ChronoUnit.DAYS);
       // Monday is the first day of the week
       final TemporalAdjuster firstDayOfWeek = TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY);
       final ZonedDateTime bow =
           zonefulReferenceDate.with(firstDayOfWeek).truncatedTo(ChronoUnit.DAYS);
       // Bi-weekly reference date is first Monday of 2021
-      final ZonedDateTime biWeeklyReferenceDate =
-          LocalDate.of(2021, 1, 4).with(firstDayOfWeek).atStartOfDay(DaoUtils.getDefaultZoneId())
-              .toInstant().atZone(DaoUtils.getDefaultZoneId());
+      final ZonedDateTime biWeeklyReferenceDate = LocalDate.of(2021, 1, 4).with(firstDayOfWeek)
+          .atStartOfDay(DaoUtils.getServerNativeZoneId()).toInstant()
+          .atZone(DaoUtils.getServerNativeZoneId());
       final ZonedDateTime bom = zonefulReferenceDate.with(TemporalAdjusters.firstDayOfMonth())
           .truncatedTo(ChronoUnit.DAYS);
       final ZonedDateTime boy = zonefulReferenceDate.with(TemporalAdjusters.firstDayOfYear())
@@ -485,7 +486,7 @@ public class PendingAssessmentsNotificationWorker extends AbstractWorker {
               final LocalDate periodStartDate =
                   DateTimeFormatter.ISO_LOCAL_DATE.parse(periodStart.asText(), LocalDate::from);
               final Instant periodStartInstant =
-                  periodStartDate.atStartOfDay(DaoUtils.getDefaultZoneId()).toInstant();
+                  periodStartDate.atStartOfDay(DaoUtils.getServerNativeZoneId()).toInstant();
               assessmentsByRecurrence.compute(Recurrence.valueOfRecurrence(recurrence.asText()),
                   (r, currentValue) -> currentValue == null ? periodStartInstant
                       : periodStartInstant.isAfter(currentValue) ? periodStartInstant
