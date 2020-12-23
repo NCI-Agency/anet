@@ -94,7 +94,7 @@ const widgetPropsLocation = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Location.autocompleteQuery,
+  fields: Models.Location.autocompleteQueryWithNotes,
   addon: LOCATIONS_ICON
 }
 
