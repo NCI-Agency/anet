@@ -48,7 +48,7 @@ public class JobHistoryDao {
 
   @InTransaction
   public void runInTransaction(String jobName, BiConsumer<Instant, JobHistory> runner) {
-    final Instant now = Instant.now().atZone(DaoUtils.getDefaultZoneId()).toInstant();
+    final Instant now = Instant.now().atZone(DaoUtils.getServerNativeZoneId()).toInstant();
     final JobHistory jobHistory = getByJobName(jobName);
     runner.accept(now, jobHistory);
     final JobHistory newJobHistory = new JobHistory(jobName, now);
