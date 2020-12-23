@@ -3650,4 +3650,9 @@
 			<column name="customFields" type="${long_text_type}" />
 		</addColumn>
 	</changeSet>
+	<changeSet id="add-custom-fields-to-locations" author="cemalettin-simsoft">
+		<addColumn tableName="locations">
+			<column name="customFields" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

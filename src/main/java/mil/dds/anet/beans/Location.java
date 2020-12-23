@@ -9,9 +9,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 
-public class Location extends AbstractAnetBean implements RelatableObject, WithStatus {
+public class Location extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
 
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";
@@ -120,12 +120,13 @@ public class Location extends AbstractAnetBean implements RelatableObject, WithS
     Location l = (Location) o;
     return Objects.equals(l.getUuid(), uuid) && Objects.equals(l.getName(), name)
         && Objects.equals(l.getStatus(), status) && Objects.equals(l.getLat(), lat)
-        && Objects.equals(l.getLng(), lng) && Objects.equals(l.getCreatedAt(), createdAt);
+        && Objects.equals(l.getLng(), lng) && Objects.equals(l.getCreatedAt(), createdAt)
+        && Objects.equals(l.getCustomFields(), customFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, status, lat, lng, createdAt);
+    return Objects.hash(uuid, name, status, lat, lng, createdAt, customFields);
   }
 
   @Override
