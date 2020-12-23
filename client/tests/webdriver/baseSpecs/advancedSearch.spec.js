@@ -23,6 +23,7 @@ const ANET_OBJECT_TYPES = {
   }
 }
 const COMMON_FILTER_TEXT = "Status"
+const ALL_COMMON_FILTERS = [COMMON_FILTER_TEXT, "Subscribed"]
 
 const PERSON_DEFAULT_FILTER = "Pending Verification"
 const PERSON_INDEX = 1
@@ -59,6 +60,21 @@ describe("When using advanced search", () => {
     expect(AdvancedSearch.commonSearchFilter.getText()).to.equal(
       COMMON_FILTER_TEXT
     )
+  })
+  it("Should show the additional common filters when no object type selected", () => {
+    expect(AdvancedSearch.addFilterButtonText.getText()).to.equal(
+      ADD_FILTER_BUTTON_TEXT
+    )
+    AdvancedSearch.addFilterButton.click()
+    AdvancedSearch.addFilterPopover.waitForExist()
+    AdvancedSearch.addFilterPopover.waitForDisplayed()
+    expect(AdvancedSearch.addFilterPopover.getText()).to.match(
+      new RegExp(ALL_COMMON_FILTERS.join("\n"))
+    )
+    // Select all common filters now
+    ALL_COMMON_FILTERS.forEach(filter => {
+      AdvancedSearch.getSearchFilter(filter).click()
+    })
   })
   it("Should show the common filter and default filters for each anet object type", () => {
     AdvancedSearch.anetObjectSearchToggleButtons.forEach((button, i) => {
