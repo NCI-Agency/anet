@@ -7,7 +7,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -117,7 +117,7 @@ const LocationShow = ({ pageDispatchers }) => {
           })
         }
         const action = canEdit && (
-          <LinkToNotPreviewed
+          <LinkTo
             modelType="Location"
             model={location}
             edit
@@ -125,7 +125,7 @@ const LocationShow = ({ pageDispatchers }) => {
             id="editButton"
           >
             Edit
-          </LinkToNotPreviewed>
+          </LinkTo>
         )
         return (
           <div>

@@ -4,7 +4,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import RemoveButton from "components/RemoveButton"
@@ -39,21 +39,13 @@ const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
         return (
           <tr key={relPos.uuid}>
             <td>
-              <LinkToNotPreviewed
-                modelType="Person"
-                model={person}
-                isLink={false}
-              />
+              <LinkTo modelType="Person" model={person} isLink={false} />
             </td>
             <td>
-              <LinkToNotPreviewed
-                modelType="Position"
-                model={relPos}
-                isLink={false}
-              />
+              <LinkTo modelType="Position" model={relPos} isLink={false} />
             </td>
             <td>
-              <LinkToNotPreviewed
+              <LinkTo
                 modelType="Organization"
                 model={relPos.organization}
                 isLink={false}

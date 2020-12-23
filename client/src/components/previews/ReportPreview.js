@@ -3,7 +3,7 @@ import { gql } from "apollo-boost"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import { Field, Form, Formik } from "formik"
@@ -230,10 +230,7 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     report.location && (
-                      <LinkToNotPreviewed
-                        modelType="Location"
-                        model={report.location}
-                      />
+                      <LinkTo modelType="Location" model={report.location} />
                     )
                   }
                 />
@@ -267,7 +264,7 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={report.authors?.map((a, index) => (
                     <React.Fragment key={a.uuid}>
-                      <LinkToNotPreviewed modelType="Person" model={a} />
+                      <LinkTo modelType="Person" model={a} />
                       {index !== report.authors.length - 1 ? ", " : ""}
                     </React.Fragment>
                   ))}
@@ -278,7 +275,7 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   label={Settings.fields.advisor.org.name}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    <LinkToNotPreviewed
+                    <LinkTo
                       modelType="Organization"
                       model={report.advisorOrg}
                     />
@@ -290,7 +287,7 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   label={Settings.fields.principal.org.name}
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    <LinkToNotPreviewed
+                    <LinkTo
                       modelType="Organization"
                       model={report.principalOrg}
                     />
@@ -304,15 +301,11 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                     : "People attended in this engagement"
                 }
               >
-                <ReportPeople
-                  report={report}
-                  linkToComp={LinkToNotPreviewed}
-                  disabled
-                />
+                <ReportPeople report={report} linkToComp={LinkTo} disabled />
               </Fieldset>
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
-                  {parseHtmlWithLinkTo(report.reportText, LinkToNotPreviewed)}
+                  {parseHtmlWithLinkTo(report.reportText, LinkTo)}
                 </Fieldset>
               )}
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
@@ -320,7 +313,7 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   tasks={report.tasks}
                   showParent
                   noTasksMessage={`No ${tasksLabel} selected`}
-                  linkToComp={LinkToNotPreviewed}
+                  linkToComp={LinkTo}
                 />
               </Fieldset>
             </Form>

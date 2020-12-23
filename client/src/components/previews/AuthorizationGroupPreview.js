@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import PositionTable from "components/PositionTable"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
@@ -77,7 +77,7 @@ const AuthorizationGroupPreview = ({ className, uuid, previewId }) => {
                     pageSize: 10,
                     authorizationGroupUuid: uuid
                   }}
-                  linkToComp={LinkToNotPreviewed}
+                  linkToComp={LinkTo}
                 />
               </Fieldset>
             </Form>

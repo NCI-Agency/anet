@@ -6,8 +6,7 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
-import Pie from "components/graphs/Pie"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   INVISIBLE_CUSTOM_FIELDS_FIELD,
@@ -170,7 +169,7 @@ const RelatedObjectNotes = ({
               isJson && note.text ? utils.parseJsonSafe(note.text) : {}
             const noteText = isJson
               ? jsonFields.text
-              : parseHtmlWithLinkTo(note.text, LinkTo)
+              : parseHtmlWithLinkTo(note.text, LinkToPreviewed)
             return (
               <Panel
                 key={note.uuid}
@@ -191,7 +190,7 @@ const RelatedObjectNotes = ({
                   }}
                 >
                   <i>{updatedAt}</i>{" "}
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Person"
                     model={note.author}
                     style={{ color: "white" }}

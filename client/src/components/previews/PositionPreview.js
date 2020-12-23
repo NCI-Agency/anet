@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Position } from "models"
@@ -128,14 +128,14 @@ const PositionPreview = ({ className, uuid, previewId }) => {
                     name="organization"
                     component={FieldHelper.ReadonlyField}
                     humanValue={
-                      <LinkToNotPreviewed
+                      <LinkTo
                         modelType="Organization"
                         model={position.organization}
                       >
                         {position.organization.shortName}{" "}
                         {position.organization.longName}{" "}
                         {position.organization.identificationCode}
-                      </LinkToNotPreviewed>
+                      </LinkTo>
                     }
                   />
                 )}
@@ -145,10 +145,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkToNotPreviewed
-                        modelType="Location"
-                        model={position.location}
-                      />
+                      <LinkTo modelType="Location" model={position.location} />
                     )
                   }
                 />
@@ -167,10 +164,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkToNotPreviewed
-                        modelType="Person"
-                        model={position.person}
-                      />
+                      <LinkTo modelType="Person" model={position.person} />
                     </h4>
                     <p />
                   </div>
@@ -223,10 +217,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
                     {position.previousPeople.map((pp, idx) => (
                       <tr key={idx} id={`previousPerson_${idx}_${previewId}`}>
                         <td>
-                          <LinkToNotPreviewed
-                            modelType="Person"
-                            model={pp.person}
-                          />
+                          <LinkTo modelType="Person" model={pp.person} />
                         </td>
                         <td>
                           {moment(pp.startTime).format(
@@ -255,13 +246,13 @@ const PositionPreview = ({ className, uuid, previewId }) => {
     if (!pos.person) {
       personName = "Unfilled"
     } else {
-      personName = <LinkToNotPreviewed modelType="Person" model={pos.person} />
+      personName = <LinkTo modelType="Person" model={pos.person} />
     }
     return (
       <tr key={pos.uuid} id={`associatedPosition_${idx}_${previewId}`}>
         <td>{personName}</td>
         <td>
-          <LinkToNotPreviewed modelType="Position" model={pos} />
+          <LinkTo modelType="Position" model={pos} />
         </td>
       </tr>
     )

@@ -1,4 +1,4 @@
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -24,7 +24,7 @@ const AuthorizationGroupTable = props => {
         {authorizationGroups.map(authorizationGroup => (
           <tr key={authorizationGroup.uuid}>
             <td>
-              <LinkTo
+              <LinkToPreviewed
                 modelType="AuthorizationGroup"
                 model={authorizationGroup}
                 previewId="auth-groups-table-ag"
@@ -34,7 +34,7 @@ const AuthorizationGroupTable = props => {
             <td>
               {authorizationGroup.positions.map(position => (
                 <div key={position.uuid}>
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Position"
                     model={position}
                     previewId="auth-groups-table-pos"

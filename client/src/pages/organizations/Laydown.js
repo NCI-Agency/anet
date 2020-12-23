@@ -1,7 +1,7 @@
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -61,7 +61,7 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
         action={
           <div>
             {isSuperUser && (
-              <LinkToNotPreviewed
+              <LinkTo
                 modelType="Position"
                 model={Position.pathForNew({
                   organizationUuid: organization.uuid
@@ -69,7 +69,7 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
                 button
               >
                 Create position
-              </LinkToNotPreviewed>
+              </LinkTo>
             )}
           </div>
         }
@@ -187,20 +187,19 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
           </LinkToComp>
         </td>
       )
-      positionPersonCol =
-        position.person && position.person.uuid ? (
-          <td>
-            <LinkToComp
-              modelType="Person"
-              model={position.person}
-              previewId="org-lay-person-0"
-            >
-              {personWithStatus(position.person)}
-            </LinkToComp>
-          </td>
-        ) : (
-          <td className="text-danger">Unfilled</td>
-        )
+      positionPersonCol = position?.person?.uuid ? (
+        <td>
+          <LinkToComp
+            modelType="Person"
+            model={position.person}
+            previewId="org-lay-person-0"
+          >
+            {personWithStatus(position.person)}
+          </LinkToComp>
+        </td>
+      ) : (
+        <td className="text-danger">Unfilled</td>
+      )
     }
 
     otherPersonCol = otherPersonCol || <td />

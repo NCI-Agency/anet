@@ -4,7 +4,7 @@ import { gql } from "apollo-boost"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import {
   jumpToTop,
@@ -306,7 +306,7 @@ const MergePeople = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
-              <LinkTo
+              <LinkToPreviewed
                 modelType="Position"
                 model={person.position}
                 previewId="merge-people-pos"
@@ -320,7 +320,7 @@ const MergePeople = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
-              <LinkTo
+              <LinkToPreviewed
                 modelType="Organization"
                 model={person.position.organization}
                 previewId="merge-people-org"

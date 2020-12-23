@@ -10,7 +10,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -164,7 +164,7 @@ const PositionShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkToNotPreviewed
+          <LinkTo
             modelType="Position"
             model={position}
             edit
@@ -172,7 +172,7 @@ const PositionShow = ({ pageDispatchers }) => {
             className="edit-position"
           >
             Edit
-          </LinkToNotPreviewed>
+          </LinkTo>
         )
         return (
           <div>
@@ -232,7 +232,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       position.organization && (
-                        <LinkTo
+                        <LinkToPreviewed
                           modelType="Organization"
                           model={position.organization}
                           previewId="pos-show-org"
@@ -240,7 +240,7 @@ const PositionShow = ({ pageDispatchers }) => {
                           {position.organization.shortName}{" "}
                           {position.organization.longName}{" "}
                           {position.organization.identificationCode}
-                        </LinkTo>
+                        </LinkToPreviewed>
                       )
                     }
                   />
@@ -251,7 +251,7 @@ const PositionShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkTo
+                      <LinkToPreviewed
                         modelType="Location"
                         model={position.location}
                         previewId="pos-show-loc"
@@ -283,7 +283,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkTo
+                      <LinkToPreviewed
                         modelType="Person"
                         model={position.person}
                         previewId="pos-show-person"
@@ -371,7 +371,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     {position.previousPeople.map((pp, idx) => (
                       <tr key={idx} id={`previousPerson_${idx}`}>
                         <td>
-                          <LinkTo
+                          <LinkToPreviewed
                             modelType="Person"
                             model={pp.person}
                             previewId="pos-show-prev-person"
@@ -428,7 +428,7 @@ const PositionShow = ({ pageDispatchers }) => {
       personName = "Unfilled"
     } else {
       personName = (
-        <LinkTo
+        <LinkToPreviewed
           modelType="Person"
           model={pos.person}
           previewId="pos-show-asc-pos-person"
@@ -439,7 +439,7 @@ const PositionShow = ({ pageDispatchers }) => {
       <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
         <td>{personName}</td>
         <td>
-          <LinkTo
+          <LinkToPreviewed
             modelType="Position"
             model={pos}
             previewId="pos-show-asc-pos"

@@ -1,6 +1,6 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -24,7 +24,7 @@ const ApprovalStepModalStatus = ({ action }) => {
     return (
       <span className={cssClass}>
         {actionType.text} by{" "}
-        <LinkToNotPreviewed
+        <LinkTo
           modelType="Person"
           model={action.person}
           whenUnspecified="system"
@@ -72,13 +72,13 @@ const ApprovalStepModal = ({ action }) => {
             {(noApprovers && "This step has no approvers!") ||
               step.approvers.map(position => (
                 <li key={position.uuid}>
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Position"
                     model={position}
                     previewId="rep-wf-pos"
                   />{" "}
                   -{" "}
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Person"
                     model={position.person}
                     previewId="rep-wf-person"
@@ -113,11 +113,7 @@ export const ActionButton = ({ action }) => {
   ) : (
     <Button className={actionType.cssClass + " btn-sm"} disabled>
       <span>
-        <LinkToNotPreviewed
-          modelType="Person"
-          model={action.person}
-          isLink={false}
-        />
+        <LinkTo modelType="Person" model={action.person} isLink={false} />
       </span>
     </Button>
   )
@@ -132,7 +128,7 @@ const ActionDetails = ({ action }) => {
       <div>
         <span>
           By{" "}
-          <LinkTo
+          <LinkToPreviewed
             modelType="Person"
             model={action.person}
             whenUnspecified="system"

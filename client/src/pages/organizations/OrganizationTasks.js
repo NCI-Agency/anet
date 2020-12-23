@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -77,13 +77,13 @@ const OrganizationTasks = ({
       title={pluralize(taskShortLabel)}
       action={
         isAdminUser && (
-          <LinkToNotPreviewed
+          <LinkTo
             modelType="Task"
             model={Task.pathForNew({ taskedOrgUuid: organization.uuid })}
             button
           >
             Create {taskShortLabel}
-          </LinkToNotPreviewed>
+          </LinkTo>
         )
       }
     >

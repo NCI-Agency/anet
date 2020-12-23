@@ -1,5 +1,5 @@
 import { CompactRow } from "components/Compact"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import PropTypes from "prop-types"
@@ -519,7 +519,7 @@ export const FieldShortcuts = ({
           onClick={() => handleAddItem(shortcut, onChange, curValue)}
         >
           Add{" "}
-          <LinkToNotPreviewed
+          <LinkTo
             modelType={objectType.resourceName}
             model={shortcut}
             isLink={false}

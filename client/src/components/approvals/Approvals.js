@@ -1,5 +1,5 @@
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import { Location, Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -38,7 +38,7 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo
+                        <LinkToPreviewed
                           modelType="Person"
                           model={position.person}
                           previewId="plan-appr-person"
@@ -48,7 +48,7 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo
+                      <LinkToPreviewed
                         modelType="Position"
                         model={position}
                         previewId="plan-appr-pos"
@@ -91,7 +91,7 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo
+                        <LinkToPreviewed
                           modelType="Person"
                           model={position.person}
                           previewId="appr-person"
@@ -101,7 +101,7 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo
+                      <LinkToPreviewed
                         modelType="Position"
                         model={position}
                         previewId="appr-pos"

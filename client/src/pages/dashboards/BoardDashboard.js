@@ -19,7 +19,7 @@ import {
 } from "@projectstorm/react-diagrams-routing"
 import { DEFAULT_PAGE_PROPS } from "actions"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -302,7 +302,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                     <span>ANET entity:</span>
                     <br />
                     <Button onClick={() => setSelectingEntity(true)}>
-                      <LinkToNotPreviewed
+                      <LinkTo
                         modelType={editedNode.options.anetObjectType}
                         model={editedNode.options.anetObject}
                         isLink={false}

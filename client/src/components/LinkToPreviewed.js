@@ -1,40 +1,28 @@
+import { PopoverInteractionKind } from "@blueprintjs/core"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
+import ModelPreview from "components/ModelPreview"
+import ModelTooltip from "components/ModelTooltip"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Link } from "react-router-dom"
 
-const LinkTo = ({
+const LinkToPreviewed = ({
   componentClass,
   children,
-  edit,
-  button,
   showIcon,
   showAvatar,
-  isLink,
   whenUnspecified,
   className,
   modelType,
   model,
   style,
+  previewId,
   ...componentProps
 }) => {
-  if (componentProps.previewId) {
-    // Previewed version consumes the previewId, so remove from this one
-    delete componentProps.previewId
-  }
-  if (button) {
-    componentProps.className = [
-      className,
-      "btn",
-      `btn-${button === true ? "default" : button}`
-    ].join(" ")
-  } else {
-    componentProps.className = className
-  }
-
+  componentProps.className = className
   if (_isEmpty(model)) {
     return <span>{whenUnspecified}</span>
   }
@@ -45,7 +33,7 @@ const LinkTo = ({
   const modelInstance = new ModelClass(isModel ? model : {})
 
   // Icon
-  const iconComponent = showIcon && !button && modelInstance.iconUrl() && (
+  const iconComponent = showIcon && modelInstance.iconUrl() && (
     <img
       src={modelInstance.iconUrl()}
       alt=""
@@ -64,20 +52,9 @@ const LinkTo = ({
       />
   )
 
-  if (!isLink) {
-    return (
-      <span style={style}>
-        {avatarComponent}
-        {modelInstance.toString()}
-      </span>
-    )
-  }
-
   let to
   if (isModel) {
-    to = edit
-      ? ModelClass.pathForEdit(modelInstance)
-      : ModelClass.pathFor(modelInstance)
+    to = ModelClass.pathFor(modelInstance)
   } else if (model.indexOf("?")) {
     const components = model.split("?")
     to = { pathname: components[0], search: components[1] }
@@ -87,17 +64,33 @@ const LinkTo = ({
 
   const LinkToComponent = componentClass
   return (
-    <LinkToComponent to={to} style={style} {...componentProps}>
-      <>
-        {iconComponent}
-        {avatarComponent}
-        {children || modelInstance.toString()}
-      </>
-    </LinkToComponent>
+    <ModelTooltip
+      tooltipContent={
+        <ModelPreview
+          modelType={modelType}
+          uuid={modelInstance.uuid}
+          previewId={previewId}
+        />
+      }
+      popoverClassName="bp3-dark"
+      hoverCloseDelay={400}
+      hoverOpenDelay={500}
+      portalClassName="linkto-model-preview-portal"
+      interactionKind={PopoverInteractionKind.HOVER}
+      boundary="viewport"
+    >
+      <LinkToComponent to={to} style={style} {...componentProps}>
+        <>
+          {iconComponent}
+          {avatarComponent}
+          {children || modelInstance.toString()}
+        </>
+      </LinkToComponent>
+    </ModelTooltip>
   )
 }
 
-LinkTo.propTypes = {
+LinkToPreviewed.propTypes = {
   componentClass: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -105,14 +98,9 @@ LinkTo.propTypes = {
   ]),
   children: PropTypes.node,
   className: PropTypes.string,
-
   showIcon: PropTypes.bool,
   showAvatar: PropTypes.bool,
-  isLink: PropTypes.bool,
-  edit: PropTypes.bool,
-  // Configures this link to look like a button. Set it to true to make it a button,
-  // or pass a string to set a button type
-  button: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+  previewId: PropTypes.string, // needed for previewing same pages multiple times
   target: PropTypes.string,
   whenUnspecified: PropTypes.string,
   modelType: PropTypes.string.isRequired,
@@ -120,16 +108,14 @@ LinkTo.propTypes = {
   style: PropTypes.object
 }
 
-LinkTo.defaultProps = {
+LinkToPreviewed.defaultProps = {
   componentClass: Link,
   showIcon: true,
   showAvatar: true,
-  isLink: true,
-  edit: false,
-  button: false,
+  previewId: null,
   whenUnspecified: "Unspecified",
   modelType: null,
   model: null
 }
 
-export default LinkTo
+export default LinkToPreviewed

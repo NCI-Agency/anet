@@ -1,6 +1,6 @@
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import { EngagementTrends } from "components/Trends"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -123,9 +123,9 @@ const Card = ({ task }) => {
       }}
     >
       <div>
-        <LinkTo modelType="Task" model={task} previewId="kanban-task">
+        <LinkToPreviewed modelType="Task" model={task} previewId="kanban-task">
           <strong>{task.shortName}</strong>
-        </LinkTo>
+        </LinkToPreviewed>
         <br />
         <EngagementTrends
           newValue={task.lastMonthReports.length}
@@ -171,7 +171,7 @@ const Card = ({ task }) => {
                   <td>
                     {" "}
                     {task.taskedOrganizations.map(org => (
-                      <LinkToNotPreviewed
+                      <LinkTo
                         modelType="Organization"
                         model={org}
                         isLink={false}

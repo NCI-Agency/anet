@@ -4,7 +4,7 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -100,7 +100,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkTo
+          <LinkToPreviewed
             modelType="Person"
             model={position.person}
             onClick={onCancel}
@@ -145,11 +145,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       <Modal.Header closeButton>
         <Modal.Title>
           Set Position for{" "}
-          <LinkToNotPreviewed
-            modelType="Person"
-            model={person}
-            isLink={false}
-          />
+          <LinkTo modelType="Person" model={person} isLink={false} />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -163,14 +159,9 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
               }}
               className="remove-person-from-position"
             >
-              Remove{" "}
-              <LinkToNotPreviewed
-                modelType="Person"
-                model={person}
-                isLink={false}
-              />{" "}
+              Remove <LinkTo modelType="Person" model={person} isLink={false} />{" "}
               from{" "}
-              <LinkToNotPreviewed
+              <LinkTo
                 modelType="Position"
                 model={person.position}
                 isLink={false}

@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
 import { Field, Form, Formik } from "formik"
@@ -186,7 +186,7 @@ const TaskPreview = ({ className, uuid, previewId }) => {
                       task.taskedOrganizations && (
                         <>
                           {task.taskedOrganizations.map(org => (
-                            <LinkToNotPreviewed
+                            <LinkTo
                               modelType="Organization"
                               model={org}
                               key={`${org.uuid}`}
@@ -203,13 +203,10 @@ const TaskPreview = ({ className, uuid, previewId }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         task.customFieldRef1 && (
-                          <LinkToNotPreviewed
-                            modelType="Task"
-                            model={task.customFieldRef1}
-                          >
+                          <LinkTo modelType="Task" model={task.customFieldRef1}>
                             {task.customFieldRef1.shortName}{" "}
                             {task.customFieldRef1.longName}
-                          </LinkToNotPreviewed>
+                          </LinkTo>
                         )
                       }
                     />
@@ -272,7 +269,7 @@ const TaskPreview = ({ className, uuid, previewId }) => {
             <Fieldset title="Responsible positions">
               <PositionTable
                 positions={task.responsiblePositions}
-                linkToComp={LinkToNotPreviewed}
+                linkToComp={LinkTo}
               />
             </Fieldset>
           </div>

@@ -5,7 +5,7 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import {
   mapPageDispatchersToProps,
@@ -91,14 +91,14 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={authorizationGroup}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkToNotPreviewed
+          <LinkTo
             modelType="AuthorizationGroup"
             model={authorizationGroup}
             edit
             button="primary"
           >
             Edit
-          </LinkToNotPreviewed>
+          </LinkTo>
         )
         return (
           <div>
@@ -134,7 +134,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                     pageSize: 10,
                     authorizationGroupUuid: uuid
                   }}
-                  linkToComp={LinkTo}
+                  linkToComp={LinkToPreviewed}
                 />
               </Fieldset>
 

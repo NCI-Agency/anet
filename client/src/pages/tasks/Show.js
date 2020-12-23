@@ -7,7 +7,7 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
@@ -187,14 +187,9 @@ const TaskShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkToNotPreviewed
-            modelType="Task"
-            model={task}
-            edit
-            button="primary"
-          >
+          <LinkTo modelType="Task" model={task} edit button="primary">
             Edit
-          </LinkToNotPreviewed>
+          </LinkTo>
         )
         return (
           <div>
@@ -249,7 +244,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       task.taskedOrganizations && (
                         <>
                           {task.taskedOrganizations.map(org => (
-                            <LinkTo
+                            <LinkToPreviewed
                               modelType="Organization"
                               model={org}
                               key={`${org.uuid}`}
@@ -267,14 +262,14 @@ const TaskShow = ({ pageDispatchers }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         task.customFieldRef1 && (
-                          <LinkTo
+                          <LinkToPreviewed
                             modelType="Task"
                             model={task.customFieldRef1}
                             previewId="task-show-parent-task"
                           >
                             {task.customFieldRef1.shortName}{" "}
                             {task.customFieldRef1.longName}
-                          </LinkTo>
+                          </LinkToPreviewed>
                         )
                       }
                     />
@@ -348,7 +343,7 @@ const TaskShow = ({ pageDispatchers }) => {
             <Fieldset title="Responsible positions">
               <PositionTable
                 positions={task.responsiblePositions}
-                linkToComp={LinkTo}
+                linkToComp={LinkToPreviewed}
               />
             </Fieldset>
 

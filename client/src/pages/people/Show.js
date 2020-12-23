@@ -12,7 +12,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -161,7 +161,7 @@ const PersonShow = ({ pageDispatchers }) => {
         const action = (
           <div>
             {canEdit && (
-              <LinkToNotPreviewed
+              <LinkTo
                 modelType="Person"
                 model={person}
                 edit
@@ -169,7 +169,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 className="edit-person"
               >
                 Edit
-              </LinkToNotPreviewed>
+              </LinkTo>
             )}
           </div>
         )
@@ -275,7 +275,10 @@ const PersonShow = ({ pageDispatchers }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography, LinkTo)}
+                  humanValue={parseHtmlWithLinkTo(
+                    person.biography,
+                    LinkToPreviewed
+                  )}
                 />
               </Fieldset>
 
@@ -290,14 +293,14 @@ const PersonShow = ({ pageDispatchers }) => {
                     hasPosition &&
                     canChangePosition && (
                       <div>
-                        <LinkToNotPreviewed
+                        <LinkTo
                           modelType="Position"
                           model={position}
                           edit
                           button="default"
                         >
                           Edit position details
-                        </LinkToNotPreviewed>
+                        </LinkTo>
                         <Button
                           onClick={() => setShowAssignPositionModal(true)}
                           className="change-assigned-position"
@@ -387,7 +390,7 @@ const PersonShow = ({ pageDispatchers }) => {
                       {person.previousPositions.map((pp, idx) => (
                         <tr key={idx} id={`previousPosition_${idx}`}>
                           <td>
-                            <LinkTo
+                            <LinkToPreviewed
                               modelType="Position"
                               model={pp.position}
                               previewId="people-show-prev-pos"
@@ -415,7 +418,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
                     values={values}
-                    linkToComp={LinkTo}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}
@@ -440,14 +443,14 @@ const PersonShow = ({ pageDispatchers }) => {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
-          <LinkTo
+          <LinkToPreviewed
             modelType="Position"
             model={position}
             className="position-name"
             previewId="people-show-pos"
           />{" "}
           (
-          <LinkTo
+          <LinkToPreviewed
             modelType="Organization"
             model={position.organization}
             previewId="people-show-org"
@@ -480,7 +483,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkTo
+                      <LinkToPreviewed
                         modelType="Person"
                         model={assocPos.person}
                         previewId="people-show-asc-person"
@@ -488,14 +491,14 @@ const PersonShow = ({ pageDispatchers }) => {
                     )}
                   </td>
                   <td>
-                    <LinkTo
+                    <LinkToPreviewed
                       modelType="Position"
                       model={assocPos}
                       previewId="people-show-asc-pos"
                     />
                   </td>
                   <td>
-                    <LinkTo
+                    <LinkToPreviewed
                       modelType="Organization"
                       model={assocPos.organization}
                       previewId="people-show-asc-org"

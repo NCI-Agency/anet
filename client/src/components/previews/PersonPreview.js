@@ -6,7 +6,7 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -190,10 +190,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(
-                    person.biography,
-                    LinkToNotPreviewed
-                  )}
+                  humanValue={parseHtmlWithLinkTo(person.biography, LinkTo)}
                 />
               </Fieldset>
               <Fieldset title="Position">
@@ -220,7 +217,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
                     values={values}
-                    linkToComp={LinkToNotPreviewed}
+                    linkToComp={LinkTo}
                   />
                 </Fieldset>
               )}
@@ -245,10 +242,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                           id={`previousPosition_${idx}-${previewId}`}
                         >
                           <td>
-                            <LinkToNotPreviewed
-                              modelType="Position"
-                              model={pp.position}
-                            />
+                            <LinkTo modelType="Position" model={pp.position} />
                           </td>
                           <td>
                             {moment(pp.startTime).format(
@@ -277,17 +271,13 @@ const PersonPreview = ({ className, uuid, previewId }) => {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
-          <LinkToNotPreviewed
+          <LinkTo
             modelType="Position"
             model={position}
             className="position-name"
           />{" "}
           (
-          <LinkToNotPreviewed
-            modelType="Organization"
-            model={position.organization}
-          />
-          )
+          <LinkTo modelType="Organization" model={position.organization} />)
         </h4>
       </div>
     )
@@ -315,17 +305,14 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkToNotPreviewed
-                        modelType="Person"
-                        model={assocPos.person}
-                      />
+                      <LinkTo modelType="Person" model={assocPos.person} />
                     )}
                   </td>
                   <td>
-                    <LinkToNotPreviewed modelType="Position" model={assocPos} />
+                    <LinkTo modelType="Position" model={assocPos} />
                   </td>
                   <td>
-                    <LinkToNotPreviewed
+                    <LinkTo
                       modelType="Organization"
                       model={assocPos.organization}
                     />

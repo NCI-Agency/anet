@@ -1,6 +1,6 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -118,13 +118,13 @@ const BaseTaskTable = ({
               return (
                 <tr key={task.uuid}>
                   <td>
-                    <LinkTo
+                    <LinkToPreviewed
                       modelType="Task"
                       model={task}
                       previewId="task-table-task"
                     >
                       {task.shortName} {task.longName}
-                    </LinkTo>
+                    </LinkToPreviewed>
                   </td>
                 </tr>
               )

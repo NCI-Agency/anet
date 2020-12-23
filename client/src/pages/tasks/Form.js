@@ -16,7 +16,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -256,7 +256,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         <PositionTable
                           positions={values.responsiblePositions}
                           showDelete
-                          linkToComp={LinkTo}
+                          linkToComp={LinkToPreviewed}
                         />
                       }
                       overlayColumns={[
@@ -379,7 +379,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                                 false
                               )
                             }}
-                            linkToComp={LinkTo}
+                            linkToComp={LinkToPreviewed}
                           />
                         }
                       />
@@ -420,7 +420,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                       values,
                       validateForm
                     }}
-                    linkToComp={LinkTo}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

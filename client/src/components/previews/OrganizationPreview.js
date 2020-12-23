@@ -2,7 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import { Field, Form, Formik } from "formik"
 import { Organization, Position } from "models"
@@ -138,14 +138,14 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                     component={FieldHelper.ReadonlyField}
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
-                      <LinkToNotPreviewed
+                      <LinkTo
                         modelType="Organization"
                         model={organization.parentOrg}
                       >
                         {organization.parentOrg.shortName}{" "}
                         {organization.parentOrg.longName}{" "}
                         {organization.parentOrg.identificationCode}
-                      </LinkToNotPreviewed>
+                      </LinkTo>
                     }
                   />
                 )}
@@ -160,16 +160,13 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                         {superUsers.map(position => (
                           <p key={position.uuid}>
                             {position.person ? (
-                              <LinkToNotPreviewed
+                              <LinkTo
                                 modelType="Person"
                                 model={position.person}
                               />
                             ) : (
                               <i>
-                                <LinkToNotPreviewed
-                                  modelType="Position"
-                                  model={position}
-                                />
+                                <LinkTo modelType="Position" model={position} />
                                 - (Unfilled)
                               </i>
                             )}
@@ -194,13 +191,13 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                       <ListGroup>
                         {organization.childrenOrgs.map(organization => (
                           <ListGroupItem key={organization.uuid}>
-                            <LinkToNotPreviewed
+                            <LinkTo
                               modelType="Organization"
                               model={organization}
                             >
                               {organization.shortName} {organization.longName}{" "}
                               {organization.identificationCode}
-                            </LinkToNotPreviewed>
+                            </LinkTo>
                           </ListGroupItem>
                         ))}
                       </ListGroup>
@@ -211,7 +208,7 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
 
               <OrganizationLaydown
                 organization={organization}
-                linkToComp={LinkToNotPreviewed}
+                linkToComp={LinkTo}
               />
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
@@ -221,7 +218,7 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}
-                  linkToComp={LinkToNotPreviewed}
+                  linkToComp={LinkTo}
                 />
               )}
             </Form>

@@ -1,4 +1,4 @@
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -47,7 +47,7 @@ const UserActivityTable = ({ text, values }) => {
                   )}
                 </td>
                 <td className="nobr">
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Person"
                     model={ua.user}
                     previewId="user-act-person"

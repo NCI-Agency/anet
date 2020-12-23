@@ -1,4 +1,4 @@
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkTo from "components/LinkTo"
 import moment from "moment"
 import React from "react"
 import Settings from "settings"
@@ -13,7 +13,7 @@ export const AuthorizationGroupOverlayRow = item => (
 export const LocationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkToNotPreviewed modelType="Location" model={item} isLink={false} />
+      <LinkTo modelType="Location" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -41,19 +41,15 @@ export const TaskSimpleOverlayRow = item => (
 export const TaskDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
-      <LinkToNotPreviewed modelType="Task" model={item} isLink={false}>
+      <LinkTo modelType="Task" model={item} isLink={false}>
         {item.shortName}
-      </LinkToNotPreviewed>
+      </LinkTo>
     </td>
     <td className="parentTaskName">
       {item.customFieldRef1 && (
-        <LinkToNotPreviewed
-          modelType="Task"
-          model={item.customFieldRef1}
-          isLink={false}
-        >
+        <LinkTo modelType="Task" model={item.customFieldRef1} isLink={false}>
           {item.customFieldRef1.shortName}
-        </LinkToNotPreviewed>
+        </LinkTo>
       )}
     </td>
   </React.Fragment>
@@ -62,22 +58,18 @@ export const TaskDetailedOverlayRow = item => (
 export const PositionOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkToNotPreviewed modelType="Position" model={item} isLink={false} />
+      <LinkTo modelType="Position" model={item} isLink={false} />
       {item.code ? `, ${item.code}` : ""}
     </td>
     <td>
-      <LinkToNotPreviewed
+      <LinkTo
         modelType="Organization"
         model={item.organization}
         isLink={false}
       />
     </td>
     <td>
-      <LinkToNotPreviewed
-        modelType="Person"
-        model={item.person}
-        isLink={false}
-      />
+      <LinkTo modelType="Person" model={item.person} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -85,7 +77,7 @@ export const PositionOverlayRow = item => (
 export const PersonSimpleOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkToNotPreviewed modelType="Person" model={item} isLink={false} />
+      <LinkTo modelType="Person" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -93,18 +85,14 @@ export const PersonSimpleOverlayRow = item => (
 export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkToNotPreviewed modelType="Person" model={item} isLink={false} />
+      <LinkTo modelType="Person" model={item} isLink={false} />
     </td>
     <td>
-      <LinkToNotPreviewed
-        modelType="Position"
-        model={item.position}
-        isLink={false}
-      />
+      <LinkTo modelType="Position" model={item.position} isLink={false} />
       {item.position && item.position.code ? `, ${item.position.code}` : ""}
     </td>
     <td>
-      <LinkToNotPreviewed
+      <LinkTo
         modelType="Location"
         model={item.position && item.position.location}
         whenUnspecified=""
@@ -113,7 +101,7 @@ export const PersonDetailedOverlayRow = item => (
     </td>
     <td>
       {item.position && item.position.organization && (
-        <LinkToNotPreviewed
+        <LinkTo
           modelType="Organization"
           model={item.position.organization}
           isLink={false}
@@ -126,14 +114,10 @@ export const PersonDetailedOverlayRow = item => (
 export const ApproverOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkToNotPreviewed
-        modelType="Person"
-        model={item.person}
-        isLink={false}
-      />
+      <LinkTo modelType="Person" model={item.person} isLink={false} />
     </td>
     <td>
-      <LinkToNotPreviewed modelType="Position" model={item} isLink={false} />
+      <LinkTo modelType="Position" model={item} isLink={false} />
     </td>
   </React.Fragment>
 )
@@ -141,7 +125,7 @@ export const ApproverOverlayRow = item => (
 export const ReportDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkToNotPreviewed modelType="Report" model={item} isLink={false} />
+      <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
     <td>
       <span>

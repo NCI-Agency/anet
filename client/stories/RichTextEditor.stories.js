@@ -1,5 +1,5 @@
 import React from "react"
-import LinkTo from "../src/components/LinkTo"
+import LinkToPreviewed from "../src/components/LinkToPreviewed"
 import RichTextEditor from "../src/components/RichTextEditor"
 
 export default {
@@ -13,5 +13,5 @@ export const EditorOnChange = Template.bind({})
 EditorOnChange.args = {
   className: "textField",
   value: "editor content",
-  linkToComp: LinkTo
+  linkToComp: LinkToPreviewed
 }

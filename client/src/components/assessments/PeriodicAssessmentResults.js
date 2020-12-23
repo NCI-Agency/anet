@@ -5,7 +5,7 @@ import { gql } from "apollo-boost"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Model, { NOTE_TYPE } from "components/Model"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -59,7 +59,7 @@ const PeriodicAssessment = ({
       >
         <>
           <i>{moment(note.updatedAt).fromNow()}</i>{" "}
-          <LinkTo
+          <LinkToPreviewed
             modelType="Person"
             model={note.author}
             style={{ color: "white" }}
@@ -123,7 +123,7 @@ const PeriodicAssessment = ({
                   parentFieldName={parentFieldName}
                   fieldsConfig={assessmentConfig}
                   values={values}
-                  linkToComp={LinkTo}
+                  linkToComp={LinkToPreviewed}
                   vertical
                 />
               )

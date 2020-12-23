@@ -3,7 +3,7 @@ import {
   CustomFieldsContainer,
   customFieldsJSONString
 } from "components/CustomFields"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   ENTITY_ASSESSMENT_PARENT_FIELD,
@@ -81,7 +81,7 @@ const AssessmentModal = ({
                         values,
                         validateForm
                       }}
-                      linkToComp={LinkTo}
+                      linkToComp={LinkToPreviewed}
                       vertical
                     />
                   </div>

@@ -8,7 +8,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
-import LinkToNotPreviewed from "components/LinkToNotPreviewed"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
@@ -214,7 +214,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
         const action = (
           <div>
             {isAdmin && (
-              <LinkToNotPreviewed
+              <LinkTo
                 modelType="Organization"
                 model={Organization.pathForNew({
                   parentOrgUuid: organization.uuid
@@ -222,11 +222,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 button
               >
                 Create sub-organization
-              </LinkToNotPreviewed>
+              </LinkTo>
             )}
 
             {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
-              <LinkToNotPreviewed
+              <LinkTo
                 modelType="Organization"
                 model={organization}
                 edit
@@ -234,7 +234,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 id="editButton"
               >
                 Edit
-              </LinkToNotPreviewed>
+              </LinkTo>
             )}
           </div>
         )
@@ -312,7 +312,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     label={Settings.fields.organization.parentOrg}
                     humanValue={
                       organization.parentOrg && (
-                        <LinkTo
+                        <LinkToPreviewed
                           modelType="Organization"
                           model={organization.parentOrg}
                           previewId="org-show-org"
@@ -320,7 +320,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
                           {organization.parentOrg.identificationCode}
-                        </LinkTo>
+                        </LinkToPreviewed>
                       )
                     }
                   />
@@ -336,14 +336,14 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         {superUsers.map(position => (
                           <p key={position.uuid}>
                             {position.person ? (
-                              <LinkTo
+                              <LinkToPreviewed
                                 modelType="Person"
                                 model={position.person}
                                 previewId="org-show-person"
                               />
                             ) : (
                               <i>
-                                <LinkTo
+                                <LinkToPreviewed
                                   modelType="Position"
                                   model={position}
                                   previewId="org-show-pos"
@@ -373,14 +373,14 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         <ListGroup>
                           {organization.childrenOrgs.map(organization => (
                             <ListGroupItem key={organization.uuid}>
-                              <LinkTo
+                              <LinkToPreviewed
                                 modelType="Organization"
                                 model={organization}
                                 previewId="org-show-child-org"
                               >
                                 {organization.shortName} {organization.longName}{" "}
                                 {organization.identificationCode}
-                              </LinkTo>
+                              </LinkToPreviewed>
                             </ListGroupItem>
                           ))}
                         </ListGroup>
@@ -391,7 +391,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
 
               <OrganizationLaydown
                 organization={organization}
-                linkToComp={LinkTo}
+                linkToComp={LinkToPreviewed}
               />
               {!isPrincipalOrg && <Approvals relatedObject={organization} />}
               {organization.isTaskEnabled() && (
@@ -402,7 +402,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}
-                  linkToComp={LinkTo}
+                  linkToComp={LinkToPreviewed}
                 />
               )}
 
