@@ -36,7 +36,6 @@ describe("When using advanced search", () => {
     Home.open()
     AdvancedSearch.advancedSearchForm.waitForExist()
     AdvancedSearch.advancedSearchForm.waitForDisplayed()
-    console.log(AdvancedSearch.advancedSearchForm.getHTML())
     AdvancedSearch.advancedSearchPopoverTrigger.waitForExist()
 
     AdvancedSearch.advancedSearchPopoverTrigger.waitForDisplayed()
