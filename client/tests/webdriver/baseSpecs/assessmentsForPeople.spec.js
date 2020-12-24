@@ -33,9 +33,7 @@ describe("For the periodic person assessments", () => {
       ShowPerson.assessmentsTable.waitForDisplayed()
 
       ShowPerson.addPeriodicAssessmentButton.click()
-
-      ShowPerson.assessmentModalForm.waitForExist({ timeout: 20000 })
-      ShowPerson.assessmentModalForm.waitForDisplayed()
+      ShowPerson.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
       ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
@@ -58,8 +56,7 @@ describe("For the periodic person assessments", () => {
       ShowPerson.editAssessmentButton.waitForDisplayed()
 
       ShowPerson.editAssessmentButton.click()
-      ShowPerson.assessmentModalForm.waitForExist()
-      ShowPerson.assessmentModalForm.waitForDisplayed()
+      ShowPerson.waitForAssessmentModalForm()
 
       ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_EDIT_DETAILS)
       ShowPerson.saveAssessmentAndWaitForModalClose(
@@ -98,8 +95,7 @@ describe("For the periodic person assessments", () => {
       ShowPerson.editAssessmentButton.waitForDisplayed()
 
       ShowPerson.editAssessmentButton.click()
-      ShowPerson.assessmentModalForm.waitForExist()
-      ShowPerson.assessmentModalForm.waitForDisplayed()
+      ShowPerson.waitForAssessmentModalForm()
 
       ShowPerson.fillAssessmentQuestion(ADMIN_PERSON_EDIT_DETAILS)
       ShowPerson.saveAssessmentAndWaitForModalClose(
@@ -118,13 +114,8 @@ describe("For the periodic person assessments", () => {
 
     it("Should allow an admin to delete the assessment", () => {
       ShowPerson.deleteAssessmentButton.click()
-      ShowPerson.deleteConfirmButton.waitForExist()
-      ShowPerson.deleteConfirmButton.waitForDisplayed()
-      ShowPerson.deleteConfirmButton.click()
-      ShowPerson.shownAssessmentPanel.waitForExist({
-        reverse: true,
-        timeout: 10000
-      })
+      ShowPerson.confirmDelete()
+      ShowPerson.waitForDeletedAssessmentToDisappear()
     })
   })
 })

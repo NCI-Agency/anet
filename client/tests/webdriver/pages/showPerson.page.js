@@ -44,6 +44,12 @@ class ShowPerson extends Page {
     return browser.$("#entity-assessments-results-quarterly")
   }
 
+  waitForAssessmentModalForm(reverse = false) {
+    browser.pause(300) // wait for modal animation to finish
+    this.assessmentModalForm.waitForExist({ reverse, timeout: 20000 })
+    this.assessmentModalForm.waitForDisplayed()
+  }
+
   fillAssessmentQuestion(valuesArr) {
     this.assessmentModalForm
       .$$(".form-group .btn-group")
@@ -59,6 +65,7 @@ class ShowPerson extends Page {
 
   saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
     this.saveAssessmentButton.click()
+    browser.pause(300) // wait for modal animation to finish
     this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
     // wait until details to change, can take some time to update show page
     browser.waitUntil(
@@ -70,6 +77,21 @@ class ShowPerson extends Page {
         timeoutMsg: "Expected change after save"
       }
     )
+  }
+
+  confirmDelete() {
+    browser.pause(500)
+    this.deleteConfirmButton.waitForExist()
+    this.deleteConfirmButton.waitForDisplayed()
+    this.deleteConfirmButton.click()
+  }
+
+  waitForDeletedAssessmentToDisappear() {
+    browser.pause(500)
+    this.shownAssessmentPanel.waitForExist({
+      reverse: true,
+      timeout: 20000
+    })
   }
 }
 

@@ -32,11 +32,8 @@ describe("For the periodic task assessments", () => {
     it("Should allow advisor to successfully add an assessment", () => {
       ShowTask.monthlyAssessmentsTable.waitForExist()
       ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-
       ShowTask.addMonthlyAssessmentButton.click()
-
-      ShowTask.assessmentModalForm.waitForExist({ timeout: 20000 })
-      ShowTask.assessmentModalForm.waitForDisplayed()
+      ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
       ShowTask.fillAssessmentQuestion(ADVISOR_1_TASK_CREATE_DETAILS)
@@ -60,9 +57,7 @@ describe("For the periodic task assessments", () => {
       ShowTask.editMonthlyAssessmentButton.waitForExist()
       ShowTask.editMonthlyAssessmentButton.waitForDisplayed()
       ShowTask.editMonthlyAssessmentButton.click()
-
-      ShowTask.assessmentModalForm.waitForExist()
-      ShowTask.assessmentModalForm.waitForDisplayed()
+      ShowTask.waitForAssessmentModalForm()
 
       ShowTask.fillAssessmentQuestion(
         ADVISOR_1_TASK_EDIT_DETAILS,
@@ -84,50 +79,7 @@ describe("For the periodic task assessments", () => {
       })
     })
   })
-  describe("As a different advisor responsible from same task", () => {
-    it("Should first search, find and open the task's page", () => {
-      Home.open("/", ADVISOR2_CREDENTIALS)
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
-    })
 
-    it("Should not show make assessment button when there is an assessment on that period", () => {
-      expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
-    })
-
-    it("Should allow other advisor to successfully edit existing assesment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-
-      ShowTask.editMonthlyAssessmentButton.click()
-
-      ShowTask.assessmentModalForm.waitForExist({ timeout: 20000 })
-      ShowTask.assessmentModalForm.waitForDisplayed()
-
-      // NOTE: assuming assessment question content here, may change in future
-      ShowTask.fillAssessmentQuestion(
-        ADVISOR_2_TASK_EDIT_DETAILS,
-        ADVISOR_1_TASK_EDIT_DETAILS[0]
-      )
-      ShowTask.saveAssessmentAndWaitForModalClose(
-        ADVISOR_2_TASK_EDIT_DETAILS[0]
-      )
-    })
-
-    it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
-            // Only some values are mapped, others are same
-            (VALUE_TO_TEXT_FOR_TASK[ADVISOR_2_TASK_EDIT_DETAILS[index]] ||
-              ADVISOR_2_TASK_EDIT_DETAILS[index])
-        )
-      })
-    })
-  })
   describe("As an admin", () => {
     it("Should first search, find and open the task's page", () => {
       Home.openAsAdminUser()
@@ -145,16 +97,13 @@ describe("For the periodic task assessments", () => {
     it("Should allow admins to successfully edit existing assesment", () => {
       ShowTask.monthlyAssessmentsTable.waitForExist()
       ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-
       ShowTask.editMonthlyAssessmentButton.click()
-
-      ShowTask.assessmentModalForm.waitForExist({ timeout: 20000 })
-      ShowTask.assessmentModalForm.waitForDisplayed()
+      ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
       ShowTask.fillAssessmentQuestion(
         ADMIN_TASK_EDIT_DETAILS,
-        ADVISOR_2_TASK_EDIT_DETAILS[0]
+        ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
       ShowTask.saveAssessmentAndWaitForModalClose(ADMIN_TASK_EDIT_DETAILS[0])
     })
@@ -169,16 +118,53 @@ describe("For the periodic task assessments", () => {
         )
       })
     })
+  })
 
-    it("Should allow an admin to delete the assessment", () => {
-      ShowTask.deleteMonthlyAssessmentButton.click()
-      ShowTask.deleteConfirmButton.waitForExist()
-      ShowTask.deleteConfirmButton.waitForDisplayed()
-      ShowTask.deleteConfirmButton.click()
-      ShowTask.shownAssessmentPanel.waitForExist({
-        reverse: true,
-        timeout: 10000
+  describe("As a different advisor responsible from same task", () => {
+    it("Should first search, find and open the task's page", () => {
+      Home.open("/", ADVISOR2_CREDENTIALS)
+      Home.searchBar.setValue(TASK_SEARCH_STRING)
+      Home.submitSearch.click()
+      Search.foundTaskTable.waitForExist({ timeout: 20000 })
+      Search.foundTaskTable.waitForDisplayed()
+      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
+    })
+
+    it("Should not show make assessment button when there is an assessment on that period", () => {
+      expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
+    })
+
+    it("Should allow the other advisor to successfully edit existing assesment", () => {
+      ShowTask.monthlyAssessmentsTable.waitForExist()
+      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
+      ShowTask.editMonthlyAssessmentButton.click()
+      ShowTask.waitForAssessmentModalForm()
+
+      // NOTE: assuming assessment question content here, may change in future
+      ShowTask.fillAssessmentQuestion(
+        ADVISOR_2_TASK_EDIT_DETAILS,
+        ADMIN_TASK_EDIT_DETAILS[0]
+      )
+      ShowTask.saveAssessmentAndWaitForModalClose(
+        ADVISOR_2_TASK_EDIT_DETAILS[0]
+      )
+    })
+
+    it("Should show the same assessment details with the details just edited", () => {
+      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
+        expect(prefix(index) + detail.getText()).to.equal(
+          prefix(index) +
+            // Only some values are mapped, others are same
+            (VALUE_TO_TEXT_FOR_TASK[ADVISOR_2_TASK_EDIT_DETAILS[index]] ||
+              ADVISOR_2_TASK_EDIT_DETAILS[index])
+        )
       })
+    })
+
+    it("Should allow the other advisor to delete the assessment", () => {
+      ShowTask.deleteMonthlyAssessmentButton.click()
+      ShowTask.confirmDelete()
+      ShowTask.waitForDeletedAssessmentToDisappear()
     })
   })
 })
