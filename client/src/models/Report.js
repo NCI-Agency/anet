@@ -1,5 +1,6 @@
 import Model, {
   createCustomFieldsSchema,
+  DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE,
   REPORT_RELATED_OBJECT_TYPE,
   REPORT_STATE_PUBLISHED,
@@ -592,6 +593,22 @@ export default class Report extends Model {
           ? " - HH:mm"
           : " >>> " + Report.getEngagementDateFormat()
       )
+    )
+  }
+
+  static getCleanReport(values) {
+    // Strip notes and any synthetic fields from a report
+    return Object.without(
+      new Report(values),
+      "notes",
+      "reportTags",
+      "showSensitiveInfo",
+      "authors",
+      DEFAULT_CUSTOM_FIELDS_PARENT,
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+      Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
+      Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
     )
   }
 }
