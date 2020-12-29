@@ -86,7 +86,7 @@ dependencies {
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
-	implementation 'com.github.waffle:waffle-jna:1.9.1'
+	implementation 'com.github.waffle:waffle-jna:3.0.0'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
