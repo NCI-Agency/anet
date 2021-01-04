@@ -148,6 +148,7 @@ processResources {
 		}
 	}
 }
+processResources.outputs.upToDateWhen{ false }
 
 def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
 projectBranch.waitFor();
