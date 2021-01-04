@@ -12,7 +12,7 @@ public class OrganizationMapper implements RowMapper<Organization> {
   @Override
   public Organization map(ResultSet r, StatementContext ctx) throws SQLException {
     Organization org = new Organization();
-    MapperUtils.setCommonBeanFields(org, r, "organizations");
+    MapperUtils.setCustomizableBeanFields(org, r, "organizations");
     org.setShortName(r.getString("organizations_shortName"));
     org.setLongName(r.getString("organizations_longName"));
     org.setStatus(MapperUtils.getEnumIdx(r, "organizations_status", Organization.Status.class));

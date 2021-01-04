@@ -25,7 +25,7 @@ public class PositionMapper implements RowMapper<Position> {
   }
 
   public static Position fillInFields(Position p, ResultSet rs) throws SQLException {
-    MapperUtils.setCommonBeanFields(p, rs, "positions");
+    MapperUtils.setCustomizableBeanFields(p, rs, "positions");
     p.setName(rs.getString("positions_name"));
     p.setCode(rs.getString("positions_code"));
     p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));
