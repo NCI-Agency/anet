@@ -543,10 +543,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <>
-                      {report.engagementDate &&
-                        moment(report.engagementDate).format(
-                          Report.getEngagementDateFormat()
-                        )}
+                      {Report.getFormattedEngagementDate(report)}
                       <PlanningConflictForReport report={report} largeIcon />
                     </>
                   }

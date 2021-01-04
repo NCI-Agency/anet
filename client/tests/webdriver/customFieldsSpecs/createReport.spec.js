@@ -9,7 +9,7 @@ const INVALID_ENGAGEMENT_DURATION_1 = "123456"
 const INVALID_ENGAGEMENT_DURATION_2 = "-1"
 // positive sliced at 4th digit, negative should turn into 0
 const VALID_ENGAGEMENT_DURATION_1 = "1234"
-const VALID_ENGAGEMENT_DURATION_2 = "0"
+const VALID_ENGAGEMENT_DURATION_2 = ""
 
 const PERSON = "EF 2.1"
 const PERSON_VALUE_1 = "HENDERSON, Henry"
@@ -36,6 +36,10 @@ describe("Create report form page", () => {
     })
 
     it("Should be able to prevent invalid duration values", () => {
+      // make it not an all day first to enable duration input
+      CreateReport.allDayCheckbox.click()
+      CreateReport.duration.waitForClickable()
+
       CreateReport.duration.setValue(INVALID_ENGAGEMENT_DURATION_1)
       browser.waitUntil(
         () => {
@@ -48,7 +52,13 @@ describe("Create report form page", () => {
           timeoutMsg: "Large positive duration value was not sliced "
         }
       )
-      CreateReport.duration.setValue(INVALID_ENGAGEMENT_DURATION_2)
+
+      // remove first value, otherwise appends the value
+      CreateReport.duration.setValue(
+        "\uE003".repeat(VALID_ENGAGEMENT_DURATION_1) +
+          INVALID_ENGAGEMENT_DURATION_2
+      )
+
       browser.waitUntil(
         () => {
           return (

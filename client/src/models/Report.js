@@ -106,7 +106,26 @@ export default class Report extends Model {
         .nullable()
         .required("You must provide the Date of Engagement")
         .default(null),
-      duration: yup.number().nullable().default(null),
+      duration: yup
+        .number()
+        .nullable()
+        .test(
+          "duration",
+          "You must provide duration when engagement time(hour:minute) is provided",
+          function(duration) {
+            const { engagementDate } = this.parent
+            if (
+              !engagementDate ||
+              moment(engagementDate).isSame(
+                moment(engagementDate).startOf("day")
+              )
+            ) {
+              return true
+            }
+            return !!duration
+          }
+        )
+        .default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
         .boolean()
@@ -570,16 +589,24 @@ export default class Report extends Model {
     )
   }
 
+  static isEngagementAllDay(report) {
+    return !report.duration
+  }
+
+  static getAllDayIndicator(report) {
+    return Report.isEngagementAllDay(report) ? " (all day)" : ""
+  }
+
   static getFormattedEngagementDate(report) {
     if (!report?.engagementDate) {
       return ""
     }
 
     const start = moment(report.engagementDate)
-    if (!report.duration) {
+    if (Report.isEngagementAllDay(report)) {
       return Settings.engagementsIncludeTimeAndDuration
         ? start.format(Settings.dateFormats.forms.displayLong.date) +
-            " (all day)"
+            Report.getAllDayIndicator(report)
         : start.format(Report.getEngagementDateFormat())
     }
 

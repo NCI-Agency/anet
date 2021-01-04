@@ -245,9 +245,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.engagementDate && (
             <Label bsStyle="default" className="engagement-date">
-              {moment(report.engagementDate).format(
-                Report.getEngagementDateFormat()
-              )}
+              {Report.getFormattedEngagementDate(report)}
             </Label>
           )}
         </Col>

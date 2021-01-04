@@ -4,13 +4,53 @@ import CreateReport from "../pages/report/createReport.page"
 import EditReport from "../pages/report/editReport.page"
 import ShowReport from "../pages/report/showReport.page"
 
+// NOTE: Copied Report model logic here because importing issues
+
+function getFormattedDateInput(report) {
+  return report.engagementDate.format("DD-MM-YYYY HH:mm")
+}
+
+function isEngagementAllDay(report) {
+  return !report.duration
+}
+
+function getEngagementDateFormat() {
+  return "dddd, D MMMM YYYY @ HH:mm"
+}
+
+function getAllDayIndicator(report) {
+  return isEngagementAllDay(report) ? " (all day)" : ""
+}
+
+function getFormattedEngagementDate(report) {
+  if (!report?.engagementDate) {
+    return ""
+  }
+
+  const start = moment(report.engagementDate)
+  if (isEngagementAllDay(report)) {
+    return start.format("dddd, D MMMM YYYY") + getAllDayIndicator(report)
+  }
+
+  const end = moment(report.engagementDate).add(report.duration, "minutes")
+
+  return (
+    start.format(getEngagementDateFormat()) +
+    end.format(
+      start.isSame(end, "day")
+        ? " - HH:mm"
+        : " >>> " + getEngagementDateFormat()
+    )
+  )
+}
+
 describe("When creating a Report with conflicts", () => {
   let firstReportUUID
   let secondReportUUID
   const report01 = {
     intent: "111111111111",
     engagementDate: moment()
-      .add(1, "day")
+      .add(2, "day")
       .hours(1)
       .minutes(0)
       .seconds(0)
@@ -22,7 +62,7 @@ describe("When creating a Report with conflicts", () => {
   const report02 = {
     intent: "2222222222",
     engagementDate: moment()
-      .add(1, "day")
+      .add(2, "day")
       .hours(1)
       .minutes(10)
       .seconds(0)
@@ -38,7 +78,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(CreateReport.intent.getValue()).to.equal(report01.intent)
     expect(CreateReport.engagementDate.getValue()).to.equal(
-      report01.engagementDate.format("DD-MM-YYYY HH:mm")
+      getFormattedDateInput(report01)
     )
     expect(CreateReport.duration.getValue()).to.equal(report01.duration)
     const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
@@ -70,7 +110,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(CreateReport.intent.getValue()).to.equal(report02.intent)
     expect(CreateReport.engagementDate.getValue()).to.equal(
-      report02.engagementDate.format("DD-MM-YYYY HH:mm")
+      getFormattedDateInput(report02)
     )
     expect(CreateReport.duration.getValue()).to.equal(report02.duration)
     const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
@@ -116,7 +156,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.intent).to.equal(report01.intent)
     expect(ShowReport.engagementDate).to.equal(
-      report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+      getFormattedEngagementDate(report01)
     )
     expect(ShowReport.reportConflictIcon.isExisting()).to.equal(true)
 
@@ -157,7 +197,7 @@ describe("When creating a Report with conflicts", () => {
 
     expect(ShowReport.intent).to.equal(report02.intent)
     expect(ShowReport.engagementDate).to.equal(
-      report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
+      getFormattedEngagementDate(report02)
     )
     expect(ShowReport.reportConflictIcon.isExisting()).to.equal(true)
 
