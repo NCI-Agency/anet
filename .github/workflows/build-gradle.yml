@@ -171,6 +171,15 @@ jobs:
         NODE_OPTIONS: '--max-old-space-size=8192 --throw-deprecation'
     - run: head -1000 logs/clientLog.log
       if: always()
+    # check if build process stdout and stderr outputs have 'error:'
+    - run: |
+        ./gradlew yarn_run_start --console=plain &> dev_error.log &
+        sleep 30
+        ! grep -i -C 2 "error:" dev_error.log
+    - run: |
+        ./gradlew yarn_run_storybook --console=plain &> storybook_error.log &
+        sleep 60
+        ! grep -i -C 2 "error:" storybook_error.log
     - name: Notify slack success
       if: success()
       env:
