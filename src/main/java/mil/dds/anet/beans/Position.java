@@ -268,17 +268,16 @@ public class Position extends AbstractCustomizableAnetBean implements RelatableO
     if (!(o instanceof Position)) {
       return false;
     }
-    Position other = (Position) o;
-    return Objects.equals(uuid, other.getUuid()) && Objects.equals(name, other.getName())
-        && Objects.equals(code, other.getCode()) && Objects.equals(type, other.getType())
-        && Objects.equals(status, other.getStatus())
-        && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid())
-        && Objects.equals(customFields, other.getCustomFields());
+    final Position other = (Position) o;
+    return super.equals(o) && Objects.equals(uuid, other.getUuid())
+        && Objects.equals(name, other.getName()) && Objects.equals(code, other.getCode())
+        && Objects.equals(type, other.getType()) && Objects.equals(status, other.getStatus())
+        && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, code, type, status, organization, customFields);
+    return Objects.hash(super.hashCode(), uuid, name, code, type, status, organization);
   }
 
   @Override

@@ -262,19 +262,19 @@ public class Organization extends AbstractCustomizableAnetBean
     if (!(o instanceof Organization)) {
       return false;
     }
-    Organization other = (Organization) o;
-    return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
+    final Organization other = (Organization) o;
+    return super.equals(o) && Objects.equals(other.getUuid(), uuid)
+        && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
-        && Objects.equals(other.getType(), type)
-        && Objects.equals(other.getCustomFields(), customFields);
+        && Objects.equals(other.getType(), type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, status, identificationCode, type, createdAt,
-        updatedAt, customFields);
+    return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
+        type, createdAt, updatedAt);
   }
 
   @Override

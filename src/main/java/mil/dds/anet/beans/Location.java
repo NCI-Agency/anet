@@ -117,16 +117,16 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
     if (!(o instanceof Location)) {
       return false;
     }
-    Location l = (Location) o;
-    return Objects.equals(l.getUuid(), uuid) && Objects.equals(l.getName(), name)
-        && Objects.equals(l.getStatus(), status) && Objects.equals(l.getLat(), lat)
-        && Objects.equals(l.getLng(), lng) && Objects.equals(l.getCreatedAt(), createdAt)
-        && Objects.equals(l.getCustomFields(), customFields);
+    final Location other = (Location) o;
+    return super.equals(o) && Objects.equals(other.getUuid(), uuid)
+        && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
+        && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)
+        && Objects.equals(other.getCreatedAt(), createdAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, status, lat, lng, createdAt, customFields);
+    return Objects.hash(super.hashCode(), uuid, name, status, lat, lng, createdAt);
   }
 
   @Override
