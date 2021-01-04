@@ -116,9 +116,13 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
 
   @Override
   public Organization insertInternal(Organization org) {
-    getDbHandle().createUpdate(
-        "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", \"customFields\") "
-            + "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid, :customFields)")
+    getDbHandle()
+        .createUpdate(
+            "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, "
+                + "\"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", "
+                + "\"customFields\") VALUES (:uuid, :shortName, :longName, :status, "
+                + ":identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid, "
+                + ":customFields)")
         .bindBean(org).bind("createdAt", DaoUtils.asLocalDateTime(org.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
@@ -129,9 +133,12 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
 
   @Override
   public int updateInternal(Organization org) {
-    return getDbHandle().createUpdate("/* updateOrg */ UPDATE organizations "
-        + "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
-        + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, \"customFields\" = :customFields where uuid = :uuid")
+    return getDbHandle()
+        .createUpdate("/* updateOrg */ UPDATE organizations "
+            + "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, "
+            + "\"identificationCode\" = :identificationCode, type = :type, "
+            + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, "
+            + "\"customFields\" = :customFields WHERE uuid = :uuid")
         .bindBean(org).bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
         .bind("type", DaoUtils.getEnumId(org.getType()))

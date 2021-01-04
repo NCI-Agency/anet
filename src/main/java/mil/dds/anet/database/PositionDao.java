@@ -45,8 +45,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     try {
       getDbHandle()
           .createUpdate("/* positionInsert */ INSERT INTO positions (uuid, name, code, type, "
-              + "status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\", \"customFields\") "
-              + "VALUES (:uuid, :name, :code, :type, :status, :organizationUuid, :locationUuid, :createdAt, :updatedAt, :customFields)")
+              + "status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\", "
+              + "\"customFields\") VALUES (:uuid, :name, :code, :type, :status, :organizationUuid, "
+              + ":locationUuid, :createdAt, :updatedAt, :customFields)")
           .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
           .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("type", DaoUtils.getEnumId(p.getType()))
@@ -157,9 +158,10 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
     try {
       final int nr = getDbHandle()
-          .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, "
-              + "code = :code, \"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
-              + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
+          .createUpdate("/* positionUpdate */ UPDATE positions SET name = :name, code = :code, "
+              + "\"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
+              + "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt, "
+              + "\"customFields\" = :customFields WHERE uuid = :uuid")
           .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
           .bind("type", DaoUtils.getEnumId(p.getType()))
           .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
