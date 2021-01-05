@@ -42,6 +42,11 @@ insertBaseData-psql.sql
 #webdriver-io local test files
 errorShots/
 
+# Jupyter files
+__pycache__
+.ipynb_checkpoints
+pex/
+
 .metadata/
 
 .DS_Store
