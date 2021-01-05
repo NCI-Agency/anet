@@ -23,7 +23,7 @@ class BaseTestFixture(unittest.TestCase):
         # get new uuid
         self.new_uuid = str(uuid.uuid4())
         # get utc_now
-        self.utc_now = datetime.datetime.now()        
+        self.utc_now = datetime.datetime.now()
         # initialize update rules
         self.update_rules = { "tables": [] }
         # Set entity classes as class attribute and set the same session to all by BaseModel
