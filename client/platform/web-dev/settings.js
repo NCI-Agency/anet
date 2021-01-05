@@ -1,10 +1,9 @@
-import { gql } from "apollo-boost"
 import { loadFileAjaxSync } from "../utils"
 
 const Settings = JSON.parse(
   loadFileAjaxSync("/api/admin/dictionary", "application/json")
 )
-const GQL_GET_VERSION_INFO = gql`
+const GQL_GET_VERSION_INFO = `
   query {
     projectVersion
   }

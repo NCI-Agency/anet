@@ -73,6 +73,7 @@ const ConnectionBanner = ({ connection }) => {
           window.location.reload()
           event.preventDefault()
         }}
+        style={{ color: "white" }}
       >
         {Settings.VERSION_CHANGED_MSG}
       </a>
@@ -88,6 +89,7 @@ const ConnectionBanner = ({ connection }) => {
 ConnectionBanner.propTypes = {
   connection: PropTypes.object.isRequired
 }
+
 export const CompactSecurityBanner = () => {
   const { appSettings } = useContext(AppContext)
   return (
