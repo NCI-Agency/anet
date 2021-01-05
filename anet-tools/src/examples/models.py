@@ -25,16 +25,16 @@ class anet_logic_mixin(BaseModel):
         self.updatedAt = createdAt
         if self.__tablename__ == "people":
             utc_now = datetime.datetime.now()
-            PeoplePositions.create(createdAt = utc_now, person = self)
+            peoplePositions = PeoplePositions.create(createdAt = utc_now, person = self)
         else:
             BaseModel.session.add(self)
             BaseModel.session.flush()
-    
+
     def update_entity(self, updatedAt):
         """Update and flush an existing record
         """
         obj = type(self).find(self.uuid)
-        
+
         self.updatedAt = updatedAt
         for attr, value in self.__dict__.items():
             if attr != "_sa_instance_state":
@@ -43,7 +43,7 @@ class anet_logic_mixin(BaseModel):
 
     def insert_update_nested_entity(self, update_rules, utc_now):
         self_c = copy.deepcopy(self)
-        
+
         if base_methods.has_entity_relation(self, "person"):
             base_methods.relation_process(self, "person", self_c, update_rules, PeoplePositions, utc_now)
 
@@ -52,24 +52,24 @@ class anet_logic_mixin(BaseModel):
 
         if base_methods.has_entity_relation(self, "organization"):
             base_methods.relation_process(self, "organization", self_c, update_rules, PeoplePositions, utc_now)
-            
+
         if base_methods.is_entity_update(self, update_rules):
             if base_methods.has_entity_relation(self, "person"):
                 base_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
             self_c.update_entity(utc_now)
         else:
             self_c.insert_entity(utc_now)
-        
+
         if base_methods.has_entity_relation(self, "person"):
             base_methods.add_new_association(self, PeoplePositions, utc_now)
-        
+
         BaseModel.session.flush()
-        
+
     @classmethod
     def commit(cls):
         cls.session.commit()
 
-        
+
 class PeoplePositions(anet_logic_mixin):
     __tablename__ = "peoplePositions"
     createdAt = Column('createdAt', DateTime)
@@ -97,13 +97,13 @@ class Position(anet_logic_mixin):
     currentPersonUuid = Column(ForeignKey('people.uuid'), unique=True)
     locationUuid = Column(ForeignKey('locations.uuid'), index=True)
     organizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
-    
+
     person = relationship("Person")
     location = relationship('Location')
     organization = relationship('Organization')
     people = relationship("PeoplePositions", back_populates="position")
-    
-    
+
+
 class Person(anet_logic_mixin):
     __tablename__ = 'people'
 
@@ -125,10 +125,10 @@ class Person(anet_logic_mixin):
     code = Column(String(100))
     customFields = Column(Text)
     avatar = Column(LargeBinary)
-    
+
     positions = relationship("PeoplePositions", back_populates="person")
 
-    
+
 class Location(anet_logic_mixin):
     __tablename__ = 'locations'
 
@@ -140,7 +140,7 @@ class Location(anet_logic_mixin):
     status = Column(Integer, nullable=False, server_default=text("0"))
     uuid = Column(String(36), primary_key=True)
 
-    
+
 class Organization(anet_logic_mixin):
     __tablename__ = 'organizations'
 
@@ -155,3 +155,45 @@ class Organization(anet_logic_mixin):
     parentOrgUuid = Column(ForeignKey('organizations.uuid'), index=True)
 
     parent = relationship('Organization', remote_side=[uuid])
+
+class ApprovalStep(Base):
+    __tablename__ = 'approvalSteps'
+
+    name = Column(String(255))
+    uuid = Column(String(36), primary_key=True)
+    relatedObjectUuid = Column(String(36), nullable=False, index=True)
+    nextStepUuid = Column(ForeignKey('approvalSteps.uuid'), index=True)
+    type = Column(Integer, nullable=False)
+    restrictedApproval = Column(Boolean, server_default=text("false"))
+
+    parent = relationship('ApprovalStep', remote_side=[uuid])
+
+class Report(anet_logic_mixin):
+    __tablename__ = 'reports'
+
+    createdAt = Column(DateTime, index=True)
+    updatedAt = Column(DateTime, index=True)
+    intent = Column(Text)
+    exsum = Column(Text)
+    text = Column(Text)
+    nextSteps = Column(Text)
+    state = Column(Integer, nullable=False)
+    engagementDate = Column(DateTime, index=True)
+    atmosphere = Column(Integer)
+    atmosphereDetails = Column(Text)
+    keyOutcomes = Column(Text)
+    cancelledReason = Column(Integer)
+    releasedAt = Column(DateTime, index=True)
+    uuid = Column(String(36), primary_key=True)
+    advisorOrganizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
+    approvalStepUuid = Column(ForeignKey('approvalSteps.uuid'), index=True)
+    locationUuid = Column(ForeignKey('locations.uuid'), index=True)
+    principalOrganizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
+    legacyId = Column(Integer)
+    duration = Column(Integer)
+    customFields = Column(Text)
+
+    organization = relationship('Organization', primaryjoin='Report.advisorOrganizationUuid == Organization.uuid')
+    approvalStep = relationship('ApprovalStep')
+    location = relationship('Location')
+    organization1 = relationship('Organization', primaryjoin='Report.principalOrganizationUuid == Organization.uuid')

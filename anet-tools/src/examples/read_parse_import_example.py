@@ -1,7 +1,7 @@
 from src.core.data import csv
 
 # Define full path of csv file
-csv_full_path = "/home/jovyan/work/datasamples/anet_import_data.csv"
+csv_full_path = "../../datasamples/anet_import_data.csv"
 
 # Create csv object
 csv_obj = csv(csv_full_path)
@@ -12,8 +12,31 @@ csv_obj.read_csv_file()
 # Import libraries
 from src.core.anet_import import anet_import
 
-# Create new anet_import object with ip address which db running on
-anet_import = anet_import()
+# Create new anet_import object with env vars only in dev environment.
+anet_import = anet_import(use_env = True, conn_json = {}, hashfile_fullpath = "./", logfile_fullpath = "./")
+# You could also use your own connection json instead of env var in both dev and prod environments.
+# Example conn_json objects
+# POSTGRES
+#     conn_json = {
+#         "DB_DRIVER":"postgresql",
+#         "DB_USERNAME":"anetDevUser",
+#         "DB_PASSWORD":"Dev-P@ssw0rd",
+#         "DB_SERVER":"<ip_address>",
+#         "DB_PORT":"5432",
+#         "DB_NAME":"devAnet",
+#     }
+
+# MSSQL
+#     conn_json = {
+#         "DB_DRIVER":"mssql+pyodbc",
+#         "DB_USERNAME":"sa",
+#         "DB_PASSWORD":"<your_db_password>",
+#         "DB_SERVER":"<ip_address>",
+#         "DB_PORT":"1433",
+#         "DB_NAME":"master",
+#         "DRIVER":"driver=ODBC+Driver+17+for+SQL+Server"
+#     }
+#anet_import = anet_import(use_env = False, conn_json = conn_json, hashfile_fullpath = "./", logfile_fullpath = "./")
 
 # Import Entity Classes
 from src.examples.models import *
@@ -95,4 +118,4 @@ anet_import.print_update_rules()
 
 # Write to DB
 # verbose is True default but setting it False causes see less log
-anet_import.save_data(entity_json_list, verbose=False)
+anet_import.save_data(entity_json_list, verbose=False, remember_with_hash = True, write_unsuccessful=True)

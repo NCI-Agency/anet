@@ -27,7 +27,7 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
 }
 
-boolean isJupyterLabEnabled = run.environment["JUPYTER_ENABLE_LAB"] == "yes"
+boolean isJupyterLabEnabled = run.environment["JUPYTER_ENABLE_LAB"] == "true"
 
 // Defaults for development variables
 run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
@@ -59,6 +59,7 @@ String keycloakContainerName = "keycloak-server"
 String keycloakVersion = "12.0.2"
 
 String jupyterContainerName = "jupyter_scipy_notebook"
+String importFrameworkVersion = "0.1.0"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -143,16 +144,16 @@ configurations {
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+	toolVersion = "0.8.6"
 }
 
 jacocoTestReport {
-    reports {
-        xml.enabled true
+	reports {
+		xml.enabled true
 		html.enabled false
 	}
 }
@@ -163,25 +164,25 @@ proc.waitFor();
 project.version = proc.text.trim();
 
 runtime {
-    options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+	options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
 	modules = [
-		'java.sql',
-		'java.desktop',
-		'java.xml',
-		'java.logging',
-		'java.management',
-		'jdk.unsupported',
-		'java.security.jgss',
-		'java.naming',
-		'java.transaction.xa',
-		'java.security.sasl',
-		'java.instrument',
-		'java.scripting',
-		'java.xml.crypto']
+			'java.sql',
+			'java.desktop',
+			'java.xml',
+			'java.logging',
+			'java.management',
+			'jdk.unsupported',
+			'java.security.jgss',
+			'java.naming',
+			'java.transaction.xa',
+			'java.security.sasl',
+			'java.instrument',
+			'java.scripting',
+			'java.xml.crypto']
 
-		jpackage {
-		    appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
-		}
+	jpackage {
+		appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
+	}
 }
 
 processResources {
@@ -407,15 +408,15 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	hostConfig.shmSize = 1024*1024*1024L
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isMssql) {
-	  withEnvVar('ACCEPT_EULA', 'Y')
-	  withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
-	  withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
-	  withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
-	  withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+		withEnvVar('ACCEPT_EULA', 'Y')
+		withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
+		withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
+		withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
+		withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	} else {
-	  withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
-	  withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
-	  withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+		withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
+		withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
+		withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	}
 	hostConfig.portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
 }
@@ -454,9 +455,9 @@ task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: com.bmuschko.grad
 	description = "Creates a keycloak container named " + keycloakContainerName + "."
 	hostConfig.portBindings = ["9080:8080", "9443:8443"]
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
-        withEnvVar("KEYCLOAK_USER", "admin")
-        withEnvVar("KEYCLOAK_PASSWORD", "admin")
-        withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
+	withEnvVar("KEYCLOAK_USER", "admin")
+	withEnvVar("KEYCLOAK_PASSWORD", "admin")
+	withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
 }
 
 task dockerStartKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
@@ -542,7 +543,9 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 
 task dockerPullJupyter(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "jupyter container"
-	image = "jupyter/scipy-notebook:6d42503c684f"
+	//image = "jupyter/scipy-notebook:6d42503c684f" // jupyter/scipy-notebook image with python 3.8 as a base
+	//image = "jupyter/scipy-notebook:ubuntu-18.04" // python 3.7
+	image = "jupyter/scipy-notebook:5811dcb711ba" // python 3.6
 	description = "Pulls a docker image for the python jupyter environment from ${image}."
 }
 
@@ -550,10 +553,10 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	group = "jupyter container"
 	imageId = dockerPullJupyter.getImage()
 	containerName = jupyterContainerName
-	description = "Creates an ANET ${dbType} jupyter_scipy container named " + jupyterContainerName + "."
+	description = "Creates an ANET jupyter_scipy container named " + jupyterContainerName + ". DB env is ${dbType}"
 	hostConfig.binds = ["${projectDir}/anet-tools":"/home/jovyan/work"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isJupyterLabEnabled){
-		withEnvVar('JUPYTER_ENABLE_LAB', run.environment["JUPYTER_ENABLE_LAB"])
+		withEnvVar('JUPYTER_ENABLE_LAB', "yes")
 	}
 	withEnvVar('DB_DRIVER', run.environment["DB_DRIVER"])
 	withEnvVar('ANET_DB_SERVER', run.environment["ANET_DB_SERVER"])
@@ -565,6 +568,7 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	withEnvVar('JUPYTER_TOKEN', "anet")
 	withEnvVar('PYTHONPATH', "/home/jovyan/work")
 	withEnvVar('LOCAL_IP', getIpAddress())
+	withEnvVar('IMPORT_FRAMEWORK_VERSION', importFrameworkVersion)
 	hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
 	user = "root"
 	workingDir = "/home/jovyan/work"
@@ -588,15 +592,41 @@ task dockerRemoveJupyter(type: com.bmuschko.gradle.docker.tasks.container.Docker
 	targetContainerId { jupyterContainerName }
 }
 
-task dockerInstallJupyterDependencies(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+task dockerInstallJupyterDevDependencies(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	group = "jupyter container"
 	description = "Installs Python dependencies."
 	targetContainerId { jupyterContainerName }
-	commands = [ ["/bin/bash", "-c", "apt update && apt-get install libsasl2-dev libldap2-dev libssl-dev && pip3 install pipenv && pipenv install --system --skip-lock" ] as String[] ]
+	commands = [ ["/bin/bash", "-c", "apt update && " +
+			"apt install -y libsasl2-dev libldap2-dev libssl-dev && " +
+			"apt install -y unixodbc-dev && " +
+			"apt install -y gnupg gnupg2 gnupg1 && " +
+			"apt install -y curl && " +
+			"curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && " +
+			"curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && " +
+			"apt update && " +
+			"ACCEPT_EULA=Y apt-get install -y msodbcsql17 && " +
+			"pip install pipenv && " +
+			"pipenv install --system --skip-lock && " +
+			"apt install -y software-properties-common"] as String[] ]
+}
+
+task packJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "jupyter container"
+	description = "Packs Jupyter Environment. Generates PEX file"
+	targetContainerId { jupyterContainerName }
+	String pexFileName = "data_import_framework_" + importFrameworkVersion + ".pex"
+  	commands = [ ["/bin/bash", "-c", "pip install virtualenv pipenv && " +
+  				  "virtualenv .ve && " +
+  			      "source .ve/bin/activate && " +
+  				  "pipenv install --skip-lock && " +
+  			      "pex \$(pip freeze) . -o ./pex/" + pexFileName + " --disable-cache && " +
+				  "deactivate &&" +
+			      "rm -r .ve"] as String[] ]
 }
 
 jar.dependsOn buildClient
 run.dependsOn buildClient
+build.dependsOn packJupyterEnv
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
@@ -622,6 +652,9 @@ distributions {
 				from('docs/TROUBLESHOOT.md')
 				from('prepare-psql.sql')
 				from('prepare-mssql.sql')
+			}
+			into('lib/') {
+				from('anet-tools/pex/data_import_framework.pex')
 			}
 		}
 	}
@@ -655,14 +688,14 @@ ospackage {
 	from('anet-dictionary.yml') {
 		rename('anet-dictionary.yml', 'anet-dictionary.yml.template')
 		into 'anet/docs'
-		}
+	}
 	from('prepare-psql.sql') {
 		into 'anet/docs'
 	}
 	from('prepare-mssql.sql') {
 		into 'anet/docs'
-			}
 	}
+}
 
 task distDeb(dependsOn: "jpackageImage",type: Deb) {
 	arch = 'amd64'
