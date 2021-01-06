@@ -22,37 +22,6 @@ public class PersonTest extends BeanTester<Person> {
   final File DEFAULT_AVATAR =
       new File(PersonTest.class.getResource("/assets/default_avatar.png").getFile());
 
-  public static Person getJackJacksonStub() {
-    final Person person = new Person();
-    person.setName("JACKSON, Jack");
-    person.setEmailAddress("hunter+foobar@example.com");
-    person.setPhoneNumber("123-456-78960");
-    person.setRank("OF-9");
-    person.setStatus(Person.Status.ACTIVE);
-    person.setRole(Role.ADVISOR);
-    person.setBiography("this is a sample biography");
-    person.setDomainUsername("jack");
-    person.setGender("Male");
-    person.setCountry("United States of America");
-    person.setEndOfTourDate(
-        ZonedDateTime.of(2017, 6, 30, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
-    return person;
-  }
-
-  public static Person getSteveStevesonStub() {
-    Person person = new Person();
-    person.setName("STEVESON, Steve");
-    person.setEmailAddress("hunter+steve@example.com");
-    person.setPhoneNumber("+011-258-32895");
-    person.setRank("LtCol");
-    person.setStatus(Person.Status.ACTIVE);
-    person.setRole(Role.PRINCIPAL);
-    person.setBiography("this is a sample person who could be a Principal!");
-    person.setGender("Male");
-    person.setCountry("Afghanistan");
-    return person;
-  }
-
   @Test
   public void serializesToJson() throws Exception {
     serializesToJson(getJackJacksonStub(), "testJson/people/jack.json");
@@ -96,6 +65,76 @@ public class PersonTest extends BeanTester<Person> {
 
     assertThat(imageBinary.getWidth()).isEqualTo(32);
     assertThat(imageBinary.getHeight()).isEqualTo(32);
+  }
+
+  public static Person getChristopfTopferness() {
+    final Person person = new Person();
+    person.setName("TOPFERNESS, Christopf");
+    person.setEmailAddress("hunter+christopf@example.com");
+    person.setPhoneNumber("+1-422222222");
+    person.setRank("CIV");
+    person.setStatus(Person.Status.ACTIVE);
+    person.setRole(Role.PRINCIPAL);
+    person.setBiography("Christopf works in the MoD Office");
+    person.setGender("Male");
+    person.setCountry("Afghanistan");
+    return person;
+  }
+
+  public static Person getHunterHuntman() {
+    final Person person = new Person();
+    person.setName("HUNTMAN, Hunter");
+    person.setEmailAddress("hunter+hunter@example.com");
+    person.setPhoneNumber("+1-412-9314");
+    person.setRank("CIV");
+    person.setStatus(Person.Status.ACTIVE);
+    person.setRole(Role.PRINCIPAL);
+    person.setGender("Male");
+    return person;
+  }
+
+  public static Person getShardulSharton() {
+    final Person person = new Person();
+    person.setName("SHARTON, Shardul");
+    person.setEmailAddress("hunter+shardul@example.com");
+    person.setPhoneNumber("+99-9999-9999");
+    person.setRank("CIV");
+    person.setStatus(Person.Status.INACTIVE);
+    person.setRole(Role.PRINCIPAL);
+    person.setGender("Male");
+    person.setCountry("Italy");
+    return person;
+  }
+
+  public static Person getJackJacksonStub() {
+    final Person person = new Person();
+    person.setName("JACKSON, Jack");
+    person.setEmailAddress("hunter+foobar@example.com");
+    person.setPhoneNumber("123-456-78960");
+    person.setRank("OF-9");
+    person.setStatus(Person.Status.ACTIVE);
+    person.setRole(Role.ADVISOR);
+    person.setBiography("this is a sample biography");
+    person.setDomainUsername("jack");
+    person.setGender("Male");
+    person.setCountry("United States of America");
+    person.setEndOfTourDate(
+        ZonedDateTime.of(2017, 6, 30, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
+    return person;
+  }
+
+  public static Person getSteveStevesonStub() {
+    Person person = new Person();
+    person.setName("STEVESON, Steve");
+    person.setEmailAddress("hunter+steve@example.com");
+    person.setPhoneNumber("+011-258-32895");
+    person.setRank("LtCol");
+    person.setStatus(Person.Status.ACTIVE);
+    person.setRole(Role.PRINCIPAL);
+    person.setBiography("this is a sample person who could be a Principal!");
+    person.setGender("Male");
+    person.setCountry("Afghanistan");
+    return person;
   }
 
   public static Person getRogerRogwell() {
@@ -272,7 +311,5 @@ public class PersonTest extends BeanTester<Person> {
       System.out.println("A equals B");
     }
   }
-
-
 
 }

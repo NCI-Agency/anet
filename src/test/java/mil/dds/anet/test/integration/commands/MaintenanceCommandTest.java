@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.fail;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableSet;
 import io.dropwizard.Application;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.setup.Bootstrap;
@@ -16,14 +17,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.MaintenanceCommand;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
+import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.utils.Utils;
@@ -35,11 +41,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(TestApp.class)
 public class MaintenanceCommandTest extends AbstractResourceTest {
   private static NoteDao noteDao;
+  private static PositionDao positionDao;
   private static List<Note> testAssessments;
 
   @BeforeAll
   public static void setUpClass() throws Exception {
     noteDao = AnetObjectEngine.getInstance().getNoteDao();
+    positionDao = AnetObjectEngine.getInstance().getPositionDao();
     testAssessments = createTestAssessments();
     final Application<AnetConfiguration> newApplication = TestApp.app.newApplication();
     final Bootstrap<AnetConfiguration> bootstrap = new Bootstrap<>(newApplication);
@@ -52,6 +60,8 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
   @AfterAll
   public static void tearDownClass() throws Exception {
     deleteTestAssessments(testAssessments);
+    // Delete Andrew's counterparts added by the tests
+    deleteCounterparts(getAndrewAnderson());
   }
 
   @Test
@@ -68,6 +78,24 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
     final List<Note> periodicAssessments = noteDao.getNotesByType(NoteType.ASSESSMENT);
     checkPeriodicAssessment(testAssessments.get(3), periodicAssessments);
     checkPeriodicAssessment(testAssessments.get(4), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(5), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(6), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(7), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(8), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(9), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(10), periodicAssessments);
+    checkPeriodicAssessment(testAssessments.get(11), periodicAssessments);
+  }
+
+  @Test
+  public void testCounterparts() throws Exception {
+    checkCounterparts(getChristopfTopferness(),
+        ImmutableSet.of(getRegularUser(), getAndrewAnderson()));
+    checkCounterparts(getRogerRogwell(), ImmutableSet.of(getJackJackson(), getAndrewAnderson()));
+    checkCounterparts(getSteveSteveson(),
+        ImmutableSet.of(getElizabethElizawell(), getAndrewAnderson()));
+    checkCounterparts(getHunterHuntman(), ImmutableSet.of());
+    checkCounterparts(getShardulSharton(), ImmutableSet.of());
   }
 
   private void checkPartnerAssessment(Note note, List<Note> remainingPartnerAssessments) {
@@ -106,39 +134,81 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
     }
   }
 
+  private void checkCounterparts(Person principal, ImmutableSet<Person> advisors) {
+    final Position principalPosition = principal.loadPosition();
+    final Set<Position> advisorPositions =
+        advisors.stream().map(a -> a.loadPosition()).collect(Collectors.toSet());
+    if (principalPosition == null) {
+      assertThat(advisorPositions).isEmpty();
+    } else {
+      final List<Position> associatedPositions =
+          principalPosition.loadAssociatedPositions(context).join();
+      assertThat(associatedPositions).containsExactlyInAnyOrderElementsOf(advisorPositions);
+    }
+  }
+
   private static List<Note> createTestAssessments() {
     final List<Note> partnerAssessments = new ArrayList<>();
+    // First, some invalid JSON objects
     // null
-    partnerAssessments.add(createTestAssessment(null));
+    partnerAssessments.add(createTestAssessment(getBobBobtown(), getChristopfTopferness(), null));
     // no JSON
-    partnerAssessments.add(createTestAssessment("text"));
+    partnerAssessments.add(createTestAssessment(getNickNicholson(), getRogerRogwell(), "text"));
     // not a JSON object
-    partnerAssessments.add(createTestAssessment("\"test\": }"));
-    // invalid but parsed into a JSON object
-    partnerAssessments.add(createTestAssessment("{ \"test\":"));
-    // valid JSON object
-    partnerAssessments.add(createTestAssessment(
-        "{ \"test1\":\"3\", \"test2\":\"3\", \"test3\":\"3\", \"text\": \"sample text\" }"));
+    partnerAssessments.add(createTestAssessment(getSuperUser(), getSteveSteveson(), "\"test\": }"));
+    // This gets parsed into a valid JSON object
+    partnerAssessments
+        .add(createTestAssessment(getRegularUser(), getChristopfTopferness(), "{ \"test\":"));
+    // Finally, some valid JSON objects
+    // these should add new counterparts for Andrew Anderson
+    partnerAssessments.add(createTestAssessment(getAndrewAnderson(), getChristopfTopferness(),
+        "{ \"test1\":\"1\", \"test2\":\"1\", \"test3\":\"1\", \"text\": \"sample text #1\" }"));
+    partnerAssessments.add(createTestAssessment(getAndrewAnderson(), getRogerRogwell(),
+        "{ \"test1\":\"2\", \"test2\":\"2\", \"test3\":\"2\", \"text\": \"sample text #2\" }"));
+    partnerAssessments.add(createTestAssessment(getAndrewAnderson(), getSteveSteveson(),
+        "{ \"test1\":\"3\", \"test2\":\"3\", \"test3\":\"3\", \"text\": \"sample text #3\" }"));
+    // these should not add new counterparts as the principal they're assessing is already
+    // their counterpart
+    partnerAssessments.add(createTestAssessment(getRegularUser(), getChristopfTopferness(),
+        "{ \"test1\":\"3\", \"test2\":\"1\", \"test3\":\"2\", \"text\": \"sample text #6\" }"));
+    partnerAssessments.add(createTestAssessment(getJackJackson(), getRogerRogwell(),
+        "{ \"test1\":\"2\", \"test2\":\"3\", \"test3\":\"1\", \"text\": \"sample text #5\" }"));
+    partnerAssessments.add(createTestAssessment(getElizabethElizawell(), getSteveSteveson(),
+        "{ \"test1\":\"1\", \"test2\":\"2\", \"test3\":\"3\", \"text\": \"sample text #4\" }"));
+    // these should not add new counterparts as the principal they're assessing has no position
+    partnerAssessments.add(createTestAssessment(getRegularUser(), getHunterHuntman(),
+        "{ \"test1\":\"3\", \"test2\":\"2\", \"test3\":\"1\", \"text\": \"sample text #7\" }"));
+    partnerAssessments.add(createTestAssessment(getJackJackson(), getShardulSharton(),
+        "{ \"test1\":\"2\", \"test2\":\"1\", \"test3\":\"3\", \"text\": \"sample text #8\" }"));
     return partnerAssessments;
   }
 
-  private static Note createTestAssessment(String text) {
+  private static Note createTestAssessment(final Person author, final Person principal,
+      final String text) {
     final Note testNote = new Note();
-    testNote.setAuthor(admin);
+    testNote.setAuthor(author);
     testNote.setType(NoteType.PARTNER_ASSESSMENT);
     testNote.setText(text);
     final NoteRelatedObject testNro = new NoteRelatedObject();
     testNro.setRelatedObjectType(PersonDao.TABLE_NAME);
-    testNro.setRelatedObjectUuid(admin.getUuid());
+    testNro.setRelatedObjectUuid(principal.getUuid());
     testNote.setNoteRelatedObjects(Collections.singletonList(testNro));
     final Note partnerAssessment = noteDao.insert(testNote);
     assertThat(partnerAssessment.getUuid()).isNotNull();
     return partnerAssessment;
   }
 
-  private static void deleteTestAssessments(List<Note> partnerAssessments) {
+  private static void deleteTestAssessments(final List<Note> partnerAssessments) {
     for (final Note note : partnerAssessments) {
       assertThat(noteDao.delete(note.getUuid())).isEqualTo(1);
+    }
+  }
+
+  private static void deleteCounterparts(Person advisor) {
+    final Position advisorPosition = advisor.loadPosition();
+    final List<Position> counterparts = advisorPosition.loadAssociatedPositions(context).join();
+    for (final Position principalPosition : counterparts) {
+      positionDao.deletePositionAssociation(advisorPosition.getUuid(), principalPosition.getUuid());
     }
   }
 }
