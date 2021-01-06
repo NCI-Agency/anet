@@ -60,6 +60,7 @@ String keycloakVersion = "12.0.2"
 
 String jupyterContainerName = "jupyter_scipy_notebook"
 String importFrameworkVersion = "0.1.0"
+String pexFilename = "data_import_framework_" + importFrameworkVersion + ".pex"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -614,14 +615,13 @@ task packJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bm
 	group = "jupyter container"
 	description = "Packs Jupyter Environment. Generates PEX file"
 	targetContainerId { jupyterContainerName }
-	String pexFileName = "data_import_framework_" + importFrameworkVersion + ".pex"
-  	commands = [ ["/bin/bash", "-c", "pip install virtualenv pipenv && " +
-  				  "virtualenv .ve && " +
-  			      "source .ve/bin/activate && " +
-  				  "pipenv install --skip-lock && " +
-  			      "pex \$(pip freeze) . -o ./pex/" + pexFileName + " --disable-cache && " +
-				  "deactivate &&" +
-			      "rm -r .ve"] as String[] ]
+		commands = [ ["/bin/bash", "-c", "pip install virtualenv pipenv && " +
+				"virtualenv .ve && " +
+				"source .ve/bin/activate && " +
+				"pipenv install --skip-lock && " +
+				"pex \$(pip freeze) . -o ./pex/" + pexFilename + " --disable-cache && " +
+				"deactivate &&" +
+				"rm -r .ve"] as String[] ]
 }
 
 jar.dependsOn buildClient
@@ -654,7 +654,7 @@ distributions {
 				from('prepare-mssql.sql')
 			}
 			into('lib/') {
-				from('anet-tools/pex/data_import_framework.pex')
+				from('anet-tools/pex/' + pexFilename)
 			}
 		}
 	}
