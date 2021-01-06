@@ -35,9 +35,11 @@ export const useConnectionInfo = () => {
 
   useEffect(() => {
     // when there is a newVersion and location changed, automatically update ANET version
-    if (newVersion && pathname !== prevLocation.current) {
+    if (pathname !== prevLocation.current) {
       prevLocation.current = pathname
-      window.location.reload()
+      if (newVersion) {
+        window.location.reload()
+      }
     }
   }, [pathname, newVersion])
 
