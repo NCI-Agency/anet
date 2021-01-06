@@ -14,18 +14,26 @@ import io.dropwizard.setup.Environment;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
+import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.NoteDao;
+import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker.AssessmentDates;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker.Recurrence;
+import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -99,6 +107,10 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
     final Map<String, Object> assessmentConfig = getAssessmentConfig(configuration);
     final String recurrence = getAssessmentRecurrence(assessmentConfig);
     final Set<String> questions = getAssessmentQuestions(assessmentConfig);
+    // Cache the people we've already seen to reduce the number of database loads
+    final Map<String, Person> seenPeople = new HashMap<>();
+    final Map<Position, Set<Position>> advisorCounterparts = new HashMap<>();
+    final Map<String, Object> context = engine.getContext();
 
     final NoteDao noteDao = engine.getNoteDao();
     for (final Note note : getPartnerAssessmentNotes(noteDao)) {
@@ -133,8 +145,53 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
         note.setText(mapper.writeValueAsString(objectNode));
         note.setType(NoteType.ASSESSMENT);
         noteDao.updateNoteTypeAndText(note);
+
+        // Update the list of position associations
+        final Person author =
+            seenPeople.computeIfAbsent(note.getAuthorUuid(), k -> note.loadAuthor(context).join());
+        final Position authorPosition =
+            findHistoricalPosition(context, author, note.getCreatedAt());
+        if (authorPosition != null) {
+          final Set<Person> assessedPeople =
+              note.loadNoteRelatedObjects(context).join().stream()
+                  .filter(nro -> PersonDao.TABLE_NAME.equals(nro.getRelatedObjectType()))
+                  .map(nro -> seenPeople.computeIfAbsent(nro.getRelatedObjectUuid(),
+                      k -> (Person) nro.loadRelatedObject(context).join()))
+                  .collect(Collectors.toSet());
+          for (final Person assessedPerson : assessedPeople) {
+            final Position assessedPosition =
+                findHistoricalPosition(context, assessedPerson, note.getCreatedAt());
+            if (assessedPosition != null) {
+              advisorCounterparts.compute(authorPosition, (k, v) -> {
+                if (v == null) {
+                  v = new HashSet<>();
+                }
+                v.add(assessedPosition);
+                return v;
+              });
+            }
+          }
+        }
       } catch (JsonProcessingException e) {
         logger.error("Can't update JSON of note {}, leaving note as-is for later inspection", note);
+      }
+    }
+
+    final PositionDao positionDao = engine.getPositionDao();
+    for (final Map.Entry<Position, Set<Position>> entry : advisorCounterparts.entrySet()) {
+      final Position advisorPosition = entry.getKey();
+      final Set<Position> principalPositions = entry.getValue();
+      final Set<String> existingUuids = advisorPosition.loadAssociatedPositions(context).join()
+          .stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+      for (final Position principalPosition : principalPositions) {
+        if (!existingUuids.contains(DaoUtils.getUuid(principalPosition))) {
+          positionDao.associatePosition(DaoUtils.getUuid(advisorPosition),
+              DaoUtils.getUuid(principalPosition));
+          AnetAuditLogger.log(
+              "Position {} has new association {},"
+                  + " added by maintenance command migratePartnerAssessments",
+              advisorPosition, principalPosition);
+        }
       }
     }
 
@@ -149,6 +206,22 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
         logger.warn("- note {}", note);
       }
     }
+  }
+
+  private Position findHistoricalPosition(final Map<String, Object> context, final Person person,
+      final Instant assessmentTime) {
+    final List<PersonPositionHistory> positionHistory =
+        person.loadPreviousPositions(context).join();
+    for (final PersonPositionHistory pph : positionHistory) {
+      if (pph.getStartTime() != null && !assessmentTime.isBefore(pph.getStartTime())
+          && (pph.getEndTime() == null || !assessmentTime.isAfter(pph.getEndTime()))) {
+        // Person's position at the time of assessment
+        final Position position = pph.loadPosition(context).join();
+        // If still active, return it, else return null
+        return Position.Status.ACTIVE.equals(position.getStatus()) ? position : null;
+      }
+    }
+    return null;
   }
 
   private List<Note> getPartnerAssessmentNotes(final NoteDao noteDao) {
