@@ -8,7 +8,7 @@ class ShowPerson extends Page {
   get addPeriodicAssessmentButton() {
     // get the add assessment button for latest assessable period (previous period)
     return this.assessmentsTable.$(
-      "tbody > tr:nth-child(4) > td:nth-child(2) > button"
+      "tbody > tr:last-child > td:nth-child(2) > button"
     )
   }
 
