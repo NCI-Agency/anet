@@ -7,10 +7,10 @@ import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -148,10 +148,12 @@ const PersonShow = ({ pageDispatchers }) => {
     (!hasPosition && currentUser.isSuperUser()) ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-  const canAddAssessment = currentUser.position.associatedPositions
-    .filter(ap => ap.person)
-    .map(ap => ap.person.uuid)
-    .includes(person.uuid)
+  const canAddAssessment =
+    isAdmin ||
+    currentUser.position.associatedPositions
+      .filter(ap => ap.person)
+      .map(ap => ap.person.uuid)
+      .includes(person.uuid)
   return (
     <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
