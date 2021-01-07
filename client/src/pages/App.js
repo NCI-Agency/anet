@@ -8,6 +8,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
+import { useConnectionInfo } from "connectionUtils"
 import { Organization, Person } from "models"
 import {
   getNotifications,
@@ -130,8 +131,9 @@ const GQL_GET_APP_DATA = gql`
 const App = ({ pageDispatchers, pageProps }) => {
   const history = useHistory()
   const routerLocation = useLocation()
-  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
 
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
+  const connectionInfo = useConnectionInfo()
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -161,7 +163,8 @@ const App = ({ pageDispatchers, pageProps }) => {
         appSettings: appState.settings,
         currentUser: appState.currentUser,
         loadAppData: refetch,
-        notifications: appState.notifications
+        notifications: appState.notifications,
+        connection: { ...connectionInfo }
       }}
     >
       <ResponsiveLayout

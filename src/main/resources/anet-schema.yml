@@ -246,8 +246,14 @@ $defs:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [CONNECTION_ERROR_MSG, VERSION_CHANGED_MSG, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
+  CONNECTION_ERROR_MSG:
+    type: string
+    description: Banner text when the connection is lost
+  VERSION_CHANGED_MSG:
+    type: string
+    description: Banner text when there is a new version of ANET
   SUPPORT_EMAIL_ADDR:
     type: string
     title: The support email address

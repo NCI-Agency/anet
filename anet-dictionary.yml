@@ -1,4 +1,6 @@
 # Do not forget to also edit testDictionaries/*.yml files if dictionary change can break stuff
+CONNECTION_ERROR_MSG: Connection to the server is lost
+VERSION_CHANGED_MSG: "There is a new version of ANET, click here to load the new version (CAUTION: save any unsaved changes first)"
 SUPPORT_EMAIL_ADDR: support@example.com
 
 engagementsIncludeTimeAndDuration: true
