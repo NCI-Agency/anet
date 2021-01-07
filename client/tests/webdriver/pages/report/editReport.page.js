@@ -25,10 +25,11 @@ class EditReport extends Page {
 
   deleteReport(uuid) {
     this.deleteButton.click()
+    browser.pause(300) // wait for modal animation to finish
     this.confirmDeleteButton(uuid).waitForExist()
     this.confirmDeleteButton(uuid).waitForDisplayed()
     this.confirmDeleteButton(uuid).waitForClickable()
-    browser.pause(200) // wait for modal animation to finish
+    browser.pause(300) // wait for modal animation to finish
     this.confirmDeleteButton(uuid).click()
     this.waitForAlertSuccessToLoad()
   }

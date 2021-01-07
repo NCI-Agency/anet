@@ -14,10 +14,10 @@ import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractAnetBean implements RelatableObject, WithStatus {
+public class Position extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
 
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
@@ -49,7 +49,7 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
   // annotated below
   Boolean isApprover;
   // annotated below
-  List<Task> tasks;
+  List<Task> responsibleTasks;
 
   public String getName() {
     return name;
@@ -248,8 +248,8 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
   public CompletableFuture<List<Task>> loadResponsibleTasks(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") TaskSearchQuery query) {
-    if (tasks != null) {
-      return CompletableFuture.completedFuture(tasks);
+    if (responsibleTasks != null) {
+      return CompletableFuture.completedFuture(responsibleTasks);
     }
     if (query == null) {
       query = new TaskSearchQuery();
@@ -258,7 +258,7 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
         "\"taskResponsiblePositions\"", "\"taskUuid\"", "\"positionUuid\""));
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
         .thenApply(o -> {
-          tasks = o;
+          responsibleTasks = o;
           return o;
         });
   }
@@ -268,16 +268,16 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
     if (!(o instanceof Position)) {
       return false;
     }
-    Position other = (Position) o;
-    return Objects.equals(uuid, other.getUuid()) && Objects.equals(name, other.getName())
-        && Objects.equals(code, other.getCode()) && Objects.equals(type, other.getType())
-        && Objects.equals(status, other.getStatus())
+    final Position other = (Position) o;
+    return super.equals(o) && Objects.equals(uuid, other.getUuid())
+        && Objects.equals(name, other.getName()) && Objects.equals(code, other.getCode())
+        && Objects.equals(type, other.getType()) && Objects.equals(status, other.getStatus())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, code, type, status, organization);
+    return Objects.hash(super.hashCode(), uuid, name, code, type, status, organization);
   }
 
   @Override

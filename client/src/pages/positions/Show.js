@@ -4,13 +4,14 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import ConfirmDelete from "components/ConfirmDelete"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -30,6 +31,7 @@ import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
@@ -83,6 +85,7 @@ const GQL_GET_POSITION = gql`
         uuid
         name
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
 
     }
@@ -122,6 +125,12 @@ const PositionShow = ({ pageDispatchers }) => {
   })
   if (done) {
     return result
+  }
+
+  if (data) {
+    data.position[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.position.customFields
+    )
   }
 
   const position = new Position(data ? data.position : {})
@@ -369,6 +378,14 @@ const PositionShow = ({ pageDispatchers }) => {
                   </tbody>
                 </Table>
               </Fieldset>
+              {Settings.fields.position.customFields && (
+                <Fieldset title="Position information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.position.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             {canDelete && (

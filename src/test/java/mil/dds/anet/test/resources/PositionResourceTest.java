@@ -184,8 +184,9 @@ public class PositionResourceTest extends AbstractResourceTest {
     prinPos.setOrganization(orgs.getList().get(0));
     prinPos.setStatus(Position.Status.ACTIVE);
 
-    Person principal = getRogerRogwell();
-    assertThat(principal.getUuid()).isNotNull();
+    final Person roger = getRogerRogwell();
+    final Position rogersOldPosition = roger.getPosition();
+    assertThat(roger.getUuid()).isNotNull();
     String tashkilUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", prinPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(tashkilUuid).isNotNull();
@@ -196,7 +197,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // put the principal in a tashkil
     variables = new HashMap<>();
     variables.put("uuid", tashkil.getUuid());
-    variables.put("person", principal);
+    variables.put("person", roger);
     nrUpdated = graphQLHelper.updateObject(admin,
         "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
         variables);
@@ -270,6 +271,20 @@ public class PositionResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
+
+    // Put roger back in his old position
+    variables = new HashMap<>();
+    variables.put("uuid", rogersOldPosition.getUuid());
+    variables.put("person", roger);
+    nrUpdated = graphQLHelper.updateObject(admin,
+        "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
+        variables);
+    assertThat(nrUpdated).isEqualTo(1);
+
+    currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, rogersOldPosition.getUuid(),
+        new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(currPos.getPerson()).isNotNull();
+    assertThat(currPos.getPersonUuid()).isEqualTo(roger.getUuid());
   }
 
   @Test

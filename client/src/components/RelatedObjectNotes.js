@@ -5,7 +5,6 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
-import Pie from "components/graphs/Pie"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -14,7 +13,6 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
-import { JSONPath } from "jsonpath-plus"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person } from "models"
@@ -25,7 +23,6 @@ import { Button, Panel } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
-import Settings from "settings"
 import utils from "utils"
 import "./BlueprintOverrides.css"
 
@@ -47,7 +44,6 @@ export const EXCLUDED_ASSESSMENT_FIELDS = [
 const RelatedObjectNotes = ({
   notesElemId,
   relatedObject,
-  relatedObjectValue,
   notes: notesProp
 }) => {
   const { currentUser } = useContext(AppContext)
@@ -81,38 +77,6 @@ const RelatedObjectNotes = ({
     const noNotes = _isEmpty(notes)
     const nrNotes = noNotes ? 0 : notes.length
     const badgeLabel = nrNotes > 10 ? "10+" : null
-    const questions =
-      relatedObject &&
-      Settings.fields.principal.person.assessment &&
-      relatedObject.relatedObjectType === Person.relatedObjectType &&
-      relatedObjectValue.role === Person.ROLE.PRINCIPAL
-        ? Settings.fields.principal.person.assessment.questions.filter(
-          question =>
-            !question.test ||
-              !_isEmpty(JSONPath(question.test, relatedObjectValue))
-        )
-        : []
-    const partnerAssessments = notes.filter(
-      note => note.type === NOTE_TYPE.PARTNER_ASSESSMENT
-    )
-    const partnerAssessmentsSummary = partnerAssessments.reduce(
-      (counters, assessment) => {
-        const assessmentJson = utils.parseJsonSafe(assessment.text)
-
-        questions.forEach(question => {
-          if (!counters[question.id]) {
-            counters[question.id] = {}
-          }
-          const counter = counters[question.id]
-          if (assessmentJson[question.id]) {
-            counter[assessmentJson[question.id]] =
-              ++counter[assessmentJson[question.id]] || 1
-          }
-        })
-        return counters
-      },
-      {}
-    )
 
     return hidden ? (
       <div style={{ minWidth: 50, padding: 5, marginRight: 15 }}>
@@ -169,17 +133,6 @@ const RelatedObjectNotes = ({
           >
             Post new note
           </Button>
-          {questions.length > 0 && (
-            <Button
-              bsStyle="primary"
-              style={{ margin: "5px" }}
-              onClick={() =>
-                showRelatedObjectNoteModal("new", NOTE_TYPE.PARTNER_ASSESSMENT)
-              }
-            >
-              Assess Person
-            </Button>
-          )}
         </div>
         <br />
         <RelatedObjectNoteModal
@@ -188,7 +141,6 @@ const RelatedObjectNotes = ({
             noteRelatedObjects: [{ ...relatedObject }]
           }}
           currentObject={relatedObject}
-          questions={questions}
           showModal={showRelatedObjectNoteModalKey === "new"}
           onCancel={cancelRelatedObjectNoteModal}
           onSuccess={hideNewRelatedObjectNoteModal}
@@ -197,52 +149,6 @@ const RelatedObjectNotes = ({
           <div>
             <i>No notes</i>
           </div>
-        )}
-
-        {partnerAssessments.length > 0 && questions.length > 0 && (
-          <Panel bsStyle="primary" style={{ width: "100%" }}>
-            <Panel.Heading>
-              Summary of <b>{partnerAssessments.length}</b> assessments for{" "}
-              {relatedObjectValue.rank} {relatedObjectValue.name}
-            </Panel.Heading>
-            <Panel.Body>
-              {questions.map(question => (
-                <React.Fragment key={question.id}>
-                  {question.label}
-                  <br />
-                  <Pie
-                    width={70}
-                    height={70}
-                    data={partnerAssessmentsSummary[question.id]}
-                    label={Object.values(
-                      partnerAssessmentsSummary[question.id]
-                    ).reduce((acc, cur) => acc + cur, 0)}
-                    segmentFill={entity => {
-                      const matching = question.choice.filter(
-                        choice => choice.value === entity.data.key
-                      )
-                      return matching.length > 0 ? matching[0].color : "#bbbbbb"
-                    }}
-                    segmentLabel={d => d.data.value}
-                  />
-
-                  <br />
-                  {question.choice.map(choice => (
-                    <React.Fragment key={choice.value}>
-                      <span style={{ backgroundColor: choice.color }}>
-                        {choice.label} :
-                        <b>
-                          {partnerAssessmentsSummary[question.id][choice.value]}
-                        </b>{" "}
-                      </span>
-                    </React.Fragment>
-                  ))}
-                  <br />
-                  <br />
-                </React.Fragment>
-              ))}
-            </Panel.Body>
-          </Panel>
         )}
 
         <div
@@ -255,6 +161,7 @@ const RelatedObjectNotes = ({
             const updatedAt = moment(note.updatedAt).fromNow()
             const byMe = Person.isEqual(currentUser, note.author)
             const canEdit =
+              note.type !== NOTE_TYPE.PARTNER_ASSESSMENT &&
               note.type !== NOTE_TYPE.ASSESSMENT &&
               (byMe || currentUser.isAdmin())
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
@@ -301,7 +208,6 @@ const RelatedObjectNotes = ({
                       <RelatedObjectNoteModal
                         note={note}
                         currentObject={relatedObject}
-                        questions={questions}
                         showModal={showRelatedObjectNoteModalKey === note.uuid}
                         onCancel={cancelRelatedObjectNoteModal}
                         onSuccess={hideEditRelatedObjectNoteModal}
@@ -344,7 +250,7 @@ const RelatedObjectNotes = ({
                       <>
                         <h4>
                           <u>
-                            <b>Partner assessment</b>
+                            <b>Old-style partner assessment</b>
                           </u>
                         </h4>
                         {Object.keys(jsonFields)
@@ -450,12 +356,7 @@ const RelatedObjectNotes = ({
 RelatedObjectNotes.propTypes = {
   notesElemId: PropTypes.string.isRequired,
   notes: PropTypes.arrayOf(Model.notePropType),
-  relatedObject: Model.relatedObjectPropType,
-  relatedObjectValue: PropTypes.shape({
-    role: PropTypes.string.isRequired,
-    rank: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired
-  })
+  relatedObject: Model.relatedObjectPropType
 }
 RelatedObjectNotes.defaultProps = {
   notesElemId: "notes-view",

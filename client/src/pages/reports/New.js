@@ -1,11 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import AppContext from "components/AppContext"
-import { getInvisibleFields } from "components/CustomFields"
+import { initInvisibleFields } from "components/CustomFields"
 import GuidedTour from "components/GuidedTour"
-import {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD
-} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -28,16 +24,8 @@ const ReportNew = ({ pageDispatchers }) => {
 
   const report = new Report()
 
-  if (report[DEFAULT_CUSTOM_FIELDS_PARENT]) {
-    // set initial invisible custom fields
-    report[DEFAULT_CUSTOM_FIELDS_PARENT][
-      INVISIBLE_CUSTOM_FIELDS_FIELD
-    ] = getInvisibleFields(
-      Settings.fields.report.customFields,
-      DEFAULT_CUSTOM_FIELDS_PARENT,
-      report
-    )
-  }
+  // mutates the object
+  initInvisibleFields(report, Settings.fields.report.customFields)
 
   if (currentUser && currentUser.uuid) {
     const person = new Person(currentUser)

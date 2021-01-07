@@ -1,12 +1,18 @@
-export function loadFileAjaxSync(filePath, mimeType) {
+export function loadFileAjaxSync(filePath, mimeType, body) {
   const xmlhttp = new XMLHttpRequest()
-  xmlhttp.open("GET", filePath, false)
-  if (mimeType !== null) {
-    if (xmlhttp.overrideMimeType) {
-      xmlhttp.overrideMimeType(mimeType)
+  if (body) {
+    xmlhttp.open("POST", filePath, false)
+    xmlhttp.setRequestHeader("Content-Type", mimeType)
+    xmlhttp.send(body)
+  } else {
+    xmlhttp.open("GET", filePath, false)
+    if (mimeType !== null) {
+      if (xmlhttp.overrideMimeType) {
+        xmlhttp.overrideMimeType(mimeType)
+      }
     }
+    xmlhttp.send()
   }
-  xmlhttp.send()
   if (xmlhttp.status === 200) {
     return xmlhttp.responseText
   } else {

@@ -2,11 +2,15 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
@@ -17,6 +21,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
+import Settings from "settings"
 import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
@@ -94,6 +99,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
         setFieldValue,
         setValues,
         values,
+        validateForm,
         submitForm
       }) => {
         const marker = {
@@ -189,7 +195,19 @@ const LocationForm = ({ edit, title, initialValues }) => {
                 setFieldValue={setFieldValue}
                 approversFilters={approversFilters}
               />
-
+              {Settings.fields.location.customFields && (
+                <Fieldset title="Location information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.location.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -260,8 +278,11 @@ const LocationForm = ({ edit, title, initialValues }) => {
     const location = Object.without(
       new Location(values),
       "notes",
-      "displayedCoordinate"
+      "displayedCoordinate",
+      "customFields", // initial JSON from the db
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
+    location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
     })

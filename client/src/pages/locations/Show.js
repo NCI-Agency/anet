@@ -3,11 +3,13 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -24,6 +26,8 @@ import { Location } from "models"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
+import utils from "utils"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "./GeoLocation"
 
 const GQL_GET_LOCATION = gql`
@@ -64,6 +68,7 @@ const GQL_GET_LOCATION = gql`
           }
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -88,7 +93,11 @@ const LocationShow = ({ pageDispatchers }) => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.location[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.location.customFields
+    )
+  }
   const location = new Location(data ? data.location : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -156,6 +165,14 @@ const LocationShow = ({ pageDispatchers }) => {
               </Fieldset>
 
               <Leaflet markers={[marker]} />
+              {Settings.fields.location.customFields && (
+                <Fieldset title="Location information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.location.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             <Approvals relatedObject={location} />

@@ -11,7 +11,7 @@ public class LocationMapper implements RowMapper<Location> {
   @Override
   public Location map(ResultSet rs, StatementContext ctx) throws SQLException {
     Location l = new Location();
-    MapperUtils.setCommonBeanFields(l, rs, null);
+    MapperUtils.setCustomizableBeanFields(l, rs, null);
     l.setName(rs.getString("name"));
     l.setStatus(MapperUtils.getEnumIdx(rs, "status", Location.Status.class));
     // preserve NULL values; when NULL there are no coordinates set:

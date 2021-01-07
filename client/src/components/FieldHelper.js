@@ -364,7 +364,10 @@ const ButtonToggleGroupField = ({
           }
           let { label, value, color, style, ...props } = button
           if (color) {
-            if (field.value === value) {
+            if (
+              field.value === value ||
+              (Array.isArray(field.value) && field.value.includes(value))
+            ) {
               style = { ...style, backgroundColor: color }
             }
             style = { ...style, borderColor: color, borderWidth: "2px" }

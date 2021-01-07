@@ -123,8 +123,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     } else {
       sql.append(":engagementDate, :releasedAt, ");
     }
-    sql.append(
-        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid, :customFields)");
+    sql.append(":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
+        + ":principalOrgUuid, :customFields)");
 
     getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -226,20 +226,20 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
     StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
         + "state = :state, \"updatedAt\" = :updatedAt, \"locationUuid\" = :locationUuid, "
-        + "intent = :intent, exsum = :exsum, text = :reportText, "
-        + "\"keyOutcomes\" = :keyOutcomes, \"nextSteps\" = :nextSteps, "
-        + "\"approvalStepUuid\" = :approvalStepUuid, ");
+        + "intent = :intent, exsum = :exsum, text = :reportText, \"keyOutcomes\" = :keyOutcomes, "
+        + "\"nextSteps\" = :nextSteps, \"approvalStepUuid\" = :approvalStepUuid, ");
     if (DaoUtils.isMsSql()) {
-      sql.append(
-          "\"engagementDate\" = CAST(:engagementDate AS datetime2), \"releasedAt\" = CAST(:releasedAt AS datetime2), ");
+      sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), "
+          + "\"releasedAt\" = CAST(:releasedAt AS datetime2), ");
     } else {
       sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
     }
-    sql.append(
-        "duration = :duration, atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
-            + "\"cancelledReason\" = :cancelledReason, "
-            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid, "
-            + "\"customFields\" = :customFields " + "WHERE uuid = :uuid");
+    sql.append("duration = :duration, atmosphere = :atmosphere, "
+        + "\"atmosphereDetails\" = :atmosphereDetails, "
+        + "\"cancelledReason\" = :cancelledReason, "
+        + "\"principalOrganizationUuid\" = :principalOrgUuid, "
+        + "\"advisorOrganizationUuid\" = :advisorOrgUuid, "
+        + "\"customFields\" = :customFields WHERE uuid = :uuid");
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))

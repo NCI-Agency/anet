@@ -1,3 +1,5 @@
+CONNECTION_ERROR_MSG: Connection to the server is lost
+VERSION_CHANGED_MSG: "There is a new version of ANET, click here to load the new version (CAUTION: save any unsaved changes first)"
 SUPPORT_EMAIL_ADDR: support@example.com
 
 engagementsIncludeTimeAndDuration: true
@@ -269,51 +271,11 @@ fields:
     person:
       name: Afghan Partner
       countries: [Afghanistan]
-      assessment:
-        questions:
-          - id: test1
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 1
-            choice:
-              - value: "1"
-                label: one
-                color: '#c2ffb3'
-              - value: "2"
-                label: two
-                color: '#ffe396'
-              - value: "3"
-                label: three
-                color: '#ff8279'
-          - id: test2
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 2
-            choice:
-              - value: "3"
-                label: three
-                color: '#ff8279'
-              - value: "4"
-                label: four
-                color: '#ffe396'
-              - value: "5"
-                label: five
-                color: '#c2ffb3'
-          - id: test3
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 3
-            choice:
-              - value: "1"
-                label: one
-                color: '#c2ffb3'
-              - value: "2"
-                label: two
-                color: '#ff8279'
-              - value: "3"
-                label: three
-                color: '#ff8279'
       assessments:
         - recurrence: quarterly
           questions:
             test1:
+              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 1
               choices:
@@ -327,6 +289,7 @@ fields:
                   label: three
                   color: '#ff8279'
             test2:
+              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 2
               choices:
@@ -340,6 +303,7 @@ fields:
                   label: five
                   color: '#c2ffb3'
             test3:
+              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 3
               choices:
@@ -352,6 +316,12 @@ fields:
                 "3":
                   label: three
                   color: '#ff8279'
+            text:
+              type: special_field
+              label: Text
+              widget: richTextEditor
+              style:
+                height: 100px
         - recurrence: once
           relatedObjectType: report
           questions:
@@ -368,6 +338,30 @@ fields:
                 "3":
                   label: high
                   color: '#ff8279'
+            question2:
+              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^P/i))]
+              type: enumset
+              label: Attendee from P org
+              choices:
+                yes:
+                  label: P
+                  color: '#ff0000'
+            question3:
+              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
+              type: enumset
+              label: Attendee from Z org
+              choices:
+                yes:
+                  label: Z
+                  color: '#00ff00'
+            question4:
+              test: $.relatedObject.[?(@property == "atmosphere" && @ == "POSITIVE")]
+              type: enumset
+              label: Report had POSITIVE atmosphere
+              choices:
+                yes:
+                  label: 👍
+                  color: '#0000ff'
 
     position:
       name: Afghan Tashkil

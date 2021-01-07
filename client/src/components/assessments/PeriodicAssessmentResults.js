@@ -1,13 +1,14 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import AppContext from "components/AppContext"
+import API from "api"
+import { gql } from "apollo-boost"
 import AssessmentModal from "components/assessments/AssessmentModal"
+import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person } from "models"
 import moment from "moment"
 import {
   AssessmentPeriodPropType,
@@ -15,8 +16,16 @@ import {
   periodToString
 } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import { Button, Panel } from "react-bootstrap"
+import { toast } from "react-toastify"
+import REMOVE_ICON from "resources/delete.png"
+
+const GQL_DELETE_NOTE = gql`
+  mutation($uuid: String!) {
+    deleteNote(uuid: $uuid)
+  }
+`
 
 const PeriodicAssessment = ({
   assessment,
@@ -26,12 +35,10 @@ const PeriodicAssessment = ({
   entity,
   period,
   recurrence,
+  canEditAssessment,
   onUpdateAssessment
 }) => {
-  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
-
-  const byMe = Person.isEqual(currentUser, note.author)
   const parentFieldName = `assessment-${note.uuid}`
   const periodDisplay = periodToString(period)
 
@@ -57,7 +64,7 @@ const PeriodicAssessment = ({
             model={note.author}
             style={{ color: "white" }}
           />
-          {byMe && (
+          {canEditAssessment && (
             <>
               <Button
                 title="Edit assessment"
@@ -67,6 +74,16 @@ const PeriodicAssessment = ({
               >
                 <Icon icon={IconNames.EDIT} />
               </Button>
+              <ConfirmDelete
+                onConfirmDelete={() => deleteNote(note.uuid)}
+                objectType="note"
+                objectDisplay={"#" + note.uuid}
+                title="Delete assessment"
+                bsSize="xsmall"
+                bsStyle="primary"
+              >
+                <img src={REMOVE_ICON} height={14} alt="Delete" />
+              </ConfirmDelete>
               <AssessmentModal
                 showModal={showAssessmentModalKey === note.uuid}
                 note={note}
@@ -114,6 +131,17 @@ const PeriodicAssessment = ({
       </Panel.Body>
     </Panel>
   )
+
+  function deleteNote(uuid) {
+    API.mutation(GQL_DELETE_NOTE, { uuid })
+      .then(() => {
+        onUpdateAssessment()
+        toast("Successfully deleted")
+      })
+      .catch(error => {
+        toast.error(error.message.split(":").pop())
+      })
+  }
 }
 PeriodicAssessment.propTypes = {
   assessment: PropTypes.object.isRequired,
@@ -123,6 +151,7 @@ PeriodicAssessment.propTypes = {
   entity: PropTypes.object.isRequired,
   period: AssessmentPeriodPropType.isRequired,
   recurrence: PropTypes.string.isRequired,
+  canEditAssessment: PropTypes.bool,
   onUpdateAssessment: PropTypes.func.isRequired
 }
 
@@ -133,7 +162,6 @@ export const PeriodicAssessmentsRows = ({
   canAddAssessment,
   onUpdateAssessment
 }) => {
-  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
   const { recurrence, periods } = periodsConfig
   if (_isEmpty(periods)) {
@@ -144,7 +172,11 @@ export const PeriodicAssessmentsRows = ({
     assessmentConfig,
     assessmentYupSchema
   } = entity.getPeriodicAssessmentDetails(recurrence)
-  if (_isEmpty(assessmentConfig)) {
+  const filteredAssessmentConfig = Model.filterAssessmentConfig(
+    assessmentConfig,
+    entity
+  )
+  if (_isEmpty(filteredAssessmentConfig)) {
     return null
   }
 
@@ -152,17 +184,15 @@ export const PeriodicAssessmentsRows = ({
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
     const periodAssessments = entity.getPeriodAssessments(recurrence, period)
-    const myPeriodAssessments = periodAssessments.filter(({ note }) =>
-      Person.isEqual(currentUser, note.author)
-    )
+
     periodsAssessments.push(periodAssessments)
     // Only allow adding new assessments for a period if the user has the rights
-    // for it, if the period is configured to allow adding new assessments and
-    // if the current user didn't already made an assessment for the period
+    // for it, if the period is configured to allow adding new assessments
+    // If there is already an assessment, don't allow to create a new one
     periodsAllowNewAssessment.push(
       canAddAssessment &&
         period.allowNewAssessments &&
-        _isEmpty(myPeriodAssessments)
+        _isEmpty(periodAssessments)
     )
   })
   const hasAddAssessmentRow = !_isEmpty(
@@ -181,10 +211,11 @@ export const PeriodicAssessmentsRows = ({
                       note={note}
                       assessment={assessment}
                       assessmentYupSchema={assessmentYupSchema}
-                      assessmentConfig={assessmentConfig}
+                      assessmentConfig={filteredAssessmentConfig}
                       entity={entity}
                       period={periods[index]}
                       recurrence={recurrence}
+                      canEditAssessment={canAddAssessment}
                       onUpdateAssessment={onUpdateAssessment}
                     />
                   </div>
@@ -228,7 +259,7 @@ export const PeriodicAssessmentsRows = ({
                       assessmentYupSchema={assessmentYupSchema}
                       recurrence={recurrence}
                       assessmentPeriod={period}
-                      assessmentConfig={assessmentConfig}
+                      assessmentConfig={filteredAssessmentConfig}
                       onSuccess={() => {
                         setShowAssessmentModalKey(null)
                         onUpdateAssessment()
