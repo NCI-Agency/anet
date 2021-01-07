@@ -14,10 +14,10 @@ import mil.dds.anet.beans.search.M2mBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractAnetBean implements RelatableObject, WithStatus {
+public class Position extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
 
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
@@ -268,16 +268,16 @@ public class Position extends AbstractAnetBean implements RelatableObject, WithS
     if (!(o instanceof Position)) {
       return false;
     }
-    Position other = (Position) o;
-    return Objects.equals(uuid, other.getUuid()) && Objects.equals(name, other.getName())
-        && Objects.equals(code, other.getCode()) && Objects.equals(type, other.getType())
-        && Objects.equals(status, other.getStatus())
+    final Position other = (Position) o;
+    return super.equals(o) && Objects.equals(uuid, other.getUuid())
+        && Objects.equals(name, other.getName()) && Objects.equals(code, other.getCode())
+        && Objects.equals(type, other.getType()) && Objects.equals(status, other.getStatus())
         && Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, code, type, status, organization);
+    return Objects.hash(super.hashCode(), uuid, name, code, type, status, organization);
   }
 
   @Override

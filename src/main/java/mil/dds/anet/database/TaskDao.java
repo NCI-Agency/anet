@@ -108,11 +108,13 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   @Override
   public Task insertInternal(Task p) {
     getDbHandle().createUpdate("/* insertTask */ INSERT INTO tasks "
-        + "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"createdAt\", \"updatedAt\", status, "
-        + "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
-        + "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :createdAt, :updatedAt, :status, "
-        + ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion, :customFields)")
-        .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+        + "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"createdAt\", "
+        + "\"updatedAt\", status, \"customField\", \"customFieldEnum1\", \"customFieldEnum2\", "
+        + "\"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
+        + "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :createdAt, "
+        + ":updatedAt, :status, :customField, :customFieldEnum1, :customFieldEnum2, "
+        + ":plannedCompletion, :projectedCompletion, :customFields)").bindBean(p)
+        .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
@@ -141,10 +143,11 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   public int updateInternal(Task p) {
     return getDbHandle().createUpdate(
         "/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
-            + "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, status = :status, "
-            + "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
+            + "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, "
+            + "\"updatedAt\" = :updatedAt, status = :status, \"customField\" = :customField, "
+            + "\"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
             + "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion, "
-            + "\"customFields\" = :customFields " + "WHERE uuid = :uuid")
+            + "\"customFields\" = :customFields WHERE uuid = :uuid")
         .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))

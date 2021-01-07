@@ -74,7 +74,7 @@ const widgetPropsOrganization = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Organization.autocompleteQuery,
+  fields: Models.Organization.autocompleteQueryWithNotes,
   addon: ORGANIZATIONS_ICON
 }
 
@@ -84,7 +84,7 @@ const widgetPropsPosition = {
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Position.autocompleteQuery,
+  fields: Models.Position.autocompleteQueryWithNotes,
   addon: POSITIONS_ICON
 }
 
@@ -94,7 +94,7 @@ const widgetPropsLocation = {
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
-  fields: Models.Location.autocompleteQuery,
+  fields: Models.Location.autocompleteQueryWithNotes,
   addon: LOCATIONS_ICON
 }
 

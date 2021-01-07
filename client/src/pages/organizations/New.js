@@ -1,9 +1,10 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { initInvisibleFields } from "components/CustomFields"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Organization } from "models"
@@ -11,6 +12,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import { useLocation } from "react-router-dom"
+import Settings from "settings"
 import utils from "utils"
 import OrganizationForm from "./Form"
 
@@ -87,7 +89,8 @@ const OrganizationNewConditional = ({
     organization.parentOrg = new Organization(data.organization)
     organization.type = organization.parentOrg.type
   }
-
+  // mutates the object
+  initInvisibleFields(organization, Settings.fields.organization.customFields)
   return (
     <OrganizationForm
       initialValues={organization}
