@@ -5,9 +5,9 @@ import ShowPerson from "../pages/showPerson.page"
 
 const PERSON_SEARCH_STRING = "Steve"
 const ADVISOR1_CREDENTIALS = "elizabeth"
-const ADVISOR_1_PERSON_CREATE_DETAILS = ["1", "3", "1"]
-const ADVISOR_1_PERSON_EDIT_DETAILS = ["2", "4", "2"]
-const ADMIN_PERSON_EDIT_DETAILS = ["3", "5", "3"]
+const ADVISOR_1_PERSON_CREATE_DETAILS = ["1", "3", "1", "advisor 1 create"]
+const ADVISOR_1_PERSON_EDIT_DETAILS = ["2", "4", "2", "advisor 1 edit"]
+const ADMIN_PERSON_EDIT_DETAILS = ["3", "5", "3", "admin edit"]
 
 const VALUE_TO_TEXT_FOR_PERSON = {
   1: "one",
@@ -46,7 +46,8 @@ describe("For the periodic person assessments", () => {
       ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
-            VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[index]]
+            (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[index]] ||
+              ADVISOR_1_PERSON_CREATE_DETAILS[index])
         )
       })
     })
@@ -58,7 +59,10 @@ describe("For the periodic person assessments", () => {
       ShowPerson.editAssessmentButton.click()
       ShowPerson.waitForAssessmentModalForm()
 
-      ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_EDIT_DETAILS)
+      ShowPerson.fillAssessmentQuestion(
+        ADVISOR_1_PERSON_EDIT_DETAILS,
+        ADVISOR_1_PERSON_CREATE_DETAILS[3]
+      )
       ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[0]]
       )
@@ -68,7 +72,8 @@ describe("For the periodic person assessments", () => {
       ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
-            VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[index]]
+            (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[index]] ||
+              ADVISOR_1_PERSON_EDIT_DETAILS[index])
         )
       })
     })
@@ -97,7 +102,10 @@ describe("For the periodic person assessments", () => {
       ShowPerson.editAssessmentButton.click()
       ShowPerson.waitForAssessmentModalForm()
 
-      ShowPerson.fillAssessmentQuestion(ADMIN_PERSON_EDIT_DETAILS)
+      ShowPerson.fillAssessmentQuestion(
+        ADMIN_PERSON_EDIT_DETAILS,
+        ADVISOR_1_PERSON_EDIT_DETAILS[3]
+      )
       ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[0]]
       )
@@ -107,7 +115,8 @@ describe("For the periodic person assessments", () => {
       ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
-            VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[index]]
+            (VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[index]] ||
+              ADMIN_PERSON_EDIT_DETAILS[index])
         )
       })
     })

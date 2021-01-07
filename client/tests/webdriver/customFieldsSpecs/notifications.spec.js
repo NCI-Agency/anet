@@ -20,11 +20,12 @@ describe("Home page", () => {
       expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
       expect(Home.myTasksNotifications.getText()).to.equal("1")
     })
-    it("Should see that Jack has 1 counterpart and 1 task with pending assessments", () => {
+    it("Should see that Jack has no counterpart and 1 task with pending assessments", () => {
       Home.open("/", "jack")
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
-      expect(Home.myCounterpartsNotifications.getText()).to.equal("1")
+      // eslint-disable-next-line no-unused-expressions
+      expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
       expect(Home.myTasksNotifications.getText()).to.equal("1")
     })
     it("Should see that Nick has no counterparts and no tasks with pending assessments", () => {

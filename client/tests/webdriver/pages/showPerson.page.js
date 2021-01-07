@@ -8,7 +8,7 @@ class ShowPerson extends Page {
   get addPeriodicAssessmentButton() {
     // get the add assessment button for latest assessable period (previous period)
     return this.assessmentsTable.$(
-      "tbody > tr:nth-child(4) > td:nth-child(2) > button"
+      "tbody > tr:last-child > td:nth-child(2) > button"
     )
   }
 
@@ -50,7 +50,7 @@ class ShowPerson extends Page {
     this.assessmentModalForm.waitForDisplayed()
   }
 
-  fillAssessmentQuestion(valuesArr) {
+  fillAssessmentQuestion(valuesArr, prevTextToClear) {
     this.assessmentModalForm
       .$$(".form-group .btn-group")
       .forEach((btnGroup, index) => {
@@ -61,6 +61,19 @@ class ShowPerson extends Page {
         button.click({ x: 10, y: 10 })
         browser.pause(300)
       })
+
+    // first focus on the text editor input
+    this.assessmentModalForm.$(".DraftEditor-editorContainer").click()
+    if (prevTextToClear) {
+      // remove previous text by deleting characters one by one
+      const chars = [...prevTextToClear]
+      browser.keys(chars.map(char => "Backspace"))
+      // maybe we clicked at the beginning of the text, Backspace doesn't clear
+      browser.keys(chars.map(char => "Delete"))
+    }
+    // fourth value is the text field
+    browser.keys(valuesArr[3])
+    browser.pause(300)
   }
 
   saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
