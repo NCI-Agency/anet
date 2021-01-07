@@ -122,6 +122,7 @@ const GQL_GET_REPORT = gql`
           organization {
             uuid
             shortName
+            identificationCode
           }
           location {
             uuid
@@ -370,9 +371,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   // Get initial tasks/people instant assessments values
   const hasAssessments = report.engagementDate && !report.isFuture()
+  let relatedObject
   if (hasAssessments) {
     report = Object.assign(report, report.getTasksEngagementAssessments())
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
+    relatedObject = Report.getCleanReport(report)
   }
 
   return (
@@ -694,6 +697,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <InstantAssessmentsContainerField
                       entityType={Person}
                       entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      relatedObject={relatedObject}
                       parentFieldName={
                         Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
                       }
@@ -711,6 +715,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <InstantAssessmentsContainerField
                       entityType={Task}
                       entities={values.tasks}
+                      relatedObject={relatedObject}
                       parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
                       formikProps={{
                         values

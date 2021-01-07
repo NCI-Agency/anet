@@ -1,5 +1,6 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import { JSONPath } from "jsonpath-plus"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
@@ -524,7 +525,8 @@ export default class Model {
 
   static getInstantAssessmentsDetailsForEntities(
     entities,
-    assessmentsParentField
+    assessmentsParentField,
+    relatedObject
   ) {
     const assessmentsConfig = {}
     const assessmentsSchemaShape = {}
@@ -598,6 +600,22 @@ export default class Model {
     }
     // if we didn't early return, there is no pending assessment
     return false
+  }
+
+  static filterAssessmentConfig(assessmentConfig, subject, relatedObject) {
+    const testValue = { subject, relatedObject }
+    const filteredAssessmentConfig = {}
+    if (!_isEmpty(assessmentConfig)) {
+      Object.entries(assessmentConfig)
+        .filter(
+          ([key, question]) =>
+            !question.test || !_isEmpty(JSONPath(question.test, testValue))
+        )
+        .forEach(([key, question]) => {
+          filteredAssessmentConfig[key] = question
+        })
+    }
+    return filteredAssessmentConfig
   }
 
   static populateCustomFields(entity) {

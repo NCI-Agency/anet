@@ -103,7 +103,7 @@ public class PositionResource {
           }, oldPositionUuid -> {
             dao.deletePositionAssociation(DaoUtils.getUuid(pos), oldPositionUuid);
           });
-      AnetAuditLogger.log("Person {} associations changed to {} by {}", current,
+      AnetAuditLogger.log("Position {} associations changed to {} by {}", current,
           pos.getAssociatedPositions(), user);
       // GraphQL mutations *have* to return something
       return 1;

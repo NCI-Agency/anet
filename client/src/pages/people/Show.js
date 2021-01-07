@@ -197,7 +197,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   relatedObject: person
                 }
               }
-              relatedObjectValue={person}
             />
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">

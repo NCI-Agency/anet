@@ -69,6 +69,8 @@ $defs:
     additionalProperties: false
     required: [type]
     properties:
+      test:
+        type: string
       type:
         title: value type field
         type: string
@@ -636,41 +638,6 @@ properties:
                   type: string
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
-              assessment:
-                type: object
-                additionalProperties: false
-                required: [questions]
-                properties:
-                  questions:
-                    type: array
-                    uniqueItems: true
-                    minItems: 1
-                    items:
-                      type: object
-                      additionalProperties: false
-                      required: [id,label,choice]
-                      properties:
-                        id:
-                          type: string
-                        test:
-                          type: string
-                        label:
-                          type: string
-                        choice:
-                          type: array
-                          uniqueItems: true
-                          minItems: 1
-                          items:
-                            type: object
-                            additionalProperties: false
-                            required: [value,label]
-                            properties:
-                              value:
-                                type: string
-                              label:
-                                type: string
-                              color:
-                                type: string
               assessments:
                 type: array
                 items:

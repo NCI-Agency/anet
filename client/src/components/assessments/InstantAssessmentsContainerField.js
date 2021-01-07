@@ -12,7 +12,7 @@ import { Table } from "react-bootstrap"
 const InstantAssessmentsContainerField = ({
   entityType,
   entities,
-  entitiesInstantAssessmentsConfig,
+  relatedObject,
   parentFieldName,
   formikProps,
   readonly
@@ -22,12 +22,12 @@ const InstantAssessmentsContainerField = ({
     <Table condensed responsive>
       <tbody>
         {entities.map(entity => {
-          const entityInstantAssessmentConfig = !_isEmpty(
-            entitiesInstantAssessmentsConfig
+          const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
+            entity.getInstantAssessmentConfig(),
+            entity,
+            relatedObject
           )
-            ? entitiesInstantAssessmentsConfig[entity.uuid]
-            : entity.getInstantAssessmentConfig()
-          if (!entityInstantAssessmentConfig) {
+          if (_isEmpty(entityInstantAssessmentConfig)) {
             return null
           }
           return (
@@ -64,7 +64,7 @@ const InstantAssessmentsContainerField = ({
 InstantAssessmentsContainerField.propTypes = {
   entityType: PropTypes.func.isRequired,
   entities: PropTypes.arrayOf(PropTypes.instanceOf(Model)),
-  entitiesInstantAssessmentsConfig: PropTypes.object,
+  relatedObject: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
   formikProps: PropTypes.shape({
     setFieldTouched: PropTypes.func,
