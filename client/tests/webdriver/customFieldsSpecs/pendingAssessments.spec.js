@@ -1,9 +1,9 @@
 import { expect } from "chai"
 import moment from "moment"
 import AssessmentsSection from "../pages/assessments.page"
-import CreateReport from "../pages/report/createReport.page"
 import MyCounterparts from "../pages/myCounterparts.page"
 import MyTasks from "../pages/myTasks.page"
+import CreateReport from "../pages/report/createReport.page"
 
 const SHORT_WAIT_MS = 1000
 
@@ -52,14 +52,13 @@ describe("In my counterparts page", () => {
   })
 
   describe("When Jack is checking the contents of the page", () => {
-    it("Should see 1 counterpart in the table of pending my counterparts that has pending assessments", () => {
+    it("Should see no counterparts in the table of pending my counterparts that has pending assessments", () => {
       MyCounterparts.openAs("jack")
       MyCounterparts.myPendingCounterparts.waitForDisplayed()
-      const myPendingCounterpartsItems = MyCounterparts.myPendingCounterpartsContent.$$(
-        "tr"
-      )
-      expect(myPendingCounterpartsItems).to.have.length(1)
-      MyCounterparts.getMyPendingCounterpart("Maj ROGWELL, Roger").click()
+      // eslint-disable-next-line no-unused-expressions
+      expect(MyCounterparts.myPendingCounterpartsContent.isExisting()).to.be
+        .false
+      MyCounterparts.getMyCounterpart("Maj ROGWELL, Roger").click()
     })
     it("Should be able to add a quarterly assessment with 1 question for the counterpart", () => {
       AssessmentsSection.getAssessmentsSection("quarterly").waitForDisplayed()

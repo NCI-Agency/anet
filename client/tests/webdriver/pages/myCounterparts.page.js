@@ -34,6 +34,10 @@ class MyTasks extends Page {
   getMyPendingCounterpart(name) {
     return this.myPendingCounterpartsContent.$(`//a[text()="${name}"]`)
   }
+
+  getMyCounterpart(name) {
+    return this.myCounterparts.$(`//a[text()="${name}"]`)
+  }
 }
 
 export default new MyTasks()
