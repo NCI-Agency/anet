@@ -2,9 +2,7 @@ import fs from "fs"
 import jsyaml from "js-yaml"
 
 console.log("Using config file " + process.env.ANET_CONFIG)
-const anetConfig = jsyaml.load(
-  fs.readFileSync(process.env.ANET_CONFIG, "utf8")
-)
+const anetConfig = jsyaml.load(fs.readFileSync(process.env.ANET_CONFIG, "utf8"))
 console.log("Using dictionary file " + process.env.ANET_DICTIONARY)
 const anetDictionary = jsyaml.load(
   fs.readFileSync(process.env.ANET_DICTIONARY, "utf8")
