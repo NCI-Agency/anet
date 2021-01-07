@@ -24,7 +24,7 @@ const clientConfig = merge.merge(common.clientConfig, {
       new TerserPlugin({
         cache: true,
         parallel: true,
-        sourceMap: false // TODO: disabled until SourceMapDevToolPlugin supports caching in webpack 5
+        sourceMap: true // TODO: disabled until SourceMapDevToolPlugin supports caching in webpack 5
       })
     ],
     splitChunks: {
