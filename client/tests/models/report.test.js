@@ -1,8 +1,7 @@
 import moment from "moment"
+import { v4 as uuidv4 } from 'uuid'
 import Settings from "../../platform/node/settings"
 import Report from "../../src/models/Report"
-
-const uuidv4 = require("uuid/v4")
 
 function tStart(report) {
   return moment(report.engagementDate).toDate().getTime()

@@ -49,7 +49,7 @@ jobs:
     - run: ./gradlew yarnSetup
     - name: get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
+      run: echo "::set-output name=dir::$(./gradlew -q yarn_config_get_cacheFolder)"
     - name: cache yarn
       uses: actions/cache@v2
       with:

@@ -18,7 +18,7 @@ import React, { useContext, useState } from "react"
 import { Button, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from 'uuid'
 
 const GQL_GET_ADMIN_SETTINGS = gql`
   query {

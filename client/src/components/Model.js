@@ -1,3 +1,4 @@
+import encodeQuery from "querystring/encode"
 import API from "api"
 import { gql } from "apollo-boost"
 import { JSONPath } from "jsonpath-plus"
@@ -10,7 +11,6 @@ import {
   RECURRENCE_TYPE
 } from "periodUtils"
 import PropTypes from "prop-types"
-import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 

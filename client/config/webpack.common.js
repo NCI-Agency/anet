@@ -94,7 +94,10 @@ module.exports = {
   clientConfig: merge.merge(commonConfig, {
     target: "web",
     resolve: {
-      alias: { vm: "vm-browserify" }
+      fallback: {
+        vm: false,
+        punycode: false
+      }
     },
     entry: {
       anet: [require.resolve("./polyfills"), "./src/index.js"]

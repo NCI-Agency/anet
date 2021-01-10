@@ -1,7 +1,7 @@
 plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.6.1"
-	id "com.github.node-gradle.node" version "2.2.4"
+	id "com.github.node-gradle.node" version "3.0.0-rc6"
 	id "com.diffplug.spotless" version "5.9.0"
 }
 
@@ -190,7 +190,7 @@ task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["check", anetConfig]
 }
 
-task buildClient(dependsOn: 'yarn', type: YarnTask) {
+task buildClient(dependsOn: 'yarnInstall', type: YarnTask) {
 	group = "build"
 	description = "Builds the client application."
 	inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
@@ -201,6 +201,19 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	outputs.cacheIf { true }
 	args = ['run', 'build']
 }
+
+task yarnConfigure(dependsOn: 'yarn', type: YarnTask) {
+	description = "Sets up yarn"
+	args = ['set', 'version', 'berry']
+	outputs.file('client/.yarnrc.yml')
+	outputs.cacheIf { true }
+}
+
+task yarnInstall(dependsOn: 'yarn', type: YarnTask) {
+	description = "Yarn install"
+	args = ['install']
+}
+
 
 task dbWait(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
@@ -485,6 +498,8 @@ allprojects {
 	markdownToHtml.outputDir = file("$buildDir/documentation")
 	markdownToHtml.hardwraps = true
 }
+
+yarnSetup.finalizedBy yarnConfigure
 
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
