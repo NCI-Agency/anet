@@ -132,10 +132,7 @@ const API = {
   _getAuthHeader: function() {
     const creds = API._getAuthParams()
     if (creds) {
-      return [
-        "Authorization",
-        "Basic " + btoa(`${creds.user}:${creds.pass}`)
-      ]
+      return ["Authorization", "Basic " + btoa(`${creds.user}:${creds.pass}`)]
     }
     return null
   },

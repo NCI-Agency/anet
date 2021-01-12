@@ -104,7 +104,12 @@ async function createHierarchy(user, grow, args) {
     const level = path.length
 
     // create and fill an organization object
-    const org = Object.without(new Organization(), "childrenOrgs", "positions", "formCustomFields")
+    const org = Object.without(
+      new Organization(),
+      "childrenOrgs",
+      "positions",
+      "formCustomFields"
+    )
     if (level === 0) {
       org.longName = longName
     } else if (level === 1) {
