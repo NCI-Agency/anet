@@ -20,6 +20,5 @@ Settings.keycloakConfiguration = {
   clientId,
   showLogoutLink
 }
-const Version = "Sim-Mode"
 
-export { Version, Settings as default }
+export default Settings
