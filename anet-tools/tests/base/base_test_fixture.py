@@ -1,15 +1,19 @@
 import time
 import uuid
 import datetime
-import unittest
-from src.core.db import db
+
 from sqlalchemy.orm import sessionmaker
+import unittest
+
+from src.core.db import db
 from src.examples.models import PeoplePositions, Position, Person, Location, Organization, BaseModel
+
 
 # new db instance to get new engine using env vars
 db_obj = db(use_env=True)
 db_obj.create_engine()
 Session = sessionmaker()
+
 
 class BaseTestFixture(unittest.TestCase):
     # setUp method will work before each test method
@@ -25,7 +29,7 @@ class BaseTestFixture(unittest.TestCase):
         # get utc_now
         self.utc_now = datetime.datetime.now()
         # initialize update rules
-        self.update_rules = { "tables": [] }
+        self.update_rules = {"tables": []}
         # Set entity classes as class attribute and set the same session to all by BaseModel
         self.PeoplePositions = PeoplePositions
         self.Position = Position
@@ -35,6 +39,7 @@ class BaseTestFixture(unittest.TestCase):
         self.BaseModel = BaseModel
         self.BaseModel.set_session(self.session)
     # tearDown method will work after each test method
+
     def tearDown(self):
         self.session.close()
         # rollback - everything that happened with the

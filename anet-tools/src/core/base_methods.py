@@ -1,6 +1,8 @@
-from sqlalchemy import and_
-import uuid
 import datetime
+import uuid
+
+from sqlalchemy import and_
+
 
 class base_methods:
     @staticmethod
@@ -45,7 +47,8 @@ class base_methods:
         query_result_list = list()
         for update_rule in update_rules["tables"]:
             if entity.__tablename__ == update_rule["name"]:
-                query_result_list = entity.session.query(entity.__class__).filter(and_(getattr(entity.__class__, attr_name) == getattr(entity, attr_name) for attr_name in tuple(update_rule["columns"]))).all()
+                query_result_list = entity.session.query(entity.__class__).filter(and_(getattr(
+                    entity.__class__, attr_name) == getattr(entity, attr_name) for attr_name in tuple(update_rule["columns"]))).all()
                 break
         return query_result_list
 
@@ -57,7 +60,7 @@ class base_methods:
                 return False
             else:
                 return True
-        elif update_rules == { "tables": [] }:
+        elif update_rules == {"tables": []}:
             entity.uuid = cls.get_new_uuid()
             return False
         else:
@@ -83,8 +86,10 @@ class base_methods:
     def relation_process(entity, relation_name, entity_c, update_rules, PeoplePositions, utc_now):
         if base_methods.is_entity_update(getattr(entity, relation_name), update_rules):
             if relation_name == "person":
-                base_methods.remove_persons_association_with_position(entity, PeoplePositions, utc_now)
-                entity_c.currentPersonUuid = getattr(entity, relation_name).uuid
+                base_methods.remove_persons_association_with_position(
+                    entity, PeoplePositions, utc_now)
+                entity_c.currentPersonUuid = getattr(
+                    entity, relation_name).uuid
             elif relation_name == "location":
                 entity_c.locationUuid = getattr(entity, relation_name).uuid
             elif relation_name == "organization":
@@ -92,56 +97,66 @@ class base_methods:
             getattr(entity, relation_name).update_entity(utc_now)
             delattr(entity_c, relation_name)
         else:
-            getattr(entity_c, relation_name).uuid = getattr(entity, relation_name).uuid
+            getattr(entity_c, relation_name).uuid = getattr(
+                entity, relation_name).uuid
             getattr(entity_c, relation_name).createdAt = utc_now
             getattr(entity_c, relation_name).updatedAt = utc_now
 
     @staticmethod
     def remove_persons_association_with_position(position, PeoplePositions, utc_now):
-        pos = position.session.query(position.__class__).filter(position.__class__.currentPersonUuid == position.person.uuid).all()
+        pos = position.session.query(position.__class__).filter(
+            position.__class__.currentPersonUuid == position.person.uuid).all()
         if len(pos) == 0:
             return
         if pos[0].uuid == position.uuid:
             return
         position.session.flush()
-        pp_list = position.session.query(PeoplePositions).filter(and_(PeoplePositions.personUuid == position.person.uuid, PeoplePositions.positionUuid == pos[0].uuid)).all()
+        pp_list = position.session.query(PeoplePositions).filter(and_(
+            PeoplePositions.personUuid == position.person.uuid, PeoplePositions.positionUuid == pos[0].uuid)).all()
 
         if len(pp_list) == 0:
             raise("Association does not exist")
 
         for pp in pp_list:
             if pp.endedAt is None:
-                pp.endedAt = utc_now - datetime.timedelta(0,1) # days, seconds, then other fields.
+                # days, seconds, then other fields.
+                pp.endedAt = utc_now - datetime.timedelta(0, 1)
                 pp.position.currentPersonUuid = None
-                PeoplePositions.create(createdAt = utc_now, positionUuid = pp.positionUuid)
+                PeoplePositions.create(
+                    createdAt=utc_now, positionUuid=pp.positionUuid)
                 pp.session.flush()
                 break
 
     @staticmethod
     def remove_positions_association_with_person(position, PeoplePositions, utc_now):
-        pos = position.session.query(position.__class__).filter(position.__class__.uuid == position.uuid).all()[0]
+        pos = position.session.query(position.__class__).filter(
+            position.__class__.uuid == position.uuid).all()[0]
         if pos.currentPersonUuid is None or pos.currentPersonUuid == position.person.uuid:
             return
-        pp_list = position.session.query(PeoplePositions).filter(and_(PeoplePositions.positionUuid == position.uuid, PeoplePositions.personUuid == pos.currentPersonUuid)).all()
+        pp_list = position.session.query(PeoplePositions).filter(and_(
+            PeoplePositions.positionUuid == position.uuid, PeoplePositions.personUuid == pos.currentPersonUuid)).all()
 
         if len(pp_list) == 0:
             raise("Association does not exist")
 
         for pp in pp_list:
             if pp.endedAt is None:
-                pp.endedAt = utc_now - datetime.timedelta(0,1)
+                pp.endedAt = utc_now - datetime.timedelta(0, 1)
                 pp.position.currentPersonUuid = None
-                PeoplePositions.create(createdAt = utc_now, personUuid = pp.personUuid)
+                PeoplePositions.create(
+                    createdAt=utc_now, personUuid=pp.personUuid)
                 pp.session.flush()
                 break
 
     @staticmethod
     def add_new_association(position, PeoplePositions, utc_now):
-        pp_list = position.session.query(PeoplePositions).filter(and_(PeoplePositions.positionUuid == position.uuid, PeoplePositions.personUuid == position.person.uuid)).all()
+        pp_list = position.session.query(PeoplePositions).filter(and_(
+            PeoplePositions.positionUuid == position.uuid, PeoplePositions.personUuid == position.person.uuid)).all()
         if len(pp_list) != 0:
             for pp in pp_list:
                 if pp.endedAt is None and pp.personUuid == position.person.uuid and pp.positionUuid == position.uuid:
                     return
-        PeoplePositions.create(createdAt = utc_now, positionUuid = position.uuid)
-        PeoplePositions.create(createdAt = utc_now, personUuid = position.person.uuid, positionUuid = position.uuid)
+        PeoplePositions.create(createdAt=utc_now, positionUuid=position.uuid)
+        PeoplePositions.create(
+            createdAt=utc_now, personUuid=position.person.uuid, positionUuid=position.uuid)
         PeoplePositions.session.flush()

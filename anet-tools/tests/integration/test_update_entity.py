@@ -1,5 +1,7 @@
-from src.tests.base import base_test_fixture
 import unittest
+
+from tests.base import base_test_fixture
+
 
 class UpdateEntityTest(base_test_fixture.BaseTestFixture):
     def test_update_entity(self):

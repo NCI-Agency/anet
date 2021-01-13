@@ -1,19 +1,22 @@
-# coding: utf-8
-from sqlalchemy import Boolean, Column, Computed, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint, text
-from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_mixins import ActiveRecordMixin
+import copy
 import datetime
 import uuid
-import copy
+
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text, text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy_mixins import ActiveRecordMixin
+
 from src.core.base_methods import base_methods
+
 
 Base = declarative_base()
 metadata = Base.metadata
 
+
 class BaseModel(Base, ActiveRecordMixin):
     __abstract__ = True
+
 
 class anet_logic_mixin(BaseModel):
     __abstract__ = True
@@ -25,7 +28,8 @@ class anet_logic_mixin(BaseModel):
         self.updatedAt = createdAt
         if self.__tablename__ == "people":
             utc_now = datetime.datetime.now()
-            peoplePositions = PeoplePositions.create(createdAt = utc_now, person = self)
+            peoplePositions = PeoplePositions.create(
+                createdAt=utc_now, person=self)
         else:
             BaseModel.session.add(self)
             BaseModel.session.flush()
@@ -45,17 +49,21 @@ class anet_logic_mixin(BaseModel):
         self_c = copy.deepcopy(self)
 
         if base_methods.has_entity_relation(self, "person"):
-            base_methods.relation_process(self, "person", self_c, update_rules, PeoplePositions, utc_now)
+            base_methods.relation_process(
+                self, "person", self_c, update_rules, PeoplePositions, utc_now)
 
         if base_methods.has_entity_relation(self, "location"):
-            base_methods.relation_process(self, "location", self_c, update_rules, PeoplePositions, utc_now)
+            base_methods.relation_process(
+                self, "location", self_c, update_rules, PeoplePositions, utc_now)
 
         if base_methods.has_entity_relation(self, "organization"):
-            base_methods.relation_process(self, "organization", self_c, update_rules, PeoplePositions, utc_now)
+            base_methods.relation_process(
+                self, "organization", self_c, update_rules, PeoplePositions, utc_now)
 
         if base_methods.is_entity_update(self, update_rules):
             if base_methods.has_entity_relation(self, "person"):
-                base_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
+                base_methods.remove_positions_association_with_person(
+                    self, PeoplePositions, utc_now)
             self_c.update_entity(utc_now)
         else:
             self_c.insert_entity(utc_now)
@@ -74,10 +82,11 @@ class PeoplePositions(anet_logic_mixin):
     __tablename__ = "peoplePositions"
     createdAt = Column('createdAt', DateTime)
     personUuid = Column('personUuid', ForeignKey('people.uuid'), index=True)
-    positionUuid = Column('positionUuid', ForeignKey('positions.uuid'), index=True)
+    positionUuid = Column('positionUuid', ForeignKey(
+        'positions.uuid'), index=True)
     endedAt = Column('endedAt', DateTime)
     __mapper_args__ = {
-        "primary_key":[createdAt, personUuid, positionUuid]
+        "primary_key": [createdAt, personUuid, positionUuid]
     }
 
     person = relationship("Person", back_populates="positions")
@@ -156,6 +165,7 @@ class Organization(anet_logic_mixin):
 
     parent = relationship('Organization', remote_side=[uuid])
 
+
 class ApprovalStep(Base):
     __tablename__ = 'approvalSteps'
 
@@ -167,6 +177,7 @@ class ApprovalStep(Base):
     restrictedApproval = Column(Boolean, server_default=text("false"))
 
     parent = relationship('ApprovalStep', remote_side=[uuid])
+
 
 class Report(anet_logic_mixin):
     __tablename__ = 'reports'
@@ -185,15 +196,19 @@ class Report(anet_logic_mixin):
     cancelledReason = Column(Integer)
     releasedAt = Column(DateTime, index=True)
     uuid = Column(String(36), primary_key=True)
-    advisorOrganizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
+    advisorOrganizationUuid = Column(
+        ForeignKey('organizations.uuid'), index=True)
     approvalStepUuid = Column(ForeignKey('approvalSteps.uuid'), index=True)
     locationUuid = Column(ForeignKey('locations.uuid'), index=True)
-    principalOrganizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
+    principalOrganizationUuid = Column(
+        ForeignKey('organizations.uuid'), index=True)
     legacyId = Column(Integer)
     duration = Column(Integer)
     customFields = Column(Text)
 
-    organization = relationship('Organization', primaryjoin='Report.advisorOrganizationUuid == Organization.uuid')
+    organization = relationship(
+        'Organization', primaryjoin='Report.advisorOrganizationUuid == Organization.uuid')
     approvalStep = relationship('ApprovalStep')
     location = relationship('Location')
-    organization1 = relationship('Organization', primaryjoin='Report.principalOrganizationUuid == Organization.uuid')
+    organization1 = relationship(
+        'Organization', primaryjoin='Report.principalOrganizationUuid == Organization.uuid')
