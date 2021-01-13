@@ -29,7 +29,7 @@ The framework saves the data samples encountered with errors during import into 
 #### Changes in localSettings.gradle file
 - If you want to use jupyter lab instead of jupyter notebook use following in your `localSettings.gradle` file (default jupyter notebook).
     ```
-    run.environment("JUPYTER_ENABLE_LAB", "yes")
+    run.environment("JUPYTER_ENABLE_LAB", "true")
     ```
 - If you want to specify port you will use jupyter, use following in your `localSettings.gradle` file (default port is 5000).
     ```
