@@ -19,7 +19,9 @@ varname = "==0.4.0"
 sqlalchemy-mixins = "==1.2.1"
 pex = "==2.1.21"
 pyodbc = "==4.0.30"
+packaging = "==20.8"
 mgrs = "==1.4.0"
+pylint = "==2.6.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.6"
