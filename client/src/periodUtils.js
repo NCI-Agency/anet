@@ -265,7 +265,7 @@ function getPeriodNumberForScreen(width) {
     }
   }
   throw new Error(
-    "Invalid width or screen sizes are not continious. width= ",
+    "Invalid width or screen sizes are not continuous. width= ",
     width
   )
 }

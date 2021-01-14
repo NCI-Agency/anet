@@ -529,7 +529,6 @@ properties:
             additionalProperties:
               "$ref": "#/$defs/customField"
 
-
       location:
         type: object
         additionalProperties: false

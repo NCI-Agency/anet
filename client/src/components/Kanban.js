@@ -13,7 +13,7 @@ const Kanban = ({ columns, allTasks }) => (
     style={{
       display: "flex",
       flexDirection: "row",
-      overflowX: "scroll"
+      overflowX: "auto"
     }}
   >
     {columns.map(column => {

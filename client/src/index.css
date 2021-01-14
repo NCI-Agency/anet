@@ -886,6 +886,11 @@ header.searchPagination {
   padding: 15px;
 }
 
+.advanced-search-content {
+  max-height: 40vh;
+  overflow: auto;
+}
+
 .advanced-search-content .form-group {
   margin: 0 0 15px !important;
 }
@@ -1128,9 +1133,9 @@ header.searchPagination {
     height: 100% !important;
   }
   /* adds random characters at the end of document which causes printed pdf to have empty pages*/
-	svg > text#__react_svg_text_measurement_id {
-		display: none;
-	}
+  svg > text#__react_svg_text_measurement_id {
+    display: none;
+  }
 }
 
 #main-viewport {
@@ -1155,7 +1160,7 @@ header.searchPagination {
   align-items: center;
 }
 
-#fg-position > .col-sm-3{
+#fg-position > .col-sm-3 {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -1164,6 +1169,11 @@ header.searchPagination {
 
 #fg-position > .col-sm-3 > * {
   margin-left: 10px;
+}
+
+.react-confirm-bootstrap-modal .modal-content {
+  width: max-content;
+  white-space: wrap;
 }
 
 @media screen and (max-width: 768px) {
@@ -1177,7 +1187,7 @@ header.searchPagination {
     max-width: 13%;
   }
 
-  #fg-position > .col-sm-3{
+  #fg-position > .col-sm-3 {
     margin-top: 6px;
   }
 
@@ -1191,6 +1201,7 @@ header.searchPagination {
   .search-popover-target {
     max-height: 200px;
     overflow-y: scroll;
+    font-size: 12px;
   }
 
   .search-popover-target ~ .bp3-overlay > .bp3-transition-container {
@@ -1227,16 +1238,23 @@ header.searchPagination {
   }
 
   .scroll-anchor-container .action-small > * {
-    margin: 0;
-    margin-top: 5px;
+    margin: 5px 0 0 0;
   }
 
   .legend small .btn {
-    margin: 0;
-    margin-top: 5px;
+    margin: 5px 0 0 0;
   }
 
   fieldset {
     padding: 1em;
+  }
+
+  .react-confirm-bootstrap-modal .modal-footer {
+    flex-direction: column;
+  }
+
+  .react-confirm-bootstrap-modal .modal-footer button {
+    white-space: normal;
+    margin-bottom: 0.5rem;
   }
 }
