@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import com.google.common.collect.ObjectArrays;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,9 +61,14 @@ import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY or search post-processing
   public static final String[] minimalFields = {"uuid", "approvalStepUuid",
@@ -819,6 +825,41 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     email.setToAddresses(r.loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
         .map(rp -> rp.getEmailAddress()).collect(Collectors.toList()));
     AnetEmailWorker.sendEmailAsync(email);
+  }
+
+  public int submit(final Report r, final Person user) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    // Get all the approval steps for this report
+    final List<ApprovalStep> steps = r.computeApprovalSteps(engine.getContext(), engine).join();
+
+    // Write the submission action
+    final ReportAction action = new ReportAction();
+    action.setReportUuid(r.getUuid());
+    action.setPersonUuid(user.getUuid());
+    action.setType(ActionType.SUBMIT);
+    engine.getReportActionDao().insert(action);
+
+    if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
+      // Future engagements without planning approval chain will be approved directly
+      // Write the approval action
+      final ReportAction approval = new ReportAction();
+      approval.setReportUuid(r.getUuid());
+      approval.setPersonUuid(user.getUuid());
+      approval.setType(ActionType.APPROVE);
+      approval.setPlanned(true); // so the FutureEngagementWorker can find this
+      engine.getReportActionDao().insert(approval);
+      r.setState(ReportState.APPROVED);
+    } else {
+      // Push the report into the first step of this workflow
+      r.setApprovalStep(steps.get(0));
+      r.setState(ReportState.PENDING_APPROVAL);
+    }
+    final int numRows = update(r, user);
+    if (numRows != 0 && !Utils.isEmptyOrNull(steps)) {
+      sendApprovalNeededEmail(r, steps.get(0));
+      logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
+    }
+    return numRows;
   }
 
   public int approve(Report r, Person user, ApprovalStep step) {
