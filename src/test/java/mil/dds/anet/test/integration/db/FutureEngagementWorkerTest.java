@@ -25,6 +25,7 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
@@ -330,6 +331,20 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     testReportDraft(report.getUuid());
   }
 
+  @Test
+  public void testPublishedReport() {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final int emailSize = engine.getEmailDao().getAll().size();
+    final Report report = createPublishedTestReport("testPublishedReport_1");
+    // Should have sent 2 emails: approval and published
+    assertThat(engine.getEmailDao().getAll().size()).isEqualTo(emailSize + 2);
+    expectedIds.add("hunter+arthur");
+    expectedIds.add("testPublishedReport_1");
+    testFutureEngagementWorker(1);
+    // Report should be draft now
+    testReportDraft(report.getUuid());
+  }
+
   private Report testReportDraft(final String uuid) {
     return testReportState(uuid, ReportState.DRAFT);
   }
@@ -377,6 +392,32 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
 
     final Report report = TestBeans.getTestReport(approvalStep, ImmutableList.of(author));
     return engine.getReportDao().insert(report);
+  }
+
+  private Report createPublishedTestReport(final String toAdressId) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ReportDao reportDao = engine.getReportDao();
+    final Person author = engine.getPersonDao().insert(TestBeans.getTestPerson());
+    author.setEmailAddress(toAdressId + whitelistedEmail);
+
+    final Organization organization =
+        engine.getOrganizationDao().insert(TestBeans.getTestOrganization());
+
+    final ApprovalStep as = TestBeans.getTestApprovalStep(organization);
+    as.setType(ApprovalStepType.PLANNING_APPROVAL);
+    final ApprovalStep approvalStep = engine.getApprovalStepDao().insertAtEnd(as);
+
+    final Report report = TestBeans.getTestReport(approvalStep,
+        ImmutableList.of(PersonTest.personToReportAuthor(author)));
+    report.setState(ReportState.DRAFT);
+    final Report testReport = engine.getReportDao().insert(report);
+    // Submit this report
+    reportDao.submit(testReport, author);
+    // Approve this report
+    reportDao.approve(testReport, null, approvalStep);
+    // Publish this report
+    reportDao.publish(testReport, null);
+    return testReport;
   }
 
 }
