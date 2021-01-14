@@ -868,7 +868,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     final ReportAction action = new ReportAction();
     action.setReportUuid(r.getUuid());
     action.setStepUuid(step.getUuid());
-    // User could be null when the publication action is being done automatically by a worker
+    // User could be null when the approval action is being done automatically by a worker
     action.setPersonUuid(DaoUtils.getUuid(user));
     action.setType(ActionType.APPROVE);
     action.setPlanned(ApprovalStep.isPlanningStep(step));
@@ -958,6 +958,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append("/* getFutureToPastReports */");
     sql.append(" SELECT r.uuid AS reports_uuid");
     sql.append(" FROM reports r");
+    // Get the last report action
     // FIXME: Hard-coded MS SQL or PostgreSQL specific query stanza
     if (DaoUtils.isMsSql()) {
       sql.append(" OUTER APPLY (SELECT TOP (1)");
@@ -980,19 +981,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sql.append(" )");
     // Get past reports relative to the endDate argument
     sql.append(" AND r.\"engagementDate\" <= :endDate");
-    sql.append(" AND (");
     // Get reports for engagements which just became past engagements during or
     // after the planning approval process, but which are not in the report approval process yet
-    sql.append("   ra.planned = :planned");
-    sql.append("   OR ra.\"approvalStepUuid\" IN (");
-    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
-    sql.append("     WHERE a.type = :planningApprovalStepType");
-    sql.append("   )");
-    // Also get reports pending planning approval when the approval action was not taken yet
-    sql.append("   OR r.\"approvalStepUuid\" IN (");
-    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
-    sql.append("     WHERE a.type = :planningApprovalStepType");
-    sql.append(" ))");
+    sql.append(" AND ra.planned = :planned");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
     sqlArgs.put("reportRejected", DaoUtils.getEnumId(ReportState.REJECTED));
