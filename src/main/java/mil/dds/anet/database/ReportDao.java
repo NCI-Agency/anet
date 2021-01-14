@@ -837,6 +837,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     action.setReportUuid(r.getUuid());
     action.setPersonUuid(user.getUuid());
     action.setType(ActionType.SUBMIT);
+    action.setPlanned(r.isFutureEngagement());
     engine.getReportActionDao().insert(action);
 
     if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
@@ -870,6 +871,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     // User could be null when the publication action is being done automatically by a worker
     action.setPersonUuid(DaoUtils.getUuid(user));
     action.setType(ActionType.APPROVE);
+    action.setPlanned(ApprovalStep.isPlanningStep(step));
     AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
     // Update the report

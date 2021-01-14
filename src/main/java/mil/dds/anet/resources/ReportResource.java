@@ -492,7 +492,7 @@ public class ReportResource {
     }
 
     // Write the rejection action
-    ReportAction rejection = new ReportAction();
+    final ReportAction rejection = new ReportAction();
     rejection.setReportUuid(r.getUuid());
     if (step != null) {
       // Step is null when an approved report is being rejected by an admin
@@ -500,6 +500,7 @@ public class ReportResource {
     }
     rejection.setPersonUuid(approver.getUuid());
     rejection.setType(ActionType.REJECT);
+    rejection.setPlanned(ApprovalStep.isPlanningStep(step) || r.isFutureEngagement());
     engine.getReportActionDao().insert(rejection);
 
     // Update the report
