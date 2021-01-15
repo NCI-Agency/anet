@@ -206,10 +206,10 @@ public class ReportPublicationWorkerTest {
     emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
   }
 
-  private static Report createTestReport(final String toAdressId) {
+  private static Report createTestReport(final String toAddressId) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAdressId + whitelistedEmail);
+    author.setEmailAddress(toAddressId + whitelistedEmail);
     engine.getPersonDao().insert(author);
 
     final Organization organization = TestBeans.getTestOrganization();
@@ -219,7 +219,9 @@ public class ReportPublicationWorkerTest {
     approvalStep.setType(ApprovalStepType.PLANNING_APPROVAL);
     engine.getApprovalStepDao().insertAtEnd(approvalStep);
 
-    final Report report = TestBeans.getTestReport(approvalStep, ImmutableList.of(author));
+    final Report report =
+        TestBeans.getTestReport(toAddressId, null, approvalStep, ImmutableList.of(author));
+    report.setState(ReportState.APPROVED);
     engine.getReportDao().insert(report);
     return report;
   }

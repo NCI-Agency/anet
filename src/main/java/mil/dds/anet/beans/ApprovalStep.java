@@ -137,4 +137,8 @@ public class ApprovalStep extends AbstractAnetBean {
     return clone;
   }
 
+  public static boolean isPlanningStep(ApprovalStep step) {
+    return step != null && ApprovalStepType.PLANNING_APPROVAL.equals(step.getType());
+  }
+
 }
