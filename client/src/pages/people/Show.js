@@ -229,7 +229,10 @@ const PersonShow = ({ pageDispatchers }) => {
                         height={256}
                         width={256}
                         style={{
-                          maxWidth: "100%"
+                          maxWidth: "100%",
+                          display: "block",
+                          margin: "0 auto",
+                          marginBottom: "10px"
                         }}
                       />
                       {leftColumUnderAvatar}
@@ -443,7 +446,7 @@ const PersonShow = ({ pageDispatchers }) => {
     const canAssignPosition = currentUser.isSuperUser()
 
     const assignPositionButton =
-      !hasPosition & canAssignPosition ? (
+      !hasPosition && canAssignPosition ? (
         <Tooltip content="Assign a position" position="top">
           <Button
             onClick={() => setShowAssignPositionModal(true)}
