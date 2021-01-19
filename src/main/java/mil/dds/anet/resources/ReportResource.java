@@ -398,39 +398,9 @@ public class ReportResource {
       throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
     }
 
-    // Get all the approval steps for this report
-    final List<ApprovalStep> steps = r.computeApprovalSteps(engine.getContext(), engine).join();
-
-    // Write the submission action
-    final ReportAction action = new ReportAction();
-    action.setReportUuid(r.getUuid());
-    action.setPersonUuid(user.getUuid());
-    action.setType(ActionType.SUBMIT);
-    engine.getReportActionDao().insert(action);
-
-    if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
-      // Future engagements without planning approval chain will be approved directly
-      // Write the approval action
-      final ReportAction approval = new ReportAction();
-      approval.setReportUuid(r.getUuid());
-      approval.setPersonUuid(user.getUuid());
-      approval.setType(ActionType.APPROVE);
-      approval.setPlanned(true); // so the FutureEngagementWorker can find this
-      engine.getReportActionDao().insert(approval);
-      r.setState(ReportState.APPROVED);
-    } else {
-      // Push the report into the first step of this workflow
-      r.setApprovalStep(steps.get(0));
-      r.setState(ReportState.PENDING_APPROVAL);
-    }
-    final int numRows = dao.update(r, user);
-    if (numRows != 1) {
+    final int numRows = dao.submit(r, user);
+    if (numRows == 0) {
       throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
-    }
-
-    if (!Utils.isEmptyOrNull(steps)) {
-      dao.sendApprovalNeededEmail(r, steps.get(0));
-      logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
     }
 
     AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
@@ -522,7 +492,7 @@ public class ReportResource {
     }
 
     // Write the rejection action
-    ReportAction rejection = new ReportAction();
+    final ReportAction rejection = new ReportAction();
     rejection.setReportUuid(r.getUuid());
     if (step != null) {
       // Step is null when an approved report is being rejected by an admin
@@ -530,6 +500,7 @@ public class ReportResource {
     }
     rejection.setPersonUuid(approver.getUuid());
     rejection.setType(ActionType.REJECT);
+    rejection.setPlanned(ApprovalStep.isPlanningStep(step) || r.isFutureEngagement());
     engine.getReportActionDao().insert(rejection);
 
     // Update the report

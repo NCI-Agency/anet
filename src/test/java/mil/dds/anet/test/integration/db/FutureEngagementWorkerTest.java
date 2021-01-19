@@ -21,10 +21,10 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
-import mil.dds.anet.beans.ReportAction;
-import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
@@ -42,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TestApp.class)
 public class FutureEngagementWorkerTest extends AbstractResourceTest {
+
   private final static List<String> expectedIds = new ArrayList<>();
   private final static List<String> unexpectedIds = new ArrayList<>();
 
@@ -100,11 +101,11 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   @Test
   public void reportsOK() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("reportsOK_1");
+    final Report report = createTestReport("reportsOK_1", true, true, true);
     engine.getReportDao().update(report);
-    final Report report2 = createTestReport("reportsOK_2");
+    final Report report2 = createTestReport("reportsOK_2", true, true, true);
     engine.getReportDao().update(report2);
-    final Report report3 = createTestReport("reportsOK_3");
+    final Report report3 = createTestReport("reportsOK_3", true, true, true);
     engine.getReportDao().update(report3);
 
     expectedIds.add("reportsOK_1");
@@ -122,7 +123,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   @Test
   public void testReportDueInFuture() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testReportDueInFuture_1");
+    final Report report = createTestReport("testReportDueInFuture_1", true, true, true);
     report.setEngagementDate(Instant.now().plus(Duration.ofDays(2L)));
     engine.getReportDao().update(report);
 
@@ -134,7 +135,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   @Test
   public void testReportDueEndToday() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testReportDueEndToday_1");
+    final Report report = createTestReport("testReportDueEndToday_1", true, true, true);
     report.setEngagementDate(Instant.now());
     engine.getReportDao().update(report);
 
@@ -150,13 +151,12 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   public void testGH3304() {
     // Create a draft report
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ReportDao reportDao = engine.getReportDao();
     final Person author = getRegularUser();
     final ReportPerson advisor = PersonTest.personToPrimaryReportAuthor(author);
     final ReportPerson principal = PersonTest.personToPrimaryReportPerson(getSteveSteveson());
-    final Report report = TestBeans.getTestReport(null, Lists.newArrayList(advisor, principal));
-    report.setState(ReportState.DRAFT);
-    report.setEngagementDate(Instant.now().plus(1, ChronoUnit.HOURS));
-    final Report draftReport = engine.getReportDao().insert(report);
+    final Report draftReport = reportDao.insert(TestBeans.getTestReport("testGH3304",
+        getFutureDate(), null, Lists.newArrayList(advisor, principal)));
 
     // Submit the report
     graphQLHelper.updateObject(author, "submitReport", "uuid", "uuid", "String",
@@ -168,8 +168,8 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     testFutureEngagementWorker(0);
 
     // Move the engagementDate from future to past to simulate time passing
-    submittedReport.setEngagementDate(Instant.now().minus(1, ChronoUnit.HOURS));
-    engine.getReportDao().update(submittedReport);
+    submittedReport.setEngagementDate(getPastDate());
+    reportDao.update(submittedReport);
     // State shouldn't have changed
     final Report updatedReport = testReportState(submittedReport.getUuid(), ReportState.APPROVED);
 
@@ -201,26 +201,25 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     checkApprovalStepType(ApprovalStepType.REPORT_APPROVAL, false, "2");
   }
 
-  private void checkApprovalStepType(final ApprovalStepType type, final boolean isExpected,
+  private void checkApprovalStepType(final ApprovalStepType type, final boolean isFuture,
       final String id) {
     final String fullId = "checkApprovalStepType_" + id;
-    if (isExpected) {
+    if (isFuture) {
       expectedIds.add(fullId);
     } else {
       unexpectedIds.add(fullId);
     }
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport(fullId);
-    final ApprovalStep as = report.getApprovalStep();
-    as.setType(type);
-    engine.getApprovalStepDao().insert(as);
+    final Report report = createTestReport(fullId, false, false, isFuture);
+    final ApprovalStep as = createApprovalStep(type);
     report.setApprovalStep(as);
+    report.setAdvisorOrgUuid(as.getRelatedObjectUuid());
     engine.getReportDao().update(report);
 
-    testFutureEngagementWorker(isExpected ? 1 : 0);
+    testFutureEngagementWorker(isFuture ? 1 : 0);
 
-    if (isExpected) {
+    if (isFuture) {
       // Report should be draft now
       testReportDraft(report.getUuid());
     }
@@ -246,7 +245,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     }
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport(fullId);
+    final Report report = createTestReport(fullId, true, true, true);
     report.setState(state);
     engine.getReportDao().update(report);
 
@@ -261,43 +260,29 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   @Test
   public void testApprovalStepReport() {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testApprovalStepReport_1");
-    final ApprovalStep step = report.getApprovalStep();
-    step.setType(ApprovalStepType.REPORT_APPROVAL);
-    engine.getApprovalStepDao().insert(step);
+    final Report report = createTestReport("testApprovalStepReport_1", true, true, true);
+
+    expectedIds.add("testApprovalStepReport_1");
+
+    testFutureEngagementWorker(1);
+
+    // Report should be draft now
+    testReportDraft(report.getUuid());
+    // Edit it & submit
+    final ApprovalStep step = createApprovalStep(ApprovalStepType.REPORT_APPROVAL);
     report.setApprovalStep(step);
+    report.setAdvisorOrgUuid(step.getRelatedObjectUuid());
     engine.getReportDao().update(report);
-
-    // Report in approve step
-    final ReportAction ra = new ReportAction();
-    ra.setReport(report);
-    ra.setStep(step);
-    ra.setType(ActionType.APPROVE);
-    ra.setCreatedAt(Instant.now());
-    engine.getReportActionDao().insert(ra);
-
-    unexpectedIds.add("testApprovalStepReport_1");
+    engine.getReportDao().submit(report, report.loadAuthors(engine.getContext()).join().get(0));
+    testReportState(report.getUuid(), ReportState.PENDING_APPROVAL);
 
     testFutureEngagementWorker(0);
+    testReportState(report.getUuid(), ReportState.PENDING_APPROVAL);
   }
 
   @Test
   public void testPlanningApprovalStepReport() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testPlanningApprovalStepReport_1");
-    final ApprovalStep step = report.getApprovalStep();
-    step.setType(ApprovalStepType.PLANNING_APPROVAL);
-    engine.getApprovalStepDao().insert(step);
-    report.setApprovalStep(step);
-    engine.getReportDao().update(report);
-
-    // Report in planning approve step
-    final ReportAction ra = new ReportAction();
-    ra.setReport(report);
-    ra.setStep(step);
-    ra.setType(ActionType.APPROVE);
-    ra.setCreatedAt(Instant.now());
-    engine.getReportActionDao().insert(ra);
+    final Report report = createTestReport("testPlanningApprovalStepReport_1", true, false, true);
 
     expectedIds.add("testPlanningApprovalStepReport_1");
 
@@ -309,23 +294,22 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
 
   @Test
   public void testAutomaticallyApprovedReport() {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final Report report = createTestReport("testAutomaticallyApprovedReport_1");
-    report.setApprovalStep(null);
-    engine.getReportDao().update(report);
-
     // Report in automatic approve step (no planning workflow)
-    final ReportAction ra = new ReportAction();
-    ra.setReport(report);
-    ra.setType(ActionType.APPROVE);
-    ra.setPlanned(true);
-    ra.setCreatedAt(Instant.now());
-    engine.getReportActionDao().insert(ra);
+    final Report report = createTestReport("testAutomaticallyApprovedReport_1", false, true, true);
 
     expectedIds.add("testAutomaticallyApprovedReport_1");
 
     testFutureEngagementWorker(1);
 
+    // Report should be draft now
+    testReportDraft(report.getUuid());
+  }
+
+  @Test
+  public void testPublishedReport() {
+    final Report report = createPublishedTestReport("testPublishedReport_1");
+    expectedIds.add("testPublishedReport_1");
+    testFutureEngagementWorker(1);
     // Report should be draft now
     testReportDraft(report.getUuid());
   }
@@ -362,21 +346,77 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     emails.forEach(e -> assertThat(unexpectedIds).doesNotContain(e.to.text.split("@")[0]));
   }
 
-  private Report createTestReport(final String toAdressId) {
+  private void setPastDate(final Report report) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ReportDao reportDao = engine.getReportDao();
+    report.setEngagementDate(getPastDate());
+    reportDao.update(report);
+  }
+
+  private Report createTestReport(final String toAddressId, final boolean addApprovalStep,
+      final boolean approve, final boolean setPastDate) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ReportDao reportDao = engine.getReportDao();
+
     final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAdressId + whitelistedEmail);
+    author.setEmailAddress(toAddressId + whitelistedEmail);
     engine.getPersonDao().insert(author);
 
+    ApprovalStep approvalStep = null;
+    if (addApprovalStep) {
+      approvalStep = createApprovalStep(ApprovalStepType.PLANNING_APPROVAL);
+    }
+
+    final Report report = reportDao.insert(TestBeans.getTestReport(toAddressId, getFutureDate(),
+        approvalStep, ImmutableList.of(author)));
+    // Submit this report
+    reportDao.submit(report, author);
+
+    if (approvalStep != null && approve) {
+      // Approve this report
+      reportDao.approve(report, null, approvalStep);
+    }
+
+    if (setPastDate) {
+      setPastDate(report);
+    }
+    return report;
+  }
+
+  private ApprovalStep createApprovalStep(final ApprovalStepType type) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final Organization organization = TestBeans.getTestOrganization();
     engine.getOrganizationDao().insert(organization);
-
     final ApprovalStep approvalStep = TestBeans.getTestApprovalStep(organization);
-    approvalStep.setType(ApprovalStepType.PLANNING_APPROVAL);
+    approvalStep.setType(type);
     engine.getApprovalStepDao().insertAtEnd(approvalStep);
+    return approvalStep;
+  }
 
-    final Report report = TestBeans.getTestReport(approvalStep, ImmutableList.of(author));
-    return engine.getReportDao().insert(report);
+  private Report createPublishedTestReport(final String toAddressId) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final ReportDao reportDao = engine.getReportDao();
+    final EmailDao emailDao = engine.getEmailDao();
+
+    final Report report = createTestReport(toAddressId, true, true, false);
+
+    // Publish this report
+    final int emailSize = emailDao.getAll().size();
+    reportDao.publish(report, null);
+    // Should have sent email for publication
+    assertThat(emailDao.getAll().size()).isEqualTo(emailSize + 1);
+    expectedIds.add(toAddressId);
+
+    setPastDate(report);
+    return report;
+  }
+
+  private Instant getFutureDate() {
+    return Instant.now().plus(1, ChronoUnit.HOURS);
+  }
+
+  private Instant getPastDate() {
+    return Instant.now().minus(1, ChronoUnit.HOURS);
   }
 
 }

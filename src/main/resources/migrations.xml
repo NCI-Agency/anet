@@ -3656,6 +3656,119 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="set-planned-reportActions" author="gjvoosten">
+		<!-- any report action linked to a planning step is itself planned -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = true
+			WHERE "approvalStepUuid" IN (
+				SELECT uuid
+				FROM "approvalSteps"
+				WHERE type = 0
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+		<sql dbms="mssql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = 1
+			WHERE "approvalStepUuid" IN (
+				SELECT uuid
+				FROM "approvalSteps"
+				WHERE type = 0
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+
+		<!-- any report submit action directly followed by a planned action is itself planned -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = true
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				LEFT JOIN LATERAL (
+					SELECT ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" < ra."createdAt"
+					ORDER BY ra2."createdAt" DESC
+					LIMIT 1
+				) ra2 ON TRUE
+				WHERE ra2.type = 2
+				AND ra.planned = true
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+		<sql dbms="mssql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = 1
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				OUTER APPLY (
+					SELECT TOP(1) ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" < ra."createdAt"
+					ORDER BY ra2."createdAt" DESC
+				) ra2
+				WHERE ra2.type = 2
+				AND ra.planned = 1
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+
+		<!-- any report publish action directly preceded by a planned action is itself planned -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = true
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				LEFT JOIN LATERAL (
+					SELECT ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" > ra."createdAt"
+					ORDER BY ra2."createdAt"
+					LIMIT 1
+				) ra2 ON TRUE
+				WHERE ra2.type = 3
+				AND ra.planned = true
+			);
+		]]>
+		</sql>
+		<sql dbms="mssql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = 1
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				OUTER APPLY (
+					SELECT TOP(1) ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" > ra."createdAt"
+					ORDER BY ra2."createdAt"
+				) ra2
+				WHERE ra2.type = 3
+				AND ra.planned = 1
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+	</changeSet>
+
 	<changeSet id="add-people-openIdSubject" author="gjvoosten">
 		<!-- Store the Subject returned by the OpenID Provider (Keycloak); from the OIDC spec:
                      "It MUST NOT exceed 255 ASCII characters in length." -->
