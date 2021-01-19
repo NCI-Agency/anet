@@ -107,6 +107,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     DaoUtils.setUpdateFields(note);
     updateSubscriptions(1, note);
     return deleteInternal(uuid);
+  }
 
   @Override
   public int deleteInternal(String uuid) {
