@@ -1,4 +1,6 @@
 # Do not forget to also edit testDictionaries/*.yml files if dictionary change can break stuff
+CONNECTION_ERROR_MSG: Connection to the server is lost
+VERSION_CHANGED_MSG: "There is a new version of ANET, click here to load the new version (CAUTION: save any unsaved changes first)"
 SUPPORT_EMAIL_ADDR: support@example.com
 
 engagementsIncludeTimeAndDuration: true
@@ -476,13 +478,247 @@ fields:
 
   location:
     format: LAT_LON
+    customFields:
+      multipleButtons:
+        type: enumset
+        label: Choose one or more of the options
+        helpText: Help text for choosing multiple values
+        choices:
+          opt1:
+            label: Option 1
+          opt2:
+            label: Option 2
+          opt3:
+            label: Option 3
+      inputFieldName:
+        type: text
+        label: Text field
+        placeholder: Placeholder text for input field
+        helpText: Help text for text field
+      colourOptions:
+        type: enum
+        label: Choose one of the colours
+        helpText: Help text for choosing colours
+        choices:
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
+      textareaFieldName:
+        type: text
+        label: Textarea field
+        placeholder: Placeholder text for textarea field
+        helpText: Help text for textarea field
+        componentClass: textarea
+        style:
+          height: 200px
+        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+      numberFieldName:
+        type: number
+        typeError: Number field must be a number
+        label: Number field
+        placeholder: Placeholder text for number field
+        helpText: Help text for number field
+        validations:
+          - type: integer
+          - type: min
+            params: [5]
+          - type: max
+            params: [100]
+        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+      nlt:
+        type: date
+        label: Not later than date
+        helpText: Help text for date field
+      nlt_dt:
+        type: datetime
+        label: Not later than datetime
+        helpText: Help text for datetime field
+      arrayFieldName:
+        type: array_of_objects
+        label: Array of objects
+        helpText: Here you can add as many objects as needed
+        addButtonLabel: Add an object
+        objectLabel: Object
+        objectFields:
+          textF:
+            type: text
+            label: Object text
+            placeholder: Placeholder text for object text field
+            helpText: Help text for object text field
+          dateF:
+            type: date
+            label: Object date
+            helpText: Help text for object date field
+            visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
   position:
     name: 'Position Name'
+    customFields:
+      multipleButtons:
+        type: enumset
+        label: Choose one or more of the options
+        helpText: Help text for choosing multiple values
+        choices:
+          opt1:
+            label: Option 1
+          opt2:
+            label: Option 2
+          opt3:
+            label: Option 3
+      inputFieldName:
+        type: text
+        label: Text field
+        placeholder: Placeholder text for input field
+        helpText: Help text for text field
+      colourOptions:
+        type: enum
+        label: Choose one of the colours
+        helpText: Help text for choosing colours
+        choices:
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
+      textareaFieldName:
+        type: text
+        label: Textarea field
+        placeholder: Placeholder text for textarea field
+        helpText: Help text for textarea field
+        componentClass: textarea
+        style:
+          height: 200px
+        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+      numberFieldName:
+        type: number
+        typeError: Number field must be a number
+        label: Number field
+        placeholder: Placeholder text for number field
+        helpText: Help text for number field
+        validations:
+          - type: integer
+          - type: min
+            params: [5]
+          - type: max
+            params: [100]
+        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+      nlt:
+        type: date
+        label: Not later than date
+        helpText: Help text for date field
+      nlt_dt:
+        type: datetime
+        label: Not later than datetime
+        helpText: Help text for datetime field
+      arrayFieldName:
+        type: array_of_objects
+        label: Array of objects
+        helpText: Here you can add as many objects as needed
+        addButtonLabel: Add an object
+        objectLabel: Object
+        objectFields:
+          textF:
+            type: text
+            label: Object text
+            placeholder: Placeholder text for object text field
+            helpText: Help text for object text field
+          dateF:
+            type: date
+            label: Object date
+            helpText: Help text for object date field
+            visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
   organization:
     shortName: Name
     parentOrg: Parent Organization
+    customFields:
+      multipleButtons:
+        type: enumset
+        label: Choose one or more of the options
+        helpText: Help text for choosing multiple values
+        choices:
+          opt1:
+            label: Option 1
+          opt2:
+            label: Option 2
+          opt3:
+            label: Option 3
+      inputFieldName:
+        type: text
+        label: Text field
+        placeholder: Placeholder text for input field
+        helpText: Help text for text field
+      colourOptions:
+        type: enum
+        label: Choose one of the colours
+        helpText: Help text for choosing colours
+        choices:
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
+      textareaFieldName:
+        type: text
+        label: Textarea field
+        placeholder: Placeholder text for textarea field
+        helpText: Help text for textarea field
+        componentClass: textarea
+        style:
+          height: 200px
+        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+      numberFieldName:
+        type: number
+        typeError: Number field must be a number
+        label: Number field
+        placeholder: Placeholder text for number field
+        helpText: Help text for number field
+        validations:
+          - type: integer
+          - type: min
+            params: [5]
+          - type: max
+            params: [100]
+        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+      nlt:
+        type: date
+        label: Not later than date
+        helpText: Help text for date field
+      nlt_dt:
+        type: datetime
+        label: Not later than datetime
+        helpText: Help text for datetime field
+      arrayFieldName:
+        type: array_of_objects
+        label: Array of objects
+        helpText: Here you can add as many objects as needed
+        addButtonLabel: Add an object
+        objectLabel: Object
+        objectFields:
+          textF:
+            type: text
+            label: Object text
+            placeholder: Placeholder text for object text field
+            helpText: Help text for object text field
+          dateF:
+            type: date
+            label: Object date
+            helpText: Help text for object date field
+            visibleWhen: $[?(@.colourOptions === 'GREEN')]
 
   advisor:
 
@@ -514,51 +750,11 @@ fields:
     person:
       name: Afghan Partner
       countries: [Afghanistan]
-      assessment:
-        questions:
-          - id: test1
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 1
-            choice:
-              - value: "1"
-                label: one
-                color: '#c2ffb3'
-              - value: "2"
-                label: two
-                color: '#ffe396'
-              - value: "3"
-                label: three
-                color: '#ff8279'
-          - id: test2
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 2
-            choice:
-              - value: "3"
-                label: three
-                color: '#ff8279'
-              - value: "4"
-                label: four
-                color: '#ffe396'
-              - value: "5"
-                label: five
-                color: '#c2ffb3'
-          - id: test3
-            test: $.position.[?(@.identificationCode && /^(Z|z)/.test(@.identificationCode))]
-            label: Test question 3
-            choice:
-              - value: "1"
-                label: one
-                color: '#c2ffb3'
-              - value: "2"
-                label: two
-                color: '#ff8279'
-              - value: "3"
-                label: three
-                color: '#ff8279'
       assessments:
         - recurrence: quarterly
           questions:
             test1:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 1
               choices:
@@ -572,6 +768,7 @@ fields:
                   label: three
                   color: '#ff8279'
             test2:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 2
               choices:
@@ -585,6 +782,7 @@ fields:
                   label: five
                   color: '#c2ffb3'
             test3:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 3
               choices:
@@ -597,6 +795,12 @@ fields:
                 "3":
                   label: three
                   color: '#ff8279'
+            text:
+              type: special_field
+              label: Text
+              widget: richTextEditor
+              style:
+                height: 100px
         - recurrence: once
           relatedObjectType: report
           questions:
@@ -613,6 +817,30 @@ fields:
                 "3":
                   label: high
                   color: '#ff8279'
+            question2:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^P/i))]
+              type: enumset
+              label: Attendee from P org
+              choices:
+                yes:
+                  label: P
+                  color: '#ff0000'
+            question3:
+              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
+              type: enumset
+              label: Attendee from Z org
+              choices:
+                yes:
+                  label: Z
+                  color: '#00ff00'
+            question4:
+              test: $.relatedObject.[?(@property === "atmosphere" && @ === "POSITIVE")]
+              type: enumset
+              label: Report had POSITIVE atmosphere
+              choices:
+                yes:
+                  label: 👍
+                  color: '#0000ff'
 
     position:
       name: Afghan Tashkil

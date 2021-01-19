@@ -198,15 +198,15 @@ public class PendingAssessmentsNotificationWorker extends AbstractWorker {
   }
 
   // Dictionary lookup keys we use
-  private static final String PRINCIPAL_PERSON_ASSESSMENTS = "fields.principal.person.assessments";
-  private static final String TASK_SUB_LEVEL_ASSESSMENTS = "fields.task.subLevel.assessments";
-  private static final String TASK_TOP_LEVEL_ASSESSMENTS = "fields.task.topLevel.assessments";
+  public static final String PRINCIPAL_PERSON_ASSESSMENTS = "fields.principal.person.assessments";
+  public static final String TASK_SUB_LEVEL_ASSESSMENTS = "fields.task.subLevel.assessments";
+  public static final String TASK_TOP_LEVEL_ASSESSMENTS = "fields.task.topLevel.assessments";
   // JSON fields in task.customFields we use
-  private static final String TASK_ASSESSMENTS = "assessments";
-  private static final String TASK_RECURRENCE = "recurrence";
+  public static final String TASK_ASSESSMENTS = "assessments";
+  public static final String TASK_RECURRENCE = "recurrence";
   // JSON fields in note.text we use
-  private static final String NOTE_RECURRENCE = "__recurrence";
-  private static final String NOTE_PERIOD_START = "__periodStart";
+  public static final String NOTE_RECURRENCE = "__recurrence";
+  public static final String NOTE_PERIOD_START = "__periodStart";
 
   private final PositionDao positionDao;
   private final TaskDao taskDao;

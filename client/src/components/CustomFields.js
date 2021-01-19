@@ -660,6 +660,20 @@ const FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: ArrayOfAnetObjectsField
 }
 
+// mutates the object
+export function initInvisibleFields(
+  anetObj,
+  config,
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT
+) {
+  if (anetObj[parentFieldName]) {
+    // set initial invisible custom fields
+    anetObj[parentFieldName][
+      INVISIBLE_CUSTOM_FIELDS_FIELD
+    ] = getInvisibleFields(config, parentFieldName, anetObj)
+  }
+}
+
 export function getInvisibleFields(
   fieldsConfig = {},
   parentFieldName,
@@ -753,6 +767,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     helpText,
     validations,
     visibleWhen,
+    test,
     objectFields,
     ...fieldProps
   } = fieldConfig

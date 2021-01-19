@@ -51,6 +51,7 @@ public class OrganizationResource {
   @GraphQLMutation(name = "createOrganization")
   public Organization createOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
+    org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     final Organization created;
@@ -91,6 +92,7 @@ public class OrganizationResource {
   @GraphQLMutation(name = "updateOrganization")
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
+    org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
     AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);

@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.6.1"
 	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.spotless" version "5.8.2"
+	id "com.diffplug.spotless" version "5.9.0"
 }
 
 apply plugin: 'java'
@@ -148,6 +148,7 @@ processResources {
 		}
 	}
 }
+processResources.outputs.upToDateWhen{ false }
 
 def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
 projectBranch.waitFor();

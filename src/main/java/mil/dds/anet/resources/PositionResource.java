@@ -70,6 +70,7 @@ public class PositionResource {
   @GraphQLMutation(name = "createPosition")
   public Position createPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
+    pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
@@ -103,7 +104,7 @@ public class PositionResource {
           }, oldPositionUuid -> {
             dao.deletePositionAssociation(DaoUtils.getUuid(pos), oldPositionUuid);
           });
-      AnetAuditLogger.log("Person {} associations changed to {} by {}", current,
+      AnetAuditLogger.log("Position {} associations changed to {} by {}", current,
           pos.getAssociatedPositions(), user);
       // GraphQL mutations *have* to return something
       return 1;
@@ -114,6 +115,7 @@ public class PositionResource {
   @GraphQLMutation(name = "updatePosition")
   public Integer updatePosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
+    pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);

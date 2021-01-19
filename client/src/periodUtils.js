@@ -162,7 +162,7 @@ export const getPeriodsConfig = (
   for (let i = numberOfperiods - 1; i >= 0; i--) {
     const periodDetails = PERIOD_FACTORIES[recurrence](now, offset + i)
     if (forAssessments) {
-      // don't allow assessments for current and future periods
+      // only allow assessments for past periods
       periodDetails.allowNewAssessments = offset + i > 0
     }
     periods.push(periodDetails)

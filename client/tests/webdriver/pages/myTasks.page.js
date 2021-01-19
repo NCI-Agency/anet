@@ -7,6 +7,10 @@ class MyTasks extends Page {
     super.open(PAGE_URL)
   }
 
+  openAs(user) {
+    super.open(PAGE_URL, user)
+  }
+
   openAsOnboardUser() {
     super.openAsOnboardUser(PAGE_URL)
   }
@@ -25,6 +29,10 @@ class MyTasks extends Page {
 
   get myPendingTasksContent() {
     return browser.$("#my-tasks-with-pending-assessments").$("tbody")
+  }
+
+  getMyPendingTask(name) {
+    return this.myPendingTasksContent.$(`//a[contains(text(), "${name}")]`)
   }
 }
 

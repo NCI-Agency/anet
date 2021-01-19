@@ -146,35 +146,47 @@ public abstract class AbstractResourceTest {
     return erin;
   }
 
-  public Person getJackJackson() {
+  public static Person getChristopfTopferness() {
+    return findOrPutPersonInDb(PersonTest.getChristopfTopferness());
+  }
+
+  public static Person getHunterHuntman() {
+    return findOrPutPersonInDb(PersonTest.getHunterHuntman());
+  }
+
+  public static Person getJackJackson() {
     return findOrPutPersonInDb(PersonTest.getJackJacksonStub());
   }
 
-  public Person getSteveSteveson() {
+  public static Person getShardulSharton() {
+    return findOrPutPersonInDb(PersonTest.getShardulSharton());
+  }
+
+  public static Person getSteveSteveson() {
     return findOrPutPersonInDb(PersonTest.getSteveStevesonStub());
   }
 
-  public Person getRogerRogwell() {
+  public static Person getRogerRogwell() {
     return findOrPutPersonInDb(PersonTest.getRogerRogwell());
   }
 
-  public Person getElizabethElizawell() {
+  public static Person getElizabethElizawell() {
     return findOrPutPersonInDb(PersonTest.getElizabethElizawell());
   }
 
-  public Person getNickNicholson() {
+  public static Person getNickNicholson() {
     return findOrPutPersonInDb(PersonTest.getNickNicholson());
   }
 
-  public Person getBobBobtown() {
+  public static Person getBobBobtown() {
     return findOrPutPersonInDb(PersonTest.getBobBobtown());
   }
 
-  public Person getAndrewAnderson() {
+  public static Person getAndrewAnderson() {
     return findOrPutPersonInDb(PersonTest.getAndrewAnderson());
   }
 
-  public Organization createOrganizationWithUuid(String uuid) {
+  public static Organization createOrganizationWithUuid(String uuid) {
     final Organization ao = new Organization();
     ao.setUuid(uuid);
     return ao;

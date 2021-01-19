@@ -1,32 +1,22 @@
 import Page from "./page"
 
-class ShowTask extends Page {
-  get assessmentResultsMonthly() {
-    return browser.$("#entity-assessments-results-monthly")
+class ShowPerson extends Page {
+  get assessmentsTable() {
+    return this.quarterlyAssessmentContainer.$("table.assessments-table")
   }
 
-  get assessmentResultsWeekly() {
-    return browser.$("#entity-assessments-results-weekly")
-  }
-
-  get monthlyAssessmentsTable() {
-    return this.assessmentResultsMonthly.$("table.assessments-table")
-  }
-
-  get addMonthlyAssessmentButton() {
-    // get the add assessment button for first period on the table
-    return this.monthlyAssessmentsTable.$(
-      "tbody > tr > td:first-child > button"
+  get addPeriodicAssessmentButton() {
+    // get the add assessment button for latest assessable period (previous period)
+    return this.assessmentsTable.$(
+      "tbody > tr:last-child > td:nth-child(2) > button"
     )
   }
 
-  get editMonthlyAssessmentButton() {
-    return this.monthlyAssessmentsTable.$(
-      'div.panel-primary button[title="Edit assessment"]'
-    )
+  get editAssessmentButton() {
+    return browser.$('div.panel-primary button[title="Edit assessment"]')
   }
 
-  get deleteMonthlyAssessmentButton() {
+  get deleteAssessmentButton() {
     return browser.$('div.panel-primary button[title="Delete assessment"]')
   }
 
@@ -43,11 +33,15 @@ class ShowTask extends Page {
   }
 
   get shownAssessmentPanel() {
-    return this.monthlyAssessmentsTable.$("td:first-child .panel-primary")
+    return this.assessmentsTable.$("td:nth-child(2) .panel-primary")
   }
 
   get shownAssessmentDetails() {
     return this.shownAssessmentPanel.$$("div.form-control-static")
+  }
+
+  get quarterlyAssessmentContainer() {
+    return browser.$("#entity-assessments-results-quarterly")
   }
 
   waitForAssessmentModalForm(reverse = false) {
@@ -57,7 +51,17 @@ class ShowTask extends Page {
   }
 
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
-    // NOTE: assuming assessment content, 2 questions
+    this.assessmentModalForm
+      .$$(".form-group .btn-group")
+      .forEach((btnGroup, index) => {
+        const button = btnGroup.$(`label[id="${valuesArr[index]}"]`)
+        // wait for a bit, clicks and do double click, sometimes it does not go through
+        browser.pause(300)
+        button.click({ x: 10, y: 10 })
+        button.click({ x: 10, y: 10 })
+        browser.pause(300)
+      })
+
     // first focus on the text editor input
     this.assessmentModalForm.$(".DraftEditor-editorContainer").click()
     if (prevTextToClear) {
@@ -67,22 +71,14 @@ class ShowTask extends Page {
       // maybe we clicked at the beginning of the text, Backspace doesn't clear
       browser.keys(chars.map(char => "Delete"))
     }
-    browser.keys(valuesArr[0])
-
-    const button = this.assessmentModalForm
-      .$(".form-group .btn-group")
-      .$(`label[id="${valuesArr[1]}"]`)
-    // wait for a bit, clicks and do double click, sometimes it does not go through
-    browser.pause(300)
-    button.click({ x: 10, y: 10 })
-    button.click({ x: 10, y: 10 })
+    // fourth value is the text field
+    browser.keys(valuesArr[3])
     browser.pause(300)
   }
 
   saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
     this.saveAssessmentButton.click()
     browser.pause(300) // wait for modal animation to finish
-
     this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
     // wait until details to change, can take some time to update show page
     browser.waitUntil(
@@ -90,7 +86,7 @@ class ShowTask extends Page {
         return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
       },
       {
-        timeout: 5000,
+        timeout: 20000,
         timeoutMsg: "Expected change after save"
       }
     )
@@ -112,4 +108,4 @@ class ShowTask extends Page {
   }
 }
 
-export default new ShowTask()
+export default new ShowPerson()

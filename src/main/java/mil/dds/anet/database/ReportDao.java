@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import com.google.common.collect.ObjectArrays;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,9 +61,14 @@ import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQuery> {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY or search post-processing
   public static final String[] minimalFields = {"uuid", "approvalStepUuid",
@@ -123,8 +129,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     } else {
       sql.append(":engagementDate, :releasedAt, ");
     }
-    sql.append(
-        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid, :customFields)");
+    sql.append(":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
+        + ":principalOrgUuid, :customFields)");
 
     getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -236,20 +242,20 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
         + "state = :state, \"updatedAt\" = :updatedAt, \"locationUuid\" = :locationUuid, "
-        + "intent = :intent, exsum = :exsum, text = :reportText, "
-        + "\"keyOutcomes\" = :keyOutcomes, \"nextSteps\" = :nextSteps, "
-        + "\"approvalStepUuid\" = :approvalStepUuid, ");
+        + "intent = :intent, exsum = :exsum, text = :reportText, \"keyOutcomes\" = :keyOutcomes, "
+        + "\"nextSteps\" = :nextSteps, \"approvalStepUuid\" = :approvalStepUuid, ");
     if (DaoUtils.isMsSql()) {
-      sql.append(
-          "\"engagementDate\" = CAST(:engagementDate AS datetime2), \"releasedAt\" = CAST(:releasedAt AS datetime2), ");
+      sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), "
+          + "\"releasedAt\" = CAST(:releasedAt AS datetime2), ");
     } else {
       sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
     }
-    sql.append(
-        "duration = :duration, atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
-            + "\"cancelledReason\" = :cancelledReason, "
-            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid, "
-            + "\"customFields\" = :customFields " + "WHERE uuid = :uuid");
+    sql.append("duration = :duration, atmosphere = :atmosphere, "
+        + "\"atmosphereDetails\" = :atmosphereDetails, "
+        + "\"cancelledReason\" = :cancelledReason, "
+        + "\"principalOrganizationUuid\" = :principalOrgUuid, "
+        + "\"advisorOrganizationUuid\" = :advisorOrgUuid, "
+        + "\"customFields\" = :customFields WHERE uuid = :uuid");
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
@@ -839,14 +845,51 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     AnetEmailWorker.sendEmailAsync(email);
   }
 
+  public int submit(final Report r, final Person user) {
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    // Get all the approval steps for this report
+    final List<ApprovalStep> steps = r.computeApprovalSteps(engine.getContext(), engine).join();
+
+    // Write the submission action
+    final ReportAction action = new ReportAction();
+    action.setReportUuid(r.getUuid());
+    action.setPersonUuid(user.getUuid());
+    action.setType(ActionType.SUBMIT);
+    action.setPlanned(r.isFutureEngagement());
+    engine.getReportActionDao().insert(action);
+
+    if (r.isFutureEngagement() && Utils.isEmptyOrNull(steps)) {
+      // Future engagements without planning approval chain will be approved directly
+      // Write the approval action
+      final ReportAction approval = new ReportAction();
+      approval.setReportUuid(r.getUuid());
+      approval.setPersonUuid(user.getUuid());
+      approval.setType(ActionType.APPROVE);
+      approval.setPlanned(true); // so the FutureEngagementWorker can find this
+      engine.getReportActionDao().insert(approval);
+      r.setState(ReportState.APPROVED);
+    } else {
+      // Push the report into the first step of this workflow
+      r.setApprovalStep(steps.get(0));
+      r.setState(ReportState.PENDING_APPROVAL);
+    }
+    final int numRows = update(r, user);
+    if (numRows != 0 && !Utils.isEmptyOrNull(steps)) {
+      sendApprovalNeededEmail(r, steps.get(0));
+      logger.info("Putting report {} into step {}", r.getUuid(), steps.get(0).getUuid());
+    }
+    return numRows;
+  }
+
   public int approve(Report r, Person user, ApprovalStep step) {
     // Write the approval action
     final ReportAction action = new ReportAction();
     action.setReportUuid(r.getUuid());
     action.setStepUuid(step.getUuid());
-    // User could be null when the publication action is being done automatically by a worker
+    // User could be null when the approval action is being done automatically by a worker
     action.setPersonUuid(DaoUtils.getUuid(user));
     action.setType(ActionType.APPROVE);
+    action.setPlanned(ApprovalStep.isPlanningStep(step));
     AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
     // Update the report
@@ -933,6 +976,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append("/* getFutureToPastReports */");
     sql.append(" SELECT r.uuid AS reports_uuid");
     sql.append(" FROM reports r");
+    // Get the last report action
     // FIXME: Hard-coded MS SQL or PostgreSQL specific query stanza
     if (DaoUtils.isMsSql()) {
       sql.append(" OUTER APPLY (SELECT TOP (1)");
@@ -955,19 +999,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append(" )");
     // Get past reports relative to the endDate argument
     sql.append(" AND r.\"engagementDate\" <= :endDate");
-    sql.append(" AND (");
     // Get reports for engagements which just became past engagements during or
     // after the planning approval process, but which are not in the report approval process yet
-    sql.append("   ra.planned = :planned");
-    sql.append("   OR ra.\"approvalStepUuid\" IN (");
-    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
-    sql.append("     WHERE a.type = :planningApprovalStepType");
-    sql.append("   )");
-    // Also get reports pending planning approval when the approval action was not taken yet
-    sql.append("   OR r.\"approvalStepUuid\" IN (");
-    sql.append("     SELECT a.uuid FROM \"approvalSteps\" a");
-    sql.append("     WHERE a.type = :planningApprovalStepType");
-    sql.append(" ))");
+    sql.append(" AND ra.planned = :planned");
     DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
     sqlArgs.put("reportApproved", DaoUtils.getEnumId(ReportState.APPROVED));
     sqlArgs.put("reportRejected", DaoUtils.getEnumId(ReportState.REJECTED));

@@ -19,10 +19,10 @@ import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Organization extends AbstractAnetBean
+public class Organization extends AbstractCustomizableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
   /** Pseudo uuid to represent all/top-level organization(s). */
@@ -262,8 +262,9 @@ public class Organization extends AbstractAnetBean
     if (!(o instanceof Organization)) {
       return false;
     }
-    Organization other = (Organization) o;
-    return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
+    final Organization other = (Organization) o;
+    return super.equals(o) && Objects.equals(other.getUuid(), uuid)
+        && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
@@ -272,8 +273,8 @@ public class Organization extends AbstractAnetBean
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, status, identificationCode, type, createdAt,
-        updatedAt);
+    return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
+        type, createdAt, updatedAt);
   }
 
   @Override

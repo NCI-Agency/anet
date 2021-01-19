@@ -69,6 +69,8 @@ $defs:
     additionalProperties: false
     required: [type]
     properties:
+      test:
+        type: string
       type:
         title: value type field
         type: string
@@ -246,8 +248,14 @@ $defs:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [CONNECTION_ERROR_MSG, VERSION_CHANGED_MSG, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
+  CONNECTION_ERROR_MSG:
+    type: string
+    description: Banner text when the connection is lost
+  VERSION_CHANGED_MSG:
+    type: string
+    description: Banner text when there is a new version of ANET
   SUPPORT_EMAIL_ADDR:
     type: string
     title: The support email address
@@ -523,6 +531,10 @@ properties:
             enum: [LAT_LON, MGRS]
             title: Coordinate format for location
             description: Used in the UI where a location's coordinate is shown. Defaults to LAT_LON.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/customField"
 
       position:
         type: object
@@ -533,6 +545,10 @@ properties:
             type: string
             title: The label for a position's name
             description: Used in the UI where a position's name is shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/customField"
 
       organization:
         type: object
@@ -547,6 +563,10 @@ properties:
             type: string
             title: The label for an organization's parent organization
             description: Used in the UI where an organization's parent organization is shown.
+          customFields:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/customField"
 
       advisor:
         type: object
@@ -630,41 +650,6 @@ properties:
                   type: string
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
-              assessment:
-                type: object
-                additionalProperties: false
-                required: [questions]
-                properties:
-                  questions:
-                    type: array
-                    uniqueItems: true
-                    minItems: 1
-                    items:
-                      type: object
-                      additionalProperties: false
-                      required: [id,label,choice]
-                      properties:
-                        id:
-                          type: string
-                        test:
-                          type: string
-                        label:
-                          type: string
-                        choice:
-                          type: array
-                          uniqueItems: true
-                          minItems: 1
-                          items:
-                            type: object
-                            additionalProperties: false
-                            required: [value,label]
-                            properties:
-                              value:
-                                type: string
-                              label:
-                                type: string
-                              color:
-                                type: string
               assessments:
                 type: array
                 items:

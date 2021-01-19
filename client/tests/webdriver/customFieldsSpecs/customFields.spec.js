@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import { v4 as uuidv4 } from "uuid"
 import CreatePerson from "../pages/createNewPerson.page"
 import CreateTask from "../pages/createNewTask.page"
 import CreateReport from "../pages/createReport.page"
@@ -262,7 +263,9 @@ describe("When working with custom fields for different anet objects", () => {
       CreateTask.form.waitForExist()
       CreateTask.form.waitForDisplayed()
       // Fill other required fields so that we can test custom field validation
-      CreateTask.shortName.setValue(REQUIRED_TASK_FIELDS.shortName)
+      CreateTask.shortName.setValue(
+        `${REQUIRED_TASK_FIELDS.shortName} ${uuidv4()}`
+      )
     })
 
     it("Should be able to see assessment fields", () => {

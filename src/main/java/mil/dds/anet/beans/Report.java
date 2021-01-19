@@ -824,8 +824,9 @@ public class Report extends AbstractCustomizableAnetBean
     if (!(o instanceof Report)) {
       return false;
     }
-    Report r = (Report) o;
-    return Objects.equals(r.getUuid(), uuid) && Objects.equals(r.getState(), state)
+    final Report r = (Report) o;
+    return super.equals(o) && Objects.equals(r.getUuid(), uuid)
+        && Objects.equals(r.getState(), state)
         && Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())
         && Objects.equals(r.getCreatedAt(), createdAt)
         && Objects.equals(r.getUpdatedAt(), updatedAt)
@@ -840,16 +841,15 @@ public class Report extends AbstractCustomizableAnetBean
         && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getTags(), tags)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
-        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups)
-        && Objects.equals(r.getCustomFields(), customFields);
+        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt, location, intent, exsum,
-        reportPeople, tasks, reportText, nextSteps, comments, atmosphere, atmosphereDetails,
-        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups,
-        customFields);
+    return Objects.hash(super.hashCode(), uuid, state, approvalStep, createdAt, updatedAt, location,
+        intent, exsum, reportPeople, tasks, reportText, nextSteps, comments, atmosphere,
+        atmosphereDetails, engagementDate, duration, tags, reportSensitiveInformation,
+        authorizationGroups);
   }
 
   public static Report createWithUuid(String uuid) {

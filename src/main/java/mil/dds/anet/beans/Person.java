@@ -324,9 +324,10 @@ public class Person extends AbstractCustomizableAnetBean
     if (!(o instanceof Person)) {
       return false;
     }
-    Person other = (Person) o;
-    boolean b = Objects.equals(uuid, other.getUuid()) && Objects.equals(other.getName(), name)
-        && Objects.equals(other.getStatus(), status) && Objects.equals(other.getRole(), role)
+    final Person other = (Person) o;
+    return super.equals(o) && Objects.equals(uuid, other.getUuid())
+        && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
+        && Objects.equals(other.getRole(), role)
         && Objects.equals(other.getEmailAddress(), emailAddress)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
@@ -336,15 +337,13 @@ public class Person extends AbstractCustomizableAnetBean
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
                 ? updatedAt.equals(other.getUpdatedAt())
-                : other.getUpdatedAt() == null)
-        && Objects.equals(other.getCustomFields(), customFields);
-    return b;
+                : other.getUpdatedAt() == null);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        pendingVerification, avatar, code, createdAt, updatedAt, customFields);
+    return Objects.hash(super.hashCode(), uuid, name, status, role, emailAddress, phoneNumber, rank,
+        biography, pendingVerification, avatar, code, createdAt, updatedAt);
   }
 
   @Override

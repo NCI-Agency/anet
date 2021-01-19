@@ -104,8 +104,8 @@ const API = {
       .catch(response => Promise.reject(API._handleError(response)))
   },
 
-  useApiQuery(query, variables) {
-    const results = useQuery(query, { variables })
+  useApiQuery(query, variables, others) {
+    const results = useQuery(query, { variables, ...others })
     results.error = results.error && API._handleError(results.error)
     return results
   },
@@ -132,10 +132,7 @@ const API = {
   _getAuthHeader: function() {
     const creds = API._getAuthParams()
     if (creds) {
-      return [
-        "Authorization",
-        "Basic " + Buffer.from(`${creds.user}:${creds.pass}`).toString("base64")
-      ]
+      return ["Authorization", "Basic " + btoa(`${creds.user}:${creds.pass}`)]
     }
     return null
   },

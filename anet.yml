@@ -148,15 +148,7 @@ logging:
     "io.dropwizard.assets.*": TRACE
     "waffle.servlet.NegotiateSecurityFilter": TRACE
     "mil.dds.anet.auth.AnetAuthenticationFilter": TRACE
-    "mil.dds.anet.threads": DEBUG
-    "mil.dds.anet.resources.TestingResource":
-      level: INFO
-      appenders:
-        - type: file
-          currentLogFilename: ./logs/testingLogger.log
-          archivedLogFilenamePattern: ./logs/testingLogger-%d.log.zip
-          archivedFileCount: 2
-          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
+    "mil.dds.anet": DEBUG
     "mil.dds.anet.utils.AnetAuditLogger":
       level: INFO
       appenders:

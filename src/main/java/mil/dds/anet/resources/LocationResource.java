@@ -49,6 +49,7 @@ public class LocationResource {
   @GraphQLMutation(name = "createLocation")
   public Location createLocation(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "location") Location l) {
+    l.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertSuperUser(user);
     if (l.getName() == null || l.getName().trim().length() == 0) {
@@ -79,6 +80,7 @@ public class LocationResource {
   @GraphQLMutation(name = "updateLocation")
   public Integer updateLocation(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "location") Location l) {
+    l.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertSuperUser(user);
     final int numRows = dao.update(l);

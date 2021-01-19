@@ -276,18 +276,19 @@ public class Task extends AbstractCustomizableAnetBean
     if (!(o instanceof Task)) {
       return false;
     }
-    Task other = (Task) o;
-    return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
+    final Task other = (Task) o;
+    return super.equals(o) && Objects.equals(other.getUuid(), uuid)
+        && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
-        && Objects.equals(other.getStatus(), status)
-        && Objects.equals(other.getCustomFields(), customFields);
+        && Objects.equals(other.getStatus(), status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, status, customFields);
+    return Objects.hash(super.hashCode(), uuid, shortName, longName, category, customFieldRef1,
+        status);
   }
 
   @Override

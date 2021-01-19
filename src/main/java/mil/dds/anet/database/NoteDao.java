@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
@@ -91,6 +92,14 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   @InTransaction
+  public int updateNoteTypeAndText(Note n) {
+    return getDbHandle()
+        .createUpdate(
+            "/* updateNote */ UPDATE notes SET type = :type, text = :text WHERE uuid = :uuid")
+        .bindBean(n).bind("type", DaoUtils.getEnumId(n.getType())).execute();
+  }
+
+  @InTransaction
   @Override
   public int delete(String uuid) {
     final Note note = getByUuid(uuid);
@@ -98,7 +107,6 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     DaoUtils.setUpdateFields(note);
     updateSubscriptions(1, note);
     return deleteInternal(uuid);
-  }
 
   @Override
   public int deleteInternal(String uuid) {
@@ -205,6 +213,12 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     final int nrNotesDeleted = getDbHandle().execute("/* deleteDanglingNotes */ DELETE FROM notes"
         + " WHERE uuid NOT IN ( SELECT \"noteUuid\" FROM \"noteRelatedObjects\" )");
     logger.info("Deleted {} dangling notes", nrNotesDeleted);
+  }
+
+  @InTransaction
+  public List<Note> getNotesByType(NoteType type) {
+    return getDbHandle().createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
+        .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
   }
 
   private void updateSubscriptions(int numRows, Note obj) {

@@ -1,4 +1,7 @@
-import Model from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
 import { convertLatLngToMGRS, convertMGRSToLatLng } from "geoUtils"
 import _isEmpty from "lodash/isEmpty"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -16,6 +19,11 @@ export default class Location extends Model {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(
+    Settings.fields.location.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -118,9 +126,13 @@ export default class Location extends Model {
         .nullable()
         .default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static hasCoordinates(location) {
     return (

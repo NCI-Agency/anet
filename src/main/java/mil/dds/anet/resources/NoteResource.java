@@ -7,13 +7,22 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
+import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.NoteDao;
+import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -26,10 +35,14 @@ public class NoteResource {
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private final AnetObjectEngine engine;
   private final NoteDao dao;
+  private final PositionDao positionDao;
 
   public NoteResource(AnetObjectEngine engine) {
+    this.engine = engine;
     this.dao = engine.getNoteDao();
+    this.positionDao = engine.getPositionDao();
   }
 
   @GraphQLMutation(name = "createNote")
@@ -41,17 +54,6 @@ public class NoteResource {
     n.setAuthorUuid(DaoUtils.getUuid(user));
     n = dao.insert(n);
     AnetAuditLogger.log("Note {} created by {}", n, user);
-    return n;
-  }
-
-  @GraphQLMutation(name = "createNotes")
-  public int createNotes(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "notes") List<Note> notes) {
-    int n = 0;
-    for (final Note note : notes) {
-      createNote(context, note);
-      n++;
-    }
     return n;
   }
 
@@ -90,11 +92,69 @@ public class NoteResource {
     return numRows;
   }
 
-  private void checkPermission(Note n, final Person user) {
-    if (!n.getAuthorUuid().equals(DaoUtils.getUuid(user)) && !AuthUtils.isAdmin(user)) {
+  private void checkPermission(final Note note, final Person user) {
+    if (AuthUtils.isAdmin(user)) {
+      // Admin can edit any note
+      return;
+    }
+
+    if (note.getType() != NoteType.ASSESSMENT) {
+      if (note.getAuthorUuid().equals(DaoUtils.getUuid(user))) {
+        // Authors can edit their non-assessment notes
+        return;
+      }
       throw new WebApplicationException("Only the author or an admin can do this",
           Status.FORBIDDEN);
     }
+
+    // Assessments have special restrictions
+    Set<String> responsibleTasksUuids = null;
+    Set<String> associatedPositionsUuids = null;
+    for (final NoteRelatedObject nro : note.loadNoteRelatedObjects(engine.getContext()).join()) {
+      if (TaskDao.TABLE_NAME.equals(nro.getRelatedObjectType())) {
+        responsibleTasksUuids = lazyLoadResponsibleTasks(responsibleTasksUuids, user);
+        if (responsibleTasksUuids.contains(nro.getRelatedObjectUuid())) {
+          // This task is among the user's responsible tasks
+          return;
+        }
+      } else if (PersonDao.TABLE_NAME.equals(nro.getRelatedObjectType())) {
+        associatedPositionsUuids = lazyLoadAssociatedPositions(associatedPositionsUuids, user);
+        final Position position = positionDao
+            .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
+        if (associatedPositionsUuids.contains(DaoUtils.getUuid(position))) {
+          // This position is among the associated positions of the user
+          return;
+        }
+      }
+    }
+    throw new WebApplicationException("You do not have permissions to edit this assessment",
+        Status.FORBIDDEN);
+  }
+
+  private Set<String> lazyLoadResponsibleTasks(final Set<String> responsibleTasksUuids,
+      final Person user) {
+    if (responsibleTasksUuids != null) {
+      // Already loaded
+      return responsibleTasksUuids;
+    }
+    // Load
+    final TaskSearchQuery tsq = new TaskSearchQuery();
+    tsq.setStatus(Task.Status.ACTIVE);
+    final List<Task> responsibleTasks =
+        user.loadPosition().loadResponsibleTasks(engine.getContext(), tsq).join();
+    return responsibleTasks.stream().map(rp -> rp.getUuid()).collect(Collectors.toSet());
+  }
+
+  private Set<String> lazyLoadAssociatedPositions(final Set<String> associatedPositionsUuids,
+      final Person user) {
+    if (associatedPositionsUuids != null) {
+      // Already loaded
+      return associatedPositionsUuids;
+    }
+    // Load
+    final List<Position> associatedPositions =
+        user.loadPosition().loadAssociatedPositions(engine.getContext()).join();
+    return associatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
   }
 
   private void checkAndFixText(Note n) {

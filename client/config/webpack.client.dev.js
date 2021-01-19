@@ -5,6 +5,7 @@ const common = require("./webpack.common.js")
 const paths = require("./paths")
 
 module.exports = merge.merge(common.clientConfig, {
+  mode: "development",
   resolve: {
     modules: [paths.appSrc, "node_modules", "platform/web-dev"]
   },
@@ -39,7 +40,6 @@ module.exports = merge.merge(common.clientConfig, {
       inject: true,
       template: "public/index.hbs"
     }),
-    new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin()
   ]
 })

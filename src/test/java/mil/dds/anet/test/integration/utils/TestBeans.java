@@ -51,16 +51,21 @@ public class TestBeans {
     return as;
   }
 
-  public static Report getTestReport(ApprovalStep approvalStep, List<ReportPerson> reportPeople) {
-    Report r = new Report();
-    r.setState(ReportState.APPROVED);
-    r.setIntent("test_dummy");
+  public static Report getTestReport(String reportText, Instant engagementDate,
+      ApprovalStep approvalStep, List<ReportPerson> reportPeople) {
+    final String s = "test_dummy: " + reportText;
+    final Report r = new Report();
+    r.setState(ReportState.DRAFT);
+    r.setIntent(s);
     r.setAtmosphere(Atmosphere.NEUTRAL);
     r.setApprovalStep(approvalStep);
+    if (approvalStep != null) {
+      r.setAdvisorOrgUuid(approvalStep.getRelatedObjectUuid());
+    }
     r.setReportPeople(reportPeople);
-    r.setReportText("test_dummy");
-    r.setNextSteps("test_dummy");
-    r.setEngagementDate(Instant.now());
+    r.setReportText(s);
+    r.setNextSteps(s);
+    r.setEngagementDate(engagementDate == null ? Instant.now() : engagementDate);
     r.setDuration(60);
     return r;
   }
