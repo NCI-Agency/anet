@@ -3,15 +3,14 @@
 
     <xsl:template match="/">
         <nvg xmlns="http://tide.act.nato.int/schemas/2008/10/nvg" version="1.4.0" classification="NOT CLASSIFIED">
-            <xsl:apply-templates select="data/reportList/list/element[number(location/lat)=location/lat]"/>
-            <xsl:apply-templates select="data/REPORTS/list/element[number(location/lat)=location/lat]"/>
+            <xsl:apply-templates select="data/reports/list/element[number(location/lat)=location/lat]"/>
         </nvg>
     </xsl:template>
 
     <xsl:template match="element">
         <point>
             <xsl:attribute name="label">
-                <xsl:value-of select="primaryAdvisor/name" />@<xsl:value-of select="primaryPrincipal/position/organization/longName" />
+                <xsl:value-of select="primaryAdvisor/name" />@<xsl:value-of select="primaryAdvisor/position/organization/shortName" />
             </xsl:attribute>
             <xsl:attribute name="x">
                 <xsl:value-of select="location/lng" />

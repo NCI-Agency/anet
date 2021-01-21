@@ -12,8 +12,7 @@
                         </Icon>
                     </IconStyle>
                 </Style>
-                <xsl:apply-templates select="data/reportList/list/element[number(location/lat)=location/lat]" mode="report"/>
-                <xsl:apply-templates select="data/REPORTS/list/element[number(location/lat)=location/lat]" mode="report"/>
+                <xsl:apply-templates select="data/reports/list/element[number(location/lat)=location/lat]" mode="report"/>
                 <ScreenOverlay>
                     <name>ANET Legend </name>
                     <Icon>
@@ -31,7 +30,7 @@
     <xsl:template match="element" mode="report">
         <Placemark>
             <name>
-                <h1><xsl:value-of select="primaryAdvisor/name" />@<xsl:value-of select="primaryPrincipal/position/organization/longName"/></h1>
+                <h1><xsl:value-of select="primaryAdvisor/name" />@<xsl:value-of select="primaryAdvisor/position/organization/shortName"/></h1>
             </name>
             <description>
             <xsl:text disable-output-escaping="yes">&lt;![CDATA[</xsl:text>
@@ -42,7 +41,7 @@
                 <br/>
                 <h2>Attendees</h2>
                 <p>
-                    <xsl:apply-templates select="attendees/element" mode="attendee"/>
+                    <xsl:apply-templates select="reportPeople/element" mode="reportPerson"/>
                 </p>
                 <h2>Engagement Intent</h2>
                 <xsl:value-of select="intent"/>
@@ -55,7 +54,7 @@
         </Placemark>
     </xsl:template>
 
-    <xsl:template match="element" mode="attendee">
+    <xsl:template match="element" mode="reportPerson">
         <p>
             <xsl:value-of select="rank"/>  <xsl:text> </xsl:text>
             <xsl:value-of select="name"/>  <xsl:text> [</xsl:text>
