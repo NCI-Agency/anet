@@ -101,8 +101,8 @@
   },
   "dependencies": {
     "@apollo/react-hooks": "3.1.5",
-    "@blueprintjs/core": "3.38.0",
-    "@blueprintjs/datetime": "3.20.2",
+    "@blueprintjs/core": "3.38.1",
+    "@blueprintjs/datetime": "3.20.3",
     "@emotion/react": "11.1.4",
     "@emotion/styled": "11.0.0",
     "@fullcalendar/core": "4.4.2",
