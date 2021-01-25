@@ -1,5 +1,6 @@
 plugins {
-	id "com.bmuschko.docker-remote-api" version "6.6.1"
+	id "org.kordamp.markdown.convert" version "1.2.0"
+	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "2.2.4"
 	id "com.diffplug.spotless" version "5.9.0"
 	id 'org.beryx.runtime' version '1.11.4'
@@ -65,11 +66,11 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	implementation 'io.dropwizard:dropwizard-core:2.0.17'
-	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.17'
-	implementation 'io.dropwizard:dropwizard-migrations:2.0.17'
-	implementation 'io.dropwizard:dropwizard-auth:2.0.17'
-	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.17'
+	implementation 'io.dropwizard:dropwizard-core:2.0.18'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.18'
+	implementation 'io.dropwizard:dropwizard-migrations:2.0.18'
+	implementation 'io.dropwizard:dropwizard-auth:2.0.18'
+	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.18'
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.2.0-1'
@@ -93,7 +94,7 @@ dependencies {
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
-	implementation 'com.mikesamuel:json-sanitizer:1.2.1'
+	implementation 'com.mikesamuel:json-sanitizer:1.2.2'
 	// Authentication
 	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.1.3'
 	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
@@ -117,11 +118,11 @@ dependencies {
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.13'
 
-	testImplementation 'io.dropwizard:dropwizard-testing:2.0.17'
-	testImplementation 'io.dropwizard:dropwizard-client:2.0.17'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.18'
+	testImplementation 'io.dropwizard:dropwizard-client:2.0.18'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
-	testImplementation 'org.assertj:assertj-core:3.18.1'
+	testImplementation 'org.assertj:assertj-core:3.19.0'
 
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
