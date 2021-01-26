@@ -3769,4 +3769,151 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="alter-changeset-29-for-postgresql" author="gjvoosten" dbms="postgresql" runInTransaction="false" >
+		<sql>
+			<!-- Drop full-text materialized views (incl. indexes);
+                             copied from changeset alter-postgresql-fulltext -->
+			DROP MATERIALIZED VIEW mv_fts_locations;
+			DROP MATERIALIZED VIEW mv_fts_organizations;
+			DROP MATERIALIZED VIEW mv_fts_people;
+			DROP MATERIALIZED VIEW mv_fts_positions; -- depends on organizations.full_text
+			DROP MATERIALIZED VIEW mv_fts_tasks;
+
+			<!-- Drop generated full-text columns;
+                             copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE locations DROP COLUMN full_text;
+			ALTER TABLE organizations DROP COLUMN full_text;
+			ALTER TABLE people DROP COLUMN full_text;
+			ALTER TABLE tasks DROP COLUMN full_text;
+
+                        <!-- Make column lengths consistent with mssql (see changeset 29) -->
+			ALTER TABLE locations ALTER COLUMN name TYPE varchar(512); -- was varchar(500)
+			ALTER TABLE organizations ALTER COLUMN "longName" TYPE varchar(255); -- was text
+			ALTER TABLE people ALTER COLUMN "domainUsername" TYPE varchar(512); -- was varchar(500)
+			ALTER TABLE tasks ALTER COLUMN "shortName" TYPE varchar(255); -- was varchar(100)
+			ALTER TABLE tasks ALTER COLUMN "longName" TYPE text; -- was varchar(255)
+
+			<!-- Re-add generated full-text columns;
+			     use 'anet' config only for columns containing English text,
+			     use 'simple' config for all columns;
+                             copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+						  || to_tsvector('simple', coalesce(locations.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
+						  || to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."emailAddress", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
+						  || to_tsvector('simple', coalesce(people.biography, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(tasks."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", ''))
+						  || to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high})
+				) STORED;
+
+			<!-- Re-create full-text materialized views and indexes;
+                             copied from changeset alter-postgresql-fulltext -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+				SELECT
+					locations.uuid,
+					locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM locations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+				SELECT
+					organizations.uuid,
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM organizations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+				SELECT
+					people.uuid,
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM people
+				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+					AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY people.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+				SELECT
+					positions.uuid,
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM positions
+				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+					AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY positions.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
+				SELECT
+					tasks.uuid,
+					tasks.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM tasks
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
+					AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY tasks.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
+			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
