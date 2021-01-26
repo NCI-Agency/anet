@@ -2,7 +2,7 @@
 This section describes the recommended Developer Environment and how to set it up.  You are welcome to use any other tools you prefer.
 
 ## Download open source software
-1. [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
+1. [JDK 15](https://openjdk.java.net/install/).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
 1. [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
