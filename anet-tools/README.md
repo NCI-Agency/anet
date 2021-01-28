@@ -40,7 +40,7 @@ The framework saves the data samples encountered with errors during import into 
 - Pull the Jupyter Docker image: `./gradlew dockerPullJupyter`
 - Create the Jupyter Docker container: `./gradlew dockerCreateJupyter`
 - Start the Jupyter Docker container: `./gradlew dockerStartJupyter`
-- Wait until the container is fully started, then run `./gradlew dockerInstallJupyterDependencies` to install dependencies by using pipfile.
+- Wait until the container is fully started, then run `./gradlew dockerInstallJupyterDevDependencies` to install dependencies by using pipfile.
 - Open browser and type following to addressbar `localhost:<port_number>`
 - Type `anet` in token area and press enter.
 
