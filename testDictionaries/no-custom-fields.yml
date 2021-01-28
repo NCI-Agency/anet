@@ -388,7 +388,7 @@ fields:
                   label: 👍
                   color: '#0000ff'
 
-      # number of fields after Avatar in the left column for advisors
+      # number of fields after Avatar in the left column for principals
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 6
       # select and order person fields (including custom fields)
