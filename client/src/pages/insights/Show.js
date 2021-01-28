@@ -17,6 +17,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
+import PendingAssessmentsByPosition from "components/PendingAssessmentsByPosition"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
 import {
@@ -31,6 +32,7 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"
@@ -38,6 +40,7 @@ export const CANCELLED_REPORTS = "cancelled-reports"
 export const REPORTS_BY_TASK = "reports-by-task"
 export const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
+export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 export const ADVISOR_REPORTS = "advisor-reports"
 
 export const INSIGHTS = [
@@ -46,43 +49,55 @@ export const INSIGHTS = [
   REPORTS_BY_TASK,
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
+  PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS
 ]
 
-const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
+const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   onSearchGoToSearchPage: false,
   searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
 })
 
+const POSITION_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
+  onSearchGoToSearchPage: false,
+  searchObjectTypes: [SEARCH_OBJECT_TYPES.POSITIONS]
+})
+
 export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: "Pending Approval Reports",
     title: ""
   },
   [CANCELLED_REPORTS]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: "Cancelled Engagement Reports",
     title: ""
   },
   [REPORTS_BY_TASK]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: `Reports by ${Settings.fields.task.subLevel.shortLabel}`,
     title: ""
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: "Reports by Day of the Week",
     title: ""
   },
   [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: "Future Engagements by Location",
+    title: ""
+  },
+  [PENDING_ASSESSMENTS_BY_POSITION]: {
+    searchProps: POSITION_SEARCH_PROPS,
+    component: PendingAssessmentsByPosition,
+    navTitle: "Pending Assessments by Position",
     title: ""
   },
   [ADVISOR_REPORTS]: {
@@ -94,7 +109,7 @@ export const INSIGHT_DETAILS = {
 }
 
 const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
-  const { appSettings } = useContext(AppContext)
+  const { appSettings, currentUser } = useContext(AppContext)
   const { insight } = useParams()
   const flexStyle = {
     display: "flex",
@@ -122,6 +137,14 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     startDate: getCurrentDateTime(),
     endDate: getCurrentDateTime().add(14, "days")
   }
+  const orgQuery = currentUser.isAdmin()
+    ? {}
+    : {
+      organizationUuid: currentUser.position.organization.uuid,
+      orgRecurseStrategy: currentUser.isSuperUser()
+        ? RECURSE_STRATEGY.CHILDREN
+        : RECURSE_STRATEGY.NONE
+    }
   const insightDefaultQueryParams = {
     [NOT_APPROVED_REPORTS]: {
       state: [Report.STATE.PENDING_APPROVAL],
@@ -147,6 +170,10 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
         .startOf("day")
         .valueOf(),
       engagementDateEnd: defaultFutureDates.endDate.endOf("day").valueOf()
+    },
+    [PENDING_ASSESSMENTS_BY_POSITION]: {
+      hasPendingAssessments: true,
+      ...orgQuery
     },
     [ADVISOR_REPORTS]: {}
   }
@@ -212,7 +239,7 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   function setInsightDefaultSearchQuery() {
     const queryParams = insightDefaultQueryParams[insight]
     deserializeQueryParams(
-      SEARCH_OBJECT_TYPES.REPORTS,
+      SEARCH_OBJECT_TYPES.POSITIONS,
       queryParams,
       deserializeCallback
     )

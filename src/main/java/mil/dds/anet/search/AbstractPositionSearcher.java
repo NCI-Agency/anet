@@ -1,5 +1,10 @@
 package mil.dds.anet.search;
 
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -8,6 +13,9 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.PendingAssessmentsHelper;
+import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPositionSearcher
@@ -22,6 +30,29 @@ public abstract class AbstractPositionSearcher
   public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
     buildQuery(query);
     return qb.buildAndRun(getDbHandle(), query, new PositionMapper());
+  }
+
+  @Override
+  public CompletableFuture<AnetBeanList<Position>> runSearch(Map<String, Object> context,
+      PositionSearchQuery query) {
+    // Asynchronous version of search; should be wrapped in a transaction by the GraphQlResource
+    // handling the request
+    final Handle dbHandle = getDbHandle();
+    final PositionMapper mapper = new PositionMapper();
+    buildQuery(query);
+    if (!query.getHasPendingAssessments()) {
+      return CompletableFuture.completedFuture(qb.buildAndRun(dbHandle, query, mapper));
+    }
+
+    // Filter to only the positions with pending assessments
+    final Instant now = Instant.now().atZone(DaoUtils.getServerNativeZoneId()).toInstant();
+    return new PendingAssessmentsHelper(AnetObjectEngine.getConfiguration())
+        .loadAll(context, now, null, false).thenApply(otaMap -> {
+          return otaMap.keySet().stream().map(p -> p.getUuid()).collect(Collectors.toList());
+        }).thenCompose(positionUuids -> {
+          qb.addInListClause("positionUuids", "positions.uuid", positionUuids);
+          return CompletableFuture.completedFuture(qb.buildAndRun(dbHandle, query, mapper));
+        });
   }
 
   @Override
