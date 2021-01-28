@@ -146,6 +146,7 @@ jobs:
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerCreateKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
+    - run: ./gradlew -PtestEnv dockerCreateJupyter dockerStartJupyter
     - run: ./gradlew -PtestEnv jar
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv check test jacocoTestReport
@@ -181,6 +182,11 @@ jobs:
         ./gradlew yarn_run_storybook --console=plain &> storybook_error.log &
         sleep 60
         ! grep -i -C 2 "error:" storybook_error.log
+    # run import framework tests
+    - run: |
+        ./gradlew dockerTestJupyter --console=plain &> jupyter_error.log
+        sleep 60
+        ! grep -i -C 2 "FAILED (" jupyter_error.log
     - name: Notify slack success
       if: success()
       env:

@@ -544,9 +544,7 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 
 task dockerPullJupyter(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "jupyter container"
-	//image = "jupyter/scipy-notebook:6d42503c684f" // jupyter/scipy-notebook image with python 3.8 as a base
-	//image = "jupyter/scipy-notebook:ubuntu-18.04" // python 3.7
-	image = "jupyter/scipy-notebook:5811dcb711ba" // python 3.6
+	image = "jupyter/scipy-notebook:5811dcb711ba" // jupyter/scipy-notebook image with python 3.6 as a base
 	description = "Pulls a docker image for the python jupyter environment from ${image}."
 }
 
@@ -615,7 +613,7 @@ task dockerInstallJupyterDevDependencies(type: com.bmuschko.gradle.docker.tasks.
 			"pipenv install --system --skip-lock" ] as String[] ]
 }
 
-task packJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+task dockerPackJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	group = "jupyter container"
 	description = "Packs Jupyter Environment. Generates PEX file"
 	targetContainerId { jupyterContainerName }
@@ -628,9 +626,16 @@ task packJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bm
 				"rm -r .ve"] as String[] ]
 }
 
+task dockerTestJupyter(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "jupyter container"
+	description = "Run tests inside Jupyter Environment."
+	targetContainerId { jupyterContainerName }
+		commands = [ ["/bin/bash", "-c", "python -m unittest discover -s /home/jovyan/work/tests/integration/"] as String[] ]
+}
+
 jar.dependsOn buildClient
 run.dependsOn buildClient
-build.dependsOn packJupyterEnv
+build.dependsOn dockerPackJupyterEnv
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
