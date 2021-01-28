@@ -7197,10 +7197,10 @@ elliptic@^6.5.3:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.0"
 
-email-addresses@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-3.1.0.tgz#cabf7e085cbdb63008a70319a74e6136188812fb"
-  integrity sha512-k0/r7GrWVL32kZlGwfPNgB2Y/mMXVTq/decgLczm/j34whdaspNrZO8CnXPf1laaHxI6ptUlsnAxN+UAPw+fzg==
+email-addresses@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-4.0.0.tgz#94fa214c30f943b02eaf91da717d89ff6a19e345"
+  integrity sha512-Nas3sSSiD5lSIoqBos0FMjB9h4clHxXuAahHKGJ5doRWavEB7pBHzOxnI7R5f1MuGNrrSnsZFJ81HCBv0DZmnw==
 
 emittery@^0.7.1:
   version "0.7.2"
@@ -8882,10 +8882,10 @@ graphql-tag@^2.4.2:
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.11.0.tgz#1deb53a01c46a7eb401d6cb59dec86fa1cccbffd"
   integrity sha512-VmsD5pJqWJnQZMUeRwrDhfgoyqcfwEkvtpANqcoUG8/tOLkwNgU9mzub/Mc78OJMhHjx7gfAMTxzdG43VGg3bA==
 
-graphql@15.4.0:
-  version "15.4.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.4.0.tgz#e459dea1150da5a106486ba7276518b5295a4347"
-  integrity sha512-EB3zgGchcabbsU9cFe1j+yxdzKQKAbGUWRb13DsrsMN1yyfmmIq+2+L5MqVWcDCE4V89R5AyUOi7sMOGxdsYtA==
+graphql@15.5.0:
+  version "15.5.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.5.0.tgz#39d19494dbe69d1ea719915b578bf920344a69d5"
+  integrity sha512-OmaM7y0kaK31NKG31q4YbD2beNYa6jBBKtMFT6gLYJljHLJr42IqJ8KX08u3Li/0ifzTU5HjmoOOrwa5BRLeDA==
 
 growl@1.10.5:
   version "1.10.5"
@@ -9231,10 +9231,10 @@ html-minifier-terser@^5.0.1, html-minifier-terser@^5.1.1:
     relateurl "^0.2.7"
     terser "^4.6.3"
 
-html-react-parser@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/html-react-parser/-/html-react-parser-1.2.1.tgz#19f0701460b846a211926e9727dafd7331c4d006"
-  integrity sha512-DAKA91tLogB6lSK5hdS3pAZ883UkFpca4H1Em1eg2I8F3uIXbpyNfi+JTCphEUs0koazX/a8hIoujXndfqPATg==
+html-react-parser@1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/html-react-parser/-/html-react-parser-1.2.3.tgz#f6de79a696f439371c410ad674d67d156de4688b"
+  integrity sha512-grtFTiAIwX41C8rSXaDVeqJ9TjFWVr/xOtkGQOkNHdlS1OwQzb/+qf3B0V7RQTVjnUGbtGiio6pyHZ3/IY00lQ==
   dependencies:
     html-dom-parser "1.0.0"
     react-property "1.0.1"
@@ -13832,10 +13832,10 @@ react-textarea-autosize@^8.1.1:
     use-composed-ref "^1.0.0"
     use-latest "^1.0.0"
 
-react-toastify@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-7.0.0.tgz#378976937d44911366fcb9cdeb83a9ed6c6b0ae7"
-  integrity sha512-Ff1JzfWNlxaB6FSAbNnRdXpg5HSTDzTaaddXS85lj2U7pYw4Sw/hTlL3qS7fuA5P6WwXk9Lyute2jr7SBW+qUA==
+react-toastify@7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-7.0.1.tgz#c2193e771cdb9ec38e302451b0c789d7dbbf22a4"
+  integrity sha512-f17NjQcYb5MPiOENe8aqlf+nofsCbnSPlRaRkh6fF5lrrIS+q5EhNZojCiuT7p1ezm0W4Q59DZd5oWHBLeE1Wg==
   dependencies:
     clsx "^1.1.1"
 
@@ -16660,10 +16660,10 @@ webpack-virtual-modules@^0.2.2:
   dependencies:
     debug "^3.0.0"
 
-webpack@5.17.0:
-  version "5.17.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.17.0.tgz#e92aebad45be25f86f788dc72fc11daacdcfd55d"
-  integrity sha512-R+IdNEaYcYaACpXZOt7reyc8txBK7J06lOPkX1SbgmeoAnUbyBZivJIksrDBnmMA3wlTWvPcX7DubxELyPB8rA==
+webpack@5.18.0:
+  version "5.18.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.18.0.tgz#bbcf13094aa0da0534d513f27d7ee72d74e499c6"
+  integrity sha512-RmiP/iy6ROvVe/S+u0TrvL/oOmvP+2+Bs8MWjvBwwY/j82Q51XJyDJ75m0QAGntL1Wx6B//Xc0+4VPP/hlNHmw==
   dependencies:
     "@types/eslint-scope" "^3.7.0"
     "@types/estree" "^0.0.46"

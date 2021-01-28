@@ -142,11 +142,24 @@ const GQL_GET_REPORT_LIST = gql`
           rank
           role
         }
+        reportPeople {
+          uuid
+          name
+          rank
+          role
+        }
         primaryAdvisor {
           uuid
           name
           rank
           role
+          position {
+            uuid
+            organization {
+              uuid
+              shortName
+            }
+          }
         }
         primaryPrincipal {
           uuid
