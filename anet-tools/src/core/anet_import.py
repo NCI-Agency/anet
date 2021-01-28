@@ -20,7 +20,7 @@ class anet_import(db):
 
     def print_info(self, content):
         if self.verbose:
-            print(str(content))
+            print(f"{content}")
 
     def initialize_successful_entity_list_json(self):
         self.successful_entity_list_json = list()
@@ -45,10 +45,12 @@ class anet_import(db):
         self.print_info(exc_reason)
         entity_json["row"]["exception_reason"] = exc_reason
         self.append_unsuccessful_entity_list_json(entity_json)
-        self.print_info("Unsuccessfull: " +
-                        str(len(self.unsuccessful_entity_list_json)))
+        self.print_info(f"Unsuccessfull: {len(self.unsuccessful_entity_list_json)}")
 
     def write_data(self, entity_list_json):
+        if len(entity_list_json) == 0:
+            print("There is not any valid entity to import!")
+            return 
         counter = 0
         for entity_json in entity_list_json:
             utc_now = datetime.datetime.now()
@@ -69,8 +71,7 @@ class anet_import(db):
                         self.update_rules, utc_now)
                 entity.commit()
                 self.append_successful_entity_list_json(entity_json)
-                self.print_info("Successfull: " +
-                                str(len(self.successful_entity_list_json)))
+                self.print_info(f"Successfull: {len(self.successful_entity_list_json)}")
             except exc.SQLAlchemyError as e:
                 entity.session.rollback()
                 self.sqlalc_exc(e=e, entity_json=entity_json,
@@ -81,9 +82,8 @@ class anet_import(db):
                                 from_relation_table=True)
             counter = counter + 1
             if not self.verbose:
-                print(str(counter) + "/" +
-                      str(len(entity_list_json)) + " passed", end="\r")
-        print(str(counter) + "/" + str(len(entity_list_json)) + " passed")
+                print(f"Importing {counter}/{len(entity_list_json)} passed", end="\r")
+        print(f"Importing {counter}/{len(entity_list_json)} passed")
         print("Import is complete for entities whose table name is",
               entity_json["entity"].__tablename__)
 
@@ -100,8 +100,8 @@ class anet_import(db):
                 str(datetime.datetime.now()).replace(" ", "_")
             fullpath = os.path.join(self.path_log, filename + ".csv")
             unsuccessful_entity_df.to_csv(fullpath)
-            print("importing " + str(len(self.unsuccessful_entity_list_json)) +
-                  " entities unsuccessful. It is written to log file named: " + filename)
+            print(f"Importing {len(self.unsuccessful_entity_list_json)} entities unsuccessful.")
+            print(f"It is written to log file named: {filename}")
             print("\n")
 
     def generate_new_empty_file_if_not_exists(self, path):
@@ -109,7 +109,6 @@ class anet_import(db):
             print("Generating new file: " + "/".join(path.split("/")[4:]))
             print("\n")
             # this call requires root privileges on OSX
-            print(path)
             os.mknod(path)
 
     def read_from_hashlist_file(self, fullpath_hashfile):
@@ -142,8 +141,7 @@ class anet_import(db):
             else:
                 count_old_record = count_old_record + 1
         if count_old_record != 0:
-            print(str(count_old_record),
-                  " entity will not be processed again since they were processed in the past!")
+            print(f"{count_old_record} entity will not be processed again since they were processed in the past!")
             print("\n")
         else:
             print("No entity excluded, all entities are new.")
@@ -155,6 +153,9 @@ class anet_import(db):
         for e in entity_list_json:
             if type(e["row"]) == pd.core.series.Series:
                 entity_list_json_incorrect_excluded.append(e)
+            else:
+                e["row"]["exception_reason"] = "row data type must be pandas.core.series.Series"
+                self.append_unsuccessful_entity_list_json(e)
         return entity_list_json_incorrect_excluded
 
     def write_successful_entities_hashfile(self):
@@ -185,18 +186,6 @@ class anet_import(db):
         if remember_with_hash:
             self.write_successful_entities_hashfile()
         print()
-
-    def save_log(self, list_row, log_file_name):
-        path_file = os.path.join(self.path_log, log_file_name + ".csv")
-        df_of_row = pd.DataFrame(list_row)
-        if os.path.exists(path_file):
-            log_file = pd.read_csv(path_file)
-            log_file = pd.concat([log_file, df_of_row])
-        else:
-            log_file = df_of_row
-        log_file.to_csv(path_file, index=False)
-        print("Log saving successful")
-        print("\n")
 
     def add_update_rule(self, tablename, col_names):
         self.update_rules["tables"].append(
