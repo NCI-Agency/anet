@@ -28,8 +28,10 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
 
         position.insert_update_nested_entity(self.update_rules, self.utc_now)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(
-            self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == person.uuid, 
+                            self.PeoplePositions.positionUuid == position.uuid) \
+                    .all()
 
         result = len(pp_q)
         expected = 1
@@ -69,8 +71,10 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
 
         position.insert_update_nested_entity(self.update_rules, self.utc_now)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(
-            self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == person.uuid, 
+                            self.PeoplePositions.positionUuid == position.uuid) \
+                    .all()
 
         result = len(pp_q)
         expected = 1
@@ -84,20 +88,29 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         expected = location.uuid
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == None,
-                                                               self.PeoplePositions.positionUuid == formerPosUuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == None,
+                            self.PeoplePositions.positionUuid == formerPosUuid, 
+                            self.PeoplePositions.endedAt == None) \
+                    .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == None,
-                                                               self.PeoplePositions.positionUuid == position.uuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == None,
+                        self.PeoplePositions.positionUuid == position.uuid,
+                        self.PeoplePositions.endedAt == None) \
+                    .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == person.uuid,
-                                                               self.PeoplePositions.positionUuid == position.uuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == person.uuid,
+                        self.PeoplePositions.positionUuid == position.uuid,
+                        self.PeoplePositions.endedAt == None) \
+                    .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
@@ -123,10 +136,8 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         base_methods.is_entity_update(person, self.update_rules)
         base_methods.is_entity_update(organization, self.update_rules)
 
-        #formerPosUuid = self.session.query(self.Position).filter(self.Position.currentPersonUuid == person.uuid).all()[0].uuid
-        formerPersonUuid = self.session.query(self.Position).filter(
-            self.Position.uuid == position.uuid).all()[0].currentPersonUuid
-        #print("formerPosUuid: ", formerPosUuid)
+        formerPersonUuid = self.session.query(self.Position) \
+                            .filter(self.Position.uuid == position.uuid).all()[0].currentPersonUuid
 
         position.insert_update_nested_entity(self.update_rules, self.utc_now)
 
@@ -145,20 +156,29 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         expected = organization.uuid
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == formerPersonUuid,
-                                                               self.PeoplePositions.positionUuid == None, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == formerPersonUuid,
+                            self.PeoplePositions.positionUuid == None,
+                            self.PeoplePositions.endedAt == None) \
+                    .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == None,
-                                                               self.PeoplePositions.positionUuid == position.uuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == None,
+                            self.PeoplePositions.positionUuid == position.uuid, 
+                            self.PeoplePositions.endedAt == None) \
+                    .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == person.uuid,
-                                                               self.PeoplePositions.positionUuid == position.uuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                    .filter(self.PeoplePositions.personUuid == person.uuid,
+                            self.PeoplePositions.positionUuid == position.uuid,
+                            self.PeoplePositions.endedAt == None) \
+                    .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
@@ -183,15 +203,19 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         base_methods.is_entity_update(person, self.update_rules)
         base_methods.is_entity_update(location, self.update_rules)
 
-        formerPosUuid = self.session.query(self.Position).filter(
-            self.Position.currentPersonUuid == person.uuid).all()[0].uuid
-        formerPersonUuid = self.session.query(self.Position).filter(
-            self.Position.uuid == position.uuid).all()[0].currentPersonUuid
+        formerPosUuid = self.session.query(self.Position) \
+                        .filter(self.Position.currentPersonUuid == person.uuid) \
+                        .all()[0].uuid
+        formerPersonUuid = self.session.query(self.Position) \
+                            .filter(self.Position.uuid == position.uuid) \
+                            .all()[0].currentPersonUuid
 
         position.insert_update_nested_entity(self.update_rules, self.utc_now)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(
-            self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                .filter(self.PeoplePositions.personUuid == person.uuid,
+                        self.PeoplePositions.positionUuid == position.uuid) \
+                        .all()
 
         result = len(pp_q)
         expected = 1
@@ -205,26 +229,38 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         expected = location.uuid
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == formerPersonUuid,
-                                                               self.PeoplePositions.positionUuid == None, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                .filter(self.PeoplePositions.personUuid == formerPersonUuid,
+                        self.PeoplePositions.positionUuid == None,
+                        self.PeoplePositions.endedAt == None) \
+                        .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == None,
-                                                               self.PeoplePositions.positionUuid == formerPosUuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                .filter(self.PeoplePositions.personUuid == None,
+                        self.PeoplePositions.positionUuid == formerPosUuid,
+                        self.PeoplePositions.endedAt == None) \
+                        .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == None,
-                                                               self.PeoplePositions.positionUuid == position.uuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                .filter(self.PeoplePositions.personUuid == None,
+                        self.PeoplePositions.positionUuid == position.uuid, 
+                        self.PeoplePositions.endedAt == None) \
+                        .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp_q = self.session.query(self.PeoplePositions).filter(self.PeoplePositions.personUuid == person.uuid,
-                                                               self.PeoplePositions.positionUuid == position.uuid, self.PeoplePositions.endedAt == None).all()
+        pp_q = self.session.query(self.PeoplePositions) \
+                .filter(self.PeoplePositions.personUuid == person.uuid,
+                        self.PeoplePositions.positionUuid == position.uuid, 
+                        self.PeoplePositions.endedAt == None) \
+                        .all()
         result = len(pp_q)
         expected = 1
         self.assertEqual(result, expected)

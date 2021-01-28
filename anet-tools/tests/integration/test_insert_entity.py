@@ -13,8 +13,9 @@ class InsertEntityTest(base_test_fixture.BaseTestFixture):
         expected = person
 
         # generate result
-        pp_from_query = self.session.query(self.PeoplePositions).filter(
-            self.PeoplePositions.personUuid == self.new_uuid).all()[0]
+        pp_from_query = self.session.query(self.PeoplePositions) \
+                        .filter(self.PeoplePositions.personUuid == self.new_uuid) \
+                        .all()[0]
         result = pp_from_query.person
 
         self.assertEqual(result, expected)
@@ -31,8 +32,9 @@ class InsertEntityTest(base_test_fixture.BaseTestFixture):
         expected = location
 
         # generate result
-        location_from_query = self.session.query(self.Location).filter(
-            self.Location.uuid == self.new_uuid).all()[0]
+        location_from_query = self.session.query(self.Location) \
+                                .filter(self.Location.uuid == self.new_uuid) \
+                                .all()[0]
         result = location_from_query
 
         self.assertEqual(result, expected)
@@ -47,8 +49,9 @@ class InsertEntityTest(base_test_fixture.BaseTestFixture):
         expected = person
 
         # generate result
-        person_from_query = self.session.query(self.Person).filter(
-            self.Person.uuid == person.uuid).all()[0]
+        person_from_query = self.session.query(self.Person) \
+                            .filter(self.Person.uuid == person.uuid) \
+                            .all()[0]
         result = person_from_query
 
         self.assertEqual(result, expected)

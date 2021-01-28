@@ -38,8 +38,8 @@ class BaseTestFixture(unittest.TestCase):
         self.Organization = Organization
         self.BaseModel = BaseModel
         self.BaseModel.set_session(self.session)
+    
     # tearDown method will work after each test method
-
     def tearDown(self):
         self.session.close()
         # rollback - everything that happened with the

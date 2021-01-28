@@ -1,4 +1,5 @@
 import ast
+
 import ldap
 
 
@@ -29,9 +30,6 @@ class ad:
     def search(self, search_filter, search_attribute):
         result = self.conn.search_s(
             self.ldap_config_json["BASE_DN"], ldap.SCOPE_SUBTREE, search_filter, search_attribute)  # ldap response sample
-        # f = open("ldap-response-sample.txt", "r")
-        # result = f.read()dictionary = ast.literal_eval(str(result))  # Convert data into dictionary format
-        # Convert data into dictionary format
         self.data_list = ast.literal_eval(str(result))
 
 
@@ -43,7 +41,7 @@ if __name__ == "__main__":
         "LDAP_LOGIN": "<LDAP_LOGIN>",
         "LDAP_PASSWORD": "<LDAP_PASSWORD>"
     }
-    ldap_obj = AD(ldap_config)
+    ldap_obj = ad(ldap_config)
     ldap_obj.connect()
 
     search_filter = "objectCategory=Person"

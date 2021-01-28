@@ -6,13 +6,6 @@ from sqlalchemy import and_
 
 class base_methods:
     @staticmethod
-    def is_entity_tablename(entity, tablename):
-        if entity.__tablename__ == tablename:
-            return True
-        else:
-            return False
-
-    @staticmethod
     def has_entity_relation(entity, rel_attr):
         if not hasattr(entity, rel_attr):
             return False
@@ -69,7 +62,7 @@ class base_methods:
                 entity.uuid = query_result_list[0].uuid
                 return True
             else:
-                entity = cls.add_new_uuid(entity)
+                cls.add_new_uuid(entity)
                 return False
 
     @staticmethod

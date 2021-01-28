@@ -28,8 +28,7 @@ class anet_logic_mixin(BaseModel):
         self.updatedAt = createdAt
         if self.__tablename__ == "people":
             utc_now = datetime.datetime.now()
-            peoplePositions = PeoplePositions.create(
-                createdAt=utc_now, person=self)
+            PeoplePositions.create(createdAt=utc_now, person=self)
         else:
             BaseModel.session.add(self)
             BaseModel.session.flush()
@@ -148,6 +147,7 @@ class Location(anet_logic_mixin):
     updatedAt = Column(DateTime)
     status = Column(Integer, nullable=False, server_default=text("0"))
     uuid = Column(String(36), primary_key=True)
+    customFields = Column(Text)
 
 
 class Organization(anet_logic_mixin):
@@ -162,6 +162,7 @@ class Organization(anet_logic_mixin):
     status = Column(Integer, nullable=False, server_default=text("0"))
     uuid = Column(String(36), primary_key=True)
     parentOrgUuid = Column(ForeignKey('organizations.uuid'), index=True)
+    customFields = Column(Text)
 
     parent = relationship('Organization', remote_side=[uuid])
 

@@ -43,12 +43,10 @@ class db:
 
     def create_engine(self):
         self.engine = create_engine(self.dbConnString)
-        #print("db engine created")
 
     def connect(self):
         self.create_engine()
         self.session = Session(self.engine)
-        #print("db session created")
         self.conn = self.engine.connect()
         print("Successfully connected to the database with conn_str: " +
               self.dbConnString)
