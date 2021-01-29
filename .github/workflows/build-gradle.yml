@@ -184,9 +184,10 @@ jobs:
         ! grep -i -C 2 "error:" storybook_error.log
     # run import framework tests
     - run: |
+        ./gradlew -PtestEnv dbDrop dbMigrate dbLoad
         ./gradlew dockerTestJupyter --console=plain &> jupyter_error.log
         sleep 60
-        ! grep -i -C 2 "FAILED (" jupyter_error.log
+        ! grep -iE -B 4 -A 10 --color "(^FAIL:|^ERROR:)" jupyter_error.log
     - name: Notify slack success
       if: success()
       env:
