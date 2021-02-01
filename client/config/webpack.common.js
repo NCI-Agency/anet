@@ -36,7 +36,7 @@ const commonConfig = {
       },
       {
         test: /\.(m?js|jsx)$/,
-        include: [paths.appSrc, paths.testSrc],
+        include: [paths.appSrc, paths.testSrc, paths.platforms],
         use: [
           "thread-loader",
           {
