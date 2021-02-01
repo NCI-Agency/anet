@@ -16,7 +16,7 @@
     },
     {
       "packageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
-      "allowedVersions": "/^.*\\.jre8$/"
+      "allowedVersions": "/^.*\\.jre11$/"
     },
     {
       "packageNames": ["autoprefixer", "draft-js", "leaflet", "react-tooltip", "yup"],
