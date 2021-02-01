@@ -3,8 +3,8 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "2.2.4"
 	id "com.diffplug.spotless" version "5.9.0"
-	id 'org.beryx.runtime' version '1.11.4'
-	id 'nebula.ospackage' version '8.4.1'
+	id "org.beryx.runtime" version "1.12.1"
+	id "nebula.ospackage" version "8.5.0"
 }
 
 apply plugin: 'java'
