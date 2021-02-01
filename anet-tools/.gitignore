@@ -1,0 +1,15 @@
+# cache files
+__pycache__
+.ipynb_checkpoints
+
+# python executable folder
+pex/
+
+# log file, ipython notebook
+*.csv
+*.xlsx
+*.txt
+*.ipynb
+
+# exclude sample import csv file
+!/datasamples/anet_import_sample_data.csv
