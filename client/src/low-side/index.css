@@ -1,0 +1,135 @@
+body {
+	font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 15px !important;
+	color: hsl(0, 0%, 13%);
+	background: #f2f2f2;
+	height: 100%;
+  overflow: auto;
+  margin: 5px 10px;
+	box-sizing: border-box;
+}
+
+fieldset {
+	background: #fff;
+	box-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
+	padding: 1.25em;
+	margin: 0;
+	margin-bottom: 4rem;
+	width: 100%;
+}
+
+h2.legend {
+	font-size: 2rem;
+	margin-top: 1rem;
+}
+
+.scroll-anchor-container {
+	/* trick so we don't have no man's land between two scroll anchor containers */
+	padding-bottom: 1px;
+}
+
+.form-control {
+	height: 38px;
+	font-size: 1.1em;
+}
+
+.legend small {
+	float: right;
+	font-size: 1.2rem;
+	margin: 1rem 0.5rem 0 0;
+}
+
+.legend small .btn {
+	margin-top: -2rem;
+}
+
+.legend small :not(.btn-group) .btn + .btn {
+	margin-left: 1rem;
+}
+
+.submit-buttons {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 10px;
+}
+
+.submit-buttons > div {
+	margin-left: 2.5rem;
+}
+
+.submit-buttons > div:first-child {
+	flex-grow: 2;
+	margin-left: 0;
+}
+
+.approve-button,
+.submit-buttons .btn-primary {
+	font-weight: bold;
+	height: 38px;
+}
+
+.submit-buttons :not(.btn-group) .btn + .btn {
+	margin-left: 1rem;
+}
+
+.submit-buttons .btn:last-child {
+	margin-right: 0.5rem;
+}
+
+#root > div  {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.container-fluid {
+  padding: 0;
+  margin: 0;
+	display: block;
+}
+
+.scroll-anchor-container {
+  width: 100%;
+}
+
+
+.header-low-side {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+	width: 100%;
+	margin-bottom: 1rem;
+}
+
+.header-low-side .logo img, .header-low-side button {
+	height: 32px;
+}
+
+div.scroll-anchor-container {
+  align-self: flex-start;
+}
+
+.delete-reports-button {
+  max-width: 200px;
+  min-width: 100px;
+  width: 50%;
+  margin-left: auto;
+}
+
+.react-confirm-bootstrap-modal .modal-content {
+	width: max-content;
+	white-space: wrap;
+}
+
+@media screen and (max-width: 768px) {
+
+	.react-confirm-bootstrap-modal .modal-footer {
+		flex-direction: column;
+	}
+
+	.react-confirm-bootstrap-modal .modal-footer button {
+		white-space: normal;
+		margin-bottom: 0.5rem;
+	}
+
+}
