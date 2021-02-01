@@ -35,8 +35,8 @@ const commonConfig = {
         use: ["eslint-loader"]
       },
       {
-        test: /\.(js|jsx)$/,
-        include: [paths.appSrc, paths.testSrc],
+        test: /\.(m?js|jsx)$/,
+        include: [paths.appSrc, paths.testSrc, paths.platforms],
         use: [
           "thread-loader",
           {
@@ -50,7 +50,7 @@ const commonConfig = {
         ]
       },
       {
-        test: /\.js$/,
+        test: /\.m?js$/,
         // Based on https://github.com/facebook/create-react-app/pull/3776
         include: /node_modules/,
         use: [
@@ -92,7 +92,7 @@ const commonConfig = {
 
 module.exports = {
   clientConfig: merge.merge(commonConfig, {
-    target: "web",
+    target: ["web", "es5"],
     resolve: {
       alias: { vm: "vm-browserify" }
     },
