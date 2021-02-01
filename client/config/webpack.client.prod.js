@@ -15,7 +15,7 @@ const clientConfig = merge.merge(common.clientConfig, {
     modules: ["platform/web", paths.appSrc, "node_modules"]
   },
   output: {
-    publicPath: "/assets/client/",
+    publicPath: common.apps[process.env.app].publicPath,
     filename: "static/js/[name].[chunkhash:8].js",
     chunkFilename: "static/js/[name].[chunkhash:8].chunk.js"
   },
@@ -184,10 +184,13 @@ const clientConfig = merge.merge(common.clientConfig, {
     }),
     new HtmlWebpackPlugin({
       title: "ANET",
-      publicUrl: "/assets/client/",
+      publicUrl: common.apps[process.env.app].publicPath,
       inject: true,
       template: "public/index.hbs",
-      filename: path.resolve(paths.appBuild, "../../views/index.ftl"),
+      filename: path.resolve(
+        common.apps[process.env.app].appBuild,
+        "../../views/index.ftl"
+      ),
       minify: {
         removeComments: true,
         collapseWhitespace: true,

@@ -90,6 +90,21 @@ const commonConfig = {
   }
 }
 
+const apps = {
+  main: {
+    entry: "./src/index-auth.js",
+    output: paths.appBuild,
+    publicPath: "/assets/client/",
+    appBuild: paths.appBuild
+  },
+  mini: {
+    entry: "./src/low-side/index-auth-low-side.js",
+    output: paths.appMiniBuild,
+    publicPath: "/assets/clientMini/",
+    appBuild: paths.appMiniBuild
+  }
+}
+
 module.exports = {
   clientConfig: merge.merge(commonConfig, {
     target: "web",
@@ -97,7 +112,7 @@ module.exports = {
       alias: { vm: "vm-browserify" }
     },
     entry: {
-      anet: [require.resolve("./polyfills"), "./src/index-auth.js"]
+      anet: [require.resolve("./polyfills"), apps[process.env.app].entry]
     },
     // A strange workaround for a strange compile-time bug:   Error in
     // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
@@ -109,7 +124,7 @@ module.exports = {
       }
     ],
     output: {
-      path: paths.appBuild
+      path: apps[process.env.app].output
     },
     plugins: [
       new webpack.DefinePlugin({
@@ -157,5 +172,7 @@ module.exports = {
     entry: {
       anet: [require.resolve("./polyfills_node"), "./tests/sim/Simulator.js"]
     }
-  })
+  }),
+
+  apps
 }
