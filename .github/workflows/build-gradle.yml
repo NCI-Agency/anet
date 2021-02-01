@@ -182,9 +182,11 @@ jobs:
         ./gradlew yarn_run_storybook --console=plain &> storybook_error.log &
         sleep 60
         ! grep -i -C 2 "error:" storybook_error.log
-    # run import framework tests
+    # reset db
     - run: |
         ./gradlew -PtestEnv dbDrop dbMigrate dbLoad
+    # run import framework tests
+    - run: |
         ./gradlew dockerTestJupyter --console=plain &> jupyter_error.log
         sleep 60
         ! grep -iE -B 4 -A 10 --color "(^FAIL:|^ERROR:)" jupyter_error.log
