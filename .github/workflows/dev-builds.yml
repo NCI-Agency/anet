@@ -1,9 +1,6 @@
-name: Build ANET
+name: ANET Dev Builds
 
 on:
-  push:
-    branches:
-    - '**'
   pull_request:
     branches:
     - candidate
@@ -57,8 +54,6 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
-    - run: ./gradlew jar
-    - run: ./gradlew yarn_run_lint
     - name: Notify slack success
       if: success()
       env:
@@ -88,18 +83,14 @@ jobs:
       fail-fast: false
       matrix:
         database:
-        - DB_DRIVER: sqlserver
         - DB_DRIVER: postgresql
         dictionary:
         - DICTIONARY_NAME: anet-dictionary.yml
-          CLIENT_TESTS: test-all
         - DICTIONARY_NAME: testDictionaries/no-custom-fields.yml
-          CLIENT_TESTS: test-all-noCF
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
       DB_DRIVER: ${{ matrix.database.DB_DRIVER }}
       ANET_DICTIONARY_NAME: ${{ matrix.dictionary.DICTIONARY_NAME }}
-      CLIENT_TESTS: ${{ matrix.dictionary.CLIENT_TESTS }}
 
     steps:
     - name: Notify slack start
@@ -117,7 +108,6 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
     - name: cache gradle
       uses: actions/cache@v2
       with:
@@ -144,33 +134,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
-    - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
-    - run: ./gradlew -PtestEnv jar
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
-    - run: ./gradlew -PtestEnv check test jacocoTestReport
     - run: |
         ./gradlew -PtestEnv run &
         sleep 15
-    - uses: olegtarasov/get-tag@v2
-      id: tagName
-    - name: Set local identifier for BrowserStack
-      id: browserstack-local
-      run: echo ::set-output name=identifier::github-${GITHUB_RUN_ID}-${DB_DRIVER}
-    - name: Start BrowserStackLocal if needed
-      run: |
-        curl -qso bsl.zip https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
-        unzip -q bsl.zip
-        ./BrowserStackLocal --local-identifier ${{ steps.browserstack-local.outputs.identifier }} --key ${{ secrets.BROWSERSTACK_ACCESS_KEY }} &
-      if: steps.tagName.outputs.tag != ''
-    - run: ./gradlew yarn_run_${CLIENT_TESTS}
-      env:
-        GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}
-        BROWSERSTACK_LOCAL_IDENTIFIER: ${{ steps.browserstack-local.outputs.identifier }}
-        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-        BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
-        NODE_OPTIONS: '--max-old-space-size=8192 --throw-deprecation'
-    - run: head -1000 logs/clientLog.log
-      if: always()
     # check if build process stdout and stderr outputs have 'error:'
     - run: |
         ./gradlew yarn_run_start --console=plain &> dev_error.log &
