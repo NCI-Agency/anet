@@ -41,7 +41,7 @@ anet_import = anet_import(use_env=True, conn_json={
 
 # Create entity_list object
 entity_json_list = list()
-
+anet_import.print_db_connection_string()
 # Loop through dataframe
 for index, row in csv_obj.df.iterrows():
     # Write your rules to check if record is valid or not
