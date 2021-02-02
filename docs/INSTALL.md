@@ -7,8 +7,8 @@ This document covers the steps required to deploy ANET to a server environment.
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
 	- 1x Windows Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
-	- 1x Microsoft SQL Server (2016 or greater) Database Server. 
-- **Software**: Software requirements: 
+	- 1x Microsoft SQL Server (2016 or greater) Database Server.
+- **Software**: Software requirements:
 	- Java JRE 1.8 installed on the Application Server
 	- Administration Privileges to run processes on restricted ports (80/443)
 	- Optional: A valid SSL certificate for the domain name of the application server.
@@ -26,7 +26,7 @@ and Semantic Extractions for Search`.
 	- Users will access the Application Server over HTTP/HTTPS (`80`/`443`)
 	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
 	- The Application Server will need to access an Active Directory server for authentication
-	- The Application Server will need to access an SMTP server for email sending. 
+	- The Application Server will need to access an SMTP server for email sending.
 - **Service Accounts**
 	- It is recommended to have a single service account with the following privileges:
 		- Administrator of the Application Server VMs. All scheduled tasks are to be performed under this account.
@@ -38,7 +38,7 @@ There is no software to install on client computers, only a modern web browser (
 
 You should have the following information on hand for the installation:
 
-- **A Build of ANET**. This comes in the form of a `.zip` file. See BUILD.md for details on how to create this file. 
+- **A Build of ANET**. This comes in the form of a `.zip` file. See BUILD.md for details on how to create this file.
 - **Microsoft SQL Server**: Your Database Administrator should be able to provide you with these settings. Just ask for an empty database. If you have access to your SQL Server directly, the command to create an empty database is `CREATE DATABASE database_name_here`. Alternatively, a database can be created using the SQL Management tool. 300Mb can be used as an initial database and logs size
 	- hostname
 	- username / password
@@ -47,14 +47,14 @@ You should have the following information on hand for the installation:
 	- hostname
 	- username / password (if necessary)
 	- TLS settings (yes/no)
-- **Fully Qualified Domain Name** of your server. 
-- **Information about who will Administer** your ANET instance. 
+- **Fully Qualified Domain Name** of your server.
+- **Information about who will Administer** your ANET instance.
 
 ## Server Installation Procedures
-Create a folder for the application, for example: `c:\anet`. In that location: 
+Create a folder for the application, for example: `c:\anet`. In that location:
 
 1. Unzip anet.zip. You'll find three folders directly under the application folder:
-	* _bin_: This contains the startup scripts to start/stop the ANET server. 
+	* _bin_: This contains the startup scripts to start/stop the ANET server.
 	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
 2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
@@ -68,7 +68,7 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
 	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
 	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
-7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
+7. If imagery/maps are needed, install them according to the "How to configure imagery" section
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
 10. You can either add a start-up task for ANET, or skip to step 11, if you wish to install it as a service:
@@ -85,13 +85,13 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 11. If you have opted to install ANET as a service:
 	* Install `nssm` or other service manager
 	* Create a serive named `anet`, with:
-    *  `c:\anet` as start-up directory 
+    *  `c:\anet` as start-up directory
     *  `c:\anet\bin\anet.bat` as application path
     *  and `server anet.yml` as arguments
     *  add the sql service as a dependency
 
 # ANET Upgrade Documentation
-On the ANET server: 
+On the ANET server:
 - Stop the `"bin/anet" server anet.yml` process. This is typically done by killing the java process from the task manager, or if a service is installed by running `net stop anet`
 - Take a complete backup of your SQL Database
 - Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
@@ -102,17 +102,17 @@ On the ANET server:
 - Start the server, if it has been installed as a service, run `net stop anet`
 - Run through verification testing to ensure there are no issues
 
-Alternatively, an experimental service update script is available in the `doc` folder. 
+Alternatively, an experimental service update script is available in the `doc` folder.
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/1.3.5/docs/manual/core.html#configuration). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/en/stable/manual/configuration.html). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
 	- Authentication: When development mode is `true`, ANET will use basic Authentication checking only that the username provided is equal to the `domainUsername` column of a valid user in the database. In the event that there is not a matching user, but the provided password is equal to the username, ANET will simulate the first-time log in of a new user (ie a user who passes windows authentication but has never logged into ANET before).
 		- ex: To Log in as `Jack Jackson` from the development data set, just type in a username of `jack` when prompted.
 		- ex: To simulate a new user type in the same name for both the username and password when prompted (ie un: `hunter`, pw: `hunter` will create a new user with Domain Username of `hunter`).
 	- GraphQL: When development mode is `true`, ANET will re-compute the GraphQL graph on every API call, this allows you to rapidly develop on changes without restarting the server.
-- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). 
+- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80).
 - **smtp**: This section controls the configuration for how ANET sends emails.
 	- **hostname**: The Fully Qualified Domain Name of your SMTP Server
 	- **port**: The port to connect to your SMTP server on (default: 25)
@@ -123,12 +123,12 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, e.g.: `"https://anet.example.com"`.
-- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional Instructions can be found here instructions [here](https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html) for avaiable configuration options for the database connection.
+- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional Instructions can be found here instructions [here](https://www.dropwizard.io/en/stable/manual/jdbi3.html) for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
 	- **url**: the url to the database in the following format: `jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]`. When Windows Authentication is used, the following parameters can be appended: `integratedSecurity=true;authenticationScheme=nativeAuthentication`
-	
+
 The following configuration can be used for MS SQL databases:
 ```yaml
 database:
@@ -137,7 +137,7 @@ database:
   password: [ANET_DB_PASSWORD]
   url: jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]
 #  properties:
-#   date_string_format: 
+#   date_string_format:
 #   date_class:
 ```
 - **timeWaffleRequests**: set to `true` to report timings of Waffle request methods:
@@ -159,9 +159,9 @@ waffleConfig:
 
 If needed, see [WAFFLE documentation: _Servlet Single-SignOn Security Filter_](https://github.com/Waffle/waffle/blob/master/Docs/ServletSingleSignOnSecurityFilter.md) on the available configuration options.
 
-- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls ths protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.  
+- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls ths protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
 
-- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` paramters to the location that you want the logs to appear.  
+- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` paramters to the location that you want the logs to appear.
 
 Finally, you can define a deployment-specific dictionary inside the `anet-dictionary.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
@@ -447,9 +447,9 @@ server:
       validateCerts: false
 ```
 
-Administrator should request certificates. 
+Administrator should request certificates.
 
-## 
+##
 
 ## Self signed certificates
 If needed, self-signed certificates can be created and used as follows:
@@ -460,7 +460,7 @@ If needed, self-signed certificates can be created and used as follows:
 4. cd to the directory with cacerts, usually `c:\Program Files\Java\jre1.8.0_121\lib\security`
 5. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -import -trustcacerts -alias selfsigned -file c:\anet\anetkey.crt -keystore cacerts`
 6. update `anet.yml` with keyStore and trustStore information
- 
+
 
 # How to configure imagery.
 
@@ -473,7 +473,7 @@ ANET uses [Leaflet](https://leafletjs.com/) as a map viewer.  You can use any ma
         location: [34.52, 69.16]
         zoomLevel: 10
 
-```      
+```
 Typically this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult. `homeView` defines the default starting location and zoom level of the map.
 _hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of `https://wmsURL?request=GetCapabilities&service=WMS` to determine the desired coordinate system
 
@@ -487,7 +487,7 @@ CRS	Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
 | Earth      | Serves as the base for CRS that are global such that they cover the earth. Can only be used as the base for other CRS and cannot be used directly, since it does not have a code, projection or transformation. distance() returns meters. |
 | Simple     | A simple CRS that maps longitude and latitude into x and y directly. May be used for maps of flat surfaces (e.g. game maps). Note that the y axis should still be inverted (going from bottom to top). distance() returns simple euclidean distance. |
 
-You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml` 
+You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml`
 
 for OSM-type providers:
 ```yaml
@@ -519,9 +519,9 @@ and for WMTS-type providers:
           tms: false
 ```
 
-If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
+If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in.
 
-1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`. 
+1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`.
 ```yaml
 assets:
   overrides:

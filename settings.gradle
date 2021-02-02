@@ -6,7 +6,7 @@
  * In a single project build this file can be empty or even removed.
  *
  * Detailed information about configuring a multi-project build in Gradle can be found
- * in the user guide at https://docs.gradle.org/2.10/userguide/multi_project_builds.html
+ * in the user guide at https://docs.gradle.org/current/userguide/multi_project_builds.html
  */
 
 rootProject.name = 'anet'
