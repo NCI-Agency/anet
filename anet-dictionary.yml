@@ -754,7 +754,7 @@ fields:
         - recurrence: quarterly
           questions:
             test1:
-              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 1
               choices:
@@ -768,7 +768,7 @@ fields:
                   label: three
                   color: '#ff8279'
             test2:
-              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 2
               choices:
@@ -782,7 +782,7 @@ fields:
                   label: five
                   color: '#c2ffb3'
             test3:
-              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 3
               choices:
@@ -818,7 +818,7 @@ fields:
                   label: high
                   color: '#ff8279'
             question2:
-              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^P/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^P/i))]
               type: enumset
               label: Attendee from P org
               choices:
@@ -826,7 +826,7 @@ fields:
                   label: P
                   color: '#ff0000'
             question3:
-              test: $.subject.position.organization.[?(@property === "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enumset
               label: Attendee from Z org
               choices:
@@ -834,7 +834,7 @@ fields:
                   label: Z
                   color: '#00ff00'
             question4:
-              test: $.relatedObject.[?(@property === "atmosphere" && @ === "POSITIVE")]
+              test: $.relatedObject[?(@property === "atmosphere" && @ === "POSITIVE")]
               type: enumset
               label: Report had POSITIVE atmosphere
               choices:
