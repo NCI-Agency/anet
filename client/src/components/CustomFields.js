@@ -685,7 +685,8 @@ export function getInvisibleFields(
   Object.entries(fieldsConfig).forEach(([key, fieldConfig]) => {
     const visibleWhenPath = fieldConfig.visibleWhen
     const isVisible =
-      !visibleWhenPath || !_isEmpty(JSONPath(visibleWhenPath, formikValues))
+      !visibleWhenPath ||
+      !_isEmpty(JSONPath({ path: visibleWhenPath, json: formikValues }))
 
     const fieldName = `${parentFieldName}.${key}`
 
