@@ -1,10 +1,6 @@
-import {
-  AnchorButton,
-  Popover,
-  PopoverInteractionKind,
-  Position,
-  Tooltip
-} from "@blueprintjs/core"
+import { AnchorButton, Tooltip } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import * as FieldHelper from "components/FieldHelper"
 import { Field } from "formik"
 import {
@@ -302,7 +298,7 @@ const CoordinateActionButtons = ({
   disabled
 }) => {
   return (
-    <Col sm={2} style={{ padding: "4px 8px" }}>
+    <Col sm={3} style={{ padding: "4px 8px" }}>
       <Tooltip content="Clear coordinates">
         <AnchorButton
           minimal
@@ -338,7 +334,12 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
     return null
   }
   return (
-    <Popover
+    <Popover2
+      placement="right"
+      interactionKind={Popover2InteractionKind.CLICK}
+      usePortal={false}
+      autoFocus={false}
+      enforceFocus={false}
       content={
         <div style={{ padding: "8px" }}>
           <Table style={{ margin: 0 }}>
@@ -366,22 +367,18 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
           </Table>
         </div>
       }
-      target={
-        <Tooltip content="Display all coordinate formats">
-          <AnchorButton
-            style={{ marginLeft: "8px" }}
-            id="gloc-info-btn"
-            minimal
-            icon="info-sign"
-            intent="primary"
-            outlined={inForm}
-          />
-        </Tooltip>
-      }
-      position={Position.RIGHT}
-      interactionKind={PopoverInteractionKind.CLICK_TARGET_ONLY}
-      usePortal={false}
-    />
+    >
+      <Tooltip content="Display all coordinate formats">
+        <AnchorButton
+          style={{ marginLeft: "8px" }}
+          id="gloc-info-btn"
+          minimal
+          icon="info-sign"
+          intent="primary"
+          outlined={inForm}
+        />
+      </Tooltip>
+    </Popover2>
   )
 }
 
