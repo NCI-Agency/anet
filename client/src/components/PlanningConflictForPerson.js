@@ -1,13 +1,10 @@
-import {
-  Button,
-  Callout,
-  Icon,
-  Intent,
-  Spinner,
-  Tooltip
-} from "@blueprintjs/core"
+import { Button, Callout, Icon, Intent, Spinner } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
-import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import {
+  Popover2,
+  Popover2InteractionKind,
+  Tooltip2
+} from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -49,20 +46,20 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
 
   if (loading) {
     return (
-      <Tooltip content="Checking for planning conflicts...">
+      <Tooltip2 content="Checking for planning conflicts...">
         <Spinner intent={Intent.WARNING} size={20} />
-      </Tooltip>
+      </Tooltip2>
     )
   }
 
   if (error) {
     return (
-      <Tooltip
+      <Tooltip2
         content="Error occured while checking for planning conflicts!"
         intent={Intent.DANGER}
       >
         <Icon icon={IconNames.ERROR} intent={Intent.DANGER} />
-      </Tooltip>
+      </Tooltip2>
     )
   }
 

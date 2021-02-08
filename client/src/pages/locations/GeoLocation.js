@@ -1,5 +1,9 @@
-import { AnchorButton, Tooltip } from "@blueprintjs/core"
-import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import { AnchorButton } from "@blueprintjs/core"
+import {
+  Popover2,
+  Popover2InteractionKind,
+  Tooltip2
+} from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import * as FieldHelper from "components/FieldHelper"
 import { Field } from "formik"
@@ -299,7 +303,7 @@ const CoordinateActionButtons = ({
 }) => {
   return (
     <Col sm={3} style={{ padding: "4px 8px" }}>
-      <Tooltip content="Clear coordinates">
+      <Tooltip2 content="Clear coordinates">
         <AnchorButton
           minimal
           icon="delete"
@@ -308,7 +312,7 @@ const CoordinateActionButtons = ({
           onClick={onClear}
           disabled={isSubmitting || disabled}
         />
-      </Tooltip>
+      </Tooltip2>
       <AllFormatsInfo coordinates={coordinates} inForm />
     </Col>
   )
@@ -368,7 +372,7 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
         </div>
       }
     >
-      <Tooltip content="Display all coordinate formats">
+      <Tooltip2 content="Display all coordinate formats">
         <AnchorButton
           style={{ marginLeft: "8px" }}
           id="gloc-info-btn"
@@ -377,7 +381,7 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
           intent="primary"
           outlined={inForm}
         />
-      </Tooltip>
+      </Tooltip2>
     </Popover2>
   )
 }
