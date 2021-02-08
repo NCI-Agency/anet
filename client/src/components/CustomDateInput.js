@@ -60,8 +60,14 @@ const CustomDateInput = ({
       rightElement={rightElement}
       value={value && moment(value).toDate()}
       onChange={onChange}
-      formatDate={date => moment(date).format(inputFormat)}
-      parseDate={str => moment(str, dateFormats, true).toDate()}
+      formatDate={date => {
+        const dt = moment(date)
+        return dt.isValid() ? dt.format(inputFormat) : ""
+      }}
+      parseDate={str => {
+        const dt = moment(str, dateFormats, true)
+        return dt.isValid() ? dt.toDate() : false
+      }}
       placeholder={inputFormat}
       maxDate={moment().add(20, "years").endOf("year").toDate()}
       canClearSelection={false}
