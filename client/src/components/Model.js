@@ -609,7 +609,8 @@ export default class Model {
       Object.entries(assessmentConfig)
         .filter(
           ([key, question]) =>
-            !question.test || !_isEmpty(JSONPath(question.test, testValue))
+            !question.test ||
+            !_isEmpty(JSONPath({ path: question.test, json: testValue }))
         )
         .forEach(([key, question]) => {
           filteredAssessmentConfig[key] = question

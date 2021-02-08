@@ -7990,7 +7990,6 @@ extsprintf@^1.2.0:
 
 "faker@https://github.com/Marak/faker.js.git":
   version "5.2.0"
-  uid "72fb83d66f275b8337406cc5cbaa29f4ac32b91a"
   resolved "https://github.com/Marak/faker.js.git#72fb83d66f275b8337406cc5cbaa29f4ac32b91a"
 
 fast-deep-equal@^2.0.1:
@@ -10847,10 +10846,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonpath-plus@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-4.0.0.tgz#954b69faa3d8b07f30ae2f9e601176a4b0d2806e"
-  integrity sha512-e0Jtg4KAzDJKKwzbLaUtinCn0RZseWBVRTRGihSpvFlM3wTR7ExSp+PTdeTsDrLNJUe7L7JYJe8mblHX5SCT6A==
+jsonpath-plus@5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-5.0.3.tgz#502f0fc953d0f92428b2c2357c0c6809a803ec36"
+  integrity sha512-RDvpzY21CmKTvEfxuGqQmPqRTuzNOim7L+/TcsdBM8jguI5ok38t0p2eKr9GAsVkazrTyylpMZV/hKSQCWqx9g==
 
 jsprim@^1.2.2:
   version "1.4.1"

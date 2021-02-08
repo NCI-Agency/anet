@@ -134,7 +134,7 @@
     "graphql": "15.5.0",
     "hopscotch": "0.3.1",
     "html-react-parser": "1.2.3",
-    "jsonpath-plus": "4.0.0",
+    "jsonpath-plus": "5.0.3",
     "leaflet": "1.6.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
     "leaflet-geosearch": "3.2.1",
