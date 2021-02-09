@@ -1,7 +1,7 @@
 plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
-	id "com.github.node-gradle.node" version "2.2.4"
+	id "com.github.node-gradle.node" version "3.0.0"
 	id "com.diffplug.spotless" version "5.9.0"
 }
 
@@ -492,7 +492,7 @@ allprojects {
 }
 
 node {
-	nodeModulesDir = file("${project.projectDir}/client")
+	nodeProjectDir = file("${project.projectDir}/client")
 	version = '12.14.1'
 	yarnVersion = '1.22.10'
 	download = true
