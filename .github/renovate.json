@@ -19,7 +19,15 @@
       "allowedVersions": "/^.*\\.jre8$/"
     },
     {
-      "packageNames": ["autoprefixer", "draft-js", "leaflet", "react-tooltip", "yup"],
+      "packageNames": [
+        "autoprefixer",
+        "com.networknt:json-schema-validator",
+        "draft-js",
+        "io.leangen.graphql:spqr",
+        "leaflet",
+        "react-tooltip",
+        "yup"
+      ],
       "packagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
