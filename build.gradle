@@ -135,6 +135,9 @@ dependencies {
 configurations {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
 	compile.exclude module: 'xalan'
+	// Also exclude XML API's to avoid (Eclipse) warnings like
+	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
+	compile.exclude group: 'xml-apis'
 }
 
 test {
