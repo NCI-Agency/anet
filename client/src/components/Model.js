@@ -127,11 +127,16 @@ export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
 }
 
 export const yupDate = yup.date().transform(function(value, originalValue) {
-  if (this.isType(value)) {
+  if (
+    this.isType(value) &&
+    (this.isType(originalValue)
+      ? value === originalValue
+      : value.getTime() === originalValue)
+  ) {
     return value
   }
   const newValue = moment(originalValue)
-  return newValue.isValid() ? newValue.toDate() : value
+  return newValue.isValid() ? newValue.toDate() : null
 })
 
 export const CUSTOM_FIELD_TYPE = {
@@ -609,7 +614,8 @@ export default class Model {
       Object.entries(assessmentConfig)
         .filter(
           ([key, question]) =>
-            !question.test || !_isEmpty(JSONPath(question.test, testValue))
+            !question.test ||
+            !_isEmpty(JSONPath({ path: question.test, json: testValue }))
         )
         .forEach(([key, question]) => {
           filteredAssessmentConfig[key] = question
