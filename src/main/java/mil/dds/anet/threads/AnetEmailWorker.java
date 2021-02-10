@@ -158,7 +158,7 @@ public class AnetEmailWorker extends AbstractWorker {
     // Remove any null email addresses
     email.getToAddresses().removeIf(s -> Objects.equals(s, null));
     email.getToAddresses()
-        .removeIf(emailAddress -> !Utils.isEmailWhitelisted(emailAddress, activeDomainNames));
+        .removeIf(emailAddress -> !Utils.isEmailAllowed(emailAddress, activeDomainNames));
     if (email.getToAddresses().size() == 0) {
       // This email will never get sent... just kill it off
       // log.error("Unable to send email of subject {}, because there are no valid
