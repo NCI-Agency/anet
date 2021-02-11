@@ -75,7 +75,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre8'
 	implementation 'org.postgresql:postgresql:42.2.18' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.2.2'
+	implementation 'org.liquibase:liquibase-core:4.3.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.0'
@@ -448,6 +448,13 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 jar.dependsOn buildClient
 run.dependsOn buildClient
 
+jar {
+	// Add classpath to manifest to prevent variables in startScripts getting too long
+	manifest {
+		attributes "Class-Path": configurations.runtimeClasspath.files*.name.join(" ")
+	}
+}
+
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
@@ -478,6 +485,8 @@ distributions {
 }
 
 startScripts {
+	// Clear up the classpath because the jar has it in its manifest
+	classpath = jar.outputs.files
 	doLast {
 		unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
 		windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%APP_HOME%')
