@@ -218,12 +218,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       }
     }
 
-    if (query.getTagUuid() != null) {
-      qb.addWhereClause(
-          "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportTags\" WHERE \"tagUuid\" = :tagUuid)");
-      qb.addSqlArg("tagUuid", query.getTagUuid());
-    }
-
     if (query.getAuthorPositionUuid() != null) {
       // Search for reports authored by people serving in that position at the report's creation
       // date

@@ -48,11 +48,6 @@ reportList(query: {releasedAtStart: -259200000, pageSize: 3, sortBy: RELEASED_AT
       uuid
       shortName
     }
-    tags {
-      uuid
-      name
-      description
-    }
     workflow {
       type
       createdAt

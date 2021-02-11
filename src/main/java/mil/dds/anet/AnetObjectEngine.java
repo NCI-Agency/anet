@@ -38,7 +38,6 @@ import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.database.SavedSearchDao;
-import mil.dds.anet.database.TagDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
@@ -64,7 +63,6 @@ public class AnetObjectEngine {
   private final AdminDao adminDao;
   private final SavedSearchDao savedSearchDao;
   private final EmailDao emailDao;
-  private final TagDao tagDao;
   private final ReportSensitiveInformationDao reportSensitiveInformationDao;
   private final AuthorizationGroupDao authorizationGroupDao;
   private final NoteDao noteDao;
@@ -93,7 +91,6 @@ public class AnetObjectEngine {
     commentDao = injector.getInstance(CommentDao.class);
     adminDao = injector.getInstance(AdminDao.class);
     savedSearchDao = injector.getInstance(SavedSearchDao.class);
-    tagDao = injector.getInstance(TagDao.class);
     reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
     emailDao = injector.getInstance(EmailDao.class);
     authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
@@ -154,10 +151,6 @@ public class AnetObjectEngine {
 
   public SavedSearchDao getSavedSearchDao() {
     return savedSearchDao;
-  }
-
-  public TagDao getTagDao() {
-    return tagDao;
   }
 
   public ReportSensitiveInformationDao getReportSensitiveInformationDao() {

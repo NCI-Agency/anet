@@ -43,7 +43,6 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -273,23 +272,6 @@ public class ReportResource {
       }
       for (String uuid : existingTaskUuids) {
         dao.removeTaskFromReport(uuid, r);
-      }
-    }
-
-    // Update Tags:
-    if (r.getTags() != null) {
-      final List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getUuid()).join();
-      for (final Tag t : r.getTags()) {
-        Optional<Tag> existingTag =
-            existingTags.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
-        if (existingTag.isPresent()) {
-          existingTags.remove(existingTag.get());
-        } else {
-          dao.addTagToReport(t, r);
-        }
-      }
-      for (Tag t : existingTags) {
-        dao.removeTagFromReport(t, r);
       }
     }
 

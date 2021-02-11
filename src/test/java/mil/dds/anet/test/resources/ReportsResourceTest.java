@@ -42,7 +42,6 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -90,8 +89,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String FIELDS = String.format("%1$s" + " advisorOrg { %2$s }"
       + " principalOrg { %2$s }" + " reportPeople { %3$s primary author attendee }"
       + " tasks { %4$s }" + " approvalStep { uuid relatedObjectUuid }" + " location { %5$s }"
-      + " tags { uuid name description }" + " comments { %6$s }"
-      + " authorizationGroups { uuid name }"
+      + " comments { %6$s }" + " authorizationGroups { uuid name }"
       + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } } person { uuid } type createdAt }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS);
@@ -1503,22 +1501,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
     final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
     assertThat(startCt).isEqualTo(endCt - diff);
-  }
-
-  @Test
-  public void testTagSearch() {
-    final ReportSearchQuery tagQuery = new ReportSearchQuery();
-    tagQuery.setText("bribery");
-    final AnetBeanList<Report> taggedReportList =
-        graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
-            tagQuery, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
-    assertThat(taggedReportList).isNotNull();
-    final List<Report> taggedReports = taggedReportList.getList();
-    for (Report rpt : taggedReports) {
-      final List<Tag> tags = rpt.getTags();
-      assertThat(tags).isNotNull();
-      assertThat(tags.stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
-    }
   }
 
   @Test

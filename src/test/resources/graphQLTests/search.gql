@@ -47,11 +47,6 @@ reportList (query:{text:"${searchQuery}",pageSize:0}) {
       uuid
       shortName
     }
-    tags {
-      uuid
-      name
-      description
-    }
     workflow {
       type
       createdAt

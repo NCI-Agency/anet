@@ -83,15 +83,6 @@
 		"text": "I really like this report, it's awesome!!!",
 		"reportUuid" : null
 	}],
-	"tags": [{
-		"uuid": null,
-		"name": "name1",
-		"description": "desc1"
-	}, {
-		"uuid": null,
-		"name": "name2",
-		"description": "desc2"
-	}],
 	"reportSensitiveInformation": {
 		"uuid": null,
 		"text": "For your eyes only",

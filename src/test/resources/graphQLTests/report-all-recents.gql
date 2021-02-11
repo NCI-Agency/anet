@@ -49,10 +49,3 @@ authorizationGroupList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, s
     description
   }
 }
-tagList(query: {pageSize: 0}) {
-  list {
-    uuid
-    name
-    description
-  }
-}
