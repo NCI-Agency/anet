@@ -448,6 +448,13 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 jar.dependsOn buildClient
 run.dependsOn buildClient
 
+jar {
+	// Add classpath to manifest to prevent variables in startScripts getting too long
+	manifest {
+		attributes "Class-Path": configurations.runtimeClasspath.files*.name.join(" ")
+	}
+}
+
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
@@ -478,6 +485,8 @@ distributions {
 }
 
 startScripts {
+	// Clear up the classpath because the jar has it in its manifest
+	classpath = jar.outputs.files
 	doLast {
 		unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
 		windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%APP_HOME%')
