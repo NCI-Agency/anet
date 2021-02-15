@@ -74,7 +74,6 @@
     "git-describe": "4.0.4",
     "handlebars": "4.7.6",
     "handlebars-loader": "1.7.1",
-    "html-loader": "2.0.0",
     "html-webpack-plugin": "5.0.0",
     "i18n-iso-countries": "6.5.0",
     "ignore-loader": "0.1.2",
