@@ -12,9 +12,9 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
@@ -66,10 +66,7 @@ const GQL_GET_REPORT_COUNT = gql`
 
 const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
   const history = useHistory()
-  const reportQuery = Object.assign({}, query.query, {
-    // we're only interested in the totalCount, so just get at most one report
-    pageSize: 1
-  })
+  const reportQuery = Object.assign({}, query.query)
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_COUNT, {
     reportQuery
   })
