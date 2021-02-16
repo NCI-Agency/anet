@@ -10,7 +10,7 @@
 	content: "to";
 	margin-right: 5px;
 }
-.bp3-transition-container {
+.bp3-popover2-transition-container {
 	/* Make sure it is on top of the advanced search popup */
 	z-index: 1070 !important;
 }

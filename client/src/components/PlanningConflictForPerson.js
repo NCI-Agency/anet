@@ -1,14 +1,11 @@
-import {
-  Button,
-  Callout,
-  Icon,
-  Intent,
-  Popover,
-  PopoverInteractionKind,
-  Spinner,
-  Tooltip
-} from "@blueprintjs/core"
+import { Button, Callout, Icon, Intent, Spinner } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import {
+  Popover2,
+  Popover2InteractionKind,
+  Tooltip2
+} from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
@@ -49,20 +46,20 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
 
   if (loading) {
     return (
-      <Tooltip content="Checking for planning conflicts...">
+      <Tooltip2 content="Checking for planning conflicts...">
         <Spinner intent={Intent.WARNING} size={20} />
-      </Tooltip>
+      </Tooltip2>
     )
   }
 
   if (error) {
     return (
-      <Tooltip
+      <Tooltip2
         content="Error occured while checking for planning conflicts!"
         intent={Intent.DANGER}
       >
         <Icon icon={IconNames.ERROR} intent={Intent.DANGER} />
-      </Tooltip>
+      </Tooltip2>
     )
   }
 
@@ -79,7 +76,11 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
   }
 
   return (
-    <Popover
+    <Popover2
+      interactionKind={Popover2InteractionKind.CLICK}
+      usePortal={false}
+      autoFocus={false}
+      enforceFocus={false}
       content={
         <Callout
           title={`${person.toString()} has ${
@@ -99,18 +100,16 @@ const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
           ))}
         </Callout>
       }
-      target={
-        <Button icon={IconNames.WARNING_SIGN} intent={Intent.WARNING} minimal>
-          {!iconOnly && (
-            <>
-              {conflictingReports.length}&nbsp;
-              {pluralize("conflict", conflictingReports.length)}
-            </>
-          )}
-        </Button>
-      }
-      interactionKind={PopoverInteractionKind.CLICK}
-    />
+    >
+      <Button icon={IconNames.WARNING_SIGN} intent={Intent.WARNING} minimal>
+        {!iconOnly && (
+          <>
+            {conflictingReports.length}&nbsp;
+            {pluralize("conflict", conflictingReports.length)}
+          </>
+        )}
+      </Button>
+    </Popover2>
   )
 }
 

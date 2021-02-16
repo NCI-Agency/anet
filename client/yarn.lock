@@ -1377,6 +1377,18 @@
     classnames "^2.2"
     tslib "~1.13.0"
 
+"@blueprintjs/popover2@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-0.2.0.tgz#4712d98e0187c343e835dbe5c7fd0dfd29d2d64b"
+  integrity sha512-BvT6fuL+3hsHuOYXYdNwpNiOCCA4m0H7BD3TmpULo8+Vzw+BP5xHyB7Q1EPxJf8OqNNfSCO+oR+6WsPgzk6rXA==
+  dependencies:
+    "@blueprintjs/core" "^3.38.2"
+    "@popperjs/core" "^2.5.4"
+    classnames "^2.2"
+    dom4 "^2.1.5"
+    react-popper "^2.2.4"
+    tslib "~1.13.0"
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"

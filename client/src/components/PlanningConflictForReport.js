@@ -1,5 +1,7 @@
-import { Icon, Intent, Spinner, Tooltip } from "@blueprintjs/core"
+import { Icon, Intent, Spinner } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import { Tooltip2 } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -58,7 +60,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
 
   if (error) {
     return (
-      <Tooltip
+      <Tooltip2
         content="An error occured while checking planning conflicts!"
         intent={Intent.DANGER}
       >
@@ -67,7 +69,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
           intent={Intent.DANGER}
           iconSize={Icon.SIZE_STANDARD}
         />
-      </Tooltip>
+      </Tooltip2>
     )
   }
 
@@ -84,7 +86,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
 
   return (
     <ReportConflictIconBox className="reportConflictIcon">
-      <Tooltip
+      <Tooltip2
         content={
           <ReportConflictTooltipContainer className="reportConflictTooltipContainer">
             <div>
@@ -106,7 +108,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
           iconSize={largeIcon ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD}
           style={{ margin: "0 5px" }}
         />
-      </Tooltip>
+      </Tooltip2>
       {text}
     </ReportConflictIconBox>
   )
