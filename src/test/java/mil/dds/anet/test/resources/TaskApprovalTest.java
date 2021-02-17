@@ -171,7 +171,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approver should have received email
-    checkPendingApproval(approver, report, 1, true);
+    checkPendingApproval(approver, report, 1, true, null);
 
     // Approve the report
     approveReport(report, approver, false);
@@ -208,7 +208,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approver should have received email
-    checkPendingApproval(approver, report, 1, true);
+    checkPendingApproval(approver, report, 1, true, null);
 
     // Approve the report
     approveReport(report, approver, false);
@@ -246,7 +246,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approver should not have received email
-    checkPendingApproval(approver, report, 0, true);
+    checkPendingApproval(approver, report, 0, true, null);
 
     // Try to approve the report
     approveReport(report, approver, true);
@@ -283,7 +283,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     organizationalApproval(report, isPlanned);
 
     // Check reports pending approval
-    checkPendingApproval(approver, report, 1, true);
+    checkPendingApproval(approver, report, 1, true, null);
 
     // Approve the report
     approveReport(report, approver, false);
@@ -325,7 +325,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     organizationalApproval(report, isPlanned);
 
     // Check reports pending approval
-    checkPendingApproval(approver, report, 1, true);
+    checkPendingApproval(approver, report, 1, true, null);
 
     // Replace the approver from the approval step
     final Task replacedTask = replaceApproversFromTaskApprovalSteps(updatedTask,
@@ -341,7 +341,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     assertThat(taskStep.get().getStep().getApprovers()).isEmpty();
 
     // Check reports pending approval; approver should not have received email
-    checkPendingApproval(approver, report2, 0, true);
+    checkPendingApproval(approver, report2, 0, true, null);
 
     // Try to approve the report
     approveReport(report2, approver, true);
@@ -403,19 +403,19 @@ public class TaskApprovalTest extends AbstractResourceTest {
     organizationalApproval(report, isPlanned);
 
     // Check reports pending approval; approverStep1 should have received email
-    checkPendingApproval(approverStep1, report, 1, true);
+    checkPendingApproval(approverStep1, report, 1, true, null);
 
     // Approve the report
     approveReport(report, approverStep1, false);
 
     // Check reports pending approval; email will be checked for approverStep3
-    checkPendingApproval(approverStep2, report, 0, false);
+    checkPendingApproval(approverStep2, report, 0, false, null);
 
     // Try to approve the report
     approveReport(report, approverStep2, true);
 
     // Check reports pending approval; approverStep3 should have received email
-    checkPendingApproval(approverStep3, report, 1, true);
+    checkPendingApproval(approverStep3, report, 1, true, null);
 
     // Approve the report
     approveReport(report, approverStep3, false);
@@ -443,13 +443,13 @@ public class TaskApprovalTest extends AbstractResourceTest {
         ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report1, updatedTask.getUuid(), 1);
     organizationalApproval(report1, isPlanned);
-    checkPendingApproval(approver1, report1, 1, true);
+    checkPendingApproval(approver1, report1, 1, true, null);
 
     final Report report2 = submitReport(text + "2", author, null, updatedTask, isPlanned,
         ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report2, updatedTask.getUuid(), 1);
     organizationalApproval(report2, isPlanned);
-    checkPendingApproval(approver1, report2, 1, true);
+    checkPendingApproval(approver1, report2, 1, true, null);
 
     // Someone from EF 1.1
     final Person approver2 = getPersonFromDb("ELIZAWELL, Elizabeth");
@@ -462,15 +462,42 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Person org2Approver = getPersonFromDb("BOBTOWN, Bob");
     assertEmails(1, org2Approver);
     approveReport(report3, org2Approver, false);
-    checkPendingApproval(approver2, report3, 1, true);
+    checkPendingApproval(approver2, report3, 1, true, null);
 
-    // Check reports pending approval
-    checkPendingApproval(approver1, report1, 1, false);
-    checkPendingApproval(approver1, report2, 1, false);
-    checkPendingApproval(approver1, report3, 0, false);
-    checkPendingApproval(approver2, report1, 0, false);
-    checkPendingApproval(approver2, report2, 0, false);
-    checkPendingApproval(approver2, report3, 1, false);
+    final ReportSearchQuery pendingQuery = new ReportSearchQuery();
+    // Check reports pending approval (without pagination)
+    pendingQuery.setPageSize(0);
+    final AnetBeanList<Report> allResults1 =
+        checkPendingApproval(approver1, report1, 1, false, pendingQuery);
+    assertThat(allResults1.getTotalCount()).isEqualTo(2);
+    checkPendingApproval(approver1, report2, 1, false, pendingQuery);
+    checkPendingApproval(approver1, report3, 0, false, pendingQuery);
+    final AnetBeanList<Report> allResults2 =
+        checkPendingApproval(approver2, report1, 0, false, pendingQuery);
+    assertThat(allResults2.getTotalCount()).isEqualTo(1);
+    checkPendingApproval(approver2, report2, 0, false, pendingQuery);
+    checkPendingApproval(approver2, report3, 1, false, pendingQuery);
+
+    // Now try with a pageSize of 1
+    pendingQuery.setPageSize(1);
+    // Due to sorting, report2 is the first one returned
+    final AnetBeanList<Report> results1p1 =
+        checkPendingApproval(approver1, report2, 1, false, pendingQuery);
+    assertPendingReports(allResults1, results1p1, pendingQuery, pendingQuery.getPageSize());
+    // Here, report3 should be returned
+    final AnetBeanList<Report> results2p1 =
+        checkPendingApproval(approver2, report3, 1, false, pendingQuery);
+    assertPendingReports(allResults2, results2p1, pendingQuery, pendingQuery.getPageSize());
+    // Retrieve the next page
+    pendingQuery.setPageNum(pendingQuery.getPageNum() + 1);
+    // Should return report1
+    final AnetBeanList<Report> results1p2 =
+        checkPendingApproval(approver1, report1, 1, false, pendingQuery);
+    assertPendingReports(allResults1, results1p2, pendingQuery, pendingQuery.getPageSize());
+    // Should return an empty page as there are no more results
+    final AnetBeanList<Report> results2p2 =
+        checkPendingApproval(approver2, report3, 0, false, pendingQuery);
+    assertPendingReports(allResults2, results2p2, pendingQuery, 0);
 
     // Delete the reports
     deleteReport(author, report1);
@@ -479,6 +506,14 @@ public class TaskApprovalTest extends AbstractResourceTest {
   }
 
   // Helper methods below
+
+  protected void assertPendingReports(final AnetBeanList<Report> allResults,
+      final AnetBeanList<Report> paginatedResults, final ReportSearchQuery pendingQuery, int size) {
+    assertThat(paginatedResults.getTotalCount()).isEqualTo(allResults.getTotalCount());
+    assertThat(paginatedResults.getPageNum()).isEqualTo(pendingQuery.getPageNum());
+    assertThat(paginatedResults.getPageSize()).isEqualTo(pendingQuery.getPageSize());
+    assertThat(paginatedResults.getList().size()).isEqualTo(size);
+  }
 
   private Task clearTaskApprovalSteps(String uuid) {
     final Task task = getTaskFromDb(uuid);
@@ -557,8 +592,11 @@ public class TaskApprovalTest extends AbstractResourceTest {
     sendEmailsToServer();
   }
 
-  private void checkPendingApproval(Person approver, Report report, int size, boolean checkEmails) {
-    final ReportSearchQuery pendingQuery = new ReportSearchQuery();
+  private AnetBeanList<Report> checkPendingApproval(Person approver, Report report, int size,
+      boolean checkEmails, ReportSearchQuery pendingQuery) {
+    if (pendingQuery == null) {
+      pendingQuery = new ReportSearchQuery();
+    }
     pendingQuery.setPendingApprovalOf(approver.getUuid());
     final AnetBeanList<Report> pendingApproval = graphQLHelper.searchObjects(approver, "reportList",
         "query", "ReportSearchQueryInput", REPORT_FIELDS, pendingQuery,
@@ -574,6 +612,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
         assertEmails(0);
       }
     }
+    return pendingApproval;
   }
 
   private Report submitReport(String text, Person author, Person reportAdvisor, Task task,
