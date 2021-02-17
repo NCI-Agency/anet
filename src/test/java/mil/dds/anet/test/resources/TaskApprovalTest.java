@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -453,8 +454,13 @@ public class TaskApprovalTest extends AbstractResourceTest {
 
     // Someone from EF 1.1
     final Person approver2 = getPersonFromDb("ELIZAWELL, Elizabeth");
-    updatedTask.getApprovalSteps().add(getApprovalStep(approver2, isPlanned, true));
-    updatedTask.getTaskedOrganizations().add(approver2.getPosition().getOrganization());
+    final List<ApprovalStep> approvalSteps = new ArrayList<>(updatedTask.getApprovalSteps());
+    approvalSteps.add(getApprovalStep(approver2, isPlanned, true));
+    updatedTask.setApprovalSteps(approvalSteps);
+    final List<Organization> taskedOrganizations =
+        new ArrayList<>(updatedTask.getTaskedOrganizations());
+    taskedOrganizations.add(approver2.getPosition().getOrganization());
+    updatedTask.setTaskedOrganizations(taskedOrganizations);
     final Task updatedTask2 = updateTask(updatedTask);
     final Report report3 = submitReport(text + "3", author, approver2, updatedTask2, isPlanned,
         ReportState.PENDING_APPROVAL);
