@@ -19,6 +19,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
@@ -81,6 +82,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static List<Position> savedPlanningApprovers;
   private static List<ApprovalStep> savedApprovalSteps;
   private static List<Position> savedApprovers;
+  private static List<Organization> savedOrganizations;
 
   @BeforeAll
   public static void setUpEmailServer() throws Exception {
@@ -112,6 +114,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
         .ifPresent(as -> savedPlanningApprovers = as.getApprovers());
     savedApprovalSteps = Lists.newArrayList(task.getApprovalSteps());
     savedApprovalSteps.stream().findFirst().ifPresent(as -> savedApprovers = as.getApprovers());
+    savedOrganizations = Lists.newArrayList(task.getTaskedOrganizations());
   }
 
   @AfterAll
@@ -122,6 +125,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     task.setPlanningApprovalSteps(savedPlanningApprovalSteps);
     savedApprovalSteps.stream().findFirst().ifPresent(as -> as.setApprovers(savedApprovers));
     task.setApprovalSteps(savedApprovalSteps);
+    task.setTaskedOrganizations(savedOrganizations);
     updateTask(task);
   }
 
@@ -131,8 +135,8 @@ public class TaskApprovalTest extends AbstractResourceTest {
   public void testNoSteps() {
     final Task task = clearTaskApprovalSteps(TEST_TASK_UUID);
 
-    final Report report = submitReport("testNoSteps", getPersonFromDb("ERINSON, Erin"), task, false,
-        ReportState.PENDING_APPROVAL);
+    final Report report = submitReport("testNoSteps", getPersonFromDb("ERINSON, Erin"), null, task,
+        false, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, task.getUuid(), 0);
 
     // Go through organization approval
@@ -159,7 +163,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Person approver = getApprover(isPlanned);
     final Task updatedTask = updateTaskApprovalSteps(task, approver, isPlanned, false);
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), updatedTask,
+    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null, updatedTask,
         isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTask.getUuid(), 1);
 
@@ -196,7 +200,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Person approver = getPersonFromDb("ELIZAWELL, Elizabeth");
     final Task updatedTask = updateTaskApprovalSteps(task, approver, isPlanned, false);
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), updatedTask,
+    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null, updatedTask,
         isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTask.getUuid(), 1);
 
@@ -234,7 +238,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Task updatedTask = updateTaskApprovalSteps(task, approver, isPlanned, true);
 
     final Person author = getPersonFromDb("ERINSON, Erin");
-    final Report report = submitReport(text, author, updatedTask, isPlanned,
+    final Report report = submitReport(text, author, null, updatedTask, isPlanned,
         isPlanned ? ReportState.APPROVED : ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTask.getUuid(), 0);
 
@@ -271,7 +275,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     final Person approver = getApprover(isPlanned);
     final Task updatedTask = updateTaskApprovalSteps(task, approver, isPlanned, true);
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), updatedTask,
+    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null, updatedTask,
         isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTask.getUuid(), 1);
 
@@ -314,7 +318,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
 
     final Person author = getPersonFromDb("ERINSON, Erin");
     final Report report =
-        submitReport(text, author, updatedTask, isPlanned, ReportState.PENDING_APPROVAL);
+        submitReport(text, author, null, updatedTask, isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTask.getUuid(), 1);
 
     // Go through organization approval first
@@ -391,7 +395,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
     }
     final Task updatedTask = updateTask(task);
 
-    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), updatedTask,
+    final Report report = submitReport(text, getPersonFromDb("ERINSON, Erin"), null, updatedTask,
         isPlanned, ReportState.PENDING_APPROVAL);
     assertWorkflowSize(report, updatedTask.getUuid(), 2);
 
@@ -419,14 +423,68 @@ public class TaskApprovalTest extends AbstractResourceTest {
     assertEmails(0);
   }
 
+  // task T has approvers from org A and B
+  // report1 submitted with advisorOrg A and task T
+  // report2 submitted with advisorOrg A and task T
+  // report3 submitted with advisorOrg B and task T
+  // => approver from A should see reports 1 and 2
+  // => approver from B should see report 3
+  @Test
+  public void testGH3442() {
+    final boolean isPlanned = false;
+    final String text = "testTwoReports";
+    final Task task = clearTaskApprovalSteps(TEST_TASK_UUID);
+    final Person author = getPersonFromDb("ERINSON, Erin");
+
+    final Person approver1 = getApprover(isPlanned);
+    final Task updatedTask = updateTaskApprovalSteps(task, approver1, isPlanned, true);
+
+    final Report report1 = submitReport(text + "1", author, null, updatedTask, isPlanned,
+        ReportState.PENDING_APPROVAL);
+    assertWorkflowSize(report1, updatedTask.getUuid(), 1);
+    organizationalApproval(report1, isPlanned);
+    checkPendingApproval(approver1, report1, 1, true);
+
+    final Report report2 = submitReport(text + "2", author, null, updatedTask, isPlanned,
+        ReportState.PENDING_APPROVAL);
+    assertWorkflowSize(report2, updatedTask.getUuid(), 1);
+    organizationalApproval(report2, isPlanned);
+    checkPendingApproval(approver1, report2, 1, true);
+
+    // Someone from EF 1.1
+    final Person approver2 = getPersonFromDb("ELIZAWELL, Elizabeth");
+    updatedTask.getApprovalSteps().add(getApprovalStep(approver2, isPlanned, true));
+    updatedTask.getTaskedOrganizations().add(approver2.getPosition().getOrganization());
+    final Task updatedTask2 = updateTask(updatedTask);
+    final Report report3 = submitReport(text + "3", author, approver2, updatedTask2, isPlanned,
+        ReportState.PENDING_APPROVAL);
+    assertWorkflowSize(report3, updatedTask2.getUuid(), 1);
+    final Person org2Approver = getPersonFromDb("BOBTOWN, Bob");
+    assertEmails(1, org2Approver);
+    approveReport(report3, org2Approver, false);
+    checkPendingApproval(approver2, report3, 1, true);
+
+    // Check reports pending approval
+    checkPendingApproval(approver1, report1, 1, false);
+    checkPendingApproval(approver1, report2, 1, false);
+    checkPendingApproval(approver1, report3, 0, false);
+    checkPendingApproval(approver2, report1, 0, false);
+    checkPendingApproval(approver2, report2, 0, false);
+    checkPendingApproval(approver2, report3, 1, false);
+
+    // Delete the reports
+    deleteReport(author, report1);
+    deleteReport(author, report2);
+    deleteReport(author, report3);
+  }
+
   // Helper methods below
 
   private Task clearTaskApprovalSteps(String uuid) {
     final Task task = getTaskFromDb(uuid);
     task.setPlanningApprovalSteps(Collections.emptyList());
     task.setApprovalSteps(Collections.emptyList());
-    updateTask(task);
-    return task;
+    return updateTask(task);
   }
 
   private Task updateTaskApprovalSteps(Task task, Person approver, boolean isPlanned,
@@ -518,15 +576,17 @@ public class TaskApprovalTest extends AbstractResourceTest {
     }
   }
 
-  private Report submitReport(String text, Person author, Task task, boolean isPlanned,
-      ReportState expectedState) {
+  private Report submitReport(String text, Person author, Person reportAdvisor, Task task,
+      boolean isPlanned, ReportState expectedState) {
     final Report r = new Report();
     final Instant engagementDate = Instant.now().plus(isPlanned ? 14 : -14, ChronoUnit.DAYS);
     r.setEngagementDate(engagementDate);
     r.setDuration(120);
-    final Person reina = getPersonFromDb("REINTON, Reina");
+    if (reportAdvisor == null) {
+      reportAdvisor = getPersonFromDb("REINTON, Reina");
+    }
+    final ReportPerson advisor = PersonTest.personToPrimaryReportPerson(reportAdvisor);
     final Person steve = getPersonFromDb("STEVESON, Steve");
-    final ReportPerson advisor = PersonTest.personToPrimaryReportPerson(reina);
     final ReportPerson principal = PersonTest.personToPrimaryReportPerson(steve);
     r.setReportPeople(
         Lists.newArrayList(advisor, principal, PersonTest.personToReportAuthor(author)));
@@ -552,7 +612,8 @@ public class TaskApprovalTest extends AbstractResourceTest {
             new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(created.getUuid()).isNotNull();
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
-    assertThat(created.getAdvisorOrgUuid()).isEqualTo(reina.getPosition().getOrganizationUuid());
+    assertThat(created.getAdvisorOrgUuid())
+        .isEqualTo(reportAdvisor.getPosition().getOrganizationUuid());
 
     // Have the author submit the report
     final Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", "uuid",
