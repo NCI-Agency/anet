@@ -860,20 +860,20 @@ header.searchPagination {
 	font-size: 0.8em;
 }
 
-.advanced-select-popover .bp3-popover-content-sizing {
+.advanced-select-popover .bp3-popover2-content-sizing {
 	width: 100% !important;
 }
 
-.advanced-select-popover span.bp3-popover-target {
+.advanced-select-popover span.bp3-popover2-target {
 	display: block;
 	width: 100%;
 }
 
-.advanced-select-popover .bp3-transition-container {
-	top: 35px !important;
+.advanced-select-popover .bp3-popover2-transition-container {
+	top: 50px !important;
 }
 
-.advanced-select-popover .bp3-popover-content {
+.advanced-select-popover .bp3-popover2-content {
 	min-width: 400px;
 	max-width: 90vw !important;
 }

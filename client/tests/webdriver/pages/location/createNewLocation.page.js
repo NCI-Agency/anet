@@ -34,7 +34,7 @@ class CreateNewLocation extends Page {
   // parent of MGRS table data => tr
   get allFormatsPopoverLat() {
     return this.form
-      .$(".bp3-popover-content table")
+      .$(".bp3-popover2-content table")
       .$("td*=Latitude")
       .$("..")
       .$("span:first-child")
@@ -42,7 +42,7 @@ class CreateNewLocation extends Page {
 
   get allFormatsPopoverLng() {
     return this.form
-      .$(".bp3-popover-content table")
+      .$(".bp3-popover2-content table")
       .$("td*=Latitude")
       .$("..")
       .$("span:nth-child(3)")
@@ -51,7 +51,7 @@ class CreateNewLocation extends Page {
   get allFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
     return this.form
-      .$(".bp3-popover-content table")
+      .$(".bp3-popover2-content table")
       .$("td*=MGRS")
       .$("..")
       .$("span:first-child")

@@ -45,7 +45,7 @@ public class ReportPublicationWorkerTest {
   private static AnetEmailWorker emailWorker;
 
   private static boolean executeEmailServerTests;
-  private static String whitelistedEmail;
+  private static String allowedEmail;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
@@ -66,8 +66,7 @@ public class ReportPublicationWorkerTest {
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
-    whitelistedEmail =
-        "@" + ((List<String>) configuration.getDictionaryEntry("domainNames")).get(0);
+    allowedEmail = "@" + ((List<String>) configuration.getDictionaryEntry("domainNames")).get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     emailWorker = new AnetEmailWorker(configuration, engine.getEmailDao());
@@ -209,7 +208,7 @@ public class ReportPublicationWorkerTest {
   private static Report createTestReport(final String toAddressId) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAddressId + whitelistedEmail);
+    author.setEmailAddress(toAddressId + allowedEmail);
     engine.getPersonDao().insert(author);
 
     final Organization organization = TestBeans.getTestOrganization();
