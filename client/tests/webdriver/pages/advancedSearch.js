@@ -38,7 +38,7 @@ class AdvancedSearch {
   }
 
   get addFilterPopover() {
-    return this.addFilterButtonText.$(".bp3-popover-content")
+    return this.addFilterButtonText.$(".bp3-popover2-content")
   }
 
   getSearchFilter(filter) {

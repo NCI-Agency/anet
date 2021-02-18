@@ -1,7 +1,7 @@
 /*
  * ava configuration file must be in the same directory as the package.json file
  *
- * https://github.com/avajs/ava/blob/master/docs/06-configuration.md#alternative-configuration-files
+ * https://github.com/avajs/ava/blob/main/docs/06-configuration.md#alternative-configuration-files
  */
 
 const config = {
@@ -32,7 +32,7 @@ if (testEnv === "remote") {
    * Our best shot is to tell ava run one test file at a time and never keep more than
    * 10 parallel tests in a single test file.
    *
-   * https://github.com/avajs/ava/blob/master/docs/05-command-line.md#cli
+   * https://github.com/avajs/ava/blob/main/docs/05-command-line.md#cli
    *
    * Also please note that all report.js tests and some permissions.js tests are always
    * serialized with test.serialize for the time being.
@@ -44,6 +44,6 @@ if (testEnv === "remote") {
 /*
  * For ava.config.js files `export default` must be used
  *
- * https://github.com/avajs/ava/blob/master/docs/06-configuration.md#avaconfigjs
+ * https://github.com/avajs/ava/blob/main/docs/06-configuration.md#avaconfigjs
  */
 export default config

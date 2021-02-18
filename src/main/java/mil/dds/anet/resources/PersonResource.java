@@ -267,11 +267,11 @@ public class PersonResource {
     }
 
     @SuppressWarnings("unchecked")
-    final List<String> whitelistDomainNames =
+    final List<String> allowedDomainNames =
         ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
             .map(String::toLowerCase).collect(Collectors.toList());
 
-    if (!Utils.isEmailWhitelisted(emailInput, whitelistDomainNames)) {
+    if (!Utils.isEmailAllowed(emailInput, allowedDomainNames)) {
       throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
     }
   }

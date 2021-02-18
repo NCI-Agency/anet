@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
-	id "com.diffplug.spotless" version "5.10.0"
+	id "com.diffplug.spotless" version "5.10.2"
 }
 
 apply plugin: 'java'
@@ -75,14 +75,14 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre8'
 	implementation 'org.postgresql:postgresql:42.2.18' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.0'
+	implementation 'org.liquibase:liquibase-core:4.3.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.0'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:6.4.4'
+	implementation 'org.simplejavamail:simple-java-mail:6.5.0'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
@@ -327,7 +327,7 @@ task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.t
 	def resultTags = ['ncia/anet-app-server:'+project.version]
 	if (projectBranch=="candidate")
 		resultTags << 'ncia/anet-app-server:'+projectBranch
-	if (projectBranch=="master")
+	if (projectBranch=="main")
 		resultTags << 'ncia/anet-app-server:latest'
 	images = resultTags
 }
