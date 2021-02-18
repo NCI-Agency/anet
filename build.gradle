@@ -3,6 +3,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
 	id "com.diffplug.spotless" version "5.11.0"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.12.5"
 }
 
 apply plugin: 'java'
@@ -12,6 +13,7 @@ apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
+apply plugin: 'com.graphql_java_generator.graphql-gradle-plugin'
 
 sourceCompatibility = 1.8
 
@@ -106,6 +108,12 @@ dependencies {
 
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.14'
+
+	// The graphql-java-runtime module agregates all dependencies for the generated code,
+	// including the plugin runtime
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.12.2'
+	// We use some extended scalars in `generateClientCodeConf` below
+	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.0'
 
 	testImplementation 'io.dropwizard:dropwizard-testing:2.0.20'
 	testImplementation 'io.dropwizard:dropwizard-client:2.0.20'
@@ -443,6 +451,50 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	}
 	cmdline << anetConfig
 	args cmdline
+}
+
+// Add the generated sources as a Java test source folder
+sourceSets.test.java.srcDirs += 'build/generated/generateClientCode'
+// And remove the auto-added generated sources from the main Java source
+def mainSrcDirs = sourceSets.main.java.srcDirs.toList()
+mainSrcDirs.removeAll { it.name == 'generateClientCode' || it.name == 'generateServerCode' }
+sourceSets.main.java.srcDirs = mainSrcDirs
+
+// Execute the GraphQL plugin before Java compiles, so that all test sources are generated on time
+compileTestJava.dependsOn generateClientCode
+
+// Configure the GraphQL Gradle Plugin; all available parameters are described here:
+// https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/generateClientCode-mojo.html
+generateClientCodeConf {
+	schemaFileFolder = 'src/test/resources/'
+	schemaFilePattern = 'anet.graphql'
+	packageName = 'mil.dds.anet.test.client'
+	separateUtilityClasses = true
+	customScalars = [
+		[
+			graphQLTypeName: "Instant",
+			javaType: "java.time.Instant",
+			graphQLScalarTypeStaticField: "mil.dds.anet.graphql.DateTimeMapper.GraphQLInstant"
+		],
+		[
+			graphQLTypeName: "Long",
+			javaType: "java.lang.Long",
+			graphQLScalarTypeStaticField: "graphql.Scalars.GraphQLLong"
+		],
+		[
+			graphQLTypeName: "Map_String_ObjectScalar",
+			javaType: "java.util.HashMap",
+			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
+		],
+		[
+			graphQLTypeName: "UNREPRESENTABLE",
+			javaType: "java.lang.Object",
+			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
+		]
+	]
+	// The parameters below change the 1.x default behavior to respect the future 2.x behavior
+	//copyRuntimeSources = false
+	//generateDeprecatedRequestResponse = false
 }
 
 jar.dependsOn buildClient
