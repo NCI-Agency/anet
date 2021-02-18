@@ -51,7 +51,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   private static AnetEmailWorker emailWorker;
 
   private static boolean executeEmailServerTests;
-  private static String whitelistedEmail;
+  private static String allowedEmail;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
-    whitelistedEmail =
+    allowedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
@@ -359,7 +359,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final ReportDao reportDao = engine.getReportDao();
 
     final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAddressId + whitelistedEmail);
+    author.setEmailAddress(toAddressId + allowedEmail);
     engine.getPersonDao().insert(author);
 
     ApprovalStep approvalStep = null;

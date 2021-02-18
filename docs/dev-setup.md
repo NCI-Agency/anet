@@ -86,7 +86,7 @@ To log in as one of the base data users, when prompted for a username and passwo
     1. You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
     1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
     1. You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
-    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
+    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Run `./gradlew run` to run the server via Gradle
     1. If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
     1. The following output indicates that the server is ready:

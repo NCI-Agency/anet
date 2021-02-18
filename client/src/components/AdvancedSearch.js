@@ -1,11 +1,6 @@
-import {
-  Classes,
-  Menu,
-  MenuItem,
-  Popover,
-  PopoverInteractionKind,
-  Position as PopoverPosition
-} from "@blueprintjs/core"
+import { Classes, Menu, MenuItem } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import RemoveButton from "components/RemoveButton"
@@ -191,15 +186,19 @@ const AdvancedSearch = ({
                     "No additional filters available"
                   )
                 ) : (
-                  <Popover
+                  <Popover2
                     content={advancedSearchMenuContent}
                     captureDismiss
-                    interactionKind={PopoverInteractionKind.CLICK}
+                    interactionKind={Popover2InteractionKind.CLICK}
                     usePortal={false}
-                    position={PopoverPosition.RIGHT}
+                    autoFocus={true}
+                    enforceFocus={true}
+                    placement="right"
                     modifiers={{
                       preventOverflow: {
-                        boundariesElement: "viewport"
+                        options: {
+                          rootBoundary: "viewport"
+                        }
                       },
                       flip: {
                         enabled: false
@@ -209,7 +208,7 @@ const AdvancedSearch = ({
                     <Button bsStyle="link" id="addFilterDropdown">
                       + Add {filters.length > 0 && "another"} filter
                     </Button>
-                  </Popover>
+                  </Popover2>
                 )}
               </div>
               <div

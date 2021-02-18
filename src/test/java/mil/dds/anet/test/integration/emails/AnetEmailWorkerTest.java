@@ -26,7 +26,7 @@ import org.mockito.Mockito;
 @ExtendWith(TestApp.class)
 public class AnetEmailWorkerTest {
 
-  private static String whitelistedEmail;
+  private static String allowedEmail;
   private static EmailDao emailDao;
   private static FakeSmtpServer emailServer;
   private static AnetEmailWorker emailWorker = null;
@@ -43,9 +43,9 @@ public class AnetEmailWorkerTest {
     emailDao = mock(EmailDao.class, Mockito.RETURNS_DEEP_STUBS);
     emailWorker = new AnetEmailWorker(app.getConfiguration(), emailDao);
 
-    whitelistedEmail =
+    allowedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
-    app.getConfiguration().setEmailFromAddr("test_from_address" + whitelistedEmail);
+    app.getConfiguration().setEmailFromAddr("test_from_address" + allowedEmail);
 
     emailServer = new FakeSmtpServer(app.getConfiguration().getSmtp());
 
@@ -70,7 +70,7 @@ public class AnetEmailWorkerTest {
   @Test
   public void testWorker() throws Exception {
     final List<String> toAddresses = new ArrayList<>();
-    toAddresses.add("test_to_address" + whitelistedEmail);
+    toAddresses.add("test_to_address" + allowedEmail);
     final AnetEmail testEmail = createTestEmail(1, toAddresses, "test_comment");
 
     // Run

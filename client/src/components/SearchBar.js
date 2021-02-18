@@ -1,4 +1,5 @@
-import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import AdvancedSearch from "components/AdvancedSearch"
 import {
@@ -20,15 +21,17 @@ export const SearchPopover = ({
   children
 }) => {
   return (
-    <Popover
+    <Popover2
       isOpen={isOpen}
       onInteraction={isOpen => setIsOpen(isOpen)}
       boundary="window"
       captureDismiss
       content={popoverContent}
-      interactionKind={PopoverInteractionKind.CLICK}
-      position={Position.BOTTOM_LEFT}
+      interactionKind={Popover2InteractionKind.CLICK_TARGET_ONLY}
+      placement="bottom-start"
       usePortal={false}
+      autoFocus={true}
+      enforceFocus={false}
       modifiers={{
         preventOverflow: {
           enabled: false
@@ -42,7 +45,7 @@ export const SearchPopover = ({
       }}
     >
       {children}
-    </Popover>
+    </Popover2>
   )
 }
 
