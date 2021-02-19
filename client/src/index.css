@@ -1200,13 +1200,13 @@ header.searchPagination {
 
   .search-popover-target {
     max-height: 200px;
-    overflow-y: scroll;
+    overflow-y: auto;
     font-size: 12px;
   }
 
-  .search-popover-target ~ .bp3-overlay > .bp3-transition-container {
-    left: -26vw !important;
-    width: 95vw;
+  .search-popover-target ~ .bp3-overlay > .bp3-popover2-transition-container {
+    left: -20vw !important;
+    width: 90vw;
   }
 
   .rollup-date-range-container {
