@@ -1,26 +1,25 @@
 import PropTypes from "prop-types"
-import React, { PureComponent } from "react"
+import React, { useEffect } from "react"
 
-export default class NotFound extends PureComponent {
-  static propTypes = {
-    text: PropTypes.string
-  }
-
-  componentDidMount() {
+const NotFound = ({ text }) => {
+  useEffect(() => {
     document.getElementsByTagName("html")[0].classList.add("not-found")
-  }
+    return () => {
+      document.getElementsByTagName("html")[0].classList.remove("not-found")
+    }
+  }, [])
 
-  componentWillUnmount() {
-    document.getElementsByTagName("html")[0].classList.remove("not-found")
-  }
-
-  render() {
-    return (
-      <div>
-        <h1 style={{ textAlign: "center" }} className="not-found-text">
-          {this.props.text}
-        </h1>
-      </div>
-    )
-  }
+  return (
+    <div>
+      <h1 style={{ textAlign: "center" }} className="not-found-text">
+        {text}
+      </h1>
+    </div>
+  )
 }
+
+NotFound.propTypes = {
+  text: PropTypes.string
+}
+
+export default NotFound
