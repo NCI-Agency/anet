@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,20 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     super(qb);
   }
 
+  protected ReportSearchQuery getQueryForPostProcessing(ReportSearchQuery query) {
+    if (query.getPendingApprovalOf() == null) {
+      return query;
+    }
+    try {
+      final ReportSearchQuery modifiedQuery = query.clone();
+      // pagination will be done after post-processing
+      modifiedQuery.setPageSize(0);
+      return modifiedQuery;
+    } catch (CloneNotSupportedException e) {
+      return query; // what else can we do?
+    }
+  }
+
   protected CompletableFuture<AnetBeanList<Report>> postProcessResults(Map<String, Object> context,
       ReportSearchQuery query, AnetBeanList<Report> result) {
     if (query.getPendingApprovalOf() == null) {
@@ -62,7 +77,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
                 r.getApprovalStepUuid(), r.getAdvisorOrgUuid()))
         .toArray(CompletableFuture<?>[]::new);
     return CompletableFuture.allOf(allReports).thenCompose(v -> {
-
       final Iterator<Report> iterator = list.iterator();
       for (final CompletableFuture<Boolean> cf : allReports) {
         iterator.next();
@@ -70,7 +84,22 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
           iterator.remove();
         }
       }
-      result.setTotalCount(list.size());
+      final int totalCount = list.size();
+      final int pageNum = query.getPageNum();
+      final int pageSize = query.getPageSize();
+      result.setTotalCount(totalCount);
+      result.setPageNum(pageNum);
+      result.setPageSize(pageSize);
+      if (pageSize > 0) {
+        // Do pagination
+        final int fromIndex = pageNum * pageSize;
+        final int toIndex = Math.min(totalCount, fromIndex + pageSize);
+        if (fromIndex >= totalCount || fromIndex > toIndex) {
+          result.setList(Collections.emptyList());
+        } else {
+          result.setList(list.subList(fromIndex, toIndex));
+        }
+      }
       return CompletableFuture.completedFuture(result);
     });
   }

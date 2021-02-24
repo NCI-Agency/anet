@@ -25,7 +25,8 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   @Override
   public CompletableFuture<AnetBeanList<Report>> runSearch(Map<String, Object> context,
       Set<String> subFields, ReportSearchQuery query) {
-    buildQuery(subFields, query);
+    final ReportSearchQuery modifiedQuery = getQueryForPostProcessing(query);
+    buildQuery(subFields, modifiedQuery);
     outerQb.addSelectClause("*");
     outerQb.addTotalCount();
     outerQb.addFromClause("( " + qb.build() + " ) l");
@@ -33,7 +34,7 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
     outerQb.addListArgs(qb.getListArgs());
     addOrderByClauses((AbstractSearchQueryBuilder<Report, ReportSearchQuery>) outerQb, query);
     return postProcessResults(context, query,
-        (outerQb).buildAndRun(getDbHandle(), query, new ReportMapper()));
+        (outerQb).buildAndRun(getDbHandle(), modifiedQuery, new ReportMapper()));
   }
 
   @Override
