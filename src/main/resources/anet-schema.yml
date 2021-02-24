@@ -446,10 +446,6 @@ properties:
             type: string
             title: The label for a report's cancelled
             description: Used in the UI where a report's cancelled is shown.
-          reportTags:
-            type: string
-            title: The label for report's tags
-            description: Used in the UI where report's tags are shown.
           nextSteps:
             type: string
             title: The label for report's next steps

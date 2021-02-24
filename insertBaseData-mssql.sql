@@ -5,7 +5,6 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE positionRelationships;
 --DROP TABLE reportTasks;
 --DROP TABLE reportPeople;
---DROP TABLE reportTags;
 --DROP TABLE peoplePositions;
 --DROP TABLE savedSearches;
 --DROP TABLE taskTaskedOrganizations;
@@ -20,7 +19,6 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE organizations;
 --DROP TABLE adminSettings;
 --DROP TABLE pendingEmails;
---DROP TABLE tags;
 --DROP TABLE authorizationGroupPositions;
 --DROP TABLE authorizationGroups;
 --DROP TABLE reportAuthorizationGroups;
@@ -35,7 +33,6 @@ TRUNCATE TABLE reportActions;
 TRUNCATE TABLE positionRelationships;
 TRUNCATE TABLE reportTasks;
 TRUNCATE TABLE reportPeople;
-TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
 TRUNCATE TABLE reportsSensitiveInformation;
@@ -48,14 +45,13 @@ DELETE FROM positions;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NOT NULL;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NULL;
 DELETE FROM reports;
+DELETE FROM notes;
 DELETE FROM people;
 DELETE FROM approvalSteps;
 DELETE FROM locations;
 DELETE FROM organizations;
 DELETE FROM adminSettings;
-DELETE FROM tags;
 DELETE FROM authorizationGroups;
-DELETE FROM notes;
 
 --Advisors
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
@@ -808,46 +804,55 @@ INSERT INTO adminSettings ([key], value)
 INSERT INTO adminSettings ([key], value)
 	VALUES ('GENERAL_BANNER_VISIBILITY', '1');
 
--- Tags
-INSERT INTO tags (uuid, name, description, createdAt, updatedAt)
-	VALUES
-  (lower(newid()), 'bribery', 'Giving/Promising money or something valuable to corrupt the behavior of a public official', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'clientelism', 'Exhange of goods or services for political support; involves quid-pro-quo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'collusion', 'A secret agreement that involves fraud', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'embezzlement', 'Steal or misappropriate money from the organization the person works for', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'extortion', 'Using force or threats to obtain money or a service', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'fraud', 'Criminal deception resulting in financial personal gain', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'grand corruption', 'Abuse of high level power that benefits a few people at the expense of many', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'nepotism', 'Leaders favoring relatives or friends usually by giving them jobs', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'patronage', 'Leaders illegally appointing someone to a position', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'state capture', 'Private interests that significantly influence a decision-making process for private gain', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'petty corruption', 'Every day abuse of entrusted power by low- to mid-level public officials', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (lower(newid()), 'facilitation payment', 'Payment made to a government official that acts as an incentive to complete an action quickly', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- System role/user, used when importing data that can't be linked to any specific user
+INSERT INTO PEOPLE (uuid, name, status, role, createdAt, updatedAt)
+	SELECT lower(newid()), 'ANET Importer', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+	WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0);
+
+DECLARE @authorUuid varchar(36);
+DECLARE @noteUuid varchar(36);
+SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0);
 
 -- Tag some reports
-INSERT INTO reportTags (reportUuid, tagUuid)
-  SELECT r.uuid, t.uuid
-  FROM reports r, tags t
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e')
-  AND t.name = 'bribery';
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES(@noteUuid, @authorUuid, 0,
+		'Previously tagged as bribery - Giving/Promising money or something valuable to corrupt the behavior of a public official',
+		CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'reports', r.uuid
+	FROM reports r
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '2', '4', '6', '8', 'a', 'c', 'e');
 
-INSERT INTO reportTags (reportUuid, tagUuid)
-  SELECT r.uuid, t.uuid
-  FROM reports r, tags t
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f')
-  AND t.name = 'embezzlement';
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES(@noteUuid, @authorUuid, 0,
+		'Previously tagged as embezzlement - Steal or misappropriate money from the organization the person works for',
+		CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'reports', r.uuid
+	FROM reports r
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('0', '3', '6', '9', 'c', 'f');
 
-INSERT INTO reportTags (reportUuid, tagUuid)
-  SELECT r.uuid, t.uuid
-  FROM reports r, tags t
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f')
-  AND t.name = 'patronage';
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES(@noteUuid, @authorUuid, 0,
+		'Previously tagged as patronage - Leaders illegally appointing someone to a position',
+		CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'reports', r.uuid
+	FROM reports r
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '3', '5', '7', '9', 'b', 'd', 'f');
 
-INSERT INTO reportTags (reportUuid, tagUuid)
-  SELECT r.uuid, t.uuid
-  FROM reports r, tags t
-  WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd')
-  AND t.name = 'facilitation payment';
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES(@noteUuid, @authorUuid, 0,
+		'Previously tagged as facilitation payment - Payment made to a government official that acts as an incentive to complete an action quickly',
+		CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'reports', r.uuid
+	FROM reports r
+	WHERE SUBSTRING(r.uuid, 1, 1) IN ('1', '4', '7', 'a', 'd');
 
 -- Insert report with created at and updated at date for two days before current timestamp
 SET @reportUuid = lower(newid());
@@ -904,9 +909,6 @@ INSERT INTO reportAuthorizationGroups (reportUuid, authorizationGroupUuid)
   );
 
 -- Add some notes and link them to the objects they relate to
-DECLARE @authorUuid varchar(36);
-DECLARE @noteUuid varchar(36);
-
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
@@ -918,8 +920,9 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'DMIN, Arthur');
 SET @noteUuid = lower(newid());
+-- Oddly, we have to escape the <em> here or else Liquibase fails on mssql…
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
-	VALUES (@noteUuid, @authorUuid, 0, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (@noteUuid, @authorUuid, 0, '\<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'positions', p.uuid
 	FROM positions p
@@ -1020,10 +1023,6 @@ UPDATE tasks SET
     projectedCompletion=cast(updatedAt as datetime2(0))
   ;
 UPDATE locations SET
-    createdAt=cast(createdAt as datetime2(3)),
-    updatedAt=cast(updatedAt as datetime2(3))
-  ;
-UPDATE tags SET
     createdAt=cast(createdAt as datetime2(3)),
     updatedAt=cast(updatedAt as datetime2(3))
   ;

@@ -185,11 +185,6 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           shortName
         }
-        tags {
-          uuid
-          name
-          description
-        }
         workflow {
           type
           createdAt

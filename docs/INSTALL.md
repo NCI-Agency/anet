@@ -247,7 +247,6 @@ dictionary:
       atmosphere: Atmospherics
       atmosphereDetails: Atmospherics details
       cancelled: ''
-      reportTags: Tags
       nextSteps: Next steps
       keyOutcomes: Key outcomes
       reportText: Engagement details

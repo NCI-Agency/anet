@@ -48,11 +48,6 @@ reportList(query:{pageSize:100}) {
       shortName
       customFields
     }
-    tags {
-      uuid
-      name
-      description
-    }
     workflow {
       type
       createdAt

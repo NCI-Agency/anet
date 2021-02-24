@@ -40,8 +40,6 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
   protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     qb.addSelectClause("DISTINCT " + getTableFields(subFields));
     qb.addFromClause("reports");
-    qb.addFromClause("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid");
-    qb.addFromClause("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid");
     super.buildQuery(subFields, query);
   }
 
@@ -52,20 +50,14 @@ public class MssqlReportSearcher extends AbstractReportSearcher {
       // sum of all search ranks) so we can sort on it (show the most relevant hits at the top).
       // Note that summing up independent ranks is not ideal, but it's the best we can do now. See
       // https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
-      qb.addSelectClause("ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0)"
-          + " + ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0) AS search_rank");
+      qb.addSelectClause("ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0) AS search_rank");
     }
     qb.addFromClause(
         "LEFT JOIN CONTAINSTABLE (reports, (text, intent, keyOutcomes, nextSteps), :containsQuery) c_reports"
             + " ON reports.uuid = c_reports.[Key]"
             + " LEFT JOIN FREETEXTTABLE(reports, (text, intent, keyOutcomes, nextSteps), :fullTextQuery) f_reports"
             + " ON reports.uuid = f_reports.[Key]");
-    qb.addFromClause("LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
-        + " ON tags.uuid = c_tags.[Key]"
-        + " LEFT JOIN FREETEXTTABLE(tags, (name, description), :fullTextQuery) f_tags"
-        + " ON tags.uuid = f_tags.[Key]");
-    qb.addWhereClause("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL"
-        + " OR c_tags.rank IS NOT NULL OR f_tags.rank IS NOT NULL)");
+    qb.addWhereClause("(c_reports.rank IS NOT NULL OR f_reports.rank IS NOT NULL)");
     final String text = query.getText();
     qb.addSqlArg("containsQuery", qb.getContainsQuery(text));
     qb.addSqlArg("fullTextQuery", qb.getFullTextQuery(text));

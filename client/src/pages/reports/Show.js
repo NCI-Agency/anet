@@ -30,7 +30,6 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import { deserializeQueryParams } from "components/SearchFilters"
-import Tag from "components/Tag"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
@@ -211,11 +210,6 @@ const GQL_GET_REPORT = gql`
         }
         nextStepUuid
       }
-      tags {
-        uuid
-        name
-        description
-      }
       reportSensitiveInformation {
         uuid
         text
@@ -304,10 +298,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     report = new Report()
   } else {
     data.report.cancelled = !!data.report.cancelledReason
-    data.report.reportTags = (data.report.tags || []).map(tag => ({
-      id: tag.uuid.toString(),
-      text: tag.name
-    }))
     data.report.tasks = Task.fromArray(data.report.tasks)
     data.report.reportPeople = Person.fromArray(data.report.reportPeople)
     data.report.to = ""
@@ -593,20 +583,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         {report.atmosphereDetails &&
                           ` – ${report.atmosphereDetails}`}
                       </>
-                    }
-                  />
-                )}
-
-                {Settings.fields.report.reportTags && (
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
                     }
                   />
                 )}

@@ -24,21 +24,12 @@ import {
   LocationOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
-  TagOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
-import {
-  Location,
-  Organization,
-  Person,
-  Position,
-  Report,
-  Tag,
-  Task
-} from "models"
+import { Location, Organization, Person, Position, Report, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -226,13 +217,6 @@ export const searchFilters = function() {
     }
   }
 
-  const tagWidgetFilters = {
-    all: {
-      label: "All",
-      queryVars: {}
-    }
-  }
-
   filters[SEARCH_OBJECT_TYPES.REPORTS] = {
     filters: {
       Author: {
@@ -354,20 +338,6 @@ export const searchFilters = function() {
             Report.ATMOSPHERE.NEUTRAL,
             Report.ATMOSPHERE.NEGATIVE
           ]
-        }
-      },
-      Tag: {
-        component: AdvancedSelectFilter,
-        deserializer: deserializeAdvancedSelectFilter,
-        props: {
-          overlayColumns: ["Name"],
-          overlayRenderRow: TagOverlayRow,
-          objectType: Tag,
-          valueKey: "name",
-          fields: Tag.autocompleteQuery,
-          filterDefs: tagWidgetFilters,
-          placeholder: "Filter reports by tag...",
-          queryKey: "tagUuid"
         }
       },
       "Sensitive Info": {

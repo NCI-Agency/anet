@@ -109,8 +109,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   // annotated below
   List<Comment> comments;
   // annotated below
-  private List<Tag> tags;
-  // annotated below
   private ReportSensitiveInformation reportSensitiveInformation;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
@@ -735,27 +733,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
         : getWorkflowForRelatedObject(context, engine, locationUuid);
   };
 
-  @GraphQLQuery(name = "tags")
-  public CompletableFuture<List<Tag>> loadTags(@GraphQLRootContext Map<String, Object> context) {
-    if (tags != null) {
-      return CompletableFuture.completedFuture(tags);
-    }
-    return AnetObjectEngine.getInstance().getReportDao().getTagsForReport(context, uuid)
-        .thenApply(o -> {
-          tags = o;
-          return o;
-        });
-  }
-
-  public List<Tag> getTags() {
-    return tags;
-  }
-
-  @GraphQLInputField(name = "tags")
-  public void setTags(List<Tag> tags) {
-    this.tags = tags;
-  }
-
   @GraphQLQuery(name = "reportSensitiveInformation")
   public CompletableFuture<ReportSensitiveInformation> loadReportSensitiveInformation(
       @GraphQLRootContext Map<String, Object> context) {
@@ -838,7 +815,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
         && Objects.equals(r.getReportPeople(), reportPeople) && Objects.equals(r.getTasks(), tasks)
         && Objects.equals(r.getReportText(), reportText)
         && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
-        && Objects.equals(r.getTags(), tags)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
         && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
   }
@@ -847,7 +823,7 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, state, approvalStep, createdAt, updatedAt, location,
         intent, exsum, reportPeople, tasks, reportText, nextSteps, comments, atmosphere,
-        atmosphereDetails, engagementDate, duration, tags, reportSensitiveInformation,
+        atmosphereDetails, engagementDate, duration, reportSensitiveInformation,
         authorizationGroups);
   }
 

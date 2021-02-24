@@ -10,7 +10,6 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.TagDao;
 import mil.dds.anet.database.TaskDao;
 
 // ID batching data loaders
@@ -24,7 +23,6 @@ public enum IdDataLoaderKey {
   PEOPLE_AVATARS((PersonDao.TABLE_NAME + ".avatar")), // -
   POSITIONS(PositionDao.TABLE_NAME), // -
   REPORTS(ReportDao.TABLE_NAME), // -
-  TAGS(TagDao.TABLE_NAME), // -
   TASKS(TaskDao.TABLE_NAME);
 
   private static final Map<String, IdDataLoaderKey> BY_TABLE_NAME = new HashMap<>();
