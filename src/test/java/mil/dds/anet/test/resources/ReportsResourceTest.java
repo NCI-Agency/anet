@@ -1339,7 +1339,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     variables.put("startDate", startDate.toEpochMilli());
     variables.put("endDate", endDate.toEpochMilli());
     final List<RollupGraph> startGraph = graphQLHelper.getObjectList(admin,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1385,7 +1386,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph = graphQLHelper.getObjectList(admin,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1434,7 +1436,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     variables.put("startDate", startDate.toEpochMilli());
     variables.put("endDate", endDate.toEpochMilli());
     final List<RollupGraph> startGraph = graphQLHelper.getObjectList(elizabeth,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1480,7 +1483,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph = graphQLHelper.getObjectList(elizabeth,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
