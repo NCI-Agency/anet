@@ -141,6 +141,15 @@ const GQL_GET_APP_DATA = gql`
         shortName
       }
     }
+
+    locationList(query: { pageSize: 0 }) {
+      list {
+        uuid
+        name
+        lat
+        lng
+      }
+    }
   }
 `
 
@@ -180,7 +189,8 @@ const App = ({ pageDispatchers, pageProps }) => {
         currentUser: appState.currentUser,
         loadAppData: refetch,
         notifications: appState.notifications,
-        connection: { ...connectionInfo }
+        connection: { ...connectionInfo },
+        allLocations: appState.allLocations
       }}
     >
       <ResponsiveLayout
@@ -224,12 +234,15 @@ const App = ({ pageDispatchers, pageProps }) => {
 
     const currentUser = new Person(data.me)
     const notifications = getNotifications(currentUser)
+    const allLocations = data?.locationList?.list || []
+
     return {
       currentUser,
       settings,
       advisorOrganizations,
       principalOrganizations,
-      notifications
+      notifications,
+      allLocations
     }
   }
 }

@@ -38,7 +38,7 @@ const GQL_UPDATE_LOCATION = gql`
 `
 
 const LocationForm = ({ edit, title, initialValues }) => {
-  const { currentUser } = useContext(AppContext)
+  const { currentUser, loadAppData } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
@@ -266,6 +266,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
     // reset the form to latest values
     // to avoid unsaved changes propmt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
+    // After successful submit, reload all locations data
+    loadAppData()
     if (!edit) {
       history.replace(Location.pathForEdit(location))
     }
