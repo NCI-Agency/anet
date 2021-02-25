@@ -14,6 +14,7 @@ import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.beans.userActivity.RecentActivities;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.AnetConstants;
 import org.junit.jupiter.api.Test;
@@ -145,12 +146,15 @@ public class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final Map<String, Object> allActivities =
-          graphQLHelper.getObjectOfType(user, "query { payload: userActivities }",
-              new TypeReference<GraphQlResponse<Map<String, Object>>>() {});
+      final RecentActivities recentActivities = graphQLHelper.getObjectOfType(user,
+          "query { payload: userActivities {"
+              + " byActivity { ...userActivity } byUser { ...userActivity } } }"
+              + " fragment userActivity on UserActivity {"
+              + " user { uuid rank name domainUsername } activity { time ip request } }",
+          new TypeReference<GraphQlResponse<RecentActivities>>() {});
       if (isAdmin) {
-        assertThat(allActivities.containsKey("users")).isTrue();
-        assertThat(allActivities.containsKey("recentCalls")).isTrue();
+        assertThat(recentActivities.getByUser()).isNotEmpty();
+        assertThat(recentActivities.getByActivity()).isNotEmpty();
       } else {
         fail("Expected ForbiddenException");
       }

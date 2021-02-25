@@ -60,10 +60,8 @@ my $identifiers = qr/
   | reportId
   | reportPeople
   | reportTasks
-  | reportTags
   | savedSearches
   | shortName
-  | tagId
   | taskId
   | updatedAt
  )\b

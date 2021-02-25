@@ -147,11 +147,6 @@ report(uuid:"${reportUuid}") {
     }
     nextStepUuid
   }
-  tags {
-    uuid
-    name
-    description
-  }
   reportSensitiveInformation {
     uuid
     text

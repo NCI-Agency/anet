@@ -3,7 +3,6 @@ import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
-import Tag from "components/Tag"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
@@ -63,11 +62,6 @@ const GQL_GET_REPORT_LIST = gql`
         tasks {
           uuid
           shortName
-        }
-        tags {
-          uuid
-          name
-          description
         }
         workflow {
           type
@@ -329,19 +323,6 @@ const ReportSummaryRow = ({ report }) => {
                   task.shortName + (i < report.tasks.length - 1 ? ", " : "")
               )}
             </span>
-          )}
-        </Col>
-      </Row>
-      <Row>
-        <Col md={12}>
-          {report.tags && (
-            <Row>
-              <Col md={12}>
-                {report.tags.map((tag, i) => (
-                  <Tag key={tag.uuid} tag={tag} />
-                ))}
-              </Col>
-            </Row>
           )}
         </Col>
       </Row>

@@ -132,7 +132,6 @@ async function populateReport(report, user, args) {
     reportText: () => faker.lorem.paragraphs(),
     nextSteps: () => faker.lorem.sentence(),
     keyOutcomes: () => faker.lorem.sentence(),
-    tags: () => [],
     reportSensitiveInformation: () => null,
     authorizationGroups: () => [],
     state,
@@ -160,7 +159,6 @@ async function populateReport(report, user, args) {
     .reportText.always()
     .nextSteps.always()
     .keyOutcomes.always()
-    .tags.rarely()
     .reportSensitiveInformation.and()
     .authorizationGroups.rarely()
     .state.always()
@@ -173,7 +171,7 @@ const createReport = async function(user, grow, args) {
   const report = Object.without(new Report(), "formCustomFields")
   if (await populateReport(report, user, args)) {
     console.debug(`Creating report ${report.intent.green}`)
-    const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
+    const { cancelled, ...reportStripped } = report // TODO: we need to do this more generically
 
     return (
       await runGQL(user, {

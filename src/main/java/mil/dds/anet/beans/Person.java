@@ -8,7 +8,8 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,14 +18,19 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.userActivity.Activity;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
+import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
 public class Person extends AbstractCustomizableAnetBean
-    implements Principal, RelatableObject, WithStatus {
+    implements Principal, RelatableObject, WithStatus, Comparable<Person> {
+
+  private static final Comparator<Person> COMPARATOR =
+      Comparator.comparing(Person::getName).thenComparing(Person::getUuid);
 
   public static enum Role {
     ADVISOR, PRINCIPAL
@@ -81,7 +87,8 @@ public class Person extends AbstractCustomizableAnetBean
   @GraphQLInputField
   private String code;
 
-  private LinkedList<Map<String, Object>> userActivities;
+  // non-GraphQL
+  private Deque<Activity> userActivities;
 
   @Override
   public String getName() {
@@ -318,16 +325,22 @@ public class Person extends AbstractCustomizableAnetBean
   }
 
   @JsonIgnore
-  public LinkedList<Map<String, Object>> getUserActivities() {
+  public Deque<Activity> getUserActivities() {
     if (userActivities == null) {
-      return new LinkedList<>();
+      return new InsertionOrderLinkedList<>();
     }
-    return new LinkedList<>(userActivities);
+    return new InsertionOrderLinkedList<>(userActivities);
   }
 
   @JsonIgnore
-  public void setUserActivities(LinkedList<Map<String, Object>> userActivities) {
+  public void setUserActivities(Deque<Activity> userActivities) {
     this.userActivities = userActivities;
+  }
+
+  @Override
+  public int compareTo(Person o) {
+    // Used by Collections.sort() in AdminResource::userActivities
+    return COMPARATOR.compare(this, o);
   }
 
   @Override
@@ -346,7 +359,6 @@ public class Person extends AbstractCustomizableAnetBean
         && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
-        && Objects.equals(other.getUserActivities(), getUserActivities())
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
                 ? updatedAt.equals(other.getUpdatedAt())
