@@ -8,7 +8,10 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import LinkTo from "components/LinkTo"
 import PositionField from "components/MergeField"
 import Messages from "components/Messages"
-import { MODEL_TO_OBJECT_TYPE } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  MODEL_TO_OBJECT_TYPE
+} from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -225,6 +228,7 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
+                customStyle="height: 100px;"
                 action={getClearButton(() => {
                   setFieldValue("associatedPositions", "")
                 })}
@@ -313,7 +317,10 @@ const MergePositions = ({ pageDispatchers }) => {
 
     API.mutation(GQL_MERGE_POSITION, {
       loserUuid: loser.uuid,
-      winnerPosition: mergedPosition
+      winnerPosition: Object.without(
+        mergedPosition,
+        DEFAULT_CUSTOM_FIELDS_PARENT
+      )
     })
       .then(res => {
         if (res.mergePosition) {
@@ -431,7 +438,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Associated Positions"
-            customStyle="height: 80px;"
+            customStyle="height: 100px;"
             value={
               <>
                 {position.associatedPositions.map(pos => (
@@ -453,7 +460,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Previous People"
-            customStyle="height: 80px;"
+            customStyle="height: 100px;"
             value={
               <>
                 {position.previousPeople.map((pp, idx) => (
@@ -471,7 +478,6 @@ const PositionColumn = ({
           />
           <PositionField
             label="Person"
-            customStyle="height: 80px;"
             value={<LinkTo modelType="Person" model={position.person} />}
             align={align}
             action={getActionButton(() => {
