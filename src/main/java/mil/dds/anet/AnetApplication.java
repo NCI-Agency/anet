@@ -53,7 +53,6 @@ import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
 import mil.dds.anet.resources.SubscriptionResource;
 import mil.dds.anet.resources.SubscriptionUpdateResource;
-import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -268,7 +267,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AdminResource adminResource = new AdminResource(engine, configuration);
     final HomeResource homeResource = new HomeResource(engine, configuration);
     final SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
-    final TagResource tagResource = new TagResource(engine);
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
@@ -285,7 +283,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey()
         .register(new GraphQlResource(engine, configuration,
             ImmutableList.of(reportResource, personResource, positionResource, locationResource,
-                orgResource, taskResource, adminResource, savedSearchResource, tagResource,
+                orgResource, taskResource, adminResource, savedSearchResource,
                 authorizationGroupResource, noteResource, approvalStepResource,
                 subscriptionResource, subscriptionUpdateResource),
             metricRegistry));

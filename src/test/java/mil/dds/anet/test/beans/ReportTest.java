@@ -4,9 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.Lists;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
@@ -15,7 +13,6 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.test.TestData;
 import org.junit.jupiter.api.Test;
@@ -63,17 +60,6 @@ public class ReportTest extends BeanTester<Report> {
     LinkedList<Comment> comments = new LinkedList<Comment>();
     comments.add(c);
     r.setComments(comments);
-
-    final List<Tag> tags = new ArrayList<Tag>();
-    final Tag t1 = new Tag();
-    t1.setName("name1");
-    t1.setDescription("desc1");
-    tags.add(t1);
-    final Tag t2 = new Tag();
-    t2.setName("name2");
-    t2.setDescription("desc2");
-    tags.add(t2);
-    r.setTags(tags);
 
     final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
     rsi.setText("For your eyes only");

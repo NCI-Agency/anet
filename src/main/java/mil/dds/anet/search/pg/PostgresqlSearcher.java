@@ -9,7 +9,6 @@ import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ISubscriptionSearcher;
 import mil.dds.anet.search.ISubscriptionUpdateSearcher;
-import mil.dds.anet.search.ITagSearcher;
 import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.search.Searcher;
 import mil.dds.anet.search.pg.PostgresqlSearcher;
@@ -58,11 +57,6 @@ public class PostgresqlSearcher extends Searcher {
   @Override
   public ISubscriptionUpdateSearcher getSubscriptionUpdateSearcher() {
     return injector.getInstance(PostgresqlSubscriptionUpdateSearcher.class);
-  }
-
-  @Override
-  public ITagSearcher getTagSearcher() {
-    return injector.getInstance(PostgresqlTagSearcher.class);
   }
 
   @Override
