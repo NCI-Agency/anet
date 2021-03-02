@@ -1,6 +1,6 @@
 package mil.dds.anet.test.integration.db;
 
-import static mil.dds.anet.threads.PendingAssessmentsNotificationWorker.*;
+import static mil.dds.anet.utils.PendingAssessmentsHelper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;

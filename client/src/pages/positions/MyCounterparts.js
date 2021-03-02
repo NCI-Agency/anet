@@ -18,7 +18,7 @@ const MyCounterparts = ({ pageDispatchers }) => {
   })
   const {
     currentUser,
-    notifications: { myCounterpartsWithPendingAssessments }
+    notifications: { counterpartsWithPendingAssessments }
   } = useContext(AppContext)
 
   return (
@@ -30,7 +30,7 @@ const MyCounterparts = ({ pageDispatchers }) => {
         id="my-counterparts-with-pending-assessments"
         title="My Counterparts that have pending assessments"
       >
-        <PositionTable positions={myCounterpartsWithPendingAssessments} />
+        <PositionTable positions={counterpartsWithPendingAssessments} />
       </Fieldset>
     </div>
   )

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -32,9 +33,11 @@ import mil.dds.anet.beans.search.PositionSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
+
   private static final String ORGANIZATION_FIELDS = "uuid shortName";
   private static final String PERSON_FIELDS = "uuid name role";
   private static final String POSITION_FIELDS = "uuid name code type status";
@@ -42,6 +45,15 @@ public class PositionResourceTest extends AbstractResourceTest {
       + " } organization { " + ORGANIZATION_FIELDS + " }";
   private static final String PREVIOUS_PEOPLE_FIELDS =
       " previousPeople { startTime endTime position { uuid } person { uuid name rank role } }";
+  private static final String GRAPHQL_NOTIFICATIONS_NOTE_FIELDS =
+      "customFields notes { noteRelatedObjects { noteUuid } createdAt type text }";
+  private static final String PENDING_ASSESSMENTS_FIELDS =
+      " associatedPositions { uuid name code type status organization { uuid shortName }"
+          + " location { uuid name } person { uuid name rank avatar(size: 32) "
+          + GRAPHQL_NOTIFICATIONS_NOTE_FIELDS + " } }"
+          + " responsibleTasks(query: {status: ACTIVE}) { uuid shortName longName customFieldRef1 {"
+          + " uuid } " + GRAPHQL_NOTIFICATIONS_NOTE_FIELDS + " }";
+  private static final String PA_FIELDS = FIELDS + PENDING_ASSESSMENTS_FIELDS;
 
   @Test
   public void positionTest() {
@@ -482,6 +494,64 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(
         searchResults.stream().filter(p -> p.getStatus().equals(Position.Status.INACTIVE)).count())
             .isEqualTo(searchResults.size());
+  }
+
+  @Test
+  public void searchPendingAssessmentsTestAll() {
+    final Person erin = getRegularUser();
+    final PositionSearchQuery query = new PositionSearchQuery();
+    query.setHasPendingAssessments(true);
+
+    // Search all organizations
+    final Map<String, Object> searchResults = graphQLHelper.searchObjectsGeneric(erin,
+        "positionList", "query", "PositionSearchQueryInput", PA_FIELDS, query);
+    assertThat(searchResults).isNotEmpty();
+    @SuppressWarnings("unchecked")
+    final List<Map<String, Object>> list = (List<Map<String, Object>>) searchResults.get("list");
+    final Set<String> uuids =
+        list.stream().map(p -> (String) p.get("uuid")).collect(Collectors.toSet());
+    // EF 1
+    assertThat(uuids).contains(getAndrewAnderson().getPosition().getUuid());
+    // EF 1.1
+    assertThat(uuids).contains(getBobBobtown().getPosition().getUuid());
+    // EF 2.1
+    assertThat(uuids).contains(getJackJackson().getPosition().getUuid());
+    // EF 2.2
+    assertThat(uuids).contains(erin.getPosition().getUuid());
+    // Each entry should have associatedPositions or responsibleTasks (or both)
+    assertThat(
+        list.stream().filter(p -> !Utils.isEmptyOrNull((List<?>) p.get("associatedPositions"))
+            || !Utils.isEmptyOrNull((List<?>) p.get("responsibleTasks")))).hasSameSizeAs(list);
+  }
+
+  @Test
+  public void searchPendingAssessmentsTestEf1() {
+    final Person erin = getRegularUser();
+    final PositionSearchQuery query = new PositionSearchQuery();
+    query.setHasPendingAssessments(true);
+
+    // Search EF 1 and below
+    query.setOrganizationUuid(getAndrewAnderson().getPosition().getOrganizationUuid());
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    Map<String, Object> searchResults = graphQLHelper.searchObjectsGeneric(erin, "positionList",
+        "query", "PositionSearchQueryInput", PA_FIELDS, query);
+    assertThat(searchResults).isNotEmpty();
+    @SuppressWarnings("unchecked")
+    final List<Map<String, Object>> list = (List<Map<String, Object>>) searchResults.get("list");
+    final Set<String> uuids =
+        list.stream().map(p -> (String) p.get("uuid")).collect(Collectors.toSet());
+    // EF 1
+    assertThat(uuids).contains(getAndrewAnderson().getPosition().getUuid());
+    // EF 1.1
+    assertThat(uuids).contains(getBobBobtown().getPosition().getUuid());
+    // EF 2.1
+    assertThat(uuids).doesNotContain(getJackJackson().getPosition().getUuid());
+    // EF 2.2
+    assertThat(uuids).doesNotContain(erin.getPosition().getUuid());
+    // Each entry should have associatedPositions or responsibleTasks (or both)
+    assertThat(
+        list.stream().filter(p -> !Utils.isEmptyOrNull((List<?>) p.get("associatedPositions"))
+            || !Utils.isEmptyOrNull((List<?>) p.get("responsibleTasks")))).hasSameSizeAs(list);
   }
 
   @Test

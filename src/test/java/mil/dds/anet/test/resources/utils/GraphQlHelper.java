@@ -61,7 +61,7 @@ public final class GraphQlHelper {
   /**
    * @return the requested object of any type
    */
-  public <T extends Object> T getObjectOfType(Person user, String query,
+  public <T> T getObjectOfType(Person user, String query,
       TypeReference<GraphQlResponse<T>> responseType) {
     return graphQlClient.doGraphQlQuery(user, query, null, responseType);
   }
@@ -142,8 +142,7 @@ public final class GraphQlHelper {
   /**
    * @return the number of objects deleted
    */
-  public <T extends AbstractAnetBean> Integer deleteObject(Person user, String deleteQuery,
-      String uuid) {
+  public Integer deleteObject(Person user, String deleteQuery, String uuid) {
     final String q = String.format(updateFmt, "uuid", "String", deleteQuery);
     return graphQlClient.doGraphQlQuery(user, q, "uuid", uuid,
         new TypeReference<GraphQlResponse<Integer>>() {});
@@ -157,6 +156,16 @@ public final class GraphQlHelper {
       TypeReference<GraphQlResponse<AnetBeanList<T>>> responseType) {
     final String q = String.format(searchFmt, paramName, paramType, searchQuery, fields);
     return graphQlClient.doGraphQlQuery(user, q, paramName, param, responseType);
+  }
+
+  /**
+   * @return the object list matching the search query
+   */
+  public Map<String, Object> searchObjectsGeneric(Person user, String searchQuery, String paramName,
+      String paramType, String fields, AbstractSearchQuery<?> param) {
+    final String q = String.format(searchFmt, paramName, paramType, searchQuery, fields);
+    return graphQlClient.doGraphQlQuery(user, q, paramName, param,
+        new TypeReference<GraphQlResponse<Map<String, Object>>>() {});
   }
 
 }
