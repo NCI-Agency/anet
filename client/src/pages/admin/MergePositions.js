@@ -19,6 +19,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import _set from "lodash/set"
 import useMergeValidation, {
   areAllSet,
   getActionButton,
@@ -35,6 +36,8 @@ import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
+import Settings from "settings"
+import utils from "utils"
 
 const GQL_MERGE_POSITION = gql`
   mutation($loserUuid: String!, $winnerPosition: PositionInput!) {
@@ -44,43 +47,17 @@ const GQL_MERGE_POSITION = gql`
   }
 `
 const POSITION_FIELDS = `
-uuid
-name
-type
-status
-code
-organization {
-  uuid
-  shortName
-  longName
-  identificationCode
-}
-person {
-  uuid
-  name
-  rank
-  role
-  avatar(size: 32)
-}
-associatedPositions {
   uuid
   name
   type
-  person {
-    uuid
-    name
-    rank
-    role
-    avatar(size: 32)
-  }
+  status
+  code
   organization {
     uuid
     shortName
+    longName
+    identificationCode
   }
-}
-previousPeople {
-  startTime
-  endTime
   person {
     uuid
     name
@@ -88,13 +65,39 @@ previousPeople {
     role
     avatar(size: 32)
   }
-}
-location {
-  uuid
-  name
-}
-${GRAPHQL_NOTES_FIELDS}
-
+  associatedPositions {
+    uuid
+    name
+    type
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+    organization {
+      uuid
+      shortName
+    }
+  }
+  previousPeople {
+    startTime
+    endTime
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+  }
+  location {
+    uuid
+    name
+  }
+  ${GRAPHQL_NOTES_FIELDS}
+  customFields
 `
 
 const positionsFilters = {
@@ -261,6 +264,27 @@ const MergePositions = ({ pageDispatchers }) => {
                   setFieldValue("person", "")
                 })}
               />
+              {Settings.fields.position.customFields &&
+                Object.entries(Settings.fields.position.customFields).map(
+                  ([fieldName, fieldConfig]) => {
+                    const fieldValue =
+                      mergedPosition[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                    return (
+                      <PositionField
+                        key={fieldName}
+                        label={fieldConfig.label || fieldName}
+                        value={fieldValue}
+                        align="center"
+                        action={getClearButton(() => {
+                          setFieldValue(
+                            `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                            ""
+                          )
+                        })}
+                      />
+                    )
+                  }
+                )}
               <PositionField
                 label="Location"
                 value={
@@ -336,7 +360,11 @@ const MergePositions = ({ pageDispatchers }) => {
   }
 
   function setFieldValue(field, value) {
-    setMergedPosition(oldState => new Position({ ...oldState, [field]: value }))
+    setMergedPosition(oldState => {
+      const newState = { ...oldState }
+      _set(newState, field, value)
+      return new Position(newState)
+    })
   }
 
   function setAllFields(pos) {
@@ -380,7 +408,15 @@ const PositionColumn = ({
           overlayColumns={["Position", "Organization", "Current Occupant"]}
           overlayRenderRow={PositionOverlayRow}
           filterDefs={positionsFilters}
-          onChange={value => setPosition(value)}
+          onChange={value => {
+            const newValue = value
+            if (newValue?.customFields) {
+              newValue[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+                value.customFields
+              )
+            }
+            setPosition(value)
+          }}
           objectType={Position}
           valueKey="name"
           fields={POSITION_FIELDS}
@@ -488,6 +524,27 @@ const PositionColumn = ({
               setFieldValue("uuid", position.uuid)
             }, align)}
           />
+          {Settings.fields.position.customFields &&
+            Object.entries(Settings.fields.position.customFields).map(
+              ([fieldName, fieldConfig]) => {
+                const fieldValue =
+                  position[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                return (
+                  <PositionField
+                    key={fieldName}
+                    label={fieldConfig.label || fieldName}
+                    value={fieldValue}
+                    align={align}
+                    action={getActionButton(() => {
+                      setFieldValue(
+                        `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                        fieldValue
+                      )
+                    }, align)}
+                  />
+                )
+              }
+            )}
           <PositionField
             label="Location"
             value={<LinkTo modelType="Location" model={position.location} />}

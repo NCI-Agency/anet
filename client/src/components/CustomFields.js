@@ -897,7 +897,7 @@ CustomFields.defaultProps = {
   vertical: false
 }
 
-const READONLY_FIELD_COMPONENTS = {
+export const READONLY_FIELD_COMPONENTS = {
   [CUSTOM_FIELD_TYPE.TEXT]: ReadonlyTextField,
   [CUSTOM_FIELD_TYPE.NUMBER]: ReadonlyTextField,
   [CUSTOM_FIELD_TYPE.DATE]: ReadonlyDateField,
