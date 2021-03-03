@@ -211,4 +211,21 @@ export function getLeafletMap(mapId, location) {
   )
 }
 
+export function customStyleForLargeFields(fieldConfig) {
+  switch (fieldConfig?.type) {
+    case "array":
+      return "height: 100px;"
+    case "array_of_anet_objects":
+      return "height: 120px;"
+    case "array_of_objects":
+      return "height: 120px;"
+    case "enumset":
+      return "height: 80px;"
+    case "json":
+      return "height: 120px;"
+    default:
+      return ""
+  }
+}
+
 export default useMergeValidation

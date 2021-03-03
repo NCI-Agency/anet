@@ -5,6 +5,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { customFieldsJSONString } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import PositionField from "components/MergeField"
 import Messages from "components/Messages"
@@ -22,6 +23,7 @@ import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import _set from "lodash/set"
 import useMergeValidation, {
   areAllSet,
+  customStyleForLargeFields,
   getActionButton,
   getActivationButton,
   getClearButton,
@@ -231,7 +233,7 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
-                customStyle="height: 100px;"
+                customStyle={customStyleForLargeFields({ type: "array" })}
                 action={getClearButton(() => {
                   setFieldValue("associatedPositions", "")
                 })}
@@ -249,7 +251,7 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
-                customStyle="height: 100px;"
+                customStyle={customStyleForLargeFields({ type: "array" })}
                 action={getClearButton(() => {
                   setFieldValue("previousPeople", "")
                 })}
@@ -273,7 +275,8 @@ const MergePositions = ({ pageDispatchers }) => {
                       <PositionField
                         key={fieldName}
                         label={fieldConfig.label || fieldName}
-                        value={fieldValue}
+                        value={JSON.stringify(fieldValue)}
+                        customStyle={customStyleForLargeFields(fieldConfig)}
                         align="center"
                         action={getClearButton(() => {
                           setFieldValue(
@@ -338,13 +341,15 @@ const MergePositions = ({ pageDispatchers }) => {
       mergedPosition.uuid = position1.uuid
       loser = position2
     }
-
+    // serialize form custom fields before query, and remove unserialized field
+    mergedPosition.customFields = customFieldsJSONString(mergedPosition)
+    const winnerPosition = Object.without(
+      mergedPosition,
+      DEFAULT_CUSTOM_FIELDS_PARENT
+    )
     API.mutation(GQL_MERGE_POSITION, {
       loserUuid: loser.uuid,
-      winnerPosition: Object.without(
-        mergedPosition,
-        DEFAULT_CUSTOM_FIELDS_PARENT
-      )
+      winnerPosition
     })
       .then(res => {
         if (res.mergePosition) {
@@ -476,7 +481,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Associated Positions"
-            customStyle="height: 100px;"
+            customStyle={customStyleForLargeFields({ type: "array" })}
             value={
               <>
                 {position.associatedPositions.map(pos => (
@@ -498,7 +503,7 @@ const PositionColumn = ({
           />
           <PositionField
             label="Previous People"
-            customStyle="height: 100px;"
+            customStyle={customStyleForLargeFields({ type: "array" })}
             value={
               <>
                 {position.previousPeople.map((pp, idx) => (
@@ -529,11 +534,14 @@ const PositionColumn = ({
               ([fieldName, fieldConfig]) => {
                 const fieldValue =
                   position[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+
                 return (
                   <PositionField
                     key={fieldName}
                     label={fieldConfig.label || fieldName}
-                    value={fieldValue}
+                    customStyle={customStyleForLargeFields(fieldConfig)}
+                    // To be able to see arrays and ojects
+                    value={JSON.stringify(fieldValue)}
                     align={align}
                     action={getActionButton(() => {
                       setFieldValue(
