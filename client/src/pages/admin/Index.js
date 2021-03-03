@@ -46,12 +46,33 @@ const RELOAD_DICTIONARY = gql`
 `
 const USER_ACTIVITIES = gql`
   query {
-    userActivities
+    userActivities {
+      byActivity {
+        ...userActivity
+      }
+      byUser {
+        ...userActivity
+      }
+    }
+  }
+
+  fragment userActivity on UserActivity {
+    user {
+      uuid
+      rank
+      name
+      domainUsername
+    }
+    activity {
+      time
+      ip
+      request
+    }
   }
 `
 const AdminIndex = ({ pageDispatchers }) => {
   const { loadAppData } = useContext(AppContext)
-  const [userActivities, setUserActivities] = useState(null)
+  const [recentActivities, setRecentActivities] = useState(null)
   const [recentUsers, setRecentUsers] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [lastLoaded, setLastLoaded] = useState(null)
@@ -74,17 +95,17 @@ const AdminIndex = ({ pageDispatchers }) => {
   const settings = {}
   data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
 
-  const userActivitiesAndRecentUsersActionButton = (
+  const userActivitiesActionButton = (
     <Button
       disabled={actionLoading}
       bsStyle="primary"
       type="button"
-      onClick={loadUserActivitiesAndRecentUsers}
+      onClick={loadUserActivities}
     >
-      {Array.isArray(userActivities) || Array.isArray(recentUsers)
+      {Array.isArray(recentActivities) || Array.isArray(recentUsers)
         ? "Reload"
         : "Load"}{" "}
-      User Activities & Recent Users
+      Recent Activities & Recent Users
     </Button>
   )
 
@@ -164,14 +185,14 @@ const AdminIndex = ({ pageDispatchers }) => {
         </Grid>
       </Fieldset>
       <Fieldset
-        title={getTitleText(userActivities, "User Activities")}
-        action={userActivitiesAndRecentUsersActionButton}
+        title={getTitleText(recentActivities, "Recent Activities")}
+        action={userActivitiesActionButton}
       >
-        <UserActivityTable text="user activities" values={userActivities} />
+        <UserActivityTable text="user activities" values={recentActivities} />
       </Fieldset>
       <Fieldset
         title={getTitleText(recentUsers, "Recent Users")}
-        action={userActivitiesAndRecentUsersActionButton}
+        action={userActivitiesActionButton}
       >
         <UserActivityTable text="recent users" values={recentUsers} />
       </Fieldset>
@@ -236,30 +257,30 @@ const AdminIndex = ({ pageDispatchers }) => {
       .finally(() => setActionLoading(false))
   }
 
-  function loadUserActivitiesAndRecentUsers() {
+  function loadUserActivities() {
     setActionLoading(true)
     return API.query(USER_ACTIVITIES, {})
       .then(data => {
-        const recentCalls = data?.userActivities?.recentCalls || []
-
+        const byActivity = data?.userActivities?.byActivity || []
         /*
          * We need a stable identity to be used as Key by react.
          * Since this data is not coming from database it doesn't have a uuid by itself.
          * "listKey" is used by react as stable identity while displaying these as list in UserActivityTable
          */
-        recentCalls.forEach(ua => (ua.listKey = uuidv4()))
-        setUserActivities(recentCalls)
+        byActivity.forEach(ua => (ua.listKey = uuidv4()))
+        setRecentActivities(byActivity)
 
+        const byUser = data?.userActivities?.byUser || []
         // "listKey" is used by react as stable identity while displaying these as list in UserActivityTable
-        const users = Object.map(data?.userActivities?.users || {}, (k, v) => ({
-          ...v[0],
-          listKey: uuidv4()
-        }))
-        setRecentUsers(users)
+        byUser.forEach(ua => (ua.listKey = uuidv4()))
+        setRecentUsers(byUser)
         setLastLoaded(moment())
-        toast.success("User activities & recent users are loaded succesfully", {
-          toastId: "success-load-recent"
-        })
+        toast.success(
+          "Recent activities & recent users are loaded succesfully",
+          {
+            toastId: "success-load-recent"
+          }
+        )
       })
       .catch(handleError)
       .finally(() => setActionLoading(false))

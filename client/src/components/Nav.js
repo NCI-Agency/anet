@@ -130,9 +130,9 @@ const Nav = ({
             id="my-tasks-nav"
           >
             {`My ${pluralize(taskShortLabel)}`}
-            {notifications?.myTasksWithPendingAssessments?.length ? (
+            {notifications?.tasksWithPendingAssessments?.length ? (
               <NotificationBadge>
-                {notifications.myTasksWithPendingAssessments.length}
+                {notifications.tasksWithPendingAssessments.length}
               </NotificationBadge>
             ) : null}
           </SidebarLink>
@@ -142,9 +142,9 @@ const Nav = ({
             id="my-counterparts-nav"
           >
             My Counterparts
-            {notifications?.myCounterpartsWithPendingAssessments?.length ? (
+            {notifications?.counterpartsWithPendingAssessments?.length ? (
               <NotificationBadge>
-                {notifications.myCounterpartsWithPendingAssessments.length}
+                {notifications.counterpartsWithPendingAssessments.length}
               </NotificationBadge>
             ) : null}
           </SidebarLink>
@@ -241,7 +241,7 @@ const Nav = ({
         Help
       </SidebarLink>
 
-      {currentUser.isAdmin() /* FIXME: enable this again when nci-agency/anet#1463 is fixed: || currentUser.isSuperUser() */ && (
+      {(currentUser.isAdmin() || currentUser.isSuperUser()) && (
         <NavDropdown title="Insights" id="insights" active={inInsights}>
           {INSIGHTS.map(insight => (
             <Link

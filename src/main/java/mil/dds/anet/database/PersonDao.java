@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +24,7 @@ import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.beans.userActivity.Activity;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -219,14 +220,14 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return people;
   }
 
-  public void logActivitiesByDomainUsername(String domainUsername, Map<String, Object> activity) {
+  public void logActivitiesByDomainUsername(String domainUsername, Activity activity) {
     final Person person = domainUsersCache.get(domainUsername);
     if (person != null) {
-      final LinkedList<Map<String, Object>> activities = person.getUserActivities();
-      while (activities.size() >= ACTIVITY_LOG_LIMIT) {
+      final Deque<Activity> activities = person.getUserActivities();
+      activities.addFirst(activity);
+      while (activities.size() > ACTIVITY_LOG_LIMIT) {
         activities.removeLast();
       }
-      activities.addFirst(activity);
       person.setUserActivities(activities);
       domainUsersCache.replace(domainUsername, person);
     }

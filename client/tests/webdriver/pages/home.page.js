@@ -23,6 +23,16 @@ class Home extends Page {
     return browser.$("#searchBarInput")
   }
 
+  get homeTilesContainer() {
+    return browser.$("fieldset.home-tile-row")
+  }
+
+  get pendingMyApprovalOfCount() {
+    return browser
+      .$('//button[contains(text(), "Reports pending my approval")]')
+      .$("h1")
+  }
+
   get submitSearch() {
     return browser.$("#topbar #searchBarSubmit")
   }

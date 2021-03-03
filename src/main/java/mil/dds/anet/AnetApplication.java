@@ -51,7 +51,6 @@ import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
-import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -161,7 +160,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // The Object Engine is the core place where we store all of the Dao's
     // You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
-    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this, metricRegistry);
+    final AnetObjectEngine engine =
+        new AnetObjectEngine(dbUrl, this, configuration, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
     if (configuration.isDevelopmentMode()) {
@@ -266,23 +266,23 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AdminResource adminResource = new AdminResource(engine, configuration);
     final HomeResource homeResource = new HomeResource(engine, configuration);
     final SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
-    final TagResource tagResource = new TagResource(engine);
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
     final ApprovalStepResource approvalStepResource = new ApprovalStepResource(engine);
+    final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
+    graphQlResource.initialise(engine, configuration,
+        ImmutableList.of(reportResource, personResource, positionResource, locationResource,
+            orgResource, taskResource, adminResource, savedSearchResource,
+            authorizationGroupResource, noteResource, approvalStepResource),
+        metricRegistry);
 
     // Register all of the HTTP Resources
     environment.jersey().register(loggingResource);
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
     environment.jersey().register(new ViewResponseFilter(configuration));
-    environment.jersey()
-        .register(new GraphQlResource(engine, configuration,
-            ImmutableList.of(reportResource, personResource, positionResource, locationResource,
-                orgResource, taskResource, adminResource, savedSearchResource, tagResource,
-                authorizationGroupResource, noteResource, approvalStepResource),
-            metricRegistry));
+    environment.jersey().register(graphQlResource);
   }
 
   private void runAccountDeactivationWorker(final AnetConfiguration configuration,

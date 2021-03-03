@@ -43,7 +43,6 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -273,23 +272,6 @@ public class ReportResource {
       }
       for (String uuid : existingTaskUuids) {
         dao.removeTaskFromReport(uuid, r);
-      }
-    }
-
-    // Update Tags:
-    if (r.getTags() != null) {
-      final List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getUuid()).join();
-      for (final Tag t : r.getTags()) {
-        Optional<Tag> existingTag =
-            existingTags.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
-        if (existingTag.isPresent()) {
-          existingTags.remove(existingTag.get());
-        } else {
-          dao.addTagToReport(t, r);
-        }
-      }
-      for (Tag t : existingTags) {
-        dao.removeTagFromReport(t, r);
       }
     }
 
@@ -663,14 +645,11 @@ public class ReportResource {
    *        reports will be by/about this org or a child org.
    */
   @GraphQLQuery(name = "rollupGraph")
-  public List<RollupGraph> getDailyRollupGraph(@GraphQLArgument(name = "startDate") Long start,
-      @GraphQLArgument(name = "endDate") Long end,
+  public List<RollupGraph> getDailyRollupGraph(@GraphQLArgument(name = "startDate") Instant start,
+      @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") OrganizationType orgType,
       @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
       @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid) {
-    Instant startDate = Instant.ofEpochMilli(start);
-    Instant endDate = Instant.ofEpochMilli(end);
-
     final List<RollupGraph> dailyRollupGraph;
 
     @SuppressWarnings("unchecked")
@@ -680,16 +659,16 @@ public class ReportResource {
         getOrgsByShortNames(nonReportingOrgsShortNames);
 
     if (principalOrgUuid != null) {
-      dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, principalOrgUuid,
+      dailyRollupGraph = dao.getDailyRollupGraph(start, end, principalOrgUuid,
           OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
     } else if (advisorOrgUuid != null) {
-      dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, advisorOrgUuid,
+      dailyRollupGraph = dao.getDailyRollupGraph(start, end, advisorOrgUuid,
           OrganizationType.ADVISOR_ORG, nonReportingOrgs);
     } else {
       if (orgType == null) {
         orgType = OrganizationType.ADVISOR_ORG;
       }
-      dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, orgType, nonReportingOrgs);
+      dailyRollupGraph = dao.getDailyRollupGraph(start, end, orgType, nonReportingOrgs);
     }
 
     Collections.sort(dailyRollupGraph, getRollupGraphComparator());
@@ -698,15 +677,15 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "emailRollup")
-  public Integer emailRollup(@GraphQLArgument(name = "startDate") Long start,
-      @GraphQLArgument(name = "endDate") Long end,
+  public Integer emailRollup(@GraphQLArgument(name = "startDate") Instant start,
+      @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") OrganizationType orgType,
       @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
       @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid,
       @GraphQLArgument(name = "email") AnetEmail email) {
     DailyRollupEmail action = new DailyRollupEmail();
-    action.setStartDate(Instant.ofEpochMilli(start));
-    action.setEndDate(Instant.ofEpochMilli(end));
+    action.setStartDate(start);
+    action.setEndDate(end);
     action.setComment(email.getComment());
     action.setAdvisorOrganizationUuid(advisorOrgUuid);
     action.setPrincipalOrganizationUuid(principalOrgUuid);
@@ -719,15 +698,15 @@ public class ReportResource {
   }
 
   @GraphQLQuery(name = "showRollupEmail")
-  public String showRollupEmail(@GraphQLArgument(name = "startDate") Long start,
-      @GraphQLArgument(name = "endDate") Long end,
+  public String showRollupEmail(@GraphQLArgument(name = "startDate") Instant start,
+      @GraphQLArgument(name = "endDate") Instant end,
       @GraphQLArgument(name = "orgType") OrganizationType orgType,
       @GraphQLArgument(name = "advisorOrganizationUuid") String advisorOrgUuid,
       @GraphQLArgument(name = "principalOrganizationUuid") String principalOrgUuid,
       @GraphQLArgument(name = "showText", defaultValue = "false") Boolean showReportText) {
     DailyRollupEmail action = new DailyRollupEmail();
-    action.setStartDate(Instant.ofEpochMilli(start));
-    action.setEndDate(Instant.ofEpochMilli(end));
+    action.setStartDate(start);
+    action.setEndDate(end);
     action.setChartOrgType(orgType);
     action.setAdvisorOrganizationUuid(advisorOrgUuid);
     action.setPrincipalOrganizationUuid(principalOrgUuid);

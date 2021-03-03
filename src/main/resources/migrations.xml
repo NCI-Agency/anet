@@ -3916,4 +3916,53 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="convert-tags-to-notes" author="VassilIordanov">
+		<sql>
+			INSERT INTO PEOPLE (uuid, name, status, role, "createdAt", "updatedAt")
+				SELECT ${uuid_function}, 'ANET Importer', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+				WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0);
+
+                        -- Create one note for each tag;
+                        -- since notes are only editable by their author (the ANET Importer in this case) or admin,
+                        -- this is safe
+			INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
+				SELECT
+					t.uuid,
+					(SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0),
+					0,
+					CONCAT('Previously tagged as ', t.name, ' - ',  t.description),
+					t."createdAt",
+					t."updatedAt"
+				FROM
+					tags t;
+
+                        -- Link reports to the note containing their former tag
+			INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+				SELECT
+					rt."tagUuid",
+					'reports',
+					rt."reportUuid"
+				FROM
+					"reportTags" rt;
+		</sql>
+		<sql dbms="postgresql">
+			DROP MATERIALIZED VIEW mv_fts_tags;
+		</sql>
+		<dropForeignKeyConstraint baseTableName="reportTags" constraintName="FK_reportTags_report" />
+		<dropForeignKeyConstraint baseTableName="reportTags" constraintName="FK_reportTags_tag" />
+		<dropTable tableName="reportTags" />
+		<dropTable tableName="tags" />
+		<!-- Remove tags from saved searches -->
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			-- Remove JSON field for the tagUuid
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.tagUuid', NULL);
+		</sql>
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<sql dbms="postgresql">
+			-- Remove JSON field for the tagUuid
+			UPDATE "savedSearches" SET query=query::jsonb #- '{tagUuid}';
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

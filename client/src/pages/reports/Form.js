@@ -31,11 +31,9 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
-  PageDispatchersPropType,
-  useBoilerplate
+  PageDispatchersPropType
 } from "components/Page"
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
-import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -43,7 +41,7 @@ import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
-import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
+import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
@@ -64,19 +62,6 @@ import ReportPeople, {
   forceOnlyAttendingPersonPerRoleToPrimary
 } from "./ReportPeople"
 
-const GQL_GET_TAG_LIST = gql`
-  query {
-    tagList(
-      query: {
-        pageSize: 0 # retrieve all
-      }
-    ) {
-      list {
-        ${Tag.autocompleteQuery}
-      }
-    }
-  }
-`
 const GQL_CREATE_REPORT = gql`
   mutation($report: ReportInput!) {
     createReport(report: $report) {
@@ -175,15 +160,7 @@ const ReportForm = ({
       text: "__should_not_match_anything__" // TODO: Do this more gracefully
     }
   }
-  const { loading, error, data } = API.useApiQuery(GQL_GET_TAG_LIST)
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  if (done) {
-    return result
-  }
+
   const submitText = currentUser.hasActivePosition()
     ? "Preview and submit"
     : "Save draft"
@@ -195,15 +172,6 @@ const ReportForm = ({
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
-
-  let tagSuggestions = []
-  if (data) {
-    // ReactTags expects id and text properties
-    tagSuggestions = data.tagList.list.map(tag => ({
-      id: tag.uuid,
-      text: tag.name
-    }))
-  }
 
   // Update the report schema according to the selected report tasks and attendees
   // instant assessments schema
@@ -629,16 +597,6 @@ const ReportForm = ({
                         : ""
                     }`}
                     className="atmosphere-details"
-                  />
-                )}
-
-                {Settings.fields.report.reportTags && (
-                  <FastField
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.SpecialField}
-                    onChange={value => setFieldValue("reportTags", value, true)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
                   />
                 )}
               </Fieldset>
@@ -1270,8 +1228,6 @@ const ReportForm = ({
       report.atmosphereDetails = ""
       report.keyOutcomes = ""
     }
-    // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
-    report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip reportPeople fields not in data model
     report.reportPeople = values.reportPeople.map(reportPerson => {
       const rp = Object.without(

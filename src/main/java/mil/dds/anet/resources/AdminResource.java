@@ -8,14 +8,9 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.cache.Cache;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,12 +19,16 @@ import javax.ws.rs.core.MediaType;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.userActivity.Activity;
+import mil.dds.anet.beans.userActivity.RecentActivities;
+import mil.dds.anet.beans.userActivity.UserActivity;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 
 @Path("/api/admin")
 public class AdminResource {
@@ -106,50 +105,30 @@ public class AdminResource {
    * Returns user logs in descending order of time
    */
   @GraphQLQuery(name = "userActivities")
-  public Map<String, Object> userActivities(@GraphQLRootContext Map<String, Object> context) {
+  public RecentActivities userActivities(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
-    final Map<String, Set<Map<String, Object>>> recentCalls = new HashMap<>();
+
+    final List<UserActivity> byActivity = new ArrayList<>();
+    final List<UserActivity> byUser = new ArrayList<>();
+
     final Cache<String, Person> domainUsersCache =
         AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
-
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
-      entry.getValue().getUserActivities().removeAll(Collections.singleton(null));
-      entry.getValue().getUserActivities().forEach(k -> {
-        // Group all entries with recentCalls key
-        recentCalls.computeIfAbsent("recentCalls", l -> new LinkedHashSet<>()).add(k);
-      });
+      final Person person = entry.getValue();
+      final Deque<Activity> activities = person.getUserActivities();
+      if (!Utils.isEmptyOrNull(activities)) {
+        byUser.add(new UserActivity(person, activities.getFirst()));
+        activities.forEach(activity -> {
+          byActivity.add(new UserActivity(person, activity));
+        });
+      }
     }
 
-    if (recentCalls.size() == 0)
-      return new HashMap<>();
-
-    final Map<String, Object> allActivities = new HashMap<>();
-    @SuppressWarnings("serial")
-    final Map<String, Set<Map<String, Object>>> recentActivities =
-        new HashMap<String, Set<Map<String, Object>>>() {
-          {
-            // Sort recentCalls by time in descending order
-            put("recentCalls", recentCalls.values().stream().map(s -> {
-              final List<Map<String, Object>> activities = new ArrayList<>(s);
-              return activities.stream()
-                  .sorted((o1, o2) -> ((Long) o2.get("time")).compareTo((Long) o1.get("time")))
-                  .collect(Collectors.toCollection(LinkedHashSet::new));
-            }).collect(
-                Collectors.toMap(k -> k.iterator().next().get("activity"), Function.identity()))
-                .get("activity"));
-          }
-        };
-    allActivities.put("recentCalls", recentActivities.get("recentCalls"));
-
-    // Sort recentActivities grouping by user
-    final Map<Object, List<Map<String, Object>>> recentUsers = recentActivities.get("recentCalls")
-        .stream().collect(Collectors.groupingBy(item -> item.get("user"), LinkedHashMap::new,
-            Collectors.mapping(Function.identity(), Collectors.toList())));
-
-    // Put sorted users to the list
-    allActivities.put("users", recentUsers);
-    return allActivities;
+    // Sort them by time descending
+    Collections.sort(byUser);
+    Collections.sort(byActivity);
+    return new RecentActivities(byActivity, byUser);
   }
 
 }

@@ -392,6 +392,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
   }
 
+  public CompletableFuture<AnetBeanList<Position>> search(Map<String, Object> context,
+      PositionSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(context,
+        query);
+  }
+
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
       Map<String, Object> context, String positionUuid) {
     return new ForeignKeyFetcher<PersonPositionHistory>()

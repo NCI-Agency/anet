@@ -1,7 +1,7 @@
 package mil.dds.anet.test.integration.commands;
 
-import static mil.dds.anet.threads.PendingAssessmentsNotificationWorker.NOTE_PERIOD_START;
-import static mil.dds.anet.threads.PendingAssessmentsNotificationWorker.NOTE_RECURRENCE;
+import static mil.dds.anet.utils.PendingAssessmentsHelper.NOTE_PERIOD_START;
+import static mil.dds.anet.utils.PendingAssessmentsHelper.NOTE_RECURRENCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 

@@ -65,7 +65,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
         id="my-tasks-with-pending-assessments"
         title={`${pluralize(taskShortLabel)} that have pending assessments`}
       >
-        <TaskTable tasks={notifications.myTasksWithPendingAssessments} />
+        <TaskTable tasks={notifications.tasksWithPendingAssessments} />
       </Fieldset>
     </div>
   )

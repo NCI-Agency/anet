@@ -10,7 +10,8 @@ const UserActivityTable = ({ text, values }) => {
   if (!values) {
     return (
       <Alert bsStyle="info" style={{ textAlign: "center" }}>
-        Click <b>Load User Activities & Recent Users</b> button to load {text}.
+        Click <b>Load Recent Activities & Recent Users</b> button to load {text}
+        .
       </Alert>
     )
   }
@@ -41,15 +42,15 @@ const UserActivityTable = ({ text, values }) => {
               <tr key={ua.listKey}>
                 <td>{idx + 1}</td>
                 <td className="nobr">
-                  {moment(ua.time).format(
+                  {moment(ua.activity.time).format(
                     Settings.dateFormats.forms.displayShort.withTime
                   )}
                 </td>
                 <td className="nobr">
                   <LinkTo modelType="Person" model={ua.user} />
                 </td>
-                <td>{ua.ip}</td>
-                <td>{ua.request}</td>
+                <td>{ua.activity.ip}</td>
+                <td>{ua.activity.request}</td>
               </tr>
             )
           })}

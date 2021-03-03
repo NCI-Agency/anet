@@ -82,11 +82,6 @@ const GQL_GET_REPORT = gql`
         }
         customFields
       }
-      tags {
-        uuid
-        name
-        description
-      }
       reportSensitiveInformation {
         uuid
         text
@@ -122,10 +117,6 @@ const ReportEdit = ({ pageDispatchers }) => {
 
   if (data) {
     data.report.cancelled = !!data.report.cancelledReason
-    data.report.reportTags = (data.report.tags || []).map(tag => ({
-      id: tag.uuid.toString(),
-      text: tag.name
-    }))
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields
     )

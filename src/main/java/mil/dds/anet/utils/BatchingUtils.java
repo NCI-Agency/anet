@@ -21,7 +21,6 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -293,27 +292,11 @@ public final class BatchingUtils {
                 .getReportSensitiveInformation(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.REPORT_TAGS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<Tag>>() {
-          @Override
-          public CompletionStage<List<List<Tag>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTags(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.REPORT_TASKS.toString(),
         new DataLoader<>(new BatchLoader<String, List<Task>>() {
           @Override
           public CompletionStage<List<List<Task>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys),
-                dispatcherService);
-          }
-        }, dataLoaderOptions));
-    dataLoaderRegistry.register(IdDataLoaderKey.TAGS.toString(),
-        new DataLoader<>(new BatchLoader<String, Tag>() {
-          @Override
-          public CompletionStage<List<Tag>> load(List<String> keys) {
-            return CompletableFuture.supplyAsync(() -> engine.getTagDao().getByIds(keys),
                 dispatcherService);
           }
         }, dataLoaderOptions));

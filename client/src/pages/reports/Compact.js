@@ -201,11 +201,6 @@ const GQL_GET_REPORT = gql`
         }
         nextStepUuid
       }
-      tags {
-        uuid
-        name
-        description
-      }
       reportSensitiveInformation {
         uuid
         text

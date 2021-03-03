@@ -13,26 +13,24 @@ export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
   }
 `
 
-export const getNotifications = currentUser => {
-  const myCounterpartsWithPendingAssessments = getMyCounterpartsWithPendingAssessments(
-    currentUser
+export const getNotifications = position => {
+  const counterpartsWithPendingAssessments = getCounterpartsWithPendingAssessments(
+    position
   )
 
-  const myTasksWithPendingAssessments = getMyTasksWithPendingAssessments(
-    currentUser
-  )
+  const tasksWithPendingAssessments = getTasksWithPendingAssessments(position)
 
   const notifications = {
-    myCounterpartsWithPendingAssessments,
-    myTasksWithPendingAssessments
+    counterpartsWithPendingAssessments,
+    tasksWithPendingAssessments
   }
 
   return notifications
 }
 
-export const getMyTasksWithPendingAssessments = currentUser => {
-  if (currentUser?.position?.responsibleTasks?.length) {
-    const taskObjects = currentUser.position.responsibleTasks
+export const getTasksWithPendingAssessments = position => {
+  if (position?.responsibleTasks?.length) {
+    const taskObjects = position.responsibleTasks
       .filter(obj => obj)
       .map(obj => new Task(obj))
     taskObjects.forEach(task => {
@@ -44,9 +42,9 @@ export const getMyTasksWithPendingAssessments = currentUser => {
   return []
 }
 
-export const getMyCounterpartsWithPendingAssessments = currentUser => {
-  if (currentUser?.position?.associatedPositions?.length) {
-    return currentUser.position.associatedPositions.filter(pos => {
+export const getCounterpartsWithPendingAssessments = position => {
+  if (position?.associatedPositions?.length) {
+    return position.associatedPositions.filter(pos => {
       if (pos.person) {
         return Model.hasPendingAssessments(new Person(pos.person))
       }

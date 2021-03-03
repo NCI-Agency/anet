@@ -25,9 +25,10 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   @Override
   public CompletableFuture<AnetBeanList<Report>> runSearch(Map<String, Object> context,
       Set<String> subFields, ReportSearchQuery query) {
-    buildQuery(subFields, query);
+    final ReportSearchQuery modifiedQuery = getQueryForPostProcessing(query);
+    buildQuery(subFields, modifiedQuery);
     return postProcessResults(context, query,
-        qb.buildAndRun(getDbHandle(), query, new ReportMapper()));
+        qb.buildAndRun(getDbHandle(), modifiedQuery, new ReportMapper()));
   }
 
   @Override

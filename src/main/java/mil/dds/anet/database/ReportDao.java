@@ -34,7 +34,6 @@ import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -44,7 +43,6 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
-import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.emails.ApprovalNeededEmail;
 import mil.dds.anet.emails.ReportPublishedEmail;
@@ -163,9 +161,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     if (r.getTasks() != null) {
       rb.insertReportTasks(r.getUuid(), r.getTasks());
     }
-    if (r.getTags() != null) {
-      rb.insertReportTags(r.getUuid(), r.getTags());
-    }
     return r;
   }
 
@@ -180,9 +175,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
 
     @SqlBatch("INSERT INTO \"reportTasks\" (\"reportUuid\", \"taskUuid\") VALUES (:reportUuid, :uuid)")
     void insertReportTasks(@Bind("reportUuid") String reportUuid, @BindBean List<Task> tasks);
-
-    @SqlBatch("INSERT INTO \"reportTags\" (\"reportUuid\", \"tagUuid\") VALUES (:reportUuid, :uuid)")
-    void insertReportTags(@Bind("reportUuid") String reportUuid, @BindBean List<Tag> tags);
   }
 
   @InTransaction
@@ -327,23 +319,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
         .bind("reportUuid", r.getUuid()).bind("taskUuid", taskUuid).execute();
   }
 
-  @InTransaction
-  public int addTagToReport(Tag t, Report r) {
-    return getDbHandle()
-        .createUpdate(
-            "/* addTagToReport */ INSERT INTO \"reportTags\" (\"reportUuid\", \"tagUuid\") "
-                + "VALUES (:reportUuid, :tagUuid)")
-        .bind("reportUuid", r.getUuid()).bind("tagUuid", t.getUuid()).execute();
-  }
-
-  @InTransaction
-  public int removeTagFromReport(Tag t, Report r) {
-    return getDbHandle()
-        .createUpdate("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
-            + "WHERE \"reportUuid\" = :reportUuid AND \"tagUuid\" = :tagUuid")
-        .bind("reportUuid", r.getUuid()).bind("tagUuid", t.getUuid()).execute();
-  }
-
   public CompletableFuture<List<ReportPerson>> getPeopleForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
     return new ForeignKeyFetcher<ReportPerson>().load(context, FkDataLoaderKey.REPORT_PEOPLE,
@@ -362,11 +337,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   public CompletableFuture<List<Task>> getTasksForReport(
       @GraphQLRootContext Map<String, Object> context, String reportUuid) {
     return new ForeignKeyFetcher<Task>().load(context, FkDataLoaderKey.REPORT_TASKS, reportUuid);
-  }
-
-  public CompletableFuture<List<Tag>> getTagsForReport(
-      @GraphQLRootContext Map<String, Object> context, String reportUuid) {
-    return new ForeignKeyFetcher<Tag>().load(context, FkDataLoaderKey.REPORT_TAGS, reportUuid);
   }
 
   @Override
@@ -391,10 +361,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
    */
   @Override
   public int deleteInternal(String reportUuid) {
-    // Delete tags
-    getDbHandle().execute(
-        "/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", reportUuid);
-
     // Delete tasks
     getDbHandle().execute(
         "/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?",
@@ -747,22 +713,6 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     final ForeignKeyBatcher<ReportPerson> reportPeopleBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(ReportPeopleBatcher.class);
     return reportPeopleBatcher.getByForeignKeys(foreignKeys);
-  }
-
-  static class TagsBatcher extends ForeignKeyBatcher<Tag> {
-    private static final String sql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
-        + "INNER JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid "
-        + "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> ) ORDER BY tags.name";
-
-    public TagsBatcher() {
-      super(sql, "foreignKeys", new TagMapper(), "reportUuid");
-    }
-  }
-
-  public List<List<Tag>> getTags(List<String> foreignKeys) {
-    final ForeignKeyBatcher<Tag> tagsBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(TagsBatcher.class);
-    return tagsBatcher.getByForeignKeys(foreignKeys);
   }
 
   static class TasksBatcher extends ForeignKeyBatcher<Task> {

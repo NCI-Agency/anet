@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -193,8 +194,10 @@ public class PositionResource {
   }
 
   @GraphQLQuery(name = "positionList")
-  public AnetBeanList<Position> search(@GraphQLArgument(name = "query") PositionSearchQuery query) {
-    return dao.search(query);
+  public CompletableFuture<AnetBeanList<Position>> search(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") PositionSearchQuery query) {
+    return dao.search(context, query);
   }
 
   @GraphQLMutation(name = "deletePosition")

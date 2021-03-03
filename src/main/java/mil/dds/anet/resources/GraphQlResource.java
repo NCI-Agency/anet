@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @Path("/graphql")
 public class GraphQlResource {
@@ -57,9 +58,9 @@ public class GraphQlResource {
   private static final String MEDIATYPE_XLSX =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-  private final AnetObjectEngine engine;
-  private final List<Object> resources;
-  private final MetricRegistry metricRegistry;
+  private AnetObjectEngine engine;
+  private List<Object> resources;
+  private MetricRegistry metricRegistry;
 
   private GraphQLSchema graphqlSchema;
   private GraphQLSchema graphqlSchemaWithoutIntrospection;
@@ -85,7 +86,9 @@ public class GraphQlResource {
         }
       };
 
-  public GraphQlResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
+  public GraphQlResource() {}
+
+  public void initialise(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
       MetricRegistry metricRegistry) {
     this.engine = engine;
     this.resources = resources;
@@ -204,6 +207,7 @@ public class GraphQlResource {
     return graphql(user, operationName, query, new HashMap<String, Object>(), output);
   }
 
+  @InTransaction
   protected Response graphql(@Auth Person user, String operationName, String query,
       Map<String, Object> variables, String output) {
     final ExecutionResult executionResult = dispatchRequest(user, operationName, query, variables);
