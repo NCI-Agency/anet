@@ -19,17 +19,14 @@ import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Organization extends AbstractAnetBean {
+public class Organization extends AbstractCustomizableAnetBean
+    implements RelatableObject, WithStatus {
 
   /** Pseudo uuid to represent all/top-level organization(s). */
   public static final String DUMMY_ORG_UUID = "-1";
-
-  public static enum OrganizationStatus {
-    ACTIVE, INACTIVE
-  }
 
   public static enum OrganizationType {
     ADVISOR_ORG, PRINCIPAL_ORG
@@ -43,7 +40,7 @@ public class Organization extends AbstractAnetBean {
   String longName;
   @GraphQLQuery
   @GraphQLInputField
-  private OrganizationStatus status;
+  private Status status;
   @GraphQLQuery
   @GraphQLInputField
   private String identificationCode;
@@ -77,11 +74,13 @@ public class Organization extends AbstractAnetBean {
     this.longName = Utils.trimStringReturnNull(longName);
   }
 
-  public OrganizationStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(OrganizationStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -263,8 +262,9 @@ public class Organization extends AbstractAnetBean {
     if (!(o instanceof Organization)) {
       return false;
     }
-    Organization other = (Organization) o;
-    return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
+    final Organization other = (Organization) o;
+    return super.equals(o) && Objects.equals(other.getUuid(), uuid)
+        && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
@@ -273,8 +273,8 @@ public class Organization extends AbstractAnetBean {
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, status, identificationCode, type, createdAt,
-        updatedAt);
+    return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
+        type, createdAt, updatedAt);
   }
 
   @Override

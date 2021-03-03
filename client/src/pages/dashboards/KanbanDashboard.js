@@ -2,13 +2,13 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import Kanban from "components/Kanban"
+import Model from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
 import { LAST_MONTH } from "dateUtils"
-import { Task } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import { connect } from "react-redux"
@@ -82,7 +82,7 @@ const KanbanDashboardImpl = ({ pageDispatchers, dashboardData }) => {
   const taskQuery = {
     pageNum: 0,
     pageSize: 0,
-    status: Task.STATUS.ACTIVE
+    status: Model.STATUS.ACTIVE
   }
   const { loading, error, data } = API.useApiQuery(GQL_GET_TASK_LIST, {
     taskQuery

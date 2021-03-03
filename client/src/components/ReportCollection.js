@@ -1,13 +1,15 @@
 import { setPagination } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import {
-  PageDispatchersPropType,
-  mapPageDispatchersToProps
+  mapPageDispatchersToProps,
+  PageDispatchersPropType
 } from "components/Page"
 import ReportCalendar from "components/ReportCalendar"
 import ReportMap from "components/ReportMap"
+import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
+import { RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -17,6 +19,7 @@ export const FORMAT_CALENDAR = "calendar"
 export const FORMAT_SUMMARY = "summary"
 export const FORMAT_TABLE = "table"
 export const FORMAT_MAP = "map"
+export const FORMAT_STATISTICS = "statistics"
 
 const ReportCollection = ({
   pageDispatchers,
@@ -34,7 +37,8 @@ const ReportCollection = ({
 }) => {
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
-
+  const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
+  const idSuffix = mapId || paginationKey || "reports"
   return (
     <div className="report-collection">
       <div>
@@ -58,6 +62,9 @@ const ReportCollection = ({
                 {viewFormats.includes(FORMAT_MAP) && (
                   <Button value={FORMAT_MAP}>Map</Button>
                 )}
+                {viewFormats.includes(FORMAT_STATISTICS) && (
+                  <Button value={FORMAT_STATISTICS}>Statistics</Button>
+                )}
               </ButtonToggleGroup>
             )}
 
@@ -77,7 +84,6 @@ const ReportCollection = ({
           )}
           {viewFormat === FORMAT_TABLE && (
             <ReportTable
-              showAuthors
               pageDispatchers={pageDispatchers}
               paginationKey={paginationKey}
               pagination={pagination}
@@ -107,6 +113,23 @@ const ReportCollection = ({
               marginBottom={marginBottom}
             />
           )}
+          {viewFormat === FORMAT_STATISTICS && (
+            <>
+              {statisticsRecurrence.map(recurrence => (
+                <ReportStatistics
+                  key={`report-statistics-${recurrence}`}
+                  idSuffix={idSuffix}
+                  pageDispatchers={pageDispatchers}
+                  queryParams={queryParams}
+                  setTotalCount={setTotalCount}
+                  periodsDetails={{
+                    recurrence: recurrence,
+                    numberOfPeriods: 3
+                  }}
+                />
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -129,7 +152,13 @@ ReportCollection.propTypes = {
 }
 
 ReportCollection.defaultProps = {
-  viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_CALENDAR, FORMAT_MAP]
+  viewFormats: [
+    FORMAT_STATISTICS,
+    FORMAT_SUMMARY,
+    FORMAT_TABLE,
+    FORMAT_CALENDAR,
+    FORMAT_MAP
+  ]
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

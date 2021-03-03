@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,13 +24,17 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Report extends AbstractCustomizableAnetBean {
+public class Report extends AbstractCustomizableAnetBean implements RelatableObject {
 
   public enum ReportState {
     DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
     @Deprecated
     FUTURE, // Should no longer be used but remain in place to keep the correct values
     APPROVED
+  }
+
+  public enum EngagementStatus {
+    HAPPENED, FUTURE, CANCELLED
   }
 
   public enum Atmosphere {
@@ -39,7 +44,7 @@ public class Report extends AbstractCustomizableAnetBean {
   public enum ReportCancelledReason {
     CANCELLED_BY_ADVISOR, CANCELLED_BY_PRINCIPAL, CANCELLED_DUE_TO_TRANSPORTATION,
     CANCELLED_DUE_TO_FORCE_PROTECTION, CANCELLED_DUE_TO_ROUTES, CANCELLED_DUE_TO_THREAT,
-    NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
+    NO_REASON_GIVEN, CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS, CANCELLED_DUE_TO_NETWORK_ISSUES
   }
 
   // annotated below
@@ -77,8 +82,6 @@ public class Report extends AbstractCustomizableAnetBean {
   @GraphQLInputField
   ReportCancelledReason cancelledReason;
   // annotated below
-  List<ReportPerson> attendees;
-  // annotated below
   List<Task> tasks;
   @GraphQLQuery
   @GraphQLInputField
@@ -90,7 +93,9 @@ public class Report extends AbstractCustomizableAnetBean {
   @GraphQLInputField
   String reportText;
   // annotated below
-  private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
+  private List<ReportPerson> reportPeople;
+  // annotated below
+  private List<ReportPerson> attendees;
   // annotated below
   private ForeignObjectHolder<Organization> advisorOrg = new ForeignObjectHolder<>();
   // annotated below
@@ -100,9 +105,9 @@ public class Report extends AbstractCustomizableAnetBean {
   // annotated below
   private ForeignObjectHolder<ReportPerson> primaryPrincipal = new ForeignObjectHolder<>();
   // annotated below
-  List<Comment> comments;
+  private List<ReportPerson> authors;
   // annotated below
-  private List<Tag> tags;
+  List<Comment> comments;
   // annotated below
   private ReportSensitiveInformation reportSensitiveInformation;
   // annotated below
@@ -260,26 +265,46 @@ public class Report extends AbstractCustomizableAnetBean {
     this.cancelledReason = cancelledReason;
   }
 
+  @GraphQLQuery(name = "reportPeople")
+  public CompletableFuture<List<ReportPerson>> loadReportPeople(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (reportPeople != null) {
+      return CompletableFuture.completedFuture(reportPeople);
+    }
+    return AnetObjectEngine.getInstance().getReportDao().getPeopleForReport(context, uuid)
+        .thenApply(o -> {
+          reportPeople = o;
+          return o;
+        });
+  }
+
+  public List<ReportPerson> getReportPeople() {
+    return reportPeople;
+  }
+
+  @GraphQLInputField(name = "reportPeople")
+  public void setReportPeople(List<ReportPerson> reportPeople) {
+    this.reportPeople = reportPeople;
+  }
+
   @GraphQLQuery(name = "attendees")
   public CompletableFuture<List<ReportPerson>> loadAttendees(
       @GraphQLRootContext Map<String, Object> context) {
     if (attendees != null) {
       return CompletableFuture.completedFuture(attendees);
     }
-    return AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(context, uuid)
-        .thenApply(o -> {
+    return loadReportPeople(context) // Force the load of reportPeople
+        .thenApply(l -> {
+          final List<ReportPerson> o =
+              l.stream().filter(ReportPerson::isAttendee).collect(Collectors.toList());
           attendees = o;
           return o;
         });
   }
 
+  @JsonIgnore
   public List<ReportPerson> getAttendees() {
     return attendees;
-  }
-
-  @GraphQLInputField(name = "attendees")
-  public void setAttendees(List<ReportPerson> attendees) {
-    this.attendees = attendees;
   }
 
   @GraphQLQuery(name = "primaryAdvisor")
@@ -288,7 +313,7 @@ public class Report extends AbstractCustomizableAnetBean {
     if (primaryAdvisor.hasForeignObject()) {
       return CompletableFuture.completedFuture(primaryAdvisor.getForeignObject());
     }
-    return loadAttendees(context) // Force the load of attendees
+    return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final ReportPerson o =
               l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.ADVISOR)).findFirst()
@@ -309,7 +334,7 @@ public class Report extends AbstractCustomizableAnetBean {
     if (primaryPrincipal.hasForeignObject()) {
       return CompletableFuture.completedFuture(primaryPrincipal.getForeignObject());
     }
-    return loadAttendees(context) // Force the load of attendees
+    return loadReportPeople(context) // Force the load of reportPeople
         .thenApply(l -> {
           final ReportPerson o =
               l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.PRINCIPAL))
@@ -322,6 +347,26 @@ public class Report extends AbstractCustomizableAnetBean {
   @JsonIgnore
   public ReportPerson getPrimaryPrincipal() {
     return primaryPrincipal.getForeignObject();
+  }
+
+  @GraphQLQuery(name = "authors")
+  public CompletableFuture<List<ReportPerson>> loadAuthors(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (authors != null) {
+      return CompletableFuture.completedFuture(authors);
+    }
+    return loadReportPeople(context) // Force the load of reportPeople
+        .thenApply(l -> {
+          final List<ReportPerson> o =
+              l.stream().filter(ReportPerson::isAuthor).collect(Collectors.toList());
+          authors = o;
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public List<ReportPerson> getAuthors() {
+    return authors;
   }
 
   @GraphQLQuery(name = "tasks")
@@ -367,37 +412,6 @@ public class Report extends AbstractCustomizableAnetBean {
 
   public void setNextSteps(String nextSteps) {
     this.nextSteps = Utils.trimStringReturnNull(nextSteps);
-  }
-
-  @GraphQLQuery(name = "author")
-  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
-    if (author.hasForeignObject()) {
-      return CompletableFuture.completedFuture(author.getForeignObject());
-    }
-    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, author.getForeignUuid())
-        .thenApply(o -> {
-          author.setForeignObject(o);
-          return o;
-        });
-  }
-
-  @JsonIgnore
-  public void setAuthorUuid(String authorUuid) {
-    this.author = new ForeignObjectHolder<>(authorUuid);
-  }
-
-  @JsonIgnore
-  public String getAuthorUuid() {
-    return author.getForeignUuid();
-  }
-
-  @GraphQLInputField(name = "author")
-  public void setAuthor(Person author) {
-    this.author = new ForeignObjectHolder<>(author);
-  }
-
-  public Person getAuthor() {
-    return author.getForeignObject();
   }
 
   @GraphQLQuery(name = "advisorOrg")
@@ -719,27 +733,6 @@ public class Report extends AbstractCustomizableAnetBean {
         : getWorkflowForRelatedObject(context, engine, locationUuid);
   };
 
-  @GraphQLQuery(name = "tags")
-  public CompletableFuture<List<Tag>> loadTags(@GraphQLRootContext Map<String, Object> context) {
-    if (tags != null) {
-      return CompletableFuture.completedFuture(tags);
-    }
-    return AnetObjectEngine.getInstance().getReportDao().getTagsForReport(context, uuid)
-        .thenApply(o -> {
-          tags = o;
-          return o;
-        });
-  }
-
-  public List<Tag> getTags() {
-    return tags;
-  }
-
-  @GraphQLInputField(name = "tags")
-  public void setTags(List<Tag> tags) {
-    this.tags = tags;
-  }
-
   @GraphQLQuery(name = "reportSensitiveInformation")
   public CompletableFuture<ReportSensitiveInformation> loadReportSensitiveInformation(
       @GraphQLRootContext Map<String, Object> context) {
@@ -783,7 +776,23 @@ public class Report extends AbstractCustomizableAnetBean {
 
   @JsonIgnore
   public boolean isFutureEngagement() {
-    return engagementDate != null && engagementDate.isAfter(Utils.endOfToday());
+    return engagementDate != null && engagementDate.isAfter(Instant.now());
+  }
+
+  @GraphQLQuery(name = "engagementStatus")
+  public List<EngagementStatus> loadEngagementStatus() {
+    LinkedList<EngagementStatus> statuses = new LinkedList<EngagementStatus>();
+    if (state == ReportState.CANCELLED) {
+      statuses.add(EngagementStatus.CANCELLED);
+    }
+    statuses.add(isFutureEngagement() ? EngagementStatus.FUTURE : EngagementStatus.HAPPENED);
+    return statuses;
+  }
+
+  @JsonIgnore
+  public boolean isAuthor(Person user) {
+    return loadAuthors(AnetObjectEngine.getInstance().getContext()).join().stream()
+        .anyMatch(p -> Objects.equals(p.getUuid(), user.getUuid()));
   }
 
   @Override
@@ -791,8 +800,9 @@ public class Report extends AbstractCustomizableAnetBean {
     if (!(o instanceof Report)) {
       return false;
     }
-    Report r = (Report) o;
-    return Objects.equals(r.getUuid(), uuid) && Objects.equals(r.getState(), state)
+    final Report r = (Report) o;
+    return super.equals(o) && Objects.equals(r.getUuid(), uuid)
+        && Objects.equals(r.getState(), state)
         && Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())
         && Objects.equals(r.getCreatedAt(), createdAt)
         && Objects.equals(r.getUpdatedAt(), updatedAt)
@@ -802,21 +812,19 @@ public class Report extends AbstractCustomizableAnetBean {
         && Objects.equals(r.getIntent(), intent) && Objects.equals(r.getExsum(), exsum)
         && Objects.equals(r.getAtmosphere(), atmosphere)
         && Objects.equals(r.getAtmosphereDetails(), atmosphereDetails)
-        && Objects.equals(r.getAttendees(), attendees) && Objects.equals(r.getTasks(), tasks)
+        && Objects.equals(r.getReportPeople(), reportPeople) && Objects.equals(r.getTasks(), tasks)
         && Objects.equals(r.getReportText(), reportText)
-        && Objects.equals(r.getNextSteps(), nextSteps)
-        && Objects.equals(r.getAuthorUuid(), getAuthorUuid())
-        && Objects.equals(r.getComments(), comments) && Objects.equals(r.getTags(), tags)
+        && Objects.equals(r.getNextSteps(), nextSteps) && Objects.equals(r.getComments(), comments)
         && Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
-        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups)
-        && Objects.equals(r.getCustomFields(), customFields);
+        && Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt, location, intent, exsum,
-        attendees, tasks, reportText, nextSteps, author, comments, atmosphere, atmosphereDetails,
-        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups);
+    return Objects.hash(super.hashCode(), uuid, state, approvalStep, createdAt, updatedAt, location,
+        intent, exsum, reportPeople, tasks, reportText, nextSteps, comments, atmosphere,
+        atmosphereDetails, engagementDate, duration, reportSensitiveInformation,
+        authorizationGroups);
   }
 
   public static Report createWithUuid(String uuid) {

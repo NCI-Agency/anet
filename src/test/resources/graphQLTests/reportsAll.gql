@@ -11,7 +11,7 @@ reportList(query:{pageSize:100}) {
     atmosphere
     atmosphereDetails
     state
-    author {
+    authors {
       uuid
       name
       rank
@@ -46,11 +46,7 @@ reportList(query:{pageSize:100}) {
     tasks {
       uuid
       shortName
-    }
-    tags {
-      uuid
-      name
-      description
+      customFields
     }
     workflow {
       type
@@ -77,5 +73,6 @@ reportList(query:{pageSize:100}) {
       }
     }
     updatedAt
+    customFields
   }
 }

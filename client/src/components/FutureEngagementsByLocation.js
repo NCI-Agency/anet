@@ -5,10 +5,11 @@ import HorizontalBarChart from "components/HorizontalBarChart"
 import MosaicLayout from "components/MosaicLayout"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import ReportCollection, {
+  FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
+  FORMAT_TABLE
 } from "components/ReportCollection"
 import * as d3 from "d3"
 import _isEqual from "lodash/isEqual"
@@ -96,18 +97,21 @@ const Chart = ({
         values: [{}]
       }
     })
-    const categoriesWithData = d3
-      .nest()
-      .key(function(d) {
-        return moment(d.engagementDate).startOf("day").valueOf()
+    const categoriesWithData = Array.from(
+      d3.rollup(
+        reportsList,
+        leaves => leaves.length,
+        d => moment(d.engagementDate).startOf("day").valueOf(),
+        d => d.location.uuid
+      ),
+      ([key, values]) => ({
+        key,
+        values: Array.from(values, ([key, value]) => ({
+          key,
+          value
+        }))
       })
-      .key(function(d) {
-        return d.location.uuid
-      })
-      .rollup(function(leaves) {
-        return leaves.length
-      })
-      .entries(reportsList)
+    )
     const groupedData = allCategories.map(d => {
       const categData = categoriesWithData.find(x => {
         return Number(x.key) === d.key
@@ -170,7 +174,12 @@ const Collection = ({ id, queryParams }) => (
     <ReportCollection
       paginationKey={`r_${id}`}
       queryParams={queryParams}
-      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      viewFormats={[
+        FORMAT_CALENDAR,
+        FORMAT_TABLE,
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
+      ]}
     />
   </div>
 )

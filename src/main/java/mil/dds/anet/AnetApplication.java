@@ -1,17 +1,9 @@
 package mil.dds.anet;
 
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import io.dropwizard.Application;
@@ -29,13 +21,10 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,12 +51,12 @@ import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
-import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.threads.MaterializedViewRefreshWorker;
+import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
 import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
@@ -88,8 +77,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
 
   public static final Version FREEMARKER_VERSION = Configuration.VERSION_2_3_30;
 
@@ -167,20 +154,14 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final String dbUrl = configuration.getDataSourceFactory().getUrl();
     logger.info("datasource url: {}", dbUrl);
 
-    // Check the dictionary
-    final JsonNode dictionary = getDictionary(configuration);
-    try {
-      logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionary));
-    } catch (JsonProcessingException exception) {
-    }
-
     // We want to use our own custom DB logger in order to clean up the logs a bit.
     final Injector injector = InjectorLookup.getInjector(this).get();
     injector.getInstance(StatementLogger.class);
 
     // The Object Engine is the core place where we store all of the Dao's
     // You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
-    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this, metricRegistry);
+    final AnetObjectEngine engine =
+        new AnetObjectEngine(dbUrl, this, configuration, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
     if (configuration.isDevelopmentMode()) {
@@ -227,79 +208,88 @@ public class AnetApplication extends Application<AnetConfiguration> {
     } else {
       logger.info("AnetApplication is starting scheduled workers");
       // Schedule any tasks that need to run on an ongoing basis.
-      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-      AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration);
-      FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
-      ReportPublicationWorker reportPublicationWorker =
-          new ReportPublicationWorker(engine.getReportDao(), configuration);
-      final ReportApprovalWorker reportApprovalWorker =
-          new ReportApprovalWorker(engine.getReportDao(), configuration);
+      final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
       // Check for any reports that need to be published every 5 minutes.
       // And run once in 5 seconds from boot-up. (give the server time to boot up).
+      final ReportPublicationWorker reportPublicationWorker =
+          new ReportPublicationWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(reportPublicationWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
 
       // Check for any emails that need to be sent every 5 minutes.
       // And run once in 10 seconds from boot-up. (give the server time to boot up).
+      final AnetEmailWorker emailWorker = new AnetEmailWorker(configuration, engine.getEmailDao());
       scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(emailWorker, 10, TimeUnit.SECONDS);
 
       // Check for any future engagements every 3 hours.
       // And run once in 15 seconds from boot-up. (give the server time to boot up).
+      final FutureEngagementWorker futureWorker =
+          new FutureEngagementWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
       scheduler.schedule(futureWorker, 15, TimeUnit.SECONDS);
 
       // Check for any reports that need to be approved every 5 minutes.
       // And run once in 20 seconds from boot-up. (give the server time to boot up).
+      final ReportApprovalWorker reportApprovalWorker =
+          new ReportApprovalWorker(configuration, engine.getReportDao());
       scheduler.scheduleAtFixedRate(reportApprovalWorker, 5, 5, TimeUnit.MINUTES);
       scheduler.schedule(reportApprovalWorker, 5, TimeUnit.SECONDS);
 
       runAccountDeactivationWorker(configuration, scheduler, engine);
 
+      // Check for any missing pending assessments every 6 hours.
+      // And run once in 25 seconds from boot-up. (give the server time to boot up).
+      final PendingAssessmentsNotificationWorker pendingAssessmentsNotificationWorker =
+          new PendingAssessmentsNotificationWorker(configuration);
+      scheduler.scheduleAtFixedRate(pendingAssessmentsNotificationWorker, 6, 6, TimeUnit.HOURS);
+      scheduler.schedule(pendingAssessmentsNotificationWorker, 25, TimeUnit.SECONDS);
+
       if (DaoUtils.isPostgresql()) {
         // Wait 60 seconds between updates of PostgreSQL materialized views,
         // starting 30 seconds after boot-up.
         final MaterializedViewRefreshWorker materializedViewRefreshWorker =
-            new MaterializedViewRefreshWorker(engine.getAdminDao());
+            new MaterializedViewRefreshWorker(configuration, engine.getAdminDao());
         scheduler.scheduleWithFixedDelay(materializedViewRefreshWorker, 30, 60, TimeUnit.SECONDS);
       }
     }
 
     // Create all of the HTTP Resources.
-    LoggingResource loggingResource = new LoggingResource();
-    PersonResource personResource = new PersonResource(engine, configuration);
-    TaskResource taskResource = new TaskResource(engine, configuration);
-    LocationResource locationResource = new LocationResource(engine);
-    OrganizationResource orgResource = new OrganizationResource(engine);
-    PositionResource positionResource = new PositionResource(engine);
-    ReportResource reportResource = new ReportResource(engine, configuration);
-    AdminResource adminResource = new AdminResource(engine, configuration);
-    HomeResource homeResource = new HomeResource(engine, configuration);
-    SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
-    final TagResource tagResource = new TagResource(engine);
+    final LoggingResource loggingResource = new LoggingResource();
+    final PersonResource personResource = new PersonResource(engine, configuration);
+    final TaskResource taskResource = new TaskResource(engine, configuration);
+    final LocationResource locationResource = new LocationResource(engine);
+    final OrganizationResource orgResource = new OrganizationResource(engine);
+    final PositionResource positionResource = new PositionResource(engine);
+    final ReportResource reportResource = new ReportResource(engine, configuration);
+    final AdminResource adminResource = new AdminResource(engine, configuration);
+    final HomeResource homeResource = new HomeResource(engine, configuration);
+    final SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
     final ApprovalStepResource approvalStepResource = new ApprovalStepResource(engine);
+    final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
+    graphQlResource.initialise(engine, configuration,
+        ImmutableList.of(reportResource, personResource, positionResource, locationResource,
+            orgResource, taskResource, adminResource, savedSearchResource,
+            authorizationGroupResource, noteResource, approvalStepResource),
+        metricRegistry);
 
     // Register all of the HTTP Resources
     environment.jersey().register(loggingResource);
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
     environment.jersey().register(new ViewResponseFilter(configuration));
-    environment.jersey()
-        .register(new GraphQlResource(engine, configuration,
-            ImmutableList.of(reportResource, personResource, positionResource, locationResource,
-                orgResource, taskResource, adminResource, savedSearchResource, tagResource,
-                authorizationGroupResource, noteResource, approvalStepResource),
-            metricRegistry));
+    environment.jersey().register(graphQlResource);
   }
 
   private void runAccountDeactivationWorker(final AnetConfiguration configuration,
-      final ScheduledExecutorService scheduler, final AnetObjectEngine engine)
-      throws IllegalArgumentException {
-    // Check whether the application is configured to auto-check for account deactivation
+      final ScheduledExecutorService scheduler, final AnetObjectEngine engine) {
+    // Check whether the application is configured to auto-check for account deactivation.
+    // NOTE: if you change this, reloading the dictionary from the admin interface is *not*
+    // sufficient, you will have to restart ANET for this change to be reflected
     if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
       // Check for any accounts which are scheduled to be deactivated as they reach the end-of-tour
       // date.
@@ -308,7 +298,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
 
-      // Run the email deactivation worker at the set interval. In development run it every minute.
+      // Run the email deactivation worker at the set interval
       scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
           accountDeactivationWarningInterval, TimeUnit.SECONDS);
 
@@ -317,34 +307,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
         scheduler.schedule(deactivationWarningWorker, 20, TimeUnit.SECONDS);
       }
     }
-  }
-
-  protected static JsonNode getDictionary(AnetConfiguration configuration)
-      throws IllegalArgumentException {
-    try (final InputStream inputStream =
-        AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
-      if (inputStream == null) {
-        logger.error("ANET schema [anet-schema.yml] not found");
-      } else {
-        JsonSchemaFactory factory =
-            JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-                .objectMapper(yamlMapper).build();
-
-        JsonSchema schema = factory.getSchema(inputStream);
-        final JsonNode dictionary = jsonMapper.valueToTree(configuration.getDictionary());
-        Set<ValidationMessage> errors = schema.validate(dictionary);
-        for (ValidationMessage error : errors) {
-          logger.error(error.getMessage());
-        }
-        if (!errors.isEmpty()) {
-          throw new IllegalArgumentException("Invalid dictionary in the configuration");
-        }
-        return dictionary;
-      }
-    } catch (IOException e) {
-      logger.error("Error closing ANET schema", e);
-    }
-    throw new IllegalArgumentException("Missing dictionary in the configuration");
   }
 
   /*

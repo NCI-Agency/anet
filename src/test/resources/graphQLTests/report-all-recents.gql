@@ -27,6 +27,7 @@ personList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECEN
         name
       }
     }
+    customFields
   }
 }
 taskList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
@@ -42,13 +43,6 @@ taskList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT,
   }
 }
 authorizationGroupList(query: {pageSize: 6, status: ACTIVE, inMyReports: true, sortBy: RECENT, sortOrder: DESC}) {
-  list {
-    uuid
-    name
-    description
-  }
-}
-tagList(query: {pageSize: 0}) {
   list {
     uuid
     name

@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import java.util.Objects;
 import java.util.Optional;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -35,5 +36,22 @@ public class ForeignObjectHolder<T extends AbstractAnetBean> {
 
   public void setForeignObject(T foreignObject) {
     this.foreignObject = Optional.ofNullable(foreignObject);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof ForeignObjectHolder<?>)) {
+      return false;
+    }
+    @SuppressWarnings("unchecked")
+    final ForeignObjectHolder<T> f = (ForeignObjectHolder<T>) o;
+    return Objects.equals(f.hasForeignObject(), hasForeignObject())
+        && Objects.equals(f.getForeignUuid(), getForeignUuid())
+        && Objects.equals(f.getForeignObject(), getForeignObject());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(foreignUuid, foreignObject);
   }
 }

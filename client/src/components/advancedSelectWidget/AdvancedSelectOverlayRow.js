@@ -111,14 +111,6 @@ export const PersonDetailedOverlayRow = item => (
   </React.Fragment>
 )
 
-export const TagOverlayRow = item => (
-  <React.Fragment key={item.uuid}>
-    <td>
-      <LinkTo modelType="Tag" model={item} isLink={false} />
-    </td>
-  </React.Fragment>
-)
-
 export const ApproverOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
@@ -136,7 +128,15 @@ export const ReportDetailedOverlayRow = item => (
       <LinkTo modelType="Report" model={item} isLink={false} />
     </td>
     <td>
-      <span>{item.author ? item.author.name : "Unknown"}</span>
+      <span>
+        {item.authors
+          ? item.authors.map(a => (
+            <div key={a.uuid} style={{ whiteSpace: "nowrap" }}>
+              {a.name}
+            </div>
+          ))
+          : "Unknown"}
+      </span>
     </td>
     <td>
       <span>

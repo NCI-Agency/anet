@@ -88,14 +88,14 @@ ApprovalStepModal.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const ActionStatus = ({ action }) => (
+export const ActionStatus = ({ action }) => (
   <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
 )
 ActionStatus.propTypes = {
   action: PropTypes.object.isRequired
 }
 
-const ActionButton = ({ action }) => {
+export const ActionButton = ({ action }) => {
   const step = action.step
   const actionType = ACTION_TYPE_DETAILS[action.type]
   return step ? (

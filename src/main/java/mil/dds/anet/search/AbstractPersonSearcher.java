@@ -53,18 +53,18 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
       qb.addFromClause("LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\"");
     }
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
     qb.addDateRangeClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,
         query.getEndOfTourDateStart(), "endDate", "people.\"endOfTourDate\"", Comparison.BEFORE,
         query.getEndOfTourDateEnd());
-    qb.addEqualsClause("role", "people.role", query.getRole());
-    qb.addInClause("statuses", "people.status", query.getStatus());
-    qb.addEqualsClause("rank", "people.rank", query.getRank());
-    qb.addEqualsClause("country", "people.country", query.getCountry());
-    qb.addEqualsClause("pendingVerification", "people.\"pendingVerification\"",
+    qb.addEnumEqualsClause("role", "people.role", query.getRole());
+    qb.addEnumEqualsClause("status", "people.status", query.getStatus());
+    qb.addStringEqualsClause("rank", "people.rank", query.getRank());
+    qb.addStringEqualsClause("country", "people.country", query.getCountry());
+    qb.addObjectEqualsClause("pendingVerification", "people.\"pendingVerification\"",
         query.getPendingVerification());
 
     if (query.getOrgUuid() != null) {
@@ -74,11 +74,11 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrgUuid(),
             RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
-        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
+        qb.addStringEqualsClause("orgUuid", "positions.\"organizationUuid\"", query.getOrgUuid());
       }
     }
 
-    qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    qb.addStringEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
 
     if (query.getHasBiography() != null) {
       if (query.getHasBiography()) {
@@ -93,16 +93,17 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
           + "  SELECT \"reportPeople\".\"personUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
           + "  JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\""
-          + "  WHERE reports.\"authorUuid\" = :userUuid AND \"reportPeople\".\"personUuid\" != :userUuid"
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
+          + "  AND \"reportPeople\".\"personUuid\" != :userUuid"
           + "  GROUP BY \"reportPeople\".\"personUuid\""
           + ") \"inMyReports\" ON people.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(PersonSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -20,11 +21,9 @@ import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -37,10 +36,12 @@ import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.test.resources.utils.PositionHistoryDao;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
+
   private static final String ORGANIZATION_FIELDS = "uuid shortName";
   private static final String PERSON_FIELDS = "uuid name role";
   private static final String POSITION_FIELDS = "uuid name code type status";
@@ -48,6 +49,15 @@ public class PositionResourceTest extends AbstractResourceTest {
       + " } organization { " + ORGANIZATION_FIELDS + " }";
   private static final String PREVIOUS_PEOPLE_FIELDS =
       " previousPeople { startTime endTime position { uuid } person { uuid name rank role } }";
+  private static final String GRAPHQL_NOTIFICATIONS_NOTE_FIELDS =
+      "customFields notes { noteRelatedObjects { noteUuid } createdAt type text }";
+  private static final String PENDING_ASSESSMENTS_FIELDS =
+      " associatedPositions { uuid name code type status organization { uuid shortName }"
+          + " location { uuid name } person { uuid name rank avatar(size: 32) "
+          + GRAPHQL_NOTIFICATIONS_NOTE_FIELDS + " } }"
+          + " responsibleTasks(query: {status: ACTIVE}) { uuid shortName longName customFieldRef1 {"
+          + " uuid } " + GRAPHQL_NOTIFICATIONS_NOTE_FIELDS + " }";
+  private static final String PA_FIELDS = FIELDS + PENDING_ASSESSMENTS_FIELDS;
   private static PositionHistoryDao positionHistoryDao;
 
   @BeforeAll
@@ -66,7 +76,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Position test = new Position();
     test.setName("A Test Position created by PositionResourceTest");
     test.setType(PositionType.ADVISOR);
-    test.setStatus(PositionStatus.ACTIVE);
+    test.setStatus(Position.Status.ACTIVE);
 
     // Assign to an AO
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
@@ -194,10 +204,11 @@ public class PositionResourceTest extends AbstractResourceTest {
     prinPos.setName("A Principal Position created by PositionResourceTest");
     prinPos.setType(PositionType.PRINCIPAL);
     prinPos.setOrganization(orgs.getList().get(0));
-    prinPos.setStatus(PositionStatus.ACTIVE);
+    prinPos.setStatus(Position.Status.ACTIVE);
 
-    Person principal = getRogerRogwell();
-    assertThat(principal.getUuid()).isNotNull();
+    final Person roger = getRogerRogwell();
+    final Position rogersOldPosition = roger.getPosition();
+    assertThat(roger.getUuid()).isNotNull();
     String tashkilUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", prinPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(tashkilUuid).isNotNull();
@@ -208,7 +219,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // put the principal in a tashkil
     variables = new HashMap<>();
     variables.put("uuid", tashkil.getUuid());
-    variables.put("person", principal);
+    variables.put("person", roger);
     nrUpdated = graphQLHelper.updateObject(admin,
         "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
         variables);
@@ -226,11 +237,13 @@ public class PositionResourceTest extends AbstractResourceTest {
     retPos = graphQLHelper.getObjectById(jack, "position",
         FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(),
         new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(retPos.getAssociatedPositions().size()).isEqualTo(1);
-    assertThat(retPos.getAssociatedPositions()).contains(tashkil);
+    final List<Position> associatedPositions2 = new ArrayList<>(retPos.getAssociatedPositions());
+    assertThat(associatedPositions2.size()).isEqualTo(1);
+    assertThat(associatedPositions2).contains(tashkil);
 
     // delete the tashkil from this position
-    retPos.getAssociatedPositions().remove(tashkil);
+    associatedPositions2.remove(tashkil);
+    retPos.setAssociatedPositions(associatedPositions2);
     nrUpdated = graphQLHelper.updateObject(admin, "updateAssociatedPosition", "position",
         "PositionInput", retPos);
     assertThat(nrUpdated).isEqualTo(1);
@@ -239,7 +252,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     retPos = graphQLHelper.getObjectById(jack, "position",
         FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(),
         new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(retPos.getAssociatedPositions().size()).isEqualTo(0);
+    assertThat(associatedPositions2.size()).isEqualTo(0);
 
     // remove the principal from the tashkil
     nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", tashkil.getUuid());
@@ -252,7 +265,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     } catch (BadRequestException expectedException) {
     }
 
-    tashkil.setStatus(PositionStatus.INACTIVE);
+    tashkil.setStatus(Position.Status.INACTIVE);
     nrUpdated =
         graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", tashkil);
     assertThat(nrUpdated).isEqualTo(1);
@@ -280,6 +293,20 @@ public class PositionResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
+
+    // Put roger back in his old position
+    variables = new HashMap<>();
+    variables.put("uuid", rogersOldPosition.getUuid());
+    variables.put("person", roger);
+    nrUpdated = graphQLHelper.updateObject(admin,
+        "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
+        variables);
+    assertThat(nrUpdated).isEqualTo(1);
+
+    currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, rogersOldPosition.getUuid(),
+        new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(currPos.getPerson()).isNotNull();
+    assertThat(currPos.getPersonUuid()).isEqualTo(roger.getUuid());
 
     // Create Position
     Position newTestPos = new Position();
@@ -426,8 +453,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Search by organization
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"ef 1\" or \"ef 1.1\"" : "ef 1");
+    queryOrgs.setText("ef 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -491,15 +517,73 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // search by status.
     query = new PositionSearchQuery();
-    query.setStatus(PositionStatus.INACTIVE);
+    query.setStatus(Position.Status.INACTIVE);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
             new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults.size()).isGreaterThan(0);
     assertThat(
-        searchResults.stream().filter(p -> p.getStatus().equals(PositionStatus.INACTIVE)).count())
+        searchResults.stream().filter(p -> p.getStatus().equals(Position.Status.INACTIVE)).count())
             .isEqualTo(searchResults.size());
+  }
+
+  @Test
+  public void searchPendingAssessmentsTestAll() {
+    final Person erin = getRegularUser();
+    final PositionSearchQuery query = new PositionSearchQuery();
+    query.setHasPendingAssessments(true);
+
+    // Search all organizations
+    final Map<String, Object> searchResults = graphQLHelper.searchObjectsGeneric(erin,
+        "positionList", "query", "PositionSearchQueryInput", PA_FIELDS, query);
+    assertThat(searchResults).isNotEmpty();
+    @SuppressWarnings("unchecked")
+    final List<Map<String, Object>> list = (List<Map<String, Object>>) searchResults.get("list");
+    final Set<String> uuids =
+        list.stream().map(p -> (String) p.get("uuid")).collect(Collectors.toSet());
+    // EF 1
+    assertThat(uuids).contains(getAndrewAnderson().getPosition().getUuid());
+    // EF 1.1
+    assertThat(uuids).contains(getBobBobtown().getPosition().getUuid());
+    // EF 2.1
+    assertThat(uuids).contains(getJackJackson().getPosition().getUuid());
+    // EF 2.2
+    assertThat(uuids).contains(erin.getPosition().getUuid());
+    // Each entry should have associatedPositions or responsibleTasks (or both)
+    assertThat(
+        list.stream().filter(p -> !Utils.isEmptyOrNull((List<?>) p.get("associatedPositions"))
+            || !Utils.isEmptyOrNull((List<?>) p.get("responsibleTasks")))).hasSameSizeAs(list);
+  }
+
+  @Test
+  public void searchPendingAssessmentsTestEf1() {
+    final Person erin = getRegularUser();
+    final PositionSearchQuery query = new PositionSearchQuery();
+    query.setHasPendingAssessments(true);
+
+    // Search EF 1 and below
+    query.setOrganizationUuid(getAndrewAnderson().getPosition().getOrganizationUuid());
+    query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
+    Map<String, Object> searchResults = graphQLHelper.searchObjectsGeneric(erin, "positionList",
+        "query", "PositionSearchQueryInput", PA_FIELDS, query);
+    assertThat(searchResults).isNotEmpty();
+    @SuppressWarnings("unchecked")
+    final List<Map<String, Object>> list = (List<Map<String, Object>>) searchResults.get("list");
+    final Set<String> uuids =
+        list.stream().map(p -> (String) p.get("uuid")).collect(Collectors.toSet());
+    // EF 1
+    assertThat(uuids).contains(getAndrewAnderson().getPosition().getUuid());
+    // EF 1.1
+    assertThat(uuids).contains(getBobBobtown().getPosition().getUuid());
+    // EF 2.1
+    assertThat(uuids).doesNotContain(getJackJackson().getPosition().getUuid());
+    // EF 2.2
+    assertThat(uuids).doesNotContain(erin.getPosition().getUuid());
+    // Each entry should have associatedPositions or responsibleTasks (or both)
+    assertThat(
+        list.stream().filter(p -> !Utils.isEmptyOrNull((List<?>) p.get("associatedPositions"))
+            || !Utils.isEmptyOrNull((List<?>) p.get("responsibleTasks")))).hasSameSizeAs(list);
   }
 
   @Test
@@ -508,7 +592,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Person newb = new Person();
     newb.setName("PositionTest Person");
     newb.setRole(Role.PRINCIPAL);
-    newb.setStatus(PersonStatus.ACTIVE);
+    newb.setStatus(Person.Status.ACTIVE);
 
     String newbUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
         newb, new TypeReference<GraphQlResponse<Person>>() {});
@@ -529,7 +613,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     newbPosition.setName("PositionTest Position for Newb");
     newbPosition.setType(PositionType.PRINCIPAL);
     newbPosition.setOrganization(orgs.getList().get(0));
-    newbPosition.setStatus(PositionStatus.ACTIVE);
+    newbPosition.setStatus(Position.Status.ACTIVE);
     newbPosition.setPerson(newb);
 
     String newbPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
@@ -595,7 +679,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     pos2.setName("Created by PositionTest");
     pos2.setType(PositionType.PRINCIPAL);
     pos2.setOrganization(orgs.getList().get(0));
-    pos2.setStatus(PositionStatus.ACTIVE);
+    pos2.setStatus(Position.Status.ACTIVE);
     pos2.setPerson(Person.createWithUuid(prin2.getUuid()));
 
     String pos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
@@ -674,7 +758,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Position newPosition = new Position();
     newPosition.setName("A Test Position not related to the user's organization");
     newPosition.setType(PositionType.ADVISOR);
-    newPosition.setStatus(PositionStatus.ACTIVE);
+    newPosition.setStatus(Position.Status.ACTIVE);
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
         "OrganizationInput", OrganizationTest.getTestAO(true),
         new TypeReference<GraphQlResponse<Organization>>() {});

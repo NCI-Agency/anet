@@ -8,6 +8,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.visibility.NoIntrospectionGraphqlFieldVisibility;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.annotations.GraphQLInputField;
@@ -41,11 +42,13 @@ import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.graphql.outputtransformers.JsonToXlsxTransformer;
 import mil.dds.anet.graphql.outputtransformers.JsonToXmlTransformer;
 import mil.dds.anet.graphql.outputtransformers.XsltXmlTransformer;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dataloader.DataLoaderRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @Path("/graphql")
 public class GraphQlResource {
@@ -55,11 +58,12 @@ public class GraphQlResource {
   private static final String MEDIATYPE_XLSX =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-  private final AnetObjectEngine engine;
-  private final List<Object> resources;
-  private final MetricRegistry metricRegistry;
+  private AnetObjectEngine engine;
+  private List<Object> resources;
+  private MetricRegistry metricRegistry;
 
   private GraphQLSchema graphqlSchema;
+  private GraphQLSchema graphqlSchemaWithoutIntrospection;
   private final List<ResourceTransformer> resourceTransformers =
       new LinkedList<ResourceTransformer>();
 
@@ -82,7 +86,9 @@ public class GraphQlResource {
         }
       };
 
-  public GraphQlResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
+  public GraphQlResource() {}
+
+  public void initialise(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
       MetricRegistry metricRegistry) {
     this.engine = engine;
     this.resources = resources;
@@ -142,7 +148,7 @@ public class GraphQlResource {
    */
   private void buildGraph() {
     final String topPackage = "mil.dds.anet";
-    final GraphQLSchemaGenerator schemaBuilder = new GraphQLSchemaGenerator()
+    final GraphQLSchemaGenerator schemaGenerator = new GraphQLSchemaGenerator()
         // Load only our own packages:
         .withBasePackages(topPackage)
         // Resolve queries by @GraphQLQuery annotations only:
@@ -163,10 +169,16 @@ public class GraphQlResource {
         .withTypeMappers(
             (config, defaults) -> defaults.insertBefore(ScalarMapper.class, new DateTimeMapper()));
     for (final Object resource : resources) {
-      schemaBuilder.withOperationsFromSingleton(resource);
+      schemaGenerator.withOperationsFromSingleton(resource);
     }
+    graphqlSchema = schemaGenerator.generate();
 
-    graphqlSchema = schemaBuilder.generate();
+    graphqlSchemaWithoutIntrospection =
+        GraphQLSchema.newSchema(graphqlSchema)
+            .codeRegistry(graphqlSchema.getCodeRegistry()
+                .transform(builder -> builder.fieldVisibility(
+                    NoIntrospectionGraphqlFieldVisibility.NO_INTROSPECTION_FIELD_VISIBILITY)))
+            .build();
   }
 
   @POST
@@ -195,6 +207,7 @@ public class GraphQlResource {
     return graphql(user, operationName, query, new HashMap<String, Object>(), output);
   }
 
+  @InTransaction
   protected Response graphql(@Auth Person user, String operationName, String query,
       Map<String, Object> variables, String output) {
     final ExecutionResult executionResult = dispatchRequest(user, operationName, query, variables);
@@ -233,7 +246,8 @@ public class GraphQlResource {
         ExecutionInput.newExecutionInput().operationName(operationName).query(query)
             .variables(variables).dataLoaderRegistry(dataLoaderRegistry).context(context).build();
 
-    final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
+    final GraphQL graphql = GraphQL
+        .newGraphQL(AuthUtils.isAdmin(user) ? graphqlSchema : graphqlSchemaWithoutIntrospection)
         // Prevent adding .instrumentation(new DataLoaderDispatcherInstrumentation())
         // — use our own dispatcher instead
         .doNotAddDefaultInstrumentations().build();

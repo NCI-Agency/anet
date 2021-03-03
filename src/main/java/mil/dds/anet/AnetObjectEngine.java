@@ -22,12 +22,14 @@ import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
+import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -37,7 +39,6 @@ import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.database.SavedSearchDao;
-import mil.dds.anet.database.TagDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
@@ -63,24 +64,26 @@ public class AnetObjectEngine {
   private final AdminDao adminDao;
   private final SavedSearchDao savedSearchDao;
   private final EmailDao emailDao;
-  private final TagDao tagDao;
   private final ReportSensitiveInformationDao reportSensitiveInformationDao;
   private final AuthorizationGroupDao authorizationGroupDao;
   private final NoteDao noteDao;
+  private final JobHistoryDao jobHistoryDao;
+  private final MetricRegistry metricRegistry;
   private ThreadLocal<Map<String, Object>> context;
 
   ISearcher searcher;
 
   private static AnetObjectEngine instance;
+  private static AnetConfiguration configuration;
 
   private final String dbUrl;
   private final Injector injector;
 
-  public AnetObjectEngine(String dbUrl, Application<?> application, MetricRegistry metricRegistry) {
+  public AnetObjectEngine(String dbUrl, Application<?> application, AnetConfiguration config,
+      MetricRegistry metricRegistry) {
     this.dbUrl = dbUrl;
     injector = InjectorLookup.getInjector(application).get();
     personDao = injector.getInstance(PersonDao.class);
-    personDao.setMetricRegistry(metricRegistry);
     taskDao = injector.getInstance(TaskDao.class);
     locationDao = injector.getInstance(LocationDao.class);
     orgDao = injector.getInstance(OrganizationDao.class);
@@ -91,12 +94,14 @@ public class AnetObjectEngine {
     commentDao = injector.getInstance(CommentDao.class);
     adminDao = injector.getInstance(AdminDao.class);
     savedSearchDao = injector.getInstance(SavedSearchDao.class);
-    tagDao = injector.getInstance(TagDao.class);
     reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
     emailDao = injector.getInstance(EmailDao.class);
     authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
     noteDao = injector.getInstance(NoteDao.class);
+    jobHistoryDao = injector.getInstance(JobHistoryDao.class);
+    this.metricRegistry = metricRegistry;
     searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
+    configuration = config;
     instance = this;
   }
 
@@ -152,10 +157,6 @@ public class AnetObjectEngine {
     return savedSearchDao;
   }
 
-  public TagDao getTagDao() {
-    return tagDao;
-  }
-
   public ReportSensitiveInformationDao getReportSensitiveInformationDao() {
     return reportSensitiveInformationDao;
   }
@@ -168,8 +169,16 @@ public class AnetObjectEngine {
     return noteDao;
   }
 
+  public JobHistoryDao getJobHistoryDao() {
+    return jobHistoryDao;
+  }
+
   public EmailDao getEmailDao() {
     return emailDao;
+  }
+
+  public MetricRegistry getMetricRegistry() {
+    return metricRegistry;
   }
 
   public ISearcher getSearcher() {
@@ -354,6 +363,10 @@ public class AnetObjectEngine {
 
   public static AnetObjectEngine getInstance() {
     return instance;
+  }
+
+  public static AnetConfiguration getConfiguration() {
+    return configuration;
   }
 
   public String getAdminSetting(AdminSettingKeys key) {

@@ -1,5 +1,11 @@
-import Model from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
+import { convertLatLngToMGRS, convertMGRSToLatLng } from "geoUtils"
+import _isEmpty from "lodash/isEmpty"
 import LOCATIONS_ICON from "resources/locations.png"
+import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -9,15 +15,15 @@ export default class Location extends Model {
   static getInstanceName = "location"
   static relatedObjectType = "locations"
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static APPROVAL_STEP_TYPE = {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(
+    Settings.fields.location.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -26,7 +32,7 @@ export default class Location extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Location.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       lat: yup
         .number()
         .nullable()
@@ -53,6 +59,29 @@ export default class Location extends Model {
           return true
         })
         .default(null),
+      // not actually in the database, but used for validation
+      displayedCoordinate: yup
+        .string()
+        .nullable()
+        .test({
+          name: "displayedCoordinate",
+          test: function(displayedCoordinate) {
+            if (_isEmpty(displayedCoordinate)) {
+              return true
+            }
+            if (Settings?.fields?.location?.format === "MGRS") {
+              const latLngValue = convertMGRSToLatLng(displayedCoordinate)
+              return !latLngValue[0] || !latLngValue[1]
+                ? this.createError({
+                  message: "Please enter a valid MGRS coordinate",
+                  path: "displayedCoordinate"
+                })
+                : true
+            }
+            return true
+          }
+        })
+        .default(null),
       // FIXME: resolve code duplication in yup schema for approval steps
       planningApprovalSteps: yup
         .array()
@@ -68,7 +97,8 @@ export default class Location extends Model {
               .default(() => Location.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
@@ -88,25 +118,21 @@ export default class Location extends Model {
               .default(() => Location.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
         .nullable()
         .default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery = "uuid, name"
 
-  static parseCoordinate(latLng) {
-    const value = parseFloat(latLng)
-    if (!value && value !== 0) {
-      return null
-    }
-    // 6 decimal point (~10cm) precision https://stackoverflow.com/a/16743805/1209097
-    return parseFloat(value.toFixed(6))
-  }
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static hasCoordinates(location) {
     return (
@@ -129,6 +155,13 @@ export default class Location extends Model {
   }
 
   toString() {
+    if (this.lat && this.lng) {
+      const coordinate =
+        Settings?.fields?.location?.format === "MGRS"
+          ? convertLatLngToMGRS(this.lat, this.lng)
+          : `${this.lat},${this.lng}`
+      return `${this.name} ${coordinate}`
+    }
     return this.name
   }
 }

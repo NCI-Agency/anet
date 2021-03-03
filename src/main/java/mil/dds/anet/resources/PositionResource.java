@@ -6,12 +6,12 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -47,10 +47,6 @@ public class PositionResource {
     if (pos.getType() == null) {
       throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST);
     }
-    if (pos.getOrganizationUuid() == null) {
-      throw new WebApplicationException("A Position must belong to an organization",
-          Status.BAD_REQUEST);
-    }
     // only admins can make super user positions
     if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPER_USER)) {
       final Position existingPos = dao.getByUuid(pos.getUuid());
@@ -65,12 +61,17 @@ public class PositionResource {
     if (pos.getType() == PositionType.ADMINISTRATOR) {
       AuthUtils.assertAdministrator(user);
     }
+    if (pos.getOrganizationUuid() == null) {
+      throw new WebApplicationException("A Position must belong to an organization",
+          Status.BAD_REQUEST);
+    }
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
   }
 
   @GraphQLMutation(name = "createPosition")
   public Position createPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
+    pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
@@ -106,7 +107,7 @@ public class PositionResource {
           }, oldPositionUuid -> {
             dao.deletePositionAssociation(DaoUtils.getUuid(pos), oldPositionUuid);
           });
-      AnetAuditLogger.log("Person {} associations changed to {} by {}", current,
+      AnetAuditLogger.log("Position {} associations changed to {} by {}", current,
           pos.getAssociatedPositions(), user);
       // GraphQL mutations *have* to return something
       return 1;
@@ -117,6 +118,7 @@ public class PositionResource {
   @GraphQLMutation(name = "updatePosition")
   public Integer updatePosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
+    pos.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
@@ -126,7 +128,7 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
 
-    if (pos.getPersonUuid() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
+    if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
       final Position current = dao.getByUuid(pos.getUuid());
       if (current != null) {
         // Run the diff and see if anything changed and update.
@@ -143,7 +145,7 @@ public class PositionResource {
           }
         }
 
-        if (PositionStatus.INACTIVE.equals(pos.getStatus()) && current.getPersonUuid() != null) {
+        if (Position.Status.INACTIVE.equals(pos.getStatus()) && current.getPersonUuid() != null) {
           // Remove this person from this position.
           AnetAuditLogger.log(
               "Person {} removed from position {} by {} because the position is now inactive",
@@ -194,8 +196,10 @@ public class PositionResource {
   }
 
   @GraphQLQuery(name = "positionList")
-  public AnetBeanList<Position> search(@GraphQLArgument(name = "query") PositionSearchQuery query) {
-    return dao.search(query);
+  public CompletableFuture<AnetBeanList<Position>> search(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") PositionSearchQuery query) {
+    return dao.search(context, query);
   }
 
   @GraphQLMutation(name = "deletePosition")
@@ -214,12 +218,11 @@ public class PositionResource {
     }
 
     // if position is active, reject
-    if (PositionStatus.ACTIVE.equals(position.getStatus())) {
+    if (Position.Status.ACTIVE.equals(position.getStatus())) {
       throw new WebApplicationException("Cannot delete an active position", Status.BAD_REQUEST);
     }
 
-    AnetAuditLogger.log("Position {} deleted by {} (uuid: {})", positionUuid, user.getName(),
-        user.getUuid());
+    AnetAuditLogger.log("Position {} deleted by {}", positionUuid, user);
 
     // if this position has any history, we'll just delete it
     // if this position is in an approval chain, we just delete it

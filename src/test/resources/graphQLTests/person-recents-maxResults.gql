@@ -21,5 +21,6 @@ personList(query: {pageSize: ${maxResults}, status: ACTIVE, inMyReports: true, s
         name
       }
     }
+    customFields
   }
 }

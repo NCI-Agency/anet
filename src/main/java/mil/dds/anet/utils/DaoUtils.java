@@ -114,11 +114,15 @@ public class DaoUtils {
     return (Person) context.get("user");
   }
 
-  public static ZoneId getDefaultZoneId() {
+  public static ZoneId getServerNativeZoneId() {
     return ZoneId.of("UTC");
   }
 
-  public static ZoneOffset getDefaultZoneOffset() {
+  public static ZoneId getServerLocalZoneId() {
+    return ZoneId.systemDefault();
+  }
+
+  public static ZoneOffset getServerNativeZoneOffset() {
     return ZoneOffset.UTC;
   }
 
@@ -138,7 +142,7 @@ public class DaoUtils {
   }
 
   public static LocalDateTime asLocalDateTime(final Instant instant) {
-    return instant == null ? null : LocalDateTime.ofInstant(instant, getDefaultZoneId());
+    return instant == null ? null : LocalDateTime.ofInstant(instant, getServerNativeZoneId());
   }
 
   /*

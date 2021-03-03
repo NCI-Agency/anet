@@ -8,18 +8,23 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
-import TaskTable from "components/TaskTable"
-import { FastField, Form, Formik } from "formik"
-import { Organization, Person, Position, Task } from "models"
+import { FastField, Field, Form, Formik } from "formik"
+import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -41,18 +46,19 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
+const OrganizationForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Organization.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Organization.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -84,6 +90,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
@@ -93,7 +100,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
           ? Settings.fields.principal.org
           : Settings.fields.advisor.org
         const orgSearchQuery = {
-          status: Organization.STATUS.ACTIVE,
+          status: Model.STATUS.ACTIVE,
           type: values.type
         }
         // Reset the parentOrg property when changing the organization type
@@ -222,7 +229,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
                     />
-                    <FastField
+                    <Field
                       name="parentOrg"
                       label={Settings.fields.organization.parentOrg}
                       component={FieldHelper.SpecialField}
@@ -308,7 +315,7 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                       className="tasks-selector"
                     >
                       {!isAdmin ? (
-                        <TaskTable tasks={values.tasks} />
+                        <NoPaginationTaskTable tasks={values.tasks} />
                       ) : (
                         <FastField
                           name="tasks"
@@ -327,13 +334,16 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                               )}...`}
                               value={values.tasks}
                               renderSelected={
-                                <TaskTable tasks={values.tasks} showDelete />
+                                <NoPaginationTaskTable
+                                  tasks={values.tasks}
+                                  showDelete
+                                />
                               }
                               overlayColumns={["Name"]}
                               overlayRenderRow={TaskSimpleOverlayRow}
                               filterDefs={tasksFilters}
                               objectType={Task}
-                              queryParams={{ status: Task.STATUS.ACTIVE }}
+                              queryParams={{ status: Model.STATUS.ACTIVE }}
                               fields={Task.autocompleteQuery}
                               addon={TASKS_ICON}
                             />
@@ -343,6 +353,19 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
                     </Fieldset>
                   )}
                 </div>
+              )}
+              {Settings.fields.organization.customFields && (
+                <Fieldset title="Organization information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.organization.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
               )}
 
               <div className="submit-buttons">
@@ -391,9 +414,9 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Organization.pathForEdit(organization))
     }
@@ -408,11 +431,14 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
       "notes",
       "childrenOrgs",
       "positions",
-      "tasks"
+      "tasks",
+      "customFields", // initial JSON from the db
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     // strip tasks fields not in data model
     organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
+    organization.customFields = customFieldsJSONString(values)
     return API.mutation(
       edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
@@ -420,24 +446,15 @@ const BaseOrganizationForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BaseOrganizationForm.propTypes = {
+OrganizationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Organization).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseOrganizationForm.defaultProps = {
+OrganizationForm.defaultProps = {
   title: "",
   edit: false
 }
-
-const OrganizationForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default OrganizationForm

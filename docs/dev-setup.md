@@ -17,22 +17,27 @@ This section describes the recommended Developer Environment and how to set it u
     ```
 
 ### Possible Problems
-- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
-- **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code. 
+- **You cannot access [the source code repo](https://github.com/NCI-Agency/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See [_Connecting to GitHub with SSH_](https://help.github.com/articles/connecting-to-github-with-ssh/) for more information on troubleshooting this step.
+- **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code.
 
 ## Set Up Gradle
-The frontend is run with `yarn`.  We recommend running the backend `gradle` if you are only doing frontend development.
+The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running the backend [`gradle`](https://gradle.org/) if you are only doing frontend development.
 
-1. Set up Gradle
+1. Set up [Gradle](https://gradle.org/)
     1. This step is not needed unless want to use other settings and passwords than the default ones (see `build.gradle` for the defaults). You can define custom settings in a local settings file as follows:
     1. Open a command line in the `anet` directory that was retrieved from github.
     1. Create a new empty file at `localSettings.gradle`. (`touch localSettings.gradle` on linux/mac).  This will be a file for all of your local settings and passwords that should not be checked into GitHub.
-1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](https://github.com/NCI-Agency/anet/blob/master/DOCUMENTATION.md#anet-configuration) for more details on these configuration options. You are most likely to change:
+1. Update the settings in `anet.yml` for your environment.  See the [ANET Configuration documentation](INSTALL.md#anet-configuration) for more details on these configuration options. You are most likely to change:
     1. `emailFromAddr` - use your own email address for testing.
 
 ## Java Backend
+
+### Prerequisites
+1. Make sure you can [manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
 ### Initial Setup
-1. You can either use PostgreSQL or Microsoft SQL Server for your database. Both allow you to run entirely on your local machine and develop offline.
+
+1. You can either use [PostgreSQL](https://www.postgresql.org/) or [Microsoft SQL Server](https://en.wikipedia.org/wiki/Microsoft_SQL_Server) for your database. Both allow you to run entirely on your local machine and develop offline.
     1. MSSQL
         1. This is currently the default, so you don't need to do anything special
         1. If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
@@ -44,15 +49,15 @@ The frontend is run with `yarn`.  We recommend running the backend `gradle` if y
             run.environment("ANET_DB_NAME","database name")
             ```
    1. PostgreSQL
-        1. To re-force gradle to use PostgreSQL you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
+        1. To re-force gradle to use [PostgreSQL](https://www.postgresql.org/) you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
             ```java
             run.environment("DB_DRIVER", "postgresql")
             ```
-1. Pull the MSSQL Docker image: `./gradlew dockerPullDB`
-1. Create the MSSQL Docker container and the initial database: `./gradlew dockerCreateDB`
-1. Start the MSSQL Docker container: `./gradlew dockerStartDB`
+1. Pull the DB Docker image: `./gradlew dockerPullDB`
+1. Create the DB Docker container and the initial database: `./gradlew dockerCreateDB`
+1. Start the DB Docker container: `./gradlew dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
-    1. The database schema is stored in `src/main/resources/migrations.xml`.
+    1. The database schema is stored in [`src/main/resources/migrations.xml`](../src/main/resources/migrations.xml).
 1. Seed the initial data:
     1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
 1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn) and build the project
@@ -69,7 +74,8 @@ Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This
 | Arthur Dmin | arthur | ANET Admins | ANET Administrator | Administrator
 | Jack Jackson | jack | EF2.1 | EF2.1 Advisor B | Advisor
 | Henry Henderson | henry | EF2.1 | EF2.1 SuperUser | Super User
-| Steve Steveson | | MoD | Cost Adder | Principal
+| Steve Steveson |-| MoD | Cost Adder | Principal
+| Ihave Noposition| nopos |-| - | Advisor
 
 To log in as one of the base data users, when prompted for a username and password, just enter their name as the username and leave the password blank.
 
@@ -80,7 +86,7 @@ To log in as one of the base data users, when prompted for a username and passwo
     1. You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
     1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
     1. You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
-    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
+    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Run `./gradlew run` to run the server via Gradle
     1. If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
     1. The following output indicates that the server is ready:
@@ -104,7 +110,7 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ## Testing
 ### Initial Setup Test Database
-After successfully creating and building the MSSQL Docker container it is posisble to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
+After successfully creating and building the MSSQL Docker container it is possible to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
 1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew -PtestEnv dbMigrate`
@@ -132,16 +138,16 @@ The tests are reliant on the data looking pretty similar to what you'd get after
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
-1. Make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
+1. Optionally, make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
 
-Run `yarn run lint-fix` to automatically fix some kinds of lint errors.
+Run `./gradlew yarn_run_lint-fix` to automatically fix some kinds of lint errors.
 
 #### Client-side testing locally
 To run the tests locally, make sure you have the server using the test-database running as above.
-1. Run the client side E2E tests against the test database: `yarn run test-e2e`
-1. Run the client side wdio tests against the test database: `yarn run test-wdio`
-1. Run the client side jest tests against the test database: `yarn run test-jest`
-1. Or run all client side tests against the test database: `yarn run test-all`
+1. Run the client side E2E tests against the test database: `./gradlew yarn_run_test-e2e`
+1. Run the client side wdio tests against the test database: `./gradlew yarn_run_test-wdio`
+1. Run the client side jest tests against the test database: `./gradlew yarn_run_test-jest`
+1. Or run all client side tests against the test database: `./gradlew yarn_run_test-all`
 
 To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/package/chromedriver) as an npm dependency, we automatically have access to run in Chrome. To use Firefox instead, see [`geckodriver`](https://www.npmjs.com/package/geckodriver).
 
@@ -150,7 +156,7 @@ When writing browser tests, remember that when you take an action, you need to g
 If the tests are failing and you don't know why, run them with env var `DEBUG_LOG=true`:
 
 ```
-$ DEBUG_LOG=true yarn run test-e2e
+$ DEBUG_LOG=true ./gradlew yarn_run_test-e2e
 ```
 
 You can also insert the following into your code to make the browser pause, allowing you to investigate what is currently happening:
@@ -186,47 +192,48 @@ When all is set up, run the remote tests:
     ```
     $ ./BrowserStackLocal --key mYbRoWsErStAcKkEy
    ```
-1. Configure scripts with `TEST_ENV` envrironment variable for remote testing: 
+1. Configure scripts with `TEST_ENV` envrironment variable for remote testing:
     ```
     $ export TEST_ENV=remote
     ```
 1. Run;
     1.  the client side E2E tests:
         ```
-        $ yarn run test-e2e
+        $ ./gradlew yarn_run_test-e2e
         ```
     1. the client side wdio tests:
         ```
-        $ yarn run test-wdio
+        $ ./gradlew yarn_run_test-wdio
         ```
     1. the client side wdio-ie tests:
         ```
-        $ yarn run test-wdio-ie
+        $ ./gradlew yarn_run_test-wdio-ie
         ```
        **About IE tests:** Internet Explorer is not fully supported by ANET and all features are **NOT** guaranteed to work with IE. For that reason, a warning banner is displayed when IE detected. `test-wdio-ie` runs tests for this scenario and these tests run only on remote testing. When testing locally, they gracefully abort.
     1. all client side tests:
         ```
-        $ yarn run test-all
+        $ ./gradlew yarn_run_test-all
         ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ### Simulator
-ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.   
+ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.
 
-The simulator can be started by running 'yarn run sim' in 'client'.
+The simulator can be started by running './gradlew yarn_run_sim'.
 
 ## React Frontend
+All of the frontend code is in the `client/` directory.
+
 ### Initial Setup
-1. Make sure you have the proper nodejs and yarn in your path. Example:
+1. You can run all client-side scripts via Yarn through Gradle. Otherwise, make sure you have the proper nodejs and yarn in your path; example:
     ```
-    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-latest
+    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.10
     export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v12.14.1-linux-x64
     export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
+    cd client/
     ```
-    _Note_: nodejs version might have changed in the meanwhile, check inside <anet_root_path>/.gradle/nodejs/ for which version is being used and change the path accordingly.
-1. `cd client/`
-    1. All of the frontend code is in the `client/` directory.
-1. Run the server: `yarn run start`
+    _Note_: nodejs and yarn versions might have changed in the meanwhile, check inside `<anet_root_path>/.gradle/nodejs/` and `<anet_root_path>/.gradle/yarn/` for which versions are being used and change the path accordingly.
+1. Run the server: `./gradlew yarn_run_start`
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
     1. When prompted for credentials:
         - **Username:** `erin`
@@ -237,5 +244,5 @@ NB: You only need node.js and the npm dependencies for developing. When we deplo
 ## Development Mode
 In the `anet.yml` file there is a flag for `developmentMode`.  This flag does several valuable things::
 1. On every graphql query, the entire graphql graph is reloaded and re-parsed.  This helps in backend evelopment by allowing you to make quick changes without having to restart the server.  (Note: this only helps if you're running ANET with gradle in debug mode).
-1. ANET will use AuthType Basic rather than windows authentication.  This allows you to develop on non-windows computers and also quickly impersonate other accounts for testing.  To log in with an account, enter the `domainUsername` value for that user in the 'Username' field when prompted by your browser.  Leave the password field blank. 
-1. You can easily simulate a "new user" in development mode by entering a new username into both the username and password field.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table.  If you enter an unknown username and no password, ANET will reject you. If you enter an unknown username and the same unknown username into the password field, it will create that account and drop you into the new user workflow. 
+1. ANET will use AuthType Basic rather than windows authentication.  This allows you to develop on non-windows computers and also quickly impersonate other accounts for testing.  To log in with an account, enter the `domainUsername` value for that user in the 'Username' field when prompted by your browser.  Leave the password field blank.
+1. You can easily simulate a "new user" in development mode by entering a new username into both the username and password field.  This will activate the same code path as if a user came to the production system with a valid Windows Authentication Principal but we don't find them in the `people` table.  If you enter an unknown username and no password, ANET will reject you. If you enter an unknown username and the same unknown username into the password field, it will create that account and drop you into the new user workflow.

@@ -3148,11 +3148,827 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="alter-postgresql-fulltext" author="gjvoosten" dbms="postgresql">
+		<sql>
+			<!-- Drop full-text materialized views (incl. indexes) -->
+			DROP MATERIALIZED VIEW "mv_fts_authorizationGroups";
+			DROP MATERIALIZED VIEW mv_fts_locations;
+			DROP MATERIALIZED VIEW mv_fts_organizations;
+			DROP MATERIALIZED VIEW mv_fts_people;
+			DROP MATERIALIZED VIEW mv_fts_positions;
+			DROP MATERIALIZED VIEW mv_fts_reports;
+			DROP MATERIALIZED VIEW mv_fts_tags;
+			DROP MATERIALIZED VIEW mv_fts_tasks;
+
+			<!-- Drop generated full-text columns -->
+			ALTER TABLE "authorizationGroups" DROP COLUMN full_text;
+			ALTER TABLE locations DROP COLUMN full_text;
+			ALTER TABLE organizations DROP COLUMN full_text;
+			ALTER TABLE notes DROP COLUMN full_text;
+			ALTER TABLE people DROP COLUMN full_text;
+			ALTER TABLE positions DROP COLUMN full_text;
+			ALTER TABLE reports DROP COLUMN full_text;
+			ALTER TABLE tags DROP COLUMN full_text;
+			ALTER TABLE tasks DROP COLUMN full_text;
+
+			<!-- Re-add generated full-text columns;
+			     use 'anet' config only for columns containing English text,
+			     use 'simple' config for all columns -->
+			ALTER TABLE "authorizationGroups"
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".name, ''))
+						  || to_tsvector('simple', coalesce("authorizationGroups".name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce("authorizationGroups".description, ''))
+						  || to_tsvector('simple', coalesce("authorizationGroups".description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+						  || to_tsvector('simple', coalesce(locations.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
+						  || to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE notes
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(notes.text, ''))
+						  || to_tsvector('simple', coalesce(notes.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."emailAddress", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
+						  || to_tsvector('simple', coalesce(people.biography, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE positions
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(positions.code, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(positions.name, ''))
+						  || to_tsvector('simple', coalesce(positions.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE reports
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(reports.intent, ''))
+						  || to_tsvector('simple', coalesce(reports.intent, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(reports."keyOutcomes", ''))
+						  || to_tsvector('simple', coalesce(reports."keyOutcomes", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(reports."nextSteps", ''))
+						  || to_tsvector('simple', coalesce(reports."nextSteps", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(reports.text, ''))
+						  || to_tsvector('simple', coalesce(reports.text, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tags
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(tags.name, ''))
+						  || to_tsvector('simple', coalesce(tags.name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(tags.description, ''))
+						  || to_tsvector('simple', coalesce(tags.description, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(tasks."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", ''))
+						  || to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high})
+				) STORED;
+
+			<!-- Re-create full-text materialized views and indexes -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS "mv_fts_authorizationGroups"(uuid, full_text) AS
+				SELECT
+					"authorizationGroups".uuid,
+					"authorizationGroups".full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM "authorizationGroups"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'authorizationGroups'
+					AND "noteRelatedObjects"."relatedObjectUuid" = "authorizationGroups".uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY "authorizationGroups".uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_authorizationGroups_uuid" ON "mv_fts_authorizationGroups"(uuid);
+			CREATE INDEX "FT_mv_fts_authorizationGroups" ON "mv_fts_authorizationGroups" USING gin(full_text);
+			CREATE INDEX "TR_authorizationGroups_uuid" ON "mv_fts_authorizationGroups" USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+				SELECT
+					locations.uuid,
+					locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM locations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+				SELECT
+					organizations.uuid,
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM organizations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+				SELECT
+					people.uuid,
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM people
+				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+					AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY people.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+				SELECT
+					positions.uuid,
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM positions
+				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+					AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY positions.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_reports(uuid, full_text) AS
+				SELECT
+					reports.uuid,
+					reports.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM reports
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'reports'
+					AND "noteRelatedObjects"."relatedObjectUuid" = reports.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY reports.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_reports_uuid" ON mv_fts_reports(uuid);
+			CREATE INDEX "FT_mv_fts_reports" ON mv_fts_reports USING gin(full_text);
+			CREATE INDEX "TR_reports_uuid" ON mv_fts_reports USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tags(uuid, full_text) AS
+				SELECT
+					tags.uuid,
+					tags.full_text
+				FROM tags
+				GROUP BY tags.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tags" ON mv_fts_tags(uuid);
+			CREATE INDEX "FT_mv_fts_tags" ON mv_fts_tags USING gin(full_text);
+			CREATE INDEX "TR_tags_uuid" ON mv_fts_tags USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
+				SELECT
+					tasks.uuid,
+					tasks.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM tasks
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
+					AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY tasks.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
+			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+		</sql>
+		<!-- Rolling back is not useful anymore -->
+	</changeSet>
+
+	<changeSet id="update-task-assessment-questions" author="gjvoosten">
+		<!-- Note: the demo data has at most 3 assessment definitions for any one task
+		     and field installations have at most 2, so only update the first 3. -->
+
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+		<![CDATA[
+			-- change all &#34; to " inside 'questions'
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[0].questions', REPLACE(JSON_VALUE(customFields, 'strict $.assessments[0].questions'), '&#34;', '"'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[0].questions') IS NOT NULL
+			AND ISJSON(JSON_VALUE(customFields, 'strict $.assessments[0].questions')) = 0
+			AND JSON_VALUE(customFields, 'strict $.assessments[0].questions') LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[1].questions', REPLACE(JSON_VALUE(customFields, 'strict $.assessments[1].questions'), '&#34;', '"'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[1].questions') IS NOT NULL
+			AND ISJSON(JSON_VALUE(customFields, 'strict $.assessments[1].questions')) = 0
+			AND JSON_VALUE(customFields, 'strict $.assessments[1].questions') LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[2].questions', REPLACE(JSON_VALUE(customFields, 'strict $.assessments[2].questions'), '&#34;', '"'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[2].questions') IS NOT NULL
+			AND ISJSON(JSON_VALUE(customFields, 'strict $.assessments[2].questions')) = 0
+			AND JSON_VALUE(customFields, 'strict $.assessments[2].questions') LIKE '%&#34;%';
+
+			-- change all 'questions' from string to JSON
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[0].questions', JSON_QUERY(JSON_VALUE(customFields, 'strict $.assessments[0].questions'), '$'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[0].questions') IS NOT NULL;
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[1].questions', JSON_QUERY(JSON_VALUE(customFields, 'strict $.assessments[1].questions'), '$'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[1].questions') IS NOT NULL;
+
+			UPDATE tasks
+			SET customFields = JSON_MODIFY(customFields, '$.assessments[2].questions', JSON_QUERY(JSON_VALUE(customFields, 'strict $.assessments[2].questions'), '$'))
+			WHERE ISJSON(customFields) = 1
+			AND JSON_VALUE(customFields, 'lax $.assessments[2].questions') IS NOT NULL;
+		]]>
+		</sql>
+
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			-- create convenience function
+			CREATE OR REPLACE FUNCTION is_valid_json(p_json text)
+				RETURNS boolean
+			AS
+			'
+			BEGIN
+				IF p_json IS NULL THEN
+					RETURN NULL;
+				ELSE
+					RETURN (p_json::json IS NOT NULL);
+				END IF;
+			EXCEPTION
+				WHEN OTHERS THEN
+					RETURN FALSE;
+			END;
+			'
+			LANGUAGE plpgsql
+			IMMUTABLE;
+
+			-- change all &#34; to " inside 'questions'
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 0, questions}', to_jsonb(replace("customFields"::jsonb#>>'{assessments, 0, questions}', '&#34;', '"')::text))
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 0, questions}') IS FALSE
+			AND "customFields"::jsonb#>>'{assessments, 0, questions}' LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 1, questions}', to_jsonb(replace("customFields"::jsonb#>>'{assessments, 1, questions}', '&#34;', '"')::text))
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 1, questions}') IS FALSE
+			AND "customFields"::jsonb#>>'{assessments, 1, questions}' LIKE '%&#34;%';
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 2, questions}', to_jsonb(replace("customFields"::jsonb#>>'{assessments, 2, questions}', '&#34;', '"')::text))
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 2, questions}') IS FALSE
+			AND "customFields"::jsonb#>>'{assessments, 2, questions}' LIKE '%&#34;%';
+
+			-- change all 'questions' from string to JSON
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 0, questions}', ("customFields"::jsonb#>>'{assessments, 0, questions}')::text::jsonb)
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 0, questions}') IS TRUE;
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 1, questions}', ("customFields"::jsonb#>>'{assessments, 1, questions}')::text::jsonb)
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 1, questions}') IS TRUE;
+
+			UPDATE tasks
+			SET "customFields" = JSONB_SET("customFields"::jsonb, '{assessments, 2, questions}', ("customFields"::jsonb#>>'{assessments, 2, questions}')::text::jsonb)
+			WHERE is_valid_json("customFields") IS TRUE
+			AND is_valid_json("customFields"::jsonb#>>'{assessments, 2, questions}') IS TRUE;
+
+			-- drop convenience function
+			DROP FUNCTION IF EXISTS is_valid_json;
+		]]>
+		</sql>
+
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-reportActions-planned" author="gjvoosten">
+		<addColumn tableName="reportActions">
+			<column name="planned" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add-jobHistory-table" author="gjvoosten">
+		<createTable tableName="jobHistory">
+			<column name="jobName" type="nvarchar(100)">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="lastRun" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="people-pendingVerification" author="VassilIordanov">
+		<comment>We are going to use pendingVerification column instead of the NEW_USER value of the status column</comment>
+		<sql dbms="mssql">
+			UPDATE people SET "pendingVerification" = 0;
+			UPDATE people SET status = 0, "pendingVerification" = 1 WHERE status = 2;
+		</sql>
+		<sql dbms="postgresql">
+			UPDATE people SET "pendingVerification" = false;
+			UPDATE people SET status = 0, "pendingVerification" = true WHERE status = 2;
+		</sql>
+	</changeSet>
+
+	<changeSet id="set-read_committed_snapshot-on" author="gjvoosten" runInTransaction="false" runOnChange="true">
+		<comment>Set READ_COMMITTED_SNAPSHOT to ON to prevent hangs due to locking</comment>
+		<!-- Requires at least SQL Server 2012: -->
+		<sql dbms="mssql">
+                        ALTER DATABASE CURRENT SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+		</sql>
+	</changeSet>
+
+	<changeSet id="change-periodStart-format" author="gjvoosten">
+		<comment>Convert zone-specific timestamp to zone-agnostic date in yyyy-MM-dd format</comment>
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__periodStart', FORMAT(CONVERT(datetime, JSON_VALUE(text, 'lax $.__periodStart'), 127) + 0.5, 'yyyy-MM-dd'))
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__periodStart') IS NOT NULL;
+		</sql>
+	</changeSet>
+	<changeSet id="fix-semiannually-typo" author="gjvoosten">
+		<comment>Fix typo in 'semiannually'</comment>
+		<!-- Note: the demo data has at most 3 assessment definitions for any one task
+		     and field installations have at most 2, so only update the first 3. -->
+
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			UPDATE notes
+			SET text = JSON_MODIFY(text, '$.__recurrence', 'semiannually')
+			WHERE type = 3
+			AND ISJSON(text) = 1
+			AND JSON_VALUE(text, 'lax $.__recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[0].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[0].recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[1].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[1].recurrence') = 'semiannualy';
+
+			UPDATE tasks
+			SET "customFields" = JSON_MODIFY("customFields", '$.assessments[2].recurrence', 'semiannually')
+			WHERE ISJSON("customFields") = 1
+			AND JSON_VALUE("customFields", 'lax $.assessments[2].recurrence') = 'semiannualy';
+		</sql>
+	</changeSet>
+
+	<changeSet id="add-reportPeople-attendee" author="gjvoosten">
+		<addColumn tableName="reportPeople">
+			<column name="isAttendee" type="boolean" defaultValue="true" />
+		</addColumn>
+		<!-- Set isAttendee flag to true for all previously written reports -->
+		<sql dbms="postgresql">
+			UPDATE "reportPeople"
+			SET "isAttendee" = TRUE;
+		</sql>
+		<sql dbms="mssql">
+			UPDATE "reportPeople"
+			SET "isAttendee" = 1;
+		</sql>
+	</changeSet>
+
+	<changeSet id="add-reportPeople-author" author="cemalettin-simsoft">
+		<!-- Before, we saved report's author with reports.authorUuid -->
+		<!-- since we need more authors we will save it with a flag in reportPeople.isAuthor -->
+		<addColumn tableName="reportPeople">
+			<column name="isAuthor" type="boolean" defaultValue="false" />
+		</addColumn>
+		<!-- Insert reportPeople rows for authors who were not attendees -->
+		<sql dbms="postgresql">
+			INSERT INTO "reportPeople" ("reportUuid", "personUuid", "isPrimary", "isAuthor", "isAttendee")
+				SELECT
+					r.uuid,
+					r."authorUuid",
+					FALSE,
+					TRUE,
+					FALSE
+				FROM
+					reports r
+				WHERE NOT EXISTS (
+					SELECT rp."reportUuid"
+					FROM "reportPeople" rp
+					WHERE rp."reportUuid" = r.uuid
+					AND rp."personUuid" = r."authorUuid"
+				);
+		</sql>
+		<sql dbms="mssql">
+			INSERT INTO "reportPeople" ("reportUuid", "personUuid", "isPrimary", "isAuthor", "isAttendee")
+				SELECT
+					r.uuid,
+					r."authorUuid",
+					0,
+					1,
+					0
+				FROM
+					reports r
+				WHERE NOT EXISTS (
+					SELECT rp."reportUuid"
+					FROM "reportPeople" rp
+					WHERE rp."reportUuid" = r.uuid
+					AND rp."personUuid" = r."authorUuid"
+				);
+		</sql>
+		<!-- Set isAuthor flag to true for all authors of previously written reports -->
+		<sql dbms="postgresql">
+			UPDATE "reportPeople"
+			SET "isAuthor" = TRUE
+			WHERE "personUuid" = (SELECT "authorUuid" FROM reports WHERE uuid = "reportUuid");
+		</sql>
+		<sql dbms="mssql">
+			UPDATE "reportPeople"
+			SET "isAuthor" = 1
+			WHERE "personUuid" = (SELECT "authorUuid" FROM reports WHERE uuid = "reportUuid");
+		</sql>
+		<!-- Now drop the obsolete authorUuid column -->
+		<dropIndex tableName="reports" indexName="IDX_reports_authorUuid" />
+		<dropForeignKeyConstraint baseTableName="reports" constraintName="FK_reports_author" />
+		<dropColumn tableName="reports" columnName="authorUuid" />
+	</changeSet>
+
+	<changeSet id="add-custom-fields-to-positions" author="cemalettin-simsoft">
+		<addColumn tableName="positions">
+			<column name="customFields" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="add-custom-fields-to-organizations" author="cemalettin-simsoft">
+		<addColumn tableName="organizations">
+			<column name="customFields" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
+	<changeSet id="add-custom-fields-to-locations" author="cemalettin-simsoft">
+		<addColumn tableName="locations">
+			<column name="customFields" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="set-planned-reportActions" author="gjvoosten">
+		<!-- any report action linked to a planning step is itself planned -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = true
+			WHERE "approvalStepUuid" IN (
+				SELECT uuid
+				FROM "approvalSteps"
+				WHERE type = 0
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+		<sql dbms="mssql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = 1
+			WHERE "approvalStepUuid" IN (
+				SELECT uuid
+				FROM "approvalSteps"
+				WHERE type = 0
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+
+		<!-- any report submit action directly followed by a planned action is itself planned -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = true
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				LEFT JOIN LATERAL (
+					SELECT ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" < ra."createdAt"
+					ORDER BY ra2."createdAt" DESC
+					LIMIT 1
+				) ra2 ON TRUE
+				WHERE ra2.type = 2
+				AND ra.planned = true
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+		<sql dbms="mssql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = 1
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				OUTER APPLY (
+					SELECT TOP(1) ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" < ra."createdAt"
+					ORDER BY ra2."createdAt" DESC
+				) ra2
+				WHERE ra2.type = 2
+				AND ra.planned = 1
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+
+		<!-- any report publish action directly preceded by a planned action is itself planned -->
+		<sql dbms="postgresql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = true
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				LEFT JOIN LATERAL (
+					SELECT ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" > ra."createdAt"
+					ORDER BY ra2."createdAt"
+					LIMIT 1
+				) ra2 ON TRUE
+				WHERE ra2.type = 3
+				AND ra.planned = true
+			);
+		]]>
+		</sql>
+		<sql dbms="mssql">
+		<![CDATA[
+			UPDATE "reportActions"
+			SET planned = 1
+			WHERE "createdAt" IN (
+				SELECT ra2."createdAt"
+				FROM "reportActions" ra
+				OUTER APPLY (
+					SELECT TOP(1) ra2.*
+					FROM "reportActions" ra2
+					WHERE ra2."reportUuid" = ra."reportUuid"
+					AND ra2."createdAt" > ra."createdAt"
+					ORDER BY ra2."createdAt"
+				) ra2
+				WHERE ra2.type = 3
+				AND ra.planned = 1
+			)
+			AND "createdAt" >= '2021-01-01';
+		]]>
+		</sql>
+	</changeSet>
+
+	<changeSet id="alter-changeset-29-for-postgresql" author="gjvoosten" dbms="postgresql" runInTransaction="false" >
+		<sql>
+			<!-- Drop full-text materialized views (incl. indexes);
+                             copied from changeset alter-postgresql-fulltext -->
+			DROP MATERIALIZED VIEW mv_fts_locations;
+			DROP MATERIALIZED VIEW mv_fts_organizations;
+			DROP MATERIALIZED VIEW mv_fts_people;
+			DROP MATERIALIZED VIEW mv_fts_positions; -- depends on organizations.full_text
+			DROP MATERIALIZED VIEW mv_fts_tasks;
+
+			<!-- Drop generated full-text columns;
+                             copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE locations DROP COLUMN full_text;
+			ALTER TABLE organizations DROP COLUMN full_text;
+			ALTER TABLE people DROP COLUMN full_text;
+			ALTER TABLE tasks DROP COLUMN full_text;
+
+                        <!-- Make column lengths consistent with mssql (see changeset 29) -->
+			ALTER TABLE locations ALTER COLUMN name TYPE varchar(512); -- was varchar(500)
+			ALTER TABLE organizations ALTER COLUMN "longName" TYPE varchar(255); -- was text
+			ALTER TABLE people ALTER COLUMN "domainUsername" TYPE varchar(512); -- was varchar(500)
+			ALTER TABLE tasks ALTER COLUMN "shortName" TYPE varchar(255); -- was varchar(100)
+			ALTER TABLE tasks ALTER COLUMN "longName" TYPE text; -- was varchar(255)
+
+			<!-- Re-add generated full-text columns;
+			     use 'anet' config only for columns containing English text,
+			     use 'simple' config for all columns;
+                             copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+						  || to_tsvector('simple', coalesce(locations.name, '')), ${fts_high})
+				) STORED;
+
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
+						  || to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE people
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(people.name, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people.code, '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."domainUsername", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."emailAddress", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(people."phoneNumber", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(people.biography, ''))
+						  || to_tsvector('simple', coalesce(people.biography, '')), ${fts_low})
+				) STORED;
+
+			ALTER TABLE tasks
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(tasks."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", ''))
+						  || to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high})
+				) STORED;
+
+			<!-- Re-create full-text materialized views and indexes;
+                             copied from changeset alter-postgresql-fulltext -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+				SELECT
+					locations.uuid,
+					locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM locations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+				SELECT
+					organizations.uuid,
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM organizations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+				SELECT
+					people.uuid,
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM people
+				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+					AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY people.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+				SELECT
+					positions.uuid,
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM positions
+				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+					AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY positions.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
+				SELECT
+					tasks.uuid,
+					tasks.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM tasks
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
+					AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY tasks.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
+			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
+	<changeSet id="convert-tags-to-notes" author="VassilIordanov">
+		<sql>
+			INSERT INTO PEOPLE (uuid, name, status, role, "createdAt", "updatedAt")
+				SELECT ${uuid_function}, 'ANET Importer', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+				WHERE NOT EXISTS (SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0);
+
+                        -- Create one note for each tag;
+                        -- since notes are only editable by their author (the ANET Importer in this case) or admin,
+                        -- this is safe
+			INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
+				SELECT
+					t.uuid,
+					(SELECT uuid FROM people WHERE name = 'ANET Importer' AND role = 0),
+					0,
+					CONCAT('Previously tagged as ', t.name, ' - ',  t.description),
+					t."createdAt",
+					t."updatedAt"
+				FROM
+					tags t;
+
+                        -- Link reports to the note containing their former tag
+			INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+				SELECT
+					rt."tagUuid",
+					'reports',
+					rt."reportUuid"
+				FROM
+					"reportTags" rt;
+		</sql>
+		<sql dbms="postgresql">
+			DROP MATERIALIZED VIEW mv_fts_tags;
+		</sql>
+		<dropForeignKeyConstraint baseTableName="reportTags" constraintName="FK_reportTags_report" />
+		<dropForeignKeyConstraint baseTableName="reportTags" constraintName="FK_reportTags_tag" />
+		<dropTable tableName="reportTags" />
+		<dropTable tableName="tags" />
+		<!-- Remove tags from saved searches -->
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			-- Remove JSON field for the tagUuid
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.tagUuid', NULL);
+		</sql>
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<sql dbms="postgresql">
+			-- Remove JSON field for the tagUuid
+			UPDATE "savedSearches" SET query=query::jsonb #- '{tagUuid}';
+		</sql>
+	</changeSet>
+
 	<changeSet id="delete-peoplePositions-without-position-and-person" author="sahindoganlutfi">
 		<comment>Cleanup the NULL of the personUuid and positionUuid columns of the peoplePositions table.</comment>
 		<sql>
 			DELETE FROM "peoplePositions" WHERE "personUuid" IS NULL and "positionUuid" IS NULL;
-		</sql>
 	</changeSet>
 
 </databaseChangeLog>

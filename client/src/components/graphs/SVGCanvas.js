@@ -1,25 +1,19 @@
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useRef } from "react"
 import { Button } from "react-bootstrap"
 import DOWNLOAD_ICON from "resources/download.png"
 
-const SVGCanvas = ({
-  width,
-  height,
-  exportTitle,
-  zoomFn,
-  svgRef,
-  children
-}) => {
+const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
+  const svgRef = useRef(null)
   const exportSvg = () => {
-    var svgBlob = new Blob(
+    const svgBlob = new Blob(
       ['<?xml version="1.0" standalone="no"?>', svgRef.current.outerHTML],
       {
         type: "image/svg+xml;charset=utf-8"
       }
     )
-    var svgUrl = URL.createObjectURL(svgBlob)
-    var downloadLink = document.createElement("a")
+    const svgUrl = URL.createObjectURL(svgBlob)
+    const downloadLink = document.createElement("a")
     downloadLink.href = svgUrl
     downloadLink.download = exportTitle
     document.body.appendChild(downloadLink)
@@ -62,12 +56,7 @@ const SVGCanvas = ({
           </Button>
         </div>
       )}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={width}
-        height={height}
-        ref={svgRef}
-      >
+      <svg width={width} height={height} ref={svgRef}>
         {children}
       </svg>
     </div>
@@ -79,7 +68,6 @@ SVGCanvas.propTypes = {
   height: PropTypes.number.isRequired,
   exportTitle: PropTypes.string,
   zoomFn: PropTypes.func,
-  svgRef: PropTypes.object.isRequired,
   children: PropTypes.node
 }
 

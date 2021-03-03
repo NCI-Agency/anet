@@ -22,8 +22,13 @@
 Dear ${approvalStepName},
 <br><br>
 <div>
-  <#assign reportAuthor = (report.loadAuthor(context).get())!>
-  ${reportAuthor.name}'s report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is ready for your review.<br>
+  This report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>,
+  authored by
+  <#assign reportAuthors = (report.loadAuthors(context).get())!>
+  <#list reportAuthors as reportAuthor>
+    ${reportAuthor.name},
+  </#list>
+  is ready for your review.<br>
   Using <a href="${serverUrl}/reports/${report.uuid}" />this link</a>,
   you can either <em>Approve</em>, <em>Request changes to</em> or <em>Edit</em> the report.
 </div>
@@ -101,25 +106,15 @@ Dear ${approvalStepName},
   </#if>
 </div>
 
-<#if report.loadTags(context).get()??>
-  <#if fields.report.reportTags??>
-    <#assign tags = report.getTags()>
-    <div>
-      <strong>${fields.report.reportTags}:</strong>
-      <ul>
-        <#list tags as tag>
-          <li>
-            ${(tag.name)!} <em>(${(tag.description)!})</em>
-          </li>
-        </#list>
-      </ul>
-    </div>
-  </#if>
-</#if>
-
 <div>
   <strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
+
+<#if engagementsIncludeTimeAndDuration>
+  <div>
+    <strong>Duration (minutes):</strong> ${(report.duration)!}
+  </div>
+</#if>
 
 <#assign tasks = (report.loadTasks(context).get())!>
 <#list tasks as task>

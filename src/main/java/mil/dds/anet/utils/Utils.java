@@ -1,15 +1,26 @@
 package mil.dds.anet.utils;
 
+import static mil.dds.anet.AnetApplication.FREEMARKER_VERSION;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.json.JsonSanitizer;
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.time.Instant;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +38,7 @@ import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import net.coobird.thumbnailator.Thumbnails;
 import org.jsoup.Jsoup;
@@ -39,6 +51,7 @@ public class Utils {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final ObjectMapper mapper = MapperUtils.getDefaultMapper();
 
   /**
    * Crude method to check whether a uuid is purely integer, in which case it is probably a legacy
@@ -180,7 +193,7 @@ public class Utils {
     return result;
   }
 
-  public static final PolicyFactory POLICY_DEFINITION = new HtmlPolicyBuilder()
+  public static final PolicyFactory HTML_POLICY_DEFINITION = new HtmlPolicyBuilder()
       .allowStandardUrlProtocols()
       // Allow in-line image data
       .allowUrlProtocols("data").allowAttributes("src").matching(Pattern.compile("^data:image/.*$"))
@@ -208,9 +221,53 @@ public class Utils {
     if (input == null) {
       return null;
     }
-    return POLICY_DEFINITION.sanitize(input);
+    return HTML_POLICY_DEFINITION.sanitize(input);
   }
 
+  public static String sanitizeJson(String inputJson) throws JsonProcessingException {
+    if (inputJson == null) {
+      // `JsonSanitizer.sanitize(null)` would return `"null"` in this case,
+      // but we prefer plain `null`
+      return null;
+    }
+    final String sanitizedJson = JsonSanitizer.sanitize(inputJson);
+    final JsonNode jsonTree = mapper.readTree(sanitizedJson);
+    internalSanitizeJsonForHtml(jsonTree);
+    return mapper.writeValueAsString(jsonTree);
+  }
+
+  private static void internalSanitizeJsonForHtml(JsonNode jsonNode) {
+    if (jsonNode.isObject()) {
+      final ObjectNode objectNode = (ObjectNode) jsonNode;
+      for (final Iterator<Map.Entry<String, JsonNode>> entryIter = objectNode.fields(); entryIter
+          .hasNext();) {
+        final Map.Entry<String, JsonNode> entry = entryIter.next();
+        final JsonNode newValue = entry.getValue().isTextual()
+            ? objectNode.textNode(sanitizeHtml(entry.getValue().asText()))
+            : entry.getValue();
+        final String sanitizedKey = sanitizeHtml(entry.getKey());
+        if (!entry.getKey().equals(sanitizedKey)) {
+          objectNode.remove(entry.getKey());
+        }
+        objectNode.set(sanitizedKey, newValue);
+        internalSanitizeJsonForHtml(entry.getValue());
+      }
+    } else if (jsonNode.isArray()) {
+      final ArrayNode arrayNode = (ArrayNode) jsonNode;
+      for (int i = 0; i < arrayNode.size(); i++) {
+        if (arrayNode.get(i).isTextual()) {
+          arrayNode.set(i, arrayNode.textNode(sanitizeHtml(arrayNode.get(i).asText())));
+        } else {
+          internalSanitizeJsonForHtml(arrayNode.get(i));
+        }
+      }
+    }
+  }
+
+  public static JsonNode parseJsonSafe(String inputJson) throws JsonProcessingException {
+    final String sanitizedJson = Utils.sanitizeJson(inputJson);
+    return sanitizedJson == null ? null : mapper.readTree(sanitizedJson);
+  }
 
   public static String trimStringReturnNull(String input) {
     if (input == null) {
@@ -321,16 +378,15 @@ public class Utils {
   }
 
   /**
-   * Checks whether an email address is allowed according to a list of whitelisted domains.
+   * Checks whether an email address is allowed according to a list of allowed domains.
    * 
    * @param email The email address to check
-   * @param whitelistDomainNames The list of whitelisted domain names (wildcards allowed)
-   * @return Whether the email is whitelisted
+   * @param allowedDomainNames The list of allowed domain names (wildcards allowed)
+   * @return Whether the email is allowed
    */
-  public static boolean isEmailWhitelisted(final String email,
-      final List<String> whitelistDomainNames) {
+  public static boolean isEmailAllowed(final String email, final List<String> allowedDomainNames) {
     try {
-      return isLogonDomainInList(email, whitelistDomainNames);
+      return isEmailDomainInList(email, allowedDomainNames);
     } catch (IllegalArgumentException e) {
       logger.error("Failed to process email: {}", email);
       return false;
@@ -338,60 +394,44 @@ public class Utils {
   }
 
   /**
-   * Checks whether a domain user name is allowed according to a list of whitelisted domains.
+   * Checks whether an email address is ignored according to a list of ignored domains.
    * 
-   * More info: https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats
-   * 
-   * @param domainUserName The domain user name to check
-   * @param ignoredDomainNames The list of ignored domain user names (wildcards allowed)
-   * @return Whether the domain user name is ignored
+   * @param email The email address to check
+   * @param ignoredDomainNames The list of ignored domain names (wildcards allowed)
+   * @return Whether the email is ignored
    */
-  public static boolean isDomainUserNameIgnored(final String domainUserName,
-      final List<String> ignoredDomainNames) {
+  public static boolean isEmailIgnored(final String email, final List<String> ignoredDomainNames) {
     try {
-      return isLogonDomainInList(domainUserName, ignoredDomainNames);
+      return isEmailDomainInList(email, ignoredDomainNames);
     } catch (IllegalArgumentException e) {
-      logger.error("Failed to process domain user name: {}", domainUserName);
+      logger.error("Failed to process email: {}", email);
       return true;
     }
   }
 
-  private static boolean isLogonDomainInList(final String logon, final List<String> list)
+  private static boolean isEmailDomainInList(final String email, final List<String> list)
       throws IllegalArgumentException {
-
-    final String wildcard = "*";
-
-    // Separator for 'User Principal Name' format
-    final String upnSeparator = "@";
-
-    // Separator for 'Down-Level Logon Name' format
-    final String dlSeparator = "\\";
-
-    if (isEmptyOrNull(logon) || isEmptyOrNull(list)) {
+    if (isEmptyOrNull(email) || isEmptyOrNull(list)) {
       return false;
     }
 
-    // Logon has no domain
-    if (!logon.contains(upnSeparator) && !logon.contains(dlSeparator)) {
+    final String domainSeparator = "@";
+    if (!email.contains(domainSeparator)) {
+      // Email has no domain
       return false;
     }
 
-    // Find out the format
-    boolean isDownLevelFormat = logon.contains(dlSeparator);
-
-    final String[] splittedLogon =
-        logon.trim().split(isDownLevelFormat ? dlSeparator + "\\" : upnSeparator);
-
-    // A logon (domain user name or email) is expected to have two parts: username<separator>domain
-    if (splittedLogon.length != 2) {
-      throw new IllegalArgumentException("Malformed logon: " + logon);
+    final String[] splittedEmail = email.trim().split(domainSeparator);
+    if (splittedEmail.length != 2) {
+      // Email is expected to have two parts: username@domain
+      throw new IllegalArgumentException("Malformed email: " + email);
     }
 
-    // Find the domain name depending on the format
-    final String domainName =
-        (isDownLevelFormat ? splittedLogon[0] : splittedLogon[1]).toLowerCase();
+    // Find the domain name
+    final String domainName = splittedEmail[1].toLowerCase();
 
     // Compile a list of regex patterns we want to use to filter and then find any match
+    final String wildcard = "*";
     return list.stream().map(domain -> domainToRegexPattern(domain, wildcard))
         .anyMatch(domainPattern -> domainPattern.matcher(domainName).matches());
   }
@@ -400,14 +440,6 @@ public class Utils {
     final String regex = domain.replace(".", "[.]") // replace dots
         .replace(wildcard, ".*?"); // replace wildcards
     return Pattern.compile("^" + regex + "$");
-  }
-
-
-  // Returns an instant representing the very end of today.
-  // Used to determine if a date is tomorrow or later.
-  public static Instant endOfToday() {
-    return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59)
-        .withSecond(59).withNano(999999999).toInstant();
   }
 
   /**
@@ -546,6 +578,18 @@ public class Utils {
       throw new WebApplicationException("An approver is required for every approval step",
           Status.BAD_REQUEST);
     }
+  }
+
+  public static Configuration getFreemarkerConfig(Class<?> clazz) {
+    final Configuration freemarkerConfig = new Configuration(FREEMARKER_VERSION);
+    // auto-escape HTML in our .ftlh templates
+    freemarkerConfig.setRecognizeStandardFileExtensions(true);
+    freemarkerConfig.setObjectWrapper(new DefaultObjectWrapperBuilder(FREEMARKER_VERSION).build());
+    freemarkerConfig.loadBuiltInEncodingMap();
+    freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
+    freemarkerConfig.setClassForTemplateLoading(clazz, "/");
+    freemarkerConfig.setAPIBuiltinEnabled(true);
+    return freemarkerConfig;
   }
 
 }

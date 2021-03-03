@@ -3,11 +3,12 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
-import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
+import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -20,10 +21,9 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Person, Report, Task } from "models"
+import { Task } from "models"
 import moment from "moment"
-import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -61,6 +61,10 @@ const GQL_GET_TASK = gql`
         organization {
           uuid
           shortName
+        }
+        location {
+          uuid
+          name
         }
         person {
           uuid
@@ -104,12 +108,6 @@ const GQL_GET_TASK = gql`
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
-      publishedReports: reports(query: {
-        pageSize: 0
-        state: [${Report.STATE.PUBLISHED}]
-      }) {
-        uuid
-      }
     }
     subTasks: taskList(query: {
       pageSize: 0
@@ -126,18 +124,13 @@ const GQL_GET_TASK = gql`
         }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
-        publishedReports: reports(query: {
-          pageSize: 0
-          state: [${Report.STATE.PUBLISHED}]
-        }) {
-          uuid
-        }
       }
     }
   }
 `
 
-const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
+const TaskShow = ({ pageDispatchers }) => {
+  const { currentUser, loadAppData } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
@@ -159,17 +152,13 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   }
 
   if (data) {
-    data.task.formCustomFields = JSON.parse(data.task.customFields) // TODO: Maybe move this code to Task()
-    data.task.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
+    Model.populateCustomFields(data.task)
   }
   const task = new Task(data ? data.task : {})
 
-  const subTasks = []
-  data &&
-    data.subTasks.list.forEach(subTask => {
-      subTask.notes.forEach(note => (note.customFields = JSON.parse(note.text))) // TODO: Maybe move this code to Task()
-      subTasks.push(new Task(subTask))
-    })
+  data && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
+
+  const subTasks = data.subTasks.list.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
@@ -193,24 +182,6 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
-  const now = moment()
-  const assessmentPeriods = [
-    {
-      start: now.clone().subtract(2, "months").startOf("month"),
-      end: now.clone().subtract(2, "months").endOf("month"),
-      allowNewAssessments: false
-    },
-    {
-      start: now.clone().subtract(1, "months").startOf("month"),
-      end: now.clone().subtract(1, "months").endOf("month"),
-      allowNewAssessments: true
-    },
-    {
-      start: now.clone().startOf("month"),
-      end: now.clone().endOf("month"),
-      allowNewAssessments: false
-    }
-  ]
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -226,7 +197,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 task.uuid && {
                   relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid
+                  relatedObjectUuid: task.uuid,
+                  relatedObject: task
                 }
               }
             />
@@ -351,14 +323,15 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
               </div>
             </Form>
 
-            <AssessmentResultsTable
-              style={{ flex: "0 0 100%" }}
+            <AssessmentResultsContainer
               entity={task}
               entityType={Task}
               subEntities={subTasks}
-              assessmentPeriods={assessmentPeriods}
               canAddAssessment={canEdit}
-              onAddAssessment={refetch}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
             />
 
             <Fieldset title="Responsible positions">
@@ -386,15 +359,8 @@ const BaseTaskShow = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseTaskShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+TaskShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const TaskShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseTaskShow currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(TaskShow)

@@ -1,39 +1,43 @@
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import Approvals from "components/approvals/Approvals"
 import AppContext from "components/AppContext"
+import Approvals from "components/approvals/Approvals"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection, {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Organization, Person, Position, Report, Task } from "models"
+import { Organization, Position, Report } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
-import { ListGroup, ListGroupItem, Nav, Button } from "react-bootstrap"
+import React, { useContext, useState } from "react"
+import {
+  Button,
+  Checkbox,
+  ListGroup,
+  ListGroupItem,
+  Nav
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationLaydown from "./Laydown"
 import OrganizationTasks from "./OrganizationTasks"
@@ -119,14 +123,17 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
-const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
+const OrganizationShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
+  const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
   const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
@@ -143,7 +150,11 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.organization[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.organization.customFields
+    )
+  }
   const organization = new Organization(data ? data.organization : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -160,8 +171,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
 
   const superUsers = organization.positions.filter(
     pos =>
-      pos.status !== Position.STATUS.INACTIVE &&
-      (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) &&
+      pos.status !== Model.STATUS.INACTIVE &&
+      (!pos.person || pos.person.status !== Model.STATUS.INACTIVE) &&
       (pos.type === Position.TYPE.SUPER_USER ||
         pos.type === Position.TYPE.ADMINISTRATOR)
   )
@@ -192,6 +203,10 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
   if (filterPendingApproval) {
     reportQueryParams.state = Report.STATE.PENDING_APPROVAL
   }
+  if (includeChildrenOrgs) {
+    reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
+  }
+
   return (
     <Formik enableReinitialize initialValues={organization}>
       {({ values }) => {
@@ -253,7 +268,8 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 organization.uuid && {
                   relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
                 }
               }
             />
@@ -371,7 +387,7 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                 <OrganizationTasks
                   organization={organization}
                   queryParams={{
-                    status: Task.STATUS.ACTIVE,
+                    status: Model.STATUS.ACTIVE,
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}
@@ -385,55 +401,54 @@ const BaseOrganizationShow = ({ pageDispatchers, currentUser }) => {
                 <ReportCollection
                   paginationKey={`r_${uuid}`}
                   queryParams={reportQueryParams}
-                  viewFormats={[
-                    FORMAT_CALENDAR,
-                    FORMAT_SUMMARY,
-                    FORMAT_TABLE,
-                    FORMAT_MAP
-                  ]}
                   reportsFilter={
-                    !isSuperUser ? null : (
+                    <>
                       <Button
                         value="toggle-filter"
                         className="btn btn-sm"
-                        onClick={togglePendingApprovalFilter}
+                        onClick={() =>
+                          setFilterPendingApproval(!filterPendingApproval)
+                        }
                       >
                         {filterPendingApproval
                           ? "Show all reports"
                           : "Show pending approval"}
                       </Button>
-                    )
+                      <Checkbox
+                        checked={includeChildrenOrgs}
+                        onChange={() =>
+                          setIncludeChildrenOrgs(!includeChildrenOrgs)
+                        }
+                      >
+                        include reports from sub-orgs
+                      </Checkbox>
+                    </>
                   }
                 />
               </Fieldset>
+              {Settings.fields.organization.customFields && (
+                <Fieldset title="Organization information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.organization.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
           </div>
         )
       }}
     </Formik>
   )
-
-  function togglePendingApprovalFilter() {
-    setFilterPendingApproval(!filterPendingApproval)
-  }
 }
 
-BaseOrganizationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+OrganizationShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
 
 const mapStateToProps = (state, ownProps) => ({
   pagination: state.pagination
 })
-
-const OrganizationShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationShow currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(
   mapStateToProps,

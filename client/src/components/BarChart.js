@@ -3,6 +3,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
 import ReactTooltip from "react-tooltip"
+import utils from "utils"
 import "./BarChart.css"
 
 /*
@@ -10,9 +11,9 @@ import "./BarChart.css"
  * return obj[prop1][prop2][prop3]
  */
 function getPropValue(obj, prop) {
-  var getterDetails = [obj]
-  var objProps = prop.split(".")
-  for (var i = 0; i < objProps.length; i++) {
+  const getterDetails = [obj]
+  const objProps = prop.split(".")
+  for (let i = 0; i < objProps.length; i++) {
     getterDetails.push(objProps[i])
   }
   return getterDetails.reduce(function(d, v) {
@@ -46,11 +47,15 @@ const BarChart = ({
       bottom: 0 // left and bottom MARGINs are dynamic, these are extra margins
     }
     const label = xLabel || xProp
-    var xLabels = {} // dict containing x-value and corresponding tick label
+    const xLabels = {} // dict containing x-value and corresponding tick label
 
     const xScale = d3.scaleBand().domain(
       data.map(function(d) {
-        xLabels[getPropValue(d, xProp)] = getPropValue(d, label)
+        xLabels[getPropValue(d, xProp)] = utils.ellipsize(
+          // TODO: Make responsive
+          getPropValue(d, label),
+          10
+        )
         return getPropValue(d, xProp)
       })
     )
@@ -108,8 +113,8 @@ const BarChart = ({
 
     let chart = d3.select(node.current)
     const chartBox = node.current.getBoundingClientRect()
-    const chartWidth = isNumeric(width) ? width : chartBox.width
-    const chartHeight = isNumeric(height) ? height : 0.7 * chartWidth
+    const chartWidth = utils.isNumeric(width) ? width : chartBox.width
+    const chartHeight = utils.isNumeric(height) ? height : 0.7 * chartWidth
     const xWidth = chartWidth - marginLeft - MARGIN.right
     const yHeight = chartHeight - MARGIN.top - marginBottom
 
@@ -168,9 +173,7 @@ const BarChart = ({
       .attr("data-html", true)
       .attr("data-tip", d => tooltip && tooltip(d))
     if (onBarClick) {
-      bar.on("click", function(d) {
-        onBarClick(d)
-      })
+      bar.on("click", (event, d) => onBarClick(d))
     }
 
     ReactTooltip.rebuild()
@@ -197,10 +200,6 @@ const BarChart = ({
       </div>
     )) || <svg id={chartId} ref={node} width={width} height={height} />
   )
-
-  function isNumeric(value) {
-    return typeof value === "number"
-  }
 }
 
 BarChart.propTypes = {

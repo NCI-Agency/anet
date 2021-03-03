@@ -10,7 +10,6 @@ import java.util.List;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.config.AnetConfiguration;
@@ -73,19 +72,19 @@ public class AccountDeactivationWorkerTest {
 
     // Configure
     final Person testPerson14 = createDummyPerson(Instant.now().plus(14, ChronoUnit.DAYS),
-        "test14@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test14");
+        "test14@test.com", Person.Status.ACTIVE, "anet_test_domain\\test14");
 
     final Person testPerson15 = createDummyPerson(Instant.now().plus(15, ChronoUnit.DAYS),
-        "test15@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test15");
+        "test15@test.com", Person.Status.ACTIVE, "anet_test_domain\\test15");
 
     final Person testPerson30 = createDummyPerson(Instant.now().plus(30, ChronoUnit.DAYS),
-        "test30@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30");
+        "test30@test.com", Person.Status.ACTIVE, "anet_test_domain\\test30");
 
     final Person testPerson45 = createDummyPerson(Instant.now().plus(45, ChronoUnit.DAYS),
-        "test45@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test30");
+        "test45@test.com", Person.Status.ACTIVE, "anet_test_domain\\test30");
 
     final Person testPerson46 = createDummyPerson(Instant.now().plus(46, ChronoUnit.DAYS),
-        "test46@test.com", PersonStatus.ACTIVE, "anet_test_domain\\test46");
+        "test46@test.com", Person.Status.ACTIVE, "anet_test_domain\\test46");
 
     when(personDao.search(Mockito.any())).thenReturn(new AnetBeanList<>(
         Arrays.asList(testPerson14, testPerson15, testPerson30, testPerson45, testPerson46)));
@@ -119,10 +118,10 @@ public class AccountDeactivationWorkerTest {
 
     // Configure
     final Person testPersonEotActive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "test1_eot_acive@test.com", PersonStatus.ACTIVE);
+        "test1_eot_acive@test.com", Person.Status.ACTIVE);
 
     final Person testPersonEotInactive = createDummyPerson(Instant.now().minus(1, ChronoUnit.DAYS),
-        "test2_eot_inacive@test.com", PersonStatus.INACTIVE);
+        "test2_eot_inacive@test.com", Person.Status.INACTIVE);
 
     when(personDao.search(Mockito.any()))
         .thenReturn(new AnetBeanList<>(Arrays.asList(testPersonEotActive, testPersonEotInactive)));
@@ -145,12 +144,12 @@ public class AccountDeactivationWorkerTest {
   }
 
   private Person createDummyPerson(final Instant endOfTour, final String email,
-      final PersonStatus status) {
+      final Person.Status status) {
     return createDummyPerson(endOfTour, email, status, "domain\\dummy");
   }
 
   private Person createDummyPerson(final Instant endOfTour, final String email,
-      final PersonStatus status, final String domainName) {
+      final Person.Status status, final String domainName) {
 
     final Person testPerson = new Person();
     testPerson.setEndOfTourDate(endOfTour);

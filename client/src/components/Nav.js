@@ -1,11 +1,18 @@
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
-import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
-import { Organization, Person } from "models"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
+import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
-import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
+import React, { useContext, useEffect } from "react"
+import {
+  Badge,
+  MenuItem,
+  Nav as BSNav,
+  NavDropdown,
+  NavItem
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
@@ -61,14 +68,13 @@ SidebarLink.propTypes = {
   id: PropTypes.string
 }
 
-const BaseNav = ({
-  currentUser,
+const Nav = ({
   advisorOrganizations,
   principalOrganizations,
-  appSettings,
   resetPages,
   clearSearchQuery
 }) => {
+  const { appSettings, currentUser, notifications } = useContext(AppContext)
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -82,7 +88,9 @@ const BaseNav = ({
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
 
-  const myOrg = currentUser.position ? currentUser.position.organization : null
+  const myOrg = currentUser.position?.uuid
+    ? currentUser.position?.organization
+    : null
   let orgUuid, myOrgUuid
   if (inOrg) {
     orgUuid = path.split("/")[2]
@@ -91,6 +99,9 @@ const BaseNav = ({
 
   const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
+
+  const isAdvisor = currentUser.isAdvisor()
+  const taskShortLabel = Settings.fields.task.shortLabel
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -105,11 +116,40 @@ const BaseNav = ({
           linkTo={{ pathname: "/reports/mine" }}
           handleOnClick={resetPages}
         >
-          My reports
+          My Reports
         </SidebarLink>
       )}
 
       <BSNav id="reports-nav" />
+
+      {isAdvisor && currentUser.position?.uuid && (
+        <>
+          <SidebarLink
+            linkTo={{ pathname: "/tasks/mine" }}
+            handleOnClick={resetPages}
+            id="my-tasks-nav"
+          >
+            {`My ${pluralize(taskShortLabel)}`}
+            {notifications?.tasksWithPendingAssessments?.length ? (
+              <NotificationBadge>
+                {notifications.tasksWithPendingAssessments.length}
+              </NotificationBadge>
+            ) : null}
+          </SidebarLink>
+          <SidebarLink
+            linkTo={{ pathname: "/positions/counterparts" }}
+            handleOnClick={resetPages}
+            id="my-counterparts-nav"
+          >
+            My Counterparts
+            {notifications?.counterpartsWithPendingAssessments?.length ? (
+              <NotificationBadge>
+                {notifications.counterpartsWithPendingAssessments.length}
+              </NotificationBadge>
+            ) : null}
+          </SidebarLink>
+        </>
+      )}
 
       {myOrg && (
         <SidebarLink
@@ -117,11 +157,10 @@ const BaseNav = ({
           handleOnClick={resetPages}
           id="my-organization"
         >
-          My organization <br />
+          My Organization <br />
           <small>{myOrg.shortName}</small>
         </SidebarLink>
       )}
-
       <BSNav id="myorg-nav" />
 
       <NavDropdown
@@ -169,14 +208,8 @@ const BaseNav = ({
       <BSNav id="principal-org-nav" />
 
       <SidebarLink linkTo="/rollup" handleOnClick={resetPages}>
-        Daily rollup
+        Daily Rollup
       </SidebarLink>
-
-      {process.env.NODE_ENV === "development" && (
-        <SidebarLink linkTo="/graphiql" handleOnClick={resetPages}>
-          GraphQL
-        </SidebarLink>
-      )}
 
       {currentUser.isAdmin() && (
         <LinkContainer to="/admin" onClick={clearSearchQuery}>
@@ -192,6 +225,9 @@ const BaseNav = ({
           <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
             <NavItem>Authorization groups</NavItem>
           </LinkContainer>
+          <SidebarLink linkTo="/admin/graphiql" handleOnClick={resetPages}>
+            GraphQL
+          </SidebarLink>
         </BSNav>
       )}
 
@@ -205,7 +241,7 @@ const BaseNav = ({
         Help
       </SidebarLink>
 
-      {currentUser.isAdmin() /* FIXME: enable this again when nci-agency/anet#1463 is fixed: || currentUser.isSuperUser() */ && (
+      {(currentUser.isAdmin() || currentUser.isSuperUser()) && (
         <NavDropdown title="Insights" id="insights" active={inInsights}>
           {INSIGHTS.map(insight => (
             <Link
@@ -236,17 +272,14 @@ const BaseNav = ({
   )
 }
 
-BaseNav.propTypes = {
-  currentUser: PropTypes.instanceOf(Person),
-  appSettings: PropTypes.object,
+Nav.propTypes = {
   advisorOrganizations: PropTypes.array,
   principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
-BaseNav.defaultProps = {
-  appSettings: {},
+Nav.defaultProps = {
   advisorOrganizations: [],
   principalOrganizations: []
 }
@@ -260,17 +293,22 @@ const mapDispatchToProps = (dispatch, ownProps) =>
     dispatch
   )
 
-const Nav = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseNav
-        appSettings={context.appSettings}
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
+const NotificationBadge = ({ children }) => {
+  return (
+    <Badge
+      style={{
+        float: "right",
+        marginRight: "2px"
+      }}
+    >
+      {children}
+    </Badge>
+  )
+}
+
+NotificationBadge.propTypes = {
+  children: PropTypes.node
+}
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false

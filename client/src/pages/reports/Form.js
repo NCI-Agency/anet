@@ -11,6 +11,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -20,28 +21,33 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { createYupObjectShape, NOTE_TYPE } from "components/Model"
+import Model, {
+  ASSESSMENTS_RELATED_OBJECT_TYPE,
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  NOTE_TYPE
+} from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import ReportTags from "components/ReportTags"
+import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
 import RichTextEditor from "components/RichTextEditor"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
-import TaskTable from "components/TaskTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
 import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
+import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -49,11 +55,13 @@ import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
-import * as yup from "yup"
-import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+import ReportPeople, {
+  forceOnlyAttendingPersonPerRoleToPrimary
+} from "./ReportPeople"
 
 const GQL_GET_RECENTS = gql`
   query($taskQuery: TaskSearchQueryInput) {
@@ -67,8 +75,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
+        ${Location.autocompleteQuery}
       }
     }
     personList(
@@ -81,43 +88,12 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
-        rank
-        role
-        status
-        endOfTourDate
-        avatar(size: 32)
-        position {
-          uuid
-          name
-          type
-          status
-          organization {
-            uuid
-            shortName
-          }
-          location {
-            uuid
-            name
-          }
-        }
+        ${Person.autocompleteQuery}
       }
     }
     taskList(query: $taskQuery) {
       list {
-        uuid
-        shortName
-        longName
-        customFieldRef1 {
-          uuid
-          shortName
-        }
-        taskedOrganizations {
-          uuid
-          shortName
-        }
-        customFields
+        ${Task.autocompleteQuery}
       }
     }
     authorizationGroupList(
@@ -130,20 +106,7 @@ const GQL_GET_RECENTS = gql`
       }
     ) {
       list {
-        uuid
-        name
-        description
-      }
-    }
-    tagList(
-      query: {
-        pageSize: 0 # retrieve all
-      }
-    ) {
-      list {
-        uuid
-        name
-        description
+        ${AuthorizationGroup.autocompleteQuery}
       }
     }
   }
@@ -153,7 +116,7 @@ const GQL_CREATE_REPORT = gql`
     createReport(report: $report) {
       uuid
       state
-      author {
+      authors {
         uuid
       }
       reportSensitiveInformation {
@@ -168,7 +131,7 @@ const GQL_UPDATE_REPORT = gql`
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
       state
-      author {
+      authors {
         uuid
       }
       reportSensitiveInformation {
@@ -189,37 +152,43 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
   }
 `
 
-const BaseReportForm = ({
+const ReportForm = ({
   pageDispatchers,
-  currentUser,
   edit,
   title,
   initialValues,
   showSensitiveInfo: ssi
 }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
-  // We need the report tasks in order to be able to dynamically update the yup schema for the selected task assessments
+  // We need the report tasks/attendees in order to be able to dynamically
+  // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
+  const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
   // some autosave settings
   const defaultTimeout = moment.duration(30, "seconds")
-  const autoSaveSettings = {
+  const autoSaveSettings = useRef({
     autoSaveTimeout: defaultTimeout.clone(),
     timeoutId: null,
     dirty: false,
     values: {}
-  }
+  })
+  const autoSaveActive = useRef(true)
   useEffect(() => {
+    autoSaveActive.current = true
+
+    // Stop auto-save from running/rescheduling after unmount
     return () => {
-      window.clearTimeout(autoSaveSettings.timeoutId)
+      autoSaveActive.current = false
     }
   })
 
   const recentTasksVarCommon = {
     pageSize: 6,
-    status: Task.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     hasCustomFieldRef1: true,
     sortBy: "RECENT",
     sortOrder: "DESC"
@@ -238,11 +207,10 @@ const BaseReportForm = ({
   } else {
     recentTasksVarUser = {
       pageSize: 1,
-      status: Task.STATUS.ACTIVE,
+      status: Model.STATUS.ACTIVE,
       text: "__should_not_match_anything__" // TODO: Do this more gracefully
     }
   }
-
   const { loading, error, data } = API.useApiQuery(GQL_GET_RECENTS, {
     taskQuery: recentTasksVarUser
   })
@@ -265,56 +233,8 @@ const BaseReportForm = ({
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
-  const atmosphereButtons = [
-    {
-      id: "positiveAtmos",
-      value: Report.ATMOSPHERE.POSITIVE,
-      label: "Positive"
-    },
-    {
-      id: "neutralAtmos",
-      value: Report.ATMOSPHERE.NEUTRAL,
-      label: "Neutral"
-    },
-    {
-      id: "negativeAtmos",
-      value: Report.ATMOSPHERE.NEGATIVE,
-      label: "Negative"
-    }
-  ]
-  const cancelledReasonOptions = [
-    {
-      value: "CANCELLED_BY_ADVISOR",
-      label: `Cancelled by ${Settings.fields.advisor.person.name}`
-    },
-    {
-      value: "CANCELLED_BY_PRINCIPAL",
-      label: `Cancelled by ${Settings.fields.principal.person.name}`
-    },
-    {
-      value: "CANCELLED_DUE_TO_TRANSPORTATION",
-      label: "Cancelled due to Transportation"
-    },
-    {
-      value: "CANCELLED_DUE_TO_FORCE_PROTECTION",
-      label: "Cancelled due to Force Protection"
-    },
-    {
-      value: "CANCELLED_DUE_TO_ROUTES",
-      label: "Cancelled due to Routes"
-    },
-    {
-      value: "CANCELLED_DUE_TO_THREAT",
-      label: "Cancelled due to Threat"
-    },
-    {
-      value: "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
-      label: "Cancelled due to Availability of Interpreter(s)"
-    }
-  ]
 
   let recents = []
-  let tagSuggestions = []
   if (data) {
     recents = {
       locations: data.locationList.list,
@@ -322,36 +242,32 @@ const BaseReportForm = ({
       tasks: data.taskList.list,
       authorizationGroups: data.authorizationGroupList.list
     }
-    // ReactTags expects id and text properties
-    tagSuggestions = data.tagList.list.map(tag => ({
-      id: tag.uuid,
-      text: tag.name
-    }))
   }
 
-  // Update the task assessments schema according to the selected report tasks
-  const taskAssessmentsSchemaShape = {}
-  reportTasks
-    .filter(t => t.customFields)
-    .forEach(t => {
-      taskAssessmentsSchemaShape[t.uuid] = createYupObjectShape(
-        JSON.parse(JSON.parse(t.customFields).assessmentDefinition),
-        `taskAssessments.${t.uuid}`
-      )
-    })
-  const reportSchema = _isEmpty(taskAssessmentsSchemaShape)
-    ? Report.yupSchema
-    : Report.yupSchema.concat(
-      yup.object().shape({
-        taskAssessments: yup
-          .object()
-          .shape(taskAssessmentsSchemaShape)
-          .nullable()
-          .default(null)
-      })
-    )
+  // Update the report schema according to the selected report tasks and attendees
+  // instant assessments schema
+  const {
+    assessmentsConfig: tasksInstantAssessmentsConfig,
+    assessmentsSchema: tasksInstantAssessmentsSchema
+  } = Task.getInstantAssessmentsDetailsForEntities(
+    reportTasks,
+    Report.TASKS_ASSESSMENTS_PARENT_FIELD
+  )
+  const {
+    assessmentsConfig: attendeesInstantAssessmentsConfig,
+    assessmentsSchema: attendeesInstantAssessmentsSchema
+  } = Person.getInstantAssessmentsDetailsForEntities(
+    reportPeople?.filter(rp => rp.attendee),
+    Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+  )
+  let reportSchema = Report.yupSchema
+  if (!_isEmpty(tasksInstantAssessmentsConfig)) {
+    reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
+  }
+  if (!_isEmpty(attendeesInstantAssessmentsConfig)) {
+    reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
+  }
   let validateFieldDebounced
-
   return (
     <Formik
       enableReinitialize
@@ -371,6 +287,18 @@ const BaseReportForm = ({
         resetForm,
         setSubmitting
       }) => {
+        // need up-to-date copies of these in the autosave handler
+        Object.assign(autoSaveSettings.current, { dirty, values, touched })
+        if (autoSaveActive.current && !autoSaveSettings.current.timeoutId) {
+          // Schedule the auto-save timer
+          const autosaveHandler = () =>
+            autoSave({ setFieldValue, setFieldTouched, resetForm })
+          autoSaveSettings.current.timeoutId = window.setTimeout(
+            autosaveHandler,
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
+          )
+        }
+
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
         }
@@ -379,11 +307,11 @@ const BaseReportForm = ({
         const locationFilters = {
           activeLocations: {
             label: "Active locations",
-            queryVars: { status: Location.STATUS.ACTIVE }
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
 
-        const attendeesFilters = {
+        const reportPeopleFilters = {
           all: {
             label: "All",
             queryVars: { matchPositionName: true }
@@ -398,7 +326,7 @@ const BaseReportForm = ({
           }
         }
         if (currentOrg) {
-          attendeesFilters.myColleagues = {
+          reportPeopleFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
               role: Person.ROLE.ADVISOR,
@@ -406,7 +334,7 @@ const BaseReportForm = ({
               orgUuid: currentOrg.uuid
             }
           }
-          attendeesFilters.myCounterparts = {
+          reportPeopleFilters.myCounterparts = {
             label: "My counterparts",
             list: currentUser.position.associatedPositions
               .filter(ap => ap.person)
@@ -414,7 +342,7 @@ const BaseReportForm = ({
           }
         }
         if (values.location && values.location.uuid) {
-          attendeesFilters.atLocation = {
+          reportPeopleFilters.atLocation = {
             label: `At ${values.location.name}`,
             queryVars: {
               locationUuid:
@@ -437,8 +365,8 @@ const BaseReportForm = ({
             }
           }
         }
-        const primaryAdvisors = values.attendees.filter(
-          a => a.role === Person.ROLE.ADVISOR && a.primary === true
+        const primaryAdvisors = values.reportPeople.filter(
+          a => a.role === Person.ROLE.ADVISOR && a.primary && a.attendee
         )
         const primaryAdvisor = primaryAdvisors.length
           ? primaryAdvisors[0]
@@ -470,24 +398,12 @@ const BaseReportForm = ({
             queryVars: {}
           }
         }
-        // need up-to-date copies of these in the autosave handler
-        autoSaveSettings.dirty = dirty
-        autoSaveSettings.values = values
-        autoSaveSettings.touched = touched
-        if (!autoSaveSettings.timeoutId) {
-          // Schedule the auto-save timer
-          const autosaveHandler = () =>
-            autoSave({ setFieldValue, setFieldTouched, resetForm })
-          autoSaveSettings.timeoutId = window.setTimeout(
-            autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
-          )
-        }
-        // Only the author can delete a report, and only in DRAFT.
+
+        // Only an author can delete a report, and only in DRAFT or REJECTED state.
         const canDelete =
           !!values.uuid &&
           (Report.isDraft(values.state) || Report.isRejected(values.state)) &&
-          Person.isEqual(currentUser, values.author)
+          values.authors?.some(a => Person.isEqual(currentUser, a))
         // Skip validation on save!
         const action = (
           <div>
@@ -502,6 +418,12 @@ const BaseReportForm = ({
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
+        const hasAssessments = values.engagementDate && !isFutureEngagement
+        let relatedObject
+        if (hasAssessments) {
+          relatedObject = Report.getCleanReport(values)
+        }
+
         return (
           <div className="report-form">
             <NavigationWarning isBlocking={dirty} />
@@ -553,7 +475,8 @@ const BaseReportForm = ({
                       "intentCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )}
+                    )
+                  }
                   extraColElem={
                     <>
                       <span id="intentCharsLeft">
@@ -595,10 +518,14 @@ const BaseReportForm = ({
                     name="duration"
                     label="Duration (minutes)"
                     component={FieldHelper.InputField}
+                    inputType="number"
+                    onWheelCapture={event => event.currentTarget.blur()} // Prevent scroll action on number input
                     onChange={event => {
                       const safeVal =
-                        (event.target.value || "").replace(/[^0-9]+/g, "") ||
-                        null
+                        utils.preventNegativeAndLongDigits(
+                          event.target.value,
+                          4
+                        ) || null
                       setFieldTouched("duration", true, false)
                       setFieldValue("duration", safeVal, false)
                       validateFieldDebounced("duration")
@@ -634,7 +561,7 @@ const BaseReportForm = ({
                         title="Recent Locations"
                         shortcuts={recents.locations}
                         fieldName="location"
-                        objectType="Location"
+                        objectType={Location}
                         curValue={values.location}
                         onChange={value => {
                           // validation will be done by setFieldValue
@@ -665,7 +592,8 @@ const BaseReportForm = ({
                             "cancelledReason",
                             cancelledReasonOptions[0].value,
                             true
-                          )}
+                          )
+                        }
                       >
                         This engagement was cancelled
                       </Checkbox>
@@ -721,19 +649,11 @@ const BaseReportForm = ({
                       validateFieldDebounced("atmosphereDetails")
                     }}
                     placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                      values.atmosphere === "POSITIVE" ? "(optional)" : ""
+                      values.atmosphere === Report.ATMOSPHERE.POSITIVE
+                        ? "(optional)"
+                        : ""
                     }`}
                     className="atmosphere-details"
-                  />
-                )}
-
-                {Settings.fields.report.reportTags && (
-                  <FastField
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.SpecialField}
-                    onChange={value => setFieldValue("reportTags", value, true)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
                   />
                 )}
               </Fieldset>
@@ -741,29 +661,41 @@ const BaseReportForm = ({
               <Fieldset
                 title={
                   !values.cancelled && !isFutureEngagement
-                    ? "Meeting attendance"
-                    : "Planned attendance"
+                    ? "People involved in this engagement"
+                    : "People who will be involved in this planned engagement"
                 }
-                id="attendance-fieldset"
+                id="reportPeople-fieldset"
               >
                 <Field
-                  name="attendees"
+                  name="reportPeople"
+                  label="Attendees"
                   component={FieldHelper.SpecialField}
                   onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
-                    updateAttendees(setFieldValue, "attendees", value)
+                    updateReportPeople(
+                      setFieldValue,
+                      setFieldTouched,
+                      "reportPeople",
+                      value
+                    )
                   }}
                   widget={
                     <AdvancedMultiSelect
-                      fieldName="attendees"
-                      placeholder="Search for the meeting attendees..."
-                      value={values.attendees}
+                      fieldName="reportPeople"
+                      placeholder="Search for people involved in this engagement..."
+                      value={values.reportPeople}
                       renderSelected={
-                        <AttendeesTable
-                          attendees={values.attendees}
+                        <ReportPeople
+                          report={
+                            new Report({
+                              uuid: values.uuid,
+                              engagementDate: values.engagementDate,
+                              duration: Number.parseInt(values.duration) || 0,
+                              reportPeople: values.reportPeople
+                            })
+                          }
                           onChange={value =>
-                            setFieldValue("attendees", value, true)}
+                            setFieldValue("reportPeople", value, true)
+                          }
                           showDelete
                         />
                       }
@@ -774,10 +706,11 @@ const BaseReportForm = ({
                         "Organization"
                       ]}
                       overlayRenderRow={PersonDetailedOverlayRow}
-                      filterDefs={attendeesFilters}
+                      filterDefs={reportPeopleFilters}
                       objectType={Person}
                       queryParams={{
-                        status: [Person.STATUS.ACTIVE]
+                        status: Model.STATUS.ACTIVE,
+                        pendingVerification: false
                       }}
                       fields={Person.autocompleteQuery}
                       addon={PEOPLE_ICON}
@@ -788,13 +721,16 @@ const BaseReportForm = ({
                       <FieldHelper.FieldShortcuts
                         title="Recent attendees"
                         shortcuts={recents.persons}
-                        fieldName="attendees"
-                        objectType="Person"
-                        curValue={values.attendees}
+                        fieldName="reportPeople"
+                        objectType={Person}
+                        curValue={values.reportPeople}
                         onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("attendees", true, false) // onBlur doesn't work when selecting an option
-                          updateAttendees(setFieldValue, "attendees", value)
+                          updateReportPeople(
+                            setFieldValue,
+                            setFieldTouched,
+                            "reportPeople",
+                            value
+                          )
                         }}
                         handleAddItem={FieldHelper.handleMultiSelectAddItem}
                       />
@@ -803,66 +739,69 @@ const BaseReportForm = ({
                 />
               </Fieldset>
 
-              <Fieldset
-                title={Settings.fields.task.subLevel.longLabel}
-                className="tasks-selector"
-              >
-                <Field
-                  name="tasks"
-                  label={Settings.fields.task.subLevel.longLabel}
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                    setFieldValue("tasks", value, true)
-                    setReportTasks(value)
-                  }}
-                  widget={
-                    <AdvancedMultiSelect
-                      fieldName="tasks"
-                      placeholder={`Search for ${tasksLabel}...`}
-                      value={values.tasks}
-                      renderSelected={
-                        <TaskTable
-                          id="tasks-tasks"
-                          tasks={values.tasks}
-                          showParent
-                          showDelete
-                          showDescription
-                          noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
-                        />
-                      }
-                      overlayColumns={[
-                        Settings.fields.task.subLevel.shortLabel,
-                        Settings.fields.task.topLevel.shortLabel
-                      ]}
-                      overlayRenderRow={TaskDetailedOverlayRow}
-                      filterDefs={tasksFilters}
-                      objectType={Task}
-                      queryParams={{ status: Task.STATUS.ACTIVE }}
-                      fields={Task.autocompleteQuery}
-                      addon={TASKS_ICON}
-                    />
-                  }
-                  extraColElem={
-                    <>
-                      <FieldHelper.FieldShortcuts
-                        title={`Recent ${tasksLabel}`}
-                        shortcuts={recents.tasks}
+              {!_isEmpty(tasksFilters) && (
+                <Fieldset
+                  title={Settings.fields.task.subLevel.longLabel}
+                  className="tasks-selector"
+                >
+                  <Field
+                    name="tasks"
+                    label={Settings.fields.task.subLevel.longLabel}
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("tasks", value, true)
+                      setReportTasks(value)
+                    }}
+                    widget={
+                      <AdvancedMultiSelect
                         fieldName="tasks"
-                        objectType="Task"
-                        curValue={values.tasks}
-                        onChange={value => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("tasks", value, true)
-                        }}
-                        handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        placeholder={`Search for ${tasksLabel}...`}
+                        value={values.tasks}
+                        renderSelected={
+                          <NoPaginationTaskTable
+                            id="tasks-tasks"
+                            tasks={values.tasks}
+                            showParent
+                            showDelete
+                            showDescription
+                            noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
+                          />
+                        }
+                        overlayColumns={[
+                          Settings.fields.task.subLevel.shortLabel,
+                          Settings.fields.task.topLevel.shortLabel
+                        ]}
+                        overlayRenderRow={TaskDetailedOverlayRow}
+                        filterDefs={tasksFilters}
+                        objectType={Task}
+                        queryParams={{ status: Model.STATUS.ACTIVE }}
+                        fields={Task.autocompleteQuery}
+                        addon={TASKS_ICON}
                       />
-                    </>
-                  }
-                />
-              </Fieldset>
+                    }
+                    extraColElem={
+                      <>
+                        <FieldHelper.FieldShortcuts
+                          title={`Recent ${tasksLabel}`}
+                          shortcuts={recents.tasks}
+                          fieldName="tasks"
+                          objectType={Task}
+                          curValue={values.tasks}
+                          onChange={value => {
+                            // validation will be done by setFieldValue
+                            setFieldTouched("tasks", true, false) // onBlur doesn't work when selecting an option
+                            setFieldValue("tasks", value, true)
+                            setReportTasks(value)
+                          }}
+                          handleAddItem={FieldHelper.handleMultiSelectAddItem}
+                        />
+                      </>
+                    }
+                  />
+                </Fieldset>
+              )}
 
               {Settings.fields.report.customFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
@@ -905,7 +844,8 @@ const BaseReportForm = ({
                           "keyOutcomesCharsLeft",
                           Settings.maxTextFieldLength,
                           event
-                        )}
+                        )
+                      }
                       extraColElem={
                         <>
                           <span id="keyOutcomesCharsLeft">
@@ -935,7 +875,8 @@ const BaseReportForm = ({
                         "nextStepsCharsLeft",
                         Settings.maxTextFieldLength,
                         event
-                      )}
+                      )
+                    }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
@@ -952,7 +893,12 @@ const BaseReportForm = ({
                   name="reportText"
                   label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("reportText", value, true)}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.reportText, value)) {
+                      setFieldValue("reportText", value, true)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="reportTextField"
@@ -980,12 +926,22 @@ const BaseReportForm = ({
                         name="reportSensitiveInformation.text"
                         component={FieldHelper.SpecialField}
                         label="Report sensitive information text"
-                        onChange={value =>
-                          setFieldValue(
-                            "reportSensitiveInformation.text",
-                            value,
-                            true
-                          )}
+                        onChange={value => {
+                          const safeVal = value || null
+                          // prevent initial unnecessary render of RichTextEditor
+                          if (
+                            !_isEqual(
+                              values.reportSensitiveInformation.text,
+                              safeVal
+                            )
+                          ) {
+                            setFieldValue(
+                              "reportSensitiveInformation.text",
+                              safeVal,
+                              true
+                            )
+                          }
+                        }}
                         widget={
                           <RichTextEditor
                             className="reportSensitiveInformationField"
@@ -1025,7 +981,7 @@ const BaseReportForm = ({
                             filterDefs={authorizationGroupsFilters}
                             objectType={AuthorizationGroup}
                             queryParams={{
-                              status: AuthorizationGroup.STATUS.ACTIVE
+                              status: Model.STATUS.ACTIVE
                             }}
                             fields={AuthorizationGroup.autocompleteQuery}
                             addon={<Icon icon={IconNames.LOCK} />}
@@ -1037,7 +993,7 @@ const BaseReportForm = ({
                               title="Recent Authorization Groups"
                               shortcuts={recents.authorizationGroups}
                               fieldName="authorizationGroups"
-                              objectType="AuthorizationGroup"
+                              objectType={AuthorizationGroup}
                               curValue={values.authorizationGroups}
                               onChange={value => {
                                 // validation will be done by setFieldValue
@@ -1064,26 +1020,19 @@ const BaseReportForm = ({
                 </Collapse>
               </Fieldset>
 
-              <Fieldset
-                title="Engagement assessments"
-                id="engagement-assessments"
-              >
-                {values.tasks.map(task => {
-                  if (!task.customFields) {
-                    return null
-                  }
-                  const taskCustomFields = JSON.parse(task.customFields)
-                  if (!taskCustomFields.assessmentDefinition) {
-                    return null
-                  }
-                  const taskAssessmentDefinition = JSON.parse(
-                    taskCustomFields.assessmentDefinition
-                  )
-                  return (
-                    <CustomFieldsContainer
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
-                      fieldsConfig={taskAssessmentDefinition}
+              {hasAssessments && (
+                <>
+                  <Fieldset
+                    title="Attendees engagement assessments"
+                    id="attendees-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Person}
+                      entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      relatedObject={relatedObject}
+                      parentFieldName={
+                        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                      }
                       formikProps={{
                         setFieldTouched,
                         setFieldValue,
@@ -1091,9 +1040,27 @@ const BaseReportForm = ({
                         validateForm
                       }}
                     />
-                  )
-                })}
-              </Fieldset>
+                  </Fieldset>
+
+                  <Fieldset
+                    title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                    id="tasks-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Task}
+                      entities={values.tasks}
+                      relatedObject={relatedObject}
+                      parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                      formikProps={{
+                        setFieldTouched,
+                        setFieldValue,
+                        values,
+                        validateForm
+                      }}
+                    />
+                  </Fieldset>
+                </>
+              )}
 
               <div className="submit-buttons">
                 <div>
@@ -1110,12 +1077,12 @@ const BaseReportForm = ({
                   )}
                   {canDelete && (
                     <ConfirmDelete
-                      onConfirmDelete={() =>
-                        onConfirmDelete(values.uuid, resetForm)}
+                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
                       buttonLabel={`Delete this ${getReportType(values)}`}
+                      disabled={isSubmitting}
                     />
                   )}
                   {/* Skip validation on save! */}
@@ -1124,7 +1091,8 @@ const BaseReportForm = ({
                     bsStyle="primary"
                     type="button"
                     onClick={() =>
-                      onSubmit(values, { resetForm, setSubmitting })}
+                      onSubmit(values, { resetForm, setSubmitting })
+                    }
                     disabled={isSubmitting}
                   >
                     {submitText}
@@ -1148,16 +1116,36 @@ const BaseReportForm = ({
     return _upperFirst(getReportType(values))
   }
 
-  function updateAttendees(setFieldValue, field, attendees) {
-    attendees.forEach(attendee => {
-      if (!attendees.find(a2 => attendee.role === a2.role && a2.primary)) {
-        attendee.primary = true
-      } else {
-        // Make sure field is 'controlled' by defining a value
-        attendee.primary = attendee.primary || false
+  function updateReportPeople(
+    setFieldValue,
+    setFieldTouched,
+    field,
+    reportPeople
+  ) {
+    // validation will be done by setFieldValue
+    setFieldTouched(field, true, false) // onBlur doesn't work when selecting an option
+    const newPeopleList = reportPeople.map(rp => new Person(rp))
+
+    newPeopleList.forEach(rp => {
+      // After selecting a person, default to attending, unless it is intentionally set to false (by attendee checkbox)
+      // Do strict equality, attendee field may be undefined
+      if (rp.attendee !== false) {
+        rp.attendee = true
       }
+      // Similarly, if not intentionally made author, default is not an author
+      if (rp.author !== true) {
+        rp.author = false
+      }
+
+      // Set default primary flag to false unless set
+      // Make sure field is 'controlled' by defining a value
+      rp.primary = rp.primary || false
     })
-    setFieldValue(field, attendees, true)
+
+    // if no one else is primary, set that person primary if attending
+    forceOnlyAttendingPersonPerRoleToPrimary(newPeopleList)
+    setFieldValue(field, newPeopleList, true)
+    setReportPeople(newPeopleList)
   }
 
   function countCharsLeft(elemId, maxChars, event) {
@@ -1176,67 +1164,74 @@ const BaseReportForm = ({
   }
 
   function autoSave(form) {
+    if (!autoSaveActive.current) {
+      // We're done auto-saving
+      return
+    }
+
     const autosaveHandler = () => autoSave(form)
     // Only auto-save if the report has changed
-    if (!autoSaveSettings.dirty) {
+    if (!autoSaveSettings.current.dirty) {
       // Just re-schedule the auto-save timer
-      autoSaveSettings.timeoutId = window.setTimeout(
+      autoSaveSettings.current.timeoutId = window.setTimeout(
         autosaveHandler,
-        autoSaveSettings.autoSaveTimeout.asMilliseconds()
+        autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      save(autoSaveSettings.values, false)
+      save(autoSaveSettings.current.values, false)
         .then(response => {
-          const newValues = _cloneDeep(autoSaveSettings.values)
+          const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
           if (newValues.reportSensitiveInformation === null) {
-            newValues.reportSensitiveInformation = {} // object must exist for Collapse children
+            // object must exist for Collapse children
+            newValues.reportSensitiveInformation = { uuid: null, text: null }
           }
           // After successful autosave, reset the form with the new values in order to make sure the dirty
           // prop is also reset (otherwise we would get a blocking navigation warning)
-          const touched = _cloneDeep(autoSaveSettings.touched) // save previous touched
+          const touched = _cloneDeep(autoSaveSettings.current.touched) // save previous touched
           form.resetForm({ values: newValues })
           Object.entries(touched).forEach(([field, value]) =>
             // re-set touched so we keep messages
             form.setFieldTouched(field, value)
           )
-          autoSaveSettings.autoSaveTimeout = defaultTimeout.clone() // reset to default
+          autoSaveSettings.current.autoSaveTimeout = defaultTimeout.clone() // reset to default
           setAutoSavedAt(moment())
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
           // And re-schedule the auto-save timer
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-        /* eslint-disable handle-callback-err */
-
+        /* eslint-disable node/handle-callback-err */
         .catch(error => {
           // Show an error message
-          autoSaveSettings.autoSaveTimeout.add(autoSaveSettings.autoSaveTimeout) // exponential back-off
+          autoSaveSettings.current.autoSaveTimeout.add(
+            autoSaveSettings.current.autoSaveTimeout
+          ) // exponential back-off
           toast.error(
             `There was an error autosaving your ${getReportType(
-              autoSaveSettings.values
-            )}; we'll try again in ${autoSaveSettings.autoSaveTimeout.humanize()}`
+              autoSaveSettings.current.values
+            )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
           )
           // And re-schedule the auto-save timer
-          autoSaveSettings.timeoutId = window.setTimeout(
+          autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,
-            autoSaveSettings.autoSaveTimeout.asMilliseconds()
+            autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         })
-      /* eslint-enable handle-callback-err */
+      /* eslint-enable node/handle-callback-err */
     }
   }
 
-  function onConfirmDelete(uuid, resetForm) {
-    API.mutation(GQL_DELETE_REPORT, { uuid })
+  function onConfirmDelete(values, resetForm) {
+    API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
-        // After successful delete, reset the form in order to make sure the dirty
-        // prop is also reset (otherwise we would get a blocking navigation warning)
-        resetForm()
+        // reset the form to latest values
+        // to avoid unsaved changes propmt if it somehow becomes dirty
+        resetForm({ values, isSubmitting: true })
         history.push("/", { success: "Report deleted" })
       })
       .catch(error => {
@@ -1250,6 +1245,7 @@ const BaseReportForm = ({
   }
 
   function onSubmit(values, form) {
+    form.setSubmitting(true)
     return save(values, true)
       .then(response => onSubmitSuccess(response, values, form.resetForm))
       .catch(error => {
@@ -1261,9 +1257,9 @@ const BaseReportForm = ({
 
   function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Report.pathForEdit(report))
     }
@@ -1272,28 +1268,41 @@ const BaseReportForm = ({
     })
   }
 
-  function isEmptyTaskAssessment(assessment) {
+  function isEmptyAssessment(assessment) {
     return (
-      (Object.keys(assessment).length === 1 &&
-        Object.keys(assessment)[0] === "invisibleCustomFields") ||
-      _isEmpty(assessment)
+      Object.entries(assessment).filter(
+        ([key, value]) =>
+          !EXCLUDED_ASSESSMENT_FIELDS.includes(key) &&
+          value !== null &&
+          value !== undefined &&
+          !utils.isEmptyHtml(value)
+      ).length < 1
     )
   }
 
-  function createTaskAssessmentsNotes(values, reportUuid) {
-    const selectedTasksUuids = values.tasks.map(t => t.uuid)
-    return Object.keys(values.taskAssessments)
+  function createInstantAssessments(
+    entityType,
+    entities,
+    values,
+    asessmentsFieldName,
+    assessmentsUuidsFieldName,
+    reportUuid
+  ) {
+    const entitiesUuids = entities.map(e => e.uuid)
+    const entitiesAssessments = values[asessmentsFieldName]
+    return Object.entries(entitiesAssessments)
       .filter(
-        key =>
-          selectedTasksUuids.includes(key) &&
-          !isEmptyTaskAssessment(values.taskAssessments[key])
+        ([key, assessment]) =>
+          entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
-      .map(key => {
+      .map(([key, assessment]) => {
+        assessment.__recurrence = RECURRENCE_TYPE.ONCE
+        assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
-              relatedObjectType: Task.relatedObjectType,
+              relatedObjectType: entityType.relatedObjectType,
               relatedObjectUuid: key
             },
             {
@@ -1301,28 +1310,27 @@ const BaseReportForm = ({
               relatedObjectUuid: reportUuid
             }
           ],
-          text: customFieldsJSONString(values, true, `taskAssessments.${key}`)
+          text: customFieldsJSONString(
+            values,
+            true,
+            `${asessmentsFieldName}.${key}`
+          )
         }
-        const initialAssessmentUuid = values.taskToAssessmentUuid[key]
+        const initialAssessmentUuid = values[assessmentsUuidsFieldName][key]
         if (initialAssessmentUuid) {
           noteObj.uuid = initialAssessmentUuid
         }
         return noteObj
       })
   }
+
   function save(values, sendEmail) {
     const report = Object.without(
-      new Report(values),
-      "notes",
+      Report.getCleanReport(values),
       "cancelled",
-      "reportTags",
-      "showSensitiveInfo",
-      "attendees",
+      "reportPeople",
       "tasks",
-      "customFields", // initial JSON from the db
-      "formCustomFields",
-      "taskAssessments",
-      "taskToAssessmentUuid"
+      "customFields" // initial JSON from the db
     )
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1342,19 +1350,20 @@ const BaseReportForm = ({
       report.atmosphereDetails = ""
       report.keyOutcomes = ""
     }
-    // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
-    report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
-    // strip attendees fields not in data model
-    report.attendees = values.attendees.map(a =>
-      Object.without(
-        a,
+    // strip reportPeople fields not in data model
+    report.reportPeople = values.reportPeople.map(reportPerson => {
+      const rp = Object.without(
+        reportPerson,
         "firstName",
         "lastName",
         "position",
         "customFields",
-        "formCustomFields"
+        DEFAULT_CUSTOM_FIELDS_PARENT
       )
-    )
+      rp.author = !!reportPerson.author
+      rp.attendee = !!reportPerson.attendee
+      return rp
+    })
     // strip tasks fields not in data model
     report.tasks = values.tasks.map(t => utils.getReference(t))
     report.location = utils.getReference(report.location)
@@ -1364,11 +1373,24 @@ const BaseReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      const updateNotesVariables = { report }
-      updateNotesVariables.notes = createTaskAssessmentsNotes(
+      const updateNotesVariables = { report: { uuid: report.uuid } }
+      const tasksNotes = createInstantAssessments(
+        Task,
+        values.tasks,
         values,
+        Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+        Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
         report.uuid
       )
+      const attendeesNotes = createInstantAssessments(
+        Person,
+        values.reportPeople?.filter(rp => rp.attendee),
+        values,
+        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+        Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD,
+        report.uuid
+      )
+      updateNotesVariables.notes = tasksNotes.concat(attendeesNotes)
       return API.mutation(
         GQL_UPDATE_REPORT_ASSESSMENTS,
         updateNotesVariables
@@ -1379,7 +1401,6 @@ const BaseReportForm = ({
   function _saveReport(edit, variables, sendEmail) {
     if (edit) {
       variables.sendEditEmail = sendEmail
-      // Add an additional mutation to create notes for the taskAssessments
       return API.mutation(GQL_UPDATE_REPORT, variables)
     } else {
       return API.mutation(GQL_CREATE_REPORT, variables)
@@ -1387,25 +1408,70 @@ const BaseReportForm = ({
   }
 }
 
-BaseReportForm.propTypes = {
+ReportForm.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  showSensitiveInfo: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  showSensitiveInfo: PropTypes.bool
 }
 
-BaseReportForm.defaultProps = {
+ReportForm.defaultProps = {
   title: "",
   edit: false,
   showSensitiveInfo: false
 }
 
-const ReportForm = props => (
-  <AppContext.Consumer>
-    {context => <BaseReportForm currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
+const atmosphereButtons = [
+  {
+    id: "positiveAtmos",
+    value: Report.ATMOSPHERE.POSITIVE,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.POSITIVE]
+  },
+  {
+    id: "neutralAtmos",
+    value: Report.ATMOSPHERE.NEUTRAL,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEUTRAL]
+  },
+  {
+    id: "negativeAtmos",
+    value: Report.ATMOSPHERE.NEGATIVE,
+    label: Report.ATMOSPHERE_LABELS[Report.ATMOSPHERE.NEGATIVE]
+  }
+]
 
+const cancelledReasonOptions = [
+  {
+    value: "CANCELLED_BY_ADVISOR",
+    label: `Cancelled by ${Settings.fields.advisor.person.name}`
+  },
+  {
+    value: "CANCELLED_BY_PRINCIPAL",
+    label: `Cancelled by ${Settings.fields.principal.person.name}`
+  },
+  {
+    value: "CANCELLED_DUE_TO_TRANSPORTATION",
+    label: "Cancelled due to Transportation"
+  },
+  {
+    value: "CANCELLED_DUE_TO_FORCE_PROTECTION",
+    label: "Cancelled due to Force Protection"
+  },
+  {
+    value: "CANCELLED_DUE_TO_ROUTES",
+    label: "Cancelled due to Routes"
+  },
+  {
+    value: "CANCELLED_DUE_TO_THREAT",
+    label: "Cancelled due to Threat"
+  },
+  {
+    value: "CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS",
+    label: "Cancelled due to Availability of Interpreter(s)"
+  },
+  {
+    value: "CANCELLED_DUE_TO_NETWORK_ISSUES",
+    label: "Cancelled due to Network / Connectivity Issues"
+  }
+]
 export default connect(null, mapPageDispatchersToProps)(ReportForm)

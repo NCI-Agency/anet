@@ -1,11 +1,23 @@
-import encodeQuery from "querystring/encode"
+import API from "api"
+import { gql } from "apollo-boost"
+import { JSONPath } from "jsonpath-plus"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
+import {
+  dateBelongsToPeriod,
+  PERIOD_FACTORIES,
+  RECURRENCE_TYPE
+} from "periodUtils"
 import PropTypes from "prop-types"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
-import { gql } from "apollo-boost"
+
+// These two are needed here although they are Report specific;
+// export these separately to avoid circular import problems
+export const REPORT_RELATED_OBJECT_TYPE = "reports"
+export const REPORT_STATE_PUBLISHED = "PUBLISHED"
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
@@ -23,6 +35,36 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
     noteUuid
     relatedObjectType
     relatedObjectUuid
+    relatedObject {
+      ... on AuthorizationGroup {
+        name
+      }
+      ... on Location {
+        name
+      }
+      ... on Organization {
+        shortName
+      }
+      ... on Person {
+        role
+        rank
+        name
+        avatar(size: 32)
+      }
+      ... on Position {
+        type
+        name
+      }
+      ... on Report {
+        intent
+        engagementDate
+        state
+      }
+      ... on Task {
+        shortName
+        longName
+      }
+    }
   }
 `
 export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
@@ -30,6 +72,16 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
     ${GRAPHQL_NOTE_FIELDS}
   }
 `
+
+// Entity type --> GQL query
+export const GRAPHQL_ENTITY_FIELDS = {
+  Report: "uuid intent",
+  Person: "uuid name role avatar(size: 32)",
+  Organization: "uuid shortName",
+  Position: "uuid name",
+  Location: "uuid name",
+  Task: "uuid shortName longName"
+}
 
 export const GQL_CREATE_NOTE = gql`
   mutation($note: NoteInput!) {
@@ -46,18 +98,45 @@ export const GQL_UPDATE_NOTE = gql`
   }
 `
 
+export const MODEL_TO_OBJECT_TYPE = {
+  AuthorizationGroup: "authorizationGroups",
+  Location: "locations",
+  Organization: "organizations",
+  Person: "people",
+  Position: "positions",
+  Report: "reports",
+  Task: "tasks"
+}
+export const OBJECT_TYPE_TO_MODEL = {}
+Object.entries(MODEL_TO_OBJECT_TYPE).forEach(([k, v]) => {
+  OBJECT_TYPE_TO_MODEL[v] = k
+})
+
 export const NOTE_TYPE = {
   FREE_TEXT: "FREE_TEXT",
   CHANGE_RECORD: "CHANGE_RECORD",
   PARTNER_ASSESSMENT: "PARTNER_ASSESSMENT",
   ASSESSMENT: "ASSESSMENT"
 }
+
+export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
+export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
+
+export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
+  REPORT: "report"
+}
+
 export const yupDate = yup.date().transform(function(value, originalValue) {
-  if (this.isType(value)) {
+  if (
+    this.isType(value) &&
+    (this.isType(originalValue)
+      ? value === originalValue
+      : value.getTime() === originalValue)
+  ) {
     return value
   }
   const newValue = moment(originalValue)
-  return newValue.isValid() ? newValue.toDate() : value
+  return newValue.isValid() ? newValue.toDate() : null
 })
 
 export const CUSTOM_FIELD_TYPE = {
@@ -65,31 +144,53 @@ export const CUSTOM_FIELD_TYPE = {
   NUMBER: "number",
   DATE: "date",
   DATETIME: "datetime",
+  JSON: "json",
   ENUM: "enum",
   ENUMSET: "enumset",
   ARRAY_OF_OBJECTS: "array_of_objects",
-  SPECIAL_FIELD: "special_field"
+  SPECIAL_FIELD: "special_field",
+  ANET_OBJECT: "anet_object",
+  ARRAY_OF_ANET_OBJECTS: "array_of_anet_objects"
 }
 
 const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.TEXT]: yup.string().nullable().default(""),
-  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null),
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null).typeError(
+    // eslint-disable-next-line no-template-curly-in-string
+    "${path} must be a ${type} type, but the final value was ${originalValue}"
+  ),
   [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
   [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.JSON]: yup
+    .mixed()
+    .nullable()
+    .test(
+      "json",
+      "json error",
+      // can't use arrow function here because of binding to 'this'
+      function(value) {
+        return typeof value === "object"
+          ? true
+          : this.createError({ message: "Invalid JSON" })
+      }
+    )
+    .default(null),
   [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
   [CUSTOM_FIELD_TYPE.ENUMSET]: yup.array().nullable().default([]),
   [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup.array().nullable().default([]),
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null)
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null),
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: yup.mixed().nullable().default(null),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: yup.array().nullable().default([])
 }
 
-const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
+const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
   const { label, validations, objectFields, typeError } = fieldConfig
   let fieldTypeYupSchema = CUSTOM_FIELD_TYPE_SCHEMA[fieldConfig.type]
   if (typeError) {
     fieldTypeYupSchema = fieldTypeYupSchema.typeError(typeError)
   }
   if (!_isEmpty(objectFields)) {
-    const objSchema = createYupObjectShape(objectFields, fieldPrefix)
+    const objSchema = createYupObjectShape(objectFields, parentFieldName, false)
     fieldTypeYupSchema = fieldTypeYupSchema.of(objSchema)
   }
   if (!_isEmpty(validations)) {
@@ -108,40 +209,71 @@ const createFieldYupSchema = (fieldKey, fieldConfig, fieldPrefix) => {
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
   }
-  // Field type specific validation not needed when the field is invisible or
-  // when invisibleCustomFields hasn't even been filled (like when the report
-  // has been created via sevrer side tests, or later maybe imported from an
-  // external system (and never went through the edit/create form which normally
-  // fills the invisibleCustomFields)
+  // Field type specific validation not needed when the field is invisible
   fieldYupSchema = fieldYupSchema.when(
-    "invisibleCustomFields",
-    (invisibleCustomFields, schema) => {
-      return invisibleCustomFields === null ||
-        (invisibleCustomFields &&
-          invisibleCustomFields.includes(`${fieldPrefix}.${fieldKey}`))
+    INVISIBLE_CUSTOM_FIELDS_FIELD,
+    (invisibleCustomFields, schema) =>
+      invisibleCustomFields &&
+      invisibleCustomFields.includes(`${parentFieldName}.${fieldKey}`)
         ? schema
         : schema.concat(fieldTypeYupSchema)
-    }
   )
   return fieldYupSchema
 }
 
-export const createYupObjectShape = (config, prefix = "formCustomFields") => {
+export const createYupObjectShape = (
+  config,
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT,
+  isTopLevel = true
+) => {
   let objShape = {}
   if (config) {
     objShape = Object.fromEntries(
       Object.entries(config)
-        .map(([k, v]) => [k, createFieldYupSchema(k, config[k], prefix)])
+        .map(([k, v]) => [k, createFieldYupSchema(k, v, parentFieldName)])
         .filter(([k, v]) => v !== null)
     )
-    objShape.invisibleCustomFields = yup.mixed().nullable().default(null)
+    // only the top level config objects keep hold of the invisible fields info
+    if (isTopLevel) {
+      objShape[INVISIBLE_CUSTOM_FIELDS_FIELD] = yup
+        .mixed()
+        .nullable()
+        .default(null)
+    }
   }
   return yup.object().shape(objShape)
 }
 
+export const ENTITY_ASSESSMENT_PARENT_FIELD = "entityAssessment"
+
+export const createAssessmentSchema = (
+  assessmentConfig,
+  parentFieldName = ENTITY_ASSESSMENT_PARENT_FIELD
+) => {
+  const assessmentSchemaShape = createYupObjectShape(
+    assessmentConfig,
+    parentFieldName
+  )
+  return yup.object().shape({
+    [parentFieldName]: assessmentSchemaShape
+  })
+}
+
+export const createCustomFieldsSchema = customFieldsConfig =>
+  yup.object().shape({
+    [DEFAULT_CUSTOM_FIELDS_PARENT]: createYupObjectShape(
+      customFieldsConfig
+    ).nullable()
+  })
+
 export default class Model {
   static schema = {
     notes: []
+  }
+
+  static STATUS = {
+    ACTIVE: "ACTIVE",
+    INACTIVE: "INACTIVE"
   }
 
   static yupSchema = yup.object().shape({
@@ -154,10 +286,9 @@ export default class Model {
       _forEach(yupSchema.fields, (value, key) => {
         if (
           !Object.prototype.hasOwnProperty.call(obj, key) ||
-          obj[key] === null ||
-          obj[key] === undefined
+          utils.isNullOrUndefined(obj[key])
         ) {
-          obj[key] = value.default()
+          obj[key] = value.getDefault()
         }
       })
       return obj
@@ -167,7 +298,18 @@ export default class Model {
     }
   }
 
-  static notePropTypes = PropTypes.shape({
+  static relatedObjectPropType = PropTypes.shape({
+    noteUuid: PropTypes.string,
+    relatedObjectType: PropTypes.string.isRequired,
+    relatedObjectUuid: PropTypes.string.isRequired,
+    relatedObject: PropTypes.object
+  })
+
+  static noteRelatedObjectsPropType = PropTypes.arrayOf(
+    Model.relatedObjectPropType
+  )
+
+  static notePropType = PropTypes.shape({
     uuid: PropTypes.string,
     createdAt: PropTypes.number,
     text: PropTypes.string,
@@ -177,13 +319,7 @@ export default class Model {
       rank: PropTypes.string,
       role: PropTypes.string
     }),
-    noteRelatedObjects: PropTypes.arrayOf(
-      PropTypes.shape({
-        noteUuid: PropTypes.string,
-        relatedObjectType: PropTypes.string,
-        relatedObjectUuid: PropTypes.string
-      })
-    )
+    noteRelatedObjects: Model.noteRelatedObjectsPropType
   })
 
   static resourceName = null
@@ -264,6 +400,26 @@ export default class Model {
     return a && b && a.uuid === b.uuid
   }
 
+  static fetchByUuid(uuid, entityGqlFields) {
+    const fields = entityGqlFields[this.resourceName]
+    if (!fields) {
+      return Promise.resolve(null)
+    }
+
+    return API.query(
+      gql`
+      query($uuid: String!) {
+        ${this.getInstanceName}(uuid: $uuid) {
+          ${fields}
+        }
+      }
+    `,
+      {
+        uuid: uuid
+      }
+    ).then(data => new this(data[this.getInstanceName]))
+  }
+
   constructor(props) {
     Object.forEach(this.constructor.schema, (key, value) => {
       if (Array.isArray(value) && value.length === 0) {
@@ -304,5 +460,188 @@ export default class Model {
 
   toString() {
     return this.name || this.uuid
+  }
+
+  static parseAssessmentsConfig(assessmentsConfig) {
+    return Object.fromEntries(
+      assessmentsConfig.map(a => {
+        const recurrence = a.recurrence || RECURRENCE_TYPE.ONCE
+        const assessmentKey = a.relatedObjectType
+          ? `${a.relatedObjectType}_${recurrence}`
+          : recurrence
+        const questions = a.questions || {}
+        return [assessmentKey, questions]
+      })
+    )
+  }
+
+  generalAssessmentsConfig() {
+    // assessments configuration defined for more than one instance
+    return []
+  }
+
+  instanceAssessmentsConfig() {
+    // assessments configuration defined for one specific instance
+    return []
+  }
+
+  getAssessmentsConfig() {
+    const general = this.generalAssessmentsConfig()
+    const instance = this.instanceAssessmentsConfig()
+    return Object.assign(
+      Model.parseAssessmentsConfig(general),
+      // instance config can override
+      Model.parseAssessmentsConfig(instance)
+    )
+  }
+
+  getInstantAssessmentConfig(
+    relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+  ) {
+    return this.getAssessmentsConfig()[
+      `${relatedObjectType}_${RECURRENCE_TYPE.ONCE}`
+    ]
+  }
+
+  getPeriodicAssessmentDetails(recurrence = RECURRENCE_TYPE.MONTHLY) {
+    const assessmentConfig = this.getAssessmentsConfig()[recurrence]
+    return {
+      assessmentConfig: assessmentConfig,
+      assessmentYupSchema:
+        assessmentConfig && createAssessmentSchema(assessmentConfig)
+    }
+  }
+
+  getPeriodAssessments(recurrence, period) {
+    return this.notes
+      .filter(n => {
+        return (
+          n.type === NOTE_TYPE.ASSESSMENT && n.noteRelatedObjects.length === 1
+        )
+      })
+      .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
+      .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
+      .filter(
+        obj =>
+          obj.assessment.__recurrence === recurrence &&
+          dateBelongsToPeriod(obj.assessment.__periodStart, period)
+      )
+  }
+
+  static getInstantAssessmentsDetailsForEntities(
+    entities,
+    assessmentsParentField,
+    relatedObject
+  ) {
+    const assessmentsConfig = {}
+    const assessmentsSchemaShape = {}
+    entities?.forEach(entity => {
+      assessmentsConfig[entity.uuid] = entity.getInstantAssessmentConfig()
+      if (!_isEmpty(assessmentsConfig[entity.uuid])) {
+        assessmentsSchemaShape[entity.uuid] = createYupObjectShape(
+          assessmentsConfig[entity.uuid],
+          `${assessmentsParentField}.${entity.uuid}`
+        )
+      }
+    })
+    return {
+      assessmentsConfig: assessmentsConfig,
+      assessmentsSchema: yup.object().shape({
+        [assessmentsParentField]: yup
+          .object()
+          .shape(assessmentsSchemaShape)
+          .nullable()
+          .default(null)
+      })
+    }
+  }
+
+  getInstantAssessmentResults(
+    dateRange,
+    relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+  ) {
+    return this.notes
+      .filter(
+        n =>
+          n.type === NOTE_TYPE.ASSESSMENT &&
+          n.noteRelatedObjects.filter(
+            ro =>
+              ro.relatedObject &&
+              ro.relatedObjectType === REPORT_RELATED_OBJECT_TYPE &&
+              ro.relatedObject.state === REPORT_STATE_PUBLISHED &&
+              (!dateRange ||
+                (ro.relatedObject.engagementDate <= dateRange.end &&
+                  ro.relatedObject.engagementDate >= dateRange.start))
+          ).length
+      )
+      .map(note => utils.parseJsonSafe(note.text))
+      .filter(
+        obj =>
+          obj.__recurrence === RECURRENCE_TYPE.ONCE &&
+          obj.__relatedObjectType === relatedObjectType
+      )
+  }
+
+  static hasPendingAssessments(entity) {
+    const recurTypes = Object.keys(entity.getAssessmentsConfig())
+    const periodicRecurTypes = recurTypes.filter(type => PERIOD_FACTORIES[type])
+    if (_isEmpty(periodicRecurTypes)) {
+      // no periodic, no pending
+      return false
+    }
+
+    // "for loop" to break early
+    for (let i = 0; i < periodicRecurTypes.length; i++) {
+      // offset 1 so that the period is the previous (not current) period
+      const prevPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 1)
+      const prevPeriodAssessments = entity.getPeriodAssessments(
+        periodicRecurTypes[i],
+        prevPeriod
+      )
+      // if there is no assessment in the last period, we have pending assessment
+      if (prevPeriodAssessments.length === 0) {
+        return true
+      }
+    }
+    // if we didn't early return, there is no pending assessment
+    return false
+  }
+
+  static filterAssessmentConfig(assessmentConfig, subject, relatedObject) {
+    const testValue = { subject, relatedObject }
+    const filteredAssessmentConfig = {}
+    if (!_isEmpty(assessmentConfig)) {
+      Object.entries(assessmentConfig)
+        .filter(
+          ([key, question]) =>
+            !question.test ||
+            !_isEmpty(JSONPath({ path: question.test, json: testValue }))
+        )
+        .forEach(([key, question]) => {
+          filteredAssessmentConfig[key] = question
+        })
+    }
+    return filteredAssessmentConfig
+  }
+
+  static populateCustomFields(entity) {
+    entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      entity.customFields
+    )
+    Model.populateNotesCustomFields(entity)
+  }
+
+  static populateEntitiesNotesCustomFields(entities) {
+    entities.forEach(entity => {
+      Model.populateNotesCustomFields(entity)
+    })
+  }
+
+  static populateNotesCustomFields(entity) {
+    entity.notes.forEach(
+      note =>
+        note.type !== NOTE_TYPE.FREE_TEXT &&
+        (note.customFields = utils.parseJsonSafe(note.text))
+    )
   }
 }

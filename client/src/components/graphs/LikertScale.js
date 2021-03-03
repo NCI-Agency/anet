@@ -1,8 +1,11 @@
-import React, { useEffect, useRef } from "react"
+import { TRAFFIC_LIGHTS_LEVELS } from "components/graphs/utils"
 import * as d3 from "d3"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
+import React, { useCallback, useEffect, useRef } from "react"
 import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
+import utils from "utils"
 
 const LikertScale = ({
   onChange,
@@ -11,7 +14,8 @@ const LikertScale = ({
   levels,
   width,
   height,
-  readonly
+  editable,
+  whenUnspecified
 }) => {
   const cursorRef = useRef(null)
   const axisRef = useRef(null)
@@ -19,30 +23,50 @@ const LikertScale = ({
   const containerHeight = containerBox.height || 0
   const containerWidth = containerBox.width || 0
   const containerX = containerBox.x || 0
-  const MARGIN = 13
+  const MARGIN_LEFT = editable ? 25 : 13
+  const MARGIN_RIGHT = 13
   const scaleYPosition = containerHeight - 30
-
   const scale = d3
     .scaleLinear()
     .domain([0, 10])
-    .range([MARGIN, containerWidth - 2 * MARGIN])
-  const x = scale(Number(value !== undefined ? value : 50))
+    .range([MARGIN_LEFT, containerWidth - MARGIN_RIGHT])
+  const x = utils.isNumeric(value) ? scale(value) : MARGIN_LEFT / 2
 
-  useEffect(() => {
-    if (readonly) {
-      return
-    }
-    const handleDrag = d3.drag().on("drag", function() {
-      const me = d3.select(cursorRef.current)
-      const newX = Math.min(
-        Math.max(d3.event.x, scale.range()[0]),
+  const calculateNewX = useCallback(
+    eventX => {
+      return Math.min(
+        Math.max(eventX, scale.range()[0] - MARGIN_LEFT / 2),
         scale.range()[1]
       )
+    },
+    [scale, MARGIN_LEFT]
+  )
+
+  const xToValue = useCallback(
+    newX => (newX >= scale.range()[0] ? scale.invert(newX) : null),
+    [scale]
+  )
+
+  useEffect(() => {
+    if (!editable) {
+      return
+    }
+    const handleDrag = d3.drag().on("drag", (event, d) => {
+      const me = d3.select(cursorRef.current)
+      const newX = calculateNewX(event.x)
       me.attr("transform", `translate(${newX} ${scaleYPosition})`)
-      onChange(scale.invert(newX))
+      onChange(xToValue(newX))
     })
     handleDrag(d3.select(cursorRef.current))
-  }, [onChange, scale, scaleYPosition, readonly])
+  }, [
+    onChange,
+    scale,
+    scaleYPosition,
+    editable,
+    MARGIN_LEFT,
+    calculateNewX,
+    xToValue
+  ])
 
   useEffect(() => {
     d3.select(cursorRef.current).attr(
@@ -58,25 +82,31 @@ const LikertScale = ({
 
   let activeColor = null
   let valuesStats = null
-  if (values?.length) {
+  const numberValues = utils.arrayOfNumbers(values)
+  if (numberValues !== undefined && _isEmpty(numberValues)) {
+    return whenUnspecified
+  }
+  if (numberValues?.length) {
     valuesStats = {
-      min: Math.min(...values),
-      max: Math.max(...values),
-      avg: values.reduce((a, b) => a + b, 0) / values.length
+      min: Math.min(...numberValues),
+      max: Math.max(...numberValues),
+      avg: numberValues.reduce((a, b) => a + b, 0) / numberValues.length
     }
     valuesStats.avgColor = levels.find(
       level => level.endValue > valuesStats.avg
     )?.color
   }
-
   return (
     <svg
       height={height}
       width={width}
-      xmlns="http://www.w3.org/2000/svg"
       ref={containerRef}
-      onClick={e =>
-        !readonly && e.clientX && onChange(scale.invert(e.clientX - containerX))}
+      onClick={e => {
+        if (editable && e.clientX) {
+          const newX = calculateNewX(e.clientX - containerX)
+          onChange(xToValue(newX))
+        }
+      }}
     >
       {levels.map((level, index) => {
         const startX = scale(index === 0 ? 0 : levels[index - 1].endValue)
@@ -108,7 +138,7 @@ const LikertScale = ({
           </React.Fragment>
         )
       })}
-      {values?.map((xValue, index) => (
+      {numberValues?.map((xValue, index) => (
         <g
           transform={`translate(${scale(xValue)} ${scaleYPosition})`}
           key={`values-${index}-${xValue}`}
@@ -124,7 +154,7 @@ const LikertScale = ({
         </g>
       ))}
 
-      {values?.length > 1 && (
+      {numberValues?.length > 1 && (
         <g transform={`translate(0 ${scaleYPosition})`}>
           <line
             x1={scale(valuesStats.min)}
@@ -150,7 +180,7 @@ const LikertScale = ({
         </g>
       )}
 
-      {values?.length > 0 && (
+      {numberValues?.length > 0 && (
         <g transform={`translate(0 ${scaleYPosition})`}>
           <circle
             cx={scale(valuesStats.avg)}
@@ -165,14 +195,13 @@ const LikertScale = ({
             y={25}
             style={{ pointerEvents: "none" }}
           >
-            avg:{" "}
-            {Number(valuesStats.avg).toFixed(value < scale.domain()[1] ? 1 : 0)}
+            avg: {valuesStats.avg.toFixed(value < scale.domain()[1] ? 1 : 0)}
           </text>
         </g>
       )}
       <g ref={axisRef} transform={`translate(0 ${scaleYPosition})`} />
 
-      {onChange && (
+      {onChange && (editable || (value && value >= scale.domain()[0])) && (
         <g ref={cursorRef}>
           <polygon
             points="0,0 13,13 13,30 -13,30 -13,13"
@@ -180,7 +209,7 @@ const LikertScale = ({
               stroke: "gray",
               fill: "" + activeColor,
               strokeWidth: 1,
-              cursor: readonly ? null : "pointer"
+              cursor: editable ? "pointer" : null
             }}
           />
           <text
@@ -190,7 +219,9 @@ const LikertScale = ({
             y={25}
             style={{ pointerEvents: "none" }}
           >
-            {Number(value).toFixed(value < scale.domain()[1] ? 1 : 0)}
+            {utils.isNumeric(value) && value >= scale.domain()[0]
+              ? value.toFixed(value < scale.domain()[1] ? 1 : 0)
+              : null}
           </text>
         </g>
       )}
@@ -201,7 +232,7 @@ const LikertScale = ({
 LikertScale.propTypes = {
   value: PropTypes.number,
   values: PropTypes.arrayOf(PropTypes.number),
-  onChange: PropTypes.func,
+  onChange: utils.fnRequiredWhen.bind(null, "editable"),
   levels: PropTypes.arrayOf(
     PropTypes.shape({
       color: PropTypes.string,
@@ -212,27 +243,17 @@ LikertScale.propTypes = {
   ).isRequired,
   width: PropTypes.string.isRequired,
   height: PropTypes.string.isRequired,
-  readonly: PropTypes.bool
+  editable: PropTypes.bool,
+  whenUnspecified: PropTypes.oneOfType([PropTypes.string, PropTypes.object])
 }
 
 LikertScale.defaultProps = {
-  value: 0,
-  levels: [
-    {
-      color: "red",
-      endValue: 3
-    },
-    {
-      color: "#FFBF00",
-      endValue: 7
-    },
-    {
-      color: "green",
-      endValue: 10
-    }
-  ],
+  value: null,
+  levels: TRAFFIC_LIGHTS_LEVELS,
   height: "65",
-  width: "100%"
+  width: "100%",
+  editable: false,
+  whenUnspecified: null
 }
 
 export default LikertScale

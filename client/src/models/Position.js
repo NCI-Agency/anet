@@ -1,4 +1,7 @@
-import Model from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
 import AFG_ICON from "resources/afg_small.png"
 import POSITIONS_ICON from "resources/positions.png"
 import RS_ICON from "resources/rs_small.png"
@@ -17,11 +20,6 @@ export default class Position extends Model {
   static getInstanceName = "position"
   static relatedObjectType = "positions"
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static TYPE = {
     ADVISOR: "ADVISOR",
     PRINCIPAL: "PRINCIPAL",
@@ -29,12 +27,17 @@ export default class Position extends Model {
     ADMINISTRATOR: "ADMINISTRATOR"
   }
 
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(
+    Settings.fields.position.customFields
+  )
+
   static yupSchema = yup
     .object()
     .shape({
       name: yup
         .string()
-        .required()
+        .required("Position name is required")
         .default("")
         .label(Settings.fields.position.name),
       type: yup
@@ -45,26 +48,31 @@ export default class Position extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Position.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       associatedPositions: yup.array().nullable().default([]),
       previousPeople: yup.array().nullable().default([]),
       organization: yup
         .object()
         .nullable()
-        .default({})
+        .default(null)
+        .label("Organization")
         .test(
           "required-object",
           // eslint-disable-next-line no-template-curly-in-string
           "${path} is required",
-          value => value && value.uuid
+          org => org && org.uuid
         ),
       person: yup.object().nullable().default({}),
       location: yup.object().nullable().default({})
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Position.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

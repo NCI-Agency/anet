@@ -3,7 +3,6 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.Task.TaskStatus;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -21,7 +20,7 @@ public class TaskMapper implements RowMapper<Task> {
     p.setCustomFieldEnum2(r.getString("customFieldEnum2"));
     p.setPlannedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "plannedCompletion"));
     p.setProjectedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "projectedCompletion"));
-    p.setStatus(MapperUtils.getEnumIdx(r, "status", TaskStatus.class));
+    p.setStatus(MapperUtils.getEnumIdx(r, "status", Task.Status.class));
     p.setCustomFieldRef1Uuid(r.getString("customFieldRef1Uuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {

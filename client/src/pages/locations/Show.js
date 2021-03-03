@@ -3,32 +3,31 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection, {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
+import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
-import { Location, Person } from "models"
-import PropTypes from "prop-types"
-import React from "react"
+import { Location } from "models"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
+import Settings from "settings"
+import utils from "utils"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "./GeoLocation"
 
 const GQL_GET_LOCATION = gql`
@@ -69,12 +68,14 @@ const GQL_GET_LOCATION = gql`
           }
         }
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
-const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
+const LocationShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
   const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
@@ -92,7 +93,11 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
   if (done) {
     return result
   }
-
+  if (data) {
+    data.location[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.location.customFields
+    )
+  }
   const location = new Location(data ? data.location : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
@@ -129,7 +134,8 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 location.uuid && {
                   relatedObjectType: Location.relatedObjectType,
-                  relatedObjectUuid: location.uuid
+                  relatedObjectUuid: location.uuid,
+                  relatedObject: location
                 }
               }
             />
@@ -146,13 +152,27 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
                 />
 
                 <GeoLocation
-                  lat={location.lat}
-                  lng={location.lng}
+                  coordinates={{
+                    lat: location.lat,
+                    lng: location.lng,
+                    displayedCoordinate: convertLatLngToMGRS(
+                      location.lat,
+                      location.lng
+                    )
+                  }}
                   displayType={GEO_LOCATION_DISPLAY_TYPE.FORM_FIELD}
                 />
               </Fieldset>
 
               <Leaflet markers={[marker]} />
+              {Settings.fields.location.customFields && (
+                <Fieldset title="Location information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.location.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             <Approvals relatedObject={location} />
@@ -162,12 +182,6 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
                 paginationKey={`r_${uuid}`}
                 queryParams={{ locationUuid: uuid }}
                 mapId="reports"
-                viewFormats={[
-                  FORMAT_CALENDAR,
-                  FORMAT_SUMMARY,
-                  FORMAT_TABLE,
-                  FORMAT_MAP
-                ]}
               />
             </Fieldset>
           </div>
@@ -177,17 +191,8 @@ const BaseLocationShow = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseLocationShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+LocationShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const LocationShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseLocationShow currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(LocationShow)

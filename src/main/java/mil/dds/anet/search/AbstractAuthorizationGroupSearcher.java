@@ -30,11 +30,11 @@ public abstract class AbstractAuthorizationGroupSearcher
     qb.addTotalCount();
     qb.addFromClause("\"authorizationGroups\"");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
-    qb.addEqualsClause("status", "\"authorizationGroups\".status", query.getStatus());
+    qb.addEnumEqualsClause("status", "\"authorizationGroups\".status", query.getStatus());
 
     if (query.getPositionUuid() != null) {
       // Search for authorization groups related to a given position
@@ -49,16 +49,16 @@ public abstract class AbstractAuthorizationGroupSearcher
           + "  SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
           + "  JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\""
-          + "  WHERE reports.\"authorUuid\" = :userUuid"
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
           + "  GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\""
           + ") \"inMyReports\" ON \"authorizationGroups\".uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(AuthorizationGroupSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb,
       AuthorizationGroupSearchQuery query) {

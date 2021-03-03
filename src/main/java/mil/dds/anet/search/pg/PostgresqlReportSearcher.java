@@ -25,9 +25,10 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
   @Override
   public CompletableFuture<AnetBeanList<Report>> runSearch(Map<String, Object> context,
       Set<String> subFields, ReportSearchQuery query) {
-    buildQuery(subFields, query);
+    final ReportSearchQuery modifiedQuery = getQueryForPostProcessing(query);
+    buildQuery(subFields, modifiedQuery);
     return postProcessResults(context, query,
-        qb.buildAndRun(getDbHandle(), query, new ReportMapper()));
+        qb.buildAndRun(getDbHandle(), modifiedQuery, new ReportMapper()));
   }
 
   @Override
@@ -56,7 +57,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @Override
   protected void addEngagementDayOfWeekQuery(ReportSearchQuery query) {
-    qb.addEqualsClause("engagementDayOfWeek",
+    qb.addObjectEqualsClause("engagementDayOfWeek",
         String.format(this.isoDowFormat, "reports.\"engagementDate\""),
         query.getEngagementDayOfWeek());
   }
@@ -78,7 +79,7 @@ public class PostgresqlReportSearcher extends AbstractReportSearcher {
 
   @Override
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, ReportSearchQuery query) {
-    if (query.isTextPresent() && !query.isSortByPresent()) {
+    if (hasTextQuery(query) && !query.isSortByPresent()) {
       // We're doing a full-text search without an explicit sort order,
       // so sort first on the search pseudo-rank.
       qb.addAllOrderByClauses(getOrderBy(SortOrder.DESC, null, "search_rank"));

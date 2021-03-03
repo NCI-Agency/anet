@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -24,11 +23,9 @@ import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -50,7 +47,8 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "uuid name code type status";
   private static final String PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
-          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
+          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
+          + " customFields";
   private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
 
   // 200 x 200 avatar
@@ -75,14 +73,16 @@ public class PersonResourceTest extends AbstractResourceTest {
     Person newPerson = new Person();
     newPerson.setName("testCreatePerson Person");
     newPerson.setRole(Role.ADVISOR);
-    newPerson.setStatus(PersonStatus.ACTIVE);
+    newPerson.setStatus(Person.Status.ACTIVE);
     // set HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // set JSON of customFields
+    newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     newPerson.setGender("Female");
     newPerson.setCountry("Canada");
     newPerson.setCode("123456");
     newPerson.setEndOfTourDate(
-        ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newPersonUuid).isNotNull();
@@ -91,7 +91,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPerson.getUuid()).isNotNull();
     assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
     // check that HTML of biography is sanitized after create
-    assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after create
+    assertThat(newPerson.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     newPerson.setName("testCreatePerson updated name");
     newPerson.setCountry("The Commonwealth of Canada");
@@ -103,7 +106,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setAvatar(defaultAvatarData);
 
     // update HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // update JSON of customFields
+    newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
 
     Integer nrUpdated =
         graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson);
@@ -115,7 +120,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
     assertThat(retPerson.getAvatar()).isNotNull();
     // check that HTML of biography is sanitized after update
-    assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after update
+    assertThat(retPerson.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Test creating a person with a position already set.
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
@@ -132,7 +140,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPos.setType(PositionType.ADVISOR);
     newPos.setName("Test Position");
     newPos.setOrganization(org);
-    newPos.setStatus(PositionStatus.ACTIVE);
+    newPos.setStatus(Position.Status.ACTIVE);
     String newPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", newPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPosUuid).isNotNull();
@@ -143,7 +151,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     Person newPerson2 = new Person();
     newPerson2.setName("Namey McNameface");
     newPerson2.setRole(Role.ADVISOR);
-    newPerson2.setStatus(PersonStatus.ACTIVE);
+    newPerson2.setStatus(Person.Status.ACTIVE);
     newPerson2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
     newPerson2.setPosition(newPos);
     String newPerson2Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
@@ -161,7 +169,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPos2.setType(PositionType.ADVISOR);
     newPos2.setName("A Second Test Position");
     newPos2.setOrganization(org);
-    newPos2.setStatus(PositionStatus.ACTIVE);
+    newPos2.setStatus(Position.Status.ACTIVE);
     String newPos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", newPos2, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPos2Uuid).isNotNull();
@@ -249,8 +257,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         .findFirst()).isNotEmpty();
 
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,
@@ -267,12 +274,12 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
-    query.setStatus(ImmutableList.of(PersonStatus.INACTIVE));
+    query.setStatus(Person.Status.INACTIVE);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
-    assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == PersonStatus.INACTIVE)
+    assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == Person.Status.INACTIVE)
         .count()).isEqualTo(searchResults.getList().size());
 
     // Search with children orgs
@@ -345,12 +352,12 @@ public class PersonResourceTest extends AbstractResourceTest {
 
 
     // Search by email Address
-    query.setText("hunter+arthur@dds.mil");
+    query.setText("hunter+arthur@example.com");
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     matchCount = searchResults.getList().stream()
-        .filter(p -> p.getEmailAddress().equals("hunter+arthur@dds.mil")).count();
+        .filter(p -> p.getEmailAddress().equals("hunter+arthur@example.com")).count();
     assertThat(matchCount).isEqualTo(1);
     // TODO: should we enforce that this query returns ONLY arthur? I think not since we're using
     // the plus addressing for testing..
@@ -388,7 +395,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     Position test = new Position();
     test.setName("A Test Position created by mergePeopleTest");
     test.setType(PositionType.ADVISOR);
-    test.setStatus(PositionStatus.ACTIVE);
+    test.setStatus(Position.Status.ACTIVE);
 
     // Assign to an AO
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
@@ -544,7 +551,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPos.setType(PositionType.ADVISOR);
     newPos.setName("Test Position");
     newPos.setOrganization(org);
-    newPos.setStatus(PositionStatus.ACTIVE);
+    newPos.setStatus(Position.Status.ACTIVE);
     String retPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", newPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(retPosUuid).isNotNull();
@@ -555,7 +562,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person newPerson = new Person();
     newPerson.setName("Namey McNameface");
     newPerson.setRole(Role.ADVISOR);
-    newPerson.setStatus(PersonStatus.ACTIVE);
+    newPerson.setStatus(Person.Status.ACTIVE);
     newPerson.setDomainUsername("namey_" + Instant.now().toEpochMilli());
     newPerson.setPosition(retPos);
     String retPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
@@ -566,7 +573,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getUuid()).isNotNull();
     assertThat(retPerson.getPosition()).isNotNull();
 
-    retPerson.setStatus(PersonStatus.INACTIVE);
+    retPerson.setStatus(Person.Status.INACTIVE);
     Integer nrUpdated =
         graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", retPerson);
     assertThat(nrUpdated).isEqualTo(1);
@@ -596,7 +603,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person principal = new Person();
     principal.setName("Namey McNameface");
     principal.setRole(Role.PRINCIPAL);
-    principal.setStatus(PersonStatus.ACTIVE);
+    principal.setStatus(Person.Status.ACTIVE);
     principal.setDomainUsername("namey_" + Instant.now().toEpochMilli());
 
     try {
@@ -617,7 +624,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person advisorNoPosition = new Person();
     advisorNoPosition.setName("Namey McNameface");
     advisorNoPosition.setRole(Role.ADVISOR);
-    advisorNoPosition.setStatus(PersonStatus.ACTIVE);
+    advisorNoPosition.setStatus(Person.Status.ACTIVE);
     advisorNoPosition.setDomainUsername("namey_" + Instant.now().toEpochMilli());
 
     try {
@@ -648,7 +655,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person advisorPosition = new Person();
     advisorPosition.setName("Namey McNameface");
     advisorPosition.setRole(Role.ADVISOR);
-    advisorPosition.setStatus(PersonStatus.ACTIVE);
+    advisorPosition.setStatus(Person.Status.ACTIVE);
     advisorPosition.setDomainUsername("namey_" + Instant.now().toEpochMilli());
     advisorPosition.setPosition(freePos);
 
@@ -685,7 +692,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person advisorPosition2 = new Person();
     advisorPosition2.setName("Namey McNameface");
     advisorPosition2.setRole(Role.ADVISOR);
-    advisorPosition2.setStatus(PersonStatus.ACTIVE);
+    advisorPosition2.setStatus(Person.Status.ACTIVE);
     advisorPosition2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
     advisorPosition2.setPosition(freePos2);
 

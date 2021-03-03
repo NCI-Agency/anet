@@ -1,3 +1,4 @@
+import Model from "components/Model"
 import faker from "faker"
 import { Organization } from "models"
 import utils from "utils"
@@ -65,7 +66,7 @@ async function createHierarchy(user, grow, args) {
   const longName = faker.company.companyName()
   const shortName = abbreviateCompanyName(longName)
   const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
-  const status = args.status || Organization.STATUS.ACTIVE // faker.random.objectElement(Organization.STATUS)
+  const status = args.status || Model.STATUS.ACTIVE // faker.random.objectElement(Model.STATUS)
   const usedServices = []
 
   return createSubOrg(undefined, [])
@@ -83,7 +84,7 @@ async function createHierarchy(user, grow, args) {
     const distrib = childDistrib[level]
     const total = distrib.reduce((sum, val) => sum + val, 0)
     const r = Math.random() * total
-    var chance, i
+    let chance, i
     for (
       i = 1, chance = total - distrib[0];
       i < distrib.length && r < chance;
@@ -103,7 +104,12 @@ async function createHierarchy(user, grow, args) {
     const level = path.length
 
     // create and fill an organization object
-    const org = Object.without(new Organization(), "childrenOrgs", "positions")
+    const org = Object.without(
+      new Organization(),
+      "childrenOrgs",
+      "positions",
+      "formCustomFields"
+    )
     if (level === 0) {
       org.longName = longName
     } else if (level === 1) {
@@ -130,7 +136,7 @@ async function createHierarchy(user, grow, args) {
     // create sub organizations
     if (args.subOrgs) {
       const subOrgCount = randomSubOrgCount(level)
-      var i
+      let i
       for (i = 1; i <= subOrgCount; i++) {
         await createSubOrg(result, path.concat(i))
       }
@@ -177,7 +183,7 @@ async function gqlCreateOrganization(user, org) {
 
 const createOrganization = async function(user, parentOrg, path) {
   const randomOrg = randomOrganization()
-  const org = new Organization()
+  const org = Object.without(new Organization(), "formCustomFields")
 
   // org = Object.without(org, 'childrenOrgs', 'positions')
   delete org.childrenOrgs
@@ -194,7 +200,7 @@ const createOrganization = async function(user, parentOrg, path) {
     }
     randomOrg.shortName = path[0] + " " + path.slice(1).join(".")
   }
-  randomOrg.status = Organization.STATUS.ACTIVE
+  randomOrg.status = Model.STATUS.ACTIVE
 
   populate(org, randomOrg)
     .shortName.always()
@@ -234,7 +240,7 @@ const organizationsBuildup = async function(user, number) {
           organizationList(query: {
             pageNum: 0,
             pageSize: 1,
-            status: ${Organization.STATUS.ACTIVE}
+            status: ${Model.STATUS.ACTIVE}
           }) {
             totalCount
           }

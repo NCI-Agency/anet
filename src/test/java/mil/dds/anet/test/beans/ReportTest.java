@@ -2,10 +2,9 @@ package mil.dds.anet.test.beans;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.Lists;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
@@ -14,7 +13,6 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.test.TestData;
 import org.junit.jupiter.api.Test;
@@ -35,18 +33,15 @@ public class ReportTest extends BeanTester<Report> {
     r.setEngagementDate(Instant.ofEpochMilli(1453753380000L));
     r.setDuration(90);
 
-    r.setAuthor(PersonTest.getJackJacksonStub());
-
     LinkedList<Task> tasks = new LinkedList<Task>();
     tasks.add(TaskTest.getTestTask());
     tasks.add(TaskTest.getTestTask());
     r.setTasks(tasks);
 
-    LinkedList<ReportPerson> principals = new LinkedList<ReportPerson>();
-    ReportPerson principal = PersonTest.personToReportPerson(PersonTest.getSteveStevesonStub());
-    principal.setPrimary(true);
-    principals.add(principal);
-    r.setAttendees(principals);
+    final ReportPerson author = PersonTest.personToReportAuthor(PersonTest.getJackJacksonStub());
+    final ReportPerson principal =
+        PersonTest.personToPrimaryReportPerson(PersonTest.getSteveStevesonStub());
+    r.setReportPeople(Lists.newArrayList(author, principal));
 
     r.setReportText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
         + "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
@@ -65,17 +60,6 @@ public class ReportTest extends BeanTester<Report> {
     LinkedList<Comment> comments = new LinkedList<Comment>();
     comments.add(c);
     r.setComments(comments);
-
-    final List<Tag> tags = new ArrayList<Tag>();
-    final Tag t1 = new Tag();
-    t1.setName("name1");
-    t1.setDescription("desc1");
-    tags.add(t1);
-    final Tag t2 = new Tag();
-    t2.setName("name2");
-    t2.setDescription("desc2");
-    tags.add(t2);
-    r.setTags(tags);
 
     final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
     rsi.setText("For your eyes only");

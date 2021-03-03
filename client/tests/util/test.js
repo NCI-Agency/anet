@@ -7,6 +7,7 @@ const moment = require("moment")
 const _includes = require("lodash/includes")
 const _isRegExp = require("lodash/isRegExp")
 const chalk = require("chalk")
+const fetch = require("cross-fetch")
 
 let capabilities = {}
 const testEnv =
@@ -226,8 +227,9 @@ test.beforeEach(t => {
     timeoutMs
   ) => {
     const waitTimeoutMs = timeoutMs || longWaitMs
+    let elem
     try {
-      var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      elem = await t.context.$(cssSelector, waitTimeoutMs)
     } catch (e) {
       // If we got a TimeoutError because the element did not load, just swallow it here
       // and let the assertion on blow up instead. That will produce a clearer error message.
@@ -246,8 +248,9 @@ test.beforeEach(t => {
     timeoutMs
   ) => {
     const waitTimeoutMs = timeoutMs || longWaitMs
+    let elem
     try {
-      var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      elem = await t.context.$(cssSelector, waitTimeoutMs)
     } catch (e) {
       // If we got a TimeoutError because the element did not load, just swallow it here
       // and let the assertion on blow up instead. That will produce a clearer error message.
@@ -370,6 +373,27 @@ test.beforeEach(t => {
 // Shut down the browser when we are done.
 test.afterEach.always(async t => {
   if (t.context.driver) {
+    if (testEnv !== "local") {
+      // Send back test result to BrowserStack
+      const session = await t.context.driver.getSession()
+      const url = `https://api.browserstack.com/automate/sessions/${session.getId()}.json`
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Basic " +
+            Buffer.from(
+              `${capabilities["browserstack.user"]}:${capabilities["browserstack.key"]}`
+            ).toString("base64")
+        },
+        body: JSON.stringify({
+          status: t.passed ? "passed" : "failed"
+        })
+      }
+      await fetch(url, options)
+    }
+
     await t.context.driver.quit()
   }
 })

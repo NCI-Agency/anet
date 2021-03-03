@@ -4,6 +4,7 @@ person(uuid:"${personUuid}") {
   rank
   role
   status
+  pendingVerification
   emailAddress
   phoneNumber
   domainUsername
@@ -61,6 +62,34 @@ person(uuid:"${personUuid}") {
       noteUuid
       relatedObjectType
       relatedObjectUuid
+      relatedObject {
+        ... on AuthorizationGroup {
+          name
+        }
+        ... on Location {
+          name
+        }
+        ... on Organization {
+          shortName
+        }
+        ... on Person {
+          role
+          rank
+          name
+        }
+        ... on Position {
+          type
+          name
+        }
+        ... on Report {
+          intent
+        }
+        ... on Task {
+          shortName
+          longName
+        }
+      }
     }
   }
+  customFields
 }

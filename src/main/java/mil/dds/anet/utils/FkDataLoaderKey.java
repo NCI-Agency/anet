@@ -13,10 +13,9 @@ public enum FkDataLoaderKey {
   POSITION_PERSON_POSITION_HISTORY, // position.personPositionHistory
   RELATED_OBJECT_APPROVAL_STEPS, // <relatedObject, e.g. organization or task>.approvalSteps
   RELATED_OBJECT_PLANNING_APPROVAL_STEPS, // <relatedObject>.planningApprovalSteps
-  REPORT_ATTENDEES, // report.attendees
+  REPORT_PEOPLE, // report.reportPeople
   REPORT_REPORT_ACTIONS, // report.reportActions
   REPORT_REPORT_SENSITIVE_INFORMATION, // report.reportSensitiveInformation
-  REPORT_TAGS, // report.tags
   REPORT_TASKS, // report.tasks
   TASK_RESPONSIBLE_POSITIONS, // task.responsiblePositions
   TASK_TASKED_ORGANIZATIONS, // task.taskedOrganizations

@@ -1,4 +1,7 @@
-import Model from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS
+} from "components/Model"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import Settings from "settings"
 import utils from "utils"
@@ -10,11 +13,6 @@ export default class Organization extends Model {
   static getInstanceName = "organization"
   static relatedObjectType = "organizations"
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static TYPE = {
     ADVISOR_ORG: "ADVISOR_ORG",
     PRINCIPAL_ORG: "PRINCIPAL_ORG"
@@ -24,6 +22,11 @@ export default class Organization extends Model {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
+
+  // create yup schema for the customFields, based on the customFields config
+  static customFieldsSchema = createCustomFieldsSchema(
+    Settings.fields.organization.customFields
+  )
 
   static yupSchema = yup
     .object()
@@ -37,7 +40,7 @@ export default class Organization extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Organization.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       identificationCode: yup.string().nullable().default(""),
       type: yup
         .string()
@@ -63,7 +66,8 @@ export default class Organization extends Model {
               .default(() => Organization.APPROVAL_STEP_TYPE.PLANNING_APPROVAL),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
@@ -83,7 +87,8 @@ export default class Organization extends Model {
               .default(() => Organization.APPROVAL_STEP_TYPE.REPORT_APPROVAL),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
@@ -92,10 +97,14 @@ export default class Organization extends Model {
       positions: yup.array().nullable().default([]),
       tasks: yup.array().nullable().default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Organization.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid, shortName, longName, identificationCode, type"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)

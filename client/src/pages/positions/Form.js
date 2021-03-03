@@ -6,22 +6,27 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import { Location, Organization, Person, Position } from "models"
+import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, HelpBlock } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
@@ -38,18 +43,19 @@ const GQL_UPDATE_POSITION = gql`
   }
 `
 
-const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
+const PositionForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Position.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Position.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -108,13 +114,12 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
+        validateForm,
         submitForm
       }) => {
         const isPrincipal = values.type === Position.TYPE.PRINCIPAL
@@ -127,7 +132,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
 
-        const orgSearchQuery = { status: Organization.STATUS.ACTIVE }
+        const orgSearchQuery = { status: Model.STATUS.ACTIVE }
         if (isPrincipal) {
           orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
         } else {
@@ -149,10 +154,10 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
           values.organization.type &&
           values.organization.type !== orgSearchQuery.type
         ) {
-          values.organization = {}
+          setFieldValue("organization", null)
         }
         const willAutoKickPerson =
-          values.status === Position.STATUS.INACTIVE &&
+          values.status === Model.STATUS.INACTIVE &&
           values.person &&
           values.person.uuid
         const action = (
@@ -177,7 +182,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
         const locationFilters = {
           activeLocations: {
             label: "All locations",
-            queryVars: { status: Location.STATUS.ACTIVE }
+            queryVars: { status: Model.STATUS.ACTIVE }
           }
         }
         return (
@@ -220,7 +225,7 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                   )}
                 </FastField>
 
-                <FastField
+                <Field
                   name="organization"
                   label="Organization"
                   component={FieldHelper.SpecialField}
@@ -289,14 +294,26 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
                       filterDefs={locationFilters}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
-                      queryParams={{ status: Location.STATUS.ACTIVE }}
+                      queryParams={{ status: Model.STATUS.ACTIVE }}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
                     />
                   }
                 />
               </Fieldset>
-
+              {Settings.fields.position.customFields && (
+                <Fieldset title="Position information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.position.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -341,9 +358,9 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Position.pathForEdit(position))
     }
@@ -353,7 +370,13 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const position = Object.without(new Position(values), "notes")
+    const position = Object.without(
+      new Position(values),
+      "notes",
+      "customFields", // initial JSON from the db
+      "responsibleTasks", // Only for querying
+      DEFAULT_CUSTOM_FIELDS_PARENT
+    )
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }
@@ -364,30 +387,23 @@ const BasePositionForm = ({ currentUser, edit, title, initialValues }) => {
     position.organization = utils.getReference(position.organization)
     position.person = utils.getReference(position.person)
     position.code = position.code || null // Need to null out empty position codes
+    position.customFields = customFieldsJSONString(values)
+
     return API.mutation(edit ? GQL_UPDATE_POSITION : GQL_CREATE_POSITION, {
       position
     })
   }
 }
 
-BasePositionForm.propTypes = {
+PositionForm.propTypes = {
   initialValues: PropTypes.instanceOf(Position).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BasePositionForm.defaultProps = {
+PositionForm.defaultProps = {
   title: "",
   edit: false
 }
-
-const PositionForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePositionForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default PositionForm

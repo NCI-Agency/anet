@@ -13,7 +13,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -51,6 +50,7 @@ public class PersonResource {
   @GraphQLMutation(name = "createPerson")
   public Person createPerson(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {
+    p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     if (!canCreateOrUpdatePerson(user, p, true)) {
       throw new WebApplicationException("You do not have permissions to create this person",
@@ -118,6 +118,7 @@ public class PersonResource {
   @GraphQLMutation(name = "updatePerson")
   public Integer updatePerson(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "person") Person p) {
+    p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     if (!canCreateOrUpdatePerson(user, existing, false)) {
@@ -138,26 +139,26 @@ public class PersonResource {
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
             p.getPosition().getUuid());
-        AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
+        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null
           && existingPos.getUuid().equals(p.getPosition().getUuid()) == false) {
         // Update the position for this person.
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
             p.getPosition().getUuid());
-        AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
+        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null && p.getPosition().getUuid() == null) {
         // Remove this person from their position.
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao()
             .removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position   by {}", p, user);
+        AnetAuditLogger.log("Person {} removed from position by {}", p, user);
       }
     }
 
     // If person changed to inactive, clear out the domainUsername
-    if (PersonStatus.INACTIVE.equals(p.getStatus())
-        && !PersonStatus.INACTIVE.equals(existing.getStatus())) {
+    if (Person.Status.INACTIVE.equals(p.getStatus())
+        && !Person.Status.INACTIVE.equals(existing.getStatus())) {
       AnetAuditLogger.log(
           "Person {} domainUsername '{}' cleared by {} because they are now inactive", p,
           existing.getDomainUsername(), user);
@@ -165,7 +166,7 @@ public class PersonResource {
     }
 
     // Automatically remove people from a position if they are inactive.
-    if (PersonStatus.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
+    if (Person.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
       Position existingPos = existing.loadPosition();
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
@@ -271,11 +272,11 @@ public class PersonResource {
     }
 
     @SuppressWarnings("unchecked")
-    final List<String> whitelistDomainNames =
+    final List<String> allowedDomainNames =
         ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
             .map(String::toLowerCase).collect(Collectors.toList());
 
-    if (!Utils.isEmailWhitelisted(emailInput, whitelistDomainNames)) {
+    if (!Utils.isEmailAllowed(emailInput, allowedDomainNames)) {
       throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
     }
   }

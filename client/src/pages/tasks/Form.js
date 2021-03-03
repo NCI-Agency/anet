@@ -17,16 +17,20 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
+import Model, {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_NOTE_FIELDS,
+  NOTE_TYPE
+} from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
+import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import OrganizationTable from "components/OrganizationTable"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import { Organization, Person, Position, Task } from "models"
+import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -52,18 +56,19 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
+const TaskForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Task.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Task.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -85,7 +90,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
     allAdvisorOrganizations: {
       label: "All advisor organizations",
       queryVars: {
-        status: Organization.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         type: Organization.TYPE.ADVISOR_ORG
       }
     }
@@ -101,7 +106,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
     allAdvisorPositions: {
       label: "All advisor positions",
       queryVars: {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         type: [
           Position.TYPE.ADVISOR,
           Position.TYPE.SUPER_USER,
@@ -311,7 +316,8 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                     name="plannedCompletion"
                     component={FieldHelper.SpecialField}
                     onChange={value =>
-                      setFieldValue("plannedCompletion", value)}
+                      setFieldValue("plannedCompletion", value)
+                    }
                     onBlur={() => setFieldTouched("plannedCompletion")}
                     widget={<CustomDateInput id="plannedCompletion" />}
                     disabled={disabled}
@@ -324,7 +330,8 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                     name="projectedCompletion"
                     component={FieldHelper.SpecialField}
                     onChange={value =>
-                      setFieldValue("projectedCompletion", value)}
+                      setFieldValue("projectedCompletion", value)
+                    }
                     onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                     disabled={disabled}
@@ -348,7 +355,8 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                       onChange={value =>
-                        setFieldValue("customFieldEnum1", value)}
+                        setFieldValue("customFieldEnum1", value)
+                      }
                     />
                     {edit && !disabled && (
                       <FastField
@@ -356,7 +364,8 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.SpecialField}
                         onChange={value =>
-                          setFieldValue("assessment_customFieldEnum1", value)}
+                          setFieldValue("assessment_customFieldEnum1", value)
+                        }
                         widget={
                           <RichTextEditor
                             className="textField"
@@ -478,9 +487,9 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     history.replace(Task.pathForEdit(task))
     if (!edit) {
       history.replace(Task.pathForEdit(task))
@@ -496,7 +505,7 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
       "notes",
       "assessment_customFieldEnum1",
       "customFields", // initial JSON from the db
-      "formCustomFields"
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)
@@ -533,22 +542,15 @@ const BaseTaskForm = ({ currentUser, edit, title, initialValues }) => {
   }
 }
 
-BaseTaskForm.propTypes = {
+TaskForm.propTypes = {
   initialValues: PropTypes.instanceOf(Task).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseTaskForm.defaultProps = {
+TaskForm.defaultProps = {
   title: "",
   edit: false
 }
-
-const TaskForm = props => (
-  <AppContext.Consumer>
-    {context => <BaseTaskForm currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default TaskForm

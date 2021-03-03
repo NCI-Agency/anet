@@ -3,8 +3,10 @@ package mil.dds.anet.search;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,20 +18,20 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.search.ReportSearchQuery.EngagementStatus;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.Utils;
 
 public abstract class AbstractReportSearcher extends AbstractSearcher<Report, ReportSearchQuery>
     implements IReportSearcher {
@@ -39,10 +41,24 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   private static final Map<String, String> FIELD_MAPPING = ImmutableMap.<String, String>builder()
       .put("reportText", "text").put("location", "locationUuid")
       .put("approvalStep", "approvalStepUuid").put("advisorOrg", "advisorOrganizationUuid")
-      .put("principalOrg", "principalOrganizationUuid").put("author", "authorUuid").build();
+      .put("principalOrg", "principalOrganizationUuid").build();
 
   public AbstractReportSearcher(AbstractSearchQueryBuilder<Report, ReportSearchQuery> qb) {
     super(qb);
+  }
+
+  protected ReportSearchQuery getQueryForPostProcessing(ReportSearchQuery query) {
+    if (query.getPendingApprovalOf() == null) {
+      return query;
+    }
+    try {
+      final ReportSearchQuery modifiedQuery = query.clone();
+      // pagination will be done after post-processing
+      modifiedQuery.setPageSize(0);
+      return modifiedQuery;
+    } catch (CloneNotSupportedException e) {
+      return query; // what else can we do?
+    }
   }
 
   protected CompletableFuture<AnetBeanList<Report>> postProcessResults(Map<String, Object> context,
@@ -61,7 +77,6 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
                 r.getApprovalStepUuid(), r.getAdvisorOrgUuid()))
         .toArray(CompletableFuture<?>[]::new);
     return CompletableFuture.allOf(allReports).thenCompose(v -> {
-
       final Iterator<Report> iterator = list.iterator();
       for (final CompletableFuture<Boolean> cf : allReports) {
         iterator.next();
@@ -69,7 +84,22 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
           iterator.remove();
         }
       }
-      result.setTotalCount(list.size());
+      final int totalCount = list.size();
+      final int pageNum = query.getPageNum();
+      final int pageSize = query.getPageSize();
+      result.setTotalCount(totalCount);
+      result.setPageNum(pageNum);
+      result.setPageSize(pageSize);
+      if (pageSize > 0) {
+        // Do pagination
+        final int fromIndex = pageNum * pageSize;
+        final int toIndex = Math.min(totalCount, fromIndex + pageSize);
+        if (fromIndex >= totalCount || fromIndex > toIndex) {
+          result.setList(Collections.emptyList());
+        } else {
+          result.setList(list.subList(fromIndex, toIndex));
+        }
+      }
       return CompletableFuture.completedFuture(result);
     });
   }
@@ -87,7 +117,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
   protected void buildQuery(Set<String> subFields, ReportSearchQuery query) {
     // Base select and from clauses are added by child classes
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -95,7 +125,18 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       addBatchClause(query);
     }
 
-    qb.addEqualsClause("authorUuid", "reports.\"authorUuid\"", query.getAuthorUuid());
+    // We do not store status in reports as we consider them all ACTIVE. Hence, we want to return
+    // no results when querying for INACTIVE reports
+    if (query.getStatus() == WithStatus.Status.INACTIVE) {
+      qb.addWhereClause("0 = 1");
+    }
+
+    if (query.getAuthorUuid() != null) {
+      qb.addWhereClause("reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :authorUuid)");
+      qb.addSqlArg("isAuthor", true);
+      qb.addSqlArg("authorUuid", query.getAuthorUuid());
+    }
     qb.addDateRangeClause("startDate", "reports.\"engagementDate\"", Comparison.AFTER,
         query.getEngagementDateStart(), "endDate", "reports.\"engagementDate\"", Comparison.BEFORE,
         query.getEngagementDateEnd());
@@ -118,12 +159,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     }
 
     if (query.getAttendeeUuid() != null) {
-      qb.addWhereClause(
-          "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :attendeeUuid)");
+      qb.addWhereClause("reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + " WHERE \"personUuid\" = :attendeeUuid and \"isAttendee\" = :isAttendee)");
+      qb.addSqlArg("isAttendee", true);
       qb.addSqlArg("attendeeUuid", query.getAttendeeUuid());
     }
 
-    qb.addEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
+    qb.addEnumEqualsClause("atmosphere", "reports.atmosphere", query.getAtmosphere());
 
     if (query.getTaskUuid() != null) {
       if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
@@ -157,12 +199,12 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
         qb.addWhereClause("reports.\"locationUuid\" IS NULL");
       } else {
-        qb.addEqualsClause("locationUuid", "reports.\"locationUuid\"", query.getLocationUuid());
+        qb.addStringEqualsClause("locationUuid", "reports.\"locationUuid\"",
+            query.getLocationUuid());
       }
     }
 
     if (query.getPendingApprovalOf() != null) {
-      qb.addWhereClause("reports.\"authorUuid\" != :approverUuid");
       qb.addWhereClause("reports.\"approvalStepUuid\" IN"
           + " (SELECT \"approvalStepUuid\" FROM approvers WHERE \"positionUuid\" IN"
           + " (SELECT uuid FROM positions WHERE \"currentPersonUuid\" = :approverUuid))");
@@ -178,11 +220,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         switch (es) {
           case HAPPENED:
             engagementStatusClauses.add(" reports.\"engagementDate\" <= :endOfHappened");
-            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endOfHappened", Utils.endOfToday());
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "endOfHappened", Instant.now());
             break;
           case FUTURE:
             engagementStatusClauses.add(" reports.\"engagementDate\" > :startOfFuture");
-            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startOfFuture", Utils.endOfToday());
+            DaoUtils.addInstantAsLocalDateTime(qb.sqlArgs, "startOfFuture", Instant.now());
             break;
           case CANCELLED:
             engagementStatusClauses.add(" reports.state = :cancelledState");
@@ -200,24 +242,20 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
         qb.addWhereClause("reports.\"cancelledReason\" IS NULL");
       } else {
-        qb.addEqualsClause("cancelledReason", "reports.\"cancelledReason\"",
+        qb.addEnumEqualsClause("cancelledReason", "reports.\"cancelledReason\"",
             query.getCancelledReason());
       }
-    }
-
-    if (query.getTagUuid() != null) {
-      qb.addWhereClause(
-          "reports.uuid IN (SELECT \"reportUuid\" FROM \"reportTags\" WHERE \"tagUuid\" = :tagUuid)");
-      qb.addSqlArg("tagUuid", query.getTagUuid());
     }
 
     if (query.getAuthorPositionUuid() != null) {
       // Search for reports authored by people serving in that position at the report's creation
       // date
-      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r "
-          + PositionDao.generateCurrentPositionFilter("r.\"authorUuid\"", "r.\"createdAt\"",
+      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
+          + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+          + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"createdAt\"",
               "authorPositionUuid")
-          + ")");
+          + " AND rp.\"isAuthor\" = :isAuthor)");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("authorPositionUuid", query.getAuthorPositionUuid());
     }
 
@@ -234,11 +272,13 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
 
     if (query.getAttendeePositionUuid() != null) {
       // Search for reports attended by people serving in that position at the engagement date
-      qb.addWhereClause("reports.uuid IN (SELECT r.uuid FROM reports r"
-          + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
-          + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"engagementDate\"",
-              "attendeePositionUuid")
-          + ")");
+      qb.addWhereClause(
+          "reports.uuid IN (SELECT r.uuid FROM reports r"
+              + " JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+              + PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"",
+                  "r.\"engagementDate\"", "attendeePositionUuid")
+              + " AND rp.\"isAttendee\" = :isAttendee)");
+      qb.addSqlArg("isAttendee", true);
       qb.addSqlArg("attendeePositionUuid", query.getAttendeePositionUuid());
     }
 
@@ -264,18 +304,18 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
         qb.addSqlArg("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
       } else {
-        qb.addWhereClause(
-            "((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
+        qb.addWhereClause("((reports.state != :draftState AND reports.state != :rejectedState) OR ("
+            + " reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+            + " WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)))");
         qb.addSqlArg("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
         qb.addSqlArg("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+        qb.addSqlArg("isAuthor", true);
         qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
       }
     }
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(ReportSearchQuery query);
 
   protected abstract void addBatchClause(ReportSearchQuery query);
 
@@ -314,7 +354,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
       qb.addWhereClause("reports.\"advisorOrganizationUuid\" IS NULL");
     } else if (!query.getIncludeAdvisorOrgChildren()) {
-      qb.addEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
+      qb.addStringEqualsClause("advisorOrganizationUuid", "reports.\"advisorOrganizationUuid\"",
           query.getAdvisorOrgUuid());
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"advisorOrganizationUuid\"",
@@ -330,7 +370,7 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
       qb.addWhereClause("reports.\"principalOrganizationUuid\" IS NULL");
     } else if (!query.getIncludePrincipalOrgChildren()) {
-      qb.addEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
+      qb.addStringEqualsClause("principalOrganizationUuid", "reports.\"principalOrganizationUuid\"",
           query.getPrincipalOrgUuid());
     } else {
       qb.addRecursiveClause(outerQb, "reports", "\"principalOrganizationUuid\"",

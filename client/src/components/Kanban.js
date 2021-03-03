@@ -6,6 +6,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Glyphicon, Panel } from "react-bootstrap"
 import Settings from "settings"
+import utils from "utils"
 
 const Kanban = ({ columns, allTasks }) => (
   <div
@@ -64,8 +65,8 @@ const Column = ({ name, tasks }) => {
           segmentFill={entity => {
             const matching = Object.entries(
               Settings.fields.task.customFieldEnum1.enum
-            ).filter(candidate => {
-              return candidate[0] === entity.data.key
+            ).filter(([key, val]) => {
+              return key === entity.data.key
             })
             return matching.length > 0 ? matching[0][1].color : "#bbbbbb"
           }}
@@ -135,9 +136,7 @@ const Card = ({ task }) => {
         {task.longName && (
           <div>
             <small>
-              {open || task.longName.length < 100
-                ? task.longName
-                : task.longName.substring(0, 100) + "..."}
+              {open ? task.longName : utils.ellipsize(task.longName, 100)}
             </small>
           </div>
         )}

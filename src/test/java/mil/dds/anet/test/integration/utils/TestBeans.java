@@ -7,10 +7,8 @@ import java.util.List;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
@@ -25,14 +23,14 @@ public class TestBeans {
     p.setEmailAddress("test_person@test.anet");
     p.setPhoneNumber("+0-00000");
     p.setRank("CIV");
-    p.setStatus(PersonStatus.ACTIVE);
+    p.setStatus(Person.Status.ACTIVE);
     p.setRole(Role.ADVISOR);
     p.setBiography("");
     p.setDomainUsername("test");
     p.setGender("Male");
     p.setCountry("United States of America");
     p.setEndOfTourDate(
-        ZonedDateTime.of(2036, 8, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2036, 8, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     return p;
   }
 
@@ -40,7 +38,7 @@ public class TestBeans {
     Organization o = new Organization();
     o.setShortName("test_organization");
     o.setLongName("test_organization");
-    o.setStatus(OrganizationStatus.ACTIVE);
+    o.setStatus(Organization.Status.ACTIVE);
     o.setType(OrganizationType.ADVISOR_ORG);
     return o;
   }
@@ -53,18 +51,21 @@ public class TestBeans {
     return as;
   }
 
-  public static Report getTestReport(Person author, ApprovalStep approvalStep,
-      List<ReportPerson> attendees) {
-    Report r = new Report();
-    r.setState(ReportState.APPROVED);
-    r.setAuthor(author);
-    r.setIntent("test_dummy");
+  public static Report getTestReport(String reportText, Instant engagementDate,
+      ApprovalStep approvalStep, List<ReportPerson> reportPeople) {
+    final String s = "test_dummy: " + reportText;
+    final Report r = new Report();
+    r.setState(ReportState.DRAFT);
+    r.setIntent(s);
     r.setAtmosphere(Atmosphere.NEUTRAL);
     r.setApprovalStep(approvalStep);
-    r.setAttendees(attendees);
-    r.setReportText("test_dummy");
-    r.setNextSteps("test_dummy");
-    r.setEngagementDate(Instant.now());
+    if (approvalStep != null) {
+      r.setAdvisorOrgUuid(approvalStep.getRelatedObjectUuid());
+    }
+    r.setReportPeople(reportPeople);
+    r.setReportText(s);
+    r.setNextSteps(s);
+    r.setEngagementDate(engagementDate == null ? Instant.now() : engagementDate);
     r.setDuration(60);
     return r;
   }

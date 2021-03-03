@@ -9,23 +9,19 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 
-public class Location extends AbstractAnetBean {
+public class Location extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
 
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";
-
-  public static enum LocationStatus {
-    ACTIVE, INACTIVE
-  }
 
   @GraphQLQuery
   @GraphQLInputField
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private LocationStatus status;
+  private Status status;
   @GraphQLQuery
   @GraphQLInputField
   private Double lat;
@@ -46,11 +42,13 @@ public class Location extends AbstractAnetBean {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  public LocationStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(LocationStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -119,15 +117,16 @@ public class Location extends AbstractAnetBean {
     if (!(o instanceof Location)) {
       return false;
     }
-    Location l = (Location) o;
-    return Objects.equals(l.getUuid(), uuid) && Objects.equals(l.getName(), name)
-        && Objects.equals(l.getStatus(), status) && Objects.equals(l.getLat(), lat)
-        && Objects.equals(l.getLng(), lng) && Objects.equals(l.getCreatedAt(), createdAt);
+    final Location other = (Location) o;
+    return super.equals(o) && Objects.equals(other.getUuid(), uuid)
+        && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
+        && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)
+        && Objects.equals(other.getCreatedAt(), createdAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, status, lat, lng, createdAt);
+    return Objects.hash(super.hashCode(), uuid, name, status, lat, lng, createdAt);
   }
 
   @Override

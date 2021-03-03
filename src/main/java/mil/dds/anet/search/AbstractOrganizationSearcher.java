@@ -31,7 +31,7 @@ public abstract class AbstractOrganizationSearcher extends
     qb.addTotalCount();
     qb.addFromClause("organizations");
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -39,8 +39,8 @@ public abstract class AbstractOrganizationSearcher extends
       addBatchClause(query);
     }
 
-    qb.addEqualsClause("status", "organizations.status", query.getStatus());
-    qb.addEqualsClause("type", "organizations.type", query.getType());
+    qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());
+    qb.addEnumEqualsClause("type", "organizations.type", query.getType());
 
     if (query.getHasParentOrg() != null) {
       if (query.getHasParentOrg()) {
@@ -56,8 +56,6 @@ public abstract class AbstractOrganizationSearcher extends
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(OrganizationSearchQuery query);
 
   @SuppressWarnings("unchecked")
   protected void addBatchClause(OrganizationSearchQuery query) {

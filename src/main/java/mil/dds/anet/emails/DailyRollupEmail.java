@@ -40,8 +40,8 @@ public class DailyRollupEmail implements AnetEmailAction {
 
     DateTimeFormatter dtf = (DateTimeFormatter) context.get("dateFormatter");
 
-    if (startDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate()
-        .equals(endDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate())) {
+    if (startDate.atZone(DaoUtils.getServerNativeZoneId()).toLocalDate()
+        .equals(endDate.atZone(DaoUtils.getServerNativeZoneId()).toLocalDate())) {
       return "Rollup for " + dtf.format(startDate);
     } else {
       return "Rollup from " + dtf.format(startDate) + " to " + dtf.format(endDate);
@@ -49,12 +49,13 @@ public class DailyRollupEmail implements AnetEmailAction {
   }
 
   @Override
-  public Map<String, Object> buildContext(Map<String, Object> context) {
+  public Map<String, Object> buildContext(Map<String, Object> context)
+      throws NumberFormatException {
     String maxReportAgeStr = AnetObjectEngine.getInstance()
         .getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
     long maxReportAge = Long.parseLong(maxReportAgeStr);
     Instant engagementDateStart =
-        startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
+        startDate.atZone(DaoUtils.getServerNativeZoneId()).minusDays(maxReportAge).toInstant();
     ReportSearchQuery query = new ReportSearchQuery();
     query.setPageSize(0);
     query.setReleasedAtStart(startDate);

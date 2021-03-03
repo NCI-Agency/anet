@@ -27,23 +27,25 @@ public abstract class AbstractLocationSearcher
     qb.addSelectClause("locations.*");
     qb.addTotalCount();
     qb.addFromClause("locations");
+    qb.addEnumEqualsClause("status", "locations.status", query.getStatus());
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
       qb.addFromClause("JOIN ("
           + "  SELECT reports.\"locationUuid\" AS uuid, MAX(reports.\"createdAt\") AS max FROM reports"
-          + "  WHERE reports.\"authorUuid\" = :userUuid GROUP BY reports.\"locationUuid\""
+          + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
+          + "    WHERE \"isAuthor\" = :isAuthor AND \"personUuid\" = :userUuid)"
+          + "  GROUP BY reports.\"locationUuid\""
           + ") \"inMyReports\" ON locations.uuid = \"inMyReports\".uuid");
+      qb.addSqlArg("isAuthor", true);
       qb.addSqlArg("userUuid", DaoUtils.getUuid(query.getUser()));
     }
 
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(LocationSearchQuery query);
 
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     switch (query.getSortBy()) {

@@ -1,21 +1,20 @@
-function loadFileAjaxSync(filePath, mimeType) {
-  const xmlhttp = new XMLHttpRequest()
-  xmlhttp.open("GET", filePath, false)
-  if (mimeType !== null) {
-    if (xmlhttp.overrideMimeType) {
-      xmlhttp.overrideMimeType(mimeType)
-    }
-  }
-  xmlhttp.send()
-  if (xmlhttp.status === 200) {
-    return xmlhttp.responseText
-  } else {
-    throw new Error("unable to load " + filePath)
-  }
-}
+import { loadFileAjaxSync } from "../utils"
 
 const Settings = JSON.parse(
   loadFileAjaxSync("/api/admin/dictionary", "application/json")
 )
+const GQL_GET_VERSION_INFO = `
+  query {
+    projectVersion
+  }
+`
 
-export default Settings
+const Version = JSON.parse(
+  loadFileAjaxSync(
+    "/graphql",
+    "application/json",
+    JSON.stringify({ query: GQL_GET_VERSION_INFO })
+  )
+).data.projectVersion
+
+export { Version, Settings as default }

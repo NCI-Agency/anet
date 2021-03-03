@@ -2,41 +2,38 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import ReportCollection, {
-  FORMAT_MAP,
-  FORMAT_SUMMARY,
-  FORMAT_TABLE,
-  FORMAT_CALENDAR
-} from "components/ReportCollection"
+import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import { parseHtmlWithLinkTo } from "utils_links"
+import utils from "utils"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -46,6 +43,7 @@ const GQL_GET_PERSON = gql`
       rank
       role
       status
+      pendingVerification
       emailAddress
       phoneNumber
       domainUsername
@@ -95,7 +93,8 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const BasePersonShow = ({ pageDispatchers, currentUser }) => {
+const PersonShow = ({ pageDispatchers }) => {
+  const { currentUser, loadAppData } = useContext(AppContext)
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -119,7 +118,9 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
     return result
   }
   if (data) {
-    data.person.formCustomFields = JSON.parse(data.person.customFields)
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.person.customFields
+    )
   }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -147,7 +148,12 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
     (!hasPosition && currentUser.isSuperUser()) ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-
+  const canAddAssessment =
+    isAdmin ||
+    currentUser.position.associatedPositions
+      .filter(ap => ap.person)
+      .map(ap => ap.person.uuid)
+      .includes(person.uuid)
   return (
     <Formik enableReinitialize initialValues={person}>
       {({ values }) => {
@@ -189,10 +195,10 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 person.uuid && {
                   relatedObjectType: Person.relatedObjectType,
-                  relatedObjectUuid: person.uuid
+                  relatedObjectUuid: person.uuid,
+                  relatedObject: person
                 }
               }
-              relatedObjectValue={person}
             />
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
@@ -234,7 +240,7 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 />
                 <Field
                   name="emailAddress"
-                  label={Settings.fields.person.emailAddress}
+                  label={Settings.fields.person.emailAddress.label}
                   component={FieldHelper.ReadonlyField}
                   humanValue={emailHumanValue}
                 />
@@ -347,12 +353,6 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                     queryParams={{
                       authorUuid: uuid
                     }}
-                    viewFormats={[
-                      FORMAT_CALENDAR,
-                      FORMAT_SUMMARY,
-                      FORMAT_TABLE,
-                      FORMAT_MAP
-                    ]}
                     mapId="reports-authored"
                   />
                 </Fieldset>
@@ -414,6 +414,16 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
                 </Fieldset>
               )}
             </Form>
+
+            <AssessmentResultsContainer
+              entity={person}
+              entityType={Person}
+              canAddAssessment={canAddAssessment}
+              onUpdateAssessment={() => {
+                loadAppData()
+                refetch()
+              }}
+            />
           </div>
         )
       }}
@@ -526,15 +536,8 @@ const BasePersonShow = ({ pageDispatchers, currentUser }) => {
   }
 }
 
-BasePersonShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+PersonShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const PersonShow = props => (
-  <AppContext.Consumer>
-    {context => <BasePersonShow currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(PersonShow)

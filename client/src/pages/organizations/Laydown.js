@@ -2,20 +2,22 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 import Settings from "settings"
 
-const BaseOrganizationLaydown = ({ currentUser, organization }) => {
+const OrganizationLaydown = ({ organization }) => {
+  const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
   const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
 
   const numInactivePos = organization.positions.filter(
-    p => p.status === Position.STATUS.INACTIVE
+    p => p.status === Model.STATUS.INACTIVE
   ).length
 
   const positionsNeedingAttention = organization.positions.filter(
@@ -42,7 +44,6 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
             <ContainerDimensions>
               {({ width, height }) => (
                 <OrganizationalChart
-                  label="test"
                   org={organization}
                   exportTitle={`Organization diagram for ${organization}`}
                   width={width}
@@ -141,10 +142,7 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
   function renderPositionRow(position, other, otherIndex) {
     let key = position.uuid
     let otherPersonCol, otherNameCol, positionPersonCol, positionNameCol
-    if (
-      position.status === Position.STATUS.INACTIVE &&
-      !showInactivePositions
-    ) {
+    if (position.status === Model.STATUS.INACTIVE && !showInactivePositions) {
       return
     }
 
@@ -206,7 +204,7 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
 
   function personWithStatus(person) {
     person = new Person(person)
-    if (person.status === Person.STATUS.INACTIVE) {
+    if (person.status === Model.STATUS.INACTIVE) {
       return <i>{person.toString() + " (Inactive)"}</i>
     } else {
       return person.toString()
@@ -215,7 +213,7 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
 
   function positionWithStatus(pos) {
     const code = pos.code ? ` (${pos.code})` : ""
-    if (pos.status === Position.STATUS.INACTIVE) {
+    if (pos.status === Model.STATUS.INACTIVE) {
       return <i>{`${pos.name}${code} (Inactive)`}</i>
     } else {
       return pos.name + code
@@ -227,17 +225,8 @@ const BaseOrganizationLaydown = ({ currentUser, organization }) => {
   }
 }
 
-BaseOrganizationLaydown.propTypes = {
-  organization: PropTypes.instanceOf(Organization).isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+OrganizationLaydown.propTypes = {
+  organization: PropTypes.instanceOf(Organization).isRequired
 }
-
-const OrganizationLaydown = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseOrganizationLaydown currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default OrganizationLaydown

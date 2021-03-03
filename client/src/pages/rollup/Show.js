@@ -21,6 +21,7 @@ import {
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
+  FORMAT_STATISTICS,
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
@@ -30,7 +31,7 @@ import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useMemo, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button, HelpBlock, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
@@ -40,8 +41,8 @@ import utils from "utils"
 
 const GQL_ROLLUP_GRAPH = gql`
   query(
-    $startDate: Long!
-    $endDate: Long!
+    $startDate: Instant!
+    $endDate: Instant!
     $principalOrganizationUuid: String
     $advisorOrganizationUuid: String
     $orgType: OrganizationType
@@ -64,8 +65,8 @@ const GQL_ROLLUP_GRAPH = gql`
 `
 const GQL_SHOW_ROLLUP_EMAIL = gql`
   query(
-    $startDate: Long!
-    $endDate: Long!
+    $startDate: Instant!
+    $endDate: Instant!
     $principalOrganizationUuid: String
     $advisorOrganizationUuid: String
     $orgType: OrganizationType
@@ -81,8 +82,8 @@ const GQL_SHOW_ROLLUP_EMAIL = gql`
 `
 const GQL_EMAIL_ROLLUP = gql`
   mutation(
-    $startDate: Long!
-    $endDate: Long!
+    $startDate: Instant!
+    $endDate: Instant!
     $email: AnetEmailInput!
     $principalOrganizationUuid: String
     $advisorOrganizationUuid: String
@@ -223,7 +224,12 @@ const Collection = ({ queryParams }) => (
     <ReportCollection
       paginationKey="r_rollup"
       queryParams={queryParams}
-      viewFormats={[FORMAT_CALENDAR, FORMAT_TABLE, FORMAT_SUMMARY]}
+      viewFormats={[
+        FORMAT_CALENDAR,
+        FORMAT_TABLE,
+        FORMAT_SUMMARY,
+        FORMAT_STATISTICS
+      ]}
     />
   </div>
 )
@@ -252,7 +258,8 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
+const RollupShow = ({ pageDispatchers, searchQuery }) => {
+  const { appSettings } = useContext(AppContext)
   const history = useHistory()
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
@@ -302,7 +309,12 @@ const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
     display: "flex",
     flexDirection: "column",
     flex: "1 1 auto",
-    height: "100%"
+    height: "100%",
+    overflow: "auto"
+  }
+  const fieldsetStyle = {
+    height: "100%",
+    overflow: "auto"
   }
   const mosaicLayoutStyle = {
     display: "flex",
@@ -342,7 +354,8 @@ const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
                     str,
                     Settings.dateFormats.forms.input.date,
                     true
-                  ).toDate()}
+                  ).toDate()
+                }
                 placeholder={inputFormat}
                 maxDate={moment().toDate()}
                 allowSingleDayRange
@@ -386,7 +399,7 @@ const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
             </Button>
           </span>
         }
-        style={flexStyle}
+        style={fieldsetStyle}
       >
         <MosaicLayout
           style={mosaicLayoutStyle}
@@ -648,8 +661,7 @@ const BaseRollupShow = ({ pageDispatchers, appSettings, searchQuery }) => {
   }
 }
 
-BaseRollupShow.propTypes = {
-  appSettings: PropTypes.object,
+RollupShow.propTypes = {
   searchQuery: SearchQueryPropType,
   pageDispatchers: PageDispatchersPropType
 }
@@ -657,11 +669,5 @@ BaseRollupShow.propTypes = {
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
-
-const RollupShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseRollupShow appSettings={context.appSettings} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)

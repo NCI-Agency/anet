@@ -8,12 +8,17 @@ import {
 import API from "api"
 import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
 import {
   PageDispatchersPropType,
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
@@ -22,7 +27,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Panel, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
-import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LISTS = gql`
@@ -115,23 +119,15 @@ const DecisivesDashboard = ({ pageDispatchers }) => {
 DecisivesDashboard.propTypes = { pageDispatchers: PageDispatchersPropType }
 
 const DecisivesDashboardStatic = ({ dashboardData, pageDispatchers }) => {
+  const allActive = {
+    pageNum: 0,
+    pageSize: 0,
+    status: Model.STATUS.ACTIVE
+  }
   const { loading, error, data } = API.useApiQuery(GQL_GET_STATIC_DATA, {
-    positionQuery: {
-      // TODO: make this work with AbstractSearchQueryInput
-      pageNum: 0,
-      pageSize: 0,
-      status: "ACTIVE"
-    },
-    locationQuery: {
-      pageNum: 0,
-      pageSize: 0,
-      status: "ACTIVE"
-    },
-    taskQuery: {
-      pageNum: 0,
-      pageSize: 0,
-      status: "ACTIVE"
-    }
+    positionQuery: allActive,
+    locationQuery: allActive,
+    taskQuery: allActive
   })
   const { done, result } = useBoilerplate({
     loading,

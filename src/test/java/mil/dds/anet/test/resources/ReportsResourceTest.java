@@ -28,14 +28,11 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
@@ -45,9 +42,8 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.Task.TaskStatus;
+import mil.dds.anet.beans.WithStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -85,15 +81,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "uuid";
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
-          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt";
+          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt"
+          + " customFields";
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("%1$s customFieldRef1 { %1$s }", _TASK_FIELDS);
   private static final String FIELDS = String.format("%1$s" + " advisorOrg { %2$s }"
-      + " principalOrg { %2$s }" + " author { %3$s }" + " attendees { %3$s primary }"
+      + " principalOrg { %2$s }" + " reportPeople { %3$s primary author attendee }"
       + " tasks { %4$s }" + " approvalStep { uuid relatedObjectUuid }" + " location { %5$s }"
-      + " tags { uuid name description }" + " comments { %6$s }"
-      + " authorizationGroups { uuid name }"
+      + " comments { %6$s }" + " authorizationGroups { uuid name }"
       + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } } person { uuid } type createdAt }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
       COMMENT_FIELDS);
@@ -105,8 +101,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Create a principal for the report
     final Person principalPerson = getSteveSteveson();
-    final ReportPerson principal = PersonTest.personToReportPerson(principalPerson);
-    principal.setPrimary(true);
+    final ReportPerson principal = PersonTest.personToPrimaryReportPerson(principalPerson);
     Position principalPosition = principal.loadPosition();
     assertThat(principalPosition).isNotNull();
     final Organization principalOrg = principalPosition.loadOrganization(context).join();
@@ -123,24 +118,24 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Create leadership people in the AO who can approve this report
     Person approver1 = new Person();
     approver1.setDomainUsername("testApprover1");
-    approver1.setEmailAddress("hunter+testApprover1@dds.mil");
+    approver1.setEmailAddress("hunter+testApprover1@example.com");
     approver1.setName("Test Approver 1");
     approver1.setRole(Role.ADVISOR);
-    approver1.setStatus(PersonStatus.ACTIVE);
+    approver1.setStatus(Person.Status.ACTIVE);
     approver1 = findOrPutPersonInDb(approver1);
     Person approver2 = new Person();
     approver2.setDomainUsername("testApprover2");
-    approver2.setEmailAddress("hunter+testApprover2@dds.mil");
+    approver2.setEmailAddress("hunter+testApprover2@example.com");
     approver2.setName("Test Approver 2");
     approver2.setRole(Person.Role.ADVISOR);
-    approver2.setStatus(PersonStatus.ACTIVE);
+    approver2.setStatus(Person.Status.ACTIVE);
     approver2 = findOrPutPersonInDb(approver2);
 
     Position approver1Pos = new Position();
     approver1Pos.setName("Test Approver 1 Position");
     approver1Pos.setOrganization(advisorOrg);
     approver1Pos.setType(PositionType.SUPER_USER);
-    approver1Pos.setStatus(PositionStatus.ACTIVE);
+    approver1Pos.setStatus(Position.Status.ACTIVE);
     String approver1PosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", approver1Pos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(approver1PosUuid).isNotNull();
@@ -158,7 +153,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     approver2Pos.setName("Test Approver 2 Position");
     approver2Pos.setOrganization(advisorOrg);
     approver2Pos.setType(PositionType.SUPER_USER);
-    approver2Pos.setStatus(PositionStatus.ACTIVE);
+    approver2Pos.setStatus(Position.Status.ACTIVE);
     String approver2PosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", approver2Pos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(approver2PosUuid).isNotNull();
@@ -177,7 +172,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     authorBillet.setName("A report writer");
     authorBillet.setType(PositionType.ADVISOR);
     authorBillet.setOrganization(advisorOrg);
-    authorBillet.setStatus(PositionStatus.ACTIVE);
+    authorBillet.setStatus(Position.Status.ACTIVE);
     String authorBilletUuid = graphQLHelper.createObject(admin, "createPosition", "position",
         "PositionInput", authorBillet, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(authorBilletUuid).isNotNull();
@@ -238,13 +233,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Create some tasks for this organization
     final String topUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
         TestData.createTask("test-1", "Test Top Task", "TOP", null,
-            Collections.singletonList(advisorOrg), TaskStatus.ACTIVE),
+            Collections.singletonList(advisorOrg), Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(topUuid).isNotNull();
     final Task top = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, topUuid,
         new TypeReference<GraphQlResponse<Task>>() {});
-    final String actionUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("test-1-1", "Test Task Action", "Action", top, null, TaskStatus.ACTIVE),
+    final String actionUuid = graphQLHelper.createObject(
+        admin, "createTask", "task", "TaskInput", TestData.createTask("test-1-1",
+            "Test Task Action", "Action", top, null, Task.Status.ACTIVE),
         new TypeReference<GraphQlResponse<Task>>() {});
     assertThat(actionUuid).isNotNull();
     final Task action = graphQLHelper.getObjectById(admin, "task", TASK_FIELDS, actionUuid,
@@ -260,17 +256,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Write a Report
     Report r = new Report();
-    r.setAuthor(author);
     r.setEngagementDate(Instant.now());
     r.setDuration(120);
-    r.setAttendees(Lists.newArrayList(principal));
+    r.setReportPeople(Lists.newArrayList(principal, PersonTest.personToReportAuthor(author)));
     r.setTasks(Lists.newArrayList(action));
     r.setLocation(loc);
     r.setAtmosphere(Atmosphere.POSITIVE);
     r.setAtmosphereDetails("Everybody was super nice!");
     r.setIntent("A testing report to test that reporting reports");
     // set HTML of report text
-    r.setReportText(UtilsTest.getCombinedTestCase().getInput());
+    r.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // set JSON of customFields
+    r.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
     r.setNextSteps("This is the next steps on a report");
     r.setKeyOutcomes("These are the key outcomes of this engagement");
     r.setAdvisorOrg(advisorOrg);
@@ -285,7 +282,26 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(created.getAdvisorOrgUuid()).isEqualTo(advisorOrg.getUuid());
     assertThat(created.getPrincipalOrgUuid()).isEqualTo(principalOrg.getUuid());
     // check that HTML of report text is sanitized after create
-    assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after create
+    assertThat(created.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+
+    // Have another regular user try to submit the report
+    try {
+      graphQLHelper.updateObject(getRegularUser(), "submitReport", "uuid", FIELDS, "String",
+          created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have a super-user of another AO try to submit the report
+    try {
+      graphQLHelper.updateObject(getSuperUser(), "submitReport", "uuid", FIELDS, "String",
+          created.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
 
     // Have the author submit the report
     Report submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
@@ -311,15 +327,23 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
-    logger.debug("Expecting report {} in step {} because of org {} on author {}", new Object[] {
-        returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid()});
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+          returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
+    logger.debug("Expecting report {} in step {} because of org {} on author {}",
+        new Object[] {returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author});
     assertThat(returned.getApprovalStepUuid()).isEqualTo(approval.getUuid());
 
     // verify the location on this report
     assertThat(returned.getLocationUuid()).isEqualTo(loc.getUuid());
 
     // verify the principals on this report
-    assertThat(returned.getAttendees()).contains(principal);
+    assertThat(returned.loadAttendees(context).join()).contains(principal);
 
     // verify the tasks on this report
     assertThat(returned.getTasks()).contains(action);
@@ -407,6 +431,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
     assertThat(returned.getApprovalStepUuid()).isNull();
 
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String",
+          returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
     // check on report status to see that it got approved.
     workflow = returned.getWorkflow();
     // there were 5 actions on the report: submit, reject, submit, approve, approve
@@ -453,7 +485,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Verify this report shows up in the daily rollup
     ReportSearchQuery query = new ReportSearchQuery();
     query.setReleasedAtStart(
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant());
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant());
     AnetBeanList<Report> rollup =
         graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -463,7 +495,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Pull recent People, Tasks, and Locations and verify that the records from the last report are
     // there.
     final PersonSearchQuery queryPeople = new PersonSearchQuery();
-    queryPeople.setStatus(Collections.singletonList(PersonStatus.ACTIVE));
+    queryPeople.setStatus(Person.Status.ACTIVE);
     queryPeople.setInMyReports(true);
     queryPeople.setSortBy(PersonSearchSortBy.RECENT);
     queryPeople.setSortOrder(SortOrder.DESC);
@@ -473,7 +505,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(recentPeople.getList()).contains(principalPerson);
 
     final TaskSearchQuery queryTasks = new TaskSearchQuery();
-    queryTasks.setStatus(TaskStatus.ACTIVE);
+    queryTasks.setStatus(Task.Status.ACTIVE);
     queryTasks.setInMyReports(true);
     queryTasks.setSortBy(TaskSearchSortBy.RECENT);
     queryTasks.setSortOrder(SortOrder.DESC);
@@ -483,7 +515,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(recentTasks.getList()).contains(action);
 
     final LocationSearchQuery queryLocations = new LocationSearchQuery();
-    queryLocations.setStatus(LocationStatus.ACTIVE);
+    queryLocations.setStatus(Location.Status.ACTIVE);
     queryLocations.setInMyReports(true);
     queryLocations.setSortBy(LocationSearchSortBy.RECENT);
     queryLocations.setSortOrder(SortOrder.DESC);
@@ -515,9 +547,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Person author = new Person();
     author.setName("A New Guy");
     author.setRole(Role.ADVISOR);
-    author.setStatus(PersonStatus.ACTIVE);
+    author.setStatus(Person.Status.ACTIVE);
     author.setDomainUsername("newGuy");
-    author.setEmailAddress("newGuy@dds.mil");
+    author.setEmailAddress("newGuy@example.com");
     String authorUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
         author, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(authorUuid).isNotNull();
@@ -525,15 +557,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(author.getUuid()).isNotNull();
 
-    List<ReportPerson> attendees = ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
-        PersonTest.personToPrimaryReportPerson(jack));
+    List<ReportPerson> reportPeople =
+        ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+            PersonTest.personToPrimaryReportPerson(jack), PersonTest.personToReportAuthor(author));
 
     // Write a report as that person
     Report r = new Report();
-    r.setAuthor(author);
     r.setIntent("I am a new Advisor and wish to be included in things");
     r.setAtmosphere(Atmosphere.NEUTRAL);
-    r.setAttendees(attendees);
+    r.setReportPeople(reportPeople);
     r.setReportText(
         "I just got here in town and am writing a report for the first time, but have no reporting structure set up");
     r.setKeyOutcomes("Summary for the key outcomes");
@@ -547,8 +579,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(r.getUuid()).isNotNull();
 
-    // Submit the report
-    Report submitted = graphQLHelper.updateObject(jack, "submitReport", "uuid", FIELDS, "String",
+    // Submit the report (by admin who can do that, as author doesn't have a position)
+    Report submitted = graphQLHelper.updateObject(admin, "submitReport", "uuid", FIELDS, "String",
         r.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(submitted).isNotNull();
 
@@ -585,12 +617,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Position billet = new Position();
     billet.setName("EF 1.1 new advisor");
     billet.setType(Position.PositionType.ADVISOR);
-    billet.setStatus(PositionStatus.ACTIVE);
+    billet.setStatus(Position.Status.ACTIVE);
 
     // Put billet in EF 1.1
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> results = graphQLHelper.searchObjects(admin,
         "organizationList", "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -624,8 +655,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     // Change primary advisor of the report to someone in EF 1.1
-    returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
-        PersonTest.personToReportPerson(jack), PersonTest.personToPrimaryReportPerson(bob)));
+    returned.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+        PersonTest.personToReportPerson(jack), PersonTest.personToPrimaryReportPerson(bob),
+        PersonTest.personToReportAuthor(author)));
     final Report updated = graphQLHelper.updateObject(author, "updateReport", "report", FIELDS,
         "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(updated).isNotNull();
@@ -673,7 +705,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     Report r = new Report();
     r.setIntent("A Test Report to test editing reports");
-    r.setAuthor(elizabeth);
     r.setAtmosphere(Atmosphere.POSITIVE);
     r.setAtmosphereDetails("it was a cold, cold day");
     r.setEngagementDate(Instant.now());
@@ -681,7 +712,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setKeyOutcomes("There were some key out comes summarized");
     r.setNextSteps("These are the next steps summarized");
     r.setReportText("This report was generated by ReportsResourceTest#reportEditTest");
-    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger)));
+    r.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+        PersonTest.personToReportAuthor(elizabeth)));
     r.setTasks(ImmutableList.of(taskSearchResults.getList().get(0)));
     String returnedUuid = graphQLHelper.createObject(elizabeth, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
@@ -693,9 +725,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Elizabeth edits the report (update locationUuid and text, addPerson, remove a Task)
     returned.setLocation(loc);
     // update HTML of report text
-    returned.setReportText(UtilsTest.getCombinedTestCase().getInput());
-    returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
-        PersonTest.personToReportPerson(nick), PersonTest.personToPrimaryReportPerson(elizabeth)));
+    returned.setReportText(UtilsTest.getCombinedHtmlTestCase().getInput());
+    // u[date JSON of customFields
+    returned.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
+    returned.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+        PersonTest.personToReportPerson(nick), PersonTest.personToPrimaryReportAuthor(elizabeth)));
     returned.setTasks(ImmutableList.of());
     Report updated = graphQLHelper.updateObject(elizabeth, "updateReport", "report", FIELDS,
         "ReportInput", returned, new TypeReference<GraphQlResponse<Report>>() {});
@@ -707,11 +741,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned2.getIntent()).isEqualTo(r.getIntent());
     assertThat(returned2.getLocationUuid()).isEqualTo(loc.getUuid());
     assertThat(returned2.getTasks()).isEmpty();
-    final List<ReportPerson> returned2Attendees = returned2.getAttendees();
+    final List<ReportPerson> returned2Attendees = returned2.loadAttendees(context).join();
     assertThat(returned2Attendees).hasSize(3);
     assertThat(returned2Attendees.contains(roger));
     // check that HTML of report text is sanitized after update
-    assertThat(returned2.getReportText()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+    assertThat(returned2.getReportText())
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after update
+    assertThat(returned2.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Elizabeth submits the report
     Report submitted = graphQLHelper.updateObject(elizabeth, "submitReport", "uuid", FIELDS,
@@ -732,8 +770,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Bob edits the report (change reportText, remove Person, add a Task)
     returned3.setReportText(r.getReportText() + ", edited by Bob!!");
-    returned3.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(nick),
-        PersonTest.personToPrimaryReportPerson(elizabeth)));
+    returned3.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportPerson(nick),
+        PersonTest.personToPrimaryReportAuthor(elizabeth)));
     returned3.setTasks(
         ImmutableList.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
     updated = graphQLHelper.updateObject(bob, "updateReport", "report", FIELDS, "ReportInput",
@@ -743,7 +781,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Report returned4 = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, returned.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned4.getReportText()).endsWith("Bob!!");
-    final List<ReportPerson> returned4Attendees = returned4.getAttendees();
+    final List<ReportPerson> returned4Attendees = returned4.loadAttendees(context).join();
     assertThat(returned4Attendees).hasSize(2);
     assertThat(returned4Attendees).contains(PersonTest.personToPrimaryReportPerson(nick));
     assertThat(returned4.getTasks()).hasSize(2);
@@ -780,16 +818,17 @@ public class ReportsResourceTest extends AbstractResourceTest {
         graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
-    assertThat(searchResults.getList().stream()
-        .filter(r -> (r.getAuthorUuid().equals(jack.getUuid()))).count())
-            .isEqualTo(searchResults.getList().size());
+    assertThat(searchResults.getList().stream().filter(r -> {
+      final List<ReportPerson> authors = r.loadAuthors(context).join();
+      return authors.stream().filter(p -> p.getUuid().equals(jack.getUuid())).count() > 0;
+    }).count()).isEqualTo(searchResults.getList().size());
     final int numResults = searchResults.getList().size();
 
     // Search by Author with Date Filtering
     query.setEngagementDateStart(
-        ZonedDateTime.of(2016, 6, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2016, 6, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     query.setEngagementDateEnd(
-        ZonedDateTime.of(2016, 6, 15, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2016, 6, 15, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     searchResults =
         graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput", FIELDS,
             query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
@@ -807,7 +846,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(r -> {
       try {
-        return r.getAttendees().stream().anyMatch(rp -> (rp.getUuid().equals(steve.getUuid())));
+        return r.loadAttendees(context).join().stream()
+            .anyMatch(rp -> (rp.getUuid().equals(steve.getUuid())));
       } catch (Exception e) {
         fail("error", e);
         return false;
@@ -842,8 +882,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Search by direct organization
     OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    // FIXME: decide what the search should do in both cases
-    queryOrgs.setText(DaoUtils.isPostgresql() ? "\"EF 1\" or \"EF 1.1\"" : "EF 1");
+    queryOrgs.setText("EF 1");
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
         "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
@@ -1050,6 +1089,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  public void searchInactiveReportsTest() {
+    // All reports are considered ACTIVE; check that none are INACTIVE
+    final ReportSearchQuery query = new ReportSearchQuery();
+    query.setStatus(WithStatus.Status.INACTIVE);
+    final AnetBeanList<Report> searchResults =
+        graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
+    assertThat(searchResults.getTotalCount()).isZero();
+    assertThat(searchResults.getList()).isEmpty();
+  }
+
+  @Test
   public void searchAuthorizationGroupUuid() {
     // Search by empty list of authorization groups should not return reports
     ReportSearchQuery query = new ReportSearchQuery();
@@ -1083,9 +1134,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // insertBaseData has 1 report that is updatedAt 2 days before current timestamp
     final ReportSearchQuery query = new ReportSearchQuery();
     final Instant startDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(3).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(3).toInstant();
     final Instant endDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
 
     // Greater than startDate and smaller than endDate
     query.setUpdatedAtStart(startDate);
@@ -1119,7 +1170,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(results.getList().size()).isEqualTo(1);
 
     // A day before the startDate and startDate (no results expected)
-    query.setUpdatedAtStart(startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant());
+    query.setUpdatedAtStart(
+        startDate.atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant());
     query.setUpdatedAtEnd(startDate);
     query.setPageSize(0);
     results = graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput",
@@ -1161,16 +1213,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Person jack = getJackJackson();
     final Person liz = getElizabethElizawell();
     final Person roger = getRogerRogwell();
-
-    List<ReportPerson> attendees = ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
-        PersonTest.personToReportPerson(jack), PersonTest.personToPrimaryReportPerson(liz));
+    List<ReportPerson> reportPeople =
+        ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+            PersonTest.personToReportPerson(jack), PersonTest.personToPrimaryReportAuthor(liz));
 
     // Write a report as that person
     Report r = new Report();
-    r.setAuthor(liz);
     r.setIntent("This is a report that should be deleted");
     r.setAtmosphere(Atmosphere.NEUTRAL);
-    r.setAttendees(attendees);
+    r.setReportPeople(reportPeople);
     r.setReportText("I'm writing a report that I intend to delete very soon.");
     r.setKeyOutcomes("Summary for the key outcomes");
     r.setNextSteps("Summary for the next steps");
@@ -1215,7 +1266,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     r.setIntent("Meet with Steve about a thing we never got to talk about");
     r.setEngagementDate(Instant.now());
     r.setDuration(45);
-    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(liz),
+    r.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportAuthor(liz),
         PersonTest.personToPrimaryReportPerson(steve)));
     r.setCancelledReason(ReportCancelledReason.CANCELLED_BY_PRINCIPAL);
 
@@ -1253,6 +1304,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Report returned2 = graphQLHelper.getObjectById(liz, "report", FIELDS, saved.getUuid(),
         new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
+
+    // The author should not be able to submit the report now
+    try {
+      graphQLHelper.updateObject(liz, "submitReport", "uuid", FIELDS, "String", returned2.getUuid(),
+          new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
   }
 
   @Test
@@ -1260,11 +1319,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Person steve = getSteveSteveson();
 
     Report r = new Report();
-    r.setAuthor(admin);
     r.setIntent("Test the Daily rollup graph");
     r.setNextSteps("Check for a change in the rollup graph");
     r.setKeyOutcomes("Foobar the bazbiz");
-    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(admin),
+    r.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportAuthor(admin),
         PersonTest.personToPrimaryReportPerson(steve)));
     String ruuid = graphQLHelper.createObject(admin, "createReport", "report", "ReportInput", r,
         new TypeReference<GraphQlResponse<Report>>() {});
@@ -1273,13 +1331,16 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
 
     // Pull the daily rollup graph
-    Instant startDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant();
-    Instant endDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).plusDays(1).toInstant();
+    Instant startDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
+    Instant endDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final Map<String, Object> variables = new HashMap<>();
     variables.put("startDate", startDate.toEpochMilli());
     variables.put("endDate", endDate.toEpochMilli());
     final List<RollupGraph> startGraph = graphQLHelper.getObjectList(admin,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1325,7 +1386,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph = graphQLHelper.getObjectList(admin,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1354,11 +1416,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Person steve = getSteveSteveson();
 
     Report r = new Report();
-    r.setAuthor(elizabeth);
     r.setIntent("Test the Daily rollup graph");
     r.setNextSteps("Check for a change in the rollup graph");
     r.setKeyOutcomes("Foobar the bazbiz");
-    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(elizabeth),
+    r.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportAuthor(elizabeth),
         PersonTest.personToPrimaryReportPerson(steve)));
     String ruuid = graphQLHelper.createObject(elizabeth, "createReport", "report", "ReportInput", r,
         new TypeReference<GraphQlResponse<Report>>() {});
@@ -1367,13 +1428,16 @@ public class ReportsResourceTest extends AbstractResourceTest {
         new TypeReference<GraphQlResponse<Report>>() {});
 
     // Pull the daily rollup graph
-    Instant startDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusDays(1).toInstant();
-    Instant endDate = Instant.now().atZone(DaoUtils.getDefaultZoneId()).plusDays(1).toInstant();
+    Instant startDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
+    Instant endDate =
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final Map<String, Object> variables = new HashMap<>();
     variables.put("startDate", startDate.toEpochMilli());
     variables.put("endDate", endDate.toEpochMilli());
     final List<RollupGraph> startGraph = graphQLHelper.getObjectList(elizabeth,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1419,7 +1483,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph = graphQLHelper.getObjectList(elizabeth,
-        "query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
+        "query ($startDate: Instant!, $endDate: Instant!) {"
+            + " payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {"
             + ORGANIZATION_FIELDS + "} published cancelled } }",
         variables, new TypeReference<GraphQlResponse<List<RollupGraph>>>() {});
 
@@ -1443,32 +1508,16 @@ public class ReportsResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testTagSearch() {
-    final ReportSearchQuery tagQuery = new ReportSearchQuery();
-    tagQuery.setText("bribery");
-    final AnetBeanList<Report> taggedReportList =
-        graphQLHelper.searchObjects(admin, "reportList", "query", "ReportSearchQueryInput", FIELDS,
-            tagQuery, new TypeReference<GraphQlResponse<AnetBeanList<Report>>>() {});
-    assertThat(taggedReportList).isNotNull();
-    final List<Report> taggedReports = taggedReportList.getList();
-    for (Report rpt : taggedReports) {
-      final List<Tag> tags = rpt.getTags();
-      assertThat(tags).isNotNull();
-      assertThat(tags.stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
-    }
-  }
-
-  @Test
   public void testSensitiveInformationByAuthor() {
     final String rsiFields = FIELDS + " reportSensitiveInformation { uuid text }";
     final Person elizabeth = getElizabethElizawell();
     final Report r = new Report();
-    r.setAuthor(elizabeth);
+    r.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportAuthor(elizabeth)));
     r.setReportText(
         "This reportTest was generated by ReportsResourceTest#testSensitiveInformation");
     final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
     // set HTML of report sensitive information
-    rsi.setText(UtilsTest.getCombinedTestCase().getInput());
+    rsi.setText(UtilsTest.getCombinedHtmlTestCase().getInput());
     r.setReportSensitiveInformation(rsi);
     String returnedUuid = graphQLHelper.createObject(elizabeth, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
@@ -1480,24 +1529,25 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after create
     assertThat(returned.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     final Report returned2 = graphQLHelper.getObjectById(elizabeth, "report", rsiFields,
         returned.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
     // elizabeth should be allowed to see it
     assertThat(returned2.getReportSensitiveInformation()).isNotNull();
     assertThat(returned2.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     // update HTML of report sensitive information
-    returned2.getReportSensitiveInformation().setText(UtilsTest.getCombinedTestCase().getInput());
+    returned2.getReportSensitiveInformation()
+        .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
     Report updated = graphQLHelper.updateObject(elizabeth, "updateReport", "report", rsiFields,
         "ReportInput", returned2, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after update
     assertThat(updated.getReportSensitiveInformation().getText())
-        .isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
+        .isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
 
     final Person jack = getJackJackson();
     final Report returned3 = graphQLHelper.getObjectById(jack, "report", rsiFields,
@@ -1684,24 +1734,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
   private void createTestReport() {
     final Person author = getJackJackson();
-    final ReportPerson attendee = PersonTest.personToReportPerson(author);
-    attendee.setPrimary(true);
-    final Position advisorPosition = attendee.loadPosition();
+    final ReportPerson reportPerson = PersonTest.personToPrimaryReportAuthor(author);
+    final Position advisorPosition = reportPerson.loadPosition();
     final Organization advisorOrganization = advisorPosition.loadOrganization(context).join();
 
     final Report r = new Report();
-    r.setAuthor(author);
     r.setState(ReportState.PUBLISHED);
     r.setAtmosphere(Atmosphere.POSITIVE);
     r.setIntent("Testing the advisor reports insight");
     r.setNextSteps("Retrieve the advisor reports insight");
     r.setLocation(getLocation(author, "General Hospital"));
     final Instant engagementDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
     r.setEngagementDate(engagementDate);
-    r.setAttendees(Lists.newArrayList(attendee));
+    r.setReportPeople(Lists.newArrayList(reportPerson));
     r.setAdvisorOrg(advisorOrganization);
-    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+    final String createdUuid = graphQLHelper.createObject(admin, "createReport", "report",
         "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
     assertThat(createdUuid).isNotNull();
   }
@@ -1722,9 +1770,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Fill a report
     final Person author = getJackJackson();
     final Report r = new Report();
-    r.setAuthor(author);
-    r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(getSteveSteveson()),
-        PersonTest.personToPrimaryReportPerson(getElizabethElizawell())));
+    r.setReportPeople(ImmutableList.of(PersonTest.personToPrimaryReportPerson(getSteveSteveson()),
+        PersonTest.personToPrimaryReportPerson(getElizabethElizawell()),
+        PersonTest.personToReportAuthor(author)));
     r.setState(ReportState.DRAFT);
     r.setAtmosphere(Atmosphere.POSITIVE);
     r.setIntent("Testing the report approval flow");
@@ -1734,7 +1782,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Location loc = getLocation(author, "Portugal Cove Ferry Terminal");
     r.setLocation(loc);
     final Instant engagementDate =
-        Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusWeeks(2).toInstant();
+        Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusWeeks(2).toInstant();
     r.setEngagementDate(engagementDate);
 
     // Reference task 1.1.A
@@ -1825,4 +1873,78 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(approvedStep3.getState()).isEqualTo(Report.ReportState.APPROVED);
   }
 
+  @Test
+  public void testReportAuthors() {
+    final Person author = getJackJackson();
+    final Report r = new Report();
+    r.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(author)));
+    r.setState(ReportState.DRAFT);
+    r.setAtmosphere(Atmosphere.POSITIVE);
+    r.setIntent("Testing report authors");
+    r.setEngagementDate(Instant.now());
+    final String createdUuid = graphQLHelper.createObject(author, "createReport", "report",
+        "ReportInput", r, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(createdUuid).isNotNull();
+    final Report reportFirstAuthor = graphQLHelper.getObjectById(author, "report", FIELDS,
+        createdUuid, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(reportFirstAuthor.getUuid()).isNotNull();
+    assertThat(reportFirstAuthor.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(reportFirstAuthor.isAuthor(author)).isTrue();
+
+    // Try to remove the author, should fail
+    reportFirstAuthor.setReportPeople(null);
+    try {
+      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput",
+          reportFirstAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
+    // Add a second author
+    final Person liz = getElizabethElizawell();
+    reportFirstAuthor.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(author),
+        PersonTest.personToReportAuthor(liz)));
+    final Report reportTwoAuthors = graphQLHelper.updateObject(author, "updateReport", "report",
+        FIELDS, "ReportInput", reportFirstAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(reportTwoAuthors.isAuthor(author)).isTrue();
+    assertThat(reportTwoAuthors.isAuthor(liz)).isTrue();
+
+    // Remove the first author
+    reportTwoAuthors.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(liz)));
+    final Report reportSecondAuthor = graphQLHelper.updateObject(author, "updateReport", "report",
+        FIELDS, "ReportInput", reportTwoAuthors, new TypeReference<GraphQlResponse<Report>>() {});
+    assertThat(reportSecondAuthor.isAuthor(author)).isFalse();
+    assertThat(reportSecondAuthor.isAuthor(liz)).isTrue();
+
+    // Try to edit the report as the first author, should fail
+    reportSecondAuthor.setIntent("Testing report authors again");
+    try {
+      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput",
+          reportSecondAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Try to add first author again, should fail
+    reportSecondAuthor.setReportPeople(ImmutableList.of(PersonTest.personToReportAuthor(author),
+        PersonTest.personToReportAuthor(liz)));
+    try {
+      graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput",
+          reportSecondAuthor, new TypeReference<GraphQlResponse<Report>>() {});
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Try to delete the report as the first author, should fail
+    try {
+      graphQLHelper.deleteObject(author, "deleteReport", reportSecondAuthor.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have the remaining author delete this report.
+    final Integer nrDeleted =
+        graphQLHelper.deleteObject(liz, "deleteReport", reportSecondAuthor.getUuid());
+    assertThat(nrDeleted).isEqualTo(1);
+  }
 }

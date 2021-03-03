@@ -1,24 +1,13 @@
 import Model, {
-  createYupObjectShape,
-  NOTE_TYPE,
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS,
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Report } from "models"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
-
-function createTaskAssessmentSchema(customFieldsConfig) {
-  const taskAssessmentSchemaShape = createYupObjectShape(
-    customFieldsConfig,
-    "entityAssessment"
-  )
-  return yup.object().shape({
-    entityAssessment: taskAssessmentSchemaShape
-  })
-}
 
 export const {
   shortLabel,
@@ -42,27 +31,14 @@ export default class Task extends Model {
     return shortLabel
   }
 
-  static STATUS = {
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static APPROVAL_STEP_TYPE = {
     PLANNING_APPROVAL: "PLANNING_APPROVAL",
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
 
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.task.customFields
-  )
-
-  static topLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
-    Settings.fields.task.topLevel.assessment.customFields
-  )
-
-  static subLevelAssessmentCustomFieldsSchema = createTaskAssessmentSchema(
-    Settings.fields.task.subLevel.assessment.customFields
   )
 
   static yupSchema = yup
@@ -115,7 +91,7 @@ export default class Task extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Task.STATUS.ACTIVE),
+        .default(() => Model.STATUS.ACTIVE),
       responsiblePositions: yup
         .array()
         .nullable()
@@ -137,7 +113,8 @@ export default class Task extends Model {
             restrictedApproval: yup.boolean().default(false),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
@@ -158,19 +135,22 @@ export default class Task extends Model {
             restrictedApproval: yup.boolean().default(false),
             approvers: yup
               .array()
-              .required("You must select at least one approver")
+              .required()
+              .min(1, "You must select at least one approver")
               .default([])
           })
         )
         .nullable()
-        .default([]),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Task.customFieldsSchema.nullable()
+        .default([])
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Task.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid, shortName, longName, customFieldRef1 { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
@@ -190,16 +170,6 @@ export default class Task extends Model {
       : Settings.fields.task.subLevel
   }
 
-  periodAssessmentYupSchema() {
-    return this.isTopLevelTask()
-      ? Task.topLevelAssessmentCustomFieldsSchema
-      : Task.subLevelAssessmentCustomFieldsSchema
-  }
-
-  periodAssessmentConfig() {
-    return this.fieldSettings().assessment?.customFields
-  }
-
   iconUrl() {
     return TASKS_ICON
   }
@@ -208,49 +178,12 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  getAssessmentResults(dateRange) {
-    const publishedReportsUuids = this.publishedReports.map(r => r.uuid)
-    const taskAssessmentNotes = this.notes
-      .filter(
-        n =>
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 2 &&
-          n.noteRelatedObjects.filter(
-            ro =>
-              ro.relatedObjectType === Report.relatedObjectType &&
-              publishedReportsUuids.includes(ro.relatedObjectUuid)
-          ).length &&
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
-      )
-      .map(ta => JSON.parse(ta.text))
-    const assessmentResults = {}
-    taskAssessmentNotes.forEach(o =>
-      Object.keys(o).forEach(k => {
-        if (!Object.prototype.hasOwnProperty.call(assessmentResults, k)) {
-          assessmentResults[k] = []
-        }
-        assessmentResults[k].push(o[k])
-      })
-    )
-    return assessmentResults
+  generalAssessmentsConfig() {
+    return this.fieldSettings().assessments || []
   }
 
-  getLastAssessment(dateRange) {
-    const notesToAssessments = this.notes
-      .filter(n => {
-        return (
-          n.type === NOTE_TYPE.ASSESSMENT &&
-          n.noteRelatedObjects.length === 1 &&
-          (!dateRange ||
-            (n.createdAt <= dateRange.end && n.createdAt >= dateRange.start))
-        )
-      })
-      .sort((a, b) => b.createdAt - a.createdAt) // desc sorted
-      .map(ta => ({
-        uuid: ta.uuid,
-        assessment: JSON.parse(ta.text)
-      }))
-    return notesToAssessments.length ? notesToAssessments[0].assessment : null
+  instanceAssessmentsConfig() {
+    // The given task instance might have a specific assessments config
+    return utils.parseJsonSafe(this.customFields).assessments || []
   }
 }

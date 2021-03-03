@@ -3,12 +3,17 @@ class Page {
     user: "erin",
     superUser: "rebecca",
     adminUser: "arthur",
-    onboardUser: "bonny"
+    onboardUser: "bonny",
+    noPositionUser: "nopos"
   }
 
   _buildUrl(pathName, credentials) {
     const credSep = pathName.includes("?") ? "&" : "?"
-    return `${browser.options.baseUrl}${pathName}${credSep}user=${credentials}&pass=${credentials}`
+    const baseUrl = browser.options.baseUrl
+    const url = pathName.startsWith(baseUrl)
+      ? pathName
+      : `${baseUrl}${pathName}`
+    return `${url}${credSep}user=${credentials}&pass=${credentials}`
   }
 
   _open(pathName, credentials) {
@@ -32,8 +37,15 @@ class Page {
     this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
   }
 
-  openAsOnboardUser(pathName = "/") {
-    this._open(pathName, Page.DEFAULT_CREDENTIALS.onboardUser)
+  openAsPositionlessUser(pathName = "/") {
+    this._open(pathName, Page.DEFAULT_CREDENTIALS.noPositionUser)
+  }
+
+  openAsOnboardUser(
+    pathName = "/",
+    uniqueName = Page.DEFAULT_CREDENTIALS.onboardUser
+  ) {
+    this._open(pathName, uniqueName)
   }
 
   getRandomOption(select) {

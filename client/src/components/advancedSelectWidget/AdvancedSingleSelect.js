@@ -21,6 +21,7 @@ const AdvancedSingleSelect = props => {
       extraAddon={
         props.showRemoveButton && !_isEmpty(props.value) ? (
           <img
+            style={{ cursor: "pointer" }}
             src={REMOVE_ICON}
             height={16}
             alt=""
@@ -45,6 +46,7 @@ AdvancedSingleSelect.propTypes = {
   valueKey: PropTypes.string
 }
 AdvancedSingleSelect.defaultProps = {
+  value: {},
   overlayTable: AdvancedSingleSelectOverlayTable,
   showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
 }

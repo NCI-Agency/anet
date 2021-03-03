@@ -30,6 +30,7 @@ my $identifiers = qr/
   | endOfTourDate
   | engagementDate
   | isPrimary
+  | isAuthor
   | identificationCode
   | jobSpec
   | keyOutcomes
@@ -59,10 +60,8 @@ my $identifiers = qr/
   | reportId
   | reportPeople
   | reportTasks
-  | reportTags
   | savedSearches
   | shortName
-  | tagId
   | taskId
   | updatedAt
  )\b

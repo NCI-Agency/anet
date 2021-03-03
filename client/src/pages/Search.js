@@ -13,17 +13,23 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import ReportCollection from "components/ReportCollection"
+import ReportCollection, {
+  FORMAT_CALENDAR,
+  FORMAT_MAP,
+  FORMAT_STATISTICS,
+  FORMAT_SUMMARY,
+  FORMAT_TABLE
+} from "components/ReportCollection"
 import {
+  getSearchQuery,
   SearchDescription,
-  SearchQueryPropType,
-  getSearchQuery
+  SearchQueryPropType
 } from "components/SearchFilters"
 import SubNav from "components/SubNav"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -212,7 +218,10 @@ const Organizations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.organizationList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -310,7 +319,10 @@ const People = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.personList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -426,7 +438,10 @@ const Positions = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.positionList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -460,7 +475,7 @@ Positions.propTypes = {
   setPagination: PropTypes.func.isRequired
 }
 
-const Tasks = ({
+export const Tasks = ({
   pageDispatchers,
   queryParams,
   setTotalCount,
@@ -497,7 +512,10 @@ const Tasks = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.taskList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -591,7 +609,10 @@ const Locations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.locationList?.totalCount
-  useEffect(() => setTotalCount(totalCount), [setTotalCount, totalCount])
+  useEffect(() => setTotalCount && setTotalCount(totalCount), [
+    setTotalCount,
+    totalCount
+  ])
   if (done) {
     return result
   }
@@ -780,19 +801,22 @@ const Search = ({
             <Dropdown.Menu className="super-colors">
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)}
+                  exportResults(searchQueryParams, queryTypes, "xlsx", setError)
+                }
               >
                 Excel (xlsx)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "kml", setError)}
+                  exportResults(searchQueryParams, queryTypes, "kml", setError)
+                }
               >
                 Google Earth (kml)
               </MenuItem>
               <MenuItem
                 onClick={() =>
-                  exportResults(searchQueryParams, queryTypes, "nvg", setError)}
+                  exportResults(searchQueryParams, queryTypes, "nvg", setError)
+                }
               >
                 NATO Vector Graphics (nvg)
               </MenuItem>
@@ -893,6 +917,13 @@ const Search = ({
             queryParams={reportsSearchQueryParams}
             setTotalCount={setNumReports}
             paginationKey="SEARCH_reports"
+            viewFormats={[
+              FORMAT_SUMMARY,
+              FORMAT_TABLE,
+              FORMAT_CALENDAR,
+              FORMAT_MAP,
+              FORMAT_STATISTICS
+            ]}
           />
         </Fieldset>
       )}

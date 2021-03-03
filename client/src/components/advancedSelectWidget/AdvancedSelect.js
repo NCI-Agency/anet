@@ -1,4 +1,5 @@
-import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -33,13 +34,13 @@ const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
     <Col md={2} xsHidden smHidden>
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
-        {Object.keys(items).map(filterType => (
+        {Object.entries(items).map(([filterType, filter]) => (
           <li
             key={filterType}
             className={currentFilter === filterType ? "active" : null}
           >
             <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
-              {items[filterType].label}
+              {filter.label}
             </Button>
           </li>
         ))}
@@ -58,9 +59,9 @@ const FilterAsDropdown = ({ items, handleOnChange }) =>
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
-          {Object.keys(items).map(filterType => (
+          {Object.entries(items).map(([filterType, filter]) => (
             <option key={filterType} value={filterType}>
-              {items[filterType].label}
+              {filter.label}
             </option>
           ))}
         </select>
@@ -100,7 +101,7 @@ export const propTypes = {
   overlayColumns: PropTypes.array.isRequired,
   overlayRenderRow: PropTypes.func.isRequired,
   closeOverlayOnAdd: PropTypes.bool, // set to true if you want the overlay to be closed after an add action
-  filterDefs: PropTypes.object, // config of the search filters
+  filterDefs: PropTypes.object.isRequired, // config of the search filters
   onChange: PropTypes.func,
   // Required: ANET Object Type (Person, Report, etc) to search for.
   objectType: PropTypes.func.isRequired,
@@ -218,7 +219,10 @@ const AdvancedSelect = ({
     ]
   )
 
-  const [fetchResultsDebounced] = useDebouncedCallback(fetchResults, 400)
+  const { callback: fetchResultsDebounced } = useDebouncedCallback(
+    fetchResults,
+    400
+  )
 
   useEffect(() => {
     if (
@@ -293,11 +297,10 @@ const AdvancedSelect = ({
     <>
       {!(disabled && renderSelectedWithDelete) && (
         <>
-          <div id={`${fieldName}-popover`}>
+          <div id={`${fieldName}-popover`} className="advanced-select-popover">
             <InputGroup>
-              <Popover
-                className="advanced-select-popover"
-                popoverClassName="bp3-popover-content-sizing"
+              <Popover2
+                popoverClassName="bp3-popover2-content-sizing"
                 content={
                   <Row className="border-between">
                     <FilterAsNav
@@ -346,11 +349,13 @@ const AdvancedSelect = ({
                 }
                 isOpen={showOverlay}
                 captureDismiss
-                dsabled={disabled}
-                interactionKind={PopoverInteractionKind.CLICK}
+                disabled={disabled}
+                interactionKind={Popover2InteractionKind.CLICK}
                 onInteraction={handleInteraction}
                 usePortal={false}
-                position={Position.BOTTOM}
+                autoFocus={false}
+                enforceFocus={false}
+                placement="bottom"
                 modifiers={{
                   preventOverflow: {
                     enabled: false
@@ -368,12 +373,13 @@ const AdvancedSelect = ({
                   value={searchTerms || ""}
                   placeholder={placeholder}
                   onChange={changeSearchTerms}
+                  onFocus={event => handleInteraction(true, event)}
                   inputRef={ref => {
                     searchInput.current = ref
                   }}
                   disabled={disabled}
                 />
-              </Popover>
+              </Popover2>
               {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
               {addon && (
                 <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />

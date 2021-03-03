@@ -1,3 +1,4 @@
+import Model from "components/Model"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Position } from "models"
@@ -82,7 +83,7 @@ async function listOrganizations(user) {
         organizationsQuery: {
           pageNum: 0,
           pageSize: 1,
-          status: Organization.STATUS.ACTIVE
+          status: Model.STATUS.ACTIVE
         }
       }
     })
@@ -107,7 +108,7 @@ async function listOrganizations(user) {
           organizationsQuery: {
             pageNum: random,
             pageSize: 1,
-            status: Organization.STATUS.ACTIVE
+            status: Model.STATUS.ACTIVE
           }
         }
       })
@@ -140,9 +141,7 @@ function randomPositionTemplate(organizations) {
       }
     },
     status: () =>
-      fuzzy.withProbability(0.9)
-        ? Position.STATUS.ACTIVE
-        : Position.STATUS.INACTIVE,
+      fuzzy.withProbability(0.9) ? Model.STATUS.ACTIVE : Model.STATUS.INACTIVE,
     person: identity,
     organization: () => {
       return faker.random.arrayElement(
@@ -183,7 +182,7 @@ function getPositionType(organizationType) {
  * @param {*} user The user that creates the position
  */
 const _createPosition = async function(user) {
-  const position = new Position()
+  const position = Object.without(new Position(), "formCustomFields")
   const organization = await getRandomObject(
     user,
     "organizations",
@@ -196,8 +195,10 @@ const _createPosition = async function(user) {
     {
       role: getPersonRole(organization.type)
     },
-    "uuid",
-    [user.uuid]
+    "uuid domainUsername",
+    randomObject =>
+      randomObject?.uuid === user.uuid ||
+      randomObject?.domainUsername === specialUser.name
   )
   const location = await getRandomObject(user, "locations")
   const template = {
@@ -205,9 +206,7 @@ const _createPosition = async function(user) {
     code: () => faker.lorem.slug(),
     type: () => getPositionType(organization.type),
     status: () =>
-      fuzzy.withProbability(0.9)
-        ? Position.STATUS.ACTIVE
-        : Position.STATUS.INACTIVE,
+      fuzzy.withProbability(0.9) ? Model.STATUS.ACTIVE : Model.STATUS.INACTIVE,
     organization,
     person,
     location
@@ -252,7 +251,7 @@ const _deletePosition = async function(user) {
   ])
   const position = await getRandomPosition(user, {
     isFilled: false,
-    status: Position.STATUS.INACTIVE,
+    status: Model.STATUS.INACTIVE,
     type: [type]
   })
 
@@ -289,7 +288,7 @@ const _deactivatePosition = async function(user) {
   ])
   let position = await getRandomPosition(user, {
     isFilled: false,
-    status: Position.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     type: [type]
   })
 
@@ -328,7 +327,7 @@ const _deactivatePosition = async function(user) {
         variables: {}
       })
     ).data.position
-    position.status = Position.STATUS.INACTIVE
+    position.status = Model.STATUS.INACTIVE
 
     console.debug(`Removing position of ${position.name.green}`)
     return (
@@ -434,7 +433,7 @@ const putPersonInPosition = async function(user) {
     role === Person.ROLE.ADVISOR
       ? Position.TYPE.ADVISOR
       : Position.TYPE.PRINCIPAL
-  var persons = (
+  const persons = (
     await runGQL(user, {
       query: `
       query ($peopleQuery: PersonSearchQueryInput) {
@@ -462,7 +461,7 @@ const putPersonInPosition = async function(user) {
     isFilled: false,
     type: [type]
   })
-  var person = faker.random.arrayElement(persons)
+  const person = faker.random.arrayElement(persons)
 
   if (!position) {
     console.debug("No positions to fill available")

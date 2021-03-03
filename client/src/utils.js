@@ -6,7 +6,7 @@ import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
 import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
-import React from "react"
+import React, { useCallback, useEffect } from "react"
 import Settings from "settings"
 
 const WILDCARD = "*"
@@ -22,9 +22,29 @@ Object.keys(changeCase)
       !input ? "" : changeCase[c](input, options)
   })
 
+const isNullOrUndefined = value => {
+  return value === null || value === undefined
+}
+
+const fnRequiredWhen = (boolPropName, props, propName, componentName) => {
+  if (props[boolPropName] && typeof props[propName] !== "function") {
+    return new Error(
+      `Prop "${componentName}.${propName}" is a required function if "${boolPropName}" is true`
+    )
+  }
+}
+
+const ellipsize = (value, maxLength) =>
+  value.length > maxLength
+    ? value.substring(0, maxLength - 1) + "\u2026"
+    : value
+
 export default {
   ...wrappedChangeCase,
   pluralize,
+  isNullOrUndefined,
+  fnRequiredWhen,
+  ellipsize,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))
   },
@@ -50,13 +70,13 @@ export default {
     const from = email[0].trim()
     const domain = email[1].toLowerCase()
     return (
-      this.validateWithWhitelist(from, domain, domainNames) ||
+      this.validateAgainstAllowedDomains(from, domain, domainNames) ||
       this.validateWithWildcard(domain, wildcardDomains)
     )
   },
 
-  validateWithWhitelist: function(from, domain, whitelist) {
-    return from.length > 0 && whitelist.includes(domain)
+  validateAgainstAllowedDomains: function(from, domain, allowedDomains) {
+    return from.length > 0 && allowedDomains.includes(domain)
   },
 
   validateWithWildcard: function(domain, wildcardDomains) {
@@ -138,6 +158,10 @@ export default {
     return _isEmpty(text)
   },
 
+  isNumeric: function(value) {
+    return typeof value === "number"
+  },
+
   pushHash: function(hash) {
     const { history, location } = window
     hash = hash ? (hash.indexOf("#") === 0 ? hash : "#" + hash) : ""
@@ -151,6 +175,41 @@ export default {
     } else {
       location.hash = hash
     }
+  },
+
+  parseJsonSafe: function(jsonString, throwError) {
+    // TODO: Improve error handling so that consuming widgets can display an error w/o crashing
+    let result
+    try {
+      result = JSON.parse(jsonString || "{}")
+    } catch (error) {
+      if (throwError) {
+        throw error
+      } else {
+        console.error(`unable to parse JSON: ${jsonString}`)
+      }
+    }
+    return typeof result === "object" ? result || {} : {}
+  },
+
+  arrayOfNumbers: function(arr) {
+    return (
+      arr &&
+      arr.filter(n => !isNaN(parseFloat(n)) && isFinite(n)).map(n => Number(n))
+    )
+  },
+
+  preventNegativeAndLongDigits: function(valueStr, maxLen) {
+    let safeVal
+    const dangerVal = Number(valueStr)
+    if (!isNaN(dangerVal) && dangerVal < 0) {
+      safeVal = "0"
+    } else {
+      const nonDigitsRemoved = valueStr.replace(/\D/g, "")
+      safeVal =
+        maxLen <= 0 ? nonDigitsRemoved : nonDigitsRemoved.slice(0, maxLen)
+    }
+    return safeVal
   }
 }
 
@@ -172,7 +231,7 @@ Object.get = function(source, keypath) {
   while (keys[0]) {
     const key = keys.shift()
     source = source[key]
-    if (source === undefined || source === null) {
+    if (isNullOrUndefined(source)) {
       return source
     }
   }
@@ -200,7 +259,7 @@ Promise.prototype.log = function () {
 
 export const renderBlueprintIconAsSvg = (
   iconName,
-  iconSize: Icon.SIZE_STANDARD
+  iconSize = Icon.SIZE_STANDARD
 ) => {
   // choose which pixel grid is most appropriate for given icon size
   const pixelGridSize =
@@ -221,4 +280,29 @@ export const renderBlueprintIconAsSvg = (
         ${paths.join("")}
       </g>` // we use a rect to simulate pointer-events: bounding-box
   }
+}
+
+export const useOutsideClick = (ref, cb) => {
+  const nodeExists = ref && ref.current
+
+  const callback = useCallback(
+    event => {
+      if (nodeExists && !ref.current.contains(event.target)) {
+        cb(event)
+      }
+    },
+    // arrow functions will retrigger this every call, but we can introduce bugs if we omit
+    [ref, nodeExists, cb]
+  )
+
+  useEffect(() => {
+    if (nodeExists) {
+      document.addEventListener("click", callback)
+      document.addEventListener("ontouchstart", callback)
+      return () => {
+        document.removeEventListener("click", callback)
+        document.removeEventListener("ontouchstart", callback)
+      }
+    }
+  }, [nodeExists, callback])
 }

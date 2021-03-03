@@ -6,14 +6,15 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model from "components/Model"
 import RemoveButton from "components/RemoveButton"
-import RECURSE_STRATEGY from "components/SearchFilters"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
@@ -53,7 +54,7 @@ const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
             <td>
               <RemoveButton
                 title="Unassign person"
-                handleOnClick={() => onDelete(relPos)}
+                onClick={() => onDelete(relPos)}
               />
             </td>
           </tr>
@@ -67,20 +68,20 @@ AssociatedPositionsTable.propTypes = {
   associatedPositions: PropTypes.array
 }
 
-const BaseEditAssociatedPositionsModal = ({
+const EditAssociatedPositionsModal = ({
   position,
   showModal,
   onCancel,
-  onSuccess,
-  currentUser
+  onSuccess
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [error, setError] = useState(null)
   const assignedRole =
     position.type === Position.TYPE.PRINCIPAL
       ? Settings.fields.advisor.person.name
       : Settings.fields.principal.person.name
   const positionSearchQuery = {
-    status: Position.STATUS.ACTIVE,
+    status: Model.STATUS.ACTIVE,
     matchPersonName: true
   }
   if (position.type === Position.TYPE.PRINCIPAL) {
@@ -123,7 +124,8 @@ const BaseEditAssociatedPositionsModal = ({
                       label="Associated positions"
                       component={FieldHelper.SpecialField}
                       onChange={value =>
-                        setFieldValue("associatedPositions", value)}
+                        setFieldValue("associatedPositions", value)
+                      }
                       vertical
                       widget={
                         <AdvancedMultiSelect
@@ -183,7 +185,11 @@ const BaseEditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = new Position(position)
+    const newPosition = Object.without(
+      new Position(values),
+      "notes",
+      "responsibleTasks" // Only for querying
+    )
     newPosition.associatedPositions = values.associatedPositions
     delete newPosition.previousPeople
     delete newPosition.person // prevent any changes to person.
@@ -192,23 +198,11 @@ const BaseEditAssociatedPositionsModal = ({
     })
   }
 }
-BaseEditAssociatedPositionsModal.propTypes = {
+EditAssociatedPositionsModal.propTypes = {
   position: PropTypes.object.isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onSuccess: PropTypes.func.isRequired
 }
-
-const EditAssociatedPositionsModal = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseEditAssociatedPositionsModal
-        currentUser={context.currentUser}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default EditAssociatedPositionsModal

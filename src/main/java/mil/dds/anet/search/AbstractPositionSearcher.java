@@ -1,5 +1,10 @@
 package mil.dds.anet.search;
 
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -8,6 +13,9 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.PendingAssessmentsHelper;
+import org.jdbi.v3.core.Handle;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public abstract class AbstractPositionSearcher
@@ -25,6 +33,29 @@ public abstract class AbstractPositionSearcher
   }
 
   @Override
+  public CompletableFuture<AnetBeanList<Position>> runSearch(Map<String, Object> context,
+      PositionSearchQuery query) {
+    // Asynchronous version of search; should be wrapped in a transaction by the GraphQlResource
+    // handling the request
+    final Handle dbHandle = getDbHandle();
+    final PositionMapper mapper = new PositionMapper();
+    buildQuery(query);
+    if (!query.getHasPendingAssessments()) {
+      return CompletableFuture.completedFuture(qb.buildAndRun(dbHandle, query, mapper));
+    }
+
+    // Filter to only the positions with pending assessments
+    final Instant now = Instant.now().atZone(DaoUtils.getServerNativeZoneId()).toInstant();
+    return new PendingAssessmentsHelper(AnetObjectEngine.getConfiguration())
+        .loadAll(context, now, null, false).thenApply(otaMap -> {
+          return otaMap.keySet().stream().map(p -> p.getUuid()).collect(Collectors.toList());
+        }).thenCompose(positionUuids -> {
+          qb.addInListClause("positionUuids", "positions.uuid", positionUuids);
+          return CompletableFuture.completedFuture(qb.buildAndRun(dbHandle, query, mapper));
+        });
+  }
+
+  @Override
   protected void buildQuery(PositionSearchQuery query) {
     qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
     qb.addTotalCount();
@@ -34,7 +65,7 @@ public abstract class AbstractPositionSearcher
       qb.addFromClause("LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid");
     }
 
-    if (query.isTextPresent()) {
+    if (hasTextQuery(query)) {
       addTextQuery(query);
     }
 
@@ -51,7 +82,7 @@ public abstract class AbstractPositionSearcher
             "organizations", "\"parentOrgUuid\"", "orgUuid", query.getOrganizationUuid(),
             RecurseStrategy.CHILDREN.equals(query.getOrgRecurseStrategy()));
       } else {
-        qb.addEqualsClause("orgUuid", "positions.\"organizationUuid\"",
+        qb.addStringEqualsClause("orgUuid", "positions.\"organizationUuid\"",
             query.getOrganizationUuid());
       }
     }
@@ -64,8 +95,8 @@ public abstract class AbstractPositionSearcher
       }
     }
 
-    qb.addEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
-    qb.addEqualsClause("status", "positions.status", query.getStatus());
+    qb.addStringEqualsClause("locationUuid", "positions.\"locationUuid\"", query.getLocationUuid());
+    qb.addEnumEqualsClause("status", "positions.status", query.getStatus());
 
     if (query.getAuthorizationGroupUuid() != null) {
       // Search for positions related to a given authorization group
@@ -75,10 +106,17 @@ public abstract class AbstractPositionSearcher
       qb.addSqlArg("authorizationGroupUuid", query.getAuthorizationGroupUuid());
     }
 
+    if (query.getHasCounterparts()) {
+      qb.addWhereClause("("
+          + "positions.uuid IN (SELECT \"positionUuid_a\" FROM \"positionRelationships\""
+          + " WHERE \"positionUuid_b\" IS NOT NULL AND deleted = :deleted)"
+          + " OR positions.uuid IN (" + "SELECT \"positionUuid_b\" FROM \"positionRelationships\""
+          + " WHERE \"positionUuid_a\" IS NOT NULL AND deleted = :deleted))");
+      qb.addSqlArg("deleted", false);
+    }
+
     addOrderByClauses(qb, query);
   }
-
-  protected abstract void addTextQuery(PositionSearchQuery query);
 
   @SuppressWarnings("unchecked")
   protected void addBatchClause(PositionSearchQuery query) {

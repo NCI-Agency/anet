@@ -1,4 +1,5 @@
 const merge = require("webpack-merge")
+const CircularDependencyPlugin = require("circular-dependency-plugin")
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const webpack = require("webpack")
@@ -31,26 +32,36 @@ const commonConfig = {
         enforce: "pre",
         test: /\.js$/,
         exclude: /node_modules/,
-        use: ["cache-loader", "eslint-loader"]
+        use: ["eslint-loader"]
       },
       {
-        test: /\.(js|jsx)$/,
-        include: [paths.appSrc, paths.testSrc],
-        use: ["cache-loader", "thread-loader", "babel-loader"]
+        test: /\.(m?js|jsx)$/,
+        include: [paths.appSrc, paths.testSrc, paths.platforms],
+        use: [
+          "thread-loader",
+          {
+            loader: "babel-loader",
+            options: {
+              cacheDirectory: true,
+              // see https://github.com/facebook/create-react-app/issues/6846
+              cacheCompression: false
+            }
+          }
+        ]
       },
       {
-        test: /\.js$/,
+        test: /\.m?js$/,
         // Based on https://github.com/facebook/create-react-app/pull/3776
         include: /node_modules/,
         use: [
-          "cache-loader",
           "thread-loader",
           {
             loader: "babel-loader",
             options: {
               babelrc: false,
               compact: false,
-              presets: [require.resolve("babel-preset-react-app/dependencies")]
+              presets: [require.resolve("babel-preset-react-app/dependencies")],
+              cacheDirectory: true
             }
           }
         ]
@@ -80,8 +91,11 @@ const commonConfig = {
 }
 
 module.exports = {
-  clientConfig: merge(commonConfig, {
-    target: "web",
+  clientConfig: merge.merge(commonConfig, {
+    target: ["web", "es5"],
+    resolve: {
+      alias: { vm: "vm-browserify" }
+    },
     entry: {
       anet: [require.resolve("./polyfills"), "./src/index.js"]
     },
@@ -101,6 +115,17 @@ module.exports = {
       new webpack.DefinePlugin({
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
       }),
+      new CircularDependencyPlugin({
+        // exclude detection of files based on a RegExp
+        exclude: /node_modules/,
+        // add errors to webpack instead of warnings
+        failOnError: true,
+        // allow import cycles that include an asyncronous import,
+        // e.g. via import(/* webpackMode: "weak" */ './file.js')
+        allowAsyncCycles: false,
+        // set the current working directory for displaying module paths
+        cwd: process.cwd()
+      }),
       new ContextReplacementPlugin(/moment[\\/]locale$/, /^\.\/(en)$/),
       new CopyWebpackPlugin({
         patterns: [{ from: "public", globOptions: { ignore: ["index.html"] } }]
@@ -112,10 +137,16 @@ module.exports = {
       // new webpack.optimize.CommonsChunkPlugin({
       //     name: 'manifest'
       //   })
-    ]
+    ],
+    cache: {
+      type: "filesystem",
+      buildDependencies: {
+        config: [__filename]
+      }
+    }
   }),
 
-  simConfig: merge(commonConfig, {
+  simConfig: merge.merge(commonConfig, {
     resolve: {
       modules: [paths.appSrc, "node_modules", "platform/node"]
     },

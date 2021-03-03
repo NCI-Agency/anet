@@ -5,6 +5,7 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -36,12 +37,12 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: AuthorizationGroup.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: AuthorizationGroup.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -67,7 +68,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
           allAdvisorPositions: {
             label: "All advisor positions",
             queryVars: {
-              status: Position.STATUS.ACTIVE,
+              status: Model.STATUS.ACTIVE,
               type: [
                 Position.TYPE.ADVISOR,
                 Position.TYPE.SUPER_USER,
@@ -109,7 +110,8 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                       "descriptionCharsLeft",
                       Settings.maxTextFieldLength,
                       event
-                    )}
+                    )
+                  }
                   extraColElem={
                     <>
                       <span id="descriptionCharsLeft">
@@ -215,9 +217,9 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(AuthorizationGroup.pathForEdit(authGroup))
     }
@@ -231,6 +233,14 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
       new AuthorizationGroup(values),
       "notes"
     )
+    authorizationGroup.positions = values.positions.map(pos => {
+      const p = Object.without(
+        pos,
+        "customFields",
+        DEFAULT_CUSTOM_FIELDS_PARENT
+      )
+      return p
+    })
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
       { authorizationGroup }

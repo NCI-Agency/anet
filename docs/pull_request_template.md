@@ -1,7 +1,5 @@
 …change description goes here…
 
-### Release notes
-
 Closes #
 
 #### User changes
@@ -14,8 +12,7 @@ Closes #
 -
 
 #### System admin changes
--
-- [ ] anet.yml needs change
+- [ ] anet.yml or anet-dictionary.yml needs change
 - [ ] db needs migration
 - [ ] documentation has changed
 - [ ] graphql schema has changed

@@ -1,7 +1,7 @@
 import { ContentState, EditorState, Modifier, convertFromHTML } from "draft-js"
 
-const HTML_REGEX = new RegExp(/<[a-z][\s\S]*>/i)
-const NEW_LINE_REGEX = new RegExp(/^([^"\r\n]*(?:(?:"[^"]*")*[^"\r\n]*))/gm)
+const HTML_REGEX = /<[a-z][\s\S]*>/i
+const NEW_LINE_REGEX = /^([^"\r\n]*(?:(?:"[^"]*")*[^"\r\n]*))/gm
 
 const createNewLines = (newLines, nextState) => {
   // Create simple htmlMarkup with paragraphs based on the new lines array

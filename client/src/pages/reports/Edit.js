@@ -1,18 +1,22 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { initInvisibleFields } from "components/CustomFields"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import { Report } from "models"
+import { Person, Report, Task } from "models"
 import React from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
+import Settings from "settings"
+import utils from "utils"
 import ReportForm from "./Form"
 
 const GQL_GET_REPORT = gql`
@@ -33,17 +37,19 @@ const GQL_GET_REPORT = gql`
         uuid
         name
       }
-      author {
+      authors {
         uuid
         name
         rank
         role
         avatar(size: 32)
       }
-      attendees {
+      reportPeople {
         uuid
         name
+        author
         primary
+        attendee
         rank
         role
         status
@@ -58,6 +64,7 @@ const GQL_GET_REPORT = gql`
           organization {
             uuid
             shortName
+            identificationCode
           }
           location {
             uuid
@@ -74,11 +81,6 @@ const GQL_GET_REPORT = gql`
           shortName
         }
         customFields
-      }
-      tags {
-        uuid
-        name
-        description
       }
       reportSensitiveInformation {
         uuid
@@ -115,14 +117,24 @@ const ReportEdit = ({ pageDispatchers }) => {
 
   if (data) {
     data.report.cancelled = !!data.report.cancelledReason
-    data.report.reportTags = (data.report.tags || []).map(tag => ({
-      id: tag.uuid.toString(),
-      text: tag.name
-    }))
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.report.customFields
+    )
   }
   const report = new Report(data ? data.report : {})
-  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
+  const reportInitialValues = Object.assign(
+    report,
+    report.getTasksEngagementAssessments(),
+    report.getAttendeesEngagementAssessments()
+  )
+
+  // mutates the object
+  initInvisibleFields(reportInitialValues, Settings.fields.report.customFields)
+
+  reportInitialValues.tasks = Task.fromArray(reportInitialValues.tasks)
+  reportInitialValues.reportPeople = Person.fromArray(
+    reportInitialValues.reportPeople
+  )
 
   return (
     <div className="report-edit">
@@ -131,7 +143,8 @@ const ReportEdit = ({ pageDispatchers }) => {
         relatedObject={
           report.uuid && {
             relatedObjectType: Report.relatedObjectType,
-            relatedObjectUuid: report.uuid
+            relatedObjectUuid: report.uuid,
+            relatedObject: report
           }
         }
       />
@@ -139,10 +152,7 @@ const ReportEdit = ({ pageDispatchers }) => {
         edit
         initialValues={reportInitialValues}
         title={`Report #${report.uuid}`}
-        showSensitiveInfo={
-          !!report.reportSensitiveInformation &&
-          !!report.reportSensitiveInformation.text
-        }
+        showSensitiveInfo={!!report.reportSensitiveInformation?.text}
       />
     </div>
   )

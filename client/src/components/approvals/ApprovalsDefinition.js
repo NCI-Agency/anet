@@ -5,12 +5,13 @@ import { ApproverOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import Model from "components/Model"
+import RemoveButton from "components/RemoveButton"
 import { FastField, FieldArray } from "formik"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Checkbox, Modal, Table } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_GET_APPROVAL_STEP_IN_USE = gql`
@@ -41,10 +42,12 @@ const ApproverTable = ({ approvers, onDelete }) => (
           <td>
             <LinkTo modelType="Position" model={approver} target="_blank" />
           </td>
-          <td onClick={() => onDelete(approver)}>
-            <span style={{ cursor: "pointer" }}>
-              <img src={REMOVE_ICON} height={14} alt="Remove approver" />
-            </span>
+          <td>
+            <RemoveButton
+              title="Remove approver"
+              altText="Remove approver"
+              onClick={() => onDelete(approver)}
+            />
           </td>
         </tr>
       ))}
@@ -164,13 +167,11 @@ const ApprovalsDefinition = ({
 
     return (
       <Fieldset title={`Step ${index + 1}`} key={index}>
-        <Button
-          className="pull-right"
+        <RemoveButton
           title="Remove this step"
+          altText="Remove this step"
           onClick={() => removeApprovalStep(arrayHelpers, index, step)}
-        >
-          <img src={REMOVE_ICON} height={14} alt="Remove this step" />
-        </Button>
+        />
 
         <FastField
           name={`${fieldName}.${index}.name`}
@@ -212,7 +213,7 @@ const ApprovalsDefinition = ({
               filterDefs={approversFilters}
               objectType={Position}
               queryParams={{
-                status: Position.STATUS.ACTIVE,
+                status: Model.STATUS.ACTIVE,
                 type: [
                   Position.TYPE.ADVISOR,
                   Position.TYPE.SUPER_USER,

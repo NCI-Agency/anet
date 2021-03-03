@@ -13,15 +13,52 @@ class Home extends Page {
   }
 
   get securityBanner() {
-    return browser.$("#topbar .banner")
+    const banner = browser.$("#topbar .banner")
+    banner.waitForExist()
+    banner.waitForDisplayed()
+    return banner
   }
 
   get searchBar() {
     return browser.$("#searchBarInput")
   }
 
+  get homeTilesContainer() {
+    return browser.$("fieldset.home-tile-row")
+  }
+
+  get pendingMyApprovalOfCount() {
+    return browser
+      .$('//button[contains(text(), "Reports pending my approval")]')
+      .$("h1")
+  }
+
   get submitSearch() {
     return browser.$("#topbar #searchBarSubmit")
+  }
+
+  get myOrgLink() {
+    return browser.$("#my-organization")
+  }
+
+  get myTasksLink() {
+    return browser.$("#my-tasks-nav")
+  }
+
+  get myCounterpartsLink() {
+    return browser.$("#my-counterparts-nav")
+  }
+
+  get myCounterpartsNotifications() {
+    return this.myCounterpartsLink.$("span:last-child")
+  }
+
+  get myTasksNotifications() {
+    return this.myTasksLink.$("span:last-child")
+  }
+
+  get onboardingPopover() {
+    return browser.$(".hopscotch-bubble-container")
   }
 
   waitForSecurityBannerValue(value) {

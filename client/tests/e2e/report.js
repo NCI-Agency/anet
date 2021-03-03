@@ -1,4 +1,3 @@
-const assert = require("assert")
 const _includes = require("lodash/includes")
 const moment = require("moment")
 const test = require("../util/test")
@@ -19,8 +18,6 @@ test.serial("Draft and submit a report", async t => {
     shortWaitMs,
     mediumWaitMs
   } = t.context
-
-  await httpRequestSmtpServer("DELETE")
 
   await t.context.get("/", "erin")
 
@@ -53,12 +50,13 @@ test.serial("Draft and submit a report", async t => {
   await $positiveAtmosphereButton.click()
 
   const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
-    "#attendees",
+    "#reportPeople",
     "topferness, christopf"
   )
 
   const $attendeesTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Meeting attendance"]')
+    // if future "People who will be involved in this planned engagement"
+    By.xpath('//h2/span[text()="People involved in this engagement"]')
   )
   await $attendeesTitle.click()
 
@@ -70,6 +68,9 @@ test.serial("Draft and submit a report", async t => {
 
   const [
     $principalPrimary1,
+    /* eslint-disable no-unused-vars */ $principalAttendee1 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthor1 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalConflictBtn /* eslint-enable no-unused-vars */,
     $principalName1,
     $principalPosition1,
     /* eslint-disable no-unused-vars */ $principalLocation1 /* eslint-enable no-unused-vars */,
@@ -93,7 +94,7 @@ test.serial("Draft and submit a report", async t => {
   await assertElementText(t, $principalOrg1, "MoD")
 
   const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
-    "#attendees",
+    "#reportPeople",
     "steveson, steve"
   )
   await $attendeesTitle.click()
@@ -106,6 +107,9 @@ test.serial("Draft and submit a report", async t => {
 
   const [
     $principalPrimary2,
+    /* eslint-disable no-unused-vars */ $principalAttendeeCheckbox2 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox2 /* eslint-enable no-unused-vars */,
+    /* eslint-disable no-unused-vars */ $principalAuthorConflictBtn /* eslint-enable no-unused-vars */,
     $principalName2,
     /* eslint-disable no-unused-vars */
     $principalPosition2,
@@ -235,10 +239,6 @@ test.serial("Draft and submit a report", async t => {
     "Report submitted",
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
-
-  const serverResponse = await httpRequestSmtpServer("GET")
-  const jsonResponse = JSON.parse(serverResponse)
-  await assert.strictEqual(jsonResponse.length, 0) // Domain not in active users
 })
 
 test.serial("Publish report chain", async t => {
@@ -256,8 +256,6 @@ test.serial("Publish report chain", async t => {
     mediumWaitMs,
     longWaitMs
   } = t.context
-
-  await httpRequestSmtpServer("DELETE")
 
   // First Jacob needs to approve the report, then Rebecca can approve the report
   await approveReport(t, "jacob")
@@ -318,7 +316,7 @@ test.serial("Publish report chain", async t => {
   // )
 
   const $rollupLink = await t.context.driver.findElement(
-    By.linkText("Daily rollup")
+    By.linkText("Daily Rollup")
   )
   await t.context.driver.wait(until.elementIsEnabled($rollupLink), mediumWaitMs)
   await $rollupLink.click()
@@ -326,7 +324,7 @@ test.serial("Publish report chain", async t => {
   t.is(
     currentPathname,
     "/rollup",
-    'Clicking the "daily rollup" link takes the user to the rollup page'
+    'Clicking the "Daily Rollup" link takes the user to the rollup page'
   )
   await $("#daily-rollup")
 
@@ -357,12 +355,8 @@ test.serial("Publish report chain", async t => {
     t,
     $approvedIntent,
     "meeting goal",
-    "Daily rollup report list includes the recently approved report"
+    "Daily Rollup report list includes the recently approved report"
   )
-
-  const serverResponse = await httpRequestSmtpServer("GET")
-  const jsonResponse = JSON.parse(serverResponse)
-  await assert.strictEqual(jsonResponse.length, 0) // Domains not in active users
 })
 
 async function approveReport(t, user) {
@@ -425,8 +419,6 @@ test.serial(
       shortWaitMs,
       By
     } = t.context
-
-    await httpRequestSmtpServer("DELETE")
 
     await pageHelpers.goHomeAndThenToReportsPage()
     await assertElementText(
@@ -598,12 +590,14 @@ test.serial(
       "Neutral atmospherics details"
     )
 
-    const $attendanceFieldsetTitle = await $("#attendance-fieldset .title-text")
+    const $reportPeopleFieldsetTitle = await $(
+      "#reportPeople-fieldset .title-text"
+    )
     await assertElementText(
       t,
-      $attendanceFieldsetTitle,
-      "Meeting attendance",
-      "Meeting attendance fieldset should have correct title for an uncancelled enagement"
+      $reportPeopleFieldsetTitle,
+      "People involved in this engagement",
+      "People fieldset should have correct title for an uncancelled enagement"
     )
 
     const $cancelledCheckbox = await $(".cancelled-checkbox")
@@ -622,9 +616,9 @@ test.serial(
     )
     await assertElementText(
       t,
-      $attendanceFieldsetTitle,
-      "Planned attendance",
-      "Meeting attendance fieldset should have correct title for a cancelled enagement"
+      $reportPeopleFieldsetTitle,
+      "People who will be involved in this planned engagement",
+      "People fieldset should have correct title for a cancelled enagement"
     )
 
     let $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
@@ -643,6 +637,9 @@ test.serial(
 
     const [
       $advisorPrimaryCheckbox,
+      /* eslint-disable no-unused-vars */ $advisorAttendeeCheckbox /* eslint-enable no-unused-vars */,
+      /* eslint-disable no-unused-vars */ $advisorAuthorCheckbox /* eslint-enable no-unused-vars */,
+      /* eslint-disable no-unused-vars */ $advisorConflictBtn /* eslint-enable no-unused-vars */,
       $advisorName,
       $advisorPosition,
       /* eslint-disable no-unused-vars */ $advisorLocation /* eslint-enable no-unused-vars */,
@@ -661,7 +658,7 @@ test.serial(
     await assertElementText(t, $advisorOrg, "EF 2.2")
 
     const $addAttendeeShortcutButtons = await $$(
-      "#attendees-shortcut-list button"
+      "#reportPeople-shortcut-list button"
     )
     // Add all recent attendees
     await Promise.all(
@@ -682,27 +679,5 @@ test.serial(
       t,
       "This is a DRAFT report and hasn't been submitted."
     )
-
-    var serverResponse = await httpRequestSmtpServer("GET")
-    var jsonResponse = JSON.parse(serverResponse)
-    await assert.strictEqual(jsonResponse.length, 0) // No email should be sent
   }
 )
-
-function httpRequestSmtpServer(requestType) {
-  return new Promise((resolve, reject) => {
-    var XMLHttpRequest = require("xhr2")
-    const xhttp = new XMLHttpRequest()
-    // FIXME: Hard-coded URL
-    const url = "http://localhost:1180/api/emails"
-    xhttp.open(requestType, url)
-    xhttp.send()
-    xhttp.onreadystatechange = e => {
-      if (xhttp.readyState === 4) {
-        if (xhttp.status === 200) {
-          resolve(xhttp.responseText)
-        }
-      }
-    }
-  })
-}

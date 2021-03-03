@@ -1,4 +1,5 @@
-import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import AdvancedSearch from "components/AdvancedSearch"
 import {
@@ -13,19 +14,24 @@ import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
 
-export const SearchPopover = ({ popoverContent, children }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const _handleInteraction = isOpen => setIsOpen(isOpen)
+export const SearchPopover = ({
+  popoverContent,
+  isOpen,
+  setIsOpen,
+  children
+}) => {
   return (
-    <Popover
+    <Popover2
       isOpen={isOpen}
-      onInteraction={_handleInteraction}
+      onInteraction={isOpen => setIsOpen(isOpen)}
       boundary="window"
       captureDismiss
       content={popoverContent}
-      interactionKind={PopoverInteractionKind.CLICK}
-      position={Position.BOTTOM_LEFT}
+      interactionKind={Popover2InteractionKind.CLICK_TARGET_ONLY}
+      placement="bottom-start"
       usePortal={false}
+      autoFocus={true}
+      enforceFocus={false}
       modifiers={{
         preventOverflow: {
           enabled: false
@@ -39,12 +45,14 @@ export const SearchPopover = ({ popoverContent, children }) => {
       }}
     >
       {children}
-    </Popover>
+    </Popover2>
   )
 }
 
 SearchPopover.propTypes = {
   popoverContent: PropTypes.element.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired
 }
 
@@ -76,8 +84,8 @@ const SearchBar = ({
 
   const popoverContent = (
     <AdvancedSearch
-      onSearch={runAdvancedSearch}
-      onCancel={setShowAdvancedSearch}
+      onSearch={() => setShowAdvancedSearch(false)}
+      onCancel={() => setShowAdvancedSearch(false)}
       text={searchTerms}
     />
   )
@@ -100,7 +108,11 @@ const SearchBar = ({
           )}
         </InputGroup>
       </Form>
-      <SearchPopover popoverContent={popoverContent}>
+      <SearchPopover
+        popoverContent={popoverContent}
+        isOpen={showAdvancedSearch}
+        setIsOpen={setShowAdvancedSearch}
+      >
         <SearchDescription searchQuery={searchQuery} showPlaceholders />
       </SearchPopover>
     </>
@@ -121,10 +133,6 @@ const SearchBar = ({
     }
     event.preventDefault()
     event.stopPropagation()
-  }
-
-  function runAdvancedSearch() {
-    setShowAdvancedSearch(false)
   }
 }
 

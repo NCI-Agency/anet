@@ -1,15 +1,12 @@
-import {
-  Classes,
-  Menu,
-  MenuItem,
-  Popover,
-  PopoverInteractionKind,
-  Position as PopoverPosition
-} from "@blueprintjs/core"
+import { Classes, Menu, MenuItem } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import searchFilters, {
-  POSTITION_POSITION_TYPE_FILTER_KEY,
+import RemoveButton from "components/RemoveButton"
+import {
+  findCommonFiltersForAllObjectTypes,
+  searchFilters,
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Form, Formik } from "formik"
@@ -26,7 +23,7 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
-import REMOVE_ICON from "resources/delete.png"
+import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
 
 const ORG_QUERY_PARAM_TYPES = {
   NONE: {},
@@ -63,8 +60,14 @@ const AdvancedSearch = ({
   const [orgFilterQueryParams, setOrgFilterQueryParams] = useState(
     getOrgQueryParams(null)
   )
-  const ALL_FILTERS = searchFilters.searchFilters()
-  const filterDefs = objectType ? ALL_FILTERS[objectType].filters : {}
+  const ALL_FILTERS = searchFilters()
+  const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
+    searchObjectTypes,
+    ALL_FILTERS
+  )
+  const filterDefs = objectType
+    ? ALL_FILTERS[objectType].filters
+    : commonFiltersForAllObjectTypes
   const existingKeys = filters.map(f => f.key)
   const moreFiltersAvailable =
     existingKeys.length < Object.keys(filterDefs).length
@@ -124,9 +127,7 @@ const AdvancedSearch = ({
                   ))}
                 </ButtonToggleGroup>
 
-                <Button
-                  bsStyle="link"
-                  onClick={clearObjectType}
+                <div
                   style={{
                     visibility:
                       possibleFilterTypes.length > 1 && objectType
@@ -134,8 +135,13 @@ const AdvancedSearch = ({
                         : "hidden"
                   }}
                 >
-                  <img src={REMOVE_ICON} height={14} alt="Clear type" />
-                </Button>
+                  <RemoveButton
+                    title="Clear type"
+                    altText="Clear type"
+                    onClick={clearObjectType}
+                    buttonStyle="link"
+                  />
+                </div>
               </div>
             </FormGroup>
 
@@ -173,20 +179,26 @@ const AdvancedSearch = ({
                   flexGrow: 1
                 }}
               >
-                {!objectType ? (
-                  "To add filters, first pick a type above"
-                ) : !moreFiltersAvailable ? (
-                  "No additional filters available"
+                {!moreFiltersAvailable ? (
+                  !objectType ? (
+                    "To add more filters, first pick a type above"
+                  ) : (
+                    "No additional filters available"
+                  )
                 ) : (
-                  <Popover
+                  <Popover2
                     content={advancedSearchMenuContent}
                     captureDismiss
-                    interactionKind={PopoverInteractionKind.CLICK}
+                    interactionKind={Popover2InteractionKind.CLICK}
                     usePortal={false}
-                    position={PopoverPosition.RIGHT}
+                    autoFocus={true}
+                    enforceFocus={true}
+                    placement="right"
                     modifiers={{
                       preventOverflow: {
-                        boundariesElement: "viewport"
+                        options: {
+                          rootBoundary: "viewport"
+                        }
                       },
                       flip: {
                         enabled: false
@@ -196,7 +208,7 @@ const AdvancedSearch = ({
                     <Button bsStyle="link" id="addFilterDropdown">
                       + Add {filters.length > 0 && "another"} filter
                     </Button>
-                  </Popover>
+                  </Popover2>
                 )}
               </div>
               <div
@@ -234,7 +246,18 @@ const AdvancedSearch = ({
 
   function changeObjectType(objectType) {
     setObjectType(objectType)
-    setFilters([])
+    const defaultFiltersForObjectType = objectType
+      ? Object.entries(ALL_FILTERS[objectType].filters)
+        .filter(([key, filter]) => filter.isDefault)
+        .map(([k, f]) => ({ key: k }))
+      : []
+
+    setFilters(
+      filters
+        .filter(value => commonFiltersForAllObjectTypes[value.key])
+        // Add defaults as well
+        .concat(defaultFiltersForObjectType)
+    )
     setOrgFilterQueryParams(getOrgQueryParams(null))
   }
 
@@ -255,7 +278,7 @@ const AdvancedSearch = ({
     newFilters.splice(newFilters.indexOf(filter), 1)
     setFilters(newFilters)
 
-    if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
+    if (filter.key === POSITION_POSITION_TYPE_FILTER_KEY) {
       setOrgFilterQueryParams(getOrgQueryParams(null))
     }
   }
@@ -276,6 +299,8 @@ const AdvancedSearch = ({
         pathname: "/search"
       })
     }
+    // Prevent browser navigation to the url
+    event.preventDefault()
   }
 }
 
@@ -333,16 +358,19 @@ const SearchFilter = ({
         </div>
       </Col>
       <Col sm={1} lg={1}>
-        <Button bsStyle="link" onClick={() => onRemove(filter)}>
-          <img src={REMOVE_ICON} height={14} alt="Remove this filter" />
-        </Button>
+        <RemoveButton
+          title="Remove this filter"
+          altText="Remove this filter"
+          onClick={() => onRemove(filter)}
+          buttonStyle="link"
+        />
       </Col>
     </FormGroup>
   )
 
   function onChange(value) {
     filter.value = value
-    if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
+    if (filter.key === POSITION_POSITION_TYPE_FILTER_KEY) {
       const positionType = filter.value.value || ""
       updateOrgFilterQueryParams(getOrgQueryParams(positionType))
     }

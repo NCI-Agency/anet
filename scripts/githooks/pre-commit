@@ -4,9 +4,17 @@
 
 branch="$(git rev-parse --abbrev-ref HEAD)"
 
-if [ "$branch" = "master" ] || [ "$branch" = "candidate" ]; then
+if [ "$branch" = "main" ] || [ "$branch" = "candidate" ]; then
   echo "You can't commit directly to a protected branch"
   exit 1
+fi
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
 fi
 
 # If there are whitespace errors, print the offending file names and fail.

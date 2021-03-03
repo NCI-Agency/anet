@@ -1,9 +1,10 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
+import { initInvisibleFields } from "components/CustomFields"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Organization, Task } from "models"
@@ -87,6 +88,8 @@ const TaskNewConditional = ({
   if (data) {
     task.taskedOrganizations = [new Organization(data.organization)]
   }
+  // mutates the object
+  initInvisibleFields(task, Settings.fields.task.customFields)
 
   return (
     <TaskForm

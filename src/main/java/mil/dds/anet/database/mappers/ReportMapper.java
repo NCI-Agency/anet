@@ -34,7 +34,6 @@ public class ReportMapper implements RowMapper<Report> {
     r.setKeyOutcomes(MapperUtils.getOptionalString(rs, "reports_keyOutcomes"));
     r.setNextSteps(MapperUtils.getOptionalString(rs, "reports_nextSteps"));
 
-    r.setAuthorUuid(MapperUtils.getOptionalString(rs, "reports_authorUuid"));
     r.setAdvisorOrgUuid(MapperUtils.getOptionalString(rs, "reports_advisorOrganizationUuid"));
     r.setPrincipalOrgUuid(MapperUtils.getOptionalString(rs, "reports_principalOrganizationUuid"));
 

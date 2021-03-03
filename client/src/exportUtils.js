@@ -136,7 +136,13 @@ const GQL_GET_REPORT_LIST = gql`
         atmosphere
         atmosphereDetails
         state
-        author {
+        authors {
+          uuid
+          name
+          rank
+          role
+        }
+        reportPeople {
           uuid
           name
           rank
@@ -147,6 +153,13 @@ const GQL_GET_REPORT_LIST = gql`
           name
           rank
           role
+          position {
+            uuid
+            organization {
+              uuid
+              shortName
+            }
+          }
         }
         primaryPrincipal {
           uuid
@@ -171,11 +184,6 @@ const GQL_GET_REPORT_LIST = gql`
         tasks {
           uuid
           shortName
-        }
-        tags {
-          uuid
-          name
-          description
         }
         workflow {
           type

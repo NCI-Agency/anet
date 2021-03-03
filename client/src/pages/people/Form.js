@@ -11,6 +11,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -19,10 +20,11 @@ import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
 import { Person } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useContext, useRef, useState } from "react"
 import {
   Alert,
   Button,
@@ -48,14 +50,8 @@ const GQL_UPDATE_PERSON = gql`
   }
 `
 
-const BasePersonForm = ({
-  loadAppData,
-  currentUser,
-  edit,
-  title,
-  saveText,
-  initialValues
-}) => {
+const PersonForm = ({ edit, title, saveText, initialValues }) => {
+  const { loadAppData, currentUser } = useContext(AppContext)
   const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
@@ -64,17 +60,17 @@ const BasePersonForm = ({
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(
-    Person.isNewUser(initialValues)
+    Person.isPendingVerification(initialValues)
   )
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Person.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "ACTIVE"
     },
     {
       id: "statusInactiveButton",
-      value: Person.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "INACTIVE"
     }
   ]
@@ -117,10 +113,8 @@ const BasePersonForm = ({
       initialValues={initialValues}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldValue,
         setFieldTouched,
         values,
@@ -130,16 +124,16 @@ const BasePersonForm = ({
         const isSelf = Person.isEqual(currentUser, values)
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisor = Person.isAdvisor(values)
-        const isNewUser = Person.isNewUser(values)
+        const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast = values.endOfTourDate
           ? values.endOfTourDate <= Date.now()
           : false
         const willAutoKickPosition =
-          values.status === Person.STATUS.INACTIVE &&
+          values.status === Model.STATUS.INACTIVE &&
           values.position &&
           !!values.position.uuid
         const warnDomainUsername =
-          values.status === Person.STATUS.INACTIVE &&
+          values.status === Model.STATUS.INACTIVE &&
           !_isEmpty(values.domainUsername)
         const ranks = Settings.fields.person.ranks || []
         const roleButtons = isAdmin ? adminRoleButtons : userRoleButtons
@@ -150,12 +144,11 @@ const BasePersonForm = ({
         }
         // anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
-          (initialValues.status === Person.STATUS.INACTIVE && !isAdmin) ||
-          isSelf
+          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         // admins can edit all persons, new users can be edited by super users or themselves
         const canEditName =
           isAdmin ||
-          ((isNewUser || !edit) &&
+          ((isPendingVerification || !edit) &&
             currentUser &&
             (currentUser.isSuperUser() || isSelf))
         const fullName = Person.fullName(Person.parseFullName(values.name))
@@ -229,7 +222,7 @@ const BasePersonForm = ({
                       <TriggerableConfirm
                         onConfirm={async() => {
                           // Have to wait until field value is updated before we can submit the form
-                          await setFieldValue("status", Person.STATUS.INACTIVE)
+                          await setFieldValue("status", Model.STATUS.INACTIVE)
                           setOnSaveRedirectToHome(
                             wrongPersonOptionValue === "needNewAccount"
                           )
@@ -254,9 +247,11 @@ const BasePersonForm = ({
                         title={modalTitle}
                         showModal={showWrongPersonModal}
                         onCancel={optionValue =>
-                          hideWrongPersonModal(optionValue)}
+                          hideWrongPersonModal(optionValue)
+                        }
                         onSuccess={optionValue =>
-                          hideWrongPersonModal(optionValue)}
+                          hideWrongPersonModal(optionValue)
+                        }
                       >
                         {(isSelf && (
                           <div>
@@ -356,7 +351,7 @@ const BasePersonForm = ({
                     component={FieldHelper.ReadonlyField}
                     humanValue={Person.humanNameOfStatus(values.status)}
                   />
-                ) : isNewUser ? (
+                ) : isPendingVerification ? (
                   <FastField
                     name="status"
                     component={FieldHelper.ReadonlyField}
@@ -396,8 +391,13 @@ const BasePersonForm = ({
               <Fieldset title="Additional information">
                 <FastField
                   name="emailAddress"
-                  label={Settings.fields.person.emailAddress}
+                  label={Settings.fields.person.emailAddress.label}
                   type="email"
+                  placeholder={
+                    values.role === Person.ROLE.ADVISOR
+                      ? Settings.fields.person.emailAddress.placeholder
+                      : ""
+                  }
                   component={FieldHelper.InputField}
                 />
                 <FastField
@@ -472,7 +472,12 @@ const BasePersonForm = ({
                 <FastField
                   name="biography"
                   component={FieldHelper.SpecialField}
-                  onChange={value => setFieldValue("biography", value)}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(value, values.biography)) {
+                      setFieldValue("biography", value)
+                    }
+                  }}
                   widget={
                     <RichTextEditor
                       className="biography"
@@ -560,9 +565,9 @@ const BasePersonForm = ({
   }
 
   function onSubmitSuccess(response, values, form) {
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (onSaveRedirectToHome) {
       localStorage.clear()
       localStorage.newUser = "true"
@@ -595,10 +600,10 @@ const BasePersonForm = ({
       "firstName",
       "lastName",
       "customFields", // initial JSON from the db
-      "formCustomFields"
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
-    if (values.status === Person.STATUS.NEW_USER) {
-      person.status = Person.STATUS.ACTIVE
+    if (values.isPendingVerification) {
+      person.pendingVerification = false
     }
     person.name = Person.fullName(
       { firstName: values.firstName, lastName: values.lastName },
@@ -633,31 +638,17 @@ const BasePersonForm = ({
   }
 }
 
-BasePersonForm.propTypes = {
+PersonForm.propTypes = {
   initialValues: PropTypes.instanceOf(Person).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  saveText: PropTypes.string,
-  currentUser: PropTypes.instanceOf(Person),
-  loadAppData: PropTypes.func
+  saveText: PropTypes.string
 }
 
-BasePersonForm.defaultProps = {
+PersonForm.defaultProps = {
   title: "",
   edit: false,
   saveText: "Save Person"
 }
-
-const PersonForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePersonForm
-        currentUser={context.currentUser}
-        loadAppData={context.loadAppData}
-        {...props}
-      />
-    )}
-  </AppContext.Consumer>
-)
 
 export default PersonForm

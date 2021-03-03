@@ -1,8 +1,8 @@
 plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
-	id "com.bmuschko.docker-remote-api" version "6.4.0"
-	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.gradle.spotless" version "4.4.0"
+	id "com.bmuschko.docker-remote-api" version "6.7.0"
+	id "com.github.node-gradle.node" version "3.0.1"
+	id "com.diffplug.spotless" version "5.10.2"
 }
 
 apply plugin: 'java'
@@ -45,6 +45,7 @@ run.environment("ANET_SMTP_PORT", run.environment["ANET_SMTP_PORT"] ?: isTestEnv
 run.environment("ANET_SMTP_STARTTLS", run.environment["ANET_SMTP_STARTTLS"] ?: "true")
 run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: run.environment["ANET_SMTP_SERVER"])
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
+run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
@@ -60,63 +61,69 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	implementation 'io.dropwizard:dropwizard-core:2.0.10'
-	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.10'
-	implementation 'io.dropwizard:dropwizard-migrations:2.0.10'
-	implementation 'io.dropwizard:dropwizard-auth:2.0.10'
-	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.10'
+	implementation 'io.dropwizard:dropwizard-core:2.0.20'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.20'
+	implementation 'io.dropwizard:dropwizard-migrations:2.0.20'
+	implementation 'io.dropwizard:dropwizard-auth:2.0.20'
+	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.20'
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
-	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.1.0-1'
-	implementation 'com.google.guava:guava:29.0-jre' // Pick the non-Android version of Guice
+	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.2.0-1'
+	implementation 'com.google.guava:guava:30.1-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.2.2.jre8'
-	implementation 'org.postgresql:postgresql:42.2.14' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:3.10.0'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre8'
+	implementation 'org.postgresql:postgresql:42.2.19' // If using postgresql
+	implementation 'org.liquibase:liquibase-core:4.3.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation 'org.ehcache:ehcache:3.8.1'
+	implementation 'org.ehcache:ehcache:3.9.2'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'javax.mail:mail:1.4.7'
+	implementation 'org.simplejavamail:simple-java-mail:6.5.0'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
 	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.10.1'
-	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200615.1'
+	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
+	implementation 'com.mikesamuel:json-sanitizer:1.2.2'
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	implementation 'com.networknt:json-schema-validator:1.0.40'
+	implementation 'com.networknt:json-schema-validator:1.0.47'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:4.1.2'
-	implementation 'org.apache.poi:poi-ooxml:4.1.2'
+	implementation 'org.apache.poi:poi:5.0.0'
+	implementation 'org.apache.poi:poi-ooxml:5.0.0'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.13.1'
 
 	// For fast and simple image scaling
-	implementation 'net.coobird:thumbnailator:0.4.11'
+	implementation 'net.coobird:thumbnailator:0.4.13'
 
-	testImplementation 'io.dropwizard:dropwizard-testing:2.0.10'
-	testImplementation 'io.dropwizard:dropwizard-client:2.0.10'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.20'
+	testImplementation 'io.dropwizard:dropwizard-client:2.0.20'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
-	testImplementation 'org.assertj:assertj-core:3.16.1'
+	testImplementation 'org.assertj:assertj-core:3.19.0'
 
-	testImplementation 'org.powermock:powermock-api-mockito2:2.0.7'
-	testImplementation 'org.powermock:powermock-module-junit4:2.0.7'
-	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.7'
+	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
+	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
+	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
+}
+
+configurations {
+	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
+	compile.exclude module: 'xalan'
 }
 
 test {
@@ -124,7 +131,7 @@ test {
 }
 
 jacoco {
-    toolVersion = "0.8.1"
+    toolVersion = "0.8.6"
 }
 
 jacocoTestReport {
@@ -138,6 +145,15 @@ jacocoTestReport {
 def proc = "git describe".execute(null, projectDir);
 proc.waitFor();
 project.version = proc.text.trim();
+
+processResources {
+	filesMatching('**/version.properties') {
+		filter {
+			it.replace('APP_VERSION_TOKEN', project.version)
+		}
+	}
+}
+processResources.outputs.upToDateWhen{ false }
 
 def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
 projectBranch.waitFor();
@@ -311,7 +327,7 @@ task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.t
 	def resultTags = ['ncia/anet-app-server:'+project.version]
 	if (projectBranch=="candidate")
 		resultTags << 'ncia/anet-app-server:'+projectBranch
-	if (projectBranch=="master")
+	if (projectBranch=="main")
 		resultTags << 'ncia/anet-app-server:latest'
 	images = resultTags
 }
@@ -429,12 +445,20 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
-classes.dependsOn buildClient
+jar.dependsOn buildClient
+run.dependsOn buildClient
+
+jar {
+	// Add classpath to manifest to prevent variables in startScripts getting too long
+	manifest {
+		attributes "Class-Path": configurations.runtimeClasspath.files*.name.join(" ")
+	}
+}
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '8.18'
+	toolVersion = '8.35'
 }
 
 spotless {
@@ -450,6 +474,7 @@ distributions {
 		contents {
 			into('docs/') {
 				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
 				from(markdownToHtml)
 			}
 			into('lib/') {
@@ -460,6 +485,8 @@ distributions {
 }
 
 startScripts {
+	// Clear up the classpath because the jar has it in its manifest
+	classpath = jar.outputs.files
 	doLast {
 		unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
 		windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%APP_HOME%')
@@ -474,7 +501,8 @@ allprojects {
 }
 
 node {
-	nodeModulesDir = file("${project.projectDir}/client")
-	version = '12.14.1'
+	nodeProjectDir = file("${project.projectDir}/client")
+	version = '14.16.0'
+	yarnVersion = '1.22.10'
 	download = true
 }

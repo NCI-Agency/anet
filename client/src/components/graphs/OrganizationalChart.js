@@ -2,8 +2,8 @@ import API from "api"
 import { gql } from "apollo-boost"
 import SVGCanvas from "components/graphs/SVGCanvas"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import * as d3 from "d3"
@@ -18,6 +18,7 @@ import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import COLLAPSE_ICON from "resources/organizations.png"
 import EXPAND_ICON from "resources/plus.png"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_CHART_DATA = gql`
   query($uuid: String!) {
@@ -91,13 +92,11 @@ const OrganizationalChart = ({
   const [personnelDepth, setPersonnelDepth] = useState(5)
   const history = useHistory()
   const canvasRef = useRef(null)
-  const svgRef = useRef(null)
   const linkRef = useRef(null)
   const nodeRef = useRef(null)
   const tree = useRef(d3.tree())
   const [root, setRoot] = useState(null)
   const [height, setHeight] = useState(initialHeight)
-  const nodeSize = [200, 100 + 11 * personnelDepth]
   const { loading, error, data } = API.useApiQuery(GQL_GET_CHART_DATA, {
     uuid: org.uuid
   })
@@ -129,6 +128,7 @@ const OrganizationalChart = ({
     if (!data || !root) {
       return
     }
+    const nodeSize = [200, 100 + 11 * personnelDepth]
 
     const calculateBounds = rootArg => {
       const boundingBox = rootArg.descendants().reduce(
@@ -174,7 +174,7 @@ const OrganizationalChart = ({
     )
 
     setHeight(scale * bounds.size[1] + 50)
-  }, [nodeSize, canvas, data, height, width, root])
+  }, [personnelDepth, canvas, data, height, width, root])
 
   useEffect(() => {
     data && setExpanded([data.organization.uuid])
@@ -240,7 +240,9 @@ const OrganizationalChart = ({
       .attr("height", 12)
       .attr("x", -15)
       .attr("y", 5)
-      .on("click", d => setExpanded(expanded => _xor(expanded, [d.data.uuid])))
+      .on("click", (event, d) =>
+        setExpanded(expanded => _xor(expanded, [d.data.uuid]))
+      )
 
     node
       .selectAll("image.orgChildIcon")
@@ -250,7 +252,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("g")
-      .on("click", d => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
       .each(function(d) {
         const positions = sortPositions(d.data.positions)
         const unitcode = Settings.fields.person.ranks.find(
@@ -268,7 +270,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("text")
-      .on("click", d => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
       .attr("font-size", "20px")
       .attr("font-family", "monospace")
       .attr("font-weight", "bold")
@@ -282,7 +284,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("text")
-      .on("click", d => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
       .attr("font-family", "monospace")
       .attr("dy", 45)
       .attr("x", -40)
@@ -302,7 +304,7 @@ const OrganizationalChart = ({
       .append("g")
       .attr("class", "head")
       .attr("transform", "translate(-63, 65)")
-      .on("click", d => history.push(Position.pathFor(d)))
+      .on("click", (event, d) => history.push(Position.pathFor(d)))
 
     headG.exit().remove()
 
@@ -354,7 +356,7 @@ const OrganizationalChart = ({
       .append("g")
       .attr("class", "position")
       .attr("transform", (d, i) => `translate(-63,${87 + i * 11})`)
-      .on("click", d => history.push(Position.pathFor(d)))
+      .on("click", (event, d) => history.push(Position.pathFor(d)))
 
     positionsGA
       .append("image")
@@ -373,7 +375,7 @@ const OrganizationalChart = ({
         const result = `${d.person ? d.person.rank : ""} ${
           d.person ? d.person.name : "unfilled"
         } ${d.name}`
-        return result.length > 31 ? result.substring(0, 28) + "..." : result
+        return utils.ellipsize(result, 31)
       })
   }, [data, expanded, history, personnelDepth, root, link, node])
 
@@ -383,12 +385,12 @@ const OrganizationalChart = ({
 
   return (
     <SVGCanvas
-      ref={svgRef}
       width={width}
       height={height}
       exportTitle={`${data.shortName} organization chart`}
       zoomFn={increment =>
-        setPersonnelDepth(Math.max(0, personnelDepth + increment))}
+        setPersonnelDepth(Math.max(0, personnelDepth + increment))
+      }
     >
       <g ref={canvasRef}>
         <g ref={linkRef} style={{ fill: "none", stroke: "#555" }} />

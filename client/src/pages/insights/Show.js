@@ -17,17 +17,22 @@ import {
   useBoilerplate
 } from "components/Page"
 import PendingApprovalReports from "components/PendingApprovalReports"
+import PendingAssessmentsByPosition from "components/PendingAssessmentsByPosition"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
-import { deserializeQueryParams } from "searchUtils"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 export const NOT_APPROVED_REPORTS = "not-approved-reports"
@@ -35,6 +40,7 @@ export const CANCELLED_REPORTS = "cancelled-reports"
 export const REPORTS_BY_TASK = "reports-by-task"
 export const REPORTS_BY_DAY_OF_WEEK = "reports-by-day-of-week"
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = "future-engagements-by-location"
+export const PENDING_ASSESSMENTS_BY_POSITION = "pending-assessments-by-position"
 export const ADVISOR_REPORTS = "advisor-reports"
 
 export const INSIGHTS = [
@@ -43,43 +49,55 @@ export const INSIGHTS = [
   REPORTS_BY_TASK,
   FUTURE_ENGAGEMENTS_BY_LOCATION,
   REPORTS_BY_DAY_OF_WEEK,
+  PENDING_ASSESSMENTS_BY_POSITION,
   ADVISOR_REPORTS
 ]
 
-const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
+const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   onSearchGoToSearchPage: false,
   searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
 })
 
+const POSITION_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
+  onSearchGoToSearchPage: false,
+  searchObjectTypes: [SEARCH_OBJECT_TYPES.POSITIONS]
+})
+
 export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: "Pending Approval Reports",
     title: ""
   },
   [CANCELLED_REPORTS]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: "Cancelled Engagement Reports",
     title: ""
   },
   [REPORTS_BY_TASK]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: `Reports by ${Settings.fields.task.subLevel.shortLabel}`,
     title: ""
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: "Reports by Day of the Week",
     title: ""
   },
   [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
-    searchProps: _SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: "Future Engagements by Location",
+    title: ""
+  },
+  [PENDING_ASSESSMENTS_BY_POSITION]: {
+    searchProps: POSITION_SEARCH_PROPS,
+    component: PendingAssessmentsByPosition,
+    navTitle: "Pending Assessments by Position",
     title: ""
   },
   [ADVISOR_REPORTS]: {
@@ -90,18 +108,19 @@ export const INSIGHT_DETAILS = {
   }
 }
 
-const BaseInsightsShow = ({
-  pageDispatchers,
-  appSettings,
-  searchQuery,
-  setSearchQuery
-}) => {
+const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
+  const { appSettings, currentUser } = useContext(AppContext)
   const { insight } = useParams()
   const flexStyle = {
     display: "flex",
     flexDirection: "column",
     flex: "1 1 auto",
-    height: "100%"
+    height: "100%",
+    overflow: "auto"
+  }
+  const fieldsetStyle = {
+    height: "100%",
+    overflow: "auto"
   }
   const mosaicLayoutStyle = {
     display: "flex",
@@ -118,6 +137,14 @@ const BaseInsightsShow = ({
     startDate: getCurrentDateTime(),
     endDate: getCurrentDateTime().add(14, "days")
   }
+  const orgQuery = currentUser.isAdmin()
+    ? {}
+    : {
+      organizationUuid: currentUser.position.organization.uuid,
+      orgRecurseStrategy: currentUser.isSuperUser()
+        ? RECURSE_STRATEGY.CHILDREN
+        : RECURSE_STRATEGY.NONE
+    }
   const insightDefaultQueryParams = {
     [NOT_APPROVED_REPORTS]: {
       state: [Report.STATE.PENDING_APPROVAL],
@@ -144,6 +171,10 @@ const BaseInsightsShow = ({
         .valueOf(),
       engagementDateEnd: defaultFutureDates.endDate.endOf("day").valueOf()
     },
+    [PENDING_ASSESSMENTS_BY_POSITION]: {
+      hasPendingAssessments: true,
+      ...orgQuery
+    },
     [ADVISOR_REPORTS]: {}
   }
   let queryParams
@@ -167,7 +198,11 @@ const BaseInsightsShow = ({
   return (
     <div style={flexStyle}>
       {hasSearchCriteria ? (
-        <Fieldset id={insight} title={insightConfig.title} style={flexStyle}>
+        <Fieldset
+          id={insight}
+          title={insightConfig.title}
+          style={fieldsetStyle}
+        >
           <InsightComponent
             pageDispatchers={pageDispatchers}
             style={mosaicLayoutStyle}
@@ -204,7 +239,7 @@ const BaseInsightsShow = ({
   function setInsightDefaultSearchQuery() {
     const queryParams = insightDefaultQueryParams[insight]
     deserializeQueryParams(
-      SEARCH_OBJECT_TYPES.REPORTS,
+      SEARCH_OBJECT_TYPES.POSITIONS,
       queryParams,
       deserializeCallback
     )
@@ -212,11 +247,10 @@ const BaseInsightsShow = ({
   }
 }
 
-BaseInsightsShow.propTypes = {
+InsightsShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   searchQuery: SearchQueryPropType,
-  setSearchQuery: PropTypes.func.isRequired,
-  appSettings: PropTypes.object
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state, ownProps) => ({
@@ -230,13 +264,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-
-const InsightsShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseInsightsShow appSettings={context.appSettings} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

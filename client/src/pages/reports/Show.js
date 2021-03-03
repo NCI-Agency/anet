@@ -7,45 +7,47 @@ import {
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import ConfirmDelete from "components/ConfirmDelete"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
-import Tag from "components/Tag"
-import TaskTable from "components/TaskTable"
+import { deserializeQueryParams } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
 import _upperFirst from "lodash/upperFirst"
-import { Comment, Person, Position, Report } from "models"
+import { Comment, Person, Position, Report, Task } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
 import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
-import { deserializeQueryParams } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
-import { parseHtmlWithLinkTo } from "utils_links"
-import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
+import ReportPeople from "./ReportPeople"
 
 const GQL_GET_REPORT = gql`
   query($uuid: String!) {
@@ -65,8 +67,10 @@ const GQL_GET_REPORT = gql`
       location {
         uuid
         name
+        lat
+        lng
       }
-      author {
+      authors {
         uuid
         name
         rank
@@ -97,10 +101,12 @@ const GQL_GET_REPORT = gql`
           }
         }
       }
-      attendees {
+      reportPeople {
         uuid
         name
+        author
         primary
+        attendee
         rank
         role
         status
@@ -115,6 +121,7 @@ const GQL_GET_REPORT = gql`
           organization {
             uuid
             shortName
+            identificationCode
           }
           location {
             uuid
@@ -203,11 +210,6 @@ const GQL_GET_REPORT = gql`
         }
         nextStepUuid
       }
-      tags {
-        uuid
-        name
-        description
-      }
       reportSensitiveInformation {
         uuid
         text
@@ -268,7 +270,8 @@ const GQL_APPROVE_REPORT = gql`
   }
 `
 
-const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
+const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -295,12 +298,12 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     report = new Report()
   } else {
     data.report.cancelled = !!data.report.cancelledReason
-    data.report.reportTags = (data.report.tags || []).map(tag => ({
-      id: tag.uuid.toString(),
-      text: tag.name
-    }))
+    data.report.tasks = Task.fromArray(data.report.tasks)
+    data.report.reportPeople = Person.fromArray(data.report.reportPeople)
     data.report.to = ""
-    data.report.formCustomFields = JSON.parse(data.report.customFields)
+    data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.report.customFields
+    )
     report = new Report(data.report)
     try {
       Report.yupSchema.validateSync(report, { abortEarly: false })
@@ -317,7 +320,10 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  const isAuthor = Person.isEqual(currentUser, report.author)
+  const isAuthor = report.authors?.find(a => Person.isEqual(currentUser, a))
+  const isAttending = report.reportPeople?.find(rp =>
+    Person.isEqual(currentUser, rp)
+  )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
 
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
@@ -334,12 +340,14 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
-  // Authors can edit if report is not published
-  let canEdit = isAuthor && !report.isPublished()
+  // Attending authors can edit if report is not published
+  // Non-attending authors can only edit if it is future
+  let canEdit =
+    isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers can edit
   canEdit = canEdit || canApprove
 
-  // Only the author can submit when report is in draft or rejected AND author has a position
+  // Only an author can submit when report is in draft or rejected AND author has a position
   const hasActivePosition = currentUser.hasActivePosition()
   const canSubmit =
     isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
@@ -351,8 +359,14 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial task assessments values
-  report = Object.assign(report, report.getTaskAssessments())
+  // Get initial tasks/people instant assessments values
+  const hasAssessments = report.engagementDate && !report.isFuture()
+  let relatedObject
+  if (hasAssessments) {
+    report = Object.assign(report, report.getTasksEngagementAssessments())
+    report = Object.assign(report, report.getAttendeesEngagementAssessments())
+    relatedObject = Report.getCleanReport(report)
+  }
 
   return (
     <Formik
@@ -361,21 +375,26 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       validateOnMount
       initialValues={report}
     >
-      {({ isSubmitting, setSubmitting, isValid, setFieldValue, values }) => {
+      {({ isValid, setFieldValue, values }) => {
         const action = (
           <div>
             {canEmail && (
               <Button onClick={toggleEmailModal}>Email report</Button>
             )}
+            <Button
+              value="compactView"
+              type="button"
+              bsStyle="primary"
+              onClick={onCompactClick}
+            >
+              Summary / Print
+            </Button>
             {canEdit && (
               <LinkTo modelType="Report" model={report} edit button="primary">
                 Edit
               </LinkTo>
             )}
-            {canSubmit &&
-              renderSubmitButton(isSubmitting || !isValid, () =>
-                setSubmitting(false)
-              )}
+            {canSubmit && renderSubmitButton(!isValid)}
           </div>
         )
 
@@ -388,7 +407,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
               relatedObject={
                 uuid && {
                   relatedObjectType: Report.relatedObjectType,
-                  relatedObjectUuid: uuid
+                  relatedObjectUuid: uuid,
+                  relatedObject: report
                 }
               }
             />
@@ -472,11 +492,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 )}
                 {canPublish && (
                   <p>
-                    You can also{" "}
-                    {renderPublishButton(isSubmitting || !isValid, () =>
-                      setSubmitting(false)
-                    )}{" "}
-                    it immediately.
+                    You can also {renderPublishButton(!isValid)} it immediately.
                   </p>
                 )}
               </Fieldset>
@@ -519,10 +535,13 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   name="engagementDate"
                   component={FieldHelper.ReadonlyField}
                   humanValue={
-                    report.engagementDate &&
-                    moment(report.engagementDate).format(
-                      Report.getEngagementDateFormat()
-                    )
+                    <>
+                      {report.engagementDate &&
+                        moment(report.engagementDate).format(
+                          Report.getEngagementDateFormat()
+                        )}
+                      <PlanningConflictForReport report={report} largeIcon />
+                    </>
                   }
                 />
 
@@ -568,26 +587,15 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   />
                 )}
 
-                {Settings.fields.report.reportTags && (
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
-                )}
-
                 <Field
-                  name="author"
+                  name="authors"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo modelType="Person" model={report.author} />
-                  }
+                  humanValue={report.authors?.map(a => (
+                    <React.Fragment key={a.uuid}>
+                      <LinkTo modelType="Person" model={a} />
+                      <br />
+                    </React.Fragment>
+                  ))}
                 />
 
                 <Field
@@ -614,11 +622,17 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   }
                 />
               </Fieldset>
-              <Fieldset title="Meeting attendees">
-                <AttendeesTable attendees={report.attendees} disabled />
+              <Fieldset
+                title={
+                  report.isFuture()
+                    ? "People who will be involved in this planned engagement"
+                    : "People involved in this engagement"
+                }
+              >
+                <ReportPeople report={report} disabled />
               </Fieldset>
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
-                <TaskTable
+                <NoPaginationTaskTable
                   tasks={report.tasks}
                   showParent
                   noTasksMessage={`No ${tasksLabel} selected`}
@@ -629,21 +643,18 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
-              {report.reportSensitiveInformation &&
-                report.reportSensitiveInformation.text && (
-                  <Fieldset title="Sensitive information">
-                    {parseHtmlWithLinkTo(
-                      report.reportSensitiveInformation.text
-                    )}
-                    {(hasAuthorizationGroups && (
-                      <div>
-                        <h5>Authorized groups:</h5>
-                        <AuthorizationGroupTable
-                          authorizationGroups={values.authorizationGroups}
-                        />
-                      </div>
-                    )) || <h5>No groups are authorized!</h5>}
-                  </Fieldset>
+              {report.reportSensitiveInformation?.text && (
+                <Fieldset title="Sensitive information">
+                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
+                  {(hasAuthorizationGroups && (
+                    <div>
+                      <h5>Authorized groups:</h5>
+                      <AuthorizationGroupTable
+                        authorizationGroups={values.authorizationGroups}
+                      />
+                    </div>
+                  )) || <h5>No groups are authorized!</h5>}
+                </Fieldset>
               )}
               {Settings.fields.report.customFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
@@ -653,31 +664,43 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                   />
                 </Fieldset>
               )}
-              <Fieldset
-                title="Engagement assessments"
-                id="engagement-assessments"
-              >
-                {values.tasks.map(task => {
-                  if (!task.customFields) {
-                    return null
-                  }
-                  const taskCustomFields = JSON.parse(task.customFields)
-                  if (!taskCustomFields.assessmentDefinition) {
-                    return null
-                  }
-                  const taskAssessmentDefinition = JSON.parse(
-                    taskCustomFields.assessmentDefinition
-                  )
-                  return (
-                    <ReadonlyCustomFields
-                      key={`assessment-${values.uuid}-${task.uuid}`}
-                      fieldsConfig={taskAssessmentDefinition}
-                      fieldNamePrefix={`taskAssessments.${task.uuid}`}
-                      values={values}
+              {hasAssessments && (
+                <>
+                  <Fieldset
+                    title="Attendees engagement assessments"
+                    id="attendees-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Person}
+                      entities={values.reportPeople?.filter(rp => rp.attendee)}
+                      relatedObject={relatedObject}
+                      parentFieldName={
+                        Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+                      }
+                      formikProps={{
+                        values
+                      }}
+                      readonly
                     />
-                  )
-                })}
-              </Fieldset>
+                  </Fieldset>
+
+                  <Fieldset
+                    title={`${Settings.fields.task.subLevel.longLabel} engagement assessments`}
+                    id="tasks-engagement-assessments"
+                  >
+                    <InstantAssessmentsContainerField
+                      entityType={Task}
+                      entities={values.tasks}
+                      relatedObject={relatedObject}
+                      parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+                      formikProps={{
+                        values
+                      }}
+                      readonly
+                    />
+                  </Fieldset>
+                </>
+              )}
               {report.showWorkflow() && (
                 <ReportFullWorkflow workflow={report.workflow} />
               )}
@@ -689,10 +712,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                         By pressing submit, this {reportType} will be sent to
                         <strong>
                           {" "}
-                          {Object.get(
-                            report,
-                            "author.position.organization.name"
-                          ) || "your organization approver"}{" "}
+                          {Object.get(report, "advisorOrg.shortName") ||
+                            "your organization approver"}{" "}
                         </strong>
                         to go through the approval workflow.
                       </p>
@@ -702,8 +723,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
                   <Col md={3}>
                     {renderSubmitButton(
-                      isSubmitting || !isValid,
-                      () => setSubmitting(false),
+                      !isValid,
                       "large",
                       "submitReportButton"
                     )}
@@ -744,7 +764,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                     bsStyle="primary"
                     type="button"
                     onClick={() =>
-                      submitComment(values.newComment, setFieldValue)}
+                      submitComment(values.newComment, setFieldValue)
+                    }
                   >
                     Save comment
                   </Button>
@@ -754,16 +775,14 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
                 renderApprovalForm(
                   values,
                   !_isEmpty(validationErrors),
-                  warnApproveOwnReport,
-                  () => setSubmitting(false)
+                  warnApproveOwnReport
                 )}
               {!canApprove &&
                 canRequestChanges &&
                 renderRequestChangesForm(
                   values,
                   !_isEmpty(validationErrors),
-                  warnApproveOwnReport,
-                  () => setSubmitting(false)
+                  warnApproveOwnReport
                 )}
             </Form>
 
@@ -835,12 +854,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       })
   }
 
-  function renderApprovalForm(
-    values,
-    disabled,
-    warnApproveOwnReport,
-    cancelHandler
-  ) {
+  function renderApprovalForm(values, disabled, warnApproveOwnReport) {
     return (
       <Fieldset
         className="report-sub-form"
@@ -857,33 +871,22 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
           placeholder="Type a comment here; required when requesting changes"
         />
 
-        {renderRejectButton(
-          warnApproveOwnReport,
-          "Request changes",
-          () => rejectReport(values.approvalComment),
-          cancelHandler
+        {renderRejectButton(warnApproveOwnReport, "Request changes", () =>
+          rejectReport(values.approvalComment)
         )}
         <div className="right-button">
           <LinkTo modelType="Report" model={report} edit button>
             Edit {reportType}
           </LinkTo>
-          {renderApproveButton(
-            warnApproveOwnReport,
-            disabled,
-            () => approveReport(values.approvalComment),
-            cancelHandler
+          {renderApproveButton(warnApproveOwnReport, disabled, () =>
+            approveReport(values.approvalComment)
           )}
         </div>
       </Fieldset>
     )
   }
 
-  function renderRequestChangesForm(
-    values,
-    disabled,
-    warnApproveOwnReport,
-    cancelHandler
-  ) {
+  function renderRequestChangesForm(values, disabled, warnApproveOwnReport) {
     return (
       <Fieldset className="report-sub-form" title="Request changes">
         <h5>You can request changes to this {reportType}</h5>
@@ -895,11 +898,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
           placeholder="Type a comment here; required when requesting changes"
         />
 
-        {renderRejectButton(
-          warnApproveOwnReport,
-          "Request changes",
-          () => rejectReport(values.requestChangesComment),
-          cancelHandler
+        {renderRejectButton(warnApproveOwnReport, "Request changes", () =>
+          rejectReport(values.requestChangesComment)
         )}
       </Fieldset>
     )
@@ -951,6 +951,12 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
 
   function toggleEmailModal() {
     setShowEmailModal(!showEmailModal)
+  }
+
+  function onCompactClick() {
+    if (!_isEmpty(report)) {
+      history.push(`${report.uuid}/compact`)
+    }
   }
 
   function handleEmailValidation(value) {
@@ -1106,25 +1112,22 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     jumpToTop()
   }
 
-  function renderRejectButton(
-    warnApproveOwnReport,
-    label,
-    confirmHandler,
-    cancelHandler
-  ) {
-    const validationWarnings = warnApproveOwnReport
-      ? [`You are requesting changes to your own ${reportType}`]
-      : []
-    return _isEmpty(validationWarnings) ? (
+  function renderRejectButton(warnApproveOwnReport, label, confirmHandler) {
+    const warnings = _concat(
+      validationWarnings || [],
+      warnApproveOwnReport
+        ? [`You are requesting changes to your own ${reportType}`]
+        : []
+    )
+    return _isEmpty(warnings) ? (
       <Button bsStyle="warning" onClick={confirmHandler}>
         {label}
       </Button>
     ) : (
       <Confirm
         onConfirm={confirmHandler}
-        onClose={cancelHandler}
         title="Request changes?"
-        body={renderValidationWarnings(validationWarnings, "rejecting")}
+        body={renderValidationWarnings(warnings, "rejecting")}
         confirmText="Request changes anyway"
         cancelText="Cancel change request"
         dialogClassName="react-confirm-bootstrap-modal"
@@ -1137,7 +1140,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     )
   }
 
-  function renderSubmitButton(disabled, cancelHandler, size, id) {
+  function renderSubmitButton(disabled, size, id) {
     return renderValidationButton(
       false,
       disabled,
@@ -1147,7 +1150,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       "Submit anyway",
       submitDraft,
       "Cancel submit",
-      cancelHandler,
       size,
       id
     )
@@ -1157,7 +1159,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     warnApproveOwnReport,
     disabled,
     confirmHandler,
-    cancelHandler,
     size,
     id
   ) {
@@ -1170,14 +1171,13 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       "Approve anyway",
       confirmHandler,
       "Cancel approve",
-      cancelHandler,
       size,
       id,
       "approve-button"
     )
   }
 
-  function renderPublishButton(disabled, cancelHandler, size, id) {
+  function renderPublishButton(disabled, size, id) {
     return renderValidationButton(
       false,
       disabled,
@@ -1187,7 +1187,6 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
       "Publish anyway",
       publishReport,
       "Cancel publish",
-      cancelHandler,
       size,
       id,
       "publish-button"
@@ -1203,18 +1202,15 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     confirmText,
     confirmHandler,
     cancelText,
-    cancelHandler,
     size,
     id,
     className
   ) {
-    let validationWarnings = warnApproveOwnReport
-      ? [`You are approving your own ${reportType}`]
-      : []
-    if (!_isEmpty(validationWarnings)) {
-      validationWarnings = _concat(validationWarnings, validationWarnings)
-    }
-    return _isEmpty(validationWarnings) ? (
+    const warnings = _concat(
+      validationWarnings || [],
+      warnApproveOwnReport ? [`You are approving your own ${reportType}`] : []
+    )
+    return _isEmpty(warnings) ? (
       <Button
         type="button"
         bsStyle="primary"
@@ -1229,9 +1225,8 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     ) : (
       <Confirm
         onConfirm={confirmHandler}
-        onClose={cancelHandler}
         title={title}
-        body={renderValidationWarnings(validationWarnings, submitType)}
+        body={renderValidationWarnings(warnings, submitType)}
         confirmText={confirmText}
         cancelText={cancelText}
         dialogClassName="react-confirm-bootstrap-modal"
@@ -1287,7 +1282,7 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     }
     return (
       <Alert bsStyle="warning">
-        The following warnings should be addressed before {submitType} this
+        The following warnings should be addressed before {submitType} this{" "}
         {reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (
@@ -1299,10 +1294,9 @@ const BaseReportShow = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   }
 }
 
-BaseReportShow.propTypes = {
+ReportShow.propTypes = {
   pageDispatchers: PageDispatchersPropType,
-  setSearchQuery: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  setSearchQuery: PropTypes.func.isRequired
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -1312,11 +1306,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     ...pageDispatchers
   }
 }
-
-const ReportShow = props => (
-  <AppContext.Consumer>
-    {context => <BaseReportShow currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps)(ReportShow)

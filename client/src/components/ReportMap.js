@@ -1,15 +1,13 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import Leaflet from "components/Leaflet"
+import ReportsMapWidget from "components/aggregations/ReportsMapWidget"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import _escape from "lodash/escape"
-import { Location } from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useMemo } from "react"
+import React, { useEffect } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
@@ -50,26 +48,6 @@ const ReportMap = ({
     error,
     pageDispatchers
   })
-  const markers = useMemo(() => {
-    const reports = data ? data.reportList.list : []
-    if (!reports.length) {
-      return []
-    }
-    const markerArray = []
-    reports.forEach(report => {
-      if (Location.hasCoordinates(report.location)) {
-        let label = _escape(report.intent || "<undefined>") // escape HTML in intent!
-        label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
-        markerArray.push({
-          id: report.uuid,
-          lat: report.location.lat,
-          lng: report.location.lng,
-          name: label
-        })
-      }
-    })
-    return markerArray
-  }, [data])
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
   useEffect(() => setTotalCount && setTotalCount(totalCount), [
@@ -79,14 +57,15 @@ const ReportMap = ({
   if (done) {
     return result
   }
-
+  const reports = data ? data.reportList.list : []
   return (
-    <Leaflet
-      markers={markers}
-      mapId={mapId}
+    <ReportsMapWidget
+      values={reports}
+      widgetId={mapId}
       width={width}
       height={height}
       marginBottom={marginBottom}
+      whenUnspecified={<em>No reports with a location found</em>}
     />
   )
 }
@@ -95,10 +74,14 @@ ReportMap.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object,
   setTotalCount: PropTypes.func,
-  mapId: PropTypes.string, // pass this when you have more than one map on a page
+  // pass mapId explicitly when you have more than one map on a page (else the default is fine):
+  mapId: PropTypes.string.isRequired,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 }
 
+ReportMap.defaultProps = {
+  mapId: "reports"
+}
 export default connect(null, mapPageDispatchersToProps)(ReportMap)

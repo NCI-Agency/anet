@@ -2,19 +2,26 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
+import {
+  CustomFieldsContainer,
+  customFieldsJSONString
+} from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import { FastField, Form, Formik } from "formik"
+import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
-import { Location, Person, Position } from "models"
+import { Location, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
+import Settings from "settings"
 import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
@@ -30,7 +37,8 @@ const GQL_UPDATE_LOCATION = gql`
   }
 `
 
-const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
+const LocationForm = ({ edit, title, initialValues }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
   const canEditName =
@@ -38,12 +46,12 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
   const statusButtons = [
     {
       id: "statusActiveButton",
-      value: Location.STATUS.ACTIVE,
+      value: Model.STATUS.ACTIVE,
       label: "Active"
     },
     {
       id: "statusInactiveButton",
-      value: Location.STATUS.INACTIVE,
+      value: Model.STATUS.INACTIVE,
       label: "Inactive"
     }
   ]
@@ -76,16 +84,22 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
       enableReinitialize
       onSubmit={onSubmit}
       validationSchema={Location.yupSchema}
-      initialValues={initialValues}
+      initialValues={{
+        ...initialValues,
+        displayedCoordinate: convertLatLngToMGRS(
+          parseCoordinate(initialValues.lat),
+          parseCoordinate(initialValues.lng)
+        )
+      }}
     >
       {({
-        handleSubmit,
         isSubmitting,
         dirty,
-        errors,
         setFieldTouched,
         setFieldValue,
+        setValues,
         values,
+        validateForm,
         submitForm
       }) => {
         const marker = {
@@ -93,7 +107,10 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
           name: _escape(values.name) || "", // escape HTML in location name!
           draggable: true,
           autoPan: true,
-          onMove: (event, map) => onMarkerMove(event, map, setFieldValue)
+          onMove: (event, map) => {
+            const latLng = map.wrapLatLng(event.target.getLatLng())
+            updateCoordinateFields(values, latLng)
+          }
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
@@ -114,6 +131,13 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
             </Button>
           </div>
         )
+
+        const coordinates = {
+          lat: values.lat,
+          lng: values.lng,
+          displayedCoordinate: values.displayedCoordinate
+        }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty} />
@@ -136,8 +160,7 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
 
                 <GeoLocation
                   editable
-                  lat={values.lat}
-                  lng={values.lng}
+                  coordinates={coordinates}
                   isSubmitting={isSubmitting}
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
@@ -148,7 +171,8 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
               <Leaflet
                 markers={[marker]}
                 onMapClick={(event, map) => {
-                  onMarkerMapClick(event, map, setFieldValue)
+                  const latLng = map.wrapLatLng(event.latlng)
+                  updateCoordinateFields(values, latLng)
                 }}
               />
 
@@ -171,7 +195,19 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
                 setFieldValue={setFieldValue}
                 approversFilters={approversFilters}
               />
-
+              {Settings.fields.location.customFields && (
+                <Fieldset title="Location information" id="custom-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Settings.fields.location.customFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
@@ -191,28 +227,27 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
             </Form>
           </div>
         )
+
+        function updateCoordinateFields(values, latLng) {
+          const parsedLat = parseCoordinate(latLng.lat)
+          const parsedLng = parseCoordinate(latLng.lng)
+          setValues({
+            ...values,
+            lat: parsedLat,
+            lng: parsedLng,
+            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
+          })
+        }
       }}
     </Formik>
   )
-
-  function onMarkerMove(event, map, setFieldValue) {
-    const latLng = map.wrapLatLng(event.target.getLatLng())
-    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
-    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
-  }
-
-  function onMarkerMapClick(event, map, setFieldValue) {
-    const latLng = map.wrapLatLng(event.latlng)
-    setFieldValue("lat", Location.parseCoordinate(latLng.lat))
-    setFieldValue("lng", Location.parseCoordinate(latLng.lng))
-  }
 
   function onCancel() {
     history.goBack()
   }
 
   function onSubmit(values, form) {
-    return save(values, form)
+    return save(values)
       .then(response => onSubmitSuccess(response, values, form))
       .catch(error => {
         setError(error)
@@ -228,9 +263,9 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
         ? response[operation].uuid
         : initialValues.uuid
     })
-    // After successful submit, reset the form in order to make sure the dirty
-    // prop is also reset (otherwise we would get a blocking navigation warning)
-    form.resetForm()
+    // reset the form to latest values
+    // to avoid unsaved changes propmt if it somehow becomes dirty
+    form.resetForm({ values, isSubmitting: true })
     if (!edit) {
       history.replace(Location.pathForEdit(location))
     }
@@ -239,33 +274,31 @@ const BaseLocationForm = ({ currentUser, edit, title, initialValues }) => {
     })
   }
 
-  function save(values, form) {
-    const location = Object.without(new Location(values), "notes")
+  function save(values) {
+    const location = Object.without(
+      new Location(values),
+      "notes",
+      "displayedCoordinate",
+      "customFields", // initial JSON from the db
+      DEFAULT_CUSTOM_FIELDS_PARENT
+    )
+    location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
     })
   }
 }
 
-BaseLocationForm.propTypes = {
+LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool,
-  currentUser: PropTypes.instanceOf(Person)
+  edit: PropTypes.bool
 }
 
-BaseLocationForm.defaultProps = {
+LocationForm.defaultProps = {
   initialValues: new Location(),
   title: "",
   edit: false
 }
-
-const LocationForm = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseLocationForm currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default LocationForm

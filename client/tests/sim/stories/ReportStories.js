@@ -1,8 +1,9 @@
-import { Report, Person, Position, Task, Location } from "models"
+import Model from "components/Model"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
+import { Report, Person, Position } from "models"
 import { fuzzy, runGQL, populate } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
@@ -12,7 +13,7 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
       user,
       "positions",
       {
-        status: Position.STATUS.ACTIVE,
+        status: Model.STATUS.ACTIVE,
         isFilled: true,
         type: type
       },
@@ -34,11 +35,10 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
 
 async function populateReport(report, user, args) {
   const location = await getRandomObject(user, "locations", {
-    status: Location.STATUS.ACTIVE
+    status: Model.STATUS.ACTIVE
   })
-  let author
   async function getAttendees() {
-    const attendees = []
+    const reportPeople = []
     const nbOfAdvisors = faker.random.number({ min: 1, max: 5 })
     let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
@@ -50,14 +50,15 @@ async function populateReport(report, user, args) {
       )
       if (advisor) {
         advisor.primary = primary
+        advisor.attendee = true
+        advisor.author = false
         primary = false
-        attendees.push(advisor)
+        reportPeople.push(advisor)
       }
     }
     // Pick random advisor attendee as author
-    const n = faker.random.number({ min: 0, max: attendees.length - 1 })
-    author = Object.assign({}, attendees[n])
-    delete author.primary
+    const n = faker.random.number({ min: 0, max: reportPeople.length - 1 })
+    reportPeople[n].author = true
 
     const nbOfPrincipals = faker.random.number({ min: 1, max: 5 })
     primary = true
@@ -70,13 +71,15 @@ async function populateReport(report, user, args) {
       )
       if (principal) {
         principal.primary = primary
+        principal.attendee = true
+        principal.author = false
         primary = false
-        attendees.push(principal)
+        reportPeople.push(principal)
       }
     }
 
     const seenUuids = []
-    return attendees.filter(a => {
+    return reportPeople.filter(a => {
       if (seenUuids.includes(a.uuid)) {
         return false
       } else {
@@ -85,14 +88,14 @@ async function populateReport(report, user, args) {
       }
     })
   }
-  const attendees = await getAttendees()
+  const reportPeople = await getAttendees()
   async function getTasks() {
     const reportTasks = []
     const nbOfTasks = faker.random.number({ min: 1, max: 3 })
 
     for (let i = 0; i < nbOfTasks; i++) {
       reportTasks.push(
-        await getRandomObject(user, "tasks", { status: Task.STATUS.ACTIVE })
+        await getRandomObject(user, "tasks", { status: Model.STATUS.ACTIVE })
       )
     }
 
@@ -124,13 +127,11 @@ async function populateReport(report, user, args) {
       faker.random.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
     atmosphereDetails: () => faker.lorem.sentence(),
     location,
-    author,
-    attendees,
+    reportPeople,
     tasks,
     reportText: () => faker.lorem.paragraphs(),
     nextSteps: () => faker.lorem.sentence(),
     keyOutcomes: () => faker.lorem.sentence(),
-    tags: () => [],
     reportSensitiveInformation: () => null,
     authorizationGroups: () => [],
     state,
@@ -153,13 +154,11 @@ async function populateReport(report, user, args) {
     .atmosphere.always()
     .atmosphereDetails.always()
     .location.always()
-    .author.always()
-    .attendees.always()
+    .reportPeople.always()
     .tasks.always()
     .reportText.always()
     .nextSteps.always()
     .keyOutcomes.always()
-    .tags.rarely()
     .reportSensitiveInformation.and()
     .authorizationGroups.rarely()
     .state.always()
@@ -172,7 +171,7 @@ const createReport = async function(user, grow, args) {
   const report = Object.without(new Report(), "formCustomFields")
   if (await populateReport(report, user, args)) {
     console.debug(`Creating report ${report.intent.green}`)
-    const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
+    const { cancelled, ...reportStripped } = report // TODO: we need to do this more generically
 
     return (
       await runGQL(user, {
@@ -226,9 +225,11 @@ const updateDraftReport = async function(user) {
             cancelledReason
             atmosphere
             atmosphereDetails
-            attendees {
+            reportPeople {
               uuid
+              author
               primary
+              attendee
             }
           }
         }

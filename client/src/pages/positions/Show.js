@@ -4,16 +4,18 @@ import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
 import ConfirmDelete from "components/ConfirmDelete"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -21,15 +23,15 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import { Person, Position } from "models"
+import { Position } from "models"
 import moment from "moment"
 import { positionTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
@@ -83,6 +85,7 @@ const GQL_GET_POSITION = gql`
         uuid
         name
       }
+      customFields
       ${GRAPHQL_NOTES_FIELDS}
 
     }
@@ -94,7 +97,8 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
-const BasePositionShow = ({ pageDispatchers, currentUser }) => {
+const PositionShow = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
@@ -123,6 +127,12 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
     return result
   }
 
+  if (data) {
+    data.position[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.position.customFields
+    )
+  }
+
   const position = new Position(data ? data.position : {})
   const CodeFieldWithLabel = DictionaryField(Field)
 
@@ -145,7 +155,7 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
       currentUser.isSuperUserForOrg(position.organization))
   const canDelete =
     currentUser.isAdmin() &&
-    position.status === Position.STATUS.INACTIVE &&
+    position.status === Model.STATUS.INACTIVE &&
     position.uuid &&
     (!position.person || !position.person.uuid)
 
@@ -182,7 +192,8 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
               relatedObject={
                 position.uuid && {
                   relatedObjectType: Position.relatedObjectType,
-                  relatedObjectUuid: position.uuid
+                  relatedObjectUuid: position.uuid,
+                  relatedObject: position
                 }
               }
             />
@@ -367,6 +378,14 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
                   </tbody>
                 </Table>
               </Fieldset>
+              {Settings.fields.position.customFields && (
+                <Fieldset title="Position information" id="custom-fields">
+                  <ReadonlyCustomFields
+                    fieldsConfig={Settings.fields.position.customFields}
+                    values={values}
+                  />
+                </Fieldset>
+              )}
             </Form>
 
             {canDelete && (
@@ -433,17 +452,8 @@ const BasePositionShow = ({ pageDispatchers, currentUser }) => {
   }
 }
 
-const PositionShow = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BasePositionShow currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
-
-BasePositionShow.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+PositionShow.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionShow)

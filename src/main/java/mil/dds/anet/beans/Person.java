@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -7,6 +8,8 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,17 +18,19 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.userActivity.Activity;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
+import mil.dds.anet.utils.InsertionOrderLinkedList;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Person extends AbstractCustomizableAnetBean implements Principal {
+public class Person extends AbstractCustomizableAnetBean
+    implements Principal, RelatableObject, WithStatus, Comparable<Person> {
 
-  public static enum PersonStatus {
-    ACTIVE, INACTIVE, NEW_USER
-  }
+  private static final Comparator<Person> COMPARATOR =
+      Comparator.comparing(Person::getName).thenComparing(Person::getUuid);
 
   public static enum Role {
     ADVISOR, PRINCIPAL
@@ -38,13 +43,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   private String name;
   @GraphQLQuery
   @GraphQLInputField
-  private PersonStatus status;
+  private Status status = Status.ACTIVE;
   @GraphQLQuery
   @GraphQLInputField
   private Role role;
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean pendingVerification;
+  private Boolean pendingVerification = false;
   @GraphQLQuery
   @GraphQLInputField
   private String emailAddress;
@@ -79,9 +84,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
   @GraphQLInputField
   private String code;
 
-  public Person() {
-    this.pendingVerification = false; // Defaults
-  }
+  // non-GraphQL
+  private Deque<Activity> userActivities;
 
   @Override
   public String getName() {
@@ -92,11 +96,13 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     this.name = Utils.trimStringReturnNull(name);
   }
 
-  public PersonStatus getStatus() {
+  @Override
+  public Status getStatus() {
     return status;
   }
 
-  public void setStatus(PersonStatus status) {
+  @Override
+  public void setStatus(Status status) {
     this.status = status;
   }
 
@@ -261,7 +267,8 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     }
     return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
         .thenApply(o -> {
-          avatar = Optional.ofNullable(o.getAvatar());
+          // Careful, `o` might be null
+          avatar = Optional.ofNullable(o == null ? null : o.getAvatar());
           return resizeAvatar(size);
         });
   }
@@ -306,37 +313,55 @@ public class Person extends AbstractCustomizableAnetBean implements Principal {
     this.code = code;
   }
 
+  @JsonIgnore
+  public Deque<Activity> getUserActivities() {
+    if (userActivities == null) {
+      return new InsertionOrderLinkedList<>();
+    }
+    return new InsertionOrderLinkedList<>(userActivities);
+  }
+
+  @JsonIgnore
+  public void setUserActivities(Deque<Activity> userActivities) {
+    this.userActivities = userActivities;
+  }
+
+  @Override
+  public int compareTo(Person o) {
+    // Used by Collections.sort() in AdminResource::userActivities
+    return COMPARATOR.compare(this, o);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Person)) {
       return false;
     }
-    Person other = (Person) o;
-    boolean b = Objects.equals(uuid, other.getUuid()) && Objects.equals(other.getName(), name)
-        && Objects.equals(other.getStatus(), status) && Objects.equals(other.getRole(), role)
+    final Person other = (Person) o;
+    return super.equals(o) && Objects.equals(uuid, other.getUuid())
+        && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
+        && Objects.equals(other.getRole(), role)
         && Objects.equals(other.getEmailAddress(), emailAddress)
         && Objects.equals(other.getPhoneNumber(), phoneNumber)
         && Objects.equals(other.getRank(), rank) && Objects.equals(other.getBiography(), biography)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
         && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
-        && (createdAt != null)
-            ? (createdAt.equals(other.getCreatedAt()))
-            : (other.getCreatedAt() == null) && (updatedAt != null)
-                ? (updatedAt.equals(other.getUpdatedAt()))
-                : (other.getUpdatedAt() == null)
-                    && Objects.equals(other.getCustomFields(), customFields);
-    return b;
+        && (createdAt != null ? createdAt.equals(other.getCreatedAt())
+            : (other.getCreatedAt() == null && updatedAt != null)
+                ? updatedAt.equals(other.getUpdatedAt())
+                : other.getUpdatedAt() == null);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, status, role, emailAddress, phoneNumber, rank, biography,
-        pendingVerification, avatar, code, createdAt, updatedAt);
+    return Objects.hash(super.hashCode(), uuid, name, status, role, emailAddress, phoneNumber, rank,
+        biography, pendingVerification, avatar, code, createdAt, updatedAt);
   }
 
   @Override
   public String toString() {
-    return String.format("[uuid:%s, name:%s, emailAddress:%s]", uuid, name, emailAddress);
+    // Only use the uuid, no personal information
+    return String.format("[uuid:%s]", uuid);
   }
 
   public static Person createWithUuid(String uuid) {

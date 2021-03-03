@@ -5,12 +5,18 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
+import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from "react"
 import {
   Button,
   Col,
@@ -21,6 +27,7 @@ import {
   Table
 } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -34,13 +41,8 @@ const GQL_PUT_PERSON_IN_POSITION = gql`
   }
 `
 
-const BaseAssignPositionModal = ({
-  person,
-  currentUser,
-  showModal,
-  onCancel,
-  onSuccess
-}) => {
+const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
+  const { currentUser } = useContext(AppContext)
   const latestPersonProp = useRef(person)
   const personPropUnchanged = _isEqualWith(
     latestPersonProp.current,
@@ -108,7 +110,7 @@ const BaseAssignPositionModal = ({
 
   const newPosition = position ? new Position(position) : new Position()
 
-  const positionSearchQuery = { status: Position.STATUS.ACTIVE }
+  const positionSearchQuery = { status: Model.STATUS.ACTIVE }
   if (person.role === Person.ROLE.ADVISOR) {
     positionSearchQuery.type = [Position.TYPE.ADVISOR]
     if (currentUser.isAdmin()) {
@@ -235,20 +237,11 @@ const BaseAssignPositionModal = ({
     onCancel()
   }
 }
-BaseAssignPositionModal.propTypes = {
+AssignPositionModal.propTypes = {
   person: PropTypes.instanceOf(Person).isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
-  onSuccess: PropTypes.func.isRequired,
-  currentUser: PropTypes.instanceOf(Person)
+  onSuccess: PropTypes.func.isRequired
 }
-
-const AssignPositionModal = props => (
-  <AppContext.Consumer>
-    {context => (
-      <BaseAssignPositionModal currentUser={context.currentUser} {...props} />
-    )}
-  </AppContext.Consumer>
-)
 
 export default AssignPositionModal

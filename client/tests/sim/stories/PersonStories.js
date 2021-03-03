@@ -1,7 +1,8 @@
+import Model from "components/Model"
+import { countries } from "countries-list"
 import faker from "faker"
 import Faker from "faker/lib"
 import { getAlpha2Code } from "i18n-iso-countries"
-import { countries } from "countries-list"
 import { Person } from "models"
 import Settings from "settings"
 import { fuzzy, identity, populate, runGQL } from "../simutils"
@@ -84,7 +85,7 @@ function randomPerson(role, status) {
 
   return {
     name: () => Person.fullName(name, true),
-    status: () => status || Person.STATUS.ACTIVE,
+    status: () => status || Model.STATUS.ACTIVE,
     country: () => country,
     rank: () => rank,
     gender: () => gender,
@@ -154,7 +155,7 @@ const updatePerson = async function(user) {
         personList(query: {
           pageNum: 0,
           pageSize: 1,
-          status: ${Person.STATUS.ACTIVE}
+          status: ${Model.STATUS.ACTIVE}
         }) {
           totalCount
         }
@@ -174,7 +175,7 @@ const updatePerson = async function(user) {
         personList(query: {
           pageNum: ${random},
           pageSize: 1,
-          status: ${Person.STATUS.ACTIVE}
+          status: ${Model.STATUS.ACTIVE}
         }) {
           list {
             uuid
@@ -239,7 +240,7 @@ const _deletePerson = async function(user) {
         personList(query: {
           pageNum: 0,
           pageSize: 1,
-          status: ${Person.STATUS.ACTIVE}
+          status: ${Model.STATUS.ACTIVE}
       }) {
         totalCount
       }
@@ -261,7 +262,7 @@ const _deletePerson = async function(user) {
           personList(query: {
             pageNum: ${random},
             pageSize: 1,
-            status: ${Person.STATUS.ACTIVE}
+            status: ${Model.STATUS.ACTIVE}
         }) {
           list {
             uuid
@@ -304,7 +305,7 @@ const _deletePerson = async function(user) {
         variables: {}
       })
     ).data.person
-    person.status = Person.STATUS.INACTIVE
+    person.status = Model.STATUS.INACTIVE
 
     console.debug(`Deleting/Deactivating ${person.name.green}`)
     // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.

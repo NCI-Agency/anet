@@ -8,7 +8,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import { RECURSE_STRATEGY } from "components/SearchFilters"
+import { RECURSE_STRATEGY } from "searchUtils"
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String!) {

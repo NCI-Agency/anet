@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,14 +20,15 @@ import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.beans.userActivity.Activity;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.AnetConstants;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -59,9 +61,9 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
   private static final String DOMAIN_USERS_CACHE = "domainUsersCache";
+  private static final int ACTIVITY_LOG_LIMIT = 10;
 
   private Cache<String, Person> domainUsersCache;
-  private MetricRegistry metricRegistry;
 
   public PersonDao() {
     try {
@@ -78,12 +80,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     }
   }
 
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
-
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
+  public Cache<String, Person> getDomainUsersCache() {
+    return domainUsersCache;
   }
 
   @Override
@@ -116,10 +114,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return idBatcher.getByIds(uuids);
   }
 
-  public Person getAvatar(String uuid) {
-    return getAvatars(Arrays.asList(uuid)).get(0);
-  }
-
   public List<Person> getAvatars(List<String> uuids) {
     final IdBatcher<Person> avatarBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(AvatarBatcher.class);
@@ -146,10 +140,11 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   public Person insertInternal(Person p) {
     StringBuilder sql = new StringBuilder();
     sql.append("/* personInsert */ INSERT INTO people "
-        + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-        + "gender, country, avatar, code, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
-        + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
-        + ":gender, :country, :avatar, :code, ");
+        + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, "
+        + "\"pendingVerification\", gender, country, avatar, code, \"endOfTourDate\", biography, "
+        + "\"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
+        + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, "
+        + ":pendingVerification, :gender, :country, :avatar, :code, ");
     if (DaoUtils.isMsSql()) {
       // MsSql requires an explicit CAST when datetime2 might be NULL.
       sql.append("CAST(:endOfTourDate AS datetime2), ");
@@ -170,9 +165,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   @Override
   public int updateInternal(Person p) {
     StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
-        + "SET name = :name, status = :status, role = :role, "
-        + "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
-        + "\"avatar\" = :avatar, code = :code, "
+        + "SET name = :name, status = :status, role = :role, gender = :gender, country = :country, "
+        + "\"emailAddress\" = :emailAddress, \"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");
@@ -219,11 +213,24 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
             + "WHERE people.\"domainUsername\" = :domainUsername "
             + "AND people.status != :inactiveStatus")
         .bind("domainUsername", domainUsername)
-        .bind("inactiveStatus", DaoUtils.getEnumId(PersonStatus.INACTIVE)).map(new PersonMapper())
+        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
         .list();
     // There should at most one match
     people.stream().forEach(p -> putInCache(p));
     return people;
+  }
+
+  public void logActivitiesByDomainUsername(String domainUsername, Activity activity) {
+    final Person person = domainUsersCache.get(domainUsername);
+    if (person != null) {
+      final Deque<Activity> activities = person.getUserActivities();
+      activities.addFirst(activity);
+      while (activities.size() > ACTIVITY_LOG_LIMIT) {
+        activities.removeLast();
+      }
+      person.setUserActivities(activities);
+      domainUsersCache.replace(domainUsername, person);
+    }
   }
 
   /**
@@ -249,6 +256,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
       return null;
     }
     final Person person = domainUsersCache.get(domainUsername);
+    final MetricRegistry metricRegistry = AnetObjectEngine.getInstance().getMetricRegistry();
     if (metricRegistry != null) {
       metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "LoadCount")).inc();
       if (person == null) {
@@ -262,7 +270,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   }
 
   private void putInCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
+    if (domainUsersCache != null && person != null && person.getUuid() != null
+        && person.getDomainUsername() != null) {
       // defensively copy the person we will be caching
       final Person copy = copyPerson(person);
       if (copy != null) {
@@ -290,7 +299,7 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private Person findInCacheByPersonUuid(String personUuid) {
     if (domainUsersCache != null && personUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
+        if (entry != null && Objects.equals(DaoUtils.getUuid(entry.getValue()), personUuid)) {
           return entry.getValue();
         }
       }
@@ -301,7 +310,8 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
   private Person findInCacheByPositionUuid(String positionUuid) {
     if (domainUsersCache != null && positionUuid != null) {
       for (final Entry<String, Person> entry : domainUsersCache) {
-        if (Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
+        if (entry != null
+            && Objects.equals(DaoUtils.getUuid(entry.getValue().getPosition()), positionUuid)) {
           return entry.getValue();
         }
       }
@@ -337,19 +347,38 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
   @InTransaction
   public int mergePeople(Person winner, Person loser) {
-    // delete duplicates where other is primary, or where neither is primary
-    getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
-        + "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
-        + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR (\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
-        + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
-        + ")) OR ("
-        + "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
-        + "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" != :isPrimary"
-        + "))").bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid())
-        .bind("isPrimary", true).execute();
+    // For reports where both winner and loser are in the reportPeople:
+    // 1. set winner's isPrimary, isAttendee and is isAuthor flags to the logical OR of both
+    final String sqlUpd = "WITH dups AS ( SELECT"
+        + "  rpw.\"reportUuid\" AS wreportuuid, rpw.\"personUuid\" AS wpersonuuid,"
+        + "  rpw.\"isPrimary\" AS wprimary, rpl.\"isPrimary\" AS lprimary,"
+        + "  rpw.\"isAttendee\" AS wattendee, rpl.\"isAttendee\" AS lattendee,"
+        + "  rpw.\"isAuthor\" AS wauthor, rpl.\"isAuthor\" AS lauthor"
+        + "  FROM \"reportPeople\" rpw"
+        + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
+        + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+        + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary %1$s dups.lprimary),"
+        + " \"isAttendee\" = (dups.wattendee %1$s dups.lattendee),"
+        + " \"isAuthor\" = (dups.wauthor %1$s dups.lauthor) FROM dups"
+        + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
+        + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
+    // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
+    getDbHandle().createUpdate(String.format(sqlUpd, DaoUtils.isMsSql() ? "|" : "OR"))
+        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // 2. delete the loser so we don't have duplicates
+    final String sqlDel = "WITH dups AS ( SELECT"
+        + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
+        + "  FROM \"reportPeople\" rpw"
+        + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
+        + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
+        + " DELETE FROM \"reportPeople\" %1$s dups"
+        + " WHERE \"reportPeople\".\"reportUuid\" = dups.lreportuuid"
+        + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
+    // MS SQL and PostgreSQL have slightly different DELETE syntax
+    getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
+        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
 
-    // update report attendance, should now be unique
+    // update report people, should now be unique
     getDbHandle().createUpdate(
         "UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
         .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
@@ -357,12 +386,6 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     // update approvals this person might have done
     getDbHandle().createUpdate(
         "UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
-
-    // report author update
-    getDbHandle()
-        .createUpdate(
-            "UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
         .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
 
     // comment author update
@@ -429,6 +452,18 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
       }
     }
+  }
+
+  public String clearCache() {
+    if (domainUsersCache != null) {
+      domainUsersCache.removeAll();
+      if (!domainUsersCache.iterator().hasNext()) {
+        logger.info(AnetConstants.USERCACHE_MESSAGE);
+        return AnetConstants.USERCACHE_MESSAGE;
+      }
+    }
+    logger.warn(AnetConstants.USERCACHE_EMPTY_MESSAGE);
+    return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
 }

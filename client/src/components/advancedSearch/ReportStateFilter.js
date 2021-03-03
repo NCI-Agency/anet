@@ -5,14 +5,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { FormGroup } from "react-bootstrap"
 
-const STATE_LABELS = {
-  [Report.STATE.DRAFT]: "Draft",
-  [Report.STATE.PENDING_APPROVAL]: "Pending Approval",
-  [Report.STATE.APPROVED]: "Approved",
-  [Report.STATE.PUBLISHED]: "Published",
-  [Report.STATE.CANCELLED]: "Cancelled",
-  [Report.STATE.REJECTED]: "Changes requested"
-}
 const CANCELLATION_REASON_LABELS = {
   [Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: "Advisor",
   [Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL]: "Principal",
@@ -23,7 +15,9 @@ const CANCELLATION_REASON_LABELS = {
   [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES]: "Routes",
   [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT]: "Threat",
   [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS]:
-    "Availability of Interpreter(s)"
+    "Availability of Interpreter(s)",
+  [Report.CANCELLATION_REASON.CANCELLED_DUE_TO_NETWORK_ISSUES]:
+    "Network / Connectivity Issues"
 }
 
 const ReportStateFilter = ({
@@ -55,7 +49,7 @@ const ReportStateFilter = ({
     toQuery
   )
 
-  const labels = value.state.map(s => STATE_LABELS[s])
+  const labels = value.state.map(s => Report.STATE_LABELS[s])
   const onlyCancelled = isOnlyCancelled(value)
   let stateDisplay = labels.join(" or ")
   if (onlyCancelled && value.cancelledReason) {
@@ -79,9 +73,9 @@ const ReportStateFilter = ({
           onChange={handleChangeState}
           multiple
         >
-          {Object.keys(STATE_LABELS).map(key => (
+          {Object.entries(Report.STATE_LABELS).map(([key, label]) => (
             <option key={key} value={key}>
-              {STATE_LABELS[key]}
+              {label}
             </option>
           ))}
         </select>
@@ -94,11 +88,13 @@ const ReportStateFilter = ({
               onChange={handleChangeCancelledReason}
             >
               <option value="">Everything</option>
-              {Object.keys(CANCELLATION_REASON_LABELS).map(key => (
-                <option key={key} value={key}>
-                  {CANCELLATION_REASON_LABELS[key]}
-                </option>
-              ))}
+              {Object.entries(CANCELLATION_REASON_LABELS).map(
+                ([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                )
+              )}
             </select>
           </div>
         )}

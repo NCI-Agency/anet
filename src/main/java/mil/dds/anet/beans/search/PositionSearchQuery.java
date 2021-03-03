@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 
 public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortBy> {
@@ -30,10 +29,13 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
   String locationUuid;
   @GraphQLQuery
   @GraphQLInputField
-  PositionStatus status;
+  private String authorizationGroupUuid;
   @GraphQLQuery
   @GraphQLInputField
-  private String authorizationGroupUuid;
+  private Boolean hasCounterparts;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean hasPendingAssessments;
 
   public PositionSearchQuery() {
     super(PositionSearchSortBy.NAME);
@@ -88,14 +90,6 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.locationUuid = locationUuid;
   }
 
-  public PositionStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(PositionStatus status) {
-    this.status = status;
-  }
-
   public String getAuthorizationGroupUuid() {
     return authorizationGroupUuid;
   }
@@ -104,10 +98,27 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
     this.authorizationGroupUuid = authorizationGroupUuid;
   }
 
+  public boolean getHasCounterparts() {
+    return Boolean.TRUE.equals(hasCounterparts);
+  }
+
+  public void setHasCounterparts(Boolean hasCounterparts) {
+    this.hasCounterparts = hasCounterparts;
+  }
+
+  public boolean getHasPendingAssessments() {
+    return Boolean.TRUE.equals(hasPendingAssessments);
+  }
+
+  public void setHasPendingAssessments(Boolean hasPendingAssessments) {
+    this.hasPendingAssessments = hasPendingAssessments;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy,
-        type, isFilled, locationUuid, status, authorizationGroupUuid);
+        type, isFilled, locationUuid, authorizationGroupUuid, hasCounterparts,
+        hasPendingAssessments);
   }
 
   @Override
@@ -122,12 +133,13 @@ public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortB
         && Objects.equals(getType(), other.getType())
         && Objects.equals(getIsFilled(), other.getIsFilled())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
-        && Objects.equals(getStatus(), other.getStatus())
-        && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid());
+        && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
+        && Objects.equals(getHasCounterparts(), other.getHasCounterparts())
+        && Objects.equals(getHasPendingAssessments(), other.getHasPendingAssessments());
   }
 
   @Override
-  public Object clone() throws CloneNotSupportedException {
+  public PositionSearchQuery clone() throws CloneNotSupportedException {
     final PositionSearchQuery clone = (PositionSearchQuery) super.clone();
     if (type != null) {
       clone.setType(new ArrayList<>(type));

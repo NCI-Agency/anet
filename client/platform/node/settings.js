@@ -1,10 +1,11 @@
 import fs from "fs"
 import jsyaml from "js-yaml"
 
-console.log("Using configuration file " + process.env.ANET_CONFIG)
-const anetConfig = jsyaml.safeLoad(
-  fs.readFileSync(process.env.ANET_CONFIG, "utf8")
+console.log("Using dictionary file " + process.env.ANET_DICTIONARY)
+const anetConfig = jsyaml.load(
+  fs.readFileSync(process.env.ANET_DICTIONARY, "utf8")
 )
-const Settings = anetConfig.dictionary
+const Settings = anetConfig
+const Version = "Sim-Mode"
 
-export default Settings
+export { Version, Settings as default }

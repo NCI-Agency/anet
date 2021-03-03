@@ -1,12 +1,17 @@
-import Model, { createYupObjectShape, yupDate } from "components/Model"
+import Model, {
+  createCustomFieldsSchema,
+  GRAPHQL_NOTES_FIELDS,
+  yupDate
+} from "components/Model"
 import _isEmpty from "lodash/isEmpty"
-import { Organization, Position } from "models"
 import AFG_ICON from "resources/afg_small.png"
 import PEOPLE_ICON from "resources/people.png"
 import RS_ICON from "resources/rs_small.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
+import Organization from "./Organization"
+import Position from "./Position"
 
 export const advisorPerson = Settings.fields.advisor.person
 export const principalPerson = Settings.fields.principal.person
@@ -17,12 +22,6 @@ export default class Person extends Model {
   static getInstanceName = "person"
   static relatedObjectType = "people"
 
-  static STATUS = {
-    NEW_USER: "NEW_USER",
-    ACTIVE: "ACTIVE",
-    INACTIVE: "INACTIVE"
-  }
-
   static ROLE = {
     ADVISOR: "ADVISOR",
     PRINCIPAL: "PRINCIPAL"
@@ -30,8 +29,13 @@ export default class Person extends Model {
 
   static nameDelimiter = ","
 
+  static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
+
+  static principalAssessmentConfig =
+    Settings.fields.principal.person.assessments
+
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createYupObjectShape(
+  static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.person.customFields
   )
 
@@ -85,7 +89,7 @@ export default class Person extends Model {
           )
         )
         .default("")
-        .label(Settings.fields.person.emailAddress),
+        .label(Settings.fields.person.emailAddress.label),
       country: yup
         .string()
         .nullable()
@@ -114,27 +118,31 @@ export default class Person extends Model {
       code: yup.string().nullable().default(""),
       endOfTourDate: yupDate
         .nullable()
-        .when(["role", "status"], (role, status, schema) => {
-          if (Person.isPrincipal({ role })) {
-            return schema
-          } else {
-            schema = schema.required(
-              `You must provide the ${Settings.fields.person.endOfTourDate}`
-            )
-            if (Person.isNewUser({ status })) {
-              schema = schema.test(
-                "end-of-tour-date",
-                `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
-                endOfTourDate => endOfTourDate > Date.now()
+        .when(
+          ["role", "pendingVerification"],
+          (role, pendingVerification, schema) => {
+            if (Person.isPrincipal({ role })) {
+              return schema
+            } else {
+              schema = schema.required(
+                `You must provide the ${Settings.fields.person.endOfTourDate}`
               )
+              if (Person.isPendingVerification({ pendingVerification })) {
+                schema = schema.test(
+                  "end-of-tour-date",
+                  `The ${Settings.fields.person.endOfTourDate} date must be in the future`,
+                  endOfTourDate => endOfTourDate > Date.now()
+                )
+              }
+              return schema
             }
-            return schema
           }
-        })
+        )
         .default(null)
         .label(Settings.fields.person.endOfTourDate),
       biography: yup.string().nullable().default(""),
       position: yup.object().nullable().default({}),
+      pendingVerification: yup.boolean().default(false),
       role: yup
         .string()
         .nullable()
@@ -142,14 +150,16 @@ export default class Person extends Model {
       status: yup
         .string()
         .nullable()
-        .default(() => Person.STATUS.ACTIVE),
-      // not actually in the database, the database contains the JSON customFields
-      formCustomFields: Person.customFieldsSchema.nullable()
+        .default(() => Model.STATUS.ACTIVE)
     })
+    // not actually in the database, the database contains the JSON customFields
+    .concat(Person.customFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, name, rank, role, status, endOfTourDate, avatar(size: 32), position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
+    "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type code status organization { uuid shortName identificationCode } location { uuid name } }"
+
+  static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static humanNameOfRole(role) {
     if (role === Person.ROLE.ADVISOR) {
@@ -177,12 +187,12 @@ export default class Person extends Model {
     return Person.humanNameOfStatus(this.status)
   }
 
-  static isNewUser(person) {
-    return person.status === Person.STATUS.NEW_USER
+  static isPendingVerification(person) {
+    return person.pendingVerification
   }
 
-  isNewUser() {
-    return Person.isNewUser(this)
+  isPendingVerification() {
+    return Person.isPendingVerification(this)
   }
 
   static isAdvisor(person) {
@@ -220,8 +230,7 @@ export default class Person extends Model {
 
   hasActivePosition() {
     return (
-      this.hasAssignedPosition() &&
-      this.position.status === Position.STATUS.ACTIVE
+      this.hasAssignedPosition() && this.position.status === Model.STATUS.ACTIVE
     )
   }
 
@@ -269,7 +278,7 @@ export default class Person extends Model {
     if (this.rank) {
       return this.rank + " " + this.name
     } else {
-      return this.name || this.uuid
+      return this.name || this.domainUsername || this.uuid
     }
   }
 
@@ -315,5 +324,15 @@ export default class Person extends Model {
       lastName: lastName.trim().toUpperCase(),
       firstName: firstName.trim()
     }
+  }
+
+  generalAssessmentsConfig() {
+    let config
+    if (this.isAdvisor()) {
+      config = Person.advisorAssessmentConfig
+    } else if (this.isPrincipal()) {
+      config = Person.principalAssessmentConfig
+    }
+    return config || []
   }
 }

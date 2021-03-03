@@ -1,19 +1,21 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import AppContext from "components/AppContext"
+import { initInvisibleFields } from "components/CustomFields"
 import GuidedTour from "components/GuidedTour"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Person, Report } from "models"
 import { reportTour } from "pages/HopscotchTour"
-import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { connect } from "react-redux"
+import Settings from "settings"
 import ReportForm from "./Form"
 
-const BaseReportNew = ({ pageDispatchers, currentUser }) => {
+const ReportNew = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
@@ -21,12 +23,22 @@ const BaseReportNew = ({ pageDispatchers, currentUser }) => {
   })
 
   const report = new Report()
+
+  // mutates the object
+  initInvisibleFields(report, Settings.fields.report.customFields)
+
   if (currentUser && currentUser.uuid) {
     const person = new Person(currentUser)
     person.primary = true
-    report.attendees.push(person)
+    person.author = true
+    person.attendee = true
+    report.reportPeople.push(person)
   }
-  const reportInitialValues = Object.assign(report, report.getTaskAssessments())
+  const reportInitialValues = Object.assign(
+    report,
+    report.getTasksEngagementAssessments(),
+    report.getAttendeesEngagementAssessments()
+  )
 
   return (
     <div className="report-new">
@@ -50,15 +62,8 @@ const BaseReportNew = ({ pageDispatchers, currentUser }) => {
   )
 }
 
-BaseReportNew.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  currentUser: PropTypes.instanceOf(Person)
+ReportNew.propTypes = {
+  pageDispatchers: PageDispatchersPropType
 }
-
-const ReportNew = props => (
-  <AppContext.Consumer>
-    {context => <BaseReportNew currentUser={context.currentUser} {...props} />}
-  </AppContext.Consumer>
-)
 
 export default connect(null, mapPageDispatchersToProps)(ReportNew)
