@@ -1,4 +1,5 @@
-import { Button, Tooltip } from "@blueprintjs/core"
+import { Button } from "@blueprintjs/core"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import Leaflet from "components/Leaflet"
 import { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import _escape from "lodash/escape"
@@ -6,7 +7,6 @@ import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useState } from "react"
 import { toast } from "react-toastify"
-
 const useMergeValidation = (
   initMergeable1 = {},
   initMergeable2 = {},
@@ -140,23 +140,23 @@ export function areAllSet(...args) {
 
 export function getInfoButton(infoText) {
   return (
-    <Tooltip content={infoText} intent="primary">
+    <Tooltip2 content={infoText} intent="primary">
       <Button minimal icon="info-sign" intent="primary" />
-    </Tooltip>
+    </Tooltip2>
   )
 }
 
 export function getClearButton(onClear) {
   return (
-    <Tooltip content="Clear field value" intent="danger">
+    <Tooltip2 content="Clear field value" intent="danger">
       <Button icon="delete" outlined intent="danger" onClick={onClear} />
-    </Tooltip>
+    </Tooltip2>
   )
 }
 
 export function getActivationButton(isActive, onClickAction, instanceName) {
   return (
-    <Tooltip
+    <Tooltip2
       content={
         isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
       }
@@ -168,7 +168,7 @@ export function getActivationButton(isActive, onClickAction, instanceName) {
         intent={isActive ? "danger" : "success"}
         onClick={onClickAction}
       />
-    </Tooltip>
+    </Tooltip2>
   )
 }
 

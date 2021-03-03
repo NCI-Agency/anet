@@ -396,6 +396,8 @@ const PositionColumn = ({
             align={align}
             action={getActionButton(() => {
               setFieldValue("name", position.name)
+              setFieldValue("organization", position.organization)
+              setFieldValue("type", position.type)
             }, align)}
           />
           <PositionField
