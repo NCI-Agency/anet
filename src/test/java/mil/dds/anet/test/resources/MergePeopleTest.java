@@ -12,7 +12,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
@@ -36,7 +35,7 @@ public class MergePeopleTest extends AbstractResourceTest {
     final Position test = new Position();
     test.setName(positionName);
     test.setType(PositionType.ADVISOR);
-    test.setStatus(PositionStatus.ACTIVE);
+    test.setStatus(Position.Status.ACTIVE);
 
     // Assign to an AO
     final String organizationUuid = graphQLHelper.createObject(admin, "createOrganization",

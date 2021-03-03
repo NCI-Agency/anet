@@ -221,14 +221,14 @@ public class PersonResourceTest extends AbstractResourceTest {
     Person newPerson3 = new Person();
     newPerson3.setName("Sahin Burak");
     newPerson3.setRole(Role.ADVISOR);
-    newPerson3.setStatus(PersonStatus.ACTIVE);
+    newPerson3.setStatus(Person.Status.ACTIVE);
     // set HTML of biography
-    newPerson3.setBiography(UtilsTest.getCombinedTestCase().getInput());
+    newPerson3.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
     newPerson3.setGender("Female");
     newPerson3.setCountry("Turkey");
     newPerson3.setCode("1995");
     newPerson3.setEndOfTourDate(
-        ZonedDateTime.of(2020, 6, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
+        ZonedDateTime.of(2020, 6, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
     String newPerson3Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
         "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
     newPerson3 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newPerson3Uuid,

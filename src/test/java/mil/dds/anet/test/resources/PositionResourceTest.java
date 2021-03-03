@@ -35,7 +35,6 @@ import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.test.resources.utils.PositionHistoryDao;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -312,7 +311,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     Position newTestPos = new Position();
     newTestPos.setName("Super Position For Test");
     newTestPos.setType(PositionType.ADVISOR);
-    newTestPos.setStatus(PositionStatus.ACTIVE);
+    newTestPos.setStatus(Position.Status.ACTIVE);
 
     // Assign to an AO
     newTestPos.setOrganization(createOrganizationWithUuid(aoUuid));
