@@ -1,8 +1,8 @@
 package mil.dds.anet;
 
-import static mil.dds.anet.threads.PendingAssessmentsNotificationWorker.NOTE_PERIOD_START;
-import static mil.dds.anet.threads.PendingAssessmentsNotificationWorker.NOTE_RECURRENCE;
-import static mil.dds.anet.threads.PendingAssessmentsNotificationWorker.PRINCIPAL_PERSON_ASSESSMENTS;
+import static mil.dds.anet.utils.PendingAssessmentsHelper.NOTE_PERIOD_START;
+import static mil.dds.anet.utils.PendingAssessmentsHelper.NOTE_RECURRENCE;
+import static mil.dds.anet.utils.PendingAssessmentsHelper.PRINCIPAL_PERSON_ASSESSMENTS;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,10 +31,10 @@ import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.MapperUtils;
-import mil.dds.anet.threads.PendingAssessmentsNotificationWorker.AssessmentDates;
-import mil.dds.anet.threads.PendingAssessmentsNotificationWorker.Recurrence;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.PendingAssessmentsHelper.AssessmentDates;
+import mil.dds.anet.utils.PendingAssessmentsHelper.Recurrence;
 import mil.dds.anet.utils.Utils;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;

@@ -33,6 +33,9 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
   @GraphQLQuery
   @GraphQLInputField
   private Boolean hasCounterparts;
+  @GraphQLQuery
+  @GraphQLInputField
+  private Boolean hasPendingAssessments;
 
   public PositionSearchQuery() {
     super(PositionSearchSortBy.NAME);
@@ -103,10 +106,19 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
     this.hasCounterparts = hasCounterparts;
   }
 
+  public boolean getHasPendingAssessments() {
+    return Boolean.TRUE.equals(hasPendingAssessments);
+  }
+
+  public void setHasPendingAssessments(Boolean hasPendingAssessments) {
+    this.hasPendingAssessments = hasPendingAssessments;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), matchPersonName, organizationUuid, orgRecurseStrategy,
-        type, isFilled, locationUuid, authorizationGroupUuid, hasCounterparts);
+        type, isFilled, locationUuid, authorizationGroupUuid, hasCounterparts,
+        hasPendingAssessments);
   }
 
   @Override
@@ -122,7 +134,8 @@ public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionS
         && Objects.equals(getIsFilled(), other.getIsFilled())
         && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
-        && Objects.equals(getHasCounterparts(), other.getHasCounterparts());
+        && Objects.equals(getHasCounterparts(), other.getHasCounterparts())
+        && Objects.equals(getHasPendingAssessments(), other.getHasPendingAssessments());
   }
 
   @Override
