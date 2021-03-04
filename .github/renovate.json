@@ -25,6 +25,7 @@
         "draft-js",
         "io.leangen.graphql:spqr",
         "leaflet",
+        "react-tooltip",
         "yup"
       ],
       "packagePatterns": ["^@fullcalendar/"],
