@@ -774,7 +774,7 @@ public class PositionResourceTest extends AbstractResourceTest {
   public void mergePositionsTest() {
     // Create a new position and designate the person upfront
     Person testPerson = new Person();
-    testPerson.setName("MergePositionTest Person");
+    testPerson.setName("MergePositionsTest Person");
     testPerson.setRole(Role.PRINCIPAL);
     testPerson.setStatus(Person.Status.ACTIVE);
 
@@ -794,7 +794,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(orgs.getList().size()).isGreaterThan(0);
 
     Position firstPosition = new Position();
-    firstPosition.setName("MergePositionTest First Position");
+    firstPosition.setName("MergePositionsTest First Position");
     firstPosition.setType(PositionType.PRINCIPAL);
     firstPosition.setOrganization(orgs.getList().get(0));
     firstPosition.setStatus(Position.Status.ACTIVE);
@@ -808,7 +808,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(firstPosition.getUuid()).isNotNull();
 
     Position secondPosition = new Position();
-    secondPosition.setName("MergePositionTest Second Position");
+    secondPosition.setName("MergePositionsTest Second Position");
     secondPosition.setType(PositionType.PRINCIPAL);
     secondPosition.setOrganization(orgs.getList().get(0));
     secondPosition.setStatus(Position.Status.ACTIVE);
@@ -830,7 +830,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     variables.put("winnerPosition", firstPosition);
     Position position = graphQLHelper.updateObject(admin,
         "mutation ($loserUuid: String!, $winnerPosition: PositionInput!) "
-            + "{ payload: mergePosition (loserUuid: $loserUuid, winnerPosition: $winnerPosition) { uuid }}",
+            + "{ payload: mergePositions (loserUuid: $loserUuid, winnerPosition: $winnerPosition) { uuid }}",
         variables, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(position).isNotNull();
     assertThat(position.getUuid()).isNotNull();

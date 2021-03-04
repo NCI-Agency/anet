@@ -479,7 +479,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   @InTransaction
   public int mergePositions(Position existingPos, Position mergedPosition) {
     getDbHandle().createUpdate(
-        "/* updatePeoplePositionsAfterMergePosition */ UPDATE \"peoplePositions\" set \"positionUuid\" = :mergedPositionUuid "
+        "/* updatePeoplePositionsAfterMergePositions */ UPDATE \"peoplePositions\" set \"positionUuid\" = :mergedPositionUuid "
             + "WHERE \"positionUuid\" = :existingPosUuid")
         .bind("mergedPositionUuid", mergedPosition.getUuid())
         .bind("existingPosUuid", existingPos.getUuid()).execute();
@@ -490,21 +490,21 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
     // Update notes of existing position's with merged position info
     getDbHandle().createUpdate(
-        "/* updateNoteRelatedObjectsAfterMergePosition */ UPDATE \"noteRelatedObjects\" set \"relatedObjectUuid\" = :mergedPositionUuid "
+        "/* updateNoteRelatedObjectsAfterMergePositions */ UPDATE \"noteRelatedObjects\" set \"relatedObjectUuid\" = :mergedPositionUuid "
             + "WHERE \"relatedObjectUuid\" = :existingPosUuid")
         .bind("mergedPositionUuid", mergedPosition.getUuid())
         .bind("existingPosUuid", existingPos.getUuid()).execute();
 
     // Update approvers position info with merged position info
     getDbHandle().createUpdate(
-        "/* updateApproversAfterMergePosition */ UPDATE \"approvers\" set \"positionUuid\" = :mergedPositionUuid "
+        "/* updateApproversAfterMergePositions */ UPDATE \"approvers\" set \"positionUuid\" = :mergedPositionUuid "
             + "WHERE \"positionUuid\" = :existingPosUuid")
         .bind("mergedPositionUuid", mergedPosition.getUuid())
         .bind("existingPosUuid", existingPos.getUuid()).execute();
 
     // Update task Responsible Position info with merged position info
     getDbHandle().createUpdate(
-        "/* updateTaskResponsiblePositionsAfterMergePosition */ UPDATE \"taskResponsiblePositions\" set \"positionUuid\" = :mergedPositionUuid "
+        "/* updateTaskResponsiblePositionsAfterMergePositions */ UPDATE \"taskResponsiblePositions\" set \"positionUuid\" = :mergedPositionUuid "
             + "WHERE \"positionUuid\" = :existingPosUuid")
         .bind("mergedPositionUuid", mergedPosition.getUuid())
         .bind("existingPosUuid", existingPos.getUuid()).execute();

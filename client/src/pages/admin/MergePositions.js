@@ -43,7 +43,7 @@ import utils from "utils"
 
 const GQL_MERGE_POSITION = gql`
   mutation($loserUuid: String!, $winnerPosition: PositionInput!) {
-    mergePosition(loserUuid: $loserUuid, winnerPosition: $winnerPosition) {
+    mergePositions(loserUuid: $loserUuid, winnerPosition: $winnerPosition) {
       uuid
     }
   }
@@ -321,14 +321,14 @@ const MergePositions = ({ pageDispatchers }) => {
           large
           intent="primary"
           text="Merge Positions"
-          onClick={mergePosition}
+          onClick={mergePositions}
           disabled={!areAllSet(position1, position2, mergedPosition?.name)}
         />
       </Row>
     </Grid>
   )
 
-  function mergePosition() {
+  function mergePositions() {
     if (unassignedPerson(position1, position2, mergedPosition)) {
       return
     }
@@ -343,6 +343,7 @@ const MergePositions = ({ pageDispatchers }) => {
     }
     // serialize form custom fields before query, and remove unserialized field
     mergedPosition.customFields = customFieldsJSONString(mergedPosition)
+
     const winnerPosition = Object.without(
       mergedPosition,
       DEFAULT_CUSTOM_FIELDS_PARENT
@@ -352,8 +353,8 @@ const MergePositions = ({ pageDispatchers }) => {
       winnerPosition
     })
       .then(res => {
-        if (res.mergePosition) {
-          history.push(Position.pathFor({ uuid: res.mergePosition.uuid }), {
+        if (res.mergePositions) {
+          history.push(Position.pathFor({ uuid: res.mergePositions.uuid }), {
             success: "Positions merged. Displaying merged Position below."
           })
         }

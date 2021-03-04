@@ -229,8 +229,8 @@ public class PositionResource {
     return dao.delete(positionUuid);
   }
 
-  @GraphQLMutation(name = "mergePosition")
-  public Position mergePosition(@GraphQLRootContext Map<String, Object> context,
+  @GraphQLMutation(name = "mergePositions")
+  public Position mergePositions(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerPosition") Position winnerPosition) {
     final Person user = DaoUtils.getUserFromContext(context);
