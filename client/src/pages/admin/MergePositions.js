@@ -1,6 +1,6 @@
 import { Button, Callout } from "@blueprintjs/core"
 import styled from "@emotion/styled"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -120,7 +120,7 @@ const MergePositions = ({ pageDispatchers }) => {
   ] = useMergeValidation({}, {}, new Position(), MODEL_TO_OBJECT_TYPE.Position)
 
   useBoilerplate({
-    pageProps: DEFAULT_PAGE_PROPS,
+    pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
