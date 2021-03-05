@@ -33,10 +33,27 @@ class anet_logic_mixin(BaseModel):
             BaseModel.session.add(self)
             BaseModel.session.flush()
 
-    def update_entity(self, updatedAt):
+    def update_entity(self, updatedAt, update_rules):
         """Update and flush an existing record
         """
         obj = type(self).find(self.uuid)
+
+        if self.__tablename__ == "reports" and len(self.people) != 0:
+            #rp_list = copy.deepcopy(self.people)
+            for rp in self.people:
+                prs = rp.person
+                prs.set_session(self.session)
+                if base_methods.is_entity_update(prs, update_rules):
+                    delattr(rp.person, "reports")
+                    prs.updatedAt = updatedAt
+                    prs.update_entity(updatedAt, update_rules)
+                else:
+                    delattr(rp, "report")
+                    rp.person.createdAt = updatedAt
+                    rp.person.updatedAt = updatedAt
+                    obj.people.append(rp)
+                    BaseModel.session.flush()
+            delattr(self, "people")
 
         self.updatedAt = updatedAt
         for attr, value in self.__dict__.items():
@@ -46,7 +63,7 @@ class anet_logic_mixin(BaseModel):
 
     def insert_update_nested_entity(self, update_rules, utc_now):
         self_c = copy.deepcopy(self)
-
+        
         if base_methods.has_entity_relation(self, "person"):
             base_methods.relation_process(
                 self, "person", self_c, update_rules, PeoplePositions, utc_now)
@@ -135,6 +152,7 @@ class Person(anet_logic_mixin):
     avatar = Column(LargeBinary)
 
     positions = relationship("PeoplePositions", back_populates="person")
+    reports = relationship("ReportPeople", back_populates="person")
 
 
 class Location(anet_logic_mixin):
@@ -213,3 +231,21 @@ class Report(anet_logic_mixin):
     location = relationship('Location')
     organization1 = relationship(
         'Organization', primaryjoin='Report.principalOrganizationUuid == Organization.uuid')
+    people = relationship("ReportPeople", back_populates="report")
+
+
+class ReportPeople(anet_logic_mixin):
+    __tablename__ = "reportPeople"
+
+    isPrimary = Column('isPrimary', Boolean, server_default=text("false"))
+    personUuid = Column('personUuid', ForeignKey('people.uuid'), index=True)
+    reportUuid = Column('reportUuid', ForeignKey('reports.uuid'), index=True)
+    isAttendee = Column('isAttendee', Boolean, server_default=text("true"))
+    isAuthor = Column('isAuthor', Boolean, server_default=text("false"))
+
+    __mapper_args__ = { 
+        "primary_key": [personUuid, reportUuid]
+    }
+
+    person = relationship("Person", back_populates="reports")
+    report = relationship("Report", back_populates="people")
