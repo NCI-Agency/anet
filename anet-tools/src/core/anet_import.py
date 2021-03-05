@@ -63,10 +63,13 @@ class anet_import(db):
                     entity, self.update_rules)
                 if base_methods.is_entity_single(entity):
                     if is_entity_update:
-                        entity.update_entity(utc_now)
+                        #print("update_entity")
+                        entity.update_entity(utc_now, self.update_rules)
                     else:
+                        #print("insert_entity")
                         entity.insert_entity(utc_now)
                 else:
+                    #print("insert_update_nested_entity")
                     entity.insert_update_nested_entity(
                         self.update_rules, utc_now)
                 entity.commit()

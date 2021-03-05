@@ -4,7 +4,7 @@ from src.examples.models import Person
 
 
 # Define full path of csv file
-csv_full_path = "/home/jovyan/work/datasamples/anet_import_data.csv"
+csv_full_path = "/home/jovyan/work/datasamples/anet_import_sample_data.csv"
 
 # Create csv object
 csv_obj = csv(csv_full_path)
