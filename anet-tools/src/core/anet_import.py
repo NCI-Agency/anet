@@ -1,6 +1,8 @@
 import datetime
 import json
 import os
+import sys
+import traceback
 
 import pandas as pd
 from sqlalchemy import exc
@@ -36,6 +38,12 @@ class anet_import(db):
 
     def set_base_session(self):
         BaseModel.set_session(self.session)
+    
+    # def format_stacktrace(self):
+    #     parts = ["Traceback (most recent call last):\n"]
+    #     parts.extend(traceback.format_stack(limit=25)[:-2])
+    #     parts.extend(traceback.format_exception(*sys.exc_info())[1:])
+    #     return "".join(parts)
 
     def sqlalc_exc(self, e, entity_json, from_relation_table):
         if from_relation_table:
@@ -57,21 +65,15 @@ class anet_import(db):
             try:
                 entity = entity_json["entity"]
                 if entity.__tablename__ not in ["positions", "people", "locations", "organizations", "reports"]:
-                    raise Exception("Business logic for table " +
-                                    entity.__tablename__ + " is not implemented!")
-                is_entity_update = base_methods.is_entity_update(
-                    entity, self.update_rules)
+                    raise Exception("Business logic for table " + entity.__tablename__ + " is not implemented!")
+                is_entity_update = base_methods.is_entity_update(entity, self.update_rules)
                 if base_methods.is_entity_single(entity):
                     if is_entity_update:
-                        #print("update_entity")
                         entity.update_entity(utc_now, self.update_rules)
                     else:
-                        #print("insert_entity")
-                        entity.insert_entity(utc_now)
+                        entity.insert_entity(utc_now, self.update_rules)
                 else:
-                    #print("insert_update_nested_entity")
-                    entity.insert_update_nested_entity(
-                        self.update_rules, utc_now)
+                    entity.insert_update_nested_entity(utc_now, self.update_rules)
                 entity.commit()
                 self.append_successful_entity_list_json(entity_json)
                 self.print_info(f"Successfull: {len(self.successful_entity_list_json)}")
@@ -83,9 +85,9 @@ class anet_import(db):
                 entity.session.rollback()
                 self.sqlalc_exc(e=e, entity_json=entity_json,
                                 from_relation_table=True)
-            counter = counter + 1
-            if not self.verbose:
+            if not self.verbose and counter % 10 == 0:
                 print(f"Importing {counter}/{len(entity_list_json)} passed", end="\r")
+            counter = counter + 1
         print(f"Importing {counter}/{len(entity_list_json)} passed")
         print("Import is complete for entities whose table name is",
               entity_json["entity"].__tablename__)
@@ -95,12 +97,18 @@ class anet_import(db):
             print("all entities imported to db successfully")
             print("\n")
         else:
-            unsuccessful_entity_df = pd.DataFrame()
-            for entity_json in self.unsuccessful_entity_list_json:
-                unsuccessful_entity_df = pd.concat(
-                    [unsuccessful_entity_df, pd.DataFrame(entity_json["row"]).T])
-            filename = "unsuccessful_" + \
-                str(datetime.datetime.now()).replace(" ", "_")
+            if self.tinylog:
+                exc_set = set()
+                for entity_json in self.unsuccessful_entity_list_json:
+                    exc_set.add(entity_json["row"]["exception_reason"])
+                unsuccessful_entity_df = pd.DataFrame(exc_set)
+            else:
+                unsuccessful_entity_df = pd.DataFrame()
+                for entity_json in self.unsuccessful_entity_list_json:
+                    unsuccessful_entity_df = pd.concat(
+                        [unsuccessful_entity_df, pd.DataFrame(entity_json["row"]).T])
+            utc_now_str = str(datetime.datetime.now()).replace(" ", "_")
+            filename = "unsuccessful_" + utc_now_str
             fullpath = os.path.join(self.path_log, filename + ".csv")
             unsuccessful_entity_df.to_csv(fullpath)
             print(f"Importing {len(self.unsuccessful_entity_list_json)} entities unsuccessful.")
@@ -169,9 +177,10 @@ class anet_import(db):
         fullpath_hashfile = os.path.join(self.path_hashfile, "hashvalues.txt")
         self.write_hashlist_to_file(fullpath_hashfile)
 
-    def save_data(self, entity_list_json, verbose=True, remember_with_hash=True, write_unsuccessful=True):
+    def save_data(self, entity_list_json, verbose=True, remember_with_hash=True, write_unsuccessful=True, tinylog=True):
         print("***DATA IMPORT AND MANIPULATION FRAMEWORK***")
         self.verbose = verbose
+        self.tinylog = tinylog
         self.connect()
         self.set_base_session()
         self.initialize_successful_entity_list_json()
