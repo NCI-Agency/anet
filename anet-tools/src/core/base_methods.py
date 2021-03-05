@@ -9,7 +9,7 @@ class base_methods:
     def has_entity_relation(entity, rel_attr):
         if not hasattr(entity, rel_attr):
             return False
-        if getattr(entity, rel_attr) is None:
+        if getattr(entity, rel_attr) is None or getattr(entity, rel_attr) == []:
             return False
         else:
             return True
@@ -72,13 +72,15 @@ class base_methods:
         if entity.__tablename__ not in ["positions", "reports"]:
             return True
         else:
-            if base_methods.has_entity_relation(entity, "person") or base_methods.has_entity_relation(entity, "location") or base_methods.has_entity_relation(entity, "organization"):
+            if base_methods.has_entity_relation(entity, "person") or \
+                base_methods.has_entity_relation(entity, "location") or \
+                base_methods.has_entity_relation(entity, "organization"):
                 return False
             else:
                 return True
 
     @staticmethod
-    def relation_process(entity, relation_name, entity_c, update_rules, PeoplePositions, utc_now):
+    def position_relation_process(entity, relation_name, entity_c, update_rules, PeoplePositions, utc_now):
         if base_methods.is_entity_update(getattr(entity, relation_name), update_rules):
             if relation_name == "person":
                 base_methods.remove_persons_association_with_position(entity, PeoplePositions, utc_now)
