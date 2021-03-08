@@ -7,7 +7,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useState } from "react"
 import { toast } from "react-toastify"
-const useMergeValidation = (
+const useMergeObjects = (
   initMergeable1 = {},
   initMergeable2 = {},
   initMergedState = {},
@@ -16,6 +16,7 @@ const useMergeValidation = (
   const [mergeable1, setMergeable1] = useState(initMergeable1)
   const [mergeable2, setMergeable2] = useState(initMergeable2)
   const [merged, setMerged] = useState(initMergedState)
+  const [mergeFieldHeights, setMergeFieldHeights] = useState({})
 
   const validForThatType = OBJECT_TYPE_TO_VALIDATOR[mergeableType]
   if (!validForThatType) {
@@ -54,7 +55,8 @@ const useMergeValidation = (
 
   return [
     [mergeable1, mergeable2, merged],
-    [createStateSetter(1), createStateSetter(2), setMerged]
+    [createStateSetter(1), createStateSetter(2), setMerged],
+    [mergeFieldHeights, setMergeFieldHeights]
   ]
 }
 // FIXME: Fill when ready
@@ -106,7 +108,7 @@ function bothPosOccupied(otherPos, newPos) {
 
 export function unassignedPerson(position1, position2, mergedPosition) {
   const msg = "You can't merge if a person is left unassigned"
-  // both positions having a person is validated in useMergeValidation, can't happen
+  // both positions having a person is validated in useMergeObjects, can't happen
   // warn when one of them has it and merged doesn't
   if (
     // only position1 has it
@@ -211,21 +213,4 @@ export function getLeafletMap(mapId, location) {
   )
 }
 
-export function customStyleForLargeFields(fieldConfig) {
-  switch (fieldConfig?.type) {
-    case "array":
-      return "height: 100px;"
-    case "array_of_anet_objects":
-      return "height: 120px;"
-    case "array_of_objects":
-      return "height: 120px;"
-    case "enumset":
-      return "height: 80px;"
-    case "json":
-      return "height: 120px;"
-    default:
-      return ""
-  }
-}
-
-export default useMergeValidation
+export default useMergeObjects

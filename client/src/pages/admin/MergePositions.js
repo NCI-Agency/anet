@@ -21,9 +21,8 @@ import {
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import _set from "lodash/set"
-import useMergeValidation, {
+import useMergeObjects, {
   areAllSet,
-  customStyleForLargeFields,
   getActionButton,
   getActivationButton,
   getClearButton,
@@ -116,8 +115,9 @@ const MergePositions = ({ pageDispatchers }) => {
   const [saveError, setSaveError] = useState(null)
   const [
     [position1, position2, mergedPosition],
-    [setPosition1, setPosition2, setMergedPosition]
-  ] = useMergeValidation({}, {}, new Position(), MODEL_TO_OBJECT_TYPE.Position)
+    [setPosition1, setPosition2, setMergedPosition],
+    [mergeFieldHeights, setMergeFieldHeights]
+  ] = useMergeObjects({}, {}, new Position(), MODEL_TO_OBJECT_TYPE.Position)
 
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
@@ -139,6 +139,8 @@ const MergePositions = ({ pageDispatchers }) => {
             setFieldValue={setFieldValue}
             align="left"
             label="Position 1"
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
         </Col>
         <Col md={4}>
@@ -178,6 +180,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 value={mergedPosition.name}
                 align="center"
                 action={getInfoButton("Name is required.")}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Organization"
@@ -189,12 +193,16 @@ const MergePositions = ({ pageDispatchers }) => {
                 }
                 align="center"
                 action={getInfoButton("Organization is required.")}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Type"
                 value={mergedPosition.type}
                 align="center"
                 action={getInfoButton("Type is required.")}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Code"
@@ -203,6 +211,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 action={getClearButton(() => {
                   setFieldValue("code", "")
                 })}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Status"
@@ -220,6 +230,8 @@ const MergePositions = ({ pageDispatchers }) => {
                   },
                   Position.getInstanceName
                 )}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Associated Positions"
@@ -233,10 +245,11 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
-                customStyle={customStyleForLargeFields({ type: "array" })}
                 action={getClearButton(() => {
                   setFieldValue("associatedPositions", "")
                 })}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Previous People"
@@ -251,10 +264,11 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
-                customStyle={customStyleForLargeFields({ type: "array" })}
                 action={getClearButton(() => {
                   setFieldValue("previousPeople", "")
                 })}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               <PositionField
                 label="Person"
@@ -265,6 +279,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 action={getClearButton(() => {
                   setFieldValue("person", "")
                 })}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               {Settings.fields.position.customFields &&
                 Object.entries(Settings.fields.position.customFields).map(
@@ -276,7 +292,6 @@ const MergePositions = ({ pageDispatchers }) => {
                         key={fieldName}
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
-                        customStyle={customStyleForLargeFields(fieldConfig)}
                         align="center"
                         action={getClearButton(() => {
                           setFieldValue(
@@ -284,6 +299,8 @@ const MergePositions = ({ pageDispatchers }) => {
                             ""
                           )
                         })}
+                        mergeFieldHeights={mergeFieldHeights}
+                        setMergeFieldHeights={setMergeFieldHeights}
                       />
                     )
                   }
@@ -300,6 +317,8 @@ const MergePositions = ({ pageDispatchers }) => {
                 action={getClearButton(() => {
                   setFieldValue("location", "")
                 })}
+                mergeFieldHeights={mergeFieldHeights}
+                setMergeFieldHeights={setMergeFieldHeights}
               />
               {getLeafletMap("merged-location", mergedPosition.location)}
             </>
@@ -312,6 +331,8 @@ const MergePositions = ({ pageDispatchers }) => {
             setFieldValue={setFieldValue}
             align="right"
             label="Position 2"
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
         </Col>
       </Row>
@@ -398,7 +419,9 @@ const PositionColumn = ({
   setPosition,
   setFieldValue,
   align,
-  label
+  label,
+  mergeFieldHeights,
+  setMergeFieldHeights
 }) => {
   return (
     <PositionCol>
@@ -441,6 +464,8 @@ const PositionColumn = ({
               setFieldValue("organization", position.organization)
               setFieldValue("type", position.type)
             }, align)}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Organization"
@@ -452,6 +477,8 @@ const PositionColumn = ({
               () => setFieldValue("organization", position.organization),
               align
             )}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Type"
@@ -461,6 +488,8 @@ const PositionColumn = ({
               () => setFieldValue("type", position.type),
               align
             )}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Code"
@@ -470,6 +499,8 @@ const PositionColumn = ({
               () => setFieldValue("code", position.code),
               align
             )}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Status"
@@ -479,10 +510,11 @@ const PositionColumn = ({
               () => setFieldValue("status", position.status),
               align
             )}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Associated Positions"
-            customStyle={customStyleForLargeFields({ type: "array" })}
             value={
               <>
                 {position.associatedPositions.map(pos => (
@@ -501,10 +533,11 @@ const PositionColumn = ({
                 ),
               align
             )}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Previous People"
-            customStyle={customStyleForLargeFields({ type: "array" })}
             value={
               <>
                 {position.previousPeople.map((pp, idx) => (
@@ -519,6 +552,8 @@ const PositionColumn = ({
               () => setFieldValue("previousPeople", position.previousPeople),
               align
             )}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           <PositionField
             label="Person"
@@ -529,6 +564,8 @@ const PositionColumn = ({
               // setting person should also set uuid
               setFieldValue("uuid", position.uuid)
             }, align)}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           {Settings.fields.position.customFields &&
             Object.entries(Settings.fields.position.customFields).map(
@@ -540,7 +577,6 @@ const PositionColumn = ({
                   <PositionField
                     key={fieldName}
                     label={fieldConfig.label || fieldName}
-                    customStyle={customStyleForLargeFields(fieldConfig)}
                     // To be able to see arrays and ojects
                     value={JSON.stringify(fieldValue)}
                     align={align}
@@ -550,6 +586,8 @@ const PositionColumn = ({
                         fieldValue
                       )
                     }, align)}
+                    mergeFieldHeights={mergeFieldHeights}
+                    setMergeFieldHeights={setMergeFieldHeights}
                   />
                 )
               }
@@ -561,6 +599,8 @@ const PositionColumn = ({
             action={getActionButton(() => {
               setFieldValue("location", position.location)
             }, align)}
+            mergeFieldHeights={mergeFieldHeights}
+            setMergeFieldHeights={setMergeFieldHeights}
           />
           {getLeafletMap(`merge-position-map-${align}`, position.location)}
         </>
@@ -580,7 +620,9 @@ PositionColumn.propTypes = {
   setPosition: PropTypes.func.isRequired,
   setFieldValue: PropTypes.func.isRequired,
   align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
-  label: PropTypes.string.isRequired
+  label: PropTypes.string.isRequired,
+  mergeFieldHeights: PropTypes.object,
+  setMergeFieldHeights: PropTypes.func
 }
 
 export default connect(null, mapPageDispatchersToProps)(MergePositions)

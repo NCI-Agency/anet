@@ -1,11 +1,42 @@
 import styled from "@emotion/styled"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect, useRef, useState } from "react"
 
-const MergeField = ({ label, value, align, action, customStyle }) => {
+const MergeField = ({
+  label,
+  value,
+  align,
+  action,
+  mergeFieldHeights,
+  setMergeFieldHeights
+}) => {
+  const fieldRef = useRef(null)
+  const [updated, setUpdated] = useState(false)
+
+  useEffect(() => {
+    // We have 3 columns of fields, each field should have same height, we use label to search for previously set value
+    // if a column has bigger height, that height wins
+    if (fieldRef.current) {
+      const currentHeight = fieldRef.current.clientHeight
+      const savedHeight = mergeFieldHeights?.[label] || 0
+      if (savedHeight < currentHeight) {
+        setMergeFieldHeights({ ...mergeFieldHeights, [label]: currentHeight })
+      } else if (savedHeight > currentHeight) {
+        // if some other column field height is bigger, we update small ui
+        setUpdated(true)
+      }
+    }
+    return () => {}
+  }, [label, mergeFieldHeights, setMergeFieldHeights])
+
   const fDir = align === "right" ? "row-reverse" : "row"
   return (
-    <MergeFieldBox fDir={fDir} customStyle={customStyle}>
+    <MergeFieldBox
+      fDir={fDir}
+      ref={fieldRef}
+      /* We first let its height be auto to get the natural height */
+      fieldHeight={updated ? `${mergeFieldHeights[label]}px` : "auto"}
+    >
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>
         <ValueBox align={align}>{value}</ValueBox>
@@ -21,8 +52,7 @@ const MergeFieldBox = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  height: 50px;
-  ${props => props.customStyle};
+  height: ${props => props.fieldHeight};
 `
 
 const LabelBox = styled.div`
@@ -48,7 +78,8 @@ MergeField.propTypes = {
   value: PropTypes.node,
   align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
   action: PropTypes.node,
-  customStyle: PropTypes.string
+  mergeFieldHeights: PropTypes.object,
+  setMergeFieldHeights: PropTypes.func
 }
 
 export default MergeField
