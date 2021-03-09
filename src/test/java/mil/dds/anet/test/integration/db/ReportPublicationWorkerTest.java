@@ -22,12 +22,12 @@ import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
-import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
+import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import org.junit.jupiter.api.AfterAll;
@@ -207,7 +207,8 @@ public class ReportPublicationWorkerTest {
 
   private static Report createTestReport(final String toAddressId) {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
+    final ReportPerson author =
+        AbstractResourceTest.personToReportAuthor(TestBeans.getTestPerson());
     author.setEmailAddress(toAddressId + allowedEmail);
     engine.getPersonDao().insert(author);
 
