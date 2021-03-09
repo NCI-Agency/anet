@@ -13423,10 +13423,10 @@ rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-avatar-edit@0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/react-avatar-edit/-/react-avatar-edit-0.9.0.tgz#5e8842e890467b0ecea608362824eb715ae3b7a6"
-  integrity sha512-TpaZ8pXJiFw6UNYEc24z5hWht+2dBz6oeEXzgg8yGrcsro6WWUp86HbGra5q3CyF3Dx6CcTvGB5Mb9fTsIk5Pw==
+react-avatar-edit@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-avatar-edit/-/react-avatar-edit-1.0.0.tgz#5655337ed4bcb9cfbecce0911703f48376d1e0fd"
+  integrity sha512-4ouAnDQe7WEeRD/mAxgdZR8dqpazWKOQXdIRwojnNvWGkqdrNRf/5oQN2LXZWHVUQjuI0C8GeES0bp760Zkgsw==
   dependencies:
     blueimp-load-image "^5.14.0"
     exif-js "^2.3.0"
