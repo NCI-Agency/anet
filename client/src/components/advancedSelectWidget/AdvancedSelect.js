@@ -219,10 +219,7 @@ const AdvancedSelect = ({
     ]
   )
 
-  const { callback: fetchResultsDebounced } = useDebouncedCallback(
-    fetchResults,
-    400
-  )
+  const fetchResultsDebounced = useDebouncedCallback(fetchResults, 400)
 
   useEffect(() => {
     if (
