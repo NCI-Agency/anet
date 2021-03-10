@@ -14,7 +14,7 @@ const MergeField = ({
   const [updated, setUpdated] = useState(false)
 
   useEffect(() => {
-    // We have 3 columns of fields, each field should have same height, we use label to search for previously set value
+    // We have more than one columns of fields, each field should have same height, we use label to search for previously set value
     // if a column has bigger height, that height wins
     if (fieldRef.current) {
       const currentHeight = fieldRef.current.clientHeight

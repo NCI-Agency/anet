@@ -10,6 +10,7 @@ import LinkTo from "components/LinkTo"
 import PositionField from "components/MergeField"
 import Messages from "components/Messages"
 import {
+  CUSTOM_FIELD_TYPE_DEFAULTS,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
@@ -296,7 +297,7 @@ const MergePositions = ({ pageDispatchers }) => {
                         action={getClearButton(() => {
                           setFieldValue(
                             `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                            ""
+                            CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type]
                           )
                         })}
                         mergeFieldHeights={mergeFieldHeights}

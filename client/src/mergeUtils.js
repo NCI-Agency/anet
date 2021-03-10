@@ -7,6 +7,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Location } from "models"
 import React, { useState } from "react"
 import { toast } from "react-toastify"
+
 const useMergeObjects = (
   initMergeable1 = {},
   initMergeable2 = {},

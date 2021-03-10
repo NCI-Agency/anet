@@ -236,7 +236,7 @@ public class PositionResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existingPos = dao.getByUuid(loserUuid);
 
-    // Check that given two position can mergeable
+    // Check that given two position can be merged
     arePositionsMergeable(existingPos, winnerPosition);
     assertCanUpdatePosition(user, winnerPosition);
     validatePosition(user, winnerPosition);
