@@ -1,13 +1,13 @@
-import { Tooltip } from "@blueprintjs/core"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
 import React from "react"
 import "./ModelTooltip.css"
 
 const ModelTooltip = ({ tooltipContent, children, ...tooltipProps }) => {
   return (
-    <Tooltip content={tooltipContent} {...tooltipProps}>
+    <Tooltip2 content={tooltipContent} {...tooltipProps}>
       {children}
-    </Tooltip>
+    </Tooltip2>
   )
 }
 

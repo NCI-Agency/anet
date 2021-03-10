@@ -55,6 +55,7 @@ const LinkTo = ({
 
   // Avatar
   const avatarComponent = showAvatar &&
+    !button &&
     Object.prototype.hasOwnProperty.call(model, "avatar") && (
       <AvatarDisplayComponent
         avatar={modelInstance.avatar}
