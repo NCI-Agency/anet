@@ -38,12 +38,6 @@ class anet_import(db):
 
     def set_base_session(self):
         BaseModel.set_session(self.session)
-    
-    # def format_stacktrace(self):
-    #     parts = ["Traceback (most recent call last):\n"]
-    #     parts.extend(traceback.format_stack(limit=25)[:-2])
-    #     parts.extend(traceback.format_exception(*sys.exc_info())[1:])
-    #     return "".join(parts)
 
     def sqlalc_exc(self, e, entity_json, from_relation_table):
         if from_relation_table:

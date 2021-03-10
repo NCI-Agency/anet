@@ -5,13 +5,6 @@ import ldap
 
 class ad:
     def __init__(self, ldap_config_json):
-        # LDAP_CONFIG_JSON STRUCTURE
-        #   ldap_config =  {
-        #   "LDAP_SERVER" : "LDAP_SERVER",
-        #   "BASE_DN" : "BASE_DN",
-        #   "LDAP_LOGIN" : "LDAP_LOGIN",
-        #   "LDAP_PASSWORD" : "LDAP_PASSWORD"
-        #   }
         self.ldap_config_json = ldap_config_json
         print("Active directory object is created")
 
