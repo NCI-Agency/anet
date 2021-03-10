@@ -74,7 +74,6 @@ class anet_import(db):
                         entity.insert_entity(utc_now, self.update_rules)
                 else:
                     entity.insert_update_nested_entity(utc_now, self.update_rules)
-                entity.commit()
                 self.append_successful_entity_list_json(entity_json)
                 self.print_info(f"Successfull: {len(self.successful_entity_list_json)}")
             except exc.SQLAlchemyError as e:
@@ -88,6 +87,7 @@ class anet_import(db):
             if not self.verbose and counter % 10 == 0:
                 print(f"Importing {counter}/{len(entity_list_json)} passed", end="\r")
             counter = counter + 1
+        entity.commit()
         print(f"Importing {counter}/{len(entity_list_json)} passed")
         print("Import is complete for entities whose table name is",
               entity_json["entity"].__tablename__)
@@ -98,17 +98,17 @@ class anet_import(db):
             print("\n")
         else:
             if self.tinylog:
-                exc_set = set()
+                exc_list = list()
                 for entity_json in self.unsuccessful_entity_list_json:
-                    exc_set.add(entity_json["row"]["exception_reason"])
-                unsuccessful_entity_df = pd.DataFrame(exc_set)
+                    exc_list.append({"data": str(vars(entity_json["entity"])),"exception": str(entity_json["row"]["exception_reason"])})
+                unsuccessful_entity_df = pd.DataFrame(exc_list)
             else:
                 unsuccessful_entity_df = pd.DataFrame()
                 for entity_json in self.unsuccessful_entity_list_json:
                     unsuccessful_entity_df = pd.concat(
                         [unsuccessful_entity_df, pd.DataFrame(entity_json["row"]).T])
             utc_now_str = str(datetime.datetime.now()).replace(" ", "_")
-            filename = "unsuccessful_" + utc_now_str
+            filename = "unsuccessful_import_" + self.unsuccessful_entity_list_json[0]["entity"].__tablename__ + "_" + utc_now_str
             fullpath = os.path.join(self.path_log, filename + ".csv")
             unsuccessful_entity_df.to_csv(fullpath)
             print(f"Importing {len(self.unsuccessful_entity_list_json)} entities unsuccessful.")
@@ -197,6 +197,9 @@ class anet_import(db):
             self.write_unsuccessful_records_to_csv()
         if remember_with_hash:
             self.write_successful_entities_hashfile()
+        print(f"Invalid: {len(entity_list_json)-len(entity_list_json_incorrect_excluded)}")
+        print(f"Successful: {len(entity_list_json_incorrect_excluded)-len(self.unsuccessful_entity_list_json)}")
+        print(f"Unsuccessful: {len(self.unsuccessful_entity_list_json)}")
         print()
 
     def add_update_rule(self, tablename, col_names):
