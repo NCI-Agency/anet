@@ -512,11 +512,17 @@ checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
 	toolVersion = '8.35'
 }
+//Easiest way to avoid checking generated code
+checkstyleTest {
+	source = fileTree('src/test/java')
+}
 
 spotless {
 	java {
 		importOrderFile 'config/google.importorder'
 		eclipse().configFile 'config/eclipse-java-google-style.xml'
+		//Exclude generated code
+		targetExclude 'build/generated/**'
 	}
 }
 
