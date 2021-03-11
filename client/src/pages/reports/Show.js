@@ -524,7 +524,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         </p>
                       )}
                       <p>
-                        <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
+                        <strong>
+                          {Settings.fields.report.nextSteps.label}:
+                        </strong>{" "}
                         {report.nextSteps}
                       </p>
                     </div>
