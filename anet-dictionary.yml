@@ -201,7 +201,9 @@ fields:
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details
     cancelled: ''
-    nextSteps: Next steps
+    nextSteps:
+      label: Next steps
+      maxTextFieldLength: 1000
     keyOutcomes: Key outcomes
     reportText: Key details
     customFields:
@@ -235,7 +237,7 @@ fields:
       trainingEvent:
         type: enum
         label: Training event
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         choices:
           YES:
             label: "Yes"
@@ -250,13 +252,13 @@ fields:
           - type: integer
           - type: min
             params: [1]
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
       levelTrained:
         type: special_field
         widget: likertScale
         label: Level trained
         helpText: Basic / Intermediate / Advanced
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         levels:
           - color: lightGray
             endValue: 3
@@ -270,11 +272,11 @@ fields:
       trainingDate:
         type: date
         label: Training date
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
       systemProcess:
         type: enum
         label: System / process
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
         choices:
           YES:
             label: System
@@ -287,7 +289,7 @@ fields:
         validations:
           - type: required
             params: [You must provide the text field]
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
       itemsAgreed:
         type: array_of_objects
         label: Items Agreed To
@@ -305,7 +307,7 @@ fields:
           dueDate:
             type: date
             label: Due date
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
       assetsUsed:
         type: array_of_objects
         label: Assets used to assist
@@ -321,7 +323,7 @@ fields:
             type: number
             typeError: Qty must be a number
             label: Qty
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
 
   person:
     firstName: First name
@@ -435,7 +437,7 @@ fields:
         componentClass: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -448,7 +450,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -473,7 +475,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   location:
     format: LAT_LON
@@ -516,7 +518,7 @@ fields:
         componentClass: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -529,7 +531,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -554,7 +556,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   position:
     name: 'Position Name'
@@ -597,7 +599,7 @@ fields:
         componentClass: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -610,7 +612,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -635,7 +637,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   organization:
     shortName: Name
@@ -679,7 +681,7 @@ fields:
         componentClass: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -692,7 +694,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -717,7 +719,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   advisor:
 

@@ -294,7 +294,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.nextSteps && (
             <span>
-              <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
+              <strong>{Settings.fields.report.nextSteps.label}:</strong>{" "}
               {report.nextSteps}
             </span>
           )}

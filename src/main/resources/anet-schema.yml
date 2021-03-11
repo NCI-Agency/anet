@@ -44,6 +44,10 @@ $defs:
           type: string
           title: The bootstrap component class
           description: Used to determine how the user interface of this particular field looks.
+        maxTextFieldLength:
+          type: integer
+          minimum: 1
+          description: Used in the UI for a text input field's maximum input length.
         style:
           type: object
           title: Optional styling for the bootstrap component class
@@ -423,9 +427,7 @@ properties:
             title: The label for a report's cancelled
             description: Used in the UI where a report's cancelled is shown.
           nextSteps:
-            type: string
-            title: The label for report's next steps
-            description: Used in the UI where report's next steps are shown.
+            "$ref": "#/$defs/inputField"
           keyOutcomes:
             type: string
             title: The label for report's key outcomes

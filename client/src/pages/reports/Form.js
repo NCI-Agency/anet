@@ -861,7 +861,7 @@ const ReportForm = ({
                 {!isFutureEngagement && (
                   <FastField
                     name="nextSteps"
-                    label={Settings.fields.report.nextSteps}
+                    label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
                     componentClass="textarea"
                     onChange={event => {
@@ -869,19 +869,24 @@ const ReportForm = ({
                       setFieldValue("nextSteps", event.target.value, false)
                       validateFieldDebounced("nextSteps")
                     }}
-                    maxLength={Settings.maxTextFieldLength}
+                    maxLength={utils.getMaxTextFieldLength(
+                      Settings.fields.report.nextSteps
+                    )}
                     onKeyUp={event =>
                       countCharsLeft(
                         "nextStepsCharsLeft",
-                        Settings.maxTextFieldLength,
+                        utils.getMaxTextFieldLength(
+                          Settings.fields.report.nextSteps
+                        ),
                         event
                       )
                     }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.nextSteps.length}
+                          {utils.getMaxTextFieldLength(
+                            Settings.fields.report.nextSteps
+                          ) - initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </>
