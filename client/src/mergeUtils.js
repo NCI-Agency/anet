@@ -1,64 +1,169 @@
 import { Button } from "@blueprintjs/core"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import Leaflet from "components/Leaflet"
-import { MODEL_TO_OBJECT_TYPE } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  MODEL_TO_OBJECT_TYPE
+} from "components/Model"
+import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
+import _set from "lodash/set"
 import { Location } from "models"
-import React, { useState } from "react"
+import React, { useCallback, useReducer } from "react"
 import { toast } from "react-toastify"
 
-const useMergeObjects = (
-  initMergeable1 = {},
-  initMergeable2 = {},
-  initMergedState = {},
-  mergeableType
-) => {
-  const [mergeable1, setMergeable1] = useState(initMergeable1)
-  const [mergeable2, setMergeable2] = useState(initMergeable2)
-  const [merged, setMerged] = useState(initMergedState)
-  const [mergeFieldHeights, setMergeFieldHeights] = useState({})
+const MERGE_SIDES = ["left", "right"]
 
+const ACTIONS = {
+  SET_MERGEABLE: 1,
+  SELECT_ALL_FIELDS: 2,
+  SET_A_MERGED_FIELD: 3,
+  SET_HEIGHT_OF_A_FIELD: 4
+}
+
+export function setMergeable(data, side) {
+  return {
+    type: ACTIONS.SET_MERGEABLE,
+    payload: {
+      data,
+      side
+    }
+  }
+}
+
+export function selectAllFields(data, side) {
+  return {
+    type: ACTIONS.SELECT_ALL_FIELDS,
+    payload: {
+      data,
+      side
+    }
+  }
+}
+
+export function setAMergedField(fieldName, data, side) {
+  return {
+    type: ACTIONS.SET_A_MERGED_FIELD,
+    payload: {
+      fieldName,
+      data,
+      side
+    }
+  }
+}
+
+export function setHeightOfAField(fieldName, data) {
+  return {
+    type: ACTIONS.SET_HEIGHT_OF_A_FIELD,
+    payload: {
+      fieldName,
+      data
+    }
+  }
+}
+
+const INITIAL_STATE = {
+  [MERGE_SIDES[0]]: null, // initial value of left mergeable
+  [MERGE_SIDES[1]]: null,
+  merged: null,
+  heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
+  selectedMap: null // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
+}
+
+function reducer(state, action) {
+  switch (action.type) {
+    case ACTIONS.SET_MERGEABLE: {
+      // Which side it is coming from, set that
+      const newState = { ...state, [action.payload.side]: action.payload.data }
+      // lets fill the selectedMap with field names when an object gets picked
+      // Each field name + each custom field name gets a key
+      if (!state.selectedMap) {
+        newState.selectedMap = getInitialMapOfFieldNames(action.payload.data)
+      }
+      // Also, if a mergeable is cleared, we should set to initial state
+      if (!action.payload.data) {
+        newState.selectedMap = getClearedMapOfFieldNames(newState.selectedMap)
+      }
+      // if a mergeable changes, we want to clear the merged as well
+      newState.merged = null
+      return newState
+    }
+    case ACTIONS.SELECT_ALL_FIELDS: {
+      const newState = { ...state, merged: action.payload.data }
+      if (state.selectedMap) {
+        console.log(state.selectedMap)
+        // Since we selected everything from one side, selectedMap should point to that side
+        Object.keys(state.selectedMap).forEach(fieldName => {
+          newState.selectedMap[fieldName] = action.payload.side
+        })
+      } else {
+        throw new Error("Selected map should've been initialized")
+      }
+
+      return newState
+    }
+    case ACTIONS.SET_A_MERGED_FIELD: {
+      const newState = { ...state }
+      newState.merged = _cloneDeep(state.merged)
+      _set(newState.merged, action.payload.fieldName, action.payload.data)
+      newState.selectedMap = {
+        ...state.selectedMap,
+        [action.payload.fieldName]: action.payload.side
+      }
+      return newState
+    }
+    case ACTIONS.SET_HEIGHT_OF_A_FIELD: {
+      const newState = {
+        ...state,
+        heightMap: {
+          ...state.heightMap,
+          [action.payload.fieldName]: action.payload.data
+        }
+      }
+
+      return newState
+    }
+    default:
+      return state
+  }
+}
+
+const useMergeObjects = mergeableType => {
   const validForThatType = OBJECT_TYPE_TO_VALIDATOR[mergeableType]
   if (!validForThatType) {
     throw new Error("Pass a valid object type")
   }
 
-  function createStateSetter(mergeableNumber) {
-    let other
-    let setMergeable
+  const [mergeState, dispatch] = useReducer(reducer, INITIAL_STATE)
 
-    if (mergeableNumber === 1) {
-      other = mergeable2
-      setMergeable = setMergeable1
-    } else if (mergeableNumber === 2) {
-      other = mergeable1
-      setMergeable = setMergeable2
-    } else {
-      throw new Error("Pass a valid mergeable number")
-    }
+  const dispatchWrapper = useCallback(
+    action => {
+      if (action.type === ACTIONS.SET_MERGEABLE) {
+        const otherSide =
+          action.payload.side === MERGE_SIDES[0]
+            ? MERGE_SIDES[1]
+            : MERGE_SIDES[0]
+        const incMergeable = action.payload.data
+        const otherMergeable = mergeState[otherSide]
 
-    return function setValidState(newMergeable) {
-      // One of them being empty means first time selecting or removing of a selection (cases which should always happen)
-      // Only validate if other and incoming selections are set
-      if (areAllSet(other, newMergeable)) {
-        if (
-          !validForGeneral(other, newMergeable, mergeableType) ||
-          !validForThatType(other, newMergeable)
-        ) {
-          return
+        // One of them being empty means first time selecting or removing of a selection (cases which should always happen)
+        // Only validate if other and incoming selections are set
+        if (areAllSet(incMergeable, otherMergeable)) {
+          if (
+            !validForGeneral(incMergeable, otherMergeable, mergeableType) ||
+            !validForThatType(incMergeable, otherMergeable)
+          ) {
+            return
+          }
         }
       }
-      setMergeable(newMergeable || {})
-      setMerged(initMergedState || {}) // merged state should reset when a mergeable changes
-    }
-  }
+      dispatch(action)
+    },
+    [mergeState, mergeableType, validForThatType]
+  )
 
-  return [
-    [mergeable1, mergeable2, merged],
-    [createStateSetter(1), createStateSetter(2), setMerged],
-    [mergeFieldHeights, setMergeFieldHeights]
-  ]
+  return [mergeState, dispatchWrapper, MERGE_SIDES]
 }
 // FIXME: Fill when ready
 const OBJECT_TYPE_TO_VALIDATOR = {
@@ -68,7 +173,7 @@ const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.Person]: null,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
-  [MODEL_TO_OBJECT_TYPE.Task]: validTasks
+  [MODEL_TO_OBJECT_TYPE.Task]: null
 }
 // validations for every type of objects
 function validForGeneral(otherMergeable, newMergeable, mergeableType) {
@@ -76,10 +181,6 @@ function validForGeneral(otherMergeable, newMergeable, mergeableType) {
     toast(`Please select different ${mergeableType}`)
     return false
   }
-  return true
-}
-// FIXME: validation steps for tasks
-function validTasks() {
   return true
 }
 
@@ -178,9 +279,13 @@ export function getActivationButton(isActive, onClickAction, instanceName) {
 export function getActionButton(
   onClickAction,
   align,
+  mergeState,
+  fieldName,
   disabled = false,
   text = "Use value"
 ) {
+  const intent =
+    mergeState?.selectedMap?.[fieldName] === align ? "success" : "primary"
   const icon = align === "right" ? "double-chevron-left" : ""
   const rightIcon = align === "right" ? "" : "double-chevron-right"
   return (
@@ -188,7 +293,7 @@ export function getActionButton(
       <Button
         icon={icon}
         rightIcon={rightIcon}
-        intent="primary"
+        intent={intent}
         text={text}
         onClick={onClickAction}
         disabled={disabled}
@@ -212,6 +317,34 @@ export function getLeafletMap(mapId, location) {
       ]}
     />
   )
+}
+
+// Maps normal and custom field names to null for initialization
+function getInitialMapOfFieldNames(obj) {
+  // lets first map non-custom fields
+  const map = Object.keys(obj).reduce((accum, fieldName) => {
+    if (fieldName === DEFAULT_CUSTOM_FIELDS_PARENT) {
+      return accum
+    } else {
+      accum[fieldName] = null
+      return accum
+    }
+  }, {})
+
+  Object.keys(obj[DEFAULT_CUSTOM_FIELDS_PARENT]).reduce((accum, fieldName) => {
+    const combinedFieldName = `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
+    accum[combinedFieldName] = null
+    return accum
+  }, map)
+
+  return map
+}
+
+function getClearedMapOfFieldNames(map) {
+  return Object.keys(map).reduce((accum, fieldName) => {
+    accum[fieldName] = null
+    return accum
+  }, {})
 }
 
 export default useMergeObjects

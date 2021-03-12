@@ -1,33 +1,35 @@
 import styled from "@emotion/styled"
+import { setHeightOfAField } from "mergeUtils"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 
 const MergeField = ({
   label,
+  fieldName,
   value,
   align,
   action,
-  mergeFieldHeights,
-  setMergeFieldHeights
+  mergeState,
+  dispatchMergeActions
 }) => {
   const fieldRef = useRef(null)
   const [updated, setUpdated] = useState(false)
 
   useEffect(() => {
-    // We have more than one columns of fields, each field should have same height, we use label to search for previously set value
+    // We have more than one columns of fields, each field should have same height
     // if a column has bigger height, that height wins
     if (fieldRef.current) {
       const currentHeight = fieldRef.current.clientHeight
-      const savedHeight = mergeFieldHeights?.[label] || 0
+      const savedHeight = mergeState.heightMap?.[fieldName] || 0
       if (savedHeight < currentHeight) {
-        setMergeFieldHeights({ ...mergeFieldHeights, [label]: currentHeight })
+        dispatchMergeActions(setHeightOfAField(fieldName, currentHeight))
       } else if (savedHeight > currentHeight) {
         // if some other column field height is bigger, we update small ui
         setUpdated(true)
       }
     }
     return () => {}
-  }, [label, mergeFieldHeights, setMergeFieldHeights])
+  }, [fieldName, mergeState, dispatchMergeActions])
 
   const fDir = align === "right" ? "row-reverse" : "row"
   return (
@@ -35,7 +37,9 @@ const MergeField = ({
       fDir={fDir}
       ref={fieldRef}
       /* We first let its height be auto to get the natural height */
-      fieldHeight={updated ? `${mergeFieldHeights[label]}px` : "auto"}
+      /* If it is bigger than already existing one's height in the other column */
+      /* we set other field to this height in useEffect */
+      fieldHeight={updated ? `${mergeState.heightMap[fieldName]}px` : "auto"}
     >
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>
@@ -75,11 +79,12 @@ const ValueBox = styled.div`
 
 MergeField.propTypes = {
   label: PropTypes.string.isRequired,
+  fieldName: PropTypes.string.isRequired,
   value: PropTypes.node,
   align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
   action: PropTypes.node,
-  mergeFieldHeights: PropTypes.object,
-  setMergeFieldHeights: PropTypes.func
+  mergeState: PropTypes.object,
+  dispatchMergeActions: PropTypes.func
 }
 
 export default MergeField

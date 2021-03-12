@@ -21,7 +21,6 @@ import {
   useBoilerplate
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
-import _set from "lodash/set"
 import useMergeObjects, {
   areAllSet,
   getActionButton,
@@ -29,6 +28,9 @@ import useMergeObjects, {
   getClearButton,
   getInfoButton,
   getLeafletMap,
+  selectAllFields,
+  setAMergedField,
+  setMergeable,
   unassignedPerson
 } from "mergeUtils"
 import { Position } from "models"
@@ -114,17 +116,19 @@ const positionsFilters = {
 const MergePositions = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
-  const [
-    [position1, position2, mergedPosition],
-    [setPosition1, setPosition2, setMergedPosition],
-    [mergeFieldHeights, setMergeFieldHeights]
-  ] = useMergeObjects({}, {}, new Position(), MODEL_TO_OBJECT_TYPE.Position)
+  const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
+    MODEL_TO_OBJECT_TYPE.Position
+  )
 
   useBoilerplate({
     pageProps: PAGE_PROPS_NO_NAV,
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+
+  const position1 = mergeState[mergeSides[0]]
+  const position2 = mergeState[mergeSides[1]]
+  const mergedPosition = mergeState.merged
 
   return (
     <Grid fluid>
@@ -135,27 +139,30 @@ const MergePositions = ({ pageDispatchers }) => {
       <Row>
         <Col md={4}>
           <PositionColumn
-            position={position1}
-            setPosition={setPosition1}
-            setFieldValue={setFieldValue}
-            align="left"
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+            align={mergeSides[0]}
             label="Position 1"
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
           />
         </Col>
         <Col md={4}>
           <MidColTitle>
             {getActionButton(
-              () => setAllFields(position1),
-              "left",
+              () =>
+                dispatchMergeActions(selectAllFields(position1, mergeSides[0])),
+              mergeSides[0],
+              mergeState,
+              null,
               !areAllSet(position1, position2),
               "Use All"
             )}
             <h4 style={{ margin: "0" }}>Merged Position</h4>
             {getActionButton(
-              () => setAllFields(position2),
-              "right",
+              () =>
+                dispatchMergeActions(selectAllFields(position2, mergeSides[1])),
+              mergeSides[1],
+              mergeState,
+              null,
               !areAllSet(position1, position2),
               "Use All"
             )}
@@ -167,22 +174,23 @@ const MergePositions = ({ pageDispatchers }) => {
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, !mergedPosition.name) && (
+          {areAllSet(position1, position2, !mergedPosition?.name) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
                 Please choose a <strong>name</strong> to proceed...
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, mergedPosition.name) && (
+          {areAllSet(position1, position2, mergedPosition?.name) && (
             <>
               <PositionField
                 label="Name"
                 value={mergedPosition.name}
                 align="center"
                 action={getInfoButton("Name is required.")}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                fieldName="name"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Organization"
@@ -194,26 +202,29 @@ const MergePositions = ({ pageDispatchers }) => {
                 }
                 align="center"
                 action={getInfoButton("Organization is required.")}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                fieldName="organization"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Type"
                 value={mergedPosition.type}
                 align="center"
                 action={getInfoButton("Type is required.")}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                fieldName="type"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Code"
                 value={mergedPosition.code}
                 align="center"
-                action={getClearButton(() => {
-                  setFieldValue("code", "")
-                })}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("code", "", null))
+                )}
+                fieldName="code"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Status"
@@ -221,18 +232,21 @@ const MergePositions = ({ pageDispatchers }) => {
                 align="center"
                 action={getActivationButton(
                   mergedPosition.isActive(),
-                  () => {
-                    setFieldValue(
-                      "status",
-                      mergedPosition.isActive()
-                        ? Position.STATUS.INACTIVE
-                        : Position.STATUS.ACTIVE
-                    )
-                  },
+                  () =>
+                    dispatchMergeActions(
+                      setAMergedField(
+                        "status",
+                        mergedPosition.isActive()
+                          ? Position.STATUS.INACTIVE
+                          : Position.STATUS.ACTIVE,
+                        null
+                      )
+                    ),
                   Position.getInstanceName
                 )}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                fieldName="status"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Associated Positions"
@@ -246,11 +260,14 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
-                action={getClearButton(() => {
-                  setFieldValue("associatedPositions", "")
-                })}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("associatedPositions", "", null)
+                  )
+                )}
+                fieldName="associatedPositions"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Previous People"
@@ -265,11 +282,14 @@ const MergePositions = ({ pageDispatchers }) => {
                   </>
                 }
                 align="center"
-                action={getClearButton(() => {
-                  setFieldValue("previousPeople", "")
-                })}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("previousPeople", "", null)
+                  )
+                )}
+                fieldName="previousPeople"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               <PositionField
                 label="Person"
@@ -277,11 +297,12 @@ const MergePositions = ({ pageDispatchers }) => {
                   <LinkTo modelType="Person" model={mergedPosition.person} />
                 }
                 align="center"
-                action={getClearButton(() => {
-                  setFieldValue("person", "")
-                })}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("person", "", null))
+                )}
+                fieldName="person"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               {Settings.fields.position.customFields &&
                 Object.entries(Settings.fields.position.customFields).map(
@@ -294,14 +315,18 @@ const MergePositions = ({ pageDispatchers }) => {
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
                         align="center"
-                        action={getClearButton(() => {
-                          setFieldValue(
-                            `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                            CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type]
+                        action={getClearButton(() =>
+                          dispatchMergeActions(
+                            setAMergedField(
+                              `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                              CUSTOM_FIELD_TYPE_DEFAULTS[fieldConfig.type],
+                              null
+                            )
                           )
-                        })}
-                        mergeFieldHeights={mergeFieldHeights}
-                        setMergeFieldHeights={setMergeFieldHeights}
+                        )}
+                        fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
+                        mergeState={mergeState}
+                        dispatchMergeActions={dispatchMergeActions}
                       />
                     )
                   }
@@ -315,11 +340,12 @@ const MergePositions = ({ pageDispatchers }) => {
                   />
                 }
                 align="center"
-                action={getClearButton(() => {
-                  setFieldValue("location", "")
-                })}
-                mergeFieldHeights={mergeFieldHeights}
-                setMergeFieldHeights={setMergeFieldHeights}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("location", "", null))
+                )}
+                fieldName="location"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
               />
               {getLeafletMap("merged-location", mergedPosition.location)}
             </>
@@ -327,13 +353,10 @@ const MergePositions = ({ pageDispatchers }) => {
         </Col>
         <Col md={4}>
           <PositionColumn
-            position={position2}
-            setPosition={setPosition2}
-            setFieldValue={setFieldValue}
-            align="right"
+            align={mergeSides[1]}
             label="Position 2"
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
         </Col>
       </Row>
@@ -386,18 +409,6 @@ const MergePositions = ({ pageDispatchers }) => {
         jumpToTop()
       })
   }
-
-  function setFieldValue(field, value) {
-    setMergedPosition(oldState => {
-      const newState = { ...oldState }
-      _set(newState, field, value)
-      return new Position(newState)
-    })
-  }
-
-  function setAllFields(pos) {
-    setMergedPosition(new Position({ ...pos }))
-  }
 }
 
 MergePositions.propTypes = {
@@ -415,21 +426,15 @@ const MidColTitle = styled.div`
   align-items: center;
 `
 
-const PositionColumn = ({
-  position,
-  setPosition,
-  setFieldValue,
-  align,
-  label,
-  mergeFieldHeights,
-  setMergeFieldHeights
-}) => {
+const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
+  const position = mergeState[align]
+  const idForPosition = label.replace(/\s+/g, "")
   return (
     <PositionCol>
-      <label htmlFor={label.replace(/\s+/g, "")} style={{ textAlign: align }}>
+      <label htmlFor={idForPosition} style={{ textAlign: align }}>
         {label}
       </label>
-      <FormGroup controlId={label.replace(/\s+/g, "")}>
+      <FormGroup controlId={idForPosition}>
         <AdvancedSingleSelect
           fieldName="position"
           fieldLabel="Select a position"
@@ -445,7 +450,7 @@ const PositionColumn = ({
                 value.customFields
               )
             }
-            setPosition(value)
+            dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Position}
           valueKey="name"
@@ -458,64 +463,101 @@ const PositionColumn = ({
         <>
           <PositionField
             label="Name"
+            fieldName="name"
             value={position.name}
             align={align}
-            action={getActionButton(() => {
-              setFieldValue("name", position.name)
-              setFieldValue("organization", position.organization)
-              setFieldValue("type", position.type)
-            }, align)}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("name", position.name, align)
+                )
+                dispatchMergeActions(
+                  setAMergedField("organization", position.organization, align)
+                )
+                dispatchMergeActions(
+                  setAMergedField("type", position.type, align)
+                )
+              },
+              align,
+              mergeState,
+              "name"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Organization"
+            fieldName="organization"
             value={
               <LinkTo modelType="Organization" model={position.organization} />
             }
             align={align}
             action={getActionButton(
-              () => setFieldValue("organization", position.organization),
-              align
+              () =>
+                dispatchMergeActions(
+                  setAMergedField("organization", position.organization, align)
+                ),
+              align,
+              mergeState,
+              "organization"
             )}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Type"
+            fieldName="type"
             value={position.type}
             align={align}
             action={getActionButton(
-              () => setFieldValue("type", position.type),
-              align
+              () =>
+                dispatchMergeActions(
+                  setAMergedField("type", position.type, align)
+                ),
+              align,
+              mergeState,
+              "type"
             )}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Code"
+            fieldName="code"
             value={position.code}
             align={align}
             action={getActionButton(
-              () => setFieldValue("code", position.code),
-              align
+              () =>
+                dispatchMergeActions(
+                  setAMergedField("code", position.code, align)
+                ),
+              align,
+              mergeState,
+              "code"
             )}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Status"
+            fieldName="status"
             value={position.status}
             align={align}
             action={getActionButton(
-              () => setFieldValue("status", position.status),
-              align
+              () =>
+                dispatchMergeActions(
+                  setAMergedField("status", position.status, align)
+                ),
+              align,
+              mergeState,
+              "status"
             )}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Associated Positions"
+            fieldName="associatedPositions"
             value={
               <>
                 {position.associatedPositions.map(pos => (
@@ -528,17 +570,23 @@ const PositionColumn = ({
             align={align}
             action={getActionButton(
               () =>
-                setFieldValue(
-                  "associatedPositions",
-                  position.associatedPositions
+                dispatchMergeActions(
+                  setAMergedField(
+                    "associatedPositions",
+                    position.associatedPositions,
+                    align
+                  )
                 ),
-              align
+              align,
+              mergeState,
+              "associatedPositions"
             )}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Previous People"
+            fieldName="previousPeople"
             value={
               <>
                 {position.previousPeople.map((pp, idx) => (
@@ -550,23 +598,42 @@ const PositionColumn = ({
             }
             align={align}
             action={getActionButton(
-              () => setFieldValue("previousPeople", position.previousPeople),
-              align
+              () =>
+                dispatchMergeActions(
+                  setAMergedField(
+                    "previousPeople",
+                    position.previousPeople,
+                    align
+                  )
+                ),
+              align,
+              mergeState,
+              "previousPeople"
             )}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           <PositionField
             label="Person"
+            fieldName="person"
             value={<LinkTo modelType="Person" model={position.person} />}
             align={align}
-            action={getActionButton(() => {
-              setFieldValue("person", position.person)
-              // setting person should also set uuid
-              setFieldValue("uuid", position.uuid)
-            }, align)}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("person", position.person, align)
+                )
+                // setting person should also set uuid so we select the position's uuid with person assigned
+                dispatchMergeActions(
+                  setAMergedField("uuid", position.uuid, align)
+                )
+              },
+              align,
+              mergeState,
+              "person"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           {Settings.fields.position.customFields &&
             Object.entries(Settings.fields.position.customFields).map(
@@ -577,31 +644,46 @@ const PositionColumn = ({
                 return (
                   <PositionField
                     key={fieldName}
+                    fieldName={`${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`}
                     label={fieldConfig.label || fieldName}
                     // To be able to see arrays and ojects
                     value={JSON.stringify(fieldValue)}
                     align={align}
-                    action={getActionButton(() => {
-                      setFieldValue(
-                        `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
-                        fieldValue
-                      )
-                    }, align)}
-                    mergeFieldHeights={mergeFieldHeights}
-                    setMergeFieldHeights={setMergeFieldHeights}
+                    action={getActionButton(
+                      () =>
+                        dispatchMergeActions(
+                          setAMergedField(
+                            `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`,
+                            fieldValue,
+                            align
+                          )
+                        ),
+                      align,
+                      mergeState,
+                      `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
+                    )}
+                    mergeState={mergeState}
+                    dispatchMergeActions={dispatchMergeActions}
                   />
                 )
               }
             )}
           <PositionField
             label="Location"
+            fieldName="location"
             value={<LinkTo modelType="Location" model={position.location} />}
             align={align}
-            action={getActionButton(() => {
-              setFieldValue("location", position.location)
-            }, align)}
-            mergeFieldHeights={mergeFieldHeights}
-            setMergeFieldHeights={setMergeFieldHeights}
+            action={getActionButton(
+              () =>
+                dispatchMergeActions(
+                  setAMergedField("location", position.location, align)
+                ),
+              align,
+              mergeState,
+              "location"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
           />
           {getLeafletMap(`merge-position-map-${align}`, position.location)}
         </>
@@ -617,13 +699,10 @@ const PositionCol = styled.div`
 `
 
 PositionColumn.propTypes = {
-  position: PropTypes.object,
-  setPosition: PropTypes.func.isRequired,
-  setFieldValue: PropTypes.func.isRequired,
-  align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
+  align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
-  mergeFieldHeights: PropTypes.object,
-  setMergeFieldHeights: PropTypes.func
+  mergeState: PropTypes.object,
+  dispatchMergeActions: PropTypes.func
 }
 
 export default connect(null, mapPageDispatchersToProps)(MergePositions)
