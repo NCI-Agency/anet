@@ -1,3 +1,6 @@
+import os
+
+
 class helper_methods:
 
     @staticmethod
@@ -25,3 +28,33 @@ class helper_methods:
             custom_field[configuration["target_field_name"]] = row[configuration["source_field_name"]]
         custom_field_str = str(custom_field).replace("'", "\"")
         return custom_field_str
+    
+    @staticmethod
+    def generate_conn_str(use_env=True, conn_json={}):
+        if not use_env and conn_json == {}:
+            raise Exception("Connection json is empty")
+        if conn_json != {}:
+            use_env = False
+        source = os.environ if use_env else conn_json
+        db_driver = ("mssql+pyodbc" if source["DB_DRIVER"] == "sqlserver"
+                                    else source["DB_DRIVER"])
+        if use_env:
+            db_server = (source["LOCAL_IP"] if source["ANET_DB_SERVER"] == "localhost"
+                                            else source["ANET_DB_SERVER"])
+            db_username = source["ANET_DB_USERNAME"]
+            db_password = source["ANET_DB_PASSWORD"]
+            db_exposed_port = source["ANET_DB_EXPOSED_PORT"]
+            db_name = source["ANET_DB_NAME"]
+        else:
+            db_server = source["DB_SERVER"]
+            db_username = source["DB_USERNAME"]
+            db_password = source["DB_PASSWORD"]
+            db_exposed_port = source["DB_PORT"]
+            db_name = source["DB_NAME"]
+        
+        db_conn_str = f"{db_driver}://{db_username}:{db_password}@{db_server}:{db_exposed_port}/{db_name}"
+
+        if db_driver == "mssql+pyodbc":
+            db_conn_str += "?driver=ODBC+Driver+17+for+SQL+Server"
+        
+        return db_conn_str
