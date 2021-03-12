@@ -229,6 +229,11 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
+const GQL_UNPUBLISH_REPORT = gql`
+  mutation($uuid: String!) {
+    unpublishReport(uuid: $uuid)
+  }
+`
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
     emailReport(uuid: $uuid, email: $email)
@@ -793,6 +798,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
             {currentUser.isAdmin() && (
               <div className="submit-buttons">
+                {report.isPublished() && Settings.canUnpublishReports && (
+                  <div>
+                    <ConfirmDestructive
+                      onConfirm={onConfirmUnpublish}
+                      objectType="report"
+                      operation="unpublish"
+                      objectDisplay={"#" + uuid}
+                      bsStyle="warning"
+                      buttonLabel={`Unpublish ${reportType}`}
+                      className="pull-left"
+                    />
+                  </div>
+                )}
                 <div>
                   <ConfirmDestructive
                     onConfirm={onConfirmDelete}
@@ -843,6 +861,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         </div>
       )
     }
+  }
+  function onConfirmUnpublish() {
+    API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
+      .then(data => {
+        history.push("/", {
+          success: `${reportTypeUpperFirst} unpublished`
+        })
+      })
+      .catch(error => {
+        setSaveSuccess(null)
+        setSaveError(error)
+        jumpToTop()
+      })
   }
 
   function onConfirmDelete() {

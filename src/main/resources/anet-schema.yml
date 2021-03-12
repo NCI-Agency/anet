@@ -270,6 +270,12 @@ properties:
     default: false
     title: Whether engagements also include a time and a duration
     description: Used for report engagements; if set to `true`, you might also want to supply dateFormats.forms.inputWithTime and dateFormats.forms.longWithTime
+  canUnpublishReports:
+    type: boolean
+    default: false
+    title: Whether reports can be unpublished
+    description: Used for reports; if set to `true`, admins can change report state from published to draft
+
 
   dateFormats:
     type: object
