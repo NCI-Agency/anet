@@ -8,7 +8,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
@@ -794,8 +794,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {currentUser.isAdmin() && (
               <div className="submit-buttons">
                 <div>
-                  <ConfirmDelete
-                    onConfirmDelete={onConfirmDelete}
+                  <ConfirmDestructive
+                    onConfirm={onConfirmDelete}
                     objectType="report"
                     objectDisplay={"#" + uuid}
                     bsStyle="warning"
