@@ -58,3 +58,16 @@ class helper_methods:
             db_conn_str += "?driver=ODBC+Driver+17+for+SQL+Server"
         
         return db_conn_str
+    
+    @staticmethod
+    def update_anet_models(tables, conn_str):
+        path = "/home/jovyan/work/src/core/models.py"
+        generate_command = "sqlacodegen " + conn_str + " --outfile " + path
+        if len(tables) != 0:
+            generate_command += " --tables " + "'" + ",".join(tables) + "'"
+        try:
+            print(generate_command)
+            os.system(generate_command)
+            print("Entity classes generated inside " + path)
+        except Exception as e:
+            print("EXCEPTION WHILE GENERATING ENTITY CLASSES: ", str(e))
