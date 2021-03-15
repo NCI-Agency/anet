@@ -566,7 +566,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
 
   function onSubmitSuccess(response, values, form) {
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     if (onSaveRedirectToHome) {
       localStorage.clear()
@@ -602,7 +602,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       "customFields", // initial JSON from the db
       DEFAULT_CUSTOM_FIELDS_PARENT
     )
-    if (values.isPendingVerification) {
+    if (values.pendingVerification) {
       person.pendingVerification = false
     }
     person.name = Person.fullName(
