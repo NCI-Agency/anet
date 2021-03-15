@@ -1,10 +1,10 @@
 plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
-	id "com.github.node-gradle.node" version "2.2.4"
-	id "com.diffplug.spotless" version "5.9.0"
-	id 'org.beryx.runtime' version '1.11.4'
-	id 'nebula.ospackage' version '8.4.1'
+	id "com.github.node-gradle.node" version "3.0.1"
+	id "com.diffplug.spotless" version "5.10.0"
+	id "org.beryx.runtime" version "1.12.1"
+	id "nebula.ospackage" version "8.5.0"
 }
 
 apply plugin: 'java'
@@ -73,11 +73,11 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	implementation 'io.dropwizard:dropwizard-core:2.0.18'
-	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.18'
-	implementation 'io.dropwizard:dropwizard-migrations:2.0.18'
-	implementation 'io.dropwizard:dropwizard-auth:2.0.18'
-	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.18'
+	implementation 'io.dropwizard:dropwizard-core:2.0.19'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.19'
+	implementation 'io.dropwizard:dropwizard-migrations:2.0.19'
+	implementation 'io.dropwizard:dropwizard-auth:2.0.19'
+	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.19'
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.2.0-1'
@@ -85,9 +85,9 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:8.4.1.jre14'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.0.jre11'
 	implementation 'org.postgresql:postgresql:42.2.18' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.2.2'
+	implementation 'org.liquibase:liquibase-core:4.3.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.0'
@@ -103,7 +103,7 @@ dependencies {
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.2'
 	// Authentication
-	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.1.3'
+	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.2.0'
 	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
 	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
 
@@ -125,8 +125,8 @@ dependencies {
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.13'
 
-	testImplementation 'io.dropwizard:dropwizard-testing:2.0.18'
-	testImplementation 'io.dropwizard:dropwizard-client:2.0.18'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.19'
+	testImplementation 'io.dropwizard:dropwizard-client:2.0.19'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
 	testImplementation 'org.assertj:assertj-core:3.19.0'
@@ -135,13 +135,16 @@ dependencies {
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
 }
 
 configurations {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
 	compile.exclude module: 'xalan'
+	// Also exclude XML API's to avoid (Eclipse) warnings like
+	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
+	compile.exclude group: 'xml-apis'
 }
 
 test {
@@ -637,6 +640,13 @@ jar.dependsOn buildClient
 run.dependsOn buildClient
 build.dependsOn dockerPackJupyterEnv
 
+jar {
+	// Add classpath to manifest to prevent variables in startScripts getting too long
+	manifest {
+		attributes "Class-Path": configurations.runtimeClasspath.files*.name.join(" ")
+	}
+}
+
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
@@ -670,6 +680,8 @@ distributions {
 }
 
 startScripts {
+	// Clear up the classpath because the jar has it in its manifest
+	classpath = jar.outputs.files
 	doLast {
 		unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
 		windowsScript.text = windowsScript.text.replace('MY_APP_HOME', '%APP_HOME%')
@@ -677,7 +689,7 @@ startScripts {
 }
 
 node {
-	nodeModulesDir = file("${project.projectDir}/client")
+	nodeProjectDir = file("${project.projectDir}/client")
 	version = '12.14.1'
 	yarnVersion = '1.22.10'
 	download = true
