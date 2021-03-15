@@ -160,8 +160,19 @@ public class AnetApplication extends Application<AnetConfiguration> {
               HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
             final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
             final AccessToken token = securityContext.getToken();
+            // Call non-synchronized method first
+            Person person = findUser(dao, token);
+            if (person == null) {
+              // Call synchronized method
+              person = findOrCreateUser(dao, token);
+            }
+            return person;
+          }
+
+          // Non-synchronized method, safe to run multiple times in parallel
+          private Person findUser(final PersonDao dao, final AccessToken token) {
             final String openIdSubject = token.getSubject();
-            List<Person> p = dao.findByOpenIdSubject(openIdSubject);
+            final List<Person> p = dao.findByOpenIdSubject(openIdSubject);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
               logger.trace("found existing user={} by openIdSubject={}", existingPerson,
@@ -169,9 +180,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
               return existingPerson;
             }
 
+            return null;
+          }
+
+          // Synchronized method, so we create/update at most one user in the face of multiple
+          // simultaneous authentication requests
+          private synchronized Person findOrCreateUser(final PersonDao dao,
+              final AccessToken token) {
+            final Person person = findUser(dao, token);
+            if (person != null) {
+              return person;
+            }
+
             // Might be user from before Keycloak integration, try username
             final String username = token.getPreferredUsername();
-            p = dao.findByDomainUsername(username);
+            final String openIdSubject = token.getSubject();
+            List<Person> p = dao.findByDomainUsername(username);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
               logger.trace(
@@ -196,22 +220,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
             }
 
             // Not found, first time this user has ever logged in
-            final Person person = new Person();
+            final Person newPerson = new Person();
             logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
                 username, email, openIdSubject);
-            person.setRole(Role.ADVISOR);
-            person.setPendingVerification(true);
+            newPerson.setRole(Role.ADVISOR);
+            newPerson.setPendingVerification(true);
             // Copy some data from the authentication token
-            person.setOpenIdSubject(openIdSubject);
-            person.setDomainUsername(username);
-            person.setEmailAddress(email);
-            person.setName(getCombinedName(token));
+            newPerson.setOpenIdSubject(openIdSubject);
+            newPerson.setDomainUsername(username);
+            newPerson.setEmailAddress(email);
+            newPerson.setName(getCombinedName(token));
             /*
              * Note: there's also token.getGender(), but that's not generally available in AD/LDAP,
              * and token.getPhoneNumber(), but that requires scope="openid phone" on the
              * authentication request, which is hard to accomplish with current Keycloak code.
              */
-            return dao.insert(person);
+            return dao.insert(newPerson);
           }
         };
       }
