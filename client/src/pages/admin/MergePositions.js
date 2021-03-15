@@ -20,7 +20,6 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import useMergeObjects, {
   areAllSet,
   getActionButton,
@@ -42,6 +41,8 @@ import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
+import AssociatedPositions from "../positions/AssociatedPositions"
+import PreviousPeople from "../positions/PreviousPeople"
 
 const GQL_MERGE_POSITION = gql`
   mutation($loserUuid: String!, $winnerPosition: PositionInput!) {
@@ -49,59 +50,6 @@ const GQL_MERGE_POSITION = gql`
       uuid
     }
   }
-`
-const POSITION_FIELDS = `
-  uuid
-  name
-  type
-  status
-  code
-  organization {
-    uuid
-    shortName
-    longName
-    identificationCode
-  }
-  person {
-    uuid
-    name
-    rank
-    role
-    avatar(size: 32)
-  }
-  associatedPositions {
-    uuid
-    name
-    type
-    person {
-      uuid
-      name
-      rank
-      role
-      avatar(size: 32)
-    }
-    organization {
-      uuid
-      shortName
-    }
-  }
-  previousPeople {
-    startTime
-    endTime
-    person {
-      uuid
-      name
-      rank
-      role
-      avatar(size: 32)
-    }
-  }
-  location {
-    uuid
-    name
-  }
-  ${GRAPHQL_NOTES_FIELDS}
-  customFields
 `
 
 const positionsFilters = {
@@ -454,7 +402,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           }}
           objectType={Position}
           valueKey="name"
-          fields={POSITION_FIELDS}
+          fields={Position.allFieldsQuery}
           addon={POSITIONS_ICON}
           vertical
         />
@@ -559,13 +507,9 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             label="Associated Positions"
             fieldName="associatedPositions"
             value={
-              <>
-                {position.associatedPositions.map(pos => (
-                  <React.Fragment key={`${pos.uuid}`}>
-                    <LinkTo modelType="Position" model={pos} />{" "}
-                  </React.Fragment>
-                ))}
-              </>
+              <AssociatedPositions
+                associatedPositions={position.associatedPositions}
+              />
             }
             align={align}
             action={getActionButton(
@@ -587,15 +531,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           <PositionField
             label="Previous People"
             fieldName="previousPeople"
-            value={
-              <>
-                {position.previousPeople.map((pp, idx) => (
-                  <React.Fragment key={`${pp.person.uuid}-${idx}`}>
-                    <LinkTo modelType="Person" model={pp.person} />{" "}
-                  </React.Fragment>
-                ))}
-              </>
-            }
+            value={<PreviousPeople previousPeople={position.previousPeople} />}
             align={align}
             action={getActionButton(
               () =>
