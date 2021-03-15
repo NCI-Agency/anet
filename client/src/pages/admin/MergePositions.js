@@ -262,7 +262,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 align="center"
                 action={getClearButton(() =>
                   dispatchMergeActions(
-                    setAMergedField("associatedPositions", "", null)
+                    setAMergedField("associatedPositions", [], null)
                   )
                 )}
                 fieldName="associatedPositions"
@@ -284,7 +284,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 align="center"
                 action={getClearButton(() =>
                   dispatchMergeActions(
-                    setAMergedField("previousPeople", "", null)
+                    setAMergedField("previousPeople", [], null)
                   )
                 )}
                 fieldName="previousPeople"

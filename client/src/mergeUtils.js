@@ -92,7 +92,6 @@ function reducer(state, action) {
     case ACTIONS.SELECT_ALL_FIELDS: {
       const newState = { ...state, merged: action.payload.data }
       if (state.selectedMap) {
-        console.log(state.selectedMap)
         // Since we selected everything from one side, selectedMap should point to that side
         Object.keys(state.selectedMap).forEach(fieldName => {
           newState.selectedMap[fieldName] = action.payload.side
