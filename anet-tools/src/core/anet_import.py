@@ -10,7 +10,7 @@ from sqlalchemy import exc
 from src.core.base_methods import base_methods
 from src.core.data import txt
 from src.core.db import db
-from src.examples.models import BaseModel
+from src.core.anet_business_objects import BaseModel
 
 
 class anet_import(db):

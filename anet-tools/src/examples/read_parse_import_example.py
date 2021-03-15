@@ -1,6 +1,6 @@
 from src.core.anet_import import anet_import
 from src.core.data import csv
-from src.examples.models import Person
+from src.core.anet_business_objects import People
 
 
 # Define full path of csv file
@@ -49,7 +49,7 @@ for index, row in csv_obj.df.iterrows():
         continue
 
     # Create and fill entity objects with correct record.
-    person = Person()
+    person = People()
     person.name = row["employee name"]
     person.rank = row["tashkil rank"]
     person.role = 1
