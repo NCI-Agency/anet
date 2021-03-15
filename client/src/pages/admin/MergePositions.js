@@ -27,6 +27,7 @@ import useMergeObjects, {
   getClearButton,
   getInfoButton,
   getLeafletMap,
+  getOtherSide,
   selectAllFields,
   setAMergedField,
   setMergeable,
@@ -51,15 +52,6 @@ const GQL_MERGE_POSITION = gql`
     }
   }
 `
-
-const positionsFilters = {
-  allAdvisorPositions: {
-    label: "All",
-    queryVars: {
-      status: Position.STATUS.ACTIVE
-    }
-  }
-}
 
 const MergePositions = ({ pageDispatchers }) => {
   const history = useHistory()
@@ -374,6 +366,19 @@ const MidColTitle = styled.div`
   align-items: center;
 `
 
+function getPositionFilters(mergeState, align) {
+  const positionsFilters = {
+    allAdvisorPositions: {
+      label: "All",
+      queryVars: {
+        status: Position.STATUS.ACTIVE,
+        organizationUuid: mergeState[getOtherSide(align)]?.organization?.uuid
+      }
+    }
+  }
+  return positionsFilters
+}
+
 const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
   const position = mergeState[align]
   const idForPosition = label.replace(/\s+/g, "")
@@ -390,7 +395,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           value={position}
           overlayColumns={["Position", "Organization", "Current Occupant"]}
           overlayRenderRow={PositionOverlayRow}
-          filterDefs={positionsFilters}
+          filterDefs={getPositionFilters(mergeState, align)}
           onChange={value => {
             const newValue = value
             if (newValue?.customFields) {

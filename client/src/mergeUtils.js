@@ -15,6 +15,9 @@ import { toast } from "react-toastify"
 
 const MERGE_SIDES = ["left", "right"]
 
+export const getOtherSide = side =>
+  side === MERGE_SIDES[0] ? MERGE_SIDES[1] : MERGE_SIDES[0]
+
 const ACTIONS = {
   SET_MERGEABLE: 1,
   SELECT_ALL_FIELDS: 2,
@@ -281,7 +284,7 @@ export function getActionButton(
   mergeState,
   fieldName,
   disabled = false,
-  text = "Use value"
+  text = ""
 ) {
   const intent =
     mergeState?.selectedMap?.[fieldName] === align ? "success" : "primary"
@@ -330,12 +333,17 @@ function getInitialMapOfFieldNames(obj) {
     }
   }, {})
 
-  Object.keys(obj[DEFAULT_CUSTOM_FIELDS_PARENT]).reduce((accum, fieldName) => {
-    const combinedFieldName = `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
-    accum[combinedFieldName] = null
-    return accum
-  }, map)
-
+  // if it has custom fields, we should initialize those as well
+  if (obj[DEFAULT_CUSTOM_FIELDS_PARENT]) {
+    Object.keys(obj[DEFAULT_CUSTOM_FIELDS_PARENT]).reduce(
+      (accum, fieldName) => {
+        const combinedFieldName = `${DEFAULT_CUSTOM_FIELDS_PARENT}.${fieldName}`
+        accum[combinedFieldName] = null
+        return accum
+      },
+      map
+    )
+  }
   return map
 }
 
