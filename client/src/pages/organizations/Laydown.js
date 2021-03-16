@@ -117,7 +117,7 @@ const OrganizationLaydown = ({ organization }) => {
       posPersonHeader = Settings.fields.principal.person.name
     }
     return (
-      <Table>
+      <Table responsive>
         <thead>
           <tr>
             <th>{posNameHeader}</th>

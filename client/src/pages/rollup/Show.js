@@ -14,8 +14,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import ReportCollection, {
@@ -25,7 +25,7 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import { Organization, Report } from "models"
 import moment from "moment"
@@ -331,13 +331,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       <Fieldset
         title={
           <div style={{ float: "left" }}>
-            <div
-              style={{
-                paddingBottom: 8,
-                display: "flex",
-                alignItems: "center"
-              }}
-            >
+            <div className="rollup-date-range-container">
               <div style={{ marginRight: 5 }}>
                 Rollup
                 {focusedOrg && ` for ${focusedOrg.shortName}`}

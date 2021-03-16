@@ -370,7 +370,7 @@ const personTour = (currentUser, history) => {
         title: "Current assigned position",
         content:
           "This section tells you which position this person is currently in. If you need to remove them from this position, or assign them to a different position, you can do so from here.",
-        target: "#current-position h2",
+        target: "#current-position",
         placement: "top"
       },
       {

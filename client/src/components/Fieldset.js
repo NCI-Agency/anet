@@ -30,7 +30,7 @@ const Fieldset = ({ id, title, action, style, isCompact, ...otherProps }) => {
       {(title || action) && (
         <h2 className="legend">
           <span className="title-text">{title}</span>
-          {action && <small>{action}</small>}
+          {action && <small className="action-small">{action}</small>}
         </h2>
       )}
 

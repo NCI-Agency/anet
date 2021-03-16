@@ -301,6 +301,7 @@ const RelatedObjectNotes = ({
   return notesElem && ReactDOM.createPortal(renderPortal(), notesElem)
 
   function toggleHidden() {
+    notesElem.classList.toggle("notes-hidden")
     setHidden(!hidden)
   }
 
