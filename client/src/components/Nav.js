@@ -222,6 +222,9 @@ const Nav = ({
           <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
             <NavItem>Merge people</NavItem>
           </LinkContainer>
+          <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
+            <NavItem>Merge positions</NavItem>
+          </LinkContainer>
           <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
             <NavItem>Authorization groups</NavItem>
           </LinkContainer>

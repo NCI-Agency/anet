@@ -18,76 +18,24 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Position } from "models"
-import moment from "moment"
 import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import { Button, Table } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
+import AssociatedPositions from "./AssociatedPositions"
+import PreviousPeople from "./PreviousPeople"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
-      uuid
-      name
-      type
-      status
-      code
-      organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-      }
-      person {
-        uuid
-        name
-        rank
-        role
-        avatar(size: 32)
-      }
-      associatedPositions {
-        uuid
-        name
-        type
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
-        }
-        organization {
-          uuid
-          shortName
-        }
-      }
-      previousPeople {
-        startTime
-        endTime
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
-        }
-      }
-      location {
-        uuid
-        name
-      }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
-
+      ${Position.allFieldsQuery}
     }
   }
 `
@@ -319,20 +267,9 @@ const PositionShow = ({ pageDispatchers }) => {
                   )
                 }
               >
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Position</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Position.map(position.associatedPositions, (pos, idx) =>
-                      renderAssociatedPositionRow(pos, idx)
-                    )}
-                  </tbody>
-                </Table>
-
+                <AssociatedPositions
+                  associatedPositions={position.associatedPositions}
+                />
                 {position.associatedPositions.length === 0 && (
                   <em>
                     {position.name} has no associated {assignedRole}
@@ -350,33 +287,7 @@ const PositionShow = ({ pageDispatchers }) => {
               </Fieldset>
 
               <Fieldset title="Previous position holders" id="previous-people">
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Dates</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {position.previousPeople.map((pp, idx) => (
-                      <tr key={idx} id={`previousPerson_${idx}`}>
-                        <td>
-                          <LinkTo modelType="Person" model={pp.person} />
-                        </td>
-                        <td>
-                          {moment(pp.startTime).format(
-                            Settings.dateFormats.forms.displayShort.date
-                          )}{" "}
-                          - &nbsp;
-                          {pp.endTime &&
-                            moment(pp.endTime).format(
-                              Settings.dateFormats.forms.displayShort.date
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                <PreviousPeople previousPeople={position.previousPeople} />
               </Fieldset>
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
@@ -407,23 +318,6 @@ const PositionShow = ({ pageDispatchers }) => {
       }}
     </Formik>
   )
-
-  function renderAssociatedPositionRow(pos, idx) {
-    let personName
-    if (!pos.person) {
-      personName = "Unfilled"
-    } else {
-      personName = <LinkTo modelType="Person" model={pos.person} />
-    }
-    return (
-      <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
-        <td>{personName}</td>
-        <td>
-          <LinkTo modelType="Position" model={pos} />
-        </td>
-      </tr>
-    )
-  }
 
   function hideAssignPersonModal(success) {
     setShowAssignPersonModal(false)

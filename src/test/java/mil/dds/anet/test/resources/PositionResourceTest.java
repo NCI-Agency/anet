@@ -769,4 +769,78 @@ public class PositionResourceTest extends AbstractResourceTest {
       }
     }
   }
+
+  @Test
+  public void mergePositionsTest() {
+    // Create a new position and designate the person upfront
+    Person testPerson = new Person();
+    testPerson.setName("MergePositionsTest Person");
+    testPerson.setRole(Role.PRINCIPAL);
+    testPerson.setStatus(Person.Status.ACTIVE);
+
+    final String testPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
+        "PersonInput", testPerson, new TypeReference<GraphQlResponse<Person>>() {});
+    assertThat(testPersonUuid).isNotNull();
+    testPerson = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, testPersonUuid,
+        new TypeReference<GraphQlResponse<Person>>() {});
+    assertThat(testPerson.getUuid()).isNotNull();
+
+    final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
+    queryOrgs.setText("Ministry");
+    queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
+    final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList",
+        "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    assertThat(orgs.getList().size()).isGreaterThan(0);
+
+    Position firstPosition = new Position();
+    firstPosition.setName("MergePositionsTest First Position");
+    firstPosition.setType(PositionType.PRINCIPAL);
+    firstPosition.setOrganization(orgs.getList().get(0));
+    firstPosition.setStatus(Position.Status.ACTIVE);
+    firstPosition.setPerson(testPerson);
+
+    final String firstPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
+        "PositionInput", firstPosition, new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(firstPositionUuid).isNotNull();
+    firstPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, firstPositionUuid,
+        new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(firstPosition.getUuid()).isNotNull();
+
+    Position secondPosition = new Position();
+    secondPosition.setName("MergePositionsTest Second Position");
+    secondPosition.setType(PositionType.PRINCIPAL);
+    secondPosition.setOrganization(orgs.getList().get(0));
+    secondPosition.setStatus(Position.Status.ACTIVE);
+
+    final String secondPositionUuid =
+        graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+            secondPosition, new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(secondPositionUuid).isNotNull();
+    secondPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, secondPositionUuid,
+        new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(secondPosition.getUuid()).isNotNull();
+
+    firstPosition.setStatus(secondPosition.getStatus());
+    firstPosition.setType(secondPosition.getType());
+    firstPosition.setUuid(firstPositionUuid);
+
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("loserUuid", secondPosition.getUuid());
+    variables.put("winnerPosition", firstPosition);
+    Position position = graphQLHelper.updateObject(admin,
+        "mutation ($loserUuid: String!, $winnerPosition: PositionInput!) "
+            + "{ payload: mergePositions (loserUuid: $loserUuid, winnerPosition: $winnerPosition) { uuid }}",
+        variables, new TypeReference<GraphQlResponse<Position>>() {});
+    assertThat(position).isNotNull();
+    assertThat(position.getUuid()).isNotNull();
+
+    // Assert that loser is gone.
+    try {
+      graphQLHelper.getObjectById(admin, "position", FIELDS, secondPosition.getUuid(),
+          new TypeReference<GraphQlResponse<Position>>() {});
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
+    }
+  }
 }

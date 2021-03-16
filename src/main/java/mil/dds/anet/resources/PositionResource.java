@@ -229,4 +229,70 @@ public class PositionResource {
     return dao.delete(positionUuid);
   }
 
+  @GraphQLMutation(name = "mergePositions")
+  public Position mergePositions(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerPosition") Position winnerPosition) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position existingPos = dao.getByUuid(loserUuid);
+
+    // Check that given two position can be merged
+    arePositionsMergeable(existingPos, winnerPosition);
+    assertCanUpdatePosition(user, winnerPosition);
+    validatePosition(user, winnerPosition);
+
+    // Delete loser position's code information
+    int rowNums = dao.cleanLoserPositionCode(loserUuid);
+    if (rowNums == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, loser position code cannot be deleted.",
+          Status.NOT_FOUND);
+    }
+
+    // Update winner position.
+    final int nr = dao.update(winnerPosition);
+    if (nr == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, winner position update failed.", Status.NOT_FOUND);
+    }
+    final Position position = dao.getByUuid(winnerPosition.getUuid());
+    if (winnerPosition.getPersonUuid() != null) {
+      dao.setPersonInPosition(winnerPosition.getPersonUuid(), position.getUuid());
+    }
+    int numRows = dao.mergePositions(existingPos, position);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged position relation information.",
+          Status.NOT_FOUND);
+    }
+    AnetAuditLogger.log("Position {} merged on {} by {}", existingPos, position, user);
+    return position;
+  }
+
+  private void arePositionsMergeable(Position existingPos, Position existingPos2) {
+    if (existingPos.getUuid().equals(existingPos2.getUuid())) {
+      throw new WebApplicationException("Cannot merge same Positions.", Status.BAD_REQUEST);
+    }
+
+    if (Objects.nonNull(existingPos.getPersonUuid())
+        && Objects.nonNull(existingPos2.getPersonUuid())) {
+      throw new WebApplicationException("There are assigned person in both Position.",
+          Status.BAD_REQUEST);
+    }
+
+    if (!existingPos.getOrganizationUuid().equals(existingPos2.getOrganizationUuid())) {
+      throw new WebApplicationException("Positions to be merged must be in the same organization.",
+          Status.BAD_REQUEST);
+    }
+
+    if ((Objects.nonNull(existingPos.getPersonUuid())
+        || Objects.nonNull(existingPos2.getPersonUuid()))
+        && Objects.isNull(existingPos2.getPersonUuid())) {
+      throw new WebApplicationException(
+          "If There is a person assigned to one of the combined Positions, "
+              + "This person must be in the position which is merged",
+          Status.BAD_REQUEST);
+    }
+  }
+
 }
