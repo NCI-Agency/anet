@@ -5,13 +5,14 @@ import React from "react"
 import { Table } from "react-bootstrap"
 import Settings from "settings"
 
-function PreviousPeople({ previousPeople }) {
+function PreviousPeople({ history: previousPeople, action }) {
   return (
     <Table>
       <thead>
         <tr>
           <th>Name</th>
           <th>Dates</th>
+          {action && <th>Action</th>}
         </tr>
       </thead>
       <tbody>
@@ -30,6 +31,7 @@ function PreviousPeople({ previousPeople }) {
                   Settings.dateFormats.forms.displayShort.date
                 )}
             </td>
+            {action && <td>{action(pp, idx)}</td>}
           </tr>
         ))}
       </tbody>
@@ -38,7 +40,8 @@ function PreviousPeople({ previousPeople }) {
 }
 
 PreviousPeople.propTypes = {
-  previousPeople: PropTypes.array
+  history: PropTypes.array,
+  action: PropTypes.func
 }
 
 export default PreviousPeople

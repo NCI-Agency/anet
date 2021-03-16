@@ -31,10 +31,9 @@ const MergeField = ({
     return () => {}
   }, [fieldName, mergeState, dispatchMergeActions])
 
-  const fDir = align === "right" ? "row-reverse" : "row"
   return (
     <MergeFieldBox
-      fDir={fDir}
+      align={align}
       ref={fieldRef}
       /* We first let its height be auto to get the natural height */
       /* If it is bigger than already existing one's height in the other column */
@@ -50,9 +49,30 @@ const MergeField = ({
   )
 }
 
+const ROW_DIRECTION = {
+  column: "row",
+  right: "row-reverse",
+  left: "row",
+  center: "row"
+}
+
+const FLEX_DIRECTION = {
+  column: "column",
+  right: "row",
+  left: "row",
+  center: "row"
+}
+
+const TEXT_ALIGN = {
+  right: "right",
+  left: "left",
+  center: "center",
+  column: "center"
+}
+
 const MergeFieldBox = styled.div`
   display: flex;
-  flex-direction: ${props => props.fDir};
+  flex-direction: ${props => ROW_DIRECTION[props.align]};
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
@@ -60,7 +80,7 @@ const MergeFieldBox = styled.div`
 `
 
 const LabelBox = styled.div`
-  text-align: ${props => props.align};
+  text-align: ${props => TEXT_ALIGN[props.align]};
   font-weight: bold;
   text-decoration: underline;
 `
@@ -72,7 +92,7 @@ const ALIGN_TO_JUSTIFY = {
 
 const ValueBox = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: ${props => FLEX_DIRECTION[props.align]};
   justify-content: ${props => ALIGN_TO_JUSTIFY[props.align]};
   align-items: center;
 `
@@ -81,7 +101,7 @@ MergeField.propTypes = {
   label: PropTypes.string.isRequired,
   fieldName: PropTypes.string.isRequired,
   value: PropTypes.node,
-  align: PropTypes.oneOf(["left", "right", "center"]).isRequired,
+  align: PropTypes.oneOf(["left", "right", "center", "column"]).isRequired,
   action: PropTypes.node,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func

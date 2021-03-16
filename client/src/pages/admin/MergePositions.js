@@ -6,6 +6,7 @@ import { gql } from "apollo-boost"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import { customFieldsJSONString } from "components/CustomFields"
+import EditHistory from "components/EditHistory"
 import LinkTo from "components/LinkTo"
 import PositionField from "components/MergeField"
 import Messages from "components/Messages"
@@ -77,7 +78,7 @@ const MergePositions = ({ pageDispatchers }) => {
         <h2>Merge Positions Tool</h2>
       </Row>
       <Row>
-        <Col md={4}>
+        <Col md={4} id="left-merge-pos-col">
           <PositionColumn
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
@@ -85,7 +86,7 @@ const MergePositions = ({ pageDispatchers }) => {
             label="Position 1"
           />
         </Col>
-        <Col md={4}>
+        <Col md={4} id="mid-merge-pos-col">
           <MidColTitle>
             {getActionButton(
               () =>
@@ -191,13 +192,9 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Associated Positions"
                 value={
-                  <>
-                    {mergedPosition.associatedPositions.map(pos => (
-                      <React.Fragment key={`${pos.uuid}`}>
-                        <LinkTo modelType="Position" model={pos} />{" "}
-                      </React.Fragment>
-                    ))}
-                  </>
+                  <AssociatedPositions
+                    associatedPositions={mergedPosition.associatedPositions}
+                  />
                 }
                 align="center"
                 action={getClearButton(() =>
@@ -213,15 +210,23 @@ const MergePositions = ({ pageDispatchers }) => {
                 label="Previous People"
                 value={
                   <>
-                    {mergedPosition.previousPeople.map((pp, idx) => (
-                      // can be same people, uuid not enough
-                      <React.Fragment key={`${pp.person.uuid}-${idx}`}>
-                        <LinkTo modelType="Person" model={pp.person} />{" "}
-                      </React.Fragment>
-                    ))}
+                    <PreviousPeople history={mergedPosition.previousPeople} />
+                    <EditHistory
+                      history1={position1.previousPeople}
+                      history2={position2.previousPeople}
+                      initialHistory={mergedPosition.previousPeople}
+                      entityType="person"
+                      historyComp={PreviousPeople}
+                      title="Pick and Choose people and dates for People History"
+                      setHistory={history =>
+                        dispatchMergeActions(
+                          setAMergedField("previousPeople", history, null)
+                        )
+                      }
+                    />
                   </>
                 }
-                align="center"
+                align="column"
                 action={getClearButton(() =>
                   dispatchMergeActions(
                     setAMergedField("previousPeople", [], null)
@@ -291,7 +296,7 @@ const MergePositions = ({ pageDispatchers }) => {
             </>
           )}
         </Col>
-        <Col md={4}>
+        <Col md={4} id="right-merge-pos-col">
           <PositionColumn
             align={mergeSides[1]}
             label="Position 2"
@@ -536,7 +541,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           <PositionField
             label="Previous People"
             fieldName="previousPeople"
-            value={<PreviousPeople previousPeople={position.previousPeople} />}
+            value={<PreviousPeople history={position.previousPeople} />}
             align={align}
             action={getActionButton(
               () =>

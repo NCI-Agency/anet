@@ -287,7 +287,7 @@ const PositionShow = ({ pageDispatchers }) => {
               </Fieldset>
 
               <Fieldset title="Previous position holders" id="previous-people">
-                <PreviousPeople previousPeople={position.previousPeople} />
+                <PreviousPeople history={position.previousPeople} />
               </Fieldset>
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
