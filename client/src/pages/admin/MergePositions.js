@@ -41,6 +41,7 @@ import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
+import EditHistory from "../../components/EditHistory"
 import AssociatedPositions from "../positions/AssociatedPositions"
 import PreviousPeople from "../positions/PreviousPeople"
 
@@ -220,14 +221,10 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Previous People"
                 value={
-                  <>
-                    {mergedPosition.previousPeople.map((pp, idx) => (
-                      // can be same people, uuid not enough
-                      <React.Fragment key={`${pp.person.uuid}-${idx}`}>
-                        <LinkTo modelType="Person" model={pp.person} />{" "}
-                      </React.Fragment>
-                    ))}
-                  </>
+                  <EditHistory
+                    history1={position1.previousPeople}
+                    history2={position2.previousPeople}
+                  />
                 }
                 align="center"
                 action={getClearButton(() =>

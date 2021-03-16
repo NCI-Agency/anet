@@ -234,3 +234,21 @@ PeriodsTableHeader.propTypes = {
     PeriodsConfigPropType
   ])
 }
+
+export function getOverlappingPeriodIndexes(periodList1, periodList2) {
+  const overlappingDateIndexes = []
+
+  periodList1.forEach((date1, index1) => {
+    // end time being null means it is still continuing, might as well pick a large number for it
+    const endTime1 = date1.endTime || Infinity
+    periodList2.forEach((date2, index2) => {
+      const endTime2 = date2.endTime || Infinity
+
+      if (date1.startTime < endTime2 && endTime1 > date2.startTime) {
+        overlappingDateIndexes.push([index1, index2])
+      }
+    })
+  })
+
+  return overlappingDateIndexes.length ? overlappingDateIndexes : null
+}
