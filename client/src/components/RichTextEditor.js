@@ -1,6 +1,7 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkSourceAnet from "components/editor/LinkSourceAnet"
 import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
+import "components/RichTextEditor.css"
 import { convertFromHTML, convertToHTML } from "draft-convert"
 import { convertFromRaw, convertToRaw } from "draft-js"
 import {
@@ -14,15 +15,13 @@ import {
   UnorderedListButton
 } from "draft-js-buttons"
 import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
+import "draft-js-side-toolbar-plugin/lib/plugin.css"
+import "draft-js/dist/Draft.css"
 import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
+import "draftail/dist/draftail.css"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-
-import "draft-js/dist/Draft.css"
-import "draftail/dist/draftail.css"
-import "draft-js-side-toolbar-plugin/lib/plugin.css"
-import "components/RichTextEditor.css"
 
 const newlinePlugin = createNewlinePlugin()
 
@@ -59,7 +58,7 @@ const INLINE_STYLES = [
   { type: INLINE_STYLE.MARK }
 ]
 
-const ENTITY_CONTROL = {
+const getEntityControl = linkToComp => ({
   LINK: {
     // Unique type shared between entity instances.
     type: ENTITY_TYPE.LINK,
@@ -75,7 +74,7 @@ const ENTITY_CONTROL = {
     // React component providing the UI to manage entities of this type.
     source: LinkSourceAnet,
     // React component to display inline entities.
-    decorator: LinkAnet,
+    decorator: props => <LinkAnet {...props} linkToComp={linkToComp} />,
     // React component to display block-level entities.
     block: PropTypes.func,
     // Array of attributes the entity uses, to preserve when filtering entities on paste. If undefined, all entity data is preserved.
@@ -86,7 +85,7 @@ const ENTITY_CONTROL = {
       href: "."
     }
   }
-}
+})
 
 const importerConfig = {
   htmlToEntity: (nodeName, node, createEntity) => {
@@ -172,7 +171,7 @@ class RichTextEditor extends Component {
   }
 
   render() {
-    const { className, value, onChange, onHandleBlur } = this.props
+    const { className, value, onChange, onHandleBlur, linkToComp } = this.props
     const { sideToolbarPlugin } = this.state
     const { SideToolbar } = sideToolbarPlugin
     return (
@@ -182,7 +181,7 @@ class RichTextEditor extends Component {
           id="rich-text"
           ariaDescribedBy="rich-text-editor"
           blockTypes={BLOCK_TYPES}
-          entityTypes={[ENTITY_CONTROL.LINK]}
+          entityTypes={[getEntityControl(linkToComp).LINK]}
           inlineStyles={INLINE_STYLES}
           maxListNesting={4}
           onSave={rawContent => {
@@ -226,7 +225,8 @@ RichTextEditor.propTypes = {
   className: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
-  onHandleBlur: PropTypes.func
+  onHandleBlur: PropTypes.func,
+  linkToComp: PropTypes.func.isRequired
 }
 
 export default RichTextEditor

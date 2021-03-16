@@ -21,7 +21,7 @@ import AggregationWidgetContainer, {
 } from "components/aggregations/AggregationWidgetContainer"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import * as Models from "models"
@@ -153,11 +153,12 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
         )}
       {anetObjectType && anetObject && (
         <div style={{ paddingTop: 5 }}>
-          <LinkTo
+          <LinkToPreviewed
             modelType={anetObjectType}
             model={anetObject}
             showAvatar={false}
             showIcon={false}
+            previewId="dia-node-obj"
           />
           <>
             {instantAssessmentConfig &&

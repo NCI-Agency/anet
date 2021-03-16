@@ -7,11 +7,11 @@ import {
 } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Model from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import {
@@ -269,9 +269,13 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.positionStats}
               prevContentData={prevReportStats.positionStats}
               itemLabel={item => (
-                <LinkTo modelType="Position" model={item}>
+                <LinkToPreviewed
+                  modelType="Position"
+                  model={item}
+                  previewId="dec-dash-pos"
+                >
                   {item.name}
-                </LinkTo>
+                </LinkToPreviewed>
               )}
             />
           ))}
@@ -290,9 +294,13 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.locationStats}
               prevContentData={prevReportStats.locationStats}
               itemLabel={item => (
-                <LinkTo modelType="Location" model={item}>
+                <LinkToPreviewed
+                  modelType="Location"
+                  model={item}
+                  previewId="dec-dash-loc"
+                >
                   {item.name}
-                </LinkTo>
+                </LinkToPreviewed>
               )}
             />
           ))}

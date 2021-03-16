@@ -38,7 +38,13 @@ const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
 }
 
-const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
+const SpecialField = ({
+  name,
+  widget,
+  formikProps,
+  linkToComp,
+  ...otherFieldProps
+}) => {
   const WidgetComponent = SPECIAL_WIDGET_COMPONENTS[widget]
   const widgetProps = {}
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
@@ -46,6 +52,7 @@ const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
       // validation will be done by setFieldValue
       formikProps.setFieldTouched(name, true, false)
     }
+    widgetProps.linkToComp = linkToComp
   } else if (widget === SPECIAL_WIDGET_TYPES.LIKERT_SCALE) {
     // Can't set it on the widgetProps directly as the onChange is required when
     // editable (and onChange is set only while processing the SpecialField)
@@ -62,6 +69,7 @@ const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {
 }
 SpecialField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   widget: PropTypes.oneOf([
     SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
     SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
@@ -74,6 +82,7 @@ const ReadonlySpecialField = ({
   widget,
   values,
   isCompact,
+  linkToComp,
   ...otherFieldProps
 }) => {
   if (widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR) {
@@ -83,7 +92,7 @@ const ReadonlySpecialField = ({
         name={name}
         isCompact={isCompact}
         component={FieldHelper.ReadonlyField}
-        humanValue={parseHtmlWithLinkTo(fieldValue)}
+        humanValue={parseHtmlWithLinkTo(fieldValue, linkToComp)}
         {...Object.without(otherFieldProps, "style")}
       />
     )
@@ -103,6 +112,7 @@ const ReadonlySpecialField = ({
 }
 ReadonlySpecialField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   widget: PropTypes.oneOf([
     SPECIAL_WIDGET_TYPES.LIKERT_SCALE,
     SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
@@ -288,6 +298,7 @@ const ArrayOfObjectsField = fieldProps => {
     fieldConfig,
     formikProps,
     invisibleFields,
+    linkToComp,
     vertical,
     children
   } = fieldProps
@@ -329,6 +340,7 @@ const ArrayOfObjectsField = fieldProps => {
                 fieldConfig={fieldConfig}
                 formikProps={formikProps}
                 invisibleFields={invisibleFields}
+                linkToComp={linkToComp}
                 vertical={vertical}
                 arrayHelpers={arrayHelpers}
                 index={index}
@@ -348,6 +360,7 @@ const ArrayObject = ({
   invisibleFields,
   vertical,
   arrayHelpers,
+  linkToComp,
   index
 }) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
@@ -362,6 +375,7 @@ const ArrayObject = ({
         fieldsConfig={fieldConfig.objectFields}
         formikProps={formikProps}
         invisibleFields={invisibleFields}
+        linkToComp={linkToComp}
         vertical={vertical}
         parentFieldName={`${fieldName}.${index}`}
       />
@@ -371,6 +385,7 @@ const ArrayObject = ({
 ArrayObject.propTypes = {
   fieldName: PropTypes.string.isRequired,
   fieldConfig: PropTypes.object.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   formikProps: PropTypes.object.isRequired,
   invisibleFields: PropTypes.array.isRequired,
   vertical: PropTypes.bool,
@@ -383,7 +398,14 @@ const addObject = (objDefault, arrayHelpers) => {
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
-  const { name, fieldConfig, values, isCompact, vertical } = fieldProps
+  const {
+    name,
+    fieldConfig,
+    values,
+    isCompact,
+    vertical,
+    linkToComp
+  } = fieldProps
   const value = useMemo(() => getArrayObjectValue(values, name), [values, name])
   const fieldsetTitle = fieldConfig.label || ""
 
@@ -394,6 +416,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
       fieldConfig={fieldConfig}
       values={values}
       isCompact={isCompact}
+      linkToComp={linkToComp}
       index={index}
       vertical={vertical}
     />
@@ -416,6 +439,7 @@ const ReadonlyArrayObject = ({
   fieldName,
   fieldConfig,
   values,
+  linkToComp,
   vertical,
   index,
   isCompact
@@ -428,6 +452,7 @@ const ReadonlyArrayObject = ({
         parentFieldName={`${fieldName}.${index}`}
         values={values}
         isCompact={isCompact}
+        linkToComp={linkToComp}
         vertical={vertical}
       />
     </Fieldset>
@@ -437,6 +462,7 @@ ReadonlyArrayObject.propTypes = {
   fieldName: PropTypes.string.isRequired,
   fieldConfig: PropTypes.object.isRequired,
   values: PropTypes.object.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   vertical: PropTypes.bool,
   index: PropTypes.number.isRequired,
   isCompact: PropTypes.bool
@@ -447,6 +473,7 @@ const AnetObjectField = ({
   types,
   formikProps,
   children,
+  linkToComp,
   ...otherFieldProps
 }) => {
   const { values, setFieldValue } = formikProps
@@ -476,7 +503,11 @@ const AnetObjectField = ({
           <tbody>
             <tr>
               <td>
-                <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
+                <LinkAnetEntity
+                  type={fieldValue.type}
+                  uuid={fieldValue.uuid}
+                  linkToComp={linkToComp}
+                />
               </td>
               <td className="col-xs-1">
                 <RemoveButton
@@ -494,12 +525,19 @@ const AnetObjectField = ({
 }
 AnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   types: PropTypes.arrayOf(PropTypes.string),
   formikProps: PropTypes.object,
   children: PropTypes.node
 }
 
-const ReadonlyAnetObjectField = ({ name, label, values, isCompact }) => {
+const ReadonlyAnetObjectField = ({
+  name,
+  label,
+  values,
+  isCompact,
+  linkToComp
+}) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
     <FastField
@@ -514,7 +552,11 @@ const ReadonlyAnetObjectField = ({ name, label, values, isCompact }) => {
             <tbody>
               <tr>
                 <td>
-                  <LinkAnetEntity type={type} uuid={uuid} />
+                  <LinkAnetEntity
+                    type={type}
+                    uuid={uuid}
+                    linkToComp={linkToComp}
+                  />
                 </td>
               </tr>
             </tbody>
@@ -528,6 +570,7 @@ ReadonlyAnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   isCompact: PropTypes.bool
 }
 
@@ -536,6 +579,7 @@ const ArrayOfAnetObjectsField = ({
   types,
   formikProps,
   children,
+  linkToComp,
   ...otherFieldProps
 }) => {
   const { values, setFieldValue } = formikProps
@@ -572,7 +616,11 @@ const ArrayOfAnetObjectsField = ({
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
                 <td>
-                  <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                  <LinkAnetEntity
+                    type={entity.type}
+                    uuid={entity.uuid}
+                    linkToComp={linkToComp}
+                  />
                 </td>
                 <td className="col-xs-1">
                   <RemoveButton
@@ -603,6 +651,7 @@ const ArrayOfAnetObjectsField = ({
 }
 ArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   types: PropTypes.arrayOf(PropTypes.string),
   formikProps: PropTypes.object,
   children: PropTypes.node
@@ -612,7 +661,8 @@ const ReadonlyArrayOfAnetObjectsField = ({
   name,
   label,
   values,
-  isCompact
+  isCompact,
+  linkToComp
 }) => {
   const fieldValue = Object.get(values, name) || []
   return (
@@ -628,7 +678,11 @@ const ReadonlyArrayOfAnetObjectsField = ({
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
                   <td>
-                    <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
+                    <LinkAnetEntity
+                      type={entity.type}
+                      uuid={entity.uuid}
+                      linkToComp={linkToComp}
+                    />
                   </td>
                 </tr>
               ))}
@@ -641,6 +695,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
 }
 ReadonlyArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   isCompact: PropTypes.bool
@@ -752,6 +807,7 @@ CustomFieldsContainer.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   vertical: PropTypes.bool
 }
 CustomFieldsContainer.defaultProps = {
@@ -780,6 +836,7 @@ const CustomField = ({
   fieldName,
   formikProps,
   invisibleFields,
+  linkToComp,
   vertical
 }) => {
   const { type, helpText } = fieldConfig
@@ -807,13 +864,15 @@ const CustomField = ({
       case CUSTOM_FIELD_TYPE.SPECIAL_FIELD:
         return {
           fieldConfig,
-          formikProps
+          formikProps,
+          linkToComp
         }
       case CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS:
         return {
           fieldConfig,
           formikProps,
-          invisibleFields
+          invisibleFields,
+          linkToComp
         }
       case CUSTOM_FIELD_TYPE.JSON:
         return {
@@ -823,12 +882,13 @@ const CustomField = ({
       case CUSTOM_FIELD_TYPE.ANET_OBJECT:
       case CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS:
         return {
-          formikProps
+          formikProps,
+          linkToComp
         }
       default:
         return {}
     }
-  }, [fieldConfig, formikProps, invisibleFields, type])
+  }, [fieldConfig, formikProps, invisibleFields, type, linkToComp])
   return FieldComponent ? (
     <FieldComponent
       name={fieldName}
@@ -852,6 +912,7 @@ const CustomField = ({
 CustomField.propTypes = {
   fieldConfig: PropTypes.object,
   fieldName: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   formikProps: PropTypes.object,
   invisibleFields: PropTypes.array,
   vertical: PropTypes.bool
@@ -862,6 +923,7 @@ const CustomFields = ({
   formikProps,
   parentFieldName,
   invisibleFields,
+  linkToComp,
   vertical
 }) => {
   return (
@@ -875,6 +937,7 @@ const CustomFields = ({
             fieldName={fieldName}
             formikProps={formikProps}
             invisibleFields={invisibleFields}
+            linkToComp={linkToComp}
             vertical={vertical}
           />
         )
@@ -886,6 +949,7 @@ CustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   invisibleFields: PropTypes.array,
   vertical: PropTypes.bool
 }
@@ -913,6 +977,7 @@ export const ReadonlyCustomFields = ({
   parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
+  linkToComp,
   isCompact
 }) => {
   return (
@@ -933,6 +998,7 @@ export const ReadonlyCustomFields = ({
             key={key}
             name={fieldName}
             values={values}
+            linkToComp={linkToComp}
             vertical={vertical}
             isCompact={isCompact}
             {...fieldProps}
@@ -956,6 +1022,7 @@ export const ReadonlyCustomFields = ({
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
+  linkToComp: PropTypes.func.isRequired,
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
   isCompact: PropTypes.bool

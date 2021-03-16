@@ -14,7 +14,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -189,14 +189,15 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
-                          <LinkTo
+                          <LinkToPreviewed
                             modelType="Organization"
                             model={values.parentOrg}
+                            previewId="org-form-org"
                           >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}
                             {values.parentOrg.identificationCode}
-                          </LinkTo>
+                          </LinkToPreviewed>
                         )
                       }
                     />
@@ -315,7 +316,10 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                       className="tasks-selector"
                     >
                       {!isAdmin ? (
-                        <NoPaginationTaskTable tasks={values.tasks} />
+                        <NoPaginationTaskTable
+                          tasks={values.tasks}
+                          linkToComp={LinkToPreviewed}
+                        />
                       ) : (
                         <FastField
                           name="tasks"
@@ -337,6 +341,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                                 <NoPaginationTaskTable
                                   tasks={values.tasks}
                                   showDelete
+                                  linkToComp={LinkToPreviewed}
                                 />
                               }
                               overlayColumns={["Name"]}

@@ -9,7 +9,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
@@ -254,7 +254,11 @@ const Organizations = ({
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 <td>
-                  <LinkTo modelType="Organization" model={org} />
+                  <LinkToPreviewed
+                    modelType="Organization"
+                    model={org}
+                    previewId="search-org"
+                  />
                 </td>
                 <td>{org.longName}</td>
                 <td>{org.identificationCode}</td>
@@ -355,26 +359,36 @@ const People = ({
             {Person.map(people, person => (
               <tr key={person.uuid}>
                 <td>
-                  <LinkTo modelType="Person" model={person} />
+                  <LinkToPreviewed
+                    modelType="Person"
+                    model={person}
+                    previewId="search-people-person"
+                  />
                 </td>
                 <td>
-                  <LinkTo modelType="Position" model={person.position} />
+                  <LinkToPreviewed
+                    modelType="Position"
+                    model={person.position}
+                    previewId="search-people-pos"
+                  />
                   {person.position && person.position.code
                     ? `, ${person.position.code}`
                     : ""}
                 </td>
                 <td>
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Location"
                     model={person.position && person.position.location}
                     whenUnspecified=""
+                    previewId="search-people-loc"
                   />
                 </td>
                 <td>
                   {person.position && person.position.organization && (
-                    <LinkTo
+                    <LinkToPreviewed
                       modelType="Organization"
                       model={person.position.organization}
+                      previewId="search-people-org"
                     />
                   )}
                 </td>
@@ -457,6 +471,7 @@ const Positions = ({
       totalCount={totalCount}
       goToPage={setPage}
       id="positions-search-results"
+      linkToComp={LinkToPreviewed}
     />
   )
 
@@ -545,9 +560,13 @@ export const Tasks = ({
             {Task.map(tasks, task => (
               <tr key={task.uuid}>
                 <td>
-                  <LinkTo modelType="Task" model={task}>
+                  <LinkToPreviewed
+                    modelType="Task"
+                    model={task}
+                    previewId="search-task"
+                  >
                     {task.shortName} {task.longName}
-                  </LinkTo>
+                  </LinkToPreviewed>
                 </td>
               </tr>
             ))}
@@ -642,7 +661,11 @@ const Locations = ({
             {locations.map(loc => (
               <tr key={loc.uuid}>
                 <td>
-                  <LinkTo modelType="Location" model={loc} />
+                  <LinkToPreviewed
+                    modelType="Location"
+                    model={loc}
+                    previewId="search-loc"
+                  />
                 </td>
               </tr>
             ))}

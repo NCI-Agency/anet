@@ -14,12 +14,12 @@ import {
 } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
 import {
-  PathFindingLinkFactory,
-  DagreEngine
+  DagreEngine,
+  PathFindingLinkFactory
 } from "@projectstorm/react-diagrams-routing"
 import { DEFAULT_PAGE_PROPS } from "actions"
-import LinkTo from "components/LinkTo"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,

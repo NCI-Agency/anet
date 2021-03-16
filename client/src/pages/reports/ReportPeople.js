@@ -3,7 +3,6 @@ import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
 import AppContext from "components/AppContext"
-import LinkTo from "components/LinkTo"
 import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
 import { Person } from "models"
@@ -14,7 +13,14 @@ import { Checkbox, Label, Radio, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
-const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
+const ReportPeople = ({
+  report,
+  disabled,
+  onChange,
+  showDelete,
+  onDelete,
+  linkToComp: LinkToComp
+}) => {
   const { currentUser } = useContext(AppContext)
   const showNonAttending = report.reportPeople.some(rp => !rp.attendee)
   return (
@@ -116,31 +122,43 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             person={person}
             report={report}
             iconOnly={!!showDelete}
+            linkToComp={LinkToComp}
           />
         </td>
         <td className="reportPeopleName">
-          <LinkTo modelType="Person" model={person} showIcon={false} />
+          <LinkToComp
+            modelType="Person"
+            model={person}
+            showIcon={false}
+            previewId="rep-people-person"
+          />
         </td>
         <td>
           {person.position && person.position.uuid && (
-            <LinkTo modelType="Position" model={person.position} />
+            <LinkToComp
+              modelType="Position"
+              model={person.position}
+              previewId="rep-people-pos"
+            />
           )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
             : ""}
         </td>
         <td>
-          <LinkTo
+          <LinkToComp
             modelType="Location"
             model={person.position && person.position.location}
             whenUnspecified=""
+            previewId="rep-people-loc"
           />
         </td>
         <td>
-          <LinkTo
+          <LinkToComp
             modelType="Organization"
             model={person.position && person.position.organization}
             whenUnspecified=""
+            previewId="rep-people-org"
           />
         </td>
         {showDelete && (
@@ -261,6 +279,7 @@ export function forceOnlyAttendingPersonPerRoleToPrimary(peopleList) {
 
 ReportPeople.propTypes = {
   report: PropTypes.instanceOf(Report),
+  linkToComp: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   showDelete: PropTypes.bool,

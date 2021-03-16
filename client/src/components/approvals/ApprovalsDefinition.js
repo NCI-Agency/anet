@@ -4,7 +4,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import { ApproverOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Model from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, FieldArray } from "formik"
@@ -33,14 +33,20 @@ const ApproverTable = ({ approvers, onDelete }) => (
       {approvers.map((approver, approverIndex) => (
         <tr key={approver.uuid}>
           <td>
-            <LinkTo
+            <LinkToPreviewed
               modelType="Person"
               model={approver.person}
               target="_blank"
+              previewId="appr-def-person"
             />
           </td>
           <td>
-            <LinkTo modelType="Position" model={approver} target="_blank" />
+            <LinkToPreviewed
+              modelType="Position"
+              model={approver}
+              target="_blank"
+              previewId="appr-def-pos"
+            />
           </td>
           <td>
             <RemoveButton

@@ -42,7 +42,7 @@ const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
               <LinkTo modelType="Person" model={person} isLink={false} />
             </td>
             <td>
-              <LinkTo modelType="Person" model={relPos} isLink={false} />
+              <LinkTo modelType="Position" model={relPos} isLink={false} />
             </td>
             <td>
               <LinkTo

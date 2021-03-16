@@ -38,6 +38,14 @@ class CreateFutureReport extends CreateReport {
     return this.attendeesFieldValue.$(`tbody tr:nth-child(${n})`)
   }
 
+  get attendeesAssessments() {
+    return browser.$("#attendees-engagement-assessments")
+  }
+
+  getAttendeeAssessment(name) {
+    return this.attendeesAssessments.$(`//td//a[text()="${name}"]`)
+  }
+
   get tasksFieldFormGroup() {
     return browser.$(`div[id="fg-${tskId}"]`)
   }
@@ -62,6 +70,14 @@ class CreateFutureReport extends CreateReport {
 
   getTasksFieldValueRow(n) {
     return this.tasksFieldValue.$(`tbody tr:nth-child(${n})`)
+  }
+
+  get tasksAssessments() {
+    return browser.$("#tasks-engagement-assessments")
+  }
+
+  getTaskAssessment(shortName) {
+    return this.tasksAssessments.$(`//td//a[text()="${shortName}"]`)
   }
 
   get deleteButton() {

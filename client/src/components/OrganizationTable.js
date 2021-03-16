@@ -1,9 +1,9 @@
 import API from "api"
 import { gql } from "apollo-boost"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RemoveButton from "components/RemoveButton"
@@ -134,9 +134,13 @@ const BaseOrganizationTable = ({
               return (
                 <tr key={org.uuid}>
                   <td>
-                    <LinkTo modelType="Organization" model={org}>
+                    <LinkToPreviewed
+                      modelType="Organization"
+                      model={org}
+                      previewId="org-table-org"
+                    >
                       {nameComponents.join(" - ")}
-                    </LinkTo>
+                    </LinkToPreviewed>
                   </td>
                   {Settings.fields.advisor.org.identificationCode && (
                     <td>{org.identificationCode}</td>

@@ -10,6 +10,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
@@ -485,6 +486,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                         // validation will be done by setFieldValue
                         setFieldTouched("biography", true, false)
                       }}
+                      linkToComp={LinkToPreviewed}
                     />
                   }
                 />
@@ -500,6 +502,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       values,
                       validateForm
                     }}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

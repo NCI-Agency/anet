@@ -12,6 +12,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -274,7 +275,10 @@ const PersonShow = ({ pageDispatchers }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography)}
+                  humanValue={parseHtmlWithLinkTo(
+                    person.biography,
+                    LinkToPreviewed
+                  )}
                 />
               </Fieldset>
 
@@ -386,7 +390,11 @@ const PersonShow = ({ pageDispatchers }) => {
                       {person.previousPositions.map((pp, idx) => (
                         <tr key={idx} id={`previousPosition_${idx}`}>
                           <td>
-                            <LinkTo modelType="Position" model={pp.position} />
+                            <LinkToPreviewed
+                              modelType="Position"
+                              model={pp.position}
+                              previewId="people-show-prev-pos"
+                            />
                           </td>
                           <td>
                             {moment(pp.startTime).format(
@@ -410,6 +418,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
                     values={values}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}
@@ -434,13 +443,19 @@ const PersonShow = ({ pageDispatchers }) => {
     return (
       <div style={{ textAlign: "center" }}>
         <h4>
-          <LinkTo
+          <LinkToPreviewed
             modelType="Position"
             model={position}
             className="position-name"
+            previewId="people-show-pos"
           />{" "}
           (
-          <LinkTo modelType="Organization" model={position.organization} />)
+          <LinkToPreviewed
+            modelType="Organization"
+            model={position.organization}
+            previewId="people-show-org"
+          />
+          )
         </h4>
       </div>
     )
@@ -468,16 +483,25 @@ const PersonShow = ({ pageDispatchers }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkTo modelType="Person" model={assocPos.person} />
+                      <LinkToPreviewed
+                        modelType="Person"
+                        model={assocPos.person}
+                        previewId="people-show-asc-person"
+                      />
                     )}
                   </td>
                   <td>
-                    <LinkTo modelType="Position" model={assocPos} />
+                    <LinkToPreviewed
+                      modelType="Position"
+                      model={assocPos}
+                      previewId="people-show-asc-pos"
+                    />
                   </td>
                   <td>
-                    <LinkTo
+                    <LinkToPreviewed
                       modelType="Organization"
                       model={assocPos.organization}
+                      previewId="people-show-asc-org"
                     />
                   </td>
                 </tr>

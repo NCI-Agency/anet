@@ -10,6 +10,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -231,14 +232,15 @@ const PositionShow = ({ pageDispatchers }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       position.organization && (
-                        <LinkTo
+                        <LinkToPreviewed
                           modelType="Organization"
                           model={position.organization}
+                          previewId="pos-show-org"
                         >
                           {position.organization.shortName}{" "}
                           {position.organization.longName}{" "}
                           {position.organization.identificationCode}
-                        </LinkTo>
+                        </LinkToPreviewed>
                       )
                     }
                   />
@@ -249,7 +251,11 @@ const PositionShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkTo modelType="Location" model={position.location} />
+                      <LinkToPreviewed
+                        modelType="Location"
+                        model={position.location}
+                        previewId="pos-show-loc"
+                      />
                     )
                   }
                 />
@@ -277,7 +283,11 @@ const PositionShow = ({ pageDispatchers }) => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkTo modelType="Person" model={position.person} />
+                      <LinkToPreviewed
+                        modelType="Person"
+                        model={position.person}
+                        previewId="pos-show-person"
+                      />
                     </h4>
                     <p />
                   </div>
@@ -361,7 +371,11 @@ const PositionShow = ({ pageDispatchers }) => {
                     {position.previousPeople.map((pp, idx) => (
                       <tr key={idx} id={`previousPerson_${idx}`}>
                         <td>
-                          <LinkTo modelType="Person" model={pp.person} />
+                          <LinkToPreviewed
+                            modelType="Person"
+                            model={pp.person}
+                            previewId="pos-show-prev-person"
+                          />
                         </td>
                         <td>
                           {moment(pp.startTime).format(
@@ -413,13 +427,23 @@ const PositionShow = ({ pageDispatchers }) => {
     if (!pos.person) {
       personName = "Unfilled"
     } else {
-      personName = <LinkTo modelType="Person" model={pos.person} />
+      personName = (
+        <LinkToPreviewed
+          modelType="Person"
+          model={pos.person}
+          previewId="pos-show-asc-pos-person"
+        />
+      )
     }
     return (
       <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
         <td>{personName}</td>
         <td>
-          <LinkTo modelType="Position" model={pos} />
+          <LinkToPreviewed
+            modelType="Position"
+            model={pos}
+            previewId="pos-show-asc-pos"
+          />
         </td>
       </tr>
     )

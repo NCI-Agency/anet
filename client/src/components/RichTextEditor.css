@@ -1,17 +1,18 @@
-.Draftail-Editor .DraftEditor-root {
+/* to override defaults*/
+.anet .Draftail-Editor .DraftEditor-root {
   font-size: 1.75rem;
   min-height: 10rem;
 }
 
-.Draftail-ToolbarButton {
+.anet .Draftail-ToolbarButton {
   font-size: 2rem;
   font-weight: 300;
 }
 
-.Draftail-Editor--focus .Draftail-Toolbar {
+.anet .Draftail-Editor--focus .Draftail-Toolbar {
   top: -15px;
 }
 
-.Draftail-block--unstyled {
+.anet .Draftail-block--unstyled {
   margin: 0.75rem 0;
 }
