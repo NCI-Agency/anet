@@ -13,9 +13,11 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
+  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -40,6 +42,8 @@ const GQL_GET_POSITION = gql`
       name
       type
       status
+      isSubscribed
+      updatedAt
       code
       organization {
         uuid
@@ -199,7 +203,23 @@ const PositionShow = ({ pageDispatchers }) => {
             />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Position ${position.name}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {getSubscriptionIcon(position.isSubscribed, () =>
+                      toggleSubscription(
+                        "positions",
+                        position.uuid,
+                        position.isSubscribed,
+                        position.updatedAt,
+                        refetch
+                      )
+                    )}{" "}
+                    Position {position.name}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset>
                 <Field
                   name="name"

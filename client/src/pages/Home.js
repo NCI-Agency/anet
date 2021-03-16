@@ -11,6 +11,7 @@ import ConfirmDelete from "components/ConfirmDelete"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
+import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import {
   PageDispatchersPropType,
   jumpToTop,
@@ -463,6 +464,8 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
           pageDispatchers={pageDispatchers}
         />
       </Fieldset>
+
+      <MySubscriptionUpdates />
 
       <Fieldset title="Saved searches">
         <SavedSearches

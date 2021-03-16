@@ -11,8 +11,10 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
+  getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -38,6 +40,8 @@ const GQL_GET_LOCATION = gql`
       lat
       lng
       status
+      isSubscribed
+      updatedAt
       planningApprovalSteps {
         uuid
         name
@@ -78,7 +82,7 @@ const LocationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
   const { done, result } = useBoilerplate({
@@ -141,7 +145,23 @@ const LocationShow = ({ pageDispatchers }) => {
             />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Location ${location.name}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {getSubscriptionIcon(location.isSubscribed, () =>
+                      toggleSubscription(
+                        "locations",
+                        location.uuid,
+                        location.isSubscribed,
+                        location.updatedAt,
+                        refetch
+                      )
+                    )}{" "}
+                    Location {location.name}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset>
                 <Field name="name" component={FieldHelper.ReadonlyField} />
 

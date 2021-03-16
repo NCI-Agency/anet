@@ -12,8 +12,10 @@ import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
+  getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -49,6 +51,8 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       status
+      isSubscribed
+      updatedAt
       identificationCode
       type
       parentOrg {
@@ -135,9 +139,12 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
-    uuid
-  })
+  const { loading, error, data, refetch } = API.useApiQuery(
+    GQL_GET_ORGANIZATION,
+    {
+      uuid
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -276,7 +283,20 @@ const OrganizationShow = ({ pageDispatchers }) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`Organization ${organization.shortName}`}
+                title={
+                  <>
+                    {getSubscriptionIcon(organization.isSubscribed, () =>
+                      toggleSubscription(
+                        "organizations",
+                        organization.uuid,
+                        organization.isSubscribed,
+                        organization.updatedAt,
+                        refetch
+                      )
+                    )}{" "}
+                    Organization {organization.shortName}
+                  </>
+                }
                 action={action}
               />
               <Fieldset id="info">

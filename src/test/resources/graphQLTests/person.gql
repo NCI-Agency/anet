@@ -5,6 +5,8 @@ person(uuid:"${personUuid}") {
   role
   status
   pendingVerification
+  isSubscribed
+  updatedAt
   emailAddress
   phoneNumber
   domainUsername

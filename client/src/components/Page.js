@@ -1,9 +1,27 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { setPageProps, setSearchProps } from "actions"
+import API from "api"
+import { gql } from "apollo-boost"
 import NotFound from "components/NotFound"
 import PropTypes from "prop-types"
 import React, { useEffect } from "react"
+import { OverlayTrigger, Tooltip } from "react-bootstrap"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
+
+const GQL_CREATE_SUBSCRIPTION = gql`
+  mutation($subscription: SubscriptionInput!) {
+    createSubscription(subscription: $subscription) {
+      uuid
+    }
+  }
+`
+const GQL_DELETE_OBJECT_SUBSCRIPTION = gql`
+  mutation($subscribedObjectUuid: String!) {
+    deleteObjectSubscription(uuid: $subscribedObjectUuid)
+  }
+`
 
 export const mapPageDispatchersToProps = (dispatch, ownProps) => ({
   pageDispatchers: {
@@ -110,4 +128,46 @@ const applySearchProps = (setSearchProps, searchProps) => {
   if (searchProps) {
     setSearchProps(Object.assign({}, searchProps))
   }
+}
+
+export const getSubscriptionIcon = (isSubscribed, onClick) => {
+  const tooltip = isSubscribed ? "Click to unsubscribe" : "Click to subscribe"
+  const icon = isSubscribed ? IconNames.FEED_SUBSCRIBED : IconNames.FEED
+  // or perhaps: const icon = isSubscribed ? IconNames.EYE_ON : IconNames.EYE_OFF
+  const color = isSubscribed ? "green" : "grey"
+  return (
+    <OverlayTrigger
+      placement="top"
+      overlay={<Tooltip id="subscribe">{tooltip}</Tooltip>}
+    >
+      <Icon
+        icon={icon}
+        color={color}
+        style={{ verticalAlign: "middle", cursor: "pointer" }}
+        onClick={onClick}
+      />
+    </OverlayTrigger>
+  )
+}
+
+export const toggleSubscription = (
+  subscribedObjectType,
+  subscribedObjectUuid,
+  isSubscribed,
+  updatedAt,
+  refetch
+) => {
+  const variables = isSubscribed
+    ? { subscribedObjectUuid }
+    : {
+      subscription: {
+        subscribedObjectType,
+        subscribedObjectUuid,
+        updatedAt
+      }
+    }
+  return API.mutation(
+    isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
+    variables
+  ).then(data => refetch())
 }

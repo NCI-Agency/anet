@@ -19,9 +19,11 @@ import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
+  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
@@ -64,6 +66,8 @@ const GQL_GET_REPORT = gql`
       cancelledReason
       releasedAt
       state
+      isSubscribed
+      updatedAt
       location {
         uuid
         name
@@ -499,7 +503,24 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             )}
 
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Report #${uuid}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {(report.isPublished() || report.isCancelled()) &&
+                      getSubscriptionIcon(report.isSubscribed, () =>
+                        toggleSubscription(
+                          "reports",
+                          report.uuid,
+                          report.isSubscribed,
+                          report.updatedAt,
+                          refetch
+                        )
+                      )}{" "}
+                    Report #{report.uuid}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset className="show-report-overview">
                 <Field
                   name="intent"

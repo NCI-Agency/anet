@@ -14,7 +14,7 @@ class ShowReport extends Page {
   get uuid() {
     const title =
       browser
-        .$("//span[@class='title-text'][starts-with(.,'Report #')]")
+        .$("//span[@class='title-text'][contains(.,'Report #')]")
         .getText() || ""
     return title.slice(title.lastIndexOf("#") + 1)
   }

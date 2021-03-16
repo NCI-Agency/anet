@@ -1,0 +1,36 @@
+mySubscriptions(query: {pageSize:0}) {
+  pageNum
+  pageSize
+  totalCount
+  list {
+    uuid
+    createdAt
+    updatedAt
+    subscribedObjectType
+    subscribedObjectUuid
+    subscribedObject {
+      ... on Location {
+        name
+      }
+      ... on Organization {
+        shortName
+      }
+      ... on Person {
+        role
+        rank
+        name
+      }
+      ... on Position {
+        type
+        name
+      }
+      ... on Report {
+        intent
+      }
+      ... on Task {
+        shortName
+        longName
+      }
+    }
+  }
+}

@@ -10,8 +10,10 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
+  getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -36,6 +38,8 @@ const GQL_GET_TASK = gql`
       shortName
       longName
       status
+      isSubscribed
+      updatedAt
       customField
       customFieldEnum1
       customFieldEnum2
@@ -205,7 +209,20 @@ const TaskShow = ({ pageDispatchers }) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`${fieldSettings.shortLabel} ${task.shortName}`}
+                title={
+                  <>
+                    {getSubscriptionIcon(task.isSubscribed, () =>
+                      toggleSubscription(
+                        "tasks",
+                        task.uuid,
+                        task.isSubscribed,
+                        task.updatedAt,
+                        refetch
+                      )
+                    )}{" "}
+                    {fieldSettings.shortLabel} {task.shortName}
+                  </>
+                }
                 action={action}
               />
               <div

@@ -2,8 +2,10 @@ package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
@@ -48,6 +50,15 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return idBatcher.getByIds(uuids);
   }
 
+  @InTransaction
+  @Override
+  public Note insert(Note obj) {
+    DaoUtils.setInsertFields(obj);
+    final Note note = insertInternal(obj);
+    updateSubscriptions(1, note);
+    return note;
+  }
+
   @Override
   public Note insertInternal(Note n) {
     getDbHandle().createUpdate(
@@ -59,6 +70,15 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         .execute();
     insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
     return n;
+  }
+
+  @InTransaction
+  @Override
+  public int update(Note obj) {
+    DaoUtils.setUpdateFields(obj);
+    final int numRows = updateInternal(obj);
+    updateSubscriptions(numRows, obj);
+    return numRows;
   }
 
   @Override
@@ -77,6 +97,16 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
         .createUpdate(
             "/* updateNote */ UPDATE notes SET type = :type, text = :text WHERE uuid = :uuid")
         .bindBean(n).bind("type", DaoUtils.getEnumId(n.getType())).execute();
+  }
+
+  @InTransaction
+  @Override
+  public int delete(String uuid) {
+    final Note note = getByUuid(uuid);
+    note.loadNoteRelatedObjects(AnetObjectEngine.getInstance().getContext()).join();
+    DaoUtils.setUpdateFields(note);
+    updateSubscriptions(1, note);
+    return deleteInternal(uuid);
   }
 
   @Override
@@ -191,4 +221,31 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return getDbHandle().createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
         .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
   }
+
+  private void updateSubscriptions(int numRows, Note obj) {
+    if (numRows > 0) {
+      final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj);
+      final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+      for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
+        subscriptionDao.updateSubscriptions(subscriptionUpdate);
+      }
+    }
+  }
+
+  private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj) {
+    final String paramTpl = "noteRelatedObject%1$d";
+    final List<SubscriptionUpdateGroup> updates = new ArrayList<>();
+    final ListIterator<NoteRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
+    while (iter.hasNext()) {
+      final String param = String.format(paramTpl, iter.nextIndex());
+      final NoteRelatedObject nro = iter.next();
+      final SubscriptionUpdateStatement stmt =
+          AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(true,
+              nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);
+      updates.add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(),
+          nro.getRelatedObjectUuid(), obj.getUpdatedAt(), stmt, true));
+    }
+    return updates;
+  }
+
 }

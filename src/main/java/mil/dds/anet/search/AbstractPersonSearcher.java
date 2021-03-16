@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.Map;
 import java.util.Set;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
@@ -55,6 +56,11 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
 
     if (hasTextQuery(query)) {
       addTextQuery(query);
+    }
+
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getPersonDao().getSubscriptionUpdate(null)));
     }
 
     qb.addDateRangeClause("startDate", "people.\"endOfTourDate\"", Comparison.AFTER,

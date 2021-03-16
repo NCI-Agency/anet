@@ -40,6 +40,10 @@ class AdvancedSearch {
   get addFilterPopover() {
     return this.addFilterButtonText.$(".bp3-popover2-content")
   }
+
+  getSearchFilter(filter) {
+    return this.advancedSearchPopover.$(`//div[text()="${filter}"]`)
+  }
 }
 
 export default new AdvancedSearch()

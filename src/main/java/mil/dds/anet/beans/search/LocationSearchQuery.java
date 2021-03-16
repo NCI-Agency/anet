@@ -1,6 +1,6 @@
 package mil.dds.anet.beans.search;
 
-public class LocationSearchQuery extends AbstractSearchQuery<LocationSearchSortBy> {
+public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationSearchSortBy> {
 
   public LocationSearchQuery() {
     super(LocationSearchSortBy.NAME);

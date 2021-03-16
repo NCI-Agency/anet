@@ -14,9 +14,12 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import MySubscriptions from "components/MySubscriptions"
 import {
+  getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -44,6 +47,8 @@ const GQL_GET_PERSON = gql`
       role
       status
       pendingVerification
+      isSubscribed
+      updatedAt
       emailAddress
       phoneNumber
       domainUsername
@@ -203,7 +208,20 @@ const PersonShow = ({ pageDispatchers }) => {
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`${person.rank} ${person.name}`}
+                title={
+                  <>
+                    {getSubscriptionIcon(person.isSubscribed, () =>
+                      toggleSubscription(
+                        "people",
+                        person.uuid,
+                        person.isSubscribed,
+                        person.updatedAt,
+                        refetch
+                      )
+                    )}{" "}
+                    {person.rank} {person.name}
+                  </>
+                }
                 action={action}
               />
               <Fieldset>
@@ -277,6 +295,10 @@ const PersonShow = ({ pageDispatchers }) => {
                   humanValue={parseHtmlWithLinkTo(person.biography)}
                 />
               </Fieldset>
+
+              {person.uuid === currentUser.uuid && (
+                <MySubscriptions uuid={person.position.uuid} />
+              )}
 
               <Fieldset title="Position">
                 <Fieldset

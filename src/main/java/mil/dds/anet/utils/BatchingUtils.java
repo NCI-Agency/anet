@@ -21,6 +21,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -297,6 +298,14 @@ public final class BatchingUtils {
           @Override
           public CompletionStage<List<List<Task>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
+        new DataLoader<>(new BatchLoader<String, Subscription>() {
+          @Override
+          public CompletionStage<List<Subscription>> load(List<String> keys) {
+            return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getByIds(keys),
                 dispatcherService);
           }
         }, dataLoaderOptions));

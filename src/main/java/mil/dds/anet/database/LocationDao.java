@@ -9,7 +9,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
+public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
   public static final String TABLE_NAME = "locations";
 
@@ -62,4 +62,8 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
 
   // TODO: Don't delete any location if any references exist.
 
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "locations.uuid");
+  }
 }

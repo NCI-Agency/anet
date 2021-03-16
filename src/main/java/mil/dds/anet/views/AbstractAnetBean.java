@@ -24,6 +24,7 @@ public abstract class AbstractAnetBean {
   protected Instant updatedAt;
   private List<Note> notes;
   private String batchUuid;
+  private Boolean isSubscribed;
 
   public AbstractAnetBean() {
     uuid = null;
@@ -82,6 +83,15 @@ public abstract class AbstractAnetBean {
   @JsonIgnore
   public void setBatchUuid(String batchUuid) {
     this.batchUuid = batchUuid;
+  }
+
+  @GraphQLQuery(name = "isSubscribed")
+  public synchronized Boolean isSubscribed(@GraphQLRootContext Map<String, Object> context) {
+    if (isSubscribed == null) {
+      isSubscribed =
+          AnetObjectEngine.getInstance().getSubscriptionDao().isSubscribedObject(context, uuid);
+    }
+    return isSubscribed;
   }
 
 }

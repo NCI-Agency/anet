@@ -3,6 +3,8 @@ position(uuid:"${positionUuid}") {
   name
   type
   status
+  isSubscribed
+  updatedAt
   code
   organization {
     uuid
