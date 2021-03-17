@@ -17,6 +17,9 @@ import { FastField, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location, Position } from "models"
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
@@ -41,6 +44,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
+  const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
   const statusButtons = [
@@ -149,6 +153,21 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   name="name"
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
+                  extraColElem={
+                    values.name.length >= 3 ? (
+                      <>
+                        <Button onClick={() => setShowSimilarLocations(true)}>
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={Icon.SIZE_STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
                 />
 
                 <FastField
@@ -208,6 +227,19 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   />
                 </Fieldset>
               )}
+
+              {showSimilarLocations && (
+                <SimilarObjectsModal
+                  objectType="Location"
+                  userInput={`${values.name}`}
+                  onCancel={() => {
+                    setShowSimilarLocations(false)
+                  }}
+                  onSuccess={() => console.log("onSuccess")}
+                >
+                </SimilarObjectsModal>
+              )}
+
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>

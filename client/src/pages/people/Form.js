@@ -17,6 +17,9 @@ import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -58,6 +61,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
   const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
+  const [showSimilarPeople, setShowSimilarPeople] = useState(false)
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(
     Person.isPendingVerification(initialValues)
@@ -216,6 +220,19 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       />
                     </Col>
                   </Col>
+                  {values.firstName.length >= 2 && values.lastName.length >= 2 && (
+                    <Col sm={1}>
+                      <Button onClick={() => setShowSimilarPeople(true)}>
+                        <Icon
+                          icon={IconNames.WARNING_SIGN}
+                          intent={Intent.WARNING}
+                          iconSize={Icon.SIZE_STANDARD}
+                          style={{ margin: "0 6px" }}
+                        />
+                        Possible Duplicates
+                      </Button>
+                    </Col>
+                  )}
 
                   {edit && (
                     <>
@@ -502,6 +519,17 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     }}
                   />
                 </Fieldset>
+              )}
+              {showSimilarPeople && (
+                <SimilarObjectsModal
+                  objectType="Person"
+                  userInput={`${values.lastName} ${values.firstName}`}
+                  onCancel={() => {
+                    setShowSimilarPeople(false)
+                  }}
+                  onSuccess={() => console.log("onSuccess")}
+                >
+                </SimilarObjectsModal>
               )}
 
               <div className="submit-buttons">
