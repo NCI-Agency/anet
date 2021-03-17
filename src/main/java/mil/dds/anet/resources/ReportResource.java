@@ -545,6 +545,42 @@ public class ReportResource {
     return r;
   }
 
+  @GraphQLMutation(name = "unpublishReport")
+  public Integer unpublishReport(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String uuid) {
+    // TODO: Do we need a reason here (like with rejectReport)?
+    final Person unpublisher = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(unpublisher);
+    final Report r = dao.getByUuid(uuid);
+    if (r == null) {
+      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+    }
+
+    if (r.getState() != ReportState.PUBLISHED) {
+      logger.info("Report UUID {} cannot be unpublished", r.getUuid());
+      throw new WebApplicationException("This report is not published", Status.BAD_REQUEST);
+    }
+
+    // Write the unpublish action
+    final ReportAction unpublish = new ReportAction();
+    unpublish.setReportUuid(r.getUuid());
+    unpublish.setPersonUuid(unpublisher.getUuid());
+    unpublish.setType(ActionType.UNPUBLISH);
+    unpublish.setPlanned(r.isFutureEngagement());
+    engine.getReportActionDao().insert(unpublish);
+
+    // Update the report
+    final int numRows = dao.updateToDraftState(r);
+    if (numRows == 0) {
+      throw new WebApplicationException("Couldn't process report unpublication", Status.NOT_FOUND);
+    }
+
+    // TODO: Do we need to send email?
+    AnetAuditLogger.log("report {} was unpublished by {}", r.getUuid(), unpublisher);
+    // GraphQL mutations *have* to return something
+    return numRows;
+  }
+
   @GraphQLMutation(name = "addComment")
   public Comment addComment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String reportUuid,

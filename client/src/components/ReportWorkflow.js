@@ -13,6 +13,7 @@ const ACTION_TYPE_DETAILS = {
   REJECT: { text: "Changes requested", cssClass: "btn-danger rejected" },
   SUBMIT: { text: "Submitted", cssClass: "btn-pending submitted" },
   PUBLISH: { text: "Published", cssClass: "btn-success published" },
+  UNPUBLISH: { text: "Unpublished", cssClass: "btn-danger unpublished" },
   null: { text: "Pending", cssClass: "btn-pending default" }
 }
 
