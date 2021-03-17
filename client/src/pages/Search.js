@@ -19,6 +19,9 @@ import {
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
+import LocationTable from "components/LocationTable"
+import PeopleTable from "components/PeopleTable"
+import TaskTable from "components/TaskTable"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -38,7 +41,7 @@ import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Organization, Person, Task } from "models"
+import { Organization } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useRef, useState } from "react"
@@ -327,63 +330,18 @@ const People = ({
     return result
   }
 
-  const people = data ? data.personList.list : []
-  if (_get(people, "length", 0) === 0) {
-    return <em>No people found</em>
-  }
+  const paginatedPeople = data ? data.personList : []
+  const { pageSize, pageNum: curPage, list: people } = paginatedPeople
 
   return (
-    <div>
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={personQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      >
-        <Table responsive hover striped id="people-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Location</th>
-              <th>Organization</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Person.map(people, person => (
-              <tr key={person.uuid}>
-                <td>
-                  <LinkTo modelType="Person" model={person} />
-                </td>
-                <td>
-                  <LinkTo modelType="Position" model={person.position} />
-                  {person.position && person.position.code
-                    ? `, ${person.position.code}`
-                    : ""}
-                </td>
-                <td>
-                  <LinkTo
-                    modelType="Location"
-                    model={person.position && person.position.location}
-                    whenUnspecified=""
-                  />
-                </td>
-                <td>
-                  {person.position && person.position.organization && (
-                    <LinkTo
-                      modelType="Organization"
-                      model={person.position.organization}
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </UltimatePaginationTopDown>
-    </div>
+    <PeopleTable
+      people={people}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      id="people-search-results"
+    />
   )
 
   function setPage(pageNum) {
@@ -520,41 +478,18 @@ export const Tasks = ({
     return result
   }
 
-  const tasks = data ? data.taskList.list : []
-  if (_get(tasks, "length", 0) === 0) {
-    return <em>No {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]} found</em>
-  }
+  const paginatedTasks = data ? data.taskList : []
+  const { pageSize, pageNum: curPage, list: tasks } = paginatedTasks
 
   return (
-    <div>
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={taskQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      >
-        <Table responsive hover striped id="tasks-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Task.map(tasks, task => (
-              <tr key={task.uuid}>
-                <td>
-                  <LinkTo modelType="Task" model={task}>
-                    {task.shortName} {task.longName}
-                  </LinkTo>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </UltimatePaginationTopDown>
-    </div>
+    <TaskTable
+      tasks={tasks}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      id="tasks-search-results"
+    />
   )
 
   function setPage(pageNum) {
@@ -617,39 +552,18 @@ const Locations = ({
     return result
   }
 
-  const locations = data ? data.locationList.list : []
-  if (_get(locations, "length", 0) === 0) {
-    return <em>No locations found</em>
-  }
+  const paginatedLocations = data ? data.locationList : []
+  const { pageSize, pageNum: curPage, list: locations } = paginatedLocations
 
   return (
-    <div>
-      <UltimatePaginationTopDown
-        componentClassName="searchPagination"
-        className="pull-right"
-        pageNum={pageNum}
-        pageSize={locationQuery.pageSize}
-        totalCount={totalCount}
-        goToPage={setPage}
-      >
-        <Table responsive hover striped id="locations-search-results">
-          <thead>
-            <tr>
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {locations.map(loc => (
-              <tr key={loc.uuid}>
-                <td>
-                  <LinkTo modelType="Location" model={loc} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </UltimatePaginationTopDown>
-    </div>
+    <LocationTable
+      locations={locations}
+      pageSize={pageSize}
+      pageNum={curPage}
+      totalCount={totalCount}
+      goToPage={setPage}
+      id="locations-search-results"
+    />
   )
 
   function setPage(pageNum) {
