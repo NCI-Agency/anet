@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 import unittest
 
 from src.core.db import db
-from src.examples.models import PeoplePositions, Position, Person, Location, Organization, BaseModel
+from src.core.anet_business_objects import PeoplePositions, Positions, People, Locations, Organizations, BaseModel
 
 
 # new db instance to get new engine using env vars
@@ -32,10 +32,10 @@ class BaseTestFixture(unittest.TestCase):
         self.update_rules = {"tables": []}
         # Set entity classes as class attribute and set the same session to all by BaseModel
         self.PeoplePositions = PeoplePositions
-        self.Position = Position
-        self.Person = Person
-        self.Location = Location
-        self.Organization = Organization
+        self.Position = Positions
+        self.Person = People
+        self.Location = Locations
+        self.Organization = Organizations
         self.BaseModel = BaseModel
         self.BaseModel.set_session(self.session)
     

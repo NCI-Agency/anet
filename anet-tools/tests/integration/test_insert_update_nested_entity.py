@@ -16,17 +16,14 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         position.person = person
         position.location = location
 
-        self.update_rules["tables"].append(
-            {"name": "positions", "columns": ["name"]})
-        self.update_rules["tables"].append(
-            {"name": "people", "columns": ["name"]})
-        self.update_rules["tables"].append(
-            {"name": "locations", "columns": ["name"]})
+        self.update_rules["tables"].append({"name": "positions", "columns": ["name"]})
+        self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
+        self.update_rules["tables"].append({"name": "locations", "columns": ["name"]})
         base_methods.is_entity_update(position, self.update_rules)
         base_methods.is_entity_update(person, self.update_rules)
         base_methods.is_entity_update(location, self.update_rules)
 
-        position.insert_update_nested_entity(self.update_rules, self.utc_now)
+        position.insert_update_nested_entity(self.utc_now, self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions) \
                     .filter(self.PeoplePositions.personUuid == person.uuid, 
@@ -69,7 +66,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         formerPosUuid = self.session.query(self.Position).filter(
             self.Position.currentPersonUuid == person.uuid).all()[0].uuid
 
-        position.insert_update_nested_entity(self.update_rules, self.utc_now)
+        position.insert_update_nested_entity(self.utc_now, self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions) \
                     .filter(self.PeoplePositions.personUuid == person.uuid, 
@@ -139,7 +136,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         formerPersonUuid = self.session.query(self.Position) \
                             .filter(self.Position.uuid == position.uuid).all()[0].currentPersonUuid
 
-        position.insert_update_nested_entity(self.update_rules, self.utc_now)
+        position.insert_update_nested_entity(self.utc_now, self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions).filter(
             self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid).all()
@@ -210,7 +207,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
                             .filter(self.Position.uuid == position.uuid) \
                             .all()[0].currentPersonUuid
 
-        position.insert_update_nested_entity(self.update_rules, self.utc_now)
+        position.insert_update_nested_entity(self.utc_now, self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions) \
                 .filter(self.PeoplePositions.personUuid == person.uuid,

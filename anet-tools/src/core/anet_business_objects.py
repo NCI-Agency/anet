@@ -72,28 +72,25 @@ class anet_logic_mixin(BaseModel):
 
     def insert_update_nested_entity(self, utc_now, update_rules):
         self_c = copy.deepcopy(self)
-        
-        if base_methods.has_entity_relation(self, "person"):
-            business_logic_methods.position_relation_process(
-                self, "person", self_c, update_rules, PeoplePositions, utc_now)
-
-        if base_methods.has_entity_relation(self, "location"):
-            business_logic_methods.position_relation_process(
-                self, "location", self_c, update_rules, PeoplePositions, utc_now)
-
-        if base_methods.has_entity_relation(self, "organization"):
-            business_logic_methods.position_relation_process(
-                self, "organization", self_c, update_rules, PeoplePositions, utc_now)
-
-        if base_methods.is_entity_update(self, update_rules):
+        if self.__tablename__ == "positions":
             if base_methods.has_entity_relation(self, "person"):
-                business_logic_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
-            self_c.update_entity(utc_now)
-        else:
-            self_c.insert_entity(utc_now, update_rules)
+                business_logic_methods.position_relation_process(self, "person", self_c, update_rules, PeoplePositions, utc_now)
 
-        if base_methods.has_entity_relation(self, "person"):
-            business_logic_methods.add_new_association(self, PeoplePositions, utc_now)
+            if base_methods.has_entity_relation(self, "location"):
+                business_logic_methods.position_relation_process(self, "location", self_c, update_rules, PeoplePositions, utc_now)
+
+            if base_methods.has_entity_relation(self, "organization"):
+                business_logic_methods.position_relation_process(self, "organization", self_c, update_rules, PeoplePositions, utc_now)
+
+            if base_methods.is_entity_update(self, update_rules):
+                if base_methods.has_entity_relation(self, "person"):
+                    business_logic_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
+                self_c.update_entity(utc_now, update_rules)
+            else:
+                self_c.insert_entity(utc_now, update_rules)
+
+            if base_methods.has_entity_relation(self, "person"):
+                business_logic_methods.add_new_association(self, PeoplePositions, utc_now)
 
         BaseModel.session.flush()
 
@@ -113,12 +110,20 @@ class business_logic_methods:
                 entity_c.locationUuid = getattr(entity, relation_name).uuid
             elif relation_name == "organization":
                 entity_c.organizationUuid = getattr(entity, relation_name).uuid
-            getattr(entity, relation_name).update_entity(utc_now)
+            getattr(entity, relation_name).update_entity(utc_now, update_rules)
             delattr(entity_c, relation_name)
         else:
             getattr(entity_c, relation_name).uuid = getattr(entity, relation_name).uuid
             getattr(entity_c, relation_name).createdAt = utc_now
             getattr(entity_c, relation_name).updatedAt = utc_now
+            entity.session.add(getattr(entity_c, relation_name))
+            entity.session.flush()
+            if relation_name == "person":
+                entity_c.currentPersonUuid = getattr(entity, relation_name).uuid
+            elif relation_name == "location":
+                entity_c.locationUuid = getattr(entity, relation_name).uuid
+            elif relation_name == "organization":
+                entity_c.organizationUuid = getattr(entity, relation_name).uuid
 
     @staticmethod
     def remove_persons_association_with_position(position, PeoplePositions, utc_now):
@@ -185,10 +190,6 @@ class business_logic_methods:
         PeoplePositions.create(createdAt=utc_now, personUuid=position.person.uuid, positionUuid=position.uuid)
         PeoplePositions.session.flush()
 
-
-# __table_args__ = {'extend_existing': True}
-
-__table_args__ = {'extend_existing': True}
 
 class PeoplePositions(anet_logic_mixin):
     __tablename__ = "peoplePositions"
