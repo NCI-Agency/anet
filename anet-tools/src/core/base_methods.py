@@ -1,5 +1,3 @@
-import datetime
-import os
 import uuid
 
 from sqlalchemy import and_
@@ -72,9 +70,17 @@ class base_methods:
         if entity.__tablename__ not in ["positions", "reports"]:
             return True
         else:
-            if base_methods.has_entity_relation(entity, "person") or \
-                base_methods.has_entity_relation(entity, "location") or \
-                base_methods.has_entity_relation(entity, "organization"):
-                return False
-            else:
-                return True
+            if entity.__tablename__ == "positions":
+                if base_methods.has_entity_relation(entity, "person") or \
+                    base_methods.has_entity_relation(entity, "location") or \
+                    base_methods.has_entity_relation(entity, "organization"):
+                    return False
+                else:
+                    return True
+            elif entity.__tablename__ == "reports":
+                if len(entity.people) == 0:
+                    return True
+                else:
+                    return False
+            else: raise Exception(f"Logic is not implemented for {entity.__tablename__} table!")
+                

@@ -1,11 +1,9 @@
 import copy
 import datetime
-import uuid
 
-from sqlalchemy import and_
+from sqlalchemy import and_, Boolean, Column, DateTime, ForeignKey, text
 from sqlalchemy_mixins import ActiveRecordMixin
 from sqlalchemy.orm import relationship
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text, text
 
 from src.core.models import Base
 from src.core.base_methods import base_methods
@@ -18,52 +16,22 @@ class BaseModel(Base, ActiveRecordMixin):
 class anet_logic_mixin(BaseModel):
     __abstract__ = True
 
-    def insert_entity(self, createdAt, update_rules):
+    def insert_entity(self, utc_now):
         """Insert and flush a new record
         """
-        self.createdAt = createdAt
-        self.updatedAt = createdAt
+        self.createdAt = utc_now
+        self.updatedAt = utc_now
         if self.__tablename__ == "people":
-            utc_now = datetime.datetime.now()
+            # utc_now = datetime.datetime.now()
             PeoplePositions.create(createdAt=utc_now, person=self)
         else:
             BaseModel.session.add(self)
             BaseModel.session.flush()
-        if self.__tablename__ == "reports":
-            # print(f"self.people {self.people}")
-            for rp in self.people:
-                # print(f"rp {rp}")
-                # print(f"rp.person {rp.person}")
-                prs = rp.person
-                #if not base_methods.is_entity_update(prs, update_rules):
-                    # print(f"rp.person {vars(rp.person)}")
-                PeoplePositions.create(createdAt=createdAt, person=rp.person)
-                BaseModel.session.flush()
 
-    def update_entity(self, utc_now, update_rules):
+    def update_entity(self, utc_now):
         """Update and flush an existing record
         """
         obj = type(self).find(self.uuid)
-
-        if self.__tablename__ == "reports" and len(self.people) != 0:
-            #rp_list = copy.deepcopy(self.people)
-            for rp in self.people:
-                prs = rp.person
-                prs.set_session(self.session)
-                if base_methods.is_entity_update(prs, update_rules):
-                    delattr(rp.person, "reports")
-                    prs.updatedAt = utc_now
-                    prs.update_entity(utc_now, update_rules)
-                else:
-                    delattr(rp, "report")
-                    rp.person.createdAt = utc_now
-                    rp.person.updatedAt = utc_now
-                    obj.people.append(rp)
-                    BaseModel.session.flush()
-                    PeoplePositions.create(createdAt=utc_now, person=rp.person)
-                    BaseModel.session.flush()
-            delattr(self, "people")
-
         self.updatedAt = utc_now
         for attr, value in self.__dict__.items():
             if attr != "_sa_instance_state":
@@ -71,30 +39,55 @@ class anet_logic_mixin(BaseModel):
         BaseModel.session.flush()
 
     def insert_update_nested_entity(self, utc_now, update_rules):
-        self_c = copy.deepcopy(self)
-        
-        if base_methods.has_entity_relation(self, "person"):
-            business_logic_methods.position_relation_process(
-                self, "person", self_c, update_rules, PeoplePositions, utc_now)
-
-        if base_methods.has_entity_relation(self, "location"):
-            business_logic_methods.position_relation_process(
-                self, "location", self_c, update_rules, PeoplePositions, utc_now)
-
-        if base_methods.has_entity_relation(self, "organization"):
-            business_logic_methods.position_relation_process(
-                self, "organization", self_c, update_rules, PeoplePositions, utc_now)
-
-        if base_methods.is_entity_update(self, update_rules):
+        if self.__tablename__ == "positions":
+            self_c = copy.deepcopy(self)
             if base_methods.has_entity_relation(self, "person"):
-                business_logic_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
-            self_c.update_entity(utc_now)
-        else:
-            self_c.insert_entity(utc_now, update_rules)
+                business_logic_methods.position_relation_process(self, "person", self_c, update_rules, PeoplePositions, utc_now)
 
-        if base_methods.has_entity_relation(self, "person"):
-            business_logic_methods.add_new_association(self, PeoplePositions, utc_now)
+            if base_methods.has_entity_relation(self, "location"):
+                business_logic_methods.position_relation_process(self, "location", self_c, update_rules, PeoplePositions, utc_now)
 
+            if base_methods.has_entity_relation(self, "organization"):
+                business_logic_methods.position_relation_process(self, "organization", self_c, update_rules, PeoplePositions, utc_now)
+
+            if base_methods.is_entity_update(self, update_rules):
+                if base_methods.has_entity_relation(self, "person"):
+                    business_logic_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
+                self_c.update_entity(utc_now)
+            else:
+                self_c.insert_entity(utc_now)
+
+            if base_methods.has_entity_relation(self, "person"):
+                business_logic_methods.add_new_association(self, PeoplePositions, utc_now)
+        
+        elif self.__tablename__ == "reports":
+            
+            if base_methods.is_entity_update(self, update_rules):
+                for rp in self.people:
+                    prs = rp.person
+                    prs.set_session(self.session)
+                    if base_methods.is_entity_update(prs, update_rules):
+                        delattr(rp.person, "reports")
+                        prs.updatedAt = utc_now
+                        prs.update_entity(utc_now, update_rules)
+                    else:
+                        delattr(rp, "report")
+                        rp.person.createdAt = utc_now
+                        rp.person.updatedAt = utc_now
+                        obj = type(self).find(self.uuid)
+                        obj.people.append(rp)
+                        BaseModel.session.flush()
+                        PeoplePositions.create(createdAt = utc_now, person = rp.person)
+                        BaseModel.session.flush()
+                delattr(self, "people")
+                self.update_entity(utc_now)
+            
+            else:
+                self.insert_entity(utc_now)
+                for rp in self.people:
+                    PeoplePositions.create(createdAt=utc_now, person=rp.person)
+                    BaseModel.session.flush()
+        
         BaseModel.session.flush()
 
     @classmethod
@@ -119,6 +112,14 @@ class business_logic_methods:
             getattr(entity_c, relation_name).uuid = getattr(entity, relation_name).uuid
             getattr(entity_c, relation_name).createdAt = utc_now
             getattr(entity_c, relation_name).updatedAt = utc_now
+            entity.session.add(getattr(entity_c, relation_name))
+            entity.session.flush()
+            if relation_name == "person":
+                entity_c.currentPersonUuid = getattr(entity, relation_name).uuid
+            elif relation_name == "location":
+                entity_c.locationUuid = getattr(entity, relation_name).uuid
+            elif relation_name == "organization":
+                entity_c.organizationUuid = getattr(entity, relation_name).uuid
 
     @staticmethod
     def remove_persons_association_with_position(position, PeoplePositions, utc_now):
@@ -185,10 +186,9 @@ class business_logic_methods:
         PeoplePositions.create(createdAt=utc_now, personUuid=position.person.uuid, positionUuid=position.uuid)
         PeoplePositions.session.flush()
 
-
-# __table_args__ = {'extend_existing': True}
-
-__table_args__ = {'extend_existing': True}
+@property
+def private(self):
+    raise AttributeError
 
 class PeoplePositions(anet_logic_mixin):
     __tablename__ = "peoplePositions"
@@ -209,13 +209,14 @@ class PeoplePositions(anet_logic_mixin):
 class Positions(anet_logic_mixin):
     __tablename__ = 'positions'
     __table_args__ = {'extend_existing': True}
-
+    full_text = private
     people = relationship("PeoplePositions", back_populates="position")
 
 
 class People(anet_logic_mixin):
     __tablename__ = 'people'
     __table_args__ = {'extend_existing': True}
+    full_text = private
 
     positions = relationship("PeoplePositions", back_populates="person")
     reports = relationship("ReportPeople", back_populates="person")
@@ -224,16 +225,19 @@ class People(anet_logic_mixin):
 class Locations(anet_logic_mixin):
     __tablename__ = 'locations'
     __table_args__ = {'extend_existing': True}
+    full_text = private
 
 
 class Organizations(anet_logic_mixin):
     __tablename__ = 'organizations'
     __table_args__ = {'extend_existing': True}
+    full_text = private
     
 
 class Reports(anet_logic_mixin):
     __tablename__ = 'reports'
     __table_args__ = {'extend_existing': True}
+    full_text = private
 
     people = relationship("ReportPeople", back_populates="report")
 
