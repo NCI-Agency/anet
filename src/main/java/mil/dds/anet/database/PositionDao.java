@@ -254,7 +254,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
             + "WHERE uuid = :positionUuid")
-        .bind("personUuid", (Integer) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
+        .bind("personUuid", (String) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
         .bind("positionUuid", positionUuid).execute();
 
     final String updateSql;
@@ -376,7 +376,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("deleted", true).bind("positionUuid_a", uuids.get(0))
         .bind("positionUuid_b", uuids.get(1))
         .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-
   }
 
   @InTransaction
