@@ -2,7 +2,7 @@ import React from "react"
 import { Button, Modal } from "react-bootstrap"
 import PropTypes from "prop-types"
 import PositionTable from "components/PositionTable"
-import PeopleTable from "./PeopleTable"
+import PersonTable from "./PersonTable"
 import LocationTable from "./LocationTable"
 
 const DEFAULT_PAGESIZE = 10
@@ -23,7 +23,7 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
       </Modal.Header>
       <Modal.Body>
         {objectType === "Person" && (
-          <PeopleTable queryParams={queryParams} id="similar-people-table" />
+          <PersonTable queryParams={queryParams} id="similar-people-table" />
         )}
         {objectType === "Location" && (
           <LocationTable

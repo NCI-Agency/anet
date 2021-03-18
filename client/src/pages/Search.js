@@ -20,7 +20,7 @@ import {
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import LocationTable from "components/LocationTable"
-import PeopleTable from "components/PeopleTable"
+import PersonTable from "components/PersonTable"
 import TaskTable from "components/TaskTable"
 import ReportCollection, {
   FORMAT_CALENDAR,
@@ -334,7 +334,7 @@ const People = ({
   const { pageSize, pageNum: curPage, list: people } = paginatedPeople
 
   return (
-    <PeopleTable
+    <PersonTable
       people={people}
       pageSize={pageSize}
       pageNum={curPage}

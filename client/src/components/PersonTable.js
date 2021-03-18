@@ -46,19 +46,19 @@ const GQL_GET_PERSON_LIST = gql`
   }
 `
 
-const PeopleTable = props => {
+const PersonTable = props => {
   if (props.queryParams) {
-    return <PaginatedPeople {...props} />
+    return <PaginatedPerson {...props} />
   }
-  return <BasePeopleTable {...props} />
+  return <BasePersonTable {...props} />
 }
 
-PeopleTable.propTypes = {
+PersonTable.propTypes = {
   // query variables for people, when query & pagination wanted:
   queryParams: PropTypes.object
 }
 
-const PaginatedPeople = ({ queryParams, pageDispatchers, ...otherProps }) => {
+const PaginatedPerson = ({ queryParams, pageDispatchers, ...otherProps }) => {
   const [pageNum, setPageNum] = useState(0)
   const personQuery = Object.assign({}, queryParams, { pageNum })
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON_LIST, {
@@ -81,7 +81,7 @@ const PaginatedPeople = ({ queryParams, pageDispatchers, ...otherProps }) => {
   } = data.personList
 
   return (
-    <BasePeopleTable
+    <BasePersonTable
       people={people}
       pageSize={pageSize}
       pageNum={curPage}
@@ -92,12 +92,12 @@ const PaginatedPeople = ({ queryParams, pageDispatchers, ...otherProps }) => {
   )
 }
 
-PaginatedPeople.propTypes = {
+PaginatedPerson.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   queryParams: PropTypes.object
 }
 
-const BasePeopleTable = ({
+const BasePersonTable = ({
   id,
   people,
   pageSize,
@@ -164,7 +164,7 @@ const BasePeopleTable = ({
   )
 }
 
-BasePeopleTable.propTypes = {
+BasePersonTable.propTypes = {
   id: PropTypes.string,
   // list of people:
   people: PropTypes.array.isRequired,
@@ -175,4 +175,4 @@ BasePeopleTable.propTypes = {
   goToPage: PropTypes.func
 }
 
-export default connect(null, mapPageDispatchersToProps)(PeopleTable)
+export default connect(null, mapPageDispatchersToProps)(PersonTable)
