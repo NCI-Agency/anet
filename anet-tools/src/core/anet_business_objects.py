@@ -1,11 +1,9 @@
 import copy
 import datetime
-import uuid
 
-from sqlalchemy import and_
+from sqlalchemy import and_, Boolean, Column, DateTime, ForeignKey, text
 from sqlalchemy_mixins import ActiveRecordMixin
 from sqlalchemy.orm import relationship
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, LargeBinary, String, Text, text
 
 from src.core.models import Base
 from src.core.base_methods import base_methods
@@ -18,7 +16,7 @@ class BaseModel(Base, ActiveRecordMixin):
 class anet_logic_mixin(BaseModel):
     __abstract__ = True
 
-    def insert_entity(self, utc_now, update_rules):
+    def insert_entity(self, utc_now):
         """Insert and flush a new record
         """
         self.createdAt = utc_now
@@ -30,7 +28,7 @@ class anet_logic_mixin(BaseModel):
             BaseModel.session.add(self)
             BaseModel.session.flush()
 
-    def update_entity(self, utc_now, update_rules):
+    def update_entity(self, utc_now):
         """Update and flush an existing record
         """
         obj = type(self).find(self.uuid)
@@ -55,13 +53,15 @@ class anet_logic_mixin(BaseModel):
             if base_methods.is_entity_update(self, update_rules):
                 if base_methods.has_entity_relation(self, "person"):
                     business_logic_methods.remove_positions_association_with_person(self, PeoplePositions, utc_now)
-                self_c.update_entity(utc_now, update_rules)
+                self_c.update_entity(utc_now)
             else:
-                self_c.insert_entity(utc_now, update_rules)
+                self_c.insert_entity(utc_now)
 
             if base_methods.has_entity_relation(self, "person"):
                 business_logic_methods.add_new_association(self, PeoplePositions, utc_now)
+        
         elif self.__tablename__ == "reports":
+            
             if base_methods.is_entity_update(self, update_rules):
                 for rp in self.people:
                     prs = rp.person
@@ -80,14 +80,14 @@ class anet_logic_mixin(BaseModel):
                         PeoplePositions.create(createdAt = utc_now, person = rp.person)
                         BaseModel.session.flush()
                 delattr(self, "people")
-                self.update_entity(utc_now, update_rules)
+                self.update_entity(utc_now)
+            
             else:
-                self.insert_entity(utc_now, update_rules)
+                self.insert_entity(utc_now)
                 for rp in self.people:
-                    prs = rp.person
                     PeoplePositions.create(createdAt=utc_now, person=rp.person)
                     BaseModel.session.flush()
-
+        
         BaseModel.session.flush()
 
     @classmethod
@@ -106,7 +106,7 @@ class business_logic_methods:
                 entity_c.locationUuid = getattr(entity, relation_name).uuid
             elif relation_name == "organization":
                 entity_c.organizationUuid = getattr(entity, relation_name).uuid
-            getattr(entity, relation_name).update_entity(utc_now, update_rules)
+            getattr(entity, relation_name).update_entity(utc_now)
             delattr(entity_c, relation_name)
         else:
             getattr(entity_c, relation_name).uuid = getattr(entity, relation_name).uuid

@@ -63,9 +63,9 @@ class anet_import(db):
                 is_entity_update = base_methods.is_entity_update(entity, self.update_rules)
                 if base_methods.is_entity_single(entity):
                     if is_entity_update:
-                        entity.update_entity(utc_now, self.update_rules)
+                        entity.update_entity(utc_now)
                     else:
-                        entity.insert_entity(utc_now, self.update_rules)
+                        entity.insert_entity(utc_now)
                 else:
                     entity.insert_update_nested_entity(utc_now, self.update_rules)
                 self.append_successful_entity_list_json(entity_json)

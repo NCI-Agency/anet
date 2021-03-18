@@ -11,7 +11,7 @@ class UpdateEntityTest(base_test_fixture.BaseTestFixture):
                     .filter(self.Person.name == "JACKSON, Jack") \
                     .all()[0]
         person.name = "updated_name"
-        person.update_entity(utc_now = self.utc_now, update_rules=self.update_rules)
+        person.update_entity(utc_now = self.utc_now)
         expected = person
 
         # generate result
