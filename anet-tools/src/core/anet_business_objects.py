@@ -18,52 +18,22 @@ class BaseModel(Base, ActiveRecordMixin):
 class anet_logic_mixin(BaseModel):
     __abstract__ = True
 
-    def insert_entity(self, createdAt, update_rules):
+    def insert_entity(self, utc_now, update_rules):
         """Insert and flush a new record
         """
-        self.createdAt = createdAt
-        self.updatedAt = createdAt
+        self.createdAt = utc_now
+        self.updatedAt = utc_now
         if self.__tablename__ == "people":
-            utc_now = datetime.datetime.now()
+            # utc_now = datetime.datetime.now()
             PeoplePositions.create(createdAt=utc_now, person=self)
         else:
             BaseModel.session.add(self)
             BaseModel.session.flush()
-        if self.__tablename__ == "reports":
-            # print(f"self.people {self.people}")
-            for rp in self.people:
-                # print(f"rp {rp}")
-                # print(f"rp.person {rp.person}")
-                prs = rp.person
-                #if not base_methods.is_entity_update(prs, update_rules):
-                    # print(f"rp.person {vars(rp.person)}")
-                PeoplePositions.create(createdAt=createdAt, person=rp.person)
-                BaseModel.session.flush()
 
     def update_entity(self, utc_now, update_rules):
         """Update and flush an existing record
         """
         obj = type(self).find(self.uuid)
-
-        if self.__tablename__ == "reports" and len(self.people) != 0:
-            #rp_list = copy.deepcopy(self.people)
-            for rp in self.people:
-                prs = rp.person
-                prs.set_session(self.session)
-                if base_methods.is_entity_update(prs, update_rules):
-                    delattr(rp.person, "reports")
-                    prs.updatedAt = utc_now
-                    prs.update_entity(utc_now, update_rules)
-                else:
-                    delattr(rp, "report")
-                    rp.person.createdAt = utc_now
-                    rp.person.updatedAt = utc_now
-                    obj.people.append(rp)
-                    BaseModel.session.flush()
-                    PeoplePositions.create(createdAt=utc_now, person=rp.person)
-                    BaseModel.session.flush()
-            delattr(self, "people")
-
         self.updatedAt = utc_now
         for attr, value in self.__dict__.items():
             if attr != "_sa_instance_state":
@@ -71,8 +41,8 @@ class anet_logic_mixin(BaseModel):
         BaseModel.session.flush()
 
     def insert_update_nested_entity(self, utc_now, update_rules):
-        self_c = copy.deepcopy(self)
         if self.__tablename__ == "positions":
+            self_c = copy.deepcopy(self)
             if base_methods.has_entity_relation(self, "person"):
                 business_logic_methods.position_relation_process(self, "person", self_c, update_rules, PeoplePositions, utc_now)
 
@@ -91,6 +61,32 @@ class anet_logic_mixin(BaseModel):
 
             if base_methods.has_entity_relation(self, "person"):
                 business_logic_methods.add_new_association(self, PeoplePositions, utc_now)
+        elif self.__tablename__ == "reports":
+            if base_methods.is_entity_update(self, update_rules):
+                for rp in self.people:
+                    prs = rp.person
+                    prs.set_session(self.session)
+                    if base_methods.is_entity_update(prs, update_rules):
+                        delattr(rp.person, "reports")
+                        prs.updatedAt = utc_now
+                        prs.update_entity(utc_now, update_rules)
+                    else:
+                        delattr(rp, "report")
+                        rp.person.createdAt = utc_now
+                        rp.person.updatedAt = utc_now
+                        obj = type(self).find(self.uuid)
+                        obj.people.append(rp)
+                        BaseModel.session.flush()
+                        PeoplePositions.create(createdAt = utc_now, person = rp.person)
+                        BaseModel.session.flush()
+                delattr(self, "people")
+                self.update_entity(utc_now, update_rules)
+            else:
+                self.insert_entity(utc_now, update_rules)
+                for rp in self.people:
+                    prs = rp.person
+                    PeoplePositions.create(createdAt=utc_now, person=rp.person)
+                    BaseModel.session.flush()
 
         BaseModel.session.flush()
 
