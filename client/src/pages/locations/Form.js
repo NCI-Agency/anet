@@ -235,7 +235,6 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   onCancel={() => {
                     setShowSimilarLocations(false)
                   }}
-                  onSuccess={() => console.log("onSuccess")}
                 >
                 </SimilarObjectsModal>
               )}

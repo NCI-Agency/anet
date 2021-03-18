@@ -340,7 +340,6 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   onCancel={() => {
                     setShowSimilarPositions(false)
                   }}
-                  onSuccess={() => console.log("onSuccess")}
                 >
                 </SimilarObjectsModal>
               )}

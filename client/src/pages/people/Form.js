@@ -527,7 +527,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   onCancel={() => {
                     setShowSimilarPeople(false)
                   }}
-                  onSuccess={() => console.log("onSuccess")}
                 >
                 </SimilarObjectsModal>
               )}
