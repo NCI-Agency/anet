@@ -190,6 +190,9 @@ class business_logic_methods:
         PeoplePositions.create(createdAt=utc_now, personUuid=position.person.uuid, positionUuid=position.uuid)
         PeoplePositions.session.flush()
 
+@property
+def private(self):
+    raise AttributeError
 
 class PeoplePositions(anet_logic_mixin):
     __tablename__ = "peoplePositions"
@@ -210,13 +213,14 @@ class PeoplePositions(anet_logic_mixin):
 class Positions(anet_logic_mixin):
     __tablename__ = 'positions'
     __table_args__ = {'extend_existing': True}
-
+    full_text = private
     people = relationship("PeoplePositions", back_populates="position")
 
 
 class People(anet_logic_mixin):
     __tablename__ = 'people'
     __table_args__ = {'extend_existing': True}
+    full_text = private
 
     positions = relationship("PeoplePositions", back_populates="person")
     reports = relationship("ReportPeople", back_populates="person")
@@ -225,16 +229,19 @@ class People(anet_logic_mixin):
 class Locations(anet_logic_mixin):
     __tablename__ = 'locations'
     __table_args__ = {'extend_existing': True}
+    full_text = private
 
 
 class Organizations(anet_logic_mixin):
     __tablename__ = 'organizations'
     __table_args__ = {'extend_existing': True}
+    full_text = private
     
 
 class Reports(anet_logic_mixin):
     __tablename__ = 'reports'
     __table_args__ = {'extend_existing': True}
+    full_text = private
 
     people = relationship("ReportPeople", back_populates="report")
 
