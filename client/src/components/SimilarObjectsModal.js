@@ -41,8 +41,8 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
 }
 
 SimilarObjectsModal.propTypes = {
-  objectType: PropTypes.string,
-  userInput: PropTypes.string,
+  objectType: PropTypes.string.isRequired,
+  userInput: PropTypes.string.isRequired,
   onCancel: PropTypes.func
 }
 
