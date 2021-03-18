@@ -9,7 +9,7 @@ class InsertEntityTest(base_test_fixture.BaseTestFixture):
         print("Tests: Insert Person")
         # generate expected
         person = self.Person(name="newperson1", role=1, uuid=self.new_uuid)
-        person.insert_entity(createdAt=self.utc_now, update_rules=self.update_rules)
+        person.insert_entity(utc_now=self.utc_now, update_rules=self.update_rules)
         expected = person
 
         # generate result
@@ -28,7 +28,7 @@ class InsertEntityTest(base_test_fixture.BaseTestFixture):
         print("Tests: Insert Position - Insert Organization - Insert Location")
         # generate expected
         location = self.Location(name="newlocation1", uuid=self.new_uuid)
-        location.insert_entity(createdAt=self.utc_now, update_rules=self.update_rules)
+        location.insert_entity(utc_now=self.utc_now, update_rules=self.update_rules)
         expected = location
 
         # generate result
