@@ -8,6 +8,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Col, Grid, Modal, Row } from "react-bootstrap"
 import Settings from "settings"
+import uuidv4 from "uuid/v4"
 import "./EditHistory.css"
 
 function EditHistory({
@@ -20,7 +21,9 @@ function EditHistory({
   title
 }) {
   const [showModal, setShowModal] = useState(false)
-  const [finalHistory, setFinalHistory] = useState(initialHistory || history1)
+  const [finalHistory, setFinalHistory] = useState(() =>
+    giveEachItemUuid(initialHistory || history1)
+  )
 
   return (
     <div
@@ -106,7 +109,7 @@ function EditHistory({
                           const endTimeFieldName = `history[${idx}].endTime`
 
                           return (
-                            <div key={`${item.startTime}-${item.endTime}`}>
+                            <div key={item.uuid}>
                               <Fieldset
                                 title={`${idx + 1}-) ${item[entityType].name}`}
                                 action={
@@ -212,7 +215,9 @@ function EditHistory({
               }
 
               function addItem(item) {
-                setValues({ history: [...values.history, item] })
+                setValues({
+                  history: [...values.history, { ...item, uuid: uuidv4() }]
+                })
               }
             }}
           </Formik>
@@ -224,11 +229,16 @@ function EditHistory({
   function onHide() {
     setShowModal(false)
     // Set the state to initial value
-    setFinalHistory(initialHistory || history1)
+    setFinalHistory(giveEachItemUuid(initialHistory || history1))
   }
 
   function onSave(values) {
-    setHistory(values.history)
+    // Shouldn't have uuid, that was for item listing
+    const savedHistory = values.history.map(item =>
+      Object.without(item, "uuid")
+    )
+    setHistory(savedHistory)
+    setFinalHistory(giveEachItemUuid(savedHistory))
     setShowModal(false)
   }
 }
@@ -281,4 +291,11 @@ function getStyle(index, overlapSet, invalidDatesSet) {
   } else if (overlapSet.has(index) && !invalidDatesSet.size) {
     return getOverlapWarningStyle()
   }
+}
+
+function giveEachItemUuid(history) {
+  return history.map(item => {
+    const newItem = { ...item, uuid: uuidv4() }
+    return newItem
+  })
 }
