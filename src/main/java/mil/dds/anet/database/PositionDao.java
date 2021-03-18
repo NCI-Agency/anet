@@ -178,17 +178,23 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
-    // If the position is already assigned to another person, remove the person from the position
-    removePersonFromPosition(positionUuid);
-
-    // If this person is in a position already, we need to remove them.
-    Position currPos = getDbHandle()
+    // Find out if person already holds a position
+    final Position currPos = getDbHandle()
         .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
+    if (currPos != null && currPos.getUuid().equals(positionUuid)) {
+      // Attempt to put person in same position they already hold
+      return 0;
+    }
+
+    // If the position is already assigned to another person, remove the person from the position
+    removePersonFromPosition(positionUuid);
+
     // Get timestamp *after* remove to preserve correct order
     final Instant now = Instant.now();
     if (currPos != null) {
+      // If this person is in a position already, we need to remove them.
       final String sql;
       if (DaoUtils.isMsSql()) {
         sql =
@@ -229,11 +235,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
           .execute();
     }
 
+    // Now put the person in their new position
     getDbHandle()
         .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
         .bind("personUuid", personUuid).bind("positionUuid", positionUuid).execute();
-    // GraphQL mutations *have* to return something, so we return the number of inserted rows
+    // And update the history
     final int nr = getDbHandle()
         .createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
@@ -244,6 +251,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Evict this person from the domain users cache, as their position has changed
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
 
+    // GraphQL mutations *have* to return something, so we return the number of inserted rows
     return nr;
   }
 
