@@ -217,6 +217,7 @@ const MergePositions = ({ pageDispatchers }) => {
                       initialHistory={mergedPosition.previousPeople}
                       entityType="person"
                       historyComp={PreviousPeople}
+                      currentlyOccupyingEntity={mergedPosition.person}
                       title="Pick and Choose people and dates for People History"
                       setHistory={history =>
                         dispatchMergeActions(

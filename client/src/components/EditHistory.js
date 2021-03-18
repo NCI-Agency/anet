@@ -16,8 +16,10 @@ function EditHistory({
   history2,
   initialHistory,
   setHistory,
-  entityType,
+  historyEntityType,
   historyComp: HistoryComp,
+  // currentlyOccupyingEntity used to assert the last item in the history and end time
+  currentlyOccupyingEntity,
   title
 }) {
   const [showModal, setShowModal] = useState(false)
@@ -50,11 +52,31 @@ function EditHistory({
             }}
           >
             {({ values, setFieldValue, setValues }) => {
+              // Get overlapping items' indexes, e.g.[ [0,1], [2,3] ] means 0th and 1st overlaps, 2nd and 3rd overlaps
               const overlapArrays = getOverlappingDateIndexes(values.history)
-              const uniqueOverlappingIndexes = new Set(overlapArrays.flat())
-              const invalidDateIndexes = new Set(
+              // Flatten the above array for getting unique indexes, e.g. [[0, 1], [0,2]] => [0,1,2]
+              const overlappingIndexesSet = new Set(overlapArrays.flat())
+              const invalidDateIndexesSet = new Set(
                 getInvalidDateIndexes(values.history)
               )
+
+              const lastItem = values.history[values.history.length - 1]
+              // For last item to be valid:
+              // 1- If there is no current occupied entity
+              //    a- The end time of last item shouldn't be null
+              // 2- If there is a currently occupied entity
+              //    a- The last entity should be same with currently occupied
+              //    b- THe end time of last entity should be null ( meaning continuing range)
+              const validWhenNoOccupant =
+                !currentlyOccupyingEntity && lastItem.endTime
+              const validWhenOccupant =
+                currentlyOccupyingEntity &&
+                currentlyOccupyingEntity.uuid ===
+                  lastItem[historyEntityType].uuid &&
+                // eslint-disable-next-line eqeqeq
+                lastItem.endTime == null
+              const validLastItem = validWhenNoOccupant || validWhenOccupant
+
               return (
                 <Grid fluid>
                   <Row>
@@ -74,33 +96,12 @@ function EditHistory({
                     <Col sm={history2 ? 4 : 8}>
                       <Form className="form-horizontal">
                         <div>
-                          {invalidDateIndexes.size ? (
-                            <fieldset style={getIvalidDateStyle()}>
-                              <legend>Invalid Date Ranges</legend>
-                              <ul>
-                                {Array.from(invalidDateIndexes).map(val => (
-                                  <li key={val}>
-                                    Item #{val + 1}'s start time is later than
-                                    end time
-                                  </li>
-                                ))}
-                              </ul>
-                            </fieldset>
-                          ) : null}
-                          {/* Don't even show overlaps if there are invalid date ranges */}
-                          {!invalidDateIndexes.size && overlapArrays.length ? (
-                            <fieldset style={getOverlapWarningStyle()}>
-                              <legend>Overlapping Items:</legend>
-                              <ul>
-                                {overlapArrays.map(o => (
-                                  <li key={`${o[0]}-${o[1]}`}>
-                                    Item #{o[0] + 1} overlaps with Item #
-                                    {o[1] + 1}
-                                  </li>
-                                ))}
-                              </ul>
-                            </fieldset>
-                          ) : null}
+                          <ValidationMessages
+                            overlapArrays={overlapArrays}
+                            isInvalidLastItem={!validLastItem}
+                            invalidDateIndexesSet={invalidDateIndexesSet}
+                            historyEntityType={historyEntityType}
+                          />
                         </div>
                         <h2 style={{ textAlign: "center" }}>Merged History</h2>
                         {values.history.map((item, idx) => {
@@ -111,7 +112,9 @@ function EditHistory({
                           return (
                             <div key={item.uuid}>
                               <Fieldset
-                                title={`${idx + 1}-) ${item[entityType].name}`}
+                                title={`${idx + 1}-) ${
+                                  item[historyEntityType].name
+                                }`}
                                 action={
                                   <Button
                                     intent="danger"
@@ -124,8 +127,10 @@ function EditHistory({
                               <div
                                 style={getStyle(
                                   idx,
-                                  uniqueOverlappingIndexes,
-                                  invalidDateIndexes
+                                  overlappingIndexesSet,
+                                  invalidDateIndexesSet,
+                                  !validLastItem &&
+                                    idx === values.history.length - 1
                                 )}
                               >
                                 <Field
@@ -180,7 +185,8 @@ function EditHistory({
                               large
                               onClick={() => onSave(values)}
                               disabled={
-                                invalidDateIndexes.size || overlapArrays.length
+                                invalidDateIndexesSet.size ||
+                                overlapArrays.length
                               }
                             >
                               Save
@@ -233,27 +239,98 @@ function EditHistory({
   }
 
   function onSave(values) {
+    setFinalHistory({ history: [...values.history] })
     // Shouldn't have uuid, that was for item listing
     const savedHistory = values.history.map(item =>
       Object.without(item, "uuid")
     )
     setHistory(savedHistory)
-    setFinalHistory(giveEachItemUuid(savedHistory))
     setShowModal(false)
   }
 }
 
 EditHistory.propTypes = {
-  history1: PropTypes.array,
+  history1: PropTypes.array.isRequired,
   history2: PropTypes.array,
   initialHistory: PropTypes.array,
-  setHistory: PropTypes.func,
-  entityType: PropTypes.string,
-  historyComp: PropTypes.func,
+  setHistory: PropTypes.func.isRequired,
+  historyEntityType: PropTypes.string,
+  historyComp: PropTypes.func.isRequired,
+  currentlyOccupyingEntity: PropTypes.object,
   title: PropTypes.string
+}
+EditHistory.defaultProps = {
+  history2: null,
+  initialHistory: null,
+  historyEntityType: "person",
+  title: "Pick and Choose History Items",
+  currentlyOccupyingEntity: null
 }
 
 export default EditHistory
+
+function ValidationMessages({
+  invalidDateIndexesSet,
+  overlapArrays,
+  historyEntityType,
+  isInvalidLastItem
+}) {
+  const showInvalidMessage = invalidDateIndexesSet.size
+  /* Don't even show overlaps if there are invalid date ranges */
+  const showOverlappingMessage =
+    !invalidDateIndexesSet.size && overlapArrays.length
+
+  // This is the last warning, if everything is fixed, show it
+  const showLastItemInvalid =
+    !showInvalidMessage && !showOverlappingMessage && isInvalidLastItem
+
+  return (
+    <>
+      {showInvalidMessage ? (
+        <fieldset style={getIvalidDateWarningStyle()}>
+          <legend>Invalid Date Ranges</legend>
+          <ul>
+            {Array.from(invalidDateIndexesSet).map(val => (
+              <li key={val}>
+                Item #{val + 1}'s start time is later than end time
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ) : null}
+      {showOverlappingMessage ? (
+        <fieldset style={getOverlapWarningStyle()}>
+          <legend>Overlapping Items:</legend>
+          <ul>
+            {overlapArrays.map(o => (
+              <li key={`${o[0]}-${o[1]}`}>
+                Item #{o[0] + 1} overlaps with Item #{o[1] + 1}
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ) : null}
+      {showLastItemInvalid ? (
+        <fieldset style={getLastItemInvalidStyle()}>
+          <legend>Last Item Invalid</legend>
+          <p>
+            Last {historyEntityType} should be consistent with currently
+            assigned/occupied {historyEntityType}. If there is a continuing{" "}
+            {historyEntityType}, end time should be empty. If not, it shouldn't
+            be empty
+          </p>
+        </fieldset>
+      ) : null}
+    </>
+  )
+}
+
+ValidationMessages.propTypes = {
+  invalidDateIndexesSet: PropTypes.object,
+  overlapArrays: PropTypes.array,
+  historyEntityType: PropTypes.string,
+  isInvalidLastItem: PropTypes.bool
+}
 
 // Returns indexes of the overlapping items
 function getOverlappingDateIndexes(history) {
@@ -277,19 +354,27 @@ function getInvalidDateIndexes(history) {
   return invalidIndexes
 }
 
+function getIvalidDateWarningStyle() {
+  return { outline: "2px dashed red" }
+}
+
 function getOverlapWarningStyle() {
   return { outline: "2px dashed orange" }
 }
 
-function getIvalidDateStyle() {
-  return { outline: "2px dashed red" }
+function getLastItemInvalidStyle() {
+  return { outline: "2px dashed darkred" }
 }
 
-function getStyle(index, overlapSet, invalidDatesSet) {
+function getStyle(index, overlapSet, invalidDatesSet, isInvalidLastItem) {
   if (invalidDatesSet.has(index)) {
-    return getIvalidDateStyle()
-  } else if (overlapSet.has(index) && !invalidDatesSet.size) {
+    return getIvalidDateWarningStyle()
+    // If there is an invalid date, we shouldn't even check for overlaps
+  } else if (!invalidDatesSet.size && overlapSet.has(index)) {
     return getOverlapWarningStyle()
+    // If both of the warnings dealt with, show this last
+  } else if (!invalidDatesSet.size && !overlapSet.size && isInvalidLastItem) {
+    return getLastItemInvalidStyle()
   }
 }
 
