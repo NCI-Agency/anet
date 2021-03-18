@@ -231,62 +231,42 @@ public class PositionResource {
 
   @GraphQLMutation(name = "mergePositions")
   public Position mergePositions(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "loserUuid") String loserUuid,
-      @GraphQLArgument(name = "winnerPosition") Position winnerPosition) {
+      @GraphQLArgument(name = "winnerPosition") Position winnerPosition,
+      @GraphQLArgument(name = "loserUuid") String loserUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Position existingPos = dao.getByUuid(loserUuid);
+    final Position loserPosition = dao.getByUuid(loserUuid);
 
     assertCanUpdatePosition(user, winnerPosition);
     // Check that given two position can be merged
-    arePositionsMergeable(existingPos, winnerPosition);
+    arePositionsMergeable(winnerPosition, loserPosition);
     validatePosition(user, winnerPosition);
 
-    // Delete loser position's code information
-    int rowNums = dao.cleanLoserPositionCode(loserUuid);
-    if (rowNums == 0) {
-      throw new WebApplicationException(
-          "Couldn't process merge operation, loser position code cannot be deleted.",
-          Status.NOT_FOUND);
-    }
-
-    // Update winner position.
-    final int nr = dao.update(winnerPosition);
-    if (nr == 0) {
-      throw new WebApplicationException(
-          "Couldn't process merge operation, winner position update failed.", Status.NOT_FOUND);
-    }
-    final Position position = dao.getByUuid(winnerPosition.getUuid());
-    if (winnerPosition.getPersonUuid() != null) {
-      dao.setPersonInPosition(winnerPosition.getPersonUuid(), position.getUuid());
-    }
-    int numRows = dao.mergePositions(existingPos, position);
+    int numRows = dao.mergePositions(winnerPosition, loserPosition);
     if (numRows == 0) {
       throw new WebApplicationException(
           "Couldn't process merge operation, error occurred while updating merged position relation information.",
           Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Position {} merged on {} by {}", existingPos, position, user);
-    return position;
+    AnetAuditLogger.log("Position {} merged into {} by {}", loserPosition, winnerPosition, user);
+    return winnerPosition;
   }
 
-  private void arePositionsMergeable(Position existingPos, Position existingPos2) {
-    if (existingPos.getUuid().equals(existingPos2.getUuid())) {
+  private void arePositionsMergeable(Position winnerPos, Position loserPos) {
+    if (loserPos.getUuid().equals(winnerPos.getUuid())) {
       throw new WebApplicationException("Cannot merge identical positions.", Status.BAD_REQUEST);
     }
 
-    if (Objects.nonNull(existingPos.getPersonUuid())
-        && Objects.nonNull(existingPos2.getPersonUuid())) {
+    if (Objects.nonNull(loserPos.getPersonUuid()) && Objects.nonNull(winnerPos.getPersonUuid())) {
       throw new WebApplicationException("Cannot merge positions when both have assigned person.",
           Status.BAD_REQUEST);
     }
 
-    if (!existingPos.getOrganizationUuid().equals(existingPos2.getOrganizationUuid())) {
+    if (!loserPos.getOrganizationUuid().equals(winnerPos.getOrganizationUuid())) {
       throw new WebApplicationException("Cannot merge positions from different organizations.",
           Status.BAD_REQUEST);
     }
 
-    if (Objects.nonNull(existingPos.getPersonUuid())
-        && Objects.isNull(existingPos2.getPersonUuid())) {
+    if (Objects.nonNull(loserPos.getPersonUuid()) && Objects.isNull(winnerPos.getPersonUuid())) {
       throw new WebApplicationException(
           "If There is a person assigned to one of the combined Positions, "
               + "This person must be in the position which is merged",
