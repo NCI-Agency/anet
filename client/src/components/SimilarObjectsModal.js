@@ -1,9 +1,9 @@
+import LocationTable from "components/LocationTable"
+import PersonTable from "components/PersonTable"
+import PositionTable from "components/PositionTable"
+import PropTypes from "prop-types"
 import React from "react"
 import { Button, Modal } from "react-bootstrap"
-import PropTypes from "prop-types"
-import PositionTable from "components/PositionTable"
-import PersonTable from "./PersonTable"
-import LocationTable from "./LocationTable"
 
 const DEFAULT_PAGESIZE = 10
 

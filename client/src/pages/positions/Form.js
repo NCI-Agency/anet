@@ -1,3 +1,5 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
@@ -13,12 +15,11 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { Icon, Intent } from "@blueprintjs/core"
-import { IconNames } from "@blueprintjs/icons"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
@@ -30,7 +31,6 @@ import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
-import SimilarObjectsModal from "components/SimilarObjectsModal"
 import utils from "utils"
 
 const GQL_CREATE_POSITION = gql`

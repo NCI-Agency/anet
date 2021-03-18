@@ -1,14 +1,13 @@
 import API from "api"
 import { gql } from "apollo-boost"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
-import LinkTo from "components/LinkTo"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"

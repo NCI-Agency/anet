@@ -10,6 +10,7 @@ import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
 import {
@@ -18,10 +19,8 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import PositionTable from "components/PositionTable"
-import LocationTable from "components/LocationTable"
 import PersonTable from "components/PersonTable"
-import TaskTable from "components/TaskTable"
+import PositionTable from "components/PositionTable"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -35,6 +34,7 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import SubNav from "components/SubNav"
+import TaskTable from "components/TaskTable"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
