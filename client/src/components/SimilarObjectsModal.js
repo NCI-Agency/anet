@@ -15,8 +15,6 @@ const TABLE_COMPONENTS = {
 
 const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
   const queryParams = Object.assign({
-    sortBy: "NAME",
-    sortOrder: "ASC",
     pageNum: 0,
     pageSize: DEFAULT_PAGESIZE,
     text: userInput
