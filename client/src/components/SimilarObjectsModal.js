@@ -7,6 +7,12 @@ import LocationTable from "./LocationTable"
 
 const DEFAULT_PAGESIZE = 10
 
+const TABLE_COMPONENTS = {
+  Location: LocationTable,
+  Person: PersonTable,
+  Position: PositionTable
+}
+
 const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
   const queryParams = Object.assign({
     sortBy: "NAME",
@@ -16,27 +22,14 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
     text: userInput
   })
 
-  return (
+  const TableComponent = TABLE_COMPONENTS[objectType]
+  return !TableComponent ? null : (
     <Modal show={true} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>Possible Duplicates</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {objectType === "Person" && (
-          <PersonTable queryParams={queryParams} id="similar-people-table" />
-        )}
-        {objectType === "Location" && (
-          <LocationTable
-            queryParams={queryParams}
-            id="similar-locations-table"
-          />
-        )}
-        {objectType === "Position" && (
-          <PositionTable
-            queryParams={queryParams}
-            id="similar-positions-table"
-          />
-        )}
+        <TableComponent queryParams={queryParams} />
       </Modal.Body>
       <Modal.Footer>
         <Button className="pull-left" onClick={onCancel}>
