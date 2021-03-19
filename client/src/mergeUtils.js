@@ -107,7 +107,7 @@ function reducer(state, action) {
     }
     case ACTIONS.SET_A_MERGED_FIELD: {
       const newState = { ...state }
-      newState.merged = _cloneDeep(state.merged)
+      newState.merged = { ..._cloneDeep(state.merged) }
       _set(newState.merged, action.payload.fieldName, action.payload.data)
       newState.selectedMap = {
         ...state.selectedMap,
@@ -312,7 +312,7 @@ export function getLeafletMap(mapId, location) {
       markers={[
         {
           id: "marker-" + mapId,
-          name: _escape(location.name) || "", // escape HTML in location name!
+          name: _escape(location?.name) || "", // escape HTML in location name!
           lat: Location.hasCoordinates(location) ? location.lat : null,
           lng: Location.hasCoordinates(location) ? location.lng : null
         }

@@ -161,7 +161,11 @@ export default class Position extends Model {
   }
 
   isActive() {
-    return this.status === Position.STATUS.ACTIVE
+    return Position.isActive(this)
+  }
+
+  static isActive(pos) {
+    return pos.status === Position.STATUS.ACTIVE
   }
 
   toString() {

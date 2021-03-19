@@ -42,4 +42,8 @@ AssociatedPositions.propTypes = {
   associatedPositions: PropTypes.array
 }
 
+AssociatedPositions.defaultProps = {
+  associatedPositions: []
+}
+
 export default AssociatedPositions

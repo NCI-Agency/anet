@@ -23,16 +23,21 @@ function EditHistory({
   title
 }) {
   const [showModal, setShowModal] = useState(false)
-  const [finalHistory, setFinalHistory] = useState(() =>
-    giveEachItemUuid(initialHistory || history1)
-  )
+  const [finalHistory, setFinalHistory] = useState(getInitialState)
 
   return (
     <div
       className="edit-history"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <Button intent="primary" onClick={() => setShowModal(true)}>
+      <Button
+        intent="primary"
+        onClick={() => {
+          // Set the state to initial value first if there were any changes
+          setFinalHistory(getInitialState())
+          setShowModal(true)
+        }}
+      >
         Edit History Manually
       </Button>
       <Modal
@@ -62,19 +67,19 @@ function EditHistory({
 
               const lastItem = values.history[values.history.length - 1]
               // For last item to be valid:
-              // 1- If there is no current occupied entity
+              // 1- If there is no currently occupying entity
               //    a- The end time of last item shouldn't be null
-              // 2- If there is a currently occupied entity
-              //    a- The last entity should be same with currently occupied
-              //    b- THe end time of last entity should be null ( meaning continuing range)
+              // 2- If there is a currently occupying entity
+              //    a- The last entity should be same with currently occupying
+              //    b- The end time of last entity should be null or undefined ( meaning continuing range)
               const validWhenNoOccupant =
-                !currentlyOccupyingEntity && lastItem.endTime
+                !currentlyOccupyingEntity && lastItem?.endTime
               const validWhenOccupant =
                 currentlyOccupyingEntity &&
-                currentlyOccupyingEntity.uuid ===
-                  lastItem[historyEntityType].uuid &&
+                currentlyOccupyingEntity?.uuid ===
+                  lastItem?.[historyEntityType]?.uuid &&
                 // eslint-disable-next-line eqeqeq
-                lastItem.endTime == null
+                lastItem?.endTime == null
               const validLastItem = validWhenNoOccupant || validWhenOccupant
 
               return (
@@ -186,7 +191,8 @@ function EditHistory({
                               onClick={() => onSave(values)}
                               disabled={
                                 invalidDateIndexesSet.size ||
-                                overlapArrays.length
+                                overlapArrays.length ||
+                                !validLastItem
                               }
                             >
                               Save
@@ -232,14 +238,18 @@ function EditHistory({
     </div>
   )
 
+  function getInitialState() {
+    return giveEachItemUuid(initialHistory || history1 || [])
+  }
+
   function onHide() {
     setShowModal(false)
     // Set the state to initial value
-    setFinalHistory(giveEachItemUuid(initialHistory || history1))
+    setFinalHistory(getInitialState())
   }
 
   function onSave(values) {
-    setFinalHistory({ history: [...values.history] })
+    setFinalHistory([...values.history])
     // Shouldn't have uuid, that was for item listing
     const savedHistory = values.history.map(item =>
       Object.without(item, "uuid")
@@ -256,7 +266,10 @@ EditHistory.propTypes = {
   setHistory: PropTypes.func.isRequired,
   historyEntityType: PropTypes.string,
   historyComp: PropTypes.func.isRequired,
-  currentlyOccupyingEntity: PropTypes.object,
+  currentlyOccupyingEntity: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object
+  ]),
   title: PropTypes.string
 }
 EditHistory.defaultProps = {
@@ -288,11 +301,12 @@ function ValidationMessages({
     <>
       {showInvalidMessage ? (
         <fieldset style={getIvalidDateWarningStyle()}>
-          <legend>Invalid Date Ranges</legend>
+          <legend>Invalid date ranges errors</legend>
           <ul>
             {Array.from(invalidDateIndexesSet).map(val => (
               <li key={val}>
-                Item #{val + 1}'s start time is later than end time
+                {historyEntityType} #{val + 1}'s start time is later than end
+                time
               </li>
             ))}
           </ul>
@@ -300,11 +314,12 @@ function ValidationMessages({
       ) : null}
       {showOverlappingMessage ? (
         <fieldset style={getOverlapWarningStyle()}>
-          <legend>Overlapping Items:</legend>
+          <legend>Overlapping {historyEntityType}s error</legend>
           <ul>
             {overlapArrays.map(o => (
               <li key={`${o[0]}-${o[1]}`}>
-                Item #{o[0] + 1} overlaps with Item #{o[1] + 1}
+                {historyEntityType} #{o[0] + 1} overlaps with{" "}
+                {historyEntityType} #{o[1] + 1}
               </li>
             ))}
           </ul>
@@ -312,12 +327,14 @@ function ValidationMessages({
       ) : null}
       {showLastItemInvalid ? (
         <fieldset style={getLastItemInvalidStyle()}>
-          <legend>Last Item Invalid</legend>
+          <legend>Last {historyEntityType} invalid error</legend>
           <p>
             Last {historyEntityType} should be consistent with currently
-            assigned/occupied {historyEntityType}. If there is a continuing{" "}
-            {historyEntityType}, end time should be empty. If not, it shouldn't
-            be empty
+            assigned {historyEntityType}. If there is an active{" "}
+            {historyEntityType}, there should be at least one{" "}
+            {historyEntityType} in history.Also, last {historyEntityType}'s end
+            time should be empty. If there is no assigned {historyEntityType},
+            it shouldn't be empty
           </p>
         </fieldset>
       ) : null}
@@ -333,7 +350,7 @@ ValidationMessages.propTypes = {
 }
 
 // Returns indexes of the overlapping items
-function getOverlappingDateIndexes(history) {
+function getOverlappingDateIndexes(history = []) {
   // one of them falsy, we don't have overlapping
   if (!history) {
     return null
@@ -342,8 +359,9 @@ function getOverlappingDateIndexes(history) {
   return getOverlappingPeriodIndexes(history)
 }
 
-function getInvalidDateIndexes(history) {
+function getInvalidDateIndexes(inputHistory) {
   const invalidIndexes = []
+  const history = inputHistory || []
   history.forEach((item, index) => {
     const endTime = item.endTime || Infinity
     if (item.startTime >= endTime) {

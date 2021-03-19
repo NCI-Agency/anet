@@ -172,12 +172,12 @@ const MergePositions = ({ pageDispatchers }) => {
                 value={mergedPosition.status}
                 align="center"
                 action={getActivationButton(
-                  mergedPosition.isActive(),
+                  Position.isActive(mergedPosition),
                   () =>
                     dispatchMergeActions(
                       setAMergedField(
                         "status",
-                        mergedPosition.isActive()
+                        Position.isActive(mergedPosition)
                           ? Position.STATUS.INACTIVE
                           : Position.STATUS.ACTIVE,
                         null
@@ -215,7 +215,6 @@ const MergePositions = ({ pageDispatchers }) => {
                       history1={position1.previousPeople}
                       history2={position2.previousPeople}
                       initialHistory={mergedPosition.previousPeople}
-                      entityType="person"
                       historyComp={PreviousPeople}
                       currentlyOccupyingEntity={mergedPosition.person}
                       title="Pick and Choose people and dates for People History"
@@ -254,7 +253,9 @@ const MergePositions = ({ pageDispatchers }) => {
                 Object.entries(Settings.fields.position.customFields).map(
                   ([fieldName, fieldConfig]) => {
                     const fieldValue =
-                      mergedPosition[DEFAULT_CUSTOM_FIELDS_PARENT][fieldName]
+                      mergedPosition?.[DEFAULT_CUSTOM_FIELDS_PARENT]?.[
+                        fieldName
+                      ]
                     return (
                       <PositionField
                         key={fieldName}

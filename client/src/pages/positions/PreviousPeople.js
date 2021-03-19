@@ -44,4 +44,8 @@ PreviousPeople.propTypes = {
   action: PropTypes.func
 }
 
+PreviousPeople.defaultProps = {
+  history: []
+}
+
 export default PreviousPeople

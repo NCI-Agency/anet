@@ -235,8 +235,9 @@ PeriodsTableHeader.propTypes = {
   ])
 }
 
-export function getOverlappingPeriodIndexes(periods) {
+export function getOverlappingPeriodIndexes(inputPeriods) {
   const overlappingDateIndexes = []
+  const periods = inputPeriods || []
 
   for (let i = 0; i < periods.length; i++) {
     // end time being null means it is still continuing, might as well pick a large number for it
