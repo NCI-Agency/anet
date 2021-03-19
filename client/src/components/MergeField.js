@@ -13,7 +13,7 @@ const MergeField = ({
   dispatchMergeActions
 }) => {
   const fieldRef = useRef(null)
-  const [updated, setUpdated] = useState(false)
+  const [height, setSetHeight] = useState("auto")
 
   useEffect(() => {
     // We have more than one columns of fields, each field should have same height
@@ -23,9 +23,10 @@ const MergeField = ({
       const savedHeight = mergeState.heightMap?.[fieldName] || 0
       if (savedHeight < currentHeight) {
         dispatchMergeActions(setHeightOfAField(fieldName, currentHeight))
+        setSetHeight("auto")
       } else if (savedHeight > currentHeight) {
         // if some other column field height is bigger, we update small ui
-        setUpdated(true)
+        setSetHeight(`${savedHeight}px`)
       }
     }
     return () => {}
@@ -38,7 +39,7 @@ const MergeField = ({
       /* We first let its height be auto to get the natural height */
       /* If it is bigger than already existing one's height in the other column */
       /* we set other field to this height in useEffect */
-      fieldHeight={updated ? `${mergeState.heightMap[fieldName]}px` : "auto"}
+      fieldHeight={`${height}`}
     >
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>

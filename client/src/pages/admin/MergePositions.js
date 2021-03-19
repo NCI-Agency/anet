@@ -115,14 +115,17 @@ const MergePositions = ({ pageDispatchers }) => {
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, !mergedPosition?.name) && (
+          {areAllSet(position1, position2, !mergedPosition) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
-                Please choose a <strong>name</strong> to proceed...
+                - You must choose a <strong>name</strong> field. It
+                automatically fills organization and type
+                <br />- You also need to select the person from the filled
+                position
               </Callout>
             </div>
           )}
-          {areAllSet(position1, position2, mergedPosition?.name) && (
+          {areAllSet(position1, position2, mergedPosition) && (
             <>
               <PositionField
                 label="Name"
@@ -452,15 +455,6 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               <LinkTo modelType="Organization" model={position.organization} />
             }
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField("organization", position.organization, align)
-                ),
-              align,
-              mergeState,
-              "organization"
-            )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
@@ -469,15 +463,6 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             fieldName="type"
             value={position.type}
             align={align}
-            action={getActionButton(
-              () =>
-                dispatchMergeActions(
-                  setAMergedField("type", position.type, align)
-                ),
-              align,
-              mergeState,
-              "type"
-            )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
