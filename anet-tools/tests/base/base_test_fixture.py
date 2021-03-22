@@ -6,8 +6,9 @@ from sqlalchemy.orm import sessionmaker
 import unittest
 
 from src.core.db import db
-from src.core.anet_business_objects import PeoplePositions, Positions, People, Locations, Organizations, BaseModel
-
+from src.core.model.association import PeoplePositions
+from src.core.model.anet import Positions, People, Locations, Organizations
+from src.core.model.base import BaseModel
 
 # new db instance to get new engine using env vars
 db_obj = db(use_env=True)

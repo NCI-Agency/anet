@@ -1,19 +1,13 @@
 import copy
 import datetime
 
-from sqlalchemy import and_, Boolean, Column, DateTime, ForeignKey, text
-from sqlalchemy_mixins import ActiveRecordMixin
-from sqlalchemy.orm import relationship
+from sqlalchemy import and_
 
-from src.core.models import Base
 from src.core.base_methods import base_methods
+from src.core.model.association import PeoplePositions
+from src.core.model.base import BaseModel
 
-
-class BaseModel(Base, ActiveRecordMixin):
-    __abstract__ = True
-
-
-class anet_logic_mixin(BaseModel):
+class anet_mixin(BaseModel):
     __abstract__ = True
 
     def insert_entity(self, utc_now):
@@ -25,8 +19,8 @@ class anet_logic_mixin(BaseModel):
             # utc_now = datetime.datetime.now()
             PeoplePositions.create(createdAt=utc_now, person=self)
         else:
-            BaseModel.session.add(self)
-            BaseModel.session.flush()
+            self.session.add(self)
+            self.session.flush()
 
     def update_entity(self, utc_now):
         """Update and flush an existing record
@@ -36,7 +30,7 @@ class anet_logic_mixin(BaseModel):
         for attr, value in self.__dict__.items():
             if attr != "_sa_instance_state":
                 setattr(obj, attr, value)
-        BaseModel.session.flush()
+        self.session.flush()
 
     def insert_update_nested_entity(self, utc_now, update_rules):
         if self.__tablename__ == "positions":
@@ -76,9 +70,9 @@ class anet_logic_mixin(BaseModel):
                         rp.person.updatedAt = utc_now
                         obj = type(self).find(self.uuid)
                         obj.people.append(rp)
-                        BaseModel.session.flush()
+                        self.session.flush()
                         PeoplePositions.create(createdAt = utc_now, person = rp.person)
-                        BaseModel.session.flush()
+                        self.session.flush()
                 delattr(self, "people")
                 self.update_entity(utc_now)
             
@@ -86,9 +80,9 @@ class anet_logic_mixin(BaseModel):
                 self.insert_entity(utc_now)
                 for rp in self.people:
                     PeoplePositions.create(createdAt=utc_now, person=rp.person)
-                    BaseModel.session.flush()
+                    self.session.flush()
         
-        BaseModel.session.flush()
+        self.session.flush()
 
     @classmethod
     def commit(cls):
@@ -186,74 +180,4 @@ class business_logic_methods:
         PeoplePositions.create(createdAt=utc_now, personUuid=position.person.uuid, positionUuid=position.uuid)
         PeoplePositions.session.flush()
 
-@property
-def private(self):
-    raise AttributeError
 
-class PeoplePositions(anet_logic_mixin):
-    __tablename__ = "peoplePositions"
-
-    createdAt = Column('createdAt', DateTime)
-    personUuid = Column('personUuid', ForeignKey('people.uuid'), index=True)
-    positionUuid = Column('positionUuid', ForeignKey(
-        'positions.uuid'), index=True)
-    endedAt = Column('endedAt', DateTime)
-    __mapper_args__ = {
-        "primary_key": [createdAt, personUuid, positionUuid]
-    }
-
-    person = relationship("People", back_populates="positions")
-    position = relationship("Positions", back_populates="people")
-
-
-class Positions(anet_logic_mixin):
-    __tablename__ = 'positions'
-    __table_args__ = {'extend_existing': True}
-    full_text = private
-    people = relationship("PeoplePositions", back_populates="position")
-
-
-class People(anet_logic_mixin):
-    __tablename__ = 'people'
-    __table_args__ = {'extend_existing': True}
-    full_text = private
-
-    positions = relationship("PeoplePositions", back_populates="person")
-    reports = relationship("ReportPeople", back_populates="person")
-
-
-class Locations(anet_logic_mixin):
-    __tablename__ = 'locations'
-    __table_args__ = {'extend_existing': True}
-    full_text = private
-
-
-class Organizations(anet_logic_mixin):
-    __tablename__ = 'organizations'
-    __table_args__ = {'extend_existing': True}
-    full_text = private
-    
-
-class Reports(anet_logic_mixin):
-    __tablename__ = 'reports'
-    __table_args__ = {'extend_existing': True}
-    full_text = private
-
-    people = relationship("ReportPeople", back_populates="report")
-
-
-class ReportPeople(anet_logic_mixin):
-    __tablename__ = "reportPeople"
-
-    isPrimary = Column('isPrimary', Boolean, server_default=text("false"))
-    personUuid = Column('personUuid', ForeignKey('people.uuid'), index=True)
-    reportUuid = Column('reportUuid', ForeignKey('reports.uuid'), index=True)
-    isAttendee = Column('isAttendee', Boolean, server_default=text("true"))
-    isAuthor = Column('isAuthor', Boolean, server_default=text("false"))
-
-    __mapper_args__ = { 
-        "primary_key": [personUuid, reportUuid]
-    }
-
-    person = relationship("People", back_populates="reports")
-    report = relationship("Reports", back_populates="people")
