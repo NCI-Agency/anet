@@ -42,7 +42,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
     SavedSearch created = optional.get();
 
     // Run a saved search and get results.
-    ReportSearchQueryInput query =
+    final ReportSearchQueryInput query =
         MapperUtils.getDefaultMapper().readValue(created.getQuery(), ReportSearchQueryInput.class);
     final AnetBeanList_Report results =
         jackQueryExecutor.reportList(getListFields("{ uuid intent state }"), query);

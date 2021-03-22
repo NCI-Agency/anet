@@ -129,7 +129,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // pull for the person at a previous time.
     created = jackQueryExecutor.position(FIELDS, created.getUuid());
-    List<PersonPositionHistory> history = created.getPreviousPeople();
+    final List<PersonPositionHistory> history = created.getPreviousPeople();
     assertThat(history).isNotEmpty();
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPosition().getUuid()).isEqualTo(created.getUuid());
@@ -535,7 +535,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(currPos.getPerson()).isNull();
 
     // Check the history of newbPosition
-    List<PersonPositionHistory> history = currPos.getPreviousPeople();
+    final List<PersonPositionHistory> history = currPos.getPreviousPeople();
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPerson().getUuid()).isEqualTo(newb.getUuid());
     assertThat(history.get(1).getPerson().getUuid()).isEqualTo(prin2.getUuid());

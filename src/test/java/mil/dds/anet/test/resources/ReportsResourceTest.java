@@ -421,7 +421,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(commentTwo.getUuid()).isNotNull();
 
     returned = approver1QueryExecutor.report(FIELDS, created.getUuid());
-    List<Comment> commentsReturned = returned.getComments();
+    final List<Comment> commentsReturned = returned.getComments();
     assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
     // Assert order of comments!
     assertThat(commentsReturned.stream().map(c -> c.getUuid()).collect(Collectors.toList()))
@@ -490,7 +490,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(author.getUuid()).isNotNull();
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
 
-    List<ReportPersonInput> reportPeopleInput =
+    final List<ReportPersonInput> reportPeopleInput =
         getReportPeopleInput(ImmutableList.of(personToPrimaryReportPerson(roger),
             personToPrimaryReportPerson(jack), personToReportAuthor(author)));
 
@@ -1041,7 +1041,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
         getMutationExecutor(elizabeth.getDomainUsername());
     final Person jack = getJackJackson();
     final Person roger = getRogerRogwell();
-    List<ReportPersonInput> reportPeopleInput =
+    final List<ReportPersonInput> reportPeopleInput =
         getReportPeopleInput(ImmutableList.of(personToPrimaryReportPerson(roger),
             personToReportPerson(jack), personToPrimaryReportAuthor(elizabeth)));
 
@@ -1163,15 +1163,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Oops set the engagementDate.
     r.setEngagementDate(Instant.now());
     r.setDuration(50);
-    Report updated = adminMutationExecutor.updateReport(FIELDS, true, getReportInput(r));
+    final Report updated = adminMutationExecutor.updateReport(FIELDS, true, getReportInput(r));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    Report submitted = adminMutationExecutor.submitReport(FIELDS, r.getUuid());
+    final Report submitted = adminMutationExecutor.submitReport(FIELDS, r.getUuid());
     assertThat(submitted).isNotNull();
 
     // Admin can approve his own reports.
-    Report approved = adminMutationExecutor.approveReport(FIELDS, null, r.getUuid());
+    final Report approved = adminMutationExecutor.approveReport(FIELDS, null, r.getUuid());
     assertThat(approved).isNotNull();
 
     // Verify report is in APPROVED state.
@@ -1179,7 +1179,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
 
     // Admin can publish approved reports.
-    Report published = adminMutationExecutor.publishReport("", r.getUuid());
+    final Report published = adminMutationExecutor.publishReport("", r.getUuid());
     assertThat(published).isNotNull();
 
     // Verify report is in PUBLISHED state.
@@ -1198,10 +1198,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // non-reporting orgs
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
     final String orgUuid = org.getUuid();
-    Optional<RollupGraph> orgReportsStart = startGraph.stream()
+    final Optional<RollupGraph> orgReportsStart = startGraph.stream()
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
     final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
-    Optional<RollupGraph> orgReportsEnd = endGraph.stream()
+    final Optional<RollupGraph> orgReportsEnd = endGraph.stream()
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
     final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
     assertThat(startCt).isEqualTo(endCt - diff);
@@ -1214,7 +1214,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final QueryExecutor elizabethQueryExecutor = getQueryExecutor(elizabeth.getDomainUsername());
     final MutationExecutor elizabethMutationExecutor =
         getMutationExecutor(elizabeth.getDomainUsername());
-    Person steve = getSteveSteveson();
+    final Person steve = getSteveSteveson();
 
     final ReportInput rInput = ReportInput.builder().withIntent("Test the Daily rollup graph")
         .withNextSteps("Check for a change in the rollup graph")
@@ -1227,9 +1227,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(r.getUuid()).isNotNull();
 
     // Pull the daily rollup graph
-    Instant startDate =
+    final Instant startDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant();
-    Instant endDate =
+    final Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final List<RollupGraph> startGraph =
         adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, null, endDate, null, startDate);
@@ -1244,15 +1244,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Oops set the engagementDate.
     r.setEngagementDate(Instant.now());
     r.setDuration(115);
-    Report updated = elizabethMutationExecutor.updateReport(FIELDS, true, getReportInput(r));
+    final Report updated = elizabethMutationExecutor.updateReport(FIELDS, true, getReportInput(r));
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    Report submitted = elizabethMutationExecutor.submitReport(FIELDS, r.getUuid());
+    final Report submitted = elizabethMutationExecutor.submitReport(FIELDS, r.getUuid());
     assertThat(submitted).isNotNull();
 
     // Approve report.
-    Report approved = getMutationExecutor("bob").approveReport(FIELDS, null, r.getUuid());
+    final Report approved = getMutationExecutor("bob").approveReport(FIELDS, null, r.getUuid());
     assertThat(approved).isNotNull();
 
     // Verify report is in APPROVED state.
@@ -1260,7 +1260,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
 
     // Admin can publish approved reports.
-    Report published = adminMutationExecutor.publishReport("", r.getUuid());
+    final Report published = adminMutationExecutor.publishReport("", r.getUuid());
     assertThat(published).isNotNull();
 
     // Verify report is in PUBLISHED state.
@@ -1280,10 +1280,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
     final Organization po = org.getParentOrg();
     final String orgUuid = po == null ? null : po.getUuid();
-    Optional<RollupGraph> orgReportsStart = startGraph.stream()
+    final Optional<RollupGraph> orgReportsStart = startGraph.stream()
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
     final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
-    Optional<RollupGraph> orgReportsEnd = endGraph.stream()
+    final Optional<RollupGraph> orgReportsEnd = endGraph.stream()
         .filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
     final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
     assertThat(startCt).isEqualTo(endCt - diff);
@@ -1304,7 +1304,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .withReportText(
             "This reportTest was generated by ReportsResourceTest#testSensitiveInformation")
         .withReportSensitiveInformation(rsiInput).build();
-    Report returned = elizabethMutationExecutor.createReport(FIELDS, rInput);
+    final Report returned = elizabethMutationExecutor.createReport(FIELDS, rInput);
     assertThat(returned).isNotNull();
     assertThat(returned.getUuid()).isNotNull();
     // elizabeth should be allowed to see it returned, as she's the author
@@ -1322,7 +1322,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // update HTML of report sensitive information
     returned2.getReportSensitiveInformation()
         .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
-    Report updated =
+    final Report updated =
         elizabethMutationExecutor.updateReport(FIELDS, true, getReportInput(returned2));
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();

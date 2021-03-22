@@ -507,9 +507,9 @@ public class TaskApprovalTest extends AbstractResourceTest {
     approveReport(report3, org2Approver, false);
     checkPendingApproval(approver2, report3, 1, true, null);
 
-    final ReportSearchQueryInput pendingQuery = ReportSearchQueryInput.builder().withPageNum(0)
-        // Check reports pending approval (without pagination)
-        .withPageSize(0).build();
+    // Check reports pending approval without pagination
+    final ReportSearchQueryInput pendingQuery =
+        ReportSearchQueryInput.builder().withPageNum(0).withPageSize(0).build();
     final AnetBeanList_Report allResults1 =
         checkPendingApproval(approver1, report1, 1, false, pendingQuery);
     assertThat(allResults1.getTotalCount()).isEqualTo(2);
