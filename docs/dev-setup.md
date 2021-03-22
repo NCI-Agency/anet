@@ -35,7 +35,7 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
 ### Prerequisites
 1. Make sure you can [manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
 
-### Initial Setup
+### Development database backend configuration
 
 1. You can either use [PostgreSQL](https://www.postgresql.org/) or [Microsoft SQL Server](https://en.wikipedia.org/wiki/Microsoft_SQL_Server) for your database. Both allow you to run entirely on your local machine and develop offline.
     1. MSSQL
@@ -53,13 +53,15 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
             ```java
             run.environment("DB_DRIVER", "postgresql")
             ```
-1. Pull the DB Docker image: `./gradlew dockerPullDB`
+
+### Setup development database
+
 1. Create the DB Docker container and the initial database: `./gradlew dockerCreateDB`
 1. Start the DB Docker container: `./gradlew dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
     1. The database schema is stored in [`src/main/resources/migrations.xml`](../src/main/resources/migrations.xml).
 1. Seed the initial data:
-    1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to your sqlserver instance and load the data.
+    1. If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dbLoad`. Otherwise, you'll need to manually connect to the database instance and load the data.
 1. Run `./gradlew run` to download all dependencies (including client dependencies like nodejs and yarn) and build the project
 
 _Note_: it will also start the back-end but at this step we are not interested in that.
@@ -111,7 +113,9 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ## Testing
 ### Initial Setup Test Database
-After successfully creating and building the MSSQL Docker container it is possible to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
+First [configure the database backend](#database_backend_configuration).
+The following instructions initialize a database for testing purposes, within the database container.
+Use the `-PtestEnv` property to access the test environment settings in `gradle`.
 1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
 1. Wait until the container is fully started (can be done automatically with `./gradlew -PtestEnv dbWait`), then run `./gradlew -PtestEnv dbMigrate`
