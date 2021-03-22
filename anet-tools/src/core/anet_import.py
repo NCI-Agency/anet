@@ -10,7 +10,7 @@ from sqlalchemy import exc
 from src.core.base_methods import base_methods
 from src.core.data import txt
 from src.core.db import db
-from src.core.anet_business_objects import BaseModel
+from src.core.model.association import BaseModel
 
 
 class anet_import(db):
@@ -58,6 +58,7 @@ class anet_import(db):
             utc_now = datetime.datetime.now()
             try:
                 entity = entity_json["entity"]
+                entity.session.begin_nested()
                 if entity.__tablename__ not in ["positions", "people", "locations", "organizations", "reports"]:
                     raise Exception("Business logic for table " + entity.__tablename__ + " is not implemented!")
                 is_entity_update = base_methods.is_entity_update(entity, self.update_rules)
@@ -70,6 +71,7 @@ class anet_import(db):
                     entity.insert_update_nested_entity(utc_now, self.update_rules)
                 self.append_successful_entity_list_json(entity_json)
                 self.print_info(f"Successfull: {len(self.successful_entity_list_json)}")
+                entity.session.commit()
             except exc.SQLAlchemyError as e:
                 entity.session.rollback()
                 self.sqlalc_exc(e=e, entity_json=entity_json,
@@ -81,7 +83,7 @@ class anet_import(db):
             if not self.verbose and counter % 10 == 0:
                 print(f"Importing {counter}/{len(entity_list_json)} passed", end="\r")
             counter = counter + 1
-        entity.commit()
+        entity.session.commit()
         print(f"Importing {counter}/{len(entity_list_json)} passed")
         print("Import is complete for entities whose table name is",
               entity_json["entity"].__tablename__)
