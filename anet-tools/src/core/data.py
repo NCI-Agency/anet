@@ -14,7 +14,7 @@ class csv(data):
         super().__init__(file_path)
         # Extension of file
         self.file_extension = file_path.split(".")[-1]
-        print("csv object created\n")
+        print("csv object created")
 
     def read_csv_file(self):
         try:
@@ -23,7 +23,7 @@ class csv(data):
             # read .csv file and generate pandas dataframe object
             self.df = pd.read_csv(filepath_or_buffer=self.file_path)
         except Exception as e:
-            print("EXCEPTION: ", str(e))
+            print(f"EXCEPTION: {str(e)}")
 
     def convert_nan_to_empty_string(self):
         self.df.replace(np.nan, '', regex=True, inplace=True)
@@ -46,7 +46,7 @@ class xlsx(data):
                 df = pd.read_excel(self.file_path, sheet_name=sheet_name)
                 self.df = df
         except Exception as e:
-            print("EXCEPTION: ", str(e))
+            print(f"EXCEPTION: {str(e)}")
 
 
 class xml(data):

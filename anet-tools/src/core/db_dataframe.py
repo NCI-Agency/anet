@@ -10,6 +10,5 @@ class db_dataframe(db):
     def read_table(self, table_name):
         self.connect()
         attr_name = table_name.lower().replace(" ", "").replace("-", "_")
-        setattr(self, attr_name, pd.read_sql_table(
-            table_name, con=self.engine))
-        print("table " + table_name + " imported to <obj." + attr_name + ">")
+        setattr(self, attr_name, pd.read_sql_table(table_name, con=self.engine))
+        print(f"table {table_name} imported to <obj.{attr_name}>")

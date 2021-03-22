@@ -8,10 +8,9 @@ from src.core.helper_methods import helper_methods
 class db:
     def __init__(self, use_env=False, conn_json={}):
         self.dbConnString = helper_methods.generate_conn_str(use_env=use_env, conn_json=conn_json)
-        print("db object created")
+        print("DB object created")
 
     def print_db_connection_string(self):
-        # Print db connection string
         print(self.dbConnString)
 
     def create_engine(self):
@@ -21,5 +20,4 @@ class db:
         self.create_engine()
         self.session = Session(self.engine)
         self.conn = self.engine.connect()
-        print("Successfully connected to the database with conn_str: " +
-              self.dbConnString)
+        print(f"Successfully connected to the database with conn_str: {self.dbConnString}")

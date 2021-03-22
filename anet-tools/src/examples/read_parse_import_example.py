@@ -1,6 +1,6 @@
 from src.core.anet_import import anet_import
 from src.core.data import csv
-from src.core.anet_business_objects import People
+from src.core.model.anet import People
 
 
 # Define full path of csv file
@@ -13,8 +13,10 @@ csv_obj = csv(csv_full_path)
 csv_obj.read_csv_file()
 
 # Create new anet_import object with env vars only in dev environment.
-anet_import = anet_import(use_env=True, conn_json={
-}, hashfile_fullpath="/home/jovyan/work/datasamples/", logfile_fullpath="/home/jovyan/work/datasamples/")
+anet_import = anet_import(use_env=True,
+                            conn_json={}, 
+                            hashfile_fullpath="/home/jovyan/work/datasamples/", 
+                            logfile_fullpath="/home/jovyan/work/datasamples/")
 # You could also use your own connection json instead of env var in both dev and prod environments.
 # Example conn_json objects
 # POSTGRES
@@ -103,8 +105,9 @@ anet_import.print_update_rules()
 # The tablename property determines for which table the update rule will be added.
 # The col_names property determines which columns of the specified table will be checked for updating.
 # For example, when tablename = people and col_name = ["name"],
-# a query is sent according to the name column in the people table in the database for each entity object,
-# and if a record returns, that entity is considered as update,
+# a query is sent according to the name column in the people table 
+# in the database for each entity object and 
+# if a record returns, that entity is considered as update,
 # if no record is returned, entity is considered as insert.
 anet_import.add_update_rule(tablename="people", col_names=["name"])
 
@@ -116,5 +119,7 @@ anet_import.print_update_rules()
 
 # Write to DB
 # verbose is True default but setting it False causes see less log
-anet_import.save_data(entity_json_list, verbose=False,
-                      remember_with_hash=True, write_unsuccessful=True)
+anet_import.save_data(entity_json_list, 
+                        verbose=False,
+                        remember_with_hash=False, 
+                        write_unsuccessful=True)
