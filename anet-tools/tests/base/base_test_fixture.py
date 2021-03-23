@@ -5,7 +5,7 @@ import datetime
 from sqlalchemy.orm import sessionmaker
 import unittest
 
-from src.core.db import db
+from src.core.api.db import db
 from src.core.model.association import PeoplePositions
 from src.core.model.anet import Positions, People, Locations, Organizations
 from src.core.model.base import BaseModel

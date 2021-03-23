@@ -1,5 +1,5 @@
-from src.core.anet_import import anet_import
-from src.core.data import csv
+from src.core.api.anet_import import anet_import
+from src.core.api.data import csv
 from src.core.model.anet import People
 
 

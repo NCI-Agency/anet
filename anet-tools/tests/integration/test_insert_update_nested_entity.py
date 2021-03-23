@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.base_methods import base_methods
+from src.core.business_logic.base_methods import base_methods
 from tests.base import base_test_fixture
 
 

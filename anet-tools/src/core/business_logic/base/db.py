@@ -1,11 +1,11 @@
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from src.core.helper_methods import helper_methods
+from src.core.utils.helper.method import helper_methods
 
 class db:
+    """ This class allows to connect db using sqlalchemy for framework developer
+    """
     def __init__(self, use_env=False, conn_json={}):
         self.dbConnString = helper_methods.generate_conn_str(use_env=use_env, conn_json=conn_json)
         print("DB object created")

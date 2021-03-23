@@ -1,7 +1,6 @@
 from sqlalchemy.orm import relationship
 
-from src.core.mixin import anet_mixin
-from src.core.model.association import BaseModel
+from src.core.business_logic.mixin import anet_mixin
 from src.core.model.base import common_anet_obj_attr
 
 
