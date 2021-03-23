@@ -236,6 +236,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
     authorizationGroup.positions = values.positions.map(pos => {
       const p = Object.without(
         pos,
+        "previousPeople",
         "customFields",
         DEFAULT_CUSTOM_FIELDS_PARENT
       )
