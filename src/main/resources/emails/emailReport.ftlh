@@ -256,7 +256,7 @@ ${sender.name} sent you a report from ANET:
               </#if>
             </#if>
             <p>
-              <strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}
+              <strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>

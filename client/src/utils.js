@@ -210,6 +210,10 @@ export default {
         maxLen <= 0 ? nonDigitsRemoved : nonDigitsRemoved.slice(0, maxLen)
     }
     return safeVal
+  },
+
+  getMaxTextFieldLength: function(field) {
+    return field?.maxTextFieldLength || Settings.maxTextFieldLength
   }
 }
 

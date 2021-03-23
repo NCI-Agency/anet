@@ -276,12 +276,12 @@ export default class Report extends Model {
         .when(["engagementDate"], (engagementDate, schema) =>
           !Report.isFuture(engagementDate)
             ? schema.required(
-              `You must provide a brief summary of the ${Settings.fields.report.nextSteps}`
+              `You must provide a brief summary of the ${Settings.fields.report.nextSteps.label}`
             )
             : schema.nullable()
         )
         .default("")
-        .label(Settings.fields.report.nextSteps),
+        .label(Settings.fields.report.nextSteps.label),
       keyOutcomes: yup
         .string()
         .nullable()

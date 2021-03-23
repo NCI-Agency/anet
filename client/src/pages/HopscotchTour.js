@@ -192,7 +192,7 @@ const reportTour = (currentUser, history) => {
         ]
         : []),
       {
-        title: Settings.fields.report.nextSteps,
+        title: Settings.fields.report.nextSteps.label,
         content:
           "Here, tell readers about the next concrete steps that you'll be taking to build on the progress made in your engagement. This will be displayed in your report's summary, so include information that will explain to leadership what you are doing next, as a result of your meeting's outcomes.",
         target: "#nextSteps",

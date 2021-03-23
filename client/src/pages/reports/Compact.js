@@ -307,7 +307,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                 />
               ) : null}
               <CompactRow
-                label={Settings.fields.report.nextSteps}
+                label={Settings.fields.report.nextSteps.label}
                 content={report.nextSteps}
                 className="reportField"
               />
