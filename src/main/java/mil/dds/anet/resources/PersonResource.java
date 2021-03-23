@@ -242,7 +242,7 @@ public class PersonResource {
     }
 
     int merged = dao.mergePeople(winner, loser);
-    AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
+    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
 
     if (loserPosition != null && copyPosition) {
       AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(winner.getUuid(),

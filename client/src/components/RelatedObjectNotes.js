@@ -23,6 +23,7 @@ import { Button, Panel } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
+import Settings from "settings"
 import utils from "utils"
 import "./BlueprintOverrides.css"
 
@@ -158,7 +159,9 @@ const RelatedObjectNotes = ({
           }}
         >
           {notes.map(note => {
-            const updatedAt = moment(note.updatedAt).fromNow()
+            const updatedAt = moment(note.updatedAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )
             const byMe = Person.isEqual(currentUser, note.author)
             const canEdit =
               note.type !== NOTE_TYPE.PARTNER_ASSESSMENT &&
