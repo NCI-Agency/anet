@@ -3,7 +3,6 @@ VERSION_CHANGED_MSG: "There is a new version of ANET, click here to load the new
 SUPPORT_EMAIL_ADDR: support@example.com
 
 engagementsIncludeTimeAndDuration: true
-canUnpublishReports: true
 
 dateFormats:
   email:
@@ -149,6 +148,7 @@ fields:
       placeholder: Search for a position...
 
   report:
+    canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details

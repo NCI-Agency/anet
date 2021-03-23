@@ -798,18 +798,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
             {currentUser.isAdmin() && (
               <div className="submit-buttons">
-                {report.isPublished() && Settings.canUnpublishReports && (
-                  <div>
-                    <ConfirmDestructive
-                      onConfirm={onConfirmUnpublish}
-                      objectType="report"
-                      operation="unpublish"
-                      objectDisplay={"#" + uuid}
-                      bsStyle="warning"
-                      buttonLabel={`Unpublish ${reportType}`}
-                      className="pull-left"
-                    />
-                  </div>
+                {report.isPublished() &&
+                  Settings.fields.report.canUnpublishReports && (
+                    <div>
+                      <ConfirmDestructive
+                        onConfirm={onConfirmUnpublish}
+                        objectType="report"
+                        operation="unpublish"
+                        objectDisplay={"#" + uuid}
+                        bsStyle="warning"
+                        buttonLabel={`Unpublish ${reportType}`}
+                        className="pull-left"
+                      />
+                    </div>
                 )}
                 <div>
                   <ConfirmDestructive
