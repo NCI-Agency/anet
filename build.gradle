@@ -113,7 +113,7 @@ dependencies {
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.12.2'
 	// We use some extended scalars in `generateClientCodeConf` below
-	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.0'
+	testImplementation 'com.graphql-java:graphql-java-extended-scalars:2020-02-19T04-04-26-6f82be9'
 
 	testImplementation 'io.dropwizard:dropwizard-testing:2.0.20'
 	testImplementation 'io.dropwizard:dropwizard-client:2.0.20'
