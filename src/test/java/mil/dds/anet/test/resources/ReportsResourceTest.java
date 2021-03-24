@@ -266,23 +266,21 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Have another regular user try to submit the report
     try {
-      getMutationExecutor(getRegularUser().getDomainUsername()).submitReport(FIELDS,
-          created.getUuid());
+      getMutationExecutor(getRegularUser().getDomainUsername()).submitReport("", created.getUuid());
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
 
     // Have a super-user of another AO try to submit the report
     try {
-      getMutationExecutor(getSuperUser().getDomainUsername()).submitReport(FIELDS,
-          created.getUuid());
+      getMutationExecutor(getSuperUser().getDomainUsername()).submitReport("", created.getUuid());
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
 
     // Have the author submit the report
-    Report submitted = authorMutationExecutor.submitReport(FIELDS, created.getUuid());
-    assertThat(submitted).isNotNull();
+    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
 
     Report returned = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
@@ -293,15 +291,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
 
     // Have the author submit the report, again
-    submitted = authorMutationExecutor.submitReport(FIELDS, created.getUuid());
-    assertThat(submitted).isNotNull();
+    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
 
     returned = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
     // The author should not be able to submit the report now
     try {
-      authorMutationExecutor.submitReport(FIELDS, returned.getUuid());
+      authorMutationExecutor.submitReport("", returned.getUuid());
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -349,9 +347,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Reject the report
-    final Report rejected = approver1MutationExecutor.rejectReport(FIELDS,
+    numRows = approver1MutationExecutor.rejectReport("",
         TestData.createCommentInput("a test rejection"), created.getUuid());
-    assertThat(rejected).isNotNull();
+    assertThat(numRows).isOne();
 
     // Check on report status to verify it was rejected
     returned = authorQueryExecutor.report(FIELDS, created.getUuid());
@@ -359,14 +357,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getApprovalStep()).isNull();
 
     // Author needs to re-submit
-    submitted = authorMutationExecutor.submitReport(FIELDS, created.getUuid());
-    assertThat(submitted).isNotNull();
+    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
 
     // TODO: Approver modify the report *specifically change the attendees!*
 
     // Approve the report
-    Report approved = approver1MutationExecutor.approveReport(FIELDS, null, created.getUuid());
-    assertThat(approved).isNotNull();
+    numRows = approver1MutationExecutor.approveReport("", null, created.getUuid());
+    assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
     returned = authorQueryExecutor.report(FIELDS, created.getUuid());
@@ -375,15 +373,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Verify that the wrong person cannot approve this report.
     try {
-      approver1MutationExecutor.approveReport(FIELDS, null, created.getUuid());
+      approver1MutationExecutor.approveReport("", null, created.getUuid());
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
 
     // Approve the report
-    approved = getMutationExecutor(approver2.getDomainUsername()).approveReport(FIELDS, null,
+    numRows = getMutationExecutor(approver2.getDomainUsername()).approveReport("", null,
         created.getUuid());
-    assertThat(approved).isNotNull();
+    assertThat(numRows).isOne();
 
     // Check on Report status to verify it got moved forward
     returned = authorQueryExecutor.report(FIELDS, created.getUuid());
@@ -392,7 +390,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // The author should not be able to submit the report now
     try {
-      authorMutationExecutor.submitReport(FIELDS, returned.getUuid());
+      authorMutationExecutor.submitReport("", returned.getUuid());
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -409,8 +407,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
 
     // Admin can publish approved reports.
-    final Report published = adminMutationExecutor.publishReport("", created.getUuid());
-    assertThat(published).isNotNull();
+    numRows = adminMutationExecutor.publishReport("", created.getUuid());
+    assertThat(numRows).isOne();
 
     // Post a comment on the report because it's awesome
     final Comment commentOne = authorMutationExecutor.addComment(COMMENT_FIELDS,
@@ -509,8 +507,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(r.getUuid()).isNotNull();
 
     // Submit the report (by admin who can do that, as author doesn't have a position)
-    final Report submitted = adminMutationExecutor.submitReport(FIELDS, r.getUuid());
-    assertThat(submitted).isNotNull();
+    int numRows = adminMutationExecutor.submitReport("", r.getUuid());
+    assertThat(numRows).isOne();
 
     // Check the approval Step
     final Report returned = jackQueryExecutor.report(FIELDS, r.getUuid());
@@ -530,9 +528,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(returned.getApprovalStep().getUuid()).isEqualTo(steps.get(0).getUuid());
 
     // The only default approver is admin; reject the report
-    Report rejected = adminMutationExecutor.rejectReport(FIELDS,
+    numRows = adminMutationExecutor.rejectReport("",
         TestData.createCommentInput("default approval chain test rejection"), returned.getUuid());
-    assertThat(rejected).isNotNull();
+    assertThat(numRows).isOne();
 
     // Create billet for Author
     final PositionInput billetInput =
@@ -575,8 +573,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
 
     // Re-submit the report
-    final Report resubmitted = authorMutationExecutor.submitReport(FIELDS, r.getUuid());
-    assertThat(resubmitted).isNotNull();
+    numRows = authorMutationExecutor.submitReport("", r.getUuid());
+    assertThat(numRows).isOne();
 
     // Report should now be up for review by primary advisor org's (EF 1.1) approvers
     final Report returned2 = jackQueryExecutor.report(FIELDS, r.getUuid());
@@ -657,8 +655,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Elizabeth submits the report
-    Report submitted = elizabethMutationExecutor.submitReport(FIELDS, returned.getUuid());
-    assertThat(submitted).isNotNull();
+    int numRows = elizabethMutationExecutor.submitReport("", returned.getUuid());
+    assertThat(numRows).isOne();
     Report returned3 = elizabethQueryExecutor.report(FIELDS, returned.getUuid());
     assertThat(returned3.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -688,8 +686,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .contains(nick.getUuid());
     assertThat(returned4.getTasks()).hasSize(2);
 
-    Report approved = getMutationExecutor("bob").approveReport(FIELDS, null, returned.getUuid());
-    assertThat(approved).isNotNull();
+    numRows = getMutationExecutor("bob").approveReport("", null, returned.getUuid());
+    assertThat(numRows).isOne();
   }
 
   @Test
@@ -1101,8 +1099,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(saved).isNotNull();
     assertThat(saved.getUuid()).isNotNull();
 
-    final Report submitted = elizabethMutationExecutor.submitReport(FIELDS, saved.getUuid());
-    assertThat(submitted).isNotNull();
+    int numRows = elizabethMutationExecutor.submitReport("", saved.getUuid());
+    assertThat(numRows).isOne();
     final Report returned = elizabethQueryExecutor.report(FIELDS, saved.getUuid());
     assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
     assertThat(returned.getCancelledReason())
@@ -1117,8 +1115,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .anyMatch(rpt -> rpt.getUuid().equals(returned.getUuid()))).isTrue();
 
     // Bob should approve this report.
-    final Report approved = getMutationExecutor("bob").approveReport(FIELDS, null, saved.getUuid());
-    assertThat(approved).isNotNull();
+    numRows = getMutationExecutor("bob").approveReport("", null, saved.getUuid());
+    assertThat(numRows).isOne();
 
     // Ensure it went to cancelled status.
     final Report returned2 = elizabethQueryExecutor.report(FIELDS, saved.getUuid());
@@ -1126,7 +1124,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // The author should not be able to submit the report now
     try {
-      elizabethMutationExecutor.submitReport(FIELDS, returned2.getUuid());
+      elizabethMutationExecutor.submitReport("", returned2.getUuid());
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -1158,7 +1156,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Submit the report
     try {
-      adminMutationExecutor.submitReport(FIELDS, r.getUuid());
+      adminMutationExecutor.submitReport("", r.getUuid());
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -1170,20 +1168,20 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    final Report submitted = adminMutationExecutor.submitReport(FIELDS, r.getUuid());
-    assertThat(submitted).isNotNull();
+    int numRows = adminMutationExecutor.submitReport("", r.getUuid());
+    assertThat(numRows).isOne();
 
     // Admin can approve his own reports.
-    final Report approved = adminMutationExecutor.approveReport(FIELDS, null, r.getUuid());
-    assertThat(approved).isNotNull();
+    numRows = adminMutationExecutor.approveReport("", null, r.getUuid());
+    assertThat(numRows).isOne();
 
     // Verify report is in APPROVED state.
     r = adminQueryExecutor.report(FIELDS, r.getUuid());
     assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
 
     // Admin can publish approved reports.
-    final Report published = adminMutationExecutor.publishReport("", r.getUuid());
-    assertThat(published).isNotNull();
+    numRows = adminMutationExecutor.publishReport("", r.getUuid());
+    assertThat(numRows).isOne();
 
     // Verify report is in PUBLISHED state.
     r = adminQueryExecutor.report(FIELDS, r.getUuid());
@@ -1239,7 +1237,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Submit the report
     try {
-      elizabethMutationExecutor.submitReport(FIELDS, r.getUuid());
+      elizabethMutationExecutor.submitReport("", r.getUuid());
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -1251,20 +1249,20 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
-    final Report submitted = elizabethMutationExecutor.submitReport(FIELDS, r.getUuid());
-    assertThat(submitted).isNotNull();
+    int numRows = elizabethMutationExecutor.submitReport("", r.getUuid());
+    assertThat(numRows).isOne();
 
     // Approve report.
-    final Report approved = getMutationExecutor("bob").approveReport(FIELDS, null, r.getUuid());
-    assertThat(approved).isNotNull();
+    numRows = getMutationExecutor("bob").approveReport("", null, r.getUuid());
+    assertThat(numRows).isOne();
 
     // Verify report is in APPROVED state.
     r = elizabethQueryExecutor.report(FIELDS, r.getUuid());
     assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
 
     // Admin can publish approved reports.
-    final Report published = adminMutationExecutor.publishReport("", r.getUuid());
-    assertThat(published).isNotNull();
+    numRows = adminMutationExecutor.publishReport("", r.getUuid());
+    assertThat(numRows).isOne();
 
     // Verify report is in PUBLISHED state.
     r = elizabethQueryExecutor.report(FIELDS, r.getUuid());
@@ -1580,7 +1578,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
 
     // Submit the report
-    final Report submitted = authorMutationExecutor.submitReport(FIELDS, created.getUuid());
+    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
+    final Report submitted = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(submitted).isNotNull();
     assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -1615,8 +1615,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
         .isEqualTo(true);
 
     // Have the report approved by the EF 1.1 approver
-    final Report approvedStep1 =
-        getMutationExecutor("bob").approveReport(FIELDS, null, submitted.getUuid());
+    numRows = getMutationExecutor("bob").approveReport("", null, submitted.getUuid());
+    assertThat(numRows).isOne();
+    final Report approvedStep1 = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(approvedStep1).isNotNull();
     assertThat(approvedStep1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -1626,8 +1627,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(step2.getRelatedObjectUuid()).isEqualTo(t11a.getUuid());
 
     // Have the report approved by the 1.1.A approver
-    final Report approvedStep2 = getMutationExecutor(andrew.getDomainUsername())
-        .approveReport(FIELDS, null, submitted.getUuid());
+    numRows = getMutationExecutor(andrew.getDomainUsername()).approveReport("", null,
+        submitted.getUuid());
+    assertThat(numRows).isOne();
+    final Report approvedStep2 = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(approvedStep2).isNotNull();
     assertThat(approvedStep1.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
@@ -1637,8 +1640,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(step3.getRelatedObjectUuid()).isEqualTo(loc.getUuid());
 
     // Have the report approved by the location Portugal Cove Ferry Terminal approver
-    final Report approvedStep3 =
-        adminMutationExecutor.approveReport(FIELDS, null, submitted.getUuid());
+    numRows = adminMutationExecutor.approveReport("", null, submitted.getUuid());
+    assertThat(numRows).isOne();
+    final Report approvedStep3 = authorQueryExecutor.report(FIELDS, created.getUuid());
     assertThat(approvedStep3).isNotNull();
     assertThat(approvedStep3.getState()).isEqualTo(ReportState.APPROVED);
   }

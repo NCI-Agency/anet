@@ -364,7 +364,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
         getPersonFromDb("ELIZAWELL, Elizabeth"), isPlanned);
 
     // Check that approval step has no approvers
-    final Report report2 = getReport(author, report);
+    final Report report2 = getReport(author, report.getUuid());
     assertWorkflowSize(report2, replacedTask.getUuid(), 1);
     final Optional<ReportAction> taskStep =
         report2.getWorkflow().stream().filter(wfs -> wfs.getStep() != null
@@ -632,12 +632,11 @@ public class TaskApprovalTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final MutationExecutor personMutationExecutor = getMutationExecutor(person.getDomainUsername());
     try {
-      final Report approved =
-          personMutationExecutor.approveReport(REPORT_FIELDS, null, report.getUuid());
+      final int numRows = personMutationExecutor.approveReport("", null, report.getUuid());
       if (expectedToFail) {
         fail("Expected an exception");
       }
-      assertThat(approved).isNotNull();
+      assertThat(numRows).isOne();
     } catch (BadRequestException | ForbiddenException e) {
       if (!expectedToFail) {
         fail("Unexpected exception");
@@ -706,24 +705,23 @@ public class TaskApprovalTest extends AbstractResourceTest {
         .isEqualTo(reportAdvisor.getPosition().getOrganization().getUuid());
 
     // Have the author submit the report
-    final Report submitted = authorMutationExecutor.submitReport("{ uuid }", created.getUuid());
-    assertThat(submitted).isNotNull();
-    assertThat(submitted.getUuid()).isEqualTo(created.getUuid());
+    final int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
 
     sendEmailsToServer();
 
     // Retrieve the submitted report
-    final Report returned = getReport(author, submitted);
-    assertThat(returned.getUuid()).isEqualTo(submitted.getUuid());
-    assertThat(returned.getState()).isEqualTo(expectedState);
+    final Report submitted = getReport(author, created.getUuid());
+    assertThat(submitted.getUuid()).isEqualTo(created.getUuid());
+    assertThat(submitted.getState()).isEqualTo(expectedState);
 
-    return returned;
+    return submitted;
   }
 
-  private Report getReport(Person author, Report report)
+  private Report getReport(Person author, String reportUuid)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
-    final Report returned = authorQueryExecutor.report(REPORT_FIELDS, report.getUuid());
+    final Report returned = authorQueryExecutor.report(REPORT_FIELDS, reportUuid);
     assertThat(returned).isNotNull();
     return returned;
   }
