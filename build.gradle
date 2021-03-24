@@ -55,9 +55,8 @@ String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-
 // In this section you declare where to find the dependencies of your project
 repositories {
 	mavenCentral()
-	maven { url 'https://jitpack.io' }
-	maven { url "https://repo.spring.io/plugins-release" }
 	jcenter()
+	maven { url 'https://jitpack.io' }
 }
 
 // In this section you declare the dependencies for your production and test code
