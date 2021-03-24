@@ -3,81 +3,84 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
+import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Person.Role;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
-import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchSortBy;
-import mil.dds.anet.beans.search.PositionSearchQuery;
-import mil.dds.anet.test.beans.OrganizationTest;
-import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.client.AnetBeanList_Organization;
+import mil.dds.anet.test.client.AnetBeanList_Person;
+import mil.dds.anet.test.client.AnetBeanList_Position;
+import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.OrganizationSearchQueryInput;
+import mil.dds.anet.test.client.OrganizationType;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.PersonInput;
+import mil.dds.anet.test.client.PersonSearchQueryInput;
+import mil.dds.anet.test.client.PersonSearchSortBy;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionSearchQueryInput;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.RecurseStrategy;
+import mil.dds.anet.test.client.Role;
+import mil.dds.anet.test.client.SortOrder;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.util.MutationExecutor;
+import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
-  private static final String POSITION_FIELDS = "uuid name code type status";
-  private static final String PERSON_FIELDS =
+  private static final String _POSITION_FIELDS = "uuid name code type status organization { uuid }";
+  private static final String _PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
           + " customFields";
-  private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
+  private static final String POSITION_FIELDS =
+      "{ " + _POSITION_FIELDS + " person { " + _PERSON_FIELDS + " } }";
+  private static final String FIELDS =
+      "{ " + _PERSON_FIELDS + " position { " + _POSITION_FIELDS + " } }";
 
   // 200 x 200 avatar
   final File DEFAULT_AVATAR =
       new File(PersonResourceTest.class.getResource("/assets/default_avatar.png").getFile());
 
   @Test
-  public void testCreatePerson() throws IOException {
+  public void testCreatePerson()
+      throws IOException, GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Person jack = getJackJackson();
 
-    Person retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, jack.getUuid(),
-        new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(retPerson).isEqualTo(jack);
+    Person retPerson = jackQueryExecutor.person(FIELDS, jack.getUuid());
+    assertThat(retPerson).isNotNull();
     assertThat(retPerson.getUuid()).isEqualTo(jack.getUuid());
 
-    Person newPerson = new Person();
-    newPerson.setName("testCreatePerson Person");
-    newPerson.setRole(Role.ADVISOR);
-    newPerson.setStatus(Person.Status.ACTIVE);
-    // set HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
-    // set JSON of customFields
-    newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
-    newPerson.setGender("Female");
-    newPerson.setCountry("Canada");
-    newPerson.setCode("123456");
-    newPerson.setEndOfTourDate(
-        ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant());
-    String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(newPersonUuid).isNotNull();
-    newPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPersonUuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    final PersonInput newPersonInput = PersonInput.builder().withName("testCreatePerson Person")
+        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
+        // set HTML of biography
+        .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
+        // set JSON of customFields
+        .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput()).withGender("Female")
+        .withCountry("Canada").withCode("123456")
+        .withEndOfTourDate(
+            ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
+        .build();
+    final Person newPerson = adminMutationExecutor.createPerson(FIELDS, newPersonInput);
+    assertThat(newPerson).isNotNull();
     assertThat(newPerson.getUuid()).isNotNull();
     assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
     // check that HTML of biography is sanitized after create
@@ -100,12 +103,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     // update JSON of customFields
     newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
 
-    Integer nrUpdated =
-        graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson);
+    Integer nrUpdated = adminMutationExecutor.updatePerson("", getPersonInput(newPerson));
     assertThat(nrUpdated).isEqualTo(1);
 
-    retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, newPerson.getUuid(),
-        new TypeReference<GraphQlResponse<Person>>() {});
+    retPerson = jackQueryExecutor.person(FIELDS, newPerson.getUuid());
     assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
     assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
     assertThat(retPerson.getAvatar()).isNotNull();
@@ -116,81 +117,64 @@ public class PersonResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Test creating a person with a position already set.
-    final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setText("EF 6");
-    query.setType(OrganizationType.ADVISOR_ORG);
-    final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
-        "query", "OrganizationSearchQueryInput", "uuid shortName", query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
+        .withText("EF 6").withType(OrganizationType.ADVISOR_ORG).build();
+    final AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), query);
     assertThat(orgs.getList().size()).isGreaterThan(0);
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 
-    Position newPos = new Position();
-    newPos.setType(PositionType.ADVISOR);
-    newPos.setName("Test Position");
-    newPos.setOrganization(org);
-    newPos.setStatus(Position.Status.ACTIVE);
-    String newPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newPos, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(newPosUuid).isNotNull();
-    newPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, newPosUuid,
-        new TypeReference<GraphQlResponse<Position>>() {});
+    final PositionInput newPosInput =
+        PositionInput.builder().withType(PositionType.ADVISOR).withName("Test Position")
+            .withOrganization(getOrganizationInput(org)).withStatus(Status.ACTIVE).build();
+    final Position newPos = adminMutationExecutor.createPosition(POSITION_FIELDS, newPosInput);
+    assertThat(newPos).isNotNull();
     assertThat(newPos.getUuid()).isNotNull();
 
-    Person newPerson2 = new Person();
-    newPerson2.setName("Namey McNameface");
-    newPerson2.setRole(Role.ADVISOR);
-    newPerson2.setStatus(Person.Status.ACTIVE);
-    newPerson2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
-    newPerson2.setPosition(newPos);
-    String newPerson2Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", newPerson2, new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(newPerson2Uuid).isNotNull();
-    newPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2Uuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    final PersonInput newPerson2Input =
+        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
+            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(newPos)).build();
+    final Person newPerson2 = adminMutationExecutor.createPerson(FIELDS, newPerson2Input);
+    assertThat(newPerson2).isNotNull();
     assertThat(newPerson2.getUuid()).isNotNull();
-    assertThat(newPerson2.loadPosition()).isNotNull();
+    assertThat(newPerson2.getPosition()).isNotNull();
     assertThat(newPerson2.getPosition().getUuid()).isEqualTo(newPos.getUuid());
 
     // Change this person w/ a new position, and ensure it gets changed.
 
-    Position newPos2 = new Position();
-    newPos2.setType(PositionType.ADVISOR);
-    newPos2.setName("A Second Test Position");
-    newPos2.setOrganization(org);
-    newPos2.setStatus(Position.Status.ACTIVE);
-    String newPos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newPos2, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(newPos2Uuid).isNotNull();
-    newPos2 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, newPos2Uuid,
-        new TypeReference<GraphQlResponse<Position>>() {});
+    final PositionInput newPos2Input =
+        PositionInput.builder().withType(PositionType.ADVISOR).withName("A Second Test Position")
+            .withOrganization(getOrganizationInput(org)).withStatus(Status.ACTIVE).build();
+    final Position newPos2 = adminMutationExecutor.createPosition(POSITION_FIELDS, newPos2Input);
+    assertThat(newPos2).isNotNull();
     assertThat(newPos2.getUuid()).isNotNull();
 
     newPerson2.setName("Changey McChangeface");
     newPerson2.setPosition(newPos2);
     // A person cannot change their own position
+    final MutationExecutor newPerson2MutationExecutor =
+        getMutationExecutor(newPerson2.getDomainUsername());
     try {
-      graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson2);
+      newPerson2MutationExecutor.updatePerson("", getPersonInput(newPerson2));
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
 
-    nrUpdated =
-        graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson2);
+    nrUpdated = adminMutationExecutor.updatePerson("", getPersonInput(newPerson2));
     assertThat(nrUpdated).isEqualTo(1);
 
-    retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(),
-        new TypeReference<GraphQlResponse<Person>>() {});
+    retPerson = adminQueryExecutor.person(FIELDS, newPerson2.getUuid());
     assertThat(retPerson).isNotNull();
     assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
-    assertThat(retPerson.loadPosition()).isNotNull();
+    assertThat(retPerson.getPosition()).isNotNull();
     assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 
     // Now newPerson2 who is a super user, should NOT be able to edit newPerson
     // Because they are not in newPerson2's organization.
     try {
-      graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson);
+      newPerson2MutationExecutor.updatePerson("", getPersonInput(newPerson));
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
@@ -198,55 +182,44 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Add some scary HTML to newPerson2's profile and ensure it gets stripped out.
     newPerson2.setBiography(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
-    nrUpdated =
-        graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson2);
+    nrUpdated = adminMutationExecutor.updatePerson("", getPersonInput(newPerson2));
     assertThat(nrUpdated).isEqualTo(1);
 
-    retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(),
-        new TypeReference<GraphQlResponse<Person>>() {});
+    retPerson = adminQueryExecutor.person(FIELDS, newPerson2.getUuid());
     assertThat(retPerson.getBiography()).contains("<b>Hello world</b>");
     assertThat(retPerson.getBiography()).doesNotContain("<script>window.alert");
   }
 
   @Test
-  public void searchPerson() {
-    Person jack = getJackJackson();
+  public void searchPerson()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    PersonSearchQueryInput query = PersonSearchQueryInput.builder().withText("bob").build();
 
-    PersonSearchQuery query = new PersonSearchQuery();
-    query.setText("bob");
-
-    AnetBeanList<Person> searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    AnetBeanList_Person searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getTotalCount()).isGreaterThan(0);
     assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob"))
         .findFirst()).isNotEmpty();
 
-    final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 1");
-    queryOrgs.setType(OrganizationType.ADVISOR_ORG);
-    final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
-        "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder()
+        .withText("EF 1").withType(OrganizationType.ADVISOR_ORG).build();
+    final AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), queryOrgs);
     assertThat(orgs.getList().size()).isGreaterThan(0);
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
 
     query.setText(null);
     query.setOrgUuid(org.getUuid());
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
-    query.setStatus(Person.Status.INACTIVE);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    query.setStatus(Status.INACTIVE);
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
-    assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == Person.Status.INACTIVE)
-        .count()).isEqualTo(searchResults.getList().size());
+    assertThat(
+        searchResults.getList().stream().filter(p -> p.getStatus() == Status.INACTIVE).count())
+            .isEqualTo(searchResults.getList().size());
 
     // Search with children orgs
     org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1")).findFirst()
@@ -254,42 +227,37 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setStatus(null);
     query.setOrgUuid(org.getUuid());
     // First don't include child orgs and then increase the scope and verify results increase.
-    final AnetBeanList<Person> parentOnlyResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    final AnetBeanList_Person parentOnlyResults =
+        jackQueryExecutor.personList(getListFields(FIELDS), query);
 
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
-    assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
+    final Set<String> srUuids =
+        searchResults.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+    final Set<String> poUuids =
+        parentOnlyResults.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+    assertThat(srUuids).containsAll(poUuids);
 
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
     query.setText(null);
     query.setRole(Role.ADVISOR);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList().size()).isGreaterThan(1);
 
     query.setRole(null);
     query.setText("e");
     query.setSortBy(PersonSearchSortBy.NAME);
     query.setSortOrder(SortOrder.DESC);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     final Collator collator = Collator.getInstance();
     collator.setStrength(Collator.PRIMARY);
     String prevName = null;
-    for (Person p : searchResults.getList()) {
+    for (final Person p : searchResults.getList()) {
       if (prevName != null) {
         assertThat(collator.compare(p.getName(), prevName)).isLessThanOrEqualTo(0);
       }
@@ -297,21 +265,15 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // Search for a person with the name "A Dvisor"
-    query = new PersonSearchQuery();
-    query.setText("Dvisor");
-    query.setRole(Role.ADVISOR);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    query = PersonSearchQueryInput.builder().withText("Dvisor").withRole(Role.ADVISOR).build();
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     long matchCount =
         searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
     assertThat(matchCount).isEqualTo(1);
 
     // Search for same person from an autocomplete box.
     query.setText("Dvisor*");
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     matchCount =
         searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
     assertThat(matchCount).isEqualTo(1);
@@ -319,9 +281,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // Search by email Address
     query.setText("hunter+arthur@example.com");
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     matchCount = searchResults.getList().stream()
         .filter(p -> p.getEmailAddress().equals("hunter+arthur@example.com")).count();
     assertThat(matchCount).isEqualTo(1);
@@ -329,214 +289,159 @@ public class PersonResourceTest extends AbstractResourceTest {
     // the plus addressing for testing..
 
     // Search for persons with biography filled
-    query = new PersonSearchQuery();
-    query.setHasBiography(true);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    query = PersonSearchQueryInput.builder().withHasBiography(true).build();
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
 
     // Search for persons with empty biography
-    query = new PersonSearchQuery();
-    query.setHasBiography(false);
-    searchResults =
-        graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
+    query = PersonSearchQueryInput.builder().withHasBiography(false).build();
+    searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
   }
 
   @Test
-  public void mergePeopleTest() {
+  public void mergePeopleTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a person
-    Person loser = new Person();
-    loser.setRole(Role.ADVISOR);
-    loser.setName("Loser for Merging");
-    String loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        loser, new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(loserUuid).isNotNull();
-    loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    PersonInput loserInput =
+        PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
+    Person loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
+    assertThat(loser).isNotNull();
+    assertThat(loser.getUuid()).isNotNull();
 
     // Create a Position
-    Position test = new Position();
-    test.setName("A Test Position created by mergePeopleTest");
-    test.setType(PositionType.ADVISOR);
-    test.setStatus(Position.Status.ACTIVE);
+    final PositionInput testInput =
+        PositionInput.builder().withName("A Test Position created by mergePeopleTest")
+            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
 
     // Assign to an AO
-    final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", OrganizationTest.getTestAO(true),
-        new TypeReference<GraphQlResponse<Organization>>() {});
-    test.setOrganization(createOrganizationWithUuid(aoUuid));
+    final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
+        TestData.createAdvisorOrganizationInput(true));
+    testInput.setOrganization(getOrganizationInput(ao));
 
-    String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(createdUuid).isNotNull();
-    Position created = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, createdUuid,
-        new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(created.getName()).isEqualTo(test.getName());
+    final Position created = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput);
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(created.getName()).isEqualTo(testInput.getName());
 
     // Assign the loser into the position
-    Map<String, Object> variables = new HashMap<>();
-    variables.put("uuid", created.getUuid());
-    variables.put("person", loser);
-    Integer nrUpdated = graphQLHelper.updateObject(admin,
-        "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
-        variables);
+    Integer nrUpdated =
+        adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a second person
-    Person winner = new Person();
-    winner.setRole(Role.ADVISOR);
-    winner.setName("Winner for Merging");
-    String winnerUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        winner, new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(winnerUuid).isNotNull();
-    winner = graphQLHelper.getObjectById(admin, "person", FIELDS, winnerUuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    final PersonInput winnerInput =
+        PersonInput.builder().withRole(Role.ADVISOR).withName("Winner for Merging").build();
+    final Person winner = adminMutationExecutor.createPerson(FIELDS, winnerInput);
+    assertThat(winner).isNotNull();
+    assertThat(winner.getUuid()).isNotNull();
 
-    variables = new HashMap<>();
-    variables.put("winnerUuid", winnerUuid);
-    variables.put("loserUuid", loserUuid);
-    nrUpdated = graphQLHelper.updateObject(admin,
-        "mutation ($winnerUuid: String!, $loserUuid: String!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid) }",
-        variables);
+    nrUpdated = adminMutationExecutor.mergePeople("", winner.getUuid(), false, loser.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
     try {
-      graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(),
-          new TypeReference<GraphQlResponse<Person>>() {});
+      adminQueryExecutor.person(FIELDS, loser.getUuid());
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
 
     // Assert that the position is empty.
-    Position winnerPos = graphQLHelper.getObjectById(admin, "position",
-        POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(),
-        new TypeReference<GraphQlResponse<Position>>() {});
+    Position winnerPos = adminQueryExecutor.position(POSITION_FIELDS, created.getUuid());
     assertThat(winnerPos.getPerson()).isNull();
 
     // Re-create loser and put into the position.
-    loser = new Person();
-    loser.setRole(Role.ADVISOR);
-    loser.setName("Loser for Merging");
-    loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", loser,
-        new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(loserUuid).isNotNull();
-    loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    loserInput = PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
+    loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
+    assertThat(loser).isNotNull();
+    assertThat(loser.getUuid()).isNotNull();
 
-    variables = new HashMap<>();
-    variables.put("uuid", created.getUuid());
-    variables.put("person", loser);
-    nrUpdated = graphQLHelper.updateObject(admin,
-        "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }",
-        variables);
+    nrUpdated =
+        adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
-    variables = new HashMap<>();
-    variables.put("winnerUuid", winnerUuid);
-    variables.put("loserUuid", loserUuid);
-    variables.put("copyPosition", true);
-    nrUpdated = graphQLHelper.updateObject(admin,
-        "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }",
-        variables);
+    nrUpdated = adminMutationExecutor.mergePeople("", winner.getUuid(), true, loser.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
     try {
-      graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(),
-          new TypeReference<GraphQlResponse<Person>>() {});
+      adminQueryExecutor.person(FIELDS, loser.getUuid());
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
 
     // Assert that the winner is in the position.
-    winnerPos = graphQLHelper.getObjectById(admin, "position",
-        POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(),
-        new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(winnerPos.getPerson()).isEqualTo(winner);
+    winnerPos = adminQueryExecutor.position(POSITION_FIELDS, created.getUuid());
+    assertThat(winnerPos.getPerson().getUuid()).isEqualTo(winner.getUuid());
   }
 
   @Test
-  public void testInactivatePerson() {
-    final Person jack = getJackJackson();
-    final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setText("EF 6");
-    query.setType(OrganizationType.ADVISOR_ORG);
-    final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
-        "query", "OrganizationSearchQueryInput", "uuid shortName", query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+  public void testInactivatePerson()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
+        .withText("EF 6").withType(OrganizationType.ADVISOR_ORG).build();
+    final AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), query);
     assertThat(orgs.getList().size()).isGreaterThan(0);
     final Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
     assertThat(org.getUuid()).isNotNull();
 
-    final Position newPos = new Position();
-    newPos.setType(PositionType.ADVISOR);
-    newPos.setName("Test Position");
-    newPos.setOrganization(org);
-    newPos.setStatus(Position.Status.ACTIVE);
-    String retPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newPos, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(retPosUuid).isNotNull();
-    Position retPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, retPosUuid,
-        new TypeReference<GraphQlResponse<Position>>() {});
+    final PositionInput newPosInput =
+        PositionInput.builder().withType(PositionType.ADVISOR).withName("Test Position")
+            .withOrganization(getOrganizationInput(org)).withStatus(Status.ACTIVE).build();
+    final Position retPos = adminMutationExecutor.createPosition(POSITION_FIELDS, newPosInput);
+    assertThat(retPos).isNotNull();
     assertThat(retPos.getUuid()).isNotNull();
 
-    final Person newPerson = new Person();
-    newPerson.setName("Namey McNameface");
-    newPerson.setRole(Role.ADVISOR);
-    newPerson.setStatus(Person.Status.ACTIVE);
-    newPerson.setDomainUsername("namey_" + Instant.now().toEpochMilli());
-    newPerson.setPosition(retPos);
-    String retPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
-    assertThat(retPersonUuid).isNotNull();
-    Person retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, retPersonUuid,
-        new TypeReference<GraphQlResponse<Person>>() {});
+    final PersonInput newPersonInput =
+        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
+            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(retPos)).build();
+    final Person retPerson = adminMutationExecutor.createPerson(FIELDS, newPersonInput);
+    assertThat(retPerson).isNotNull();
     assertThat(retPerson.getUuid()).isNotNull();
     assertThat(retPerson.getPosition()).isNotNull();
 
-    retPerson.setStatus(Person.Status.INACTIVE);
-    Integer nrUpdated =
-        graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", retPerson);
+    retPerson.setStatus(Status.INACTIVE);
+    final Integer nrUpdated = adminMutationExecutor.updatePerson("", getPersonInput(retPerson));
     assertThat(nrUpdated).isEqualTo(1);
 
-    final Person retPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS,
-        retPerson.getUuid(), new TypeReference<GraphQlResponse<Person>>() {});
+    final Person retPerson2 = adminQueryExecutor.person(FIELDS, retPerson.getUuid());
     assertThat(retPerson2.getDomainUsername()).isNull();
     assertThat(retPerson2.getPosition()).isNull();
   }
 
   @Test
-  public void personCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+  public void personCreateSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createPerson(getSuperUser());
   }
 
   @Test
-  public void personCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+  public void personCreateRegularUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createPerson(getRegularUser());
   }
 
-  private void createPerson(Person user) {
+  private void createPerson(Person user)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
+    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
     final Organization organization = position.getOrganization();
 
     // principal
-    final Person principal = new Person();
-    principal.setName("Namey McNameface");
-    principal.setRole(Role.PRINCIPAL);
-    principal.setStatus(Person.Status.ACTIVE);
-    principal.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+    final PersonInput principalInput = PersonInput.builder().withName("Namey McNameface")
+        .withRole(Role.PRINCIPAL).withStatus(Status.ACTIVE)
+        .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
 
     try {
-      final String pUuid = graphQLHelper.createObject(user, "createPerson", "person", "PersonInput",
-          principal, new TypeReference<GraphQlResponse<Person>>() {});
+      final Person p = userMutationExecutor.createPerson(FIELDS, principalInput);
       if (isSuperUser) {
-        assertThat(pUuid).isNotNull();
+        assertThat(p).isNotNull();
+        assertThat(p.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -547,17 +452,15 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // advisor with no position
-    final Person advisorNoPosition = new Person();
-    advisorNoPosition.setName("Namey McNameface");
-    advisorNoPosition.setRole(Role.ADVISOR);
-    advisorNoPosition.setStatus(Person.Status.ACTIVE);
-    advisorNoPosition.setDomainUsername("namey_" + Instant.now().toEpochMilli());
+    final PersonInput advisorNoPositionInput = PersonInput.builder().withName("Namey McNameface")
+        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
+        .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
 
     try {
-      final String anpUuid = graphQLHelper.createObject(user, "createPerson", "person",
-          "PersonInput", advisorNoPosition, new TypeReference<GraphQlResponse<Person>>() {});
+      final Person anp = userMutationExecutor.createPerson(FIELDS, advisorNoPositionInput);
       if (isSuperUser) {
-        assertThat(anpUuid).isNotNull();
+        assertThat(anp).isNotNull();
+        assertThat(anp.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -568,28 +471,24 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // advisor with position in own organization
-    final PositionSearchQuery query = new PositionSearchQuery();
-    query.setOrganizationUuid(organization.getUuid());
-    query.setIsFilled(false);
-    final AnetBeanList<Position> searchObjects = graphQLHelper.searchObjects(user, "positionList",
-        "query", "PositionSearchQueryInput", POSITION_FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {});
+    final PositionSearchQueryInput query = PositionSearchQueryInput.builder()
+        .withOrganizationUuid(organization.getUuid()).withIsFilled(false).build();
+    final AnetBeanList_Position searchObjects =
+        userQueryExecutor.positionList(getListFields(POSITION_FIELDS), query);
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     final Position freePos = searchObjects.getList().get(0);
 
-    final Person advisorPosition = new Person();
-    advisorPosition.setName("Namey McNameface");
-    advisorPosition.setRole(Role.ADVISOR);
-    advisorPosition.setStatus(Person.Status.ACTIVE);
-    advisorPosition.setDomainUsername("namey_" + Instant.now().toEpochMilli());
-    advisorPosition.setPosition(freePos);
+    final PersonInput advisorPositionInput =
+        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
+            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(freePos)).build();
 
     try {
-      final String apUuid = graphQLHelper.createObject(user, "createPerson", "person",
-          "PersonInput", advisorPosition, new TypeReference<GraphQlResponse<Person>>() {});
+      final Person ap = userMutationExecutor.createPerson(FIELDS, advisorPositionInput);
       if (isSuperUser) {
-        assertThat(apUuid).isNotNull();
+        assertThat(ap).isNotNull();
+        assertThat(ap.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -600,31 +499,26 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // advisor with position in other organization
-    final PositionSearchQuery query2 = new PositionSearchQuery();
     final List<PositionType> positionTypes = new ArrayList<>();
     positionTypes.add(PositionType.ADVISOR);
-    query2.setType(positionTypes);
-    query2.setIsFilled(false);
-    final AnetBeanList<Position> searchObjects2 = graphQLHelper.searchObjects(user, "positionList",
-        "query", "PositionSearchQueryInput", POSITION_FIELDS, query2,
-        new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {});
+    final PositionSearchQueryInput query2 =
+        PositionSearchQueryInput.builder().withType(positionTypes).withIsFilled(false).build();
+    final AnetBeanList_Position searchObjects2 =
+        userQueryExecutor.positionList(getListFields(POSITION_FIELDS), query2);
     assertThat(searchObjects2).isNotNull();
     assertThat(searchObjects2.getList()).isNotEmpty();
     final Optional<Position> foundPos2 = searchObjects2.getList().stream()
-        .filter(p -> !organization.getUuid().equals(p.getOrganizationUuid())).findFirst();
+        .filter(p -> !organization.getUuid().equals(p.getOrganization().getUuid())).findFirst();
     assertThat(foundPos2.isPresent()).isTrue();
     final Position freePos2 = foundPos2.get();
 
-    final Person advisorPosition2 = new Person();
-    advisorPosition2.setName("Namey McNameface");
-    advisorPosition2.setRole(Role.ADVISOR);
-    advisorPosition2.setStatus(Person.Status.ACTIVE);
-    advisorPosition2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
-    advisorPosition2.setPosition(freePos2);
+    final PersonInput advisorPosition2Input =
+        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
+            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+            .withPosition(getPositionInput(freePos2)).build();
 
     try {
-      graphQLHelper.createObject(user, "createPerson", "person", "PersonInput", advisorPosition2,
-          new TypeReference<GraphQlResponse<Person>>() {});
+      userMutationExecutor.createPerson(FIELDS, advisorPosition2Input);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }

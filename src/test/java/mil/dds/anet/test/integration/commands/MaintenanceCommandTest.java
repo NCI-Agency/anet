@@ -61,7 +61,7 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
   public static void tearDownClass() throws Exception {
     deleteTestAssessments(testAssessments);
     // Delete Andrew's counterparts added by the tests
-    deleteCounterparts(getAndrewAnderson());
+    deleteCounterparts(getAndrewAndersonBean());
   }
 
   @Test
@@ -89,13 +89,14 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
 
   @Test
   public void testCounterparts() throws Exception {
-    checkCounterparts(getChristopfTopferness(),
-        ImmutableSet.of(getRegularUser(), getAndrewAnderson()));
-    checkCounterparts(getRogerRogwell(), ImmutableSet.of(getJackJackson(), getAndrewAnderson()));
-    checkCounterparts(getSteveSteveson(),
-        ImmutableSet.of(getElizabethElizawell(), getAndrewAnderson()));
-    checkCounterparts(getHunterHuntman(), ImmutableSet.of());
-    checkCounterparts(getShardulSharton(), ImmutableSet.of());
+    checkCounterparts(getChristopfTopfernessBean(),
+        ImmutableSet.of(getRegularUserBean(), getAndrewAndersonBean()));
+    checkCounterparts(getRogerRogwellBean(),
+        ImmutableSet.of(getJackJacksonBean(), getAndrewAndersonBean()));
+    checkCounterparts(getSteveStevesonBean(),
+        ImmutableSet.of(getElizabethElizawellBean(), getAndrewAndersonBean()));
+    checkCounterparts(getHunterHuntmanBean(), ImmutableSet.of());
+    checkCounterparts(getShardulShartonBean(), ImmutableSet.of());
   }
 
   private void checkPartnerAssessment(Note note, List<Note> remainingPartnerAssessments) {
@@ -151,34 +152,38 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
     final List<Note> partnerAssessments = new ArrayList<>();
     // First, some invalid JSON objects
     // null
-    partnerAssessments.add(createTestAssessment(getBobBobtown(), getChristopfTopferness(), null));
-    // no JSON
-    partnerAssessments.add(createTestAssessment(getNickNicholson(), getRogerRogwell(), "text"));
-    // not a JSON object
-    partnerAssessments.add(createTestAssessment(getSuperUser(), getSteveSteveson(), "\"test\": }"));
-    // This gets parsed into a valid JSON object
     partnerAssessments
-        .add(createTestAssessment(getRegularUser(), getChristopfTopferness(), "{ \"test\":"));
+        .add(createTestAssessment(getBobBobtownBean(), getChristopfTopfernessBean(), null));
+    // no JSON
+    partnerAssessments
+        .add(createTestAssessment(getNickNicholsonBean(), getRogerRogwellBean(), "text"));
+    // not a JSON object
+    partnerAssessments
+        .add(createTestAssessment(getSuperUserBean(), getSteveStevesonBean(), "\"test\": }"));
+    // This gets parsed into a valid JSON object
+    partnerAssessments.add(
+        createTestAssessment(getRegularUserBean(), getChristopfTopfernessBean(), "{ \"test\":"));
     // Finally, some valid JSON objects
     // these should add new counterparts for Andrew Anderson
-    partnerAssessments.add(createTestAssessment(getAndrewAnderson(), getChristopfTopferness(),
-        "{ \"test1\":\"1\", \"test2\":\"1\", \"test3\":\"1\", \"text\": \"sample text #1\" }"));
-    partnerAssessments.add(createTestAssessment(getAndrewAnderson(), getRogerRogwell(),
+    partnerAssessments
+        .add(createTestAssessment(getAndrewAndersonBean(), getChristopfTopfernessBean(),
+            "{ \"test1\":\"1\", \"test2\":\"1\", \"test3\":\"1\", \"text\": \"sample text #1\" }"));
+    partnerAssessments.add(createTestAssessment(getAndrewAndersonBean(), getRogerRogwellBean(),
         "{ \"test1\":\"2\", \"test2\":\"2\", \"test3\":\"2\", \"text\": \"sample text #2\" }"));
-    partnerAssessments.add(createTestAssessment(getAndrewAnderson(), getSteveSteveson(),
+    partnerAssessments.add(createTestAssessment(getAndrewAndersonBean(), getSteveStevesonBean(),
         "{ \"test1\":\"3\", \"test2\":\"3\", \"test3\":\"3\", \"text\": \"sample text #3\" }"));
     // these should not add new counterparts as the principal they're assessing is already
     // their counterpart
-    partnerAssessments.add(createTestAssessment(getRegularUser(), getChristopfTopferness(),
+    partnerAssessments.add(createTestAssessment(getRegularUserBean(), getChristopfTopfernessBean(),
         "{ \"test1\":\"3\", \"test2\":\"1\", \"test3\":\"2\", \"text\": \"sample text #6\" }"));
-    partnerAssessments.add(createTestAssessment(getJackJackson(), getRogerRogwell(),
+    partnerAssessments.add(createTestAssessment(getJackJacksonBean(), getRogerRogwellBean(),
         "{ \"test1\":\"2\", \"test2\":\"3\", \"test3\":\"1\", \"text\": \"sample text #5\" }"));
-    partnerAssessments.add(createTestAssessment(getElizabethElizawell(), getSteveSteveson(),
+    partnerAssessments.add(createTestAssessment(getElizabethElizawellBean(), getSteveStevesonBean(),
         "{ \"test1\":\"1\", \"test2\":\"2\", \"test3\":\"3\", \"text\": \"sample text #4\" }"));
     // these should not add new counterparts as the principal they're assessing has no position
-    partnerAssessments.add(createTestAssessment(getRegularUser(), getHunterHuntman(),
+    partnerAssessments.add(createTestAssessment(getRegularUserBean(), getHunterHuntmanBean(),
         "{ \"test1\":\"3\", \"test2\":\"2\", \"test3\":\"1\", \"text\": \"sample text #7\" }"));
-    partnerAssessments.add(createTestAssessment(getJackJackson(), getShardulSharton(),
+    partnerAssessments.add(createTestAssessment(getJackJacksonBean(), getShardulShartonBean(),
         "{ \"test1\":\"2\", \"test2\":\"1\", \"test3\":\"3\", \"text\": \"sample text #8\" }"));
     return partnerAssessments;
   }

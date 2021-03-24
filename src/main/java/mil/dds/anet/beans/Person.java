@@ -244,6 +244,9 @@ public class Person extends AbstractCustomizableAnetBean
   public CompletableFuture<AnetBeanList<Report>> loadAuthoredReports(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
+    if (query == null) {
+      query = new ReportSearchQuery();
+    }
     query.setAuthorUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
@@ -254,6 +257,9 @@ public class Person extends AbstractCustomizableAnetBean
   public CompletableFuture<AnetBeanList<Report>> loadAttendedReports(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
+    if (query == null) {
+      query = new ReportSearchQuery();
+    }
     query.setAttendeeUuid(uuid);
     query.setUser(DaoUtils.getUserFromContext(context));
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);

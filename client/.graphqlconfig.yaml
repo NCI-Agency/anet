@@ -1,6 +1,9 @@
 projects:
   anet:
-    schemaPath: ../build/anet.graphql
+    schema: 'http://localhost:8080/graphql?user=arthur&pass=arthur'
     extensions:
-      endpoints:
-        default: 'http://localhost:8080/graphql?user=erin&pass=erin'
+      codegen:
+        generates:
+          ../src/test/resources/anet.graphql:
+            plugins:
+              - schema-ast
