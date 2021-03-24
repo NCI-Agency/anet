@@ -3,6 +3,7 @@ enum ActionType {
   PUBLISH
   REJECT
   SUBMIT
+  UNPUBLISH
 }
 
 type Activity {
@@ -272,6 +273,7 @@ type Mutation {
   reloadDictionary: String
   saveAdminSettings(settings: [AdminSettingInput]): Int
   submitReport(uuid: String): Report
+  unpublishReport(uuid: String): Int
   updateAssociatedPosition(position: PositionInput): Int
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
   updateLocation(location: LocationInput): Int
