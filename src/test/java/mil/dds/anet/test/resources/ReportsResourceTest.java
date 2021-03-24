@@ -1720,4 +1720,108 @@ public class ReportsResourceTest extends AbstractResourceTest {
         getMutationExecutor("elizabeth").deleteReport("", reportSecondAuthor.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
   }
+
+  @Test
+  public void testUnpublishReport()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    testUnpublishReport(false);
+  }
+
+  @Test
+  public void testUnpublishFutureReport()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    testUnpublishReport(true);
+  }
+
+  private void testUnpublishReport(boolean isFuture)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Person author =
+        findOrPutPersonInDb(Person.builder().withDomainUsername("selena").build());
+    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
+    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
+    final Location loc = getLocation(author, "Cabot Tower");
+    final Instant engagementDate = Instant.now().atZone(DaoUtils.getServerNativeZoneId())
+        .minusWeeks(isFuture ? -2 : 2).toInstant();
+    final ReportInput rInput = ReportInput.builder()
+        .withReportPeople(getReportPeopleInput(ImmutableList.of(
+            personToPrimaryReportPerson(getSteveSteveson()), personToPrimaryReportAuthor(author))))
+        .withState(ReportState.DRAFT).withAtmosphere(Atmosphere.POSITIVE)
+        .withIntent("Testing unpublishing").withKeyOutcomes("Unpublishing works")
+        .withNextSteps("Approve before unpublishing")
+        .withReportText("<p>Trying to get this report unpublished</p>")
+        .withLocation(getLocationInput(loc)).withEngagementDate(engagementDate).build();
+
+    // Reference task Gender
+    final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("Gender").build();
+    final AnetBeanList_Task searchObjects =
+        authorQueryExecutor.taskList(getListFields(TASK_FIELDS), query);
+    assertThat(searchObjects).isNotNull();
+    assertThat(searchObjects.getList()).isNotEmpty();
+    final List<Task> searchResults = searchObjects.getList();
+    assertThat(searchResults).isNotEmpty();
+    final Task t11a =
+        searchResults.stream().filter(t -> t.getShortName().equals("Gender")).findFirst().get();
+    rInput.setTasks(ImmutableList.of(getTaskInput(t11a)));
+
+    // Create the report
+    final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
+
+    // Submit the report
+    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
+    final Report submitted = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(submitted).isNotNull();
+    if (!isFuture) {
+      assertThat(submitted.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+      // Approve
+      numRows = adminMutationExecutor.approveReport("", null, created.getUuid());
+      assertThat(numRows).isOne();
+    }
+    final Report approved = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(approved).isNotNull();
+    assertThat(approved.getState()).isEqualTo(ReportState.APPROVED);
+
+    // Try to unpublish report that is not published
+    try {
+      adminMutationExecutor.unpublishReport("", approved.getUuid());
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
+    // Publish report
+    numRows = adminMutationExecutor.publishReport("", approved.getUuid());
+    assertThat(numRows).isOne();
+    final Report published = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(published).isNotNull();
+    assertThat(published.getState()).isEqualTo(ReportState.PUBLISHED);
+
+    // Try to unpublish published report by regular user
+    try {
+      authorMutationExecutor.unpublishReport("", published.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+    // Try to unpublish published report by super user
+    try {
+      getMutationExecutor("bob").unpublishReport("", published.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+    // Unpublish published report by admin
+    final Integer nrUnpublished = adminMutationExecutor.unpublishReport("", published.getUuid());
+    assertThat(nrUnpublished).isEqualTo(1);
+    // Check that workflow has been extended
+    final Report unpublished = authorQueryExecutor.report(FIELDS, published.getUuid());
+    assertThat(unpublished).isNotNull();
+    assertThat(unpublished.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(unpublished.getWorkflow()).hasSize(published.getWorkflow().size() + 1);
+
+    // Clean up
+    final Integer nrDeleted = authorMutationExecutor.deleteReport("", unpublished.getUuid());
+    assertThat(nrDeleted).isEqualTo(1);
+  }
+
 }
