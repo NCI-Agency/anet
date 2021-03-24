@@ -244,8 +244,8 @@ enum LocationSearchSortBy {
 
 """Mutation root"""
 type Mutation {
-  deletePosition(uuid: String): Int
   updateOrganization(organization: OrganizationInput): Int
+  deletePosition(uuid: String): Int
   updateNote(note: NoteInput): Note
   createPosition(position: PositionInput): Position
   clearCache: String
@@ -403,6 +403,7 @@ type Person {
   gender: String
   name: String
   notes: [Note]
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -427,6 +428,7 @@ input PersonInput {
   gender: String
   name: String
   notes: [NoteInput]
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -576,8 +578,8 @@ type Query {
   location(uuid: String): Location
   showRollupEmail(orgType: OrganizationType, advisorOrganizationUuid: String, endDate: Instant, showText: Boolean = false, principalOrganizationUuid: String, startDate: Instant): String
   position(uuid: String): Position
-  adminSettings: [AdminSetting]
   authorizationGroup(uuid: String): AuthorizationGroup
+  adminSettings: [AdminSetting]
   projectVersion: String
 }
 
@@ -700,6 +702,7 @@ type ReportPerson {
   gender: String
   name: String
   notes: [Note]
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -727,6 +730,7 @@ input ReportPersonInput {
   gender: String
   name: String
   notes: [NoteInput]
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
