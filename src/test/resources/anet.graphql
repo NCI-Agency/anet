@@ -246,7 +246,7 @@ enum LocationSearchSortBy {
 """Mutation root"""
 type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
-  approveReport(comment: CommentInput, uuid: String): Report
+  approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createLocation(location: LocationInput): Location
@@ -267,12 +267,12 @@ type Mutation {
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Location
   mergePeople(copyPosition: Boolean = false, loserUuid: String, winnerUuid: String): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
-  publishReport(uuid: String): Report
+  publishReport(uuid: String): Int!
   putPersonInPosition(person: PersonInput, uuid: String): Int
-  rejectReport(comment: CommentInput, uuid: String): Report
+  rejectReport(comment: CommentInput, uuid: String): Int!
   reloadDictionary: String
   saveAdminSettings(settings: [AdminSettingInput]): Int
-  submitReport(uuid: String): Report
+  submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
   updateAssociatedPosition(position: PositionInput): Int
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
