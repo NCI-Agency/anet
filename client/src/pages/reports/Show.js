@@ -241,16 +241,12 @@ const GQL_EMAIL_REPORT = gql`
 `
 const GQL_SUBMIT_REPORT = gql`
   mutation($uuid: String!) {
-    submitReport(uuid: $uuid) {
-      uuid
-    }
+    submitReport(uuid: $uuid)
   }
 `
 const GQL_PUBLISH_REPORT = gql`
   mutation($uuid: String!) {
-    publishReport(uuid: $uuid) {
-      uuid
-    }
+    publishReport(uuid: $uuid)
   }
 `
 const GQL_ADD_REPORT_COMMENT = gql`
@@ -262,16 +258,12 @@ const GQL_ADD_REPORT_COMMENT = gql`
 `
 const GQL_REJECT_REPORT = gql`
   mutation($uuid: String!, $comment: CommentInput!) {
-    rejectReport(uuid: $uuid, comment: $comment) {
-      uuid
-    }
+    rejectReport(uuid: $uuid, comment: $comment)
   }
 `
 const GQL_APPROVE_REPORT = gql`
   mutation($uuid: String!, $comment: CommentInput!) {
-    approveReport(uuid: $uuid, comment: $comment) {
-      uuid
-    }
+    approveReport(uuid: $uuid, comment: $comment)
   }
 `
 

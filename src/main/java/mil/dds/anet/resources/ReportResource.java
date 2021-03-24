@@ -337,7 +337,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "submitReport")
-  public Report submitReport(@GraphQLRootContext Map<String, Object> context,
+  public int submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
@@ -388,7 +388,7 @@ public class ReportResource {
 
     AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
     // GraphQL mutations *have* to return something, we return the report
-    return r;
+    return numRows;
   }
 
   static class ReportComment {
@@ -402,7 +402,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "approveReport")
-  public Report approveReport(@GraphQLRootContext Map<String, Object> context,
+  public int approveReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "comment") Comment comment) {
     Person approver = DaoUtils.getUserFromContext(context);
@@ -442,11 +442,11 @@ public class ReportResource {
 
     AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
-    return r;
+    return numRows;
   }
 
   @GraphQLMutation(name = "rejectReport")
-  public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
+  public int rejectReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "comment") Comment reason) {
     Person approver = DaoUtils.getUserFromContext(context);
@@ -503,7 +503,7 @@ public class ReportResource {
     sendReportRejectEmail(r, approver, reason1);
     AnetAuditLogger.log("report {} has requested changes by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
-    return r;
+    return numRows;
   }
 
   private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {
@@ -519,7 +519,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "publishReport")
-  public Report publishReport(@GraphQLRootContext Map<String, Object> context,
+  public int publishReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
@@ -542,7 +542,7 @@ public class ReportResource {
 
     AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
     // GraphQL mutations *have* to return something
-    return r;
+    return numRows;
   }
 
   @GraphQLMutation(name = "unpublishReport")
