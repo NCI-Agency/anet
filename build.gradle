@@ -148,16 +148,16 @@ configurations {
 }
 
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 jacoco {
-	toolVersion = "0.8.6"
+    toolVersion = "0.8.6"
 }
 
 jacocoTestReport {
-	reports {
-		xml.enabled true
+    reports {
+        xml.enabled true
 		html.enabled false
 	}
 }
@@ -168,25 +168,25 @@ proc.waitFor();
 project.version = proc.text.trim();
 
 runtime {
-	options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
 	modules = [
-			'java.sql',
-			'java.desktop',
-			'java.xml',
-			'java.logging',
-			'java.management',
-			'jdk.unsupported',
-			'java.security.jgss',
-			'java.naming',
-			'java.transaction.xa',
-			'java.security.sasl',
-			'java.instrument',
-			'java.scripting',
-			'java.xml.crypto']
+		'java.sql',
+		'java.desktop',
+		'java.xml',
+		'java.logging',
+		'java.management',
+		'jdk.unsupported',
+		'java.security.jgss',
+		'java.naming',
+		'java.transaction.xa',
+		'java.security.sasl',
+		'java.instrument',
+		'java.scripting',
+		'java.xml.crypto']
 
-	jpackage {
-		appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
-	}
+		jpackage {
+		    appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
+		}
 }
 
 processResources {
@@ -412,15 +412,15 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	hostConfig.shmSize = 1024*1024*1024L
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isMssql) {
-		withEnvVar('ACCEPT_EULA', 'Y')
-		withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
-		withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
-		withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
-		withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	  withEnvVar('ACCEPT_EULA', 'Y')
+	  withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
+	  withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
+	  withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
+	  withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	} else {
-		withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
-		withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
-		withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	  withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
+	  withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
+	  withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	}
 	hostConfig.portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
 }
@@ -459,9 +459,9 @@ task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: com.bmuschko.grad
 	description = "Creates a keycloak container named " + keycloakContainerName + "."
 	hostConfig.portBindings = ["9080:8080", "9443:8443"]
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
-	withEnvVar("KEYCLOAK_USER", "admin")
-	withEnvVar("KEYCLOAK_PASSWORD", "admin")
-	withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
+        withEnvVar("KEYCLOAK_USER", "admin")
+        withEnvVar("KEYCLOAK_PASSWORD", "admin")
+        withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
 }
 
 task dockerStartKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
@@ -709,14 +709,14 @@ ospackage {
 	from('anet-dictionary.yml') {
 		rename('anet-dictionary.yml', 'anet-dictionary.yml.template')
 		into 'anet/docs'
-	}
+		}
 	from('prepare-psql.sql') {
 		into 'anet/docs'
 	}
 	from('prepare-mssql.sql') {
 		into 'anet/docs'
+			}
 	}
-}
 
 task distDeb(dependsOn: "jpackageImage",type: Deb) {
 	arch = 'amd64'
