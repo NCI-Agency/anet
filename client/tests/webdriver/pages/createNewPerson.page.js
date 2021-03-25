@@ -24,6 +24,22 @@ class CreatePerson extends Page {
     return browser.$("#firstName")
   }
 
+  get duplicatesButton() {
+    return browser.$('//button[text()="Possible Duplicates"]')
+  }
+
+  get modalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  get modalCloseButton() {
+    return this.modalContent.$("button.close")
+  }
+
+  get similarPerson() {
+    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  }
+
   get rolePrincipalButton() {
     return browser.$("#rolePrincipalButton")
   }
