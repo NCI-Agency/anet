@@ -7,3 +7,5 @@ projects:
           ../src/test/resources/anet.graphql:
             plugins:
               - schema-ast
+            config:
+              sort: true

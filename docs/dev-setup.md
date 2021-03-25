@@ -132,8 +132,6 @@ Note that the server-side tests use the [GraphQL Java Generator](https://github.
 1. Generate the schema: `./gradlew yarn_run_generate-graphql-schema`
 1. Check the generated schema, e.g.: `git diff src/test/resources/anet.graphql`
 
-Unfortunately, the order of the operations in the schema (under `type Mutation` and `type Query`) is a bit random, so it may look like the schema has changed when only some lines are in a different order. You need to look carefully for actual changes.
-
 If you have updated the generated schema and need to update the generated Java classes, you can run:
 1. `./gradlew generateClientCode` to re-generate the Java sources
 1. `./gradlew compileTestJava` to re-generate the Java sources *and* compile them into Java class files
