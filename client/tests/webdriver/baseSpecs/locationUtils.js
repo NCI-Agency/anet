@@ -10,3 +10,6 @@ export const NEW_COORDS = {
   lng: "32.75818",
   mgrs: "36SVK7932314682"
 }
+export const SIMILAR_LOCATION = {
+  name: "Kabul Hospital"
+}
