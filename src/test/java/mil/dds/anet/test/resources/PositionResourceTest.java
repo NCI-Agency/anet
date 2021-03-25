@@ -671,7 +671,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     mergedPositionInput.setType(secondPosition.getType());
 
     final Position mergedPosition =
-        adminMutationExecutor.mergePositions(FIELDS, mergedPositionInput, secondPosition.getUuid());
+        adminMutationExecutor.mergePositions(FIELDS, secondPosition.getUuid(), mergedPositionInput);
     assertThat(mergedPosition).isNotNull();
     assertThat(mergedPosition.getUuid()).isNotNull();
 

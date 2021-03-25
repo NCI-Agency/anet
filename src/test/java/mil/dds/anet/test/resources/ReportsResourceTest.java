@@ -287,7 +287,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Verify that author can still edit the report
     returned.setAtmosphereDetails("Everybody was super nice! Again!");
-    final Report r2 = authorMutationExecutor.updateReport(FIELDS, true, getReportInput(returned));
+    final Report r2 = authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
 
     // Have the author submit the report, again
@@ -567,7 +567,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
         ImmutableList.of(personToPrimaryReportPerson(roger), personToReportPerson(jack),
             personToPrimaryReportPerson(bob), personToReportAuthor(author)));
     final Report updated =
-        authorMutationExecutor.updateReport(FIELDS, true, getReportInput(returned));
+        authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
     assertThat(updated.getAdvisorOrg().getUuid()).isNotEqualTo(returned.getAdvisorOrg().getUuid());
 
@@ -634,7 +634,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     returned.setReportPeople(ImmutableList.of(personToPrimaryReportPerson(roger),
         personToReportPerson(nick), personToPrimaryReportAuthor(elizabeth)));
     returned.setTasks(ImmutableList.of());
-    Report updated = elizabethMutationExecutor.updateReport(FIELDS, true, getReportInput(returned));
+    Report updated = elizabethMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
     assertThat(updated).isNotNull();
 
     // Verify the report changed
@@ -674,7 +674,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
         personToPrimaryReportAuthor(elizabeth)));
     returned3.setTasks(
         ImmutableList.of(taskSearchResults.getList().get(1), taskSearchResults.getList().get(2)));
-    updated = getMutationExecutor("bob").updateReport(FIELDS, true, getReportInput(returned3));
+    updated = getMutationExecutor("bob").updateReport(FIELDS, getReportInput(returned3), true);
     assertThat(updated).isNotNull();
 
     Report returned4 = elizabethQueryExecutor.report(FIELDS, returned.getUuid());
@@ -1151,7 +1151,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final List<RollupGraph> startGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, null, endDate, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
 
     // Submit the report
     try {
@@ -1163,7 +1163,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Oops set the engagementDate.
     r.setEngagementDate(Instant.now());
     r.setDuration(50);
-    final Report updated = adminMutationExecutor.updateReport(FIELDS, true, getReportInput(r));
+    final Report updated = adminMutationExecutor.updateReport(FIELDS, getReportInput(r), true);
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
@@ -1188,7 +1188,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, null, endDate, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
@@ -1232,7 +1232,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     final Instant endDate =
         Instant.now().atZone(DaoUtils.getServerNativeZoneId()).plusDays(1).toInstant();
     final List<RollupGraph> startGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, null, endDate, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
 
     // Submit the report
     try {
@@ -1244,7 +1244,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Oops set the engagementDate.
     r.setEngagementDate(Instant.now());
     r.setDuration(115);
-    final Report updated = elizabethMutationExecutor.updateReport(FIELDS, true, getReportInput(r));
+    final Report updated = elizabethMutationExecutor.updateReport(FIELDS, getReportInput(r), true);
     assertThat(updated).isNotNull();
 
     // Re-submit the report, it should work.
@@ -1269,7 +1269,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     // Check on the daily rollup graph now.
     final List<RollupGraph> endGraph =
-        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, null, endDate, null, startDate);
+        adminQueryExecutor.rollupGraph(ROLLUP_FIELDS, null, endDate, null, null, startDate);
 
     final Organization org = admin.getPosition().getOrganization();
     @SuppressWarnings("unchecked")
@@ -1323,7 +1323,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     returned2.getReportSensitiveInformation()
         .setText(UtilsTest.getCombinedHtmlTestCase().getInput());
     final Report updated =
-        elizabethMutationExecutor.updateReport(FIELDS, true, getReportInput(returned2));
+        elizabethMutationExecutor.updateReport(FIELDS, getReportInput(returned2), true);
     assertThat(updated).isNotNull();
     assertThat(updated.getReportSensitiveInformation()).isNotNull();
     // check that HTML of report sensitive information is sanitized after update
@@ -1491,7 +1491,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
       createTestReport();
       final List<AdvisorReportsEntry> advisorReports =
           getQueryExecutor(user.getDomainUsername()).advisorReportInsights(
-              "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", 3, "-1");
+              "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1", 3);
       if (isSuperUser) {
         assertThat(advisorReports).isNotNull();
         assertThat(advisorReports.size()).isGreaterThan(0);
@@ -1659,7 +1659,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Try to remove the author, should fail
     reportFirstAuthor.setReportPeople(null);
     try {
-      authorMutationExecutor.updateReport(FIELDS, true, getReportInput(reportFirstAuthor));
+      authorMutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true);
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -1669,7 +1669,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     reportFirstAuthor
         .setReportPeople(ImmutableList.of(personToReportAuthor(author), personToReportAuthor(liz)));
     final Report reportTwoAuthors =
-        authorMutationExecutor.updateReport(FIELDS, true, getReportInput(reportFirstAuthor));
+        authorMutationExecutor.updateReport(FIELDS, getReportInput(reportFirstAuthor), true);
     assertThat(reportTwoAuthors.getReportPeople())
         .anyMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
     assertThat(reportTwoAuthors.getReportPeople())
@@ -1678,7 +1678,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Remove the first author
     reportTwoAuthors.setReportPeople(ImmutableList.of(personToReportAuthor(liz)));
     final Report reportSecondAuthor =
-        authorMutationExecutor.updateReport(FIELDS, true, getReportInput(reportTwoAuthors));
+        authorMutationExecutor.updateReport(FIELDS, getReportInput(reportTwoAuthors), true);
     assertThat(reportSecondAuthor.getReportPeople())
         .noneMatch(rp -> Objects.equals(rp.getUuid(), author.getUuid()) && rp.getAuthor());
     assertThat(reportSecondAuthor.getReportPeople())
@@ -1687,7 +1687,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     // Try to edit the report as the first author, should fail
     reportSecondAuthor.setIntent("Testing report authors again");
     try {
-      authorMutationExecutor.updateReport(FIELDS, true, getReportInput(reportSecondAuthor));
+      authorMutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
@@ -1696,7 +1696,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
     reportSecondAuthor
         .setReportPeople(ImmutableList.of(personToReportAuthor(author), personToReportAuthor(liz)));
     try {
-      authorMutationExecutor.updateReport(FIELDS, true, getReportInput(reportSecondAuthor));
+      authorMutationExecutor.updateReport(FIELDS, getReportInput(reportSecondAuthor), true);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }

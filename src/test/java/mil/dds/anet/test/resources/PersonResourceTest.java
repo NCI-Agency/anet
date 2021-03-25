@@ -336,7 +336,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(winner).isNotNull();
     assertThat(winner.getUuid()).isNotNull();
 
-    nrUpdated = adminMutationExecutor.mergePeople("", winner.getUuid(), false, loser.getUuid());
+    nrUpdated = adminMutationExecutor.mergePeople("", false, loser.getUuid(), winner.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
@@ -360,7 +360,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
-    nrUpdated = adminMutationExecutor.mergePeople("", winner.getUuid(), true, loser.getUuid());
+    nrUpdated = adminMutationExecutor.mergePeople("", true, loser.getUuid(), winner.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.

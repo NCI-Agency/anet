@@ -732,7 +732,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
     final Report updated =
-        authorMutationExecutor.updateReport(REPORT_FIELDS, true, getReportInput(report));
+        authorMutationExecutor.updateReport(REPORT_FIELDS, getReportInput(report), true);
     assertThat(updated).isNotNull();
     assertThat(updated.getState()).isEqualTo(ReportState.DRAFT);
     authorMutationExecutor.deleteReport("", report.getUuid());
