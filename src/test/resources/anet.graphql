@@ -244,43 +244,43 @@ enum LocationSearchSortBy {
 
 """Mutation root"""
 type Mutation {
-  updateOrganization(organization: OrganizationInput): Int
-  deletePosition(uuid: String): Int
-  updateNote(note: NoteInput): Note
-  createPosition(position: PositionInput): Position
-  clearCache: String
-  reloadDictionary: String
-  createOrganization(organization: OrganizationInput): Organization
-  createReport(report: ReportInput): Report
-  putPersonInPosition(person: PersonInput, uuid: String): Int
-  deleteReport(uuid: String): Int
-  deleteNote(uuid: String): Int
-  createNote(note: NoteInput): Note
-  deletePersonFromPosition(uuid: String): Int
   addComment(comment: CommentInput, uuid: String): Comment
-  createLocation(location: LocationInput): Location
-  publishReport(uuid: String): Report
-  submitReport(uuid: String): Report
-  updateReportAssessments(assessments: [NoteInput], report: ReportInput): Int!
-  updatePosition(position: PositionInput): Int
-  rejectReport(comment: CommentInput, uuid: String): Report
-  updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
-  createPerson(person: PersonInput): Person
-  emailReport(uuid: String, email: AnetEmailInput): Int
-  createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
-  mergePeople(winnerUuid: String, copyPosition: Boolean = false, loserUuid: String): Int
-  saveAdminSettings(settings: [AdminSettingInput]): Int
-  emailRollup(orgType: OrganizationType, advisorOrganizationUuid: String, endDate: Instant, principalOrganizationUuid: String, email: AnetEmailInput, startDate: Instant): Int
-  updateTask(task: TaskInput): Int
-  deleteSavedSearch(uuid: String): Int
-  updateLocation(location: LocationInput): Int
-  updateReport(sendEditEmail: Boolean = true, report: ReportInput): Report
-  createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
-  updateAssociatedPosition(position: PositionInput): Int
   approveReport(comment: CommentInput, uuid: String): Report
+  clearCache: String
+  createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
+  createLocation(location: LocationInput): Location
+  createNote(note: NoteInput): Note
+  createOrganization(organization: OrganizationInput): Organization
+  createPerson(person: PersonInput): Person
+  createPosition(position: PositionInput): Position
+  createReport(report: ReportInput): Report
+  createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
   createTask(task: TaskInput): Task
+  deleteNote(uuid: String): Int
+  deletePersonFromPosition(uuid: String): Int
+  deletePosition(uuid: String): Int
+  deleteReport(uuid: String): Int
+  deleteSavedSearch(uuid: String): Int
+  emailReport(email: AnetEmailInput, uuid: String): Int
+  emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
+  mergePeople(copyPosition: Boolean = false, loserUuid: String, winnerUuid: String): Int
+  mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
+  publishReport(uuid: String): Report
+  putPersonInPosition(person: PersonInput, uuid: String): Int
+  rejectReport(comment: CommentInput, uuid: String): Report
+  reloadDictionary: String
+  saveAdminSettings(settings: [AdminSettingInput]): Int
+  submitReport(uuid: String): Report
+  updateAssociatedPosition(position: PositionInput): Int
+  updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
+  updateLocation(location: LocationInput): Int
+  updateNote(note: NoteInput): Note
+  updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int
-  mergePositions(winnerPosition: PositionInput, loserUuid: String): Position
+  updatePosition(position: PositionInput): Int
+  updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
+  updateReportAssessments(assessments: [NoteInput], report: ReportInput): Int!
+  updateTask(task: TaskInput): Int
 }
 
 type Note {
@@ -558,29 +558,29 @@ enum PositionType {
 
 """Query root"""
 type Query {
-  positionList(query: PositionSearchQueryInput): AnetBeanList_Position
-  personList(query: PersonSearchQueryInput): AnetBeanList_Person
-  reportList(query: ReportSearchQueryInput): AnetBeanList_Report
+  adminSettings: [AdminSetting]
+  advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
+  approvalStepInUse(uuid: String): Boolean!
+  authorizationGroup(uuid: String): AuthorizationGroup
+  authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
+  location(uuid: String): Location
+  locationList(query: LocationSearchQueryInput): AnetBeanList_Location
+  me: Person
+  mySearches: [SavedSearch]
+  organization(uuid: String): Organization
   organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
+  person(uuid: String): Person
+  personList(query: PersonSearchQueryInput): AnetBeanList_Person
+  position(uuid: String): Position
+  positionList(query: PositionSearchQueryInput): AnetBeanList_Position
+  projectVersion: String
+  report(uuid: String): Report
+  reportList(query: ReportSearchQueryInput): AnetBeanList_Report
+  rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
+  showRollupEmail(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, showText: Boolean = false, startDate: Instant): String
+  task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
   userActivities: RecentActivities
-  mySearches: [SavedSearch]
-  locationList(query: LocationSearchQueryInput): AnetBeanList_Location
-  advisorReportInsights(weeksAgo: Int = 3, orgUuid: String = "-1"): [AdvisorReportsEntry]
-  task(uuid: String): Task
-  rollupGraph(orgType: OrganizationType, advisorOrganizationUuid: String, endDate: Instant, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
-  person(uuid: String): Person
-  authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
-  organization(uuid: String): Organization
-  report(uuid: String): Report
-  me: Person
-  approvalStepInUse(uuid: String): Boolean!
-  location(uuid: String): Location
-  showRollupEmail(orgType: OrganizationType, advisorOrganizationUuid: String, endDate: Instant, showText: Boolean = false, principalOrganizationUuid: String, startDate: Instant): String
-  position(uuid: String): Position
-  authorizationGroup(uuid: String): AuthorizationGroup
-  adminSettings: [AdminSetting]
-  projectVersion: String
 }
 
 type RecentActivities {
