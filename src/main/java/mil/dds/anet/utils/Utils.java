@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.json.JsonSanitizer;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -590,6 +591,11 @@ public class Utils {
     freemarkerConfig.setClassForTemplateLoading(clazz, "/");
     freemarkerConfig.setAPIBuiltinEnabled(true);
     return freemarkerConfig;
+  }
+
+  public static Set<String> getSubFields(ResolutionEnvironment env) {
+    return env.dataFetchingEnvironment.getSelectionSet().getFields().stream()
+        .map(sf -> sf.getQualifiedName()).collect(Collectors.toSet());
   }
 
 }

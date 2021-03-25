@@ -55,9 +55,8 @@ String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-
 // In this section you declare where to find the dependencies of your project
 repositories {
 	mavenCentral()
-	maven { url 'https://jitpack.io' }
-	maven { url "https://repo.spring.io/plugins-release" }
 	jcenter()
+	maven { url 'https://jitpack.io' }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -71,13 +70,13 @@ dependencies {
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.3.0-1'
-	implementation 'com.google.guava:guava:30.1-jre' // Pick the non-Android version of Guice
+	implementation 'com.google.guava:guava:30.1.1-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre8'
 	implementation 'org.postgresql:postgresql:42.2.19' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.1'
+	implementation 'org.liquibase:liquibase-core:4.3.2'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.2'
@@ -90,7 +89,7 @@ dependencies {
 	implementation 'ch.qos.logback:logback-access:1.2.3'
 	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
-	implementation 'io.leangen.graphql:spqr:0.11.1'
+	implementation 'io.leangen.graphql:spqr:0.11.2'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.2'
 
@@ -111,7 +110,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.12.2'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.12.5'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.0'
 
