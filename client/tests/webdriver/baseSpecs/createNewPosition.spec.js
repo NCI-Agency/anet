@@ -7,6 +7,7 @@ const ADVISOR_ORG = "EF 2.2"
 const ADVISOR_ORG_COMPLETE = "EF 2.2 -"
 const PRINCIPAL_ORG = "MoI"
 const PRINCIPAL_ORG_COMPLETE = "MoI - Ministry of Interior P12345"
+const SIMILAR_ADVISOR_POSITION_NAME = "EF 1.1 Advisor for Agriculture"
 
 describe("Create position page", () => {
   describe("When creating a position", () => {
@@ -27,6 +28,18 @@ describe("Create position page", () => {
       expect(CreatePosition.organizationHelpBlock.getText()).to.equal(
         "Organization is required"
       )
+    })
+
+    it("Should display possible duplicates with similar names", () => {
+      CreatePosition.positionNameInput.setValue(SIMILAR_ADVISOR_POSITION_NAME)
+      CreatePosition.duplicatesButton.waitForDisplayed()
+      CreatePosition.duplicatesButton.click()
+      CreatePosition.modalContent.waitForDisplayed()
+      const similar = CreatePosition.similarPosition.getText()
+      CreatePosition.modalCloseButton.waitForDisplayed()
+      CreatePosition.modalCloseButton.click()
+      CreatePosition.modalContent.waitForDisplayed({ reverse: true })
+      expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
     })
 
     it("Should successfully create a position when required fields are filled", () => {
