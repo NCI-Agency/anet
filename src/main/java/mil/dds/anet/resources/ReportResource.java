@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
@@ -626,10 +627,11 @@ public class ReportResource {
 
   @GraphQLQuery(name = "reportList")
   public CompletableFuture<AnetBeanList<Report>> search(
-      @GraphQLRootContext Map<String, Object> context, @GraphQLEnvironment Set<String> subFields,
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") ReportSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(context, subFields, query);
+    return dao.search(context, Utils.getSubFields(env), query);
   }
 
   /**

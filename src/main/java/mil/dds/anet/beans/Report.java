@@ -595,15 +595,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
     return actionTail;
   }
 
-  public List<ReportAction> getWorkflow() {
-    return workflow;
-  }
-
-  @GraphQLInputField(name = "workflow")
-  public void setWorkflow(List<ReportAction> workflow) {
-    this.workflow = workflow;
-  }
-
   private List<ReportAction> createApprovalStepsActions(List<ReportAction> actions,
       List<ApprovalStep> steps) {
     return steps.stream().map(step -> createApprovalStep(actions, step)).filter(as -> as != null)

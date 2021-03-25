@@ -23,7 +23,6 @@
         "autoprefixer",
         "com.networknt:json-schema-validator",
         "draft-js",
-        "io.leangen.graphql:spqr",
         "leaflet",
         "react-tooltip",
         "yup"

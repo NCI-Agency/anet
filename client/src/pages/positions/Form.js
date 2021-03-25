@@ -372,6 +372,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
   function save(values, form) {
     const position = Object.without(
       new Position(values),
+      "previousPeople",
       "notes",
       "customFields", // initial JSON from the db
       "responsibleTasks", // Only for querying

@@ -149,13 +149,13 @@ public class Position extends AbstractCustomizableAnetBean implements RelatableO
     return person.getForeignObject();
   }
 
-  // for easy access through reflection
+  // for easy access through reflection in {@link PersonDao#copyPerson}
   @JsonIgnore
   public void setCurrentPersonUuid(String personUuid) {
     setPersonUuid(personUuid);
   }
 
-  // for easy access through reflection
+  // for easy access through reflection in {@link PersonDao#copyPerson}
   @JsonIgnore
   public String getCurrentPersonUuid() {
     return getPersonUuid();
