@@ -5,7 +5,10 @@ import static org.assertj.core.api.Assertions.fail;
 
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.Location;
@@ -14,6 +17,7 @@ import mil.dds.anet.test.client.LocationSearchQueryInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import org.junit.jupiter.api.Test;
@@ -121,6 +125,39 @@ public class LocationResourceTest extends AbstractResourceTest {
       if (isSuperUser) {
         fail("Unexpected ForbiddenException");
       }
+    }
+  }
+
+  @Test
+  public void mergeLocationTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Create Loser Location
+    final LocationInput loserLocation =
+        TestData.createLocationInput("The Loser Location", 43.21, -87.65);
+    final Location createdLoser = adminMutationExecutor.createLocation(FIELDS, loserLocation);
+    assertThat(createdLoser).isNotNull();
+    assertThat(createdLoser.getUuid()).isNotNull();
+    assertThat(createdLoser.getName()).isEqualTo(loserLocation.getName());
+
+    // Create Winner Location
+    final LocationInput winnerLocation =
+        TestData.createLocationInput("The Winner Location", 41.11, -85.15);
+    final Location createdWinner = adminMutationExecutor.createLocation(FIELDS, winnerLocation);
+    assertThat(createdWinner).isNotNull();
+    assertThat(createdWinner.getUuid()).isNotNull();
+    assertThat(createdWinner.getName()).isEqualTo(winnerLocation.getName());
+
+    final LocationInput mergedLocationInput = getLocationInput(createdWinner);
+    final Location mergedLocation =
+        adminMutationExecutor.mergeLocations(FIELDS, loserLocation.getUuid(), mergedLocationInput);
+    assertThat(mergedLocation).isNotNull();
+    assertThat(mergedLocation.getUuid()).isNotNull();
+
+    // Assert that loser is gone.
+    try {
+      adminQueryExecutor.location(FIELDS, loserLocation.getUuid());
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
     }
   }
 

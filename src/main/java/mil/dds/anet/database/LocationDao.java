@@ -8,6 +8,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
 
@@ -19,6 +20,7 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
   }
 
   static class SelfIdBatcher extends IdBatcher<Location> {
+
     private static final String sql =
         "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
 
@@ -58,6 +60,25 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
   @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getLocationSearcher().runSearch(query);
+  }
+
+  @InTransaction
+  public int mergeLocations(Location loserLocation, Location winnerLocation) {
+    final String loserLocationUuid = loserLocation.getUuid();
+    final String winnerLocationUuid = winnerLocation.getUuid();
+
+    // Update reports location
+    updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
+
+    // update positions location
+    updateForMerge("positions", "locationUuid", winnerLocationUuid, loserLocationUuid);
+
+    // update noteRelatedObjects location
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerLocationUuid,
+        loserLocationUuid);
+
+    // finally delete the location!
+    return deleteForMerge("locations", "uuid", loserLocationUuid);
   }
 
   // TODO: Don't delete any location if any references exist.
