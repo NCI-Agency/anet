@@ -1,6 +1,6 @@
 import unittest
 
-from src.core.business_logic.base_methods import base_methods
+from src.core.business_logic.base.base_methods import base_methods
 from tests.base import base_test_fixture
 
 
@@ -23,7 +23,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         base_methods.is_entity_update(person, self.update_rules)
         base_methods.is_entity_update(location, self.update_rules)
 
-        position.insert_update_nested_entity(self.utc_now, self.update_rules)
+        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions) \
                     .filter(self.PeoplePositions.personUuid == person.uuid, 
@@ -66,7 +66,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         formerPosUuid = self.session.query(self.Position).filter(
             self.Position.currentPersonUuid == person.uuid).all()[0].uuid
 
-        position.insert_update_nested_entity(self.utc_now, self.update_rules)
+        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions) \
                     .filter(self.PeoplePositions.personUuid == person.uuid, 
@@ -136,7 +136,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
         formerPersonUuid = self.session.query(self.Position) \
                             .filter(self.Position.uuid == position.uuid).all()[0].currentPersonUuid
 
-        position.insert_update_nested_entity(self.utc_now, self.update_rules)
+        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions).filter(
             self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid).all()
@@ -207,7 +207,7 @@ class InsertUpdateNestedEntityTest(base_test_fixture.BaseTestFixture):
                             .filter(self.Position.uuid == position.uuid) \
                             .all()[0].currentPersonUuid
 
-        position.insert_update_nested_entity(self.utc_now, self.update_rules)
+        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules)
 
         pp_q = self.session.query(self.PeoplePositions) \
                 .filter(self.PeoplePositions.personUuid == person.uuid,
