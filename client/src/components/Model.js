@@ -153,14 +153,39 @@ export const CUSTOM_FIELD_TYPE = {
   ARRAY_OF_ANET_OBJECTS: "array_of_anet_objects"
 }
 
+export const CUSTOM_FIELD_TYPE_DEFAULTS = {
+  [CUSTOM_FIELD_TYPE.TEXT]: "",
+  [CUSTOM_FIELD_TYPE.NUMBER]: null,
+  [CUSTOM_FIELD_TYPE.DATE]: null,
+  [CUSTOM_FIELD_TYPE.DATETIME]: null,
+  [CUSTOM_FIELD_TYPE.JSON]: null,
+  [CUSTOM_FIELD_TYPE.ENUM]: "",
+  [CUSTOM_FIELD_TYPE.ENUMSET]: [],
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: [],
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: null,
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: null,
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: []
+}
+
 const CUSTOM_FIELD_TYPE_SCHEMA = {
-  [CUSTOM_FIELD_TYPE.TEXT]: yup.string().nullable().default(""),
-  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null).typeError(
-    // eslint-disable-next-line no-template-curly-in-string
-    "${path} must be a ${type} type, but the final value was ${originalValue}"
-  ),
-  [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
-  [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.TEXT]: yup
+    .string()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.TEXT]),
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup
+    .number()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.NUMBER])
+    .typeError(
+      // eslint-disable-next-line no-template-curly-in-string
+      "${path} must be a ${type} type, but the final value was ${originalValue}"
+    ),
+  [CUSTOM_FIELD_TYPE.DATE]: yupDate
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.DATE]),
+  [CUSTOM_FIELD_TYPE.DATETIME]: yupDate
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.DATETIME]),
   [CUSTOM_FIELD_TYPE.JSON]: yup
     .mixed()
     .nullable()
@@ -174,13 +199,33 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
           : this.createError({ message: "Invalid JSON" })
       }
     )
-    .default(null),
-  [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
-  [CUSTOM_FIELD_TYPE.ENUMSET]: yup.array().nullable().default([]),
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup.array().nullable().default([]),
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null),
-  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: yup.mixed().nullable().default(null),
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: yup.array().nullable().default([])
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.JSON]),
+  [CUSTOM_FIELD_TYPE.ENUM]: yup
+    .string()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ENUM]),
+  [CUSTOM_FIELD_TYPE.ENUMSET]: yup
+    .array()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ENUMSET]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup
+    .array()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]),
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup
+    .mixed()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.SPECIAL_FIELD]),
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: yup
+    .mixed()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ANET_OBJECT]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: yup
+    .array()
+    .nullable()
+    .default(
+      CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]
+    )
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {

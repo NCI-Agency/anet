@@ -5,9 +5,9 @@ import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -192,10 +192,10 @@ public class PersonResource {
 
   @GraphQLQuery(name = "personList")
   public AnetBeanList<Person> search(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLEnvironment Set<String> subFields,
+      @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(subFields, query);
+    return dao.search(Utils.getSubFields(env), query);
   }
 
   /**
@@ -242,7 +242,7 @@ public class PersonResource {
     }
 
     int merged = dao.mergePeople(winner, loser);
-    AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
+    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
 
     if (loserPosition != null && copyPosition) {
       AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(winner.getUuid(),
@@ -268,11 +268,11 @@ public class PersonResource {
     }
 
     @SuppressWarnings("unchecked")
-    final List<String> whitelistDomainNames =
+    final List<String> allowedDomainNames =
         ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
             .map(String::toLowerCase).collect(Collectors.toList());
 
-    if (!Utils.isEmailWhitelisted(emailInput, whitelistDomainNames)) {
+    if (!Utils.isEmailAllowed(emailInput, allowedDomainNames)) {
       throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
     }
   }

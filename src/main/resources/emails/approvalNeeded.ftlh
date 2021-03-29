@@ -106,22 +106,6 @@ Dear ${approvalStepName},
   </#if>
 </div>
 
-<#if report.loadTags(context).get()??>
-  <#if fields.report.reportTags??>
-    <#assign tags = report.getTags()>
-    <div>
-      <strong>${fields.report.reportTags}:</strong>
-      <ul>
-        <#list tags as tag>
-          <li>
-            ${(tag.name)!} <em>(${(tag.description)!})</em>
-          </li>
-        </#list>
-      </ul>
-    </div>
-  </#if>
-</#if>
-
 <div>
   <strong>Engagement date and location:</strong> ${(engagementDateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
@@ -152,7 +136,7 @@ Dear ${approvalStepName},
       </#if>
     </#if>
     <#if report.nextSteps??>
-      <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>
+      <p><strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}</p>
     </#if>
   </div>
 </div>

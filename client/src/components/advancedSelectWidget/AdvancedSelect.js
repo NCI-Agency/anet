@@ -1,4 +1,5 @@
-import { Popover, PopoverInteractionKind, Position } from "@blueprintjs/core"
+import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
 import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
@@ -218,10 +219,7 @@ const AdvancedSelect = ({
     ]
   )
 
-  const { callback: fetchResultsDebounced } = useDebouncedCallback(
-    fetchResults,
-    400
-  )
+  const fetchResultsDebounced = useDebouncedCallback(fetchResults, 400)
 
   useEffect(() => {
     if (
@@ -296,11 +294,10 @@ const AdvancedSelect = ({
     <>
       {!(disabled && renderSelectedWithDelete) && (
         <>
-          <div id={`${fieldName}-popover`}>
+          <div id={`${fieldName}-popover`} className="advanced-select-popover">
             <InputGroup>
-              <Popover
-                className="advanced-select-popover"
-                popoverClassName="bp3-popover-content-sizing"
+              <Popover2
+                popoverClassName="bp3-popover2-content-sizing"
                 content={
                   <Row className="border-between">
                     <FilterAsNav
@@ -350,10 +347,12 @@ const AdvancedSelect = ({
                 isOpen={showOverlay}
                 captureDismiss
                 disabled={disabled}
-                interactionKind={PopoverInteractionKind.CLICK}
+                interactionKind={Popover2InteractionKind.CLICK}
                 onInteraction={handleInteraction}
                 usePortal={false}
-                position={Position.BOTTOM}
+                autoFocus={false}
+                enforceFocus={false}
+                placement="bottom"
                 modifiers={{
                   preventOverflow: {
                     enabled: false
@@ -377,7 +376,7 @@ const AdvancedSelect = ({
                   }}
                   disabled={disabled}
                 />
-              </Popover>
+              </Popover2>
               {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
               {addon && (
                 <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />

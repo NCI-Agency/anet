@@ -782,27 +782,6 @@ table hr.attendee-divider {
 	width: 190px;
 }
 
-/* Specific styling for report tags in edit mode */
-.reportTag {
-	margin-right: 0.5em;
-}
-.reportTag::before {
-	content: "#";
-}
-.reportTagRemove {
-	margin-left: 0.25em;
-	color: white;
-    cursor: pointer;
-}
-.reportTagRemove, .reportTagRemove:hover {
-    text-decoration: none;
-}
-.reportTag.label {
-	display: inline-block;
-	font-size: 80%;
-	line-height: inherit;
-}
-
 .form-control-static {
 	/* The design calls for 18px of separation between static form rows.
 		The form row already has padding-top: 7px and padding-bottom: 7px,
@@ -860,20 +839,20 @@ header.searchPagination {
 	font-size: 0.8em;
 }
 
-.advanced-select-popover .bp3-popover-content-sizing {
+.advanced-select-popover .bp3-popover2-content-sizing {
 	width: 100% !important;
 }
 
-.advanced-select-popover span.bp3-popover-target {
+.advanced-select-popover span.bp3-popover2-target {
 	display: block;
 	width: 100%;
 }
 
-.advanced-select-popover .bp3-transition-container {
-	top: 35px !important;
+.advanced-select-popover .bp3-popover2-transition-container {
+	top: 50px !important;
 }
 
-.advanced-select-popover .bp3-popover-content {
+.advanced-select-popover .bp3-popover2-content {
 	min-width: 400px;
 	max-width: 90vw !important;
 }

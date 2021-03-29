@@ -74,6 +74,60 @@ export default class Position extends Model {
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
+  static allFieldsQuery = `
+    uuid
+    name
+    type
+    status
+    code
+    organization {
+      uuid
+      shortName
+      longName
+      identificationCode
+    }
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+    associatedPositions {
+      uuid
+      name
+      type
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+      organization {
+        uuid
+        shortName
+      }
+    }
+    previousPeople {
+      startTime
+      endTime
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+    location {
+      uuid
+      name
+    }
+    customFields
+    ${GRAPHQL_NOTES_FIELDS}
+  `
+
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
   }
@@ -104,6 +158,14 @@ export default class Position extends Model {
 
   isPrincipal() {
     return this.type === Position.TYPE.PRINCIPAL
+  }
+
+  isActive() {
+    return Position.isActive(this)
+  }
+
+  static isActive(pos) {
+    return pos.status === Position.STATUS.ACTIVE
   }
 
   toString() {

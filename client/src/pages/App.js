@@ -74,6 +74,22 @@ const GQL_GET_APP_DATA = gql`
             name
             rank
             avatar(size: 32)
+            position {
+              uuid
+              name
+              type
+              code
+              status
+              organization {
+                uuid
+                shortName
+                identificationCode
+              }
+              location {
+                uuid
+                name
+              }
+            }
             ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
           }
         }
@@ -207,7 +223,7 @@ const App = ({ pageDispatchers, pageProps }) => {
     )
 
     const currentUser = new Person(data.me)
-    const notifications = getNotifications(currentUser)
+    const notifications = getNotifications(currentUser.position)
     return {
       currentUser,
       settings,

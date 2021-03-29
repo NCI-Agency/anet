@@ -6,7 +6,7 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
@@ -187,12 +187,15 @@ const EditAssociatedPositionsModal = ({
   function save(values, form) {
     const newPosition = Object.without(
       new Position(values),
+      "previousPeople",
+      "person", // prevent any changes to person
       "notes",
-      "responsibleTasks" // Only for querying
+      "responsibleTasks", // Only for querying
+      DEFAULT_CUSTOM_FIELDS_PARENT
     )
-    newPosition.associatedPositions = values.associatedPositions
-    delete newPosition.previousPeople
-    delete newPosition.person // prevent any changes to person.
+    newPosition.associatedPositions = values.associatedPositions?.map(ap =>
+      Object.without(ap, DEFAULT_CUSTOM_FIELDS_PARENT)
+    )
     return API.mutation(GQL_UPDATE_ASSOCIATED_POSITION, {
       position: newPosition
     })

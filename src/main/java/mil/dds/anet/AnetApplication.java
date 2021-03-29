@@ -50,7 +50,6 @@ import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
-import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -161,8 +160,19 @@ public class AnetApplication extends Application<AnetConfiguration> {
               HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
             final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
             final AccessToken token = securityContext.getToken();
+            // Call non-synchronized method first
+            Person person = findUser(dao, token);
+            if (person == null) {
+              // Call synchronized method
+              person = findOrCreateUser(dao, token);
+            }
+            return person;
+          }
+
+          // Non-synchronized method, safe to run multiple times in parallel
+          private Person findUser(final PersonDao dao, final AccessToken token) {
             final String openIdSubject = token.getSubject();
-            List<Person> p = dao.findByOpenIdSubject(openIdSubject);
+            final List<Person> p = dao.findByOpenIdSubject(openIdSubject);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
               logger.trace("found existing user={} by openIdSubject={}", existingPerson,
@@ -170,9 +180,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
               return existingPerson;
             }
 
+            return null;
+          }
+
+          // Synchronized method, so we create/update at most one user in the face of multiple
+          // simultaneous authentication requests
+          private synchronized Person findOrCreateUser(final PersonDao dao,
+              final AccessToken token) {
+            final Person person = findUser(dao, token);
+            if (person != null) {
+              return person;
+            }
+
             // Might be user from before Keycloak integration, try username
             final String username = token.getPreferredUsername();
-            p = dao.findByDomainUsername(username);
+            final String openIdSubject = token.getSubject();
+            List<Person> p = dao.findByDomainUsername(username);
             if (!p.isEmpty()) {
               final Person existingPerson = p.get(0);
               logger.trace(
@@ -197,22 +220,22 @@ public class AnetApplication extends Application<AnetConfiguration> {
             }
 
             // Not found, first time this user has ever logged in
-            final Person person = new Person();
+            final Person newPerson = new Person();
             logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
                 username, email, openIdSubject);
-            person.setRole(Role.ADVISOR);
-            person.setPendingVerification(true);
+            newPerson.setRole(Role.ADVISOR);
+            newPerson.setPendingVerification(true);
             // Copy some data from the authentication token
-            person.setOpenIdSubject(openIdSubject);
-            person.setDomainUsername(username);
-            person.setEmailAddress(email);
-            person.setName(getCombinedName(token));
+            newPerson.setOpenIdSubject(openIdSubject);
+            newPerson.setDomainUsername(username);
+            newPerson.setEmailAddress(email);
+            newPerson.setName(getCombinedName(token));
             /*
              * Note: there's also token.getGender(), but that's not generally available in AD/LDAP,
              * and token.getPhoneNumber(), but that requires scope="openid phone" on the
              * authentication request, which is hard to accomplish with current Keycloak code.
              */
-            return dao.insert(person);
+            return dao.insert(newPerson);
           }
         };
       }
@@ -275,7 +298,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
     // The Object Engine is the core place where we store all of the Dao's
     // You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
-    final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, this, metricRegistry);
+    final AnetObjectEngine engine =
+        new AnetObjectEngine(dbUrl, this, configuration, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
     if (configuration.getRedirectToHttps()) {
@@ -351,23 +375,23 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final AdminResource adminResource = new AdminResource(engine, configuration);
     final HomeResource homeResource = new HomeResource(engine, configuration);
     final SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
-    final TagResource tagResource = new TagResource(engine);
     final AuthorizationGroupResource authorizationGroupResource =
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
     final ApprovalStepResource approvalStepResource = new ApprovalStepResource(engine);
+    final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
+    graphQlResource.initialise(engine, configuration,
+        ImmutableList.of(reportResource, personResource, positionResource, locationResource,
+            orgResource, taskResource, adminResource, savedSearchResource,
+            authorizationGroupResource, noteResource, approvalStepResource),
+        metricRegistry);
 
     // Register all of the HTTP Resources
     environment.jersey().register(loggingResource);
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
     environment.jersey().register(new ViewResponseFilter(configuration));
-    environment.jersey()
-        .register(new GraphQlResource(engine, configuration,
-            ImmutableList.of(reportResource, personResource, positionResource, locationResource,
-                orgResource, taskResource, adminResource, savedSearchResource, tagResource,
-                authorizationGroupResource, noteResource, approvalStepResource),
-            metricRegistry));
+    environment.jersey().register(graphQlResource);
   }
 
   private void runAccountDeactivationWorker(final AnetConfiguration configuration,

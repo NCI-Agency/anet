@@ -70,13 +70,13 @@ export default {
     const from = email[0].trim()
     const domain = email[1].toLowerCase()
     return (
-      this.validateWithWhitelist(from, domain, domainNames) ||
+      this.validateAgainstAllowedDomains(from, domain, domainNames) ||
       this.validateWithWildcard(domain, wildcardDomains)
     )
   },
 
-  validateWithWhitelist: function(from, domain, whitelist) {
-    return from.length > 0 && whitelist.includes(domain)
+  validateAgainstAllowedDomains: function(from, domain, allowedDomains) {
+    return from.length > 0 && allowedDomains.includes(domain)
   },
 
   validateWithWildcard: function(domain, wildcardDomains) {
@@ -210,6 +210,10 @@ export default {
         maxLen <= 0 ? nonDigitsRemoved : nonDigitsRemoved.slice(0, maxLen)
     }
     return safeVal
+  },
+
+  getMaxTextFieldLength: function(field) {
+    return field?.maxTextFieldLength || Settings.maxTextFieldLength
   }
 }
 

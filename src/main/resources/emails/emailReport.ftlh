@@ -256,7 +256,7 @@ ${sender.name} sent you a report from ANET:
               </#if>
             </#if>
             <p>
-              <strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}
+              <strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>
@@ -312,22 +312,6 @@ ${sender.name} sent you a report from ANET:
           </div>
         </#if>
       </div>
-
-      <#if report.loadTags(context).get()??>
-        <#if fields.report.reportTags??>
-          <#assign tags = report.getTags()>
-          <div class="form-group">
-            <label for="tags" class="col-sm-2 control-label">${fields.report.reportTags}</label>
-            <div class="col-sm-7">
-              <div id="tags" class="form-control-static">
-                <#list tags as tag>
-                  <span class="reportTag label label-info">${(tag.name)!}</span>
-                </#list>
-              </div>
-            </div>
-          </div>
-        </#if>
-      </#if>
 
       <div class="form-group">
         <label for="author" class="col-sm-2 control-label">Report author</label>

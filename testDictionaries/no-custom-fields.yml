@@ -152,8 +152,9 @@ fields:
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details
     cancelled: ''
-    reportTags: Tags
-    nextSteps: Next steps
+    nextSteps:
+      label: Next steps
+      maxTextFieldLength: 1000
     keyOutcomes: Key outcomes
     reportText: Key details
 

@@ -4,9 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
+import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import java.io.IOException;
 import java.time.Duration;
@@ -25,14 +26,13 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.integration.config.AnetTestConfiguration;
 import mil.dds.anet.test.integration.utils.EmailResponse;
 import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.integration.utils.TestBeans;
 import mil.dds.anet.test.resources.AbstractResourceTest;
-import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import org.junit.jupiter.api.AfterAll;
@@ -51,7 +51,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   private static AnetEmailWorker emailWorker;
 
   private static boolean executeEmailServerTests;
-  private static String whitelistedEmail;
+  private static String allowedEmail;
 
   @BeforeAll
   @SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     executeEmailServerTests = Boolean.parseBoolean(
         AnetTestConfiguration.getConfiguration().get("emailServerTestsExecute").toString());
 
-    whitelistedEmail =
+    allowedEmail =
         "@" + ((List<String>) app.getConfiguration().getDictionaryEntry("domainNames")).get(0);
 
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
@@ -148,19 +148,20 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testGH3304() {
+  public void testGH3304()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a draft report
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportDao reportDao = engine.getReportDao();
-    final Person author = getRegularUser();
-    final ReportPerson advisor = PersonTest.personToPrimaryReportAuthor(author);
-    final ReportPerson principal = PersonTest.personToPrimaryReportPerson(getSteveSteveson());
+    final Person author = getRegularUserBean();
+    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
+    final ReportPerson advisor = personToPrimaryReportAuthor(author);
+    final ReportPerson principal = personToPrimaryReportPerson(getSteveStevesonBean());
     final Report draftReport = reportDao.insert(TestBeans.getTestReport("testGH3304",
         getFutureDate(), null, Lists.newArrayList(advisor, principal)));
 
     // Submit the report
-    graphQLHelper.updateObject(author, "submitReport", "uuid", "uuid", "String",
-        draftReport.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    authorMutationExecutor.submitReport("{ uuid }", draftReport.getUuid());
     // This planned report gets approved automatically
     final Report submittedReport = testReportState(draftReport.getUuid(), ReportState.APPROVED);
 
@@ -181,8 +182,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final Report redraftedReport = testReportDraft(updatedReport.getUuid());
 
     // Submit the report
-    graphQLHelper.updateObject(author, "submitReport", "uuid", "uuid", "String",
-        redraftedReport.getUuid(), new TypeReference<GraphQlResponse<Report>>() {});
+    authorMutationExecutor.submitReport("{ uuid }", redraftedReport.getUuid());
     // This should send an email to the approver
     expectedIds.add("hunter+jacob");
     // State should be PENDING_APPROVAL
@@ -358,8 +358,8 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final AnetObjectEngine engine = AnetObjectEngine.getInstance();
     final ReportDao reportDao = engine.getReportDao();
 
-    final ReportPerson author = PersonTest.personToReportAuthor(TestBeans.getTestPerson());
-    author.setEmailAddress(toAddressId + whitelistedEmail);
+    final ReportPerson author = personToReportAuthor(TestBeans.getTestPerson());
+    author.setEmailAddress(toAddressId + allowedEmail);
     engine.getPersonDao().insert(author);
 
     ApprovalStep approvalStep = null;

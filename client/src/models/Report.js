@@ -276,12 +276,12 @@ export default class Report extends Model {
         .when(["engagementDate"], (engagementDate, schema) =>
           !Report.isFuture(engagementDate)
             ? schema.required(
-              `You must provide a brief summary of the ${Settings.fields.report.nextSteps}`
+              `You must provide a brief summary of the ${Settings.fields.report.nextSteps.label}`
             )
             : schema.nullable()
         )
         .default("")
-        .label(Settings.fields.report.nextSteps),
+        .label(Settings.fields.report.nextSteps.label),
       keyOutcomes: yup
         .string()
         .nullable()
@@ -299,12 +299,6 @@ export default class Report extends Model {
         )
         .default("")
         .label(Settings.fields.report.keyOutcomes),
-      tags: yup.array().nullable().default([]),
-      reportTags: yup
-        .array()
-        .nullable()
-        .default([])
-        .label(Settings.fields.report.reportTags),
       reportSensitiveInformation: yup
         .object()
         .nullable()
@@ -601,7 +595,6 @@ export default class Report extends Model {
     return Object.without(
       new Report(values),
       "notes",
-      "reportTags",
       "showSensitiveInfo",
       "authors",
       DEFAULT_CUSTOM_FIELDS_PARENT,

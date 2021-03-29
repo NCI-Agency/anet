@@ -41,8 +41,8 @@ import utils from "utils"
 
 const GQL_ROLLUP_GRAPH = gql`
   query(
-    $startDate: Long!
-    $endDate: Long!
+    $startDate: Instant!
+    $endDate: Instant!
     $principalOrganizationUuid: String
     $advisorOrganizationUuid: String
     $orgType: OrganizationType
@@ -65,8 +65,8 @@ const GQL_ROLLUP_GRAPH = gql`
 `
 const GQL_SHOW_ROLLUP_EMAIL = gql`
   query(
-    $startDate: Long!
-    $endDate: Long!
+    $startDate: Instant!
+    $endDate: Instant!
     $principalOrganizationUuid: String
     $advisorOrganizationUuid: String
     $orgType: OrganizationType
@@ -82,8 +82,8 @@ const GQL_SHOW_ROLLUP_EMAIL = gql`
 `
 const GQL_EMAIL_ROLLUP = gql`
   mutation(
-    $startDate: Long!
-    $endDate: Long!
+    $startDate: Instant!
+    $endDate: Instant!
     $email: AnetEmailInput!
     $principalOrganizationUuid: String
     $advisorOrganizationUuid: String

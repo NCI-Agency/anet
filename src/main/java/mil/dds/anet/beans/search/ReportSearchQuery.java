@@ -97,9 +97,6 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   ReportCancelledReason cancelledReason;
   @GraphQLQuery
   @GraphQLInputField
-  private String tagUuid;
-  @GraphQLQuery
-  @GraphQLInputField
   private String authorPositionUuid;
   @GraphQLQuery
   @GraphQLInputField
@@ -111,6 +108,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   @GraphQLInputField
   private Boolean sensitiveInfo;
   // internal search parameter:
+  @JsonIgnore
   private boolean systemSearch;
 
   public ReportSearchQuery() {
@@ -318,14 +316,6 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.cancelledReason = cancelledReason;
   }
 
-  public String getTagUuid() {
-    return tagUuid;
-  }
-
-  public void setTagUuid(String tagUuid) {
-    this.tagUuid = tagUuid;
-  }
-
   public String getAuthorPositionUuid() {
     return authorPositionUuid;
   }
@@ -358,12 +348,10 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.sensitiveInfo = sensitiveInfo;
   }
 
-  @JsonIgnore
   public boolean isSystemSearch() {
     return systemSearch;
   }
 
-  @JsonIgnore
   public void setSystemSearch(boolean systemSearch) {
     this.systemSearch = systemSearch;
   }
@@ -375,7 +363,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         updatedAtStart, updatedAtEnd, releasedAtStart, releasedAtEnd, attendeeUuid, atmosphere,
         advisorOrgUuid, includeAdvisorOrgChildren, principalOrgUuid, includePrincipalOrgChildren,
         orgUuid, orgRecurseStrategy, locationUuid, taskUuid, pendingApprovalOf, state,
-        engagementStatus, cancelledReason, tagUuid, authorPositionUuid, attendeePositionUuid,
+        engagementStatus, cancelledReason, authorPositionUuid, attendeePositionUuid,
         authorizationGroupUuid, sensitiveInfo, systemSearch);
   }
 
@@ -410,7 +398,6 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getState(), other.getState())
         && Objects.equals(getEngagementStatus(), other.getEngagementStatus())
         && Objects.equals(getCancelledReason(), other.getCancelledReason())
-        && Objects.equals(getTagUuid(), other.getTagUuid())
         && Objects.equals(getAuthorPositionUuid(), other.getAuthorPositionUuid())
         && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())

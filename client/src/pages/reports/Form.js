@@ -35,7 +35,6 @@ import {
   useBoilerplate
 } from "components/Page"
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
-import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
@@ -43,7 +42,7 @@ import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
-import { AuthorizationGroup, Location, Person, Report, Tag, Task } from "models"
+import { AuthorizationGroup, Location, Person, Report, Task } from "models"
 import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
@@ -108,15 +107,6 @@ const GQL_GET_RECENTS = gql`
     ) {
       list {
         ${AuthorizationGroup.autocompleteQuery}
-      }
-    }
-    tagList(
-      query: {
-        pageSize: 0 # retrieve all
-      }
-    ) {
-      list {
-        ${Tag.autocompleteQuery}
       }
     }
   }
@@ -245,7 +235,6 @@ const ReportForm = ({
   const advisorPositionSingular = Settings.fields.advisor.position.name
 
   let recents = []
-  let tagSuggestions = []
   if (data) {
     recents = {
       locations: data.locationList.list,
@@ -253,11 +242,6 @@ const ReportForm = ({
       tasks: data.taskList.list,
       authorizationGroups: data.authorizationGroupList.list
     }
-    // ReactTags expects id and text properties
-    tagSuggestions = data.tagList.list.map(tag => ({
-      id: tag.uuid,
-      text: tag.name
-    }))
   }
 
   // Update the report schema according to the selected report tasks and attendees
@@ -672,16 +656,6 @@ const ReportForm = ({
                     className="atmosphere-details"
                   />
                 )}
-
-                {Settings.fields.report.reportTags && (
-                  <FastField
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.SpecialField}
-                    onChange={value => setFieldValue("reportTags", value, true)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
-                  />
-                )}
               </Fieldset>
 
               <Fieldset
@@ -887,7 +861,7 @@ const ReportForm = ({
                 {!isFutureEngagement && (
                   <FastField
                     name="nextSteps"
-                    label={Settings.fields.report.nextSteps}
+                    label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
                     componentClass="textarea"
                     onChange={event => {
@@ -895,19 +869,24 @@ const ReportForm = ({
                       setFieldValue("nextSteps", event.target.value, false)
                       validateFieldDebounced("nextSteps")
                     }}
-                    maxLength={Settings.maxTextFieldLength}
+                    maxLength={utils.getMaxTextFieldLength(
+                      Settings.fields.report.nextSteps
+                    )}
                     onKeyUp={event =>
                       countCharsLeft(
                         "nextStepsCharsLeft",
-                        Settings.maxTextFieldLength,
+                        utils.getMaxTextFieldLength(
+                          Settings.fields.report.nextSteps
+                        ),
                         event
                       )
                     }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.nextSteps.length}
+                          {utils.getMaxTextFieldLength(
+                            Settings.fields.report.nextSteps
+                          ) - initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </>
@@ -1376,8 +1355,6 @@ const ReportForm = ({
       report.atmosphereDetails = ""
       report.keyOutcomes = ""
     }
-    // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
-    report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip reportPeople fields not in data model
     report.reportPeople = values.reportPeople.map(reportPerson => {
       const rp = Object.without(

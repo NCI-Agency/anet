@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -193,8 +194,10 @@ public class PositionResource {
   }
 
   @GraphQLQuery(name = "positionList")
-  public AnetBeanList<Position> search(@GraphQLArgument(name = "query") PositionSearchQuery query) {
-    return dao.search(query);
+  public CompletableFuture<AnetBeanList<Position>> search(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") PositionSearchQuery query) {
+    return dao.search(context, query);
   }
 
   @GraphQLMutation(name = "deletePosition")
@@ -224,6 +227,51 @@ public class PositionResource {
     // if this position is in an organization, just remove it
     // if this position has any associated positions, just remove them
     return dao.delete(positionUuid);
+  }
+
+  @GraphQLMutation(name = "mergePositions")
+  public Position mergePositions(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "winnerPosition") Position winnerPosition,
+      @GraphQLArgument(name = "loserUuid") String loserUuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position loserPosition = dao.getByUuid(loserUuid);
+
+    assertCanUpdatePosition(user, winnerPosition);
+    // Check that given two position can be merged
+    arePositionsMergeable(winnerPosition, loserPosition);
+    validatePosition(user, winnerPosition);
+
+    int numRows = dao.mergePositions(winnerPosition, loserPosition);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged position relation information.",
+          Status.NOT_FOUND);
+    }
+    AnetAuditLogger.log("Position {} merged into {} by {}", loserPosition, winnerPosition, user);
+    return winnerPosition;
+  }
+
+  private void arePositionsMergeable(Position winnerPos, Position loserPos) {
+    if (loserPos.getUuid().equals(winnerPos.getUuid())) {
+      throw new WebApplicationException("Cannot merge identical positions.", Status.BAD_REQUEST);
+    }
+
+    if (Objects.nonNull(loserPos.getPersonUuid()) && Objects.nonNull(winnerPos.getPersonUuid())) {
+      throw new WebApplicationException("Cannot merge positions when both have assigned person.",
+          Status.BAD_REQUEST);
+    }
+
+    if (!loserPos.getOrganizationUuid().equals(winnerPos.getOrganizationUuid())) {
+      throw new WebApplicationException("Cannot merge positions from different organizations.",
+          Status.BAD_REQUEST);
+    }
+
+    if (Objects.nonNull(loserPos.getPersonUuid()) && Objects.isNull(winnerPos.getPersonUuid())) {
+      throw new WebApplicationException(
+          "If There is a person assigned to one of the combined Positions, "
+              + "This person must be in the position which is merged",
+          Status.BAD_REQUEST);
+    }
   }
 
 }

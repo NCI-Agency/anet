@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.json.JsonSanitizer;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -378,16 +379,15 @@ public class Utils {
   }
 
   /**
-   * Checks whether an email address is allowed according to a list of whitelisted domains.
+   * Checks whether an email address is allowed according to a list of allowed domains.
    * 
    * @param email The email address to check
-   * @param whitelistDomainNames The list of whitelisted domain names (wildcards allowed)
-   * @return Whether the email is whitelisted
+   * @param allowedDomainNames The list of allowed domain names (wildcards allowed)
+   * @return Whether the email is allowed
    */
-  public static boolean isEmailWhitelisted(final String email,
-      final List<String> whitelistDomainNames) {
+  public static boolean isEmailAllowed(final String email, final List<String> allowedDomainNames) {
     try {
-      return isEmailDomainInList(email, whitelistDomainNames);
+      return isEmailDomainInList(email, allowedDomainNames);
     } catch (IllegalArgumentException e) {
       logger.error("Failed to process email: {}", email);
       return false;
@@ -591,6 +591,11 @@ public class Utils {
     freemarkerConfig.setClassForTemplateLoading(clazz, "/");
     freemarkerConfig.setAPIBuiltinEnabled(true);
     return freemarkerConfig;
+  }
+
+  public static Set<String> getSubFields(ResolutionEnvironment env) {
+    return env.dataFetchingEnvironment.getSelectionSet().getFields().stream()
+        .map(sf -> sf.getQualifiedName()).collect(Collectors.toSet());
   }
 
 }

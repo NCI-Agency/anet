@@ -86,7 +86,7 @@ To log in as one of the base data users, when prompted for a username and passwo
     1. You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
     1. You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
     1. You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
-    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
+    1. You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync; you can do this with `./gradlew dbDrop dbMigrate dbLoad` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Make sure the [Keycloak authentication server](keycloak.md#dev) is started (in a Docker container) in your local development environment: `./gradlew dockerCreateKeycloak dockerStartKeycloak`
 1. Run `./gradlew run` to run the server via Gradle
     1. If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can start an SMTP server (in a Docker container) in your local development environment: `./gradlew dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
@@ -128,6 +128,15 @@ Override the default gradle settings if you want to run your tests on a differen
 1. Make sure the Keycloak authentication server is started (in a Docker container) in your local development environment: `./gradlew dockerCreateKeycloak dockerStartKeycloak`
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. Run the server side tests with a clean build: `./gradlew -PtestEnv cleanTest test`
+
+Note that the server-side tests use the [GraphQL Java Generator](https://github.com/graphql-java-generator/graphql-gradle-plugin-project) to generate Java test classes from the GraphQL schema. If you have changed the schema, you need to update it before you can run the tests (especially if you want to test your schema changes). Since the schema is derived from the GraphQL service endpoint, you need to take the following steps for updating it:
+1. Start the server: `./gradlew run`
+1. Generate the schema: `./gradlew yarn_run_generate-graphql-schema`
+1. Check the generated schema, e.g.: `git diff src/test/resources/anet.graphql`
+
+If you have updated the generated schema and need to update the generated Java classes, you can run:
+1. `./gradlew generateClientCode` to re-generate the Java sources
+1. `./gradlew compileTestJava` to re-generate the Java sources *and* compile them into Java class files
 
 ### Client-side tests
 #### How the client-side tests work

@@ -7,7 +7,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -21,6 +23,7 @@ import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -178,17 +181,23 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
-    // If the position is already assigned to another person, remove the person from the position
-    removePersonFromPosition(positionUuid);
-
-    // If this person is in a position already, we need to remove them.
-    Position currPos = getDbHandle()
+    // Find out if person already holds a position
+    final Position currPos = getDbHandle()
         .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
+    if (currPos != null && currPos.getUuid().equals(positionUuid)) {
+      // Attempt to put person in same position they already hold
+      return 0;
+    }
+
+    // If the position is already assigned to another person, remove the person from the position
+    removePersonFromPosition(positionUuid);
+
     // Get timestamp *after* remove to preserve correct order
     final Instant now = Instant.now();
     if (currPos != null) {
+      // If this person is in a position already, we need to remove them.
       final String sql;
       if (DaoUtils.isMsSql()) {
         sql =
@@ -229,11 +238,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
           .execute();
     }
 
+    // Now put the person in their new position
     getDbHandle()
         .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
         .bind("personUuid", personUuid).bind("positionUuid", positionUuid).execute();
-    // GraphQL mutations *have* to return something, so we return the number of inserted rows
+    // And update the history
     final int nr = getDbHandle()
         .createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
@@ -244,6 +254,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Evict this person from the domain users cache, as their position has changed
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPersonUuid(personUuid);
 
+    // GraphQL mutations *have* to return something, so we return the number of inserted rows
     return nr;
   }
 
@@ -254,7 +265,7 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
             + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
             + "WHERE uuid = :positionUuid")
-        .bind("personUuid", (Integer) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
+        .bind("personUuid", (String) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
         .bind("positionUuid", positionUuid).execute();
 
     final String updateSql;
@@ -376,7 +387,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         .bind("deleted", true).bind("positionUuid_a", uuids.get(0))
         .bind("positionUuid_b", uuids.get(1))
         .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-
   }
 
   @InTransaction
@@ -390,6 +400,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   @Override
   public AnetBeanList<Position> search(PositionSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(query);
+  }
+
+  public CompletableFuture<AnetBeanList<Position>> search(Map<String, Object> context,
+      PositionSearchQuery query) {
+    return AnetObjectEngine.getInstance().getSearcher().getPositionSearcher().runSearch(context,
+        query);
   }
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
@@ -460,5 +476,113 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
             + "   maxPp.\"positionUuid\" = pp.\"positionUuid\" AND maxPp.\"createdAt\" > pp.\"createdAt\" AND maxPp.\"createdAt\" <= %2$s "
             + " WHERE pp.\"positionUuid\" = :%3$s AND maxPp.\"createdAt\" IS NULL ",
         personJoinColumn, dateFilterColumn, placeholderName);
+  }
+
+  @InTransaction
+  public int mergePositions(Position winner, Position loser) {
+    final String winnerUuid = winner.getUuid();
+    final String loserUuid = loser.getUuid();
+    // Get some data related to the existing position in the database
+    final Position existingPos = getByUuid(winnerUuid);
+    final List<Position> existingAssociatedPositions =
+        existingPos.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
+
+    // Clear loser's code to prevent update conflicts (code must be unique)
+    getDbHandle()
+        .createUpdate("/* clearPositionCode */ UPDATE \"positions\""
+            + " SET \"code\" = NULL WHERE \"uuid\" = :loserUuid")
+        .bind("loserUuid", loserUuid).execute();
+
+    // Update the winner's fields
+    update(winner);
+
+    // Update position history with given input on winnerPosition
+    deleteForMerge("peoplePositions", "positionUuid", loserUuid);
+    deleteForMerge("peoplePositions", "positionUuid", winnerUuid);
+    if (Utils.isEmptyOrNull(winner.getPreviousPeople())) {
+      updatePeoplePositions(winnerUuid, winner.getPersonUuid(), Instant.now(), null);
+    } else {
+      // Store the history as given
+      for (final PersonPositionHistory pph : winner.getPreviousPeople()) {
+        updatePeoplePositions(winnerUuid, pph.getPersonUuid(), pph.getStartTime(),
+            pph.getEndTime());
+      }
+    }
+
+    // Update positionRelationships with given input on winnerPosition
+    final Set<String> existingApUuids =
+        existingAssociatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
+    final Set<String> winnerApUuids =
+        Utils.isEmptyOrNull(winner.getAssociatedPositions()) ? Collections.emptySet()
+            : winner.getAssociatedPositions().stream().map(ap -> ap.getUuid())
+                .collect(Collectors.toSet());
+    if (!existingApUuids.equals(winnerApUuids)) {
+      // set winner's old positionRelationships to deleted
+      getDbHandle()
+          .createUpdate("UPDATE \"positionRelationships\""
+              + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
+              + " WHERE \"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid")
+          .bind("deleted", true).bind("winnerUuid", winnerUuid)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+      if (!winnerApUuids.isEmpty()) {
+        // update loser's positionRelationships
+        getDbHandle()
+            .createUpdate("UPDATE \"positionRelationships\""
+                + " SET \"positionUuid_a\" = :winnerUuid, \"updatedAt\" = :updatedAt"
+                + " WHERE \"positionUuid_a\" = :loserUuid")
+            .bind("deleted", true).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+            .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+        getDbHandle()
+            .createUpdate("UPDATE \"positionRelationships\""
+                + " SET \"positionUuid_b\" = :winnerUuid, \"updatedAt\" = :updatedAt"
+                + " WHERE \"positionUuid_b\" = :loserUuid")
+            .bind("deleted", true).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+            .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+      }
+    }
+
+    // Update notes
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
+
+    // Update approvers
+    updateM2mForMerge("approvers", "approvalStepUuid", "positionUuid", winnerUuid, loserUuid);
+
+    // Update taskResponsiblePositions
+    updateM2mForMerge("taskResponsiblePositions", "taskUuid", "positionUuid", winnerUuid,
+        loserUuid);
+
+    // Update authorizationGroupPositions
+    updateM2mForMerge("authorizationGroupPositions", "authorizationGroupUuid", "positionUuid",
+        winnerUuid, loserUuid);
+
+    // Finally, delete loser
+    final int nr = deleteForMerge("positions", "uuid", loserUuid);
+
+    // Evict the persons (previously) holding these positions from the domain users cache
+    final PersonDao personDao = AnetObjectEngine.getInstance().getPersonDao();
+    personDao.evictFromCacheByPositionUuid(loserUuid);
+    personDao.evictFromCacheByPositionUuid(winnerUuid);
+    return nr;
+  }
+
+  private void updatePeoplePositions(final String positionUuid, final String personUuid,
+      final Instant startTime, final Instant endTime) {
+    if (endTime == null) {
+      // we have to make an exception here, as MSSQL has problems inserting a null datetime
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
+    } else {
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    }
   }
 }
