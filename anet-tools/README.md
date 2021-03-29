@@ -7,7 +7,7 @@
 [Business Logic Rules](#business-logic-rules)<br />
 
 ## What is Data Import and Manipulation Framework
-This framework allows you to import data into the anet database by writing a single script from various sources (csv, xlsx, ad etc.), taking into account the anet business rules.<br />
+This framework allows you to import data into the ANET database by writing a single script from various sources (csv, xlsx, ad etc.), taking into account the ANET business rules.<br />
 
 ## How it works
 Create entity objects using classes in src/core/models.py. Make a list of objects. Write to the database using the save_data method of the data import framework with this list. The data import framework decides the business logic rule to be applied for each entity object and its associated objects, according to the update rules added with the add_update_rule method. Necessary transactions are performed for each entity according to the determined business logic rules.

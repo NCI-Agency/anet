@@ -1,6 +1,6 @@
 from src.core.api.anet_import import anet_import
-from src.core.api.data import csv
-from src.core.model.anet import People
+from src.core.utils.source.csv import csv
+from src.core.model.annotated.anet import People
 
 
 # Define full path of csv file
