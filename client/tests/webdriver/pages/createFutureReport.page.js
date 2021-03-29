@@ -22,6 +22,12 @@ class CreateFutureReport extends CreateReport {
     return this.attendeesFieldFormGroup.$(`input[id="${attId}"]`)
   }
 
+  get allAttendeesFilter() {
+    return this.attendeesFieldFormGroup.$(
+      `div[id="${attId}-popover"] .advanced-select-filters li:nth-child(2) button`
+    )
+  }
+
   get attendeesFieldAdvancedSelectFirstItem() {
     return this.attendeesFieldFormGroup.$(
       `div[id="${attId}-popover"] tbody tr:first-child td:nth-child(2)`
@@ -48,6 +54,12 @@ class CreateFutureReport extends CreateReport {
 
   get tasksField() {
     return this.tasksFieldFormGroup.$(`input[id="${tskId}"]`)
+  }
+
+  get allTasksFilter() {
+    return this.tasksFieldFormGroup.$(
+      `div[id="${tskId}-popover"] .advanced-select-filters li:nth-child(2) button`
+    )
   }
 
   get tasksFieldAdvancedSelectFirstItem() {

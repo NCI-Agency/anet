@@ -1,11 +1,9 @@
 import { CompactRow } from "components/Compact"
-import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
-  Button,
   Col,
   ControlLabel,
   FormControl,
@@ -69,8 +67,7 @@ const Field = ({
   extraColElem,
   addon,
   vertical,
-  isCompact,
-  extraAddon
+  isCompact
 }) => {
   const id = getFieldId(field)
   const widget = useMemo(
@@ -80,20 +77,20 @@ const Field = ({
       ) : (
         <InputGroup>
           {widgetElem}
-          {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
           <FieldAddon id={id} addon={addon} />
         </InputGroup>
       ),
-    [addon, extraAddon, id, widgetElem]
+    [addon, id, widgetElem]
   )
   const validationState = getFormGroupValidationState(field, form)
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
-  // setting label or extraColElem explicitly to null will completely remove these columns!
-  const widgetWidth =
-    12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
-  // controlId prop of the FormGroup sets the id of the control element
+
+  // backwards-compatible with main form width before; could be 12 to take up all space
+  const maxWidth = 9
+  // setting label explicitly to null will completely remove the label column!
+  const widgetWidth = maxWidth - (label === null ? 0 : 2)
 
   if (isCompact) {
     return (
@@ -110,6 +107,7 @@ const Field = ({
     )
   }
 
+  // controlId prop of the FormGroup sets the id of the control element
   return (
     <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
       {vertical ? (
@@ -132,10 +130,10 @@ const Field = ({
               {getHelpBlock(field, form)}
               {children}
             </div>
+            {extraColElem}
           </Col>
         </>
       )}
-      {extraColElem && <Col sm={3} {...extraColElem.props} />}
     </FormGroup>
   )
 }
@@ -148,7 +146,6 @@ Field.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  extraAddon: PropTypes.object,
   isCompact: PropTypes.bool
 }
 Field.defaultProps = {
@@ -164,7 +161,6 @@ export const InputField = ({
   extraColElem,
   addon,
   vertical,
-  extraAddon,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
@@ -188,7 +184,6 @@ export const InputField = ({
       extraColElem={extraColElem}
       addon={addon}
       vertical={vertical}
-      extraAddon={extraAddon}
     />
   )
 }
@@ -200,8 +195,7 @@ InputField.propTypes = {
   children: PropTypes.any,
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
-  vertical: PropTypes.bool,
-  extraAddon: PropTypes.object
+  vertical: PropTypes.bool
 }
 
 export const InputFieldNoLabel = ({
@@ -497,45 +491,4 @@ export function handleSingleSelectAddItem(newItem, onChange, curValue) {
 
 export function handleSingleSelectRemoveItem(oldItem, onChange, curValue) {
   onChange(null)
-}
-
-export const FieldShortcuts = ({
-  shortcuts,
-  fieldName,
-  objectType,
-  curValue,
-  onChange,
-  handleAddItem,
-  title
-}) =>
-  shortcuts &&
-  shortcuts.length > 0 && (
-    <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
-      <h5>{title}</h5>
-      {objectType.map(shortcuts, (shortcut, idx) => (
-        <Button
-          key={shortcut.uuid}
-          bsStyle="link"
-          onClick={() => handleAddItem(shortcut, onChange, curValue)}
-        >
-          Add{" "}
-          <LinkTo
-            modelType={objectType.resourceName}
-            model={shortcut}
-            isLink={false}
-            forShortcut
-          />
-        </Button>
-      ))}
-    </div>
-  )
-
-FieldShortcuts.propTypes = {
-  shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),
-  fieldName: PropTypes.string.isRequired,
-  objectType: PropTypes.func.isRequired,
-  curValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  onChange: PropTypes.func,
-  handleAddItem: PropTypes.func.isRequired,
-  title: PropTypes.string.isRequired
 }

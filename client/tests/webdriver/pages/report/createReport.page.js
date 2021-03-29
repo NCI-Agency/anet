@@ -1,7 +1,13 @@
 import moment from "moment"
 import * as cr from "../createReport.page"
 
+const SHORT_WAIT_MS = 1000
+
 class CreateReport extends cr.CreateReport {
+  get form() {
+    return browser.$("form")
+  }
+
   get title() {
     return browser.$("h2.legend")
   }
@@ -27,8 +33,26 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#reportPeople")
   }
 
+  get reportPeopleFilters() {
+    return browser.$("#reportPeople-popover .advanced-select-filters")
+  }
+
   get reportPeopleTable() {
     return browser.$("#reportPeople-popover .table-responsive table")
+  }
+
+  selectReportPeopleFilter(filterIndex) {
+    const filter = this.reportPeopleFilters.$(
+      `li:nth-child(${filterIndex}) button`
+    )
+    filter.waitForClickable()
+    filter.click()
+    browser.pause(SHORT_WAIT_MS) // give the advanced select some time to apply the filter
+    this.reportPeople.click()
+  }
+
+  get submitButton() {
+    return browser.$("#formBottomSubmit")
   }
 
   getPersonByName(name) {
@@ -43,10 +67,14 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
-  selectAttendeeByName(name) {
+  selectAttendeeByName(name, filterIndex) {
     this.reportPeople.click()
     // wait for reportPeople table loader to disappear
-    this.reportPeopleTable.waitForDisplayed()
+    this.reportPeopleFilters.waitForDisplayed()
+    if (filterIndex) {
+      // select filter
+      this.selectReportPeopleFilter(filterIndex)
+    }
     let searchTerm = name
     if (
       searchTerm.startsWith("CIV") ||
@@ -71,14 +99,30 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#tasks")
   }
 
+  get tasksFilters() {
+    return browser.$("#tasks-popover .advanced-select-filters")
+  }
+
   get tasksTable() {
     return browser.$("#tasks-popover .table-responsive table")
   }
 
-  selectTaskByName(name) {
+  selectTasksFilter(filterIndex) {
+    const filter = this.tasksFilters.$(`li:nth-child(${filterIndex}) button`)
+    filter.waitForClickable()
+    filter.click()
+    browser.pause(SHORT_WAIT_MS) // give the advanced select some time to apply the filter
+    this.tasks.click()
+  }
+
+  selectTaskByName(name, filterIndex) {
     this.tasks.click()
     // wait for tasks table loader to disappear
-    this.tasksTable.waitForDisplayed()
+    this.tasksFilters.waitForDisplayed()
+    if (filterIndex) {
+      // select filter
+      this.selectTasksFilter(filterIndex)
+    }
     browser.keys(name)
     this.tasksTable.waitForDisplayed()
     const checkBox = this.tasksTable.$(
@@ -114,15 +158,15 @@ class CreateReport extends cr.CreateReport {
     }
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
-      fields.advisors.forEach(at => this.selectAttendeeByName(at))
+      fields.advisors.forEach(at => this.selectAttendeeByName(at, 2))
     }
 
     if (Array.isArray(fields.principals) && fields.principals.length) {
-      fields.principals.forEach(at => this.selectAttendeeByName(at))
+      fields.principals.forEach(at => this.selectAttendeeByName(at, 2))
     }
 
     if (Array.isArray(fields.tasks) && fields.tasks.length) {
-      fields.tasks.forEach(t => this.selectTaskByName(t))
+      fields.tasks.forEach(t => this.selectTaskByName(t, 2))
     }
   }
 }

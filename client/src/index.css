@@ -151,16 +151,6 @@ fieldset.danger {
 	width: 10em;
 }
 
-.shortcut-list {
-	margin-top: -4px;
-}
-
-.shortcut-list .btn-link {
-	text-align: left;
-	white-space: initial;
-	padding: 0;
-}
-
 .btn.btn-link {
 	overflow: visible;
 	width: 100%;

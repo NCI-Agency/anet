@@ -26,6 +26,7 @@ describe("Create report form page", () => {
 
       // Select principal
       CreateFutureReport.attendeesFieldLabel.click()
+      CreateFutureReport.allAttendeesFilter.click()
       CreateFutureReport.attendeesField.setValue(PRINCIPAL)
       CreateFutureReport.waitForAdvancedSelectToChange(
         CreateFutureReport.attendeesFieldAdvancedSelectFirstItem,
@@ -49,6 +50,7 @@ describe("Create report form page", () => {
 
       // Select task
       CreateFutureReport.tasksFieldLabel.click()
+      CreateFutureReport.allTasksFilter.click()
       CreateFutureReport.tasksField.setValue(TASK)
       CreateFutureReport.waitForAdvancedSelectToChange(
         CreateFutureReport.tasksFieldAdvancedSelectFirstItem,

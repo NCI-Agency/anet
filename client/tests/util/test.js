@@ -48,9 +48,11 @@ test.beforeEach(t => {
   let builder = new webdriver.Builder()
   if (testEnv === "local") {
     const chrome = require("selenium-webdriver/chrome")
+    const chromeOptions = new chrome.Options().headless()
+    chromeOptions.addArguments("window-size=1600,1200")
     builder = builder
       .forBrowser("chrome")
-      .setChromeOptions(new chrome.Options().headless())
+      .setChromeOptions(chromeOptions)
       /*
        * If we don't explicitly define ServiceBuilder for ChromeDriver it uses a default ServiceBuilder
        * which is a singleton, shared amongst different driver instances. As a result, the same
@@ -289,10 +291,18 @@ test.beforeEach(t => {
       )
       await $nextMonthDate.click()
     },
-    async chooseAdvancedSelectOption(inputSelector, text) {
+    async chooseAdvancedSelectOption(inputSelector, text, filterIndex) {
       const popoverSelector = `${inputSelector}-popover`
       const $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.click()
+      if (filterIndex) {
+        // select filter
+        const $filter = await t.context.$(
+          `${popoverSelector} .advanced-select-filters li:nth-child(${filterIndex}) button`
+        )
+        await $filter.click()
+        await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to apply the filter
+      }
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()

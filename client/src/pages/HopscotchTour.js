@@ -164,7 +164,7 @@ const reportTour = (currentUser, history) => {
       },
       {
         title: "Recents",
-        content: `If you've written reports in the past, your recent selections of attendees, ${subLevelTaskShortLabelPlural}, and locations will display to the right in a section called "Recents". You can click on one of the shortcuts to quickly add it to your report.`,
+        content: `If you've written reports in the past, your recent selections of attendees, ${subLevelTaskShortLabelPlural}, locations and authorization groups will show up in the select pop-up. You can select them to quickly add them to your report.`,
         target: "#attendees",
         placement: "bottom"
       },

@@ -37,7 +37,8 @@ test.serial("Draft and submit a report", async t => {
 
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
-    "general hospit"
+    "general hospit",
+    2 // choose filter "All"
   )
 
   t.is(
@@ -51,7 +52,8 @@ test.serial("Draft and submit a report", async t => {
 
   const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
     "#reportPeople",
-    "topferness, christopf"
+    "topferness, christopf",
+    2 // choose filter "All"
   )
 
   const $attendeesTitle = await t.context.driver.findElement(
@@ -95,7 +97,8 @@ test.serial("Draft and submit a report", async t => {
 
   const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
     "#reportPeople",
-    "steveson, steve"
+    "steveson, steve",
+    2 // choose filter "All"
   )
   await $attendeesTitle.click()
 
@@ -138,7 +141,8 @@ test.serial("Draft and submit a report", async t => {
 
   const $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
-    "2.A"
+    "2.A",
+    2 // choose filter "All"
   )
 
   const $tasksTitle = await t.context.driver.findElement(
@@ -182,13 +186,13 @@ test.serial("Draft and submit a report", async t => {
     "sensitive info",
     shortWaitMs // wait for Draftail to save the editor contents
   )
-  const $addAuthGroupShortcutButtons = await $$(
-    "#meeting-details .shortcut-list button"
+  const $authGroupsInput = await $("#authorizationGroups")
+  await $authGroupsInput.click()
+  const $recentAuthGroups = await $$(
+    "#authorizationGroups-popover table tbody tr input"
   )
   // Add all recent authorization groups
-  await Promise.all(
-    $addAuthGroupShortcutButtons.map($button => $button.click())
-  )
+  await Promise.all($recentAuthGroups.map($elem => $elem.click()))
 
   const $formButtonSubmit = await $("#formBottomSubmit")
   await t.context.driver.wait(
@@ -525,12 +529,15 @@ test.serial(
       "Location field starts blank"
     )
 
-    const $locationShortcutButton = await $("#location-shortcut-list button")
-    await $locationShortcutButton.click()
+    await $locationInput.click()
+    const $recentLocation = await $(
+      "#location-popover table tbody tr:first-child"
+    )
+    await $recentLocation.click()
     t.is(
       await $locationInput.getAttribute("value"),
       "General Hospital",
-      "Clicking the shortcut adds a location"
+      "Should be able to add a recent location"
     )
 
     await assertElementNotPresent(
@@ -657,20 +664,20 @@ test.serial(
     await assertElementText(t, $advisorPosition, "EF 2.2 Advisor D")
     await assertElementText(t, $advisorOrg, "EF 2.2")
 
-    const $addAttendeeShortcutButtons = await $$(
-      "#reportPeople-shortcut-list button"
+    const $attendeesInput = await $("#reportPeople")
+    await $attendeesInput.click()
+    const $recentAttendees = await $$(
+      "#reportPeople-popover table tbody tr input"
     )
     // Add all recent attendees
-    await Promise.all(
-      $addAttendeeShortcutButtons.map($button => $button.click())
-    )
+    await Promise.all($recentAttendees.map($elem => $elem.click()))
 
     $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
     $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
     t.is(
       $advisorAttendeesRows.length + $principalAttendeesRows.length,
       5,
-      "Clicking the shortcut buttons adds rows to the table"
+      "Should be able to add recent attendees to the table"
     )
 
     const $submitButton = await $("#formBottomSubmit")
