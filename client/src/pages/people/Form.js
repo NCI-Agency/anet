@@ -52,6 +52,7 @@ const GQL_UPDATE_PERSON = gql`
     updatePerson(person: $person)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 2
 
 const PersonForm = ({ edit, title, saveText, initialValues }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
@@ -220,18 +221,19 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       />
                     </Col>
                   </Col>
-                  {values.firstName.length >= 2 && values.lastName.length >= 2 && (
-                    <Col sm={1}>
-                      <Button onClick={() => setShowSimilarPeople(true)}>
-                        <Icon
-                          icon={IconNames.WARNING_SIGN}
-                          intent={Intent.WARNING}
-                          iconSize={Icon.SIZE_STANDARD}
-                          style={{ margin: "0 6px" }}
-                        />
-                        Possible Duplicates
-                      </Button>
-                    </Col>
+                  {values.firstName.length >= MIN_CHARS_FOR_DUPLICATES &&
+                    values.lastName.length >= MIN_CHARS_FOR_DUPLICATES && (
+                      <Col sm={1}>
+                        <Button onClick={() => setShowSimilarPeople(true)}>
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={Icon.SIZE_STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </Col>
                   )}
 
                   {edit && (

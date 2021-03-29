@@ -39,6 +39,7 @@ const GQL_UPDATE_LOCATION = gql`
     updateLocation(location: $location)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 3
 
 const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
@@ -154,7 +155,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
                   extraColElem={
-                    values.name.length >= 3 ? (
+                    values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
                         <Button onClick={() => setShowSimilarLocations(true)}>
                           <Icon

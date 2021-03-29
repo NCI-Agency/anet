@@ -45,6 +45,7 @@ const GQL_UPDATE_POSITION = gql`
     updatePosition(position: $position)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 3
 
 const PositionForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
@@ -267,7 +268,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   label={Settings.fields.position.name}
                   placeholder="Name/Description of Position"
                   extraColElem={
-                    values.name.length >= 3 ? (
+                    values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
                         <Button onClick={() => setShowSimilarPositions(true)}>
                           <Icon
