@@ -468,7 +468,10 @@ generateClientCodeConf {
 	schemaFileFolder = 'src/test/resources/'
 	schemaFilePattern = 'anet.graphql'
 	packageName = 'mil.dds.anet.test.client'
+	// Set recommended parameters to respect the future 2.x behavior
 	separateUtilityClasses = true
+	copyRuntimeSources = false
+	generateDeprecatedRequestResponse = false
 	customScalars = [
 		[
 			graphQLTypeName: "Instant",
@@ -491,9 +494,6 @@ generateClientCodeConf {
 			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
 		]
 	]
-	// The parameters below change the 1.x default behavior to respect the future 2.x behavior
-	//copyRuntimeSources = false
-	//generateDeprecatedRequestResponse = false
 }
 
 jar.dependsOn buildClient
