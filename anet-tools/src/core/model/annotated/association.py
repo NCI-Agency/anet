@@ -1,9 +1,12 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, text
 from sqlalchemy.orm import relationship
-from src.core.model.base import BaseModel
+from src.core.model.base.base_model import BaseModel
 
 
 class PeoplePositions(BaseModel):
+    """ Association object holds many-to-many 
+    relationship between people and position
+    """    
     __tablename__ = "peoplePositions"
 
     createdAt = Column('createdAt', DateTime)
@@ -11,6 +14,7 @@ class PeoplePositions(BaseModel):
     positionUuid = Column('positionUuid', ForeignKey(
         'positions.uuid'), index=True)
     endedAt = Column('endedAt', DateTime)
+    
     __mapper_args__ = {
         "primary_key": [createdAt, personUuid, positionUuid]
     }
@@ -20,6 +24,9 @@ class PeoplePositions(BaseModel):
 
 
 class ReportPeople(BaseModel):
+    """ Association object holds many-to-many 
+    relationship between people and report
+    """    
     __tablename__ = "reportPeople"
 
     isPrimary = Column('isPrimary', Boolean, server_default=text("false"))
