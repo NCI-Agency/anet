@@ -389,7 +389,7 @@ const ButtonGroupContainerS = styled.div`
     flex-direction: row;
   }
 
-  @media (max-width: 876px) {
+  @media (max-width: 768px) {
     & > .btn-group {
       display: flex;
       flex-wrap: wrap;
