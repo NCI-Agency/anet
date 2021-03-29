@@ -1,19 +1,20 @@
 import datetime
 import json
 import os
-import sys
-import traceback
 
 import pandas as pd
 from sqlalchemy import exc
 
-from src.core.base_methods import base_methods
-from src.core.data import txt
-from src.core.db import db
-from src.core.anet_business_objects import BaseModel
+from src.core.business_logic.base.base_methods import base_methods
+from src.core.utils.source.txt import txt
+from src.core.business_logic.base.db import db
+from src.core.model.base.base_model import BaseModel
 
 
 class anet_import(db):
+    """ This class is the user interface of import framework. 
+        It helps user to import data.
+    """
     def __init__(self, hashfile_fullpath, logfile_fullpath, use_env=False, conn_json={}):
         super().__init__(use_env=use_env, conn_json=conn_json)
         self.path_log = logfile_fullpath
@@ -43,7 +44,7 @@ class anet_import(db):
         if from_relation_table:
             exc_reason = e
         else:
-            exc_reason = str(type(e)) + "-->" + str(e.args)
+            exc_reason = f"{str(type(e))} --> {str(e.args)}"
         self.print_info(exc_reason)
         entity_json["row"]["exception_reason"] = exc_reason
         self.append_unsuccessful_entity_list_json(entity_json)
@@ -58,18 +59,11 @@ class anet_import(db):
             utc_now = datetime.datetime.now()
             try:
                 entity = entity_json["entity"]
-                if entity.__tablename__ not in ["positions", "people", "locations", "organizations", "reports"]:
-                    raise Exception("Business logic for table " + entity.__tablename__ + " is not implemented!")
-                is_entity_update = base_methods.is_entity_update(entity, self.update_rules)
-                if base_methods.is_entity_single(entity):
-                    if is_entity_update:
-                        entity.update_entity(utc_now)
-                    else:
-                        entity.insert_entity(utc_now)
-                else:
-                    entity.insert_update_nested_entity(utc_now, self.update_rules)
+                entity.session.begin_nested()
+                entity.import_entity(utc_now, self.update_rules)
                 self.append_successful_entity_list_json(entity_json)
                 self.print_info(f"Successfull: {len(self.successful_entity_list_json)}")
+                entity.session.commit()
             except exc.SQLAlchemyError as e:
                 entity.session.rollback()
                 self.sqlalc_exc(e=e, entity_json=entity_json,
@@ -81,14 +75,13 @@ class anet_import(db):
             if not self.verbose and counter % 10 == 0:
                 print(f"Importing {counter}/{len(entity_list_json)} passed", end="\r")
             counter = counter + 1
-        entity.commit()
+            entity.session.commit()
         print(f"Importing {counter}/{len(entity_list_json)} passed")
-        print("Import is complete for entities whose table name is",
-              entity_json["entity"].__tablename__)
+        print(f"Import is complete for entities whose table name is {entity_json['entity'].__tablename__}")
 
     def write_unsuccessful_records_to_csv(self):
         if len(self.unsuccessful_entity_list_json) == 0:
-            print("all entities imported to db successfully")
+            print("All entities imported to db successfully")
             print("\n")
         else:
             if self.tinylog:
@@ -111,7 +104,7 @@ class anet_import(db):
 
     def generate_new_empty_file_if_not_exists(self, path):
         if not os.path.isfile(path):
-            print("Generating new file: " + "/".join(path.split("/")[4:]))
+            print(f"Generating new file: {'/'.join(path.split('/')[4:])}")
             print("\n")
             # this call requires root privileges on OSX
             os.mknod(path)
@@ -171,6 +164,15 @@ class anet_import(db):
         fullpath_hashfile = os.path.join(self.path_hashfile, "hashvalues.txt")
         self.write_hashlist_to_file(fullpath_hashfile)
 
+    def add_update_rule(self, tablename, col_names):
+        self.update_rules["tables"].append({"name": tablename, "columns": col_names})
+
+    def print_update_rules(self):
+        print(json.dumps(self.update_rules, indent=4))
+
+    def clear_update_rules(self):
+        self.update_rules = {"tables": []}
+
     def save_data(self, entity_list_json, verbose=True, remember_with_hash=True, write_unsuccessful=True, tinylog=True):
         print("***DATA IMPORT AND MANIPULATION FRAMEWORK***")
         self.verbose = verbose
@@ -195,13 +197,3 @@ class anet_import(db):
         print(f"Successful: {len(entity_list_json_incorrect_excluded)-len(self.unsuccessful_entity_list_json)}")
         print(f"Unsuccessful: {len(self.unsuccessful_entity_list_json)}")
         print()
-
-    def add_update_rule(self, tablename, col_names):
-        self.update_rules["tables"].append(
-            {"name": tablename, "columns": col_names})
-
-    def print_update_rules(self):
-        print(json.dumps(self.update_rules, indent=4))
-
-    def clear_update_rules(self):
-        self.update_rules = {"tables": []}

@@ -4,6 +4,8 @@ import ldap
 
 
 class ad:
+    """ Read data from active directory
+    """
     def __init__(self, ldap_config_json):
         self.ldap_config_json = ldap_config_json
         print("Active directory object is created")
@@ -22,26 +24,3 @@ class ad:
         # ldap response sample
         result = self.conn.search_s(self.ldap_config_json["BASE_DN"], ldap.SCOPE_SUBTREE, search_filter, search_attribute)  
         self.data_list = ast.literal_eval(str(result))
-
-
-if __name__ == "__main__":
-    # Define your ldap config json
-    ldap_config = {
-        "LDAP_SERVER": "<LDAP_SERVER>",
-        "BASE_DN": "<BASE_DN>",
-        "LDAP_LOGIN": "<LDAP_LOGIN>",
-        "LDAP_PASSWORD": "<LDAP_PASSWORD>"
-    }
-    ldap_obj = ad(ldap_config)
-    ldap_obj.connect()
-
-    search_filter = "objectCategory=Person"
-    search_attribute = ["mail", "sAMAccountName", "displayName"]
-    ldap_obj.search(search_filter, search_attribute)
-
-    # LOOP THROUGH THE DICTIONARY AND PRINT VALUES
-    for i in ldap_obj.data_list:
-        rawDict = i[1]
-        data = {k: v[0] for k, v in rawDict.items()}
-        if all(key in data for key in ('mail', 'displayName', 'sAMAccountName')):
-            print(data)

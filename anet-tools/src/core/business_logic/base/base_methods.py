@@ -2,7 +2,16 @@ import uuid
 
 from sqlalchemy import and_
 
+allowed_tables = ["positions", "people", "locations", "organizations", "reports"]
+
 class base_methods:
+    """ Base methods used in src.core.business_logic package
+    """
+    @staticmethod
+    def check_if_entity_allowed(entity):
+        if entity.__tablename__ not in allowed_tables:
+            raise Exception(f"You can not import to {entity.__tablename__} table!")
+
     @staticmethod
     def has_entity_relation(entity, rel_attr):
         if not hasattr(entity, rel_attr):
@@ -24,7 +33,7 @@ class base_methods:
         return str(uuid.uuid4())
 
     @classmethod
-    def add_new_uuid(cls, entity, relation="", both=False):
+    def set_new_uuid(cls, entity, relation="", both=False):
         if relation == "":
             entity.uuid = cls.get_new_uuid()
         else:
@@ -62,8 +71,12 @@ class base_methods:
                 entity.uuid = query_result_list[0].uuid
                 return True
             else:
-                cls.add_new_uuid(entity)
+                cls.set_new_uuid(entity)
                 return False
+
+    @classmethod
+    def set_uuid(cls, entity, update_rules):
+        cls.is_entity_update(entity, update_rules)
 
     @staticmethod
     def is_entity_single(entity):

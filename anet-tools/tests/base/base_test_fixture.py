@@ -5,9 +5,10 @@ import datetime
 from sqlalchemy.orm import sessionmaker
 import unittest
 
-from src.core.db import db
-from src.core.anet_business_objects import PeoplePositions, Positions, People, Locations, Organizations, BaseModel
-
+from src.core.business_logic.base.db import db
+from src.core.model.annotated.anet import People, Positions, Locations, Organizations
+from src.core.model.annotated.association import PeoplePositions
+from src.core.model.base.base_model import BaseModel
 
 # new db instance to get new engine using env vars
 db_obj = db(use_env=True)
