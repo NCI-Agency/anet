@@ -56,12 +56,14 @@ const GQL_GET_ORGANIZATION = gql`
         shortName
         longName
         identificationCode
+        type
       }
       childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
         uuid
         shortName
         longName
         identificationCode
+        type
       }
       positions {
         uuid
@@ -315,9 +317,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           modelType="Organization"
                           model={organization.parentOrg}
                         >
-                          {organization.parentOrg.shortName}{" "}
-                          {organization.parentOrg.longName}{" "}
-                          {organization.parentOrg.identificationCode}
+                          {Organization.toIdentificationCodeString(
+                            organization.parentOrg
+                          )}
                         </LinkTo>
                       )
                     }
@@ -370,8 +372,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                                 modelType="Organization"
                                 model={organization}
                               >
-                                {organization.shortName} {organization.longName}{" "}
-                                {organization.identificationCode}
+                                {Organization.toIdentificationCodeString(
+                                  organization
+                                )}
                               </LinkTo>
                             </ListGroupItem>
                           ))}
