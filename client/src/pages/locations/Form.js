@@ -155,7 +155,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
                   extraColElem={
-                    values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
                         <Button onClick={() => setShowSimilarLocations(true)}>
                           <Icon

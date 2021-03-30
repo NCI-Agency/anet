@@ -268,7 +268,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   label={Settings.fields.position.name}
                   placeholder="Name/Description of Position"
                   extraColElem={
-                    values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
                         <Button onClick={() => setShowSimilarPositions(true)}>
                           <Icon

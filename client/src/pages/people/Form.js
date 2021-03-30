@@ -221,7 +221,8 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       />
                     </Col>
                   </Col>
-                  {values.firstName.length >= MIN_CHARS_FOR_DUPLICATES &&
+                  {!edit &&
+                    values.firstName.length >= MIN_CHARS_FOR_DUPLICATES &&
                     values.lastName.length >= MIN_CHARS_FOR_DUPLICATES && (
                       <Col sm={1}>
                         <Button onClick={() => setShowSimilarPeople(true)}>
