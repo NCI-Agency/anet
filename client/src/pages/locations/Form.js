@@ -1,3 +1,5 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -13,6 +15,7 @@ import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
@@ -36,11 +39,13 @@ const GQL_UPDATE_LOCATION = gql`
     updateLocation(location: $location)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 3
 
 const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
+  const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
   const statusButtons = [
@@ -149,6 +154,21 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   name="name"
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
+                  extraColElem={
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                      <>
+                        <Button onClick={() => setShowSimilarLocations(true)}>
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={Icon.SIZE_STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
                 />
 
                 <FastField
@@ -208,6 +228,18 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   />
                 </Fieldset>
               )}
+
+              {showSimilarLocations && (
+                <SimilarObjectsModal
+                  objectType="Location"
+                  userInput={`${values.name}`}
+                  onCancel={() => {
+                    setShowSimilarLocations(false)
+                  }}
+                >
+                </SimilarObjectsModal>
+              )}
+
               <div className="submit-buttons">
                 <div>
                   <Button onClick={onCancel}>Cancel</Button>
