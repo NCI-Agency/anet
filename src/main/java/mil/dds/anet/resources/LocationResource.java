@@ -106,35 +106,33 @@ public class LocationResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "winnerLocation") Location winnerLocation) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperUser(user);
-    final Location existing = dao.getByUuid(loserUuid);
+    final Location loserLocation = dao.getByUuid(loserUuid);
 
-    // update the merged location and update approval steps.
-    final int nr = dao.update(winnerLocation);
-    if (nr == 0) {
-      throw new WebApplicationException("Couldn't process location merge", Status.NOT_FOUND);
-    }
-    final Location mergedLocation = dao.getByUuid(loserUuid);
-    final List<ApprovalStep> existingPlanningApprovalSteps =
-        existing.loadPlanningApprovalSteps(engine.getContext()).join();
-    final List<ApprovalStep> existing2PlanningApprovalSteps =
-        winnerLocation.loadPlanningApprovalSteps(engine.getContext()).join();
-    existingPlanningApprovalSteps.addAll(existing2PlanningApprovalSteps);
-    final List<ApprovalStep> existingApprovalSteps =
-        existing.loadApprovalSteps(engine.getContext()).join();
-    final List<ApprovalStep> existingApprovalSteps2 =
-        winnerLocation.loadApprovalSteps(engine.getContext()).join();
-    existingApprovalSteps.addAll(existingApprovalSteps2);
-    Utils.updateApprovalSteps(mergedLocation, mergedLocation.getPlanningApprovalSteps(),
-        existingPlanningApprovalSteps, mergedLocation.getApprovalSteps(), existingApprovalSteps);
+    AuthUtils.assertAdministrator(user);
+    // Check that given two locations can be merged
+    areLocationsMergeable(winnerLocation, loserLocation);
+    validateLocation(user, winnerLocation);
 
-    final int numRow = dao.mergeLocations(existing, mergedLocation);
-    if (numRow == 0) {
-      throw new WebApplicationException("Couldn't process location merge", Status.NOT_FOUND);
+    int numRows = dao.mergeLocations(loserLocation, winnerLocation);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged location relation information.",
+          Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Location {} merged on {} by {}", existing, mergedLocation, user);
-    // Return merged location uuid because of navigate that location.
-    return mergedLocation;
+    AnetAuditLogger.log("Location {} merged into {} by {}", loserLocation, winnerLocation, user);
+    return winnerLocation;
+  }
+
+  private void validateLocation(Person user, Location winnerLocation) {
+    if (winnerLocation.getName() == null || winnerLocation.getName().trim().length() == 0) {
+      throw new WebApplicationException("Location Name must not be null", Status.BAD_REQUEST);
+    }
+  }
+
+  private void areLocationsMergeable(Location winnerLocation, Location loserLocation) {
+    if (loserLocation.getUuid().equals(winnerLocation.getUuid())) {
+      throw new WebApplicationException("Cannot merge identical locations.", Status.BAD_REQUEST);
+    }
   }
 
 }
