@@ -70,7 +70,6 @@
     "eslint-plugin-promise": "4.3.1",
     "eslint-plugin-react": "7.23.1",
     "eslint-plugin-react-hooks": "4.2.0",
-    "eslint-plugin-standard": "4.1.0",
     "faker": "5.5.1",
     "file-loader": "6.2.0",
     "git-describe": "4.0.4",
@@ -284,8 +283,7 @@
       "node",
       "promise",
       "react",
-      "react-hooks",
-      "standard"
+      "react-hooks"
     ],
     "rules": {
       "eqeqeq": [
