@@ -134,7 +134,7 @@ const ReportTable = ({
         totalCount={totalCount}
         goToPage={setPage}
       >
-        <Table striped>
+        <Table striped responsive>
           <thead>
             <tr>
               <th>Authors</th>
