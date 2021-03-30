@@ -222,84 +222,6 @@ const PersonShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-<<<<<<< HEAD
-                <AvatarDisplayComponent
-                  avatar={person.avatar}
-                  height={256}
-                  width={256}
-                />
-                <Field
-                  name="rank"
-                  label={Settings.fields.person.rank}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="role"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Person.humanNameOfRole(values.role)}
-                />
-                {isAdmin && (
-                  <>
-                    <Field
-                      name="domainUsername"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="openIdSubject"
-                      label="OpenID subject"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                  </>
-                )}
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Person.humanNameOfStatus(values.status)}
-                />
-                <Field
-                  name="phoneNumber"
-                  label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="emailAddress"
-                  label={Settings.fields.person.emailAddress.label}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={emailHumanValue}
-                />
-                <Field
-                  name="country"
-                  label={Settings.fields.person.country}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="code"
-                  label={Settings.fields.person.code}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="gender"
-                  label={Settings.fields.person.gender}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="endOfTourDate"
-                  label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    person.endOfTourDate &&
-                    moment(person.endOfTourDate).format(
-                      Settings.dateFormats.forms.displayShort.date
-                    )
-                  }
-                />
-                <Field
-                  name="biography"
-                  className="biography"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography)}
-                />
-=======
                 <Grid fluid>
                   <Row>
                     <Col md={6}>
@@ -319,7 +241,6 @@ const PersonShow = ({ pageDispatchers }) => {
                     <Col md={6}>{rightColum}</Col>
                   </Row>
                 </Grid>
->>>>>>> candidate
               </Fieldset>
               {canChangePosition && (
                 <AssignPositionModal
@@ -402,6 +323,9 @@ const PersonShow = ({ pageDispatchers }) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       domainUsername: {
+        accessCond: isAdmin
+      },
+      openIdSubject: {
         accessCond: isAdmin
       }
     }

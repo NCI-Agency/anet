@@ -329,6 +329,7 @@ fields:
     firstName: First name
     lastName: Last name
     domainUsername: Domain username
+    openIdSubject: OpenID subject
     position: Current Position
     prevPositions: Previous Positions
     emailAddress:
@@ -739,6 +740,7 @@ fields:
         - position
         - prevPositions
         - domainUsername
+        - openIdSubject
         - emailAddress
         - multipleButtons
         - inputFieldName
@@ -880,6 +882,7 @@ fields:
         - colourOptions
         - textareaFieldName
         - domainUsername
+        - openIdSubject
         - emailAddress
         - multipleButtons
         - inputFieldName
