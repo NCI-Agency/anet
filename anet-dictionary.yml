@@ -329,6 +329,8 @@ fields:
     firstName: First name
     lastName: Last name
     domainUsername: Domain username
+    position: Current Position
+    prevPositions: Previous Positions
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
@@ -398,6 +400,7 @@ fields:
         app6Modifier: K
     gender: Gender
     endOfTourDate: End of tour
+    biography: Biography
     customFields:
       multipleButtons:
         type: enumset
@@ -728,7 +731,30 @@ fields:
       countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
                   Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
                   Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
-
+      # number of fields after Avatar in the left column for advisors
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 6
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: NATO Billet
       type: ANET User
@@ -842,7 +868,30 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
-
+      # number of fields after Avatar in the left column for principals
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 6
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: Afghan Tashkil
       type: Afghan Partner

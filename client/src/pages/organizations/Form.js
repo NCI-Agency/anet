@@ -193,9 +193,9 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                             modelType="Organization"
                             model={values.parentOrg}
                           >
-                            {values.parentOrg.shortName}{" "}
-                            {values.parentOrg.longName}{" "}
-                            {values.parentOrg.identificationCode}
+                            {Organization.toIdentificationCodeString(
+                              values.parentOrg
+                            )}
                           </LinkTo>
                         )
                       }
