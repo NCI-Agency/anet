@@ -24,6 +24,7 @@ import useMergeObjects, {
   getActivationButton,
   getClearButton,
   getInfoButton,
+  getLeafletMap,
   selectAllFields,
   setAMergedField,
   setMergeable
@@ -37,8 +38,10 @@ import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 import utils from "utils"
+import { convertLatLngToMGRS } from "../../geoUtils"
 import { areAllSet } from "../../mergeUtils"
 import ApprovalSteps from "../locations/ApprovalSteps"
+import GeoLocation from "../locations/GeoLocation"
 
 const GQL_MERGE_LOCATION = gql`
   mutation($loserUuid: String!, $winnerLocation: LocationInput!) {
@@ -122,10 +125,22 @@ const MergeLocations = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               <LocationField
-                label="Lattitude"
-                fieldName="lat"
-                value={mergedLocation.lat}
+                label="Latitude, Longitude"
+                fieldName="displayedCoordinate"
+                value={
+                  <GeoLocation
+                    editable={false}
+                    coordinates={{
+                      lat: mergedLocation.lat,
+                      lng: mergedLocation.lng,
+                      displayedCoordinate: mergedLocation.displayedCoordinate
+                    }}
+                  />
+                }
                 action={getClearButton(() => {
+                  dispatchMergeActions(
+                    setAMergedField("displayedCoordinate", null, null)
+                  )
                   dispatchMergeActions(setAMergedField("lat", null, null))
                   dispatchMergeActions(setAMergedField("lng", null, null))
                 })}
@@ -133,18 +148,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              <LocationField
-                label="Longtitude"
-                fieldName="lng"
-                value={mergedLocation.lng}
-                action={getClearButton(() => {
-                  dispatchMergeActions(setAMergedField("lat", null, null))
-                  dispatchMergeActions(setAMergedField("lng", null, null))
-                })}
-                align={"center"}
-                mergeState={mergeState}
-                dispatchMergeActions={dispatchMergeActions}
-              />
+              {getLeafletMap("merged-location-map", mergedLocation)}
               <LocationField
                 label="Status"
                 fieldName="status"
@@ -245,12 +249,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   )
 
   function mergeLocations() {
-    let loser
-    if (mergedLocation.uuid) {
-      loser = mergedLocation.uuid === location1.uuid ? location2 : location1
-    } else {
-      console.log("uuid not set")
-    }
+    const loser = mergedLocation.uuid === location1.uuid ? location2 : location1
     mergedLocation.customFields = customFieldsJSONString(mergedLocation)
 
     const winnerLocation = Object.without(
@@ -259,6 +258,7 @@ const MergeLocations = ({ pageDispatchers }) => {
       "displayedCoordinate",
       DEFAULT_CUSTOM_FIELDS_PARENT
     )
+
     API.mutation(GQL_MERGE_LOCATION, {
       loserUuid: loser.uuid,
       winnerLocation
@@ -322,6 +322,12 @@ const LocationColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 value.customFields
               )
             }
+            if (value) {
+              value.displayedCoordinate = convertLatLngToMGRS(
+                value.lat,
+                value.lng
+              )
+            }
             dispatchMergeActions(setMergeable(value, align))
           }}
           objectType={Location}
@@ -357,12 +363,27 @@ const LocationColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           />
 
           <LocationField
-            label="Lattitude"
-            fieldName="lat"
-            value={location.lat}
+            label="Latitude, Longitude"
+            fieldName="displayedCoordinate"
+            value={
+              <GeoLocation
+                coordinates={{
+                  lat: location.lat,
+                  lng: location.lng,
+                  displayedCoordinate: location.displayedCoordinate
+                }}
+              />
+            }
             align={align}
             action={getActionButton(
               () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "displayedCoordinate",
+                    convertLatLngToMGRS(location.lat, location.lng),
+                    align
+                  )
+                )
                 dispatchMergeActions(
                   setAMergedField("lat", location.lat, align)
                 )
@@ -372,34 +393,12 @@ const LocationColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               },
               align,
               mergeState,
-              "lat"
+              "displayedCoordinate"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-
-          <LocationField
-            label="Longtitude"
-            fieldName="lng"
-            value={location.lng}
-            align={align}
-            action={getActionButton(
-              () => {
-                dispatchMergeActions(
-                  setAMergedField("lat", location.lat, align)
-                )
-                dispatchMergeActions(
-                  setAMergedField("lng", location.lng, align)
-                )
-              },
-              align,
-              mergeState,
-              "lng"
-            )}
-            mergeState={mergeState}
-            dispatchMergeActions={dispatchMergeActions}
-          />
-
+          {getLeafletMap(`merge-location-map-${align}`, location)}
           <LocationField
             label="Status"
             fieldName="status"
