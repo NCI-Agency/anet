@@ -2,6 +2,7 @@ const merge = require("webpack-merge")
 const CircularDependencyPlugin = require("circular-dependency-plugin")
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
+const ESLintPlugin = require("eslint-webpack-plugin")
 const webpack = require("webpack")
 const paths = require("./paths")
 
@@ -27,12 +28,6 @@ const commonConfig = {
         test: /\.mjs$/,
         include: /node_modules/,
         type: "javascript/auto"
-      },
-      {
-        enforce: "pre",
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: ["eslint-loader"]
       },
       {
         test: /\.(m?js|jsx)$/,
@@ -129,7 +124,8 @@ module.exports = {
       new ContextReplacementPlugin(/moment[\\/]locale$/, /^\.\/(en)$/),
       new CopyWebpackPlugin({
         patterns: [{ from: "public", globOptions: { ignore: ["index.html"] } }]
-      })
+      }),
+      new ESLintPlugin()
       // new webpack.optimize.CommonsChunkPlugin({
       //     name: "dependencies",
       //     minChunks: ({ resource }) => /node_modules/.test(resource)
