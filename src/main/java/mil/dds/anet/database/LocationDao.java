@@ -67,6 +67,17 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
     final String loserLocationUuid = loserLocation.getUuid();
     final String winnerLocationUuid = winnerLocation.getUuid();
 
+    // Update Locations
+    getDbHandle().createUpdate("/* updateMergeLocations */ UPDATE locations "
+        + "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
+        + "\"customFields\" = :customFields WHERE uuid = :uuid")
+        .bind("name", winnerLocation.getName())
+        .bind("status", DaoUtils.getEnumId(winnerLocation.getStatus()))
+        .bind("lat", winnerLocation.getLat()).bind("lng", winnerLocation.getLng())
+        .bind("updatedAt", DaoUtils.asLocalDateTime(winnerLocation.getUpdatedAt()))
+        .bind("customFields", winnerLocation.getCustomFields()).bind("uuid", winnerLocationUuid)
+        .execute();
+
     // Update reports location
     updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
 
