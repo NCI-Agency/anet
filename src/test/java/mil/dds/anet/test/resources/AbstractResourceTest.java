@@ -161,6 +161,12 @@ public abstract class AbstractResourceTest {
     return stubQueryExecutor.me(PERSON_FIELDS);
   }
 
+  // Location in the test database
+  public static Location getGeneralHospital()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    return adminQueryExecutor.location("{ uuid }", "0855fb0a-995e-4a79-a132-4024ee2983ff");
+  }
+
   // Advisors in the test database
   public static Person getSuperUser() {
     final Person rebecca =
