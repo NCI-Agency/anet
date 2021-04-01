@@ -45,9 +45,11 @@ public class NoteResourceTest extends AbstractResourceTest {
 
   private static final String NOTE_FIELDS = "{ uuid type text author { uuid }"
       + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }";
-  private static final String NOTES_FIELDS = "notes " + NOTE_FIELDS;
-  private static final String POSITION_FIELDS = "{ uuid name type status " + NOTES_FIELDS + " }";
-  private static final String REPORT_FIELDS = "{ uuid intent state " + NOTES_FIELDS + "}";
+  private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
+  private static final String POSITION_FIELDS = String.format(
+      "{ uuid name type status organization { uuid } location { uuid } %1$s }", _NOTES_FIELDS);
+  private static final String REPORT_FIELDS =
+      String.format("{ uuid intent state %1$s }", _NOTES_FIELDS);
 
   private static NoteCounterDao noteCounterDao;
 
@@ -64,7 +66,8 @@ public class NoteResourceTest extends AbstractResourceTest {
     final PositionInput testPositionInput = PositionInput.builder()
         .withName("a test position created by testDeleteDanglingPositionNote")
         .withType(PositionType.ADVISOR).withStatus(Status.INACTIVE)
-        .withOrganization(getOrganizationInput(admin.getPosition().getOrganization())).build();
+        .withOrganization(getOrganizationInput(admin.getPosition().getOrganization()))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
     final Position testPosition =
         adminMutationExecutor.createPosition(POSITION_FIELDS, testPositionInput);
     assertThat(testPosition).isNotNull();

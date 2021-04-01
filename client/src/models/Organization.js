@@ -149,7 +149,7 @@ export default class Organization extends Model {
   static toIdentificationCodeString(organization) {
     return organization.type === Organization.TYPE.PRINCIPAL_ORG
       ? `${organization.shortName} \\ ${
-        Settings.fields.advisor.org.identificationCode.label
+        Settings.fields.principal.org.identificationCode.label
       }: ${organization.identificationCode || "Not specified"}`
       : `${organization.shortName} ${organization.longName} ${
         organization.identificationCode || ""

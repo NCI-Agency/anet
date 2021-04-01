@@ -43,8 +43,9 @@ public class PositionResourceTest extends AbstractResourceTest {
   private static final String _ORGANIZATION_FIELDS = "uuid shortName";
   private static final String _PERSON_FIELDS = "uuid name role";
   private static final String _POSITION_FIELDS = "uuid name code type status";
-  private static final String ORGANIZATION_FIELDS = String.format(
-      "{ %1$s positions { %2$s organization { uuid } } }", _ORGANIZATION_FIELDS, _POSITION_FIELDS);
+  private static final String ORGANIZATION_FIELDS =
+      String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
+          _ORGANIZATION_FIELDS, _POSITION_FIELDS);
   private static final String PERSON_FIELDS =
       String.format("{ %1$s position { %2$s } }", _PERSON_FIELDS, _POSITION_FIELDS);
   private static final String FIELDS = String.format(
@@ -68,7 +69,8 @@ public class PositionResourceTest extends AbstractResourceTest {
         TestData.createAdvisorOrganizationInput(true));
     final PositionInput testInput = PositionInput.builder()
         .withName("A Test Position created by PositionResourceTest").withType(PositionType.ADVISOR)
-        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao)).build();
+        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
 
     Position created = adminMutationExecutor.createPosition(FIELDS, testInput);
     assertThat(created).isNotNull();
@@ -255,6 +257,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PositionInput testInput = TestData.createPositionInput();
     testInput.setCode(testInput.getCode() + "_" + Instant.now().toEpochMilli());
     testInput.setOrganization(getOrganizationInput(orgs.getList().get(0)));
+    testInput.setLocation(getLocationInput(getGeneralHospital()));
     final Position created = adminMutationExecutor.createPosition(FIELDS, testInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
@@ -519,7 +522,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Create a new position and move prin2 there on CREATE.
     final PositionInput pos2Input =
         PositionInput.builder().withName("Created by PositionTest").withType(PositionType.PRINCIPAL)
-            .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
+            .withOrganization(getOrganizationInput(orgs.getList().get(0)))
+            .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE)
             .withPerson(getPersonInput(prin2)).build();
 
     final Position pos2 = adminMutationExecutor.createPosition(FIELDS, pos2Input);
@@ -595,7 +599,8 @@ public class PositionResourceTest extends AbstractResourceTest {
     final PositionInput newPositionInput =
         PositionInput.builder().withName("A Test Position not related to the user's organization")
             .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE)
-            .withOrganization(getOrganizationInput(ao)).build();
+            .withOrganization(getOrganizationInput(ao))
+            .withLocation(getLocationInput(getGeneralHospital())).build();
     final Position newPosition = adminMutationExecutor.createPosition(FIELDS, newPositionInput);
 
     // try to update the new position (not related to the user's organization)
