@@ -744,7 +744,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         )}
                       >
                         {" "}
-                        {createdAt.fromNow()}:{" "}
+                        {createdAt.format(
+                          Settings.dateFormats.forms.displayShort.withTime
+                        )}
+                        :{" "}
                       </span>
                       "{comment.text}"
                     </p>
