@@ -231,6 +231,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+
   return (
     <Formik enableReinitialize initialValues={person}>
       {() => {

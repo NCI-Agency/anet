@@ -172,6 +172,36 @@ export default class Person extends Model {
   static autocompleteQuery =
     "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type code status organization { uuid shortName identificationCode } location { uuid name } }"
 
+  static allFieldsQuery = `
+    uuid
+    name
+    rank
+    role
+    emailAddress
+    phoneNumber
+    status
+    pendingVerification
+    domainUsername
+    biography
+    country
+    gender
+    endOfTourDate
+    avatar(size: 256)
+    code
+    position {
+      uuid
+      name
+      type
+      organization {
+        uuid
+        shortName
+        identificationCode
+      }
+    }
+    customFields
+    ${GRAPHQL_NOTES_FIELDS}
+  `
+
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   constructor(props) {
