@@ -139,6 +139,8 @@ export default class Position extends Model {
     location {
       uuid
       name
+      lat
+      lng
     }
     customFields
     ${GRAPHQL_NOTES_FIELDS}
