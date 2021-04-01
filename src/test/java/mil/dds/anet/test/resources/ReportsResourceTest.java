@@ -145,7 +145,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
-        .withType(PositionType.SUPER_USER).withStatus(Status.ACTIVE).build();
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withStatus(Status.ACTIVE).build();
     Position approver1Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
     assertThat(approver1Pos).isNotNull();
@@ -156,7 +157,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
-        .withType(PositionType.SUPER_USER).withStatus(Status.ACTIVE).build();
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withStatus(Status.ACTIVE).build();
     final Position approver2Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
     assertThat(approver2Pos).isNotNull();
@@ -166,9 +168,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     // Create a billet for the author
-    final PositionInput authorBilletInput =
-        PositionInput.builder().withName("A report writer").withType(PositionType.ADVISOR)
-            .withOrganization(getOrganizationInput(advisorOrg)).withStatus(Status.ACTIVE).build();
+    final PositionInput authorBilletInput = PositionInput.builder().withName("A report writer")
+        .withType(PositionType.ADVISOR).withOrganization(getOrganizationInput(advisorOrg))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position authorBillet =
         adminMutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput);
     assertThat(authorBillet).isNotNull();
@@ -533,8 +535,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
     assertThat(rejected).isNotNull();
 
     // Create billet for Author
-    final PositionInput billetInput = PositionInput.builder().withName("EF 1.1 new advisor")
-        .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
+    final PositionInput billetInput =
+        PositionInput.builder().withName("EF 1.1 new advisor").withType(PositionType.ADVISOR)
+            .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
 
     // Put billet in EF 1.1
     final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder()

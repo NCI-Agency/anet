@@ -60,6 +60,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Create a position and put it in this AO
     final PositionInput b1Input = getPositionInput(TestData.getTestAdvisor());
     b1Input.setOrganization(getOrganizationInput(updated));
+    b1Input.setLocation(getLocationInput(getGeneralHospital()));
     b1Input.setCode(b1Input.getCode() + "_" + Instant.now().toEpochMilli());
     final Position createdPos = adminMutationExecutor.createPosition(POSITION_FIELDS, b1Input);
     assertThat(createdPos).isNotNull();

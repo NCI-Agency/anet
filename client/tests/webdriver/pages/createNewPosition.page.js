@@ -52,6 +52,20 @@ class CreatePosition extends Page {
     )
   }
 
+  get locationInput() {
+    return browser.$("#location")
+  }
+
+  get locationHelpBlock() {
+    return browser.$("#fg-location .help-block")
+  }
+
+  get locAdvancedSelectFirstItem() {
+    return browser.$(
+      "#location-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
   get alertSuccess() {
     return browser.$(".alert-success")
   }

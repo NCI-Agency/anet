@@ -63,8 +63,24 @@ export default class Position extends Model {
           org => org && org.uuid
         ),
       person: yup.object().nullable().default({}),
-      location: yup.object().nullable().default({})
+      location: yup
+        .object()
+        .nullable()
+        .default(null)
+        .label("Location")
+        .when("type", (type, schema) =>
+          [
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ].includes(type)
+            ? schema.required(
+              `Location is required for ${advisorPosition.name}`
+            )
+            : schema.nullable()
+        )
     })
+
     // not actually in the database, the database contains the JSON customFields
     .concat(Position.customFieldsSchema)
     .concat(Model.yupSchema)
