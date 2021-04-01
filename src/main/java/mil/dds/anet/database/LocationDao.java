@@ -78,6 +78,9 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
         .bind("customFields", winnerLocation.getCustomFields()).bind("uuid", winnerLocationUuid)
         .execute();
 
+    // Update approvalSteps
+    updateForMerge("approvalSteps", "relatedObjectUuid", winnerLocationUuid, loserLocationUuid);
+
     // Update reports location
     updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
 

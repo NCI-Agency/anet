@@ -139,25 +139,26 @@ public class LocationResourceTest extends AbstractResourceTest {
     assertThat(firstLocation.getUuid()).isNotNull();
 
     // Create Winner Location
-    final LocationInput secoLocationInput =
+    final LocationInput secondLocationInput =
         LocationInput.builder().withName("MergeLocationsTest Second Location").withLat(47.561517)
             .withLng(-52.70876).withStatus(Status.ACTIVE).build();
 
-    final Location secoLocation = adminMutationExecutor.createLocation(FIELDS, secoLocationInput);
-    assertThat(secoLocation).isNotNull();
-    assertThat(secoLocation.getUuid()).isNotNull();
+    final Location secondLocation =
+        adminMutationExecutor.createLocation(FIELDS, secondLocationInput);
+    assertThat(secondLocation).isNotNull();
+    assertThat(secondLocation.getUuid()).isNotNull();
 
     final LocationInput mergedLocationInput = getLocationInput(firstLocation);
-    mergedLocationInput.setStatus(secoLocation.getStatus());
+    mergedLocationInput.setStatus(secondLocation.getStatus());
 
     final Location mergedLocation =
-        adminMutationExecutor.mergeLocations(FIELDS, secoLocation.getUuid(), mergedLocationInput);
+        adminMutationExecutor.mergeLocations(FIELDS, secondLocation.getUuid(), mergedLocationInput);
     assertThat(mergedLocation).isNotNull();
     assertThat(mergedLocation.getUuid()).isNotNull();
 
     // Assert that loser is gone.
     try {
-      adminQueryExecutor.location(FIELDS, secoLocation.getUuid());
+      adminQueryExecutor.location(FIELDS, secondLocation.getUuid());
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
