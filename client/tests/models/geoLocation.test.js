@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/extend-expect"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import { Form, Formik } from "formik"
 import React from "react"
 import { convertLatLngToMGRS } from "../../src/geoUtils"
@@ -40,14 +40,25 @@ describe("In the location form", () => {
   })
   it("We should be able to see MGRS label and input field", () => {
     render(GeoLocationTest())
-    const formatSelect = screen.getByRole("combobox")
-    expect(formatSelect).toBeInTheDocument()
-    fireEvent.change(formatSelect, {
-      target: {
-        value: "MGRS"
-      }
+    const infoButton = screen.getByRole("button", { name: "info-sign" })
+    expect(infoButton).toBeInTheDocument()
+    act(() => {
+      fireEvent.click(infoButton)
     })
-    const mgrsInput = screen.getByLabelText(/MGRS/)
-    expect(mgrsInput).toBeInTheDocument()
+    const mgrsButton = screen.getByRole("button", {
+      name: "Military Grid Reference System (MGRS)"
+    })
+    expect(mgrsButton).toBeInTheDocument()
+    act(() => {
+      fireEvent.click(mgrsButton)
+    })
+    const mgrsLabel = screen.getByText(
+      /Military Grid Reference System \(MGRS\)/
+    )
+    expect(mgrsLabel).toBeInTheDocument()
+    const mrgsInput = screen.getByLabelText(
+      /Military Grid Reference System \(MGRS\)/
+    )
+    expect(mrgsInput).toBeInTheDocument()
   })
 })

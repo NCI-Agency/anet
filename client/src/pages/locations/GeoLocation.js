@@ -7,7 +7,6 @@ import {
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
 import * as FieldHelper from "components/FieldHelper"
-import SelectLocationFormat from "components/SelectLocationFormat"
 import { Field } from "formik"
 import {
   convertLatLngToMGRS,
@@ -25,8 +24,6 @@ export const GEO_LOCATION_DISPLAY_TYPE = {
   GENERIC: "GENERIC"
 }
 
-const MGRS_LABEL = "MGRS Coordinate"
-const LAT_LON_LABEL = "Latitude, Longitude"
 const DEFAULT_COORDINATES = {
   lat: null,
   lng: null,
@@ -42,19 +39,18 @@ const GeoLocation = ({
 }) => {
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
 
-  let label = LAT_LON_LABEL
-  let CoordinatesFormField = LatLonFormField
-  if (locationFormat === Location.LOCATION_FORMATS.MGRS) {
-    label = MGRS_LABEL
-    CoordinatesFormField = MGRSFormField
-  }
+  const label = Location.LOCATION_FORMAT_LABELS[locationFormat]
+  const CoordinatesFormField =
+    locationFormat === Location.LOCATION_FORMATS.MGRS
+      ? MGRSFormField
+      : LatLonFormField
 
   if (!editable) {
     const humanValue = (
       <ReadonlyGeoLocation>
         <CoordinatesFormField coordinates={coordinates} />
-        <AllFormatsInfo coordinates={coordinates} />
-        <SelectLocationFormat
+        <AllFormatsInfo
+          coordinates={coordinates}
           locationFormat={locationFormat}
           setLocationFormat={setLocationFormat}
         />
@@ -149,7 +145,7 @@ const MGRSFormField = ({
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="displayedCoordinate">
-        {MGRS_LABEL}
+        {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
       <Col sm={7}>
@@ -234,7 +230,7 @@ const LatLonFormField = ({
   return (
     <FormGroup style={{ marginBottom: 0 }}>
       <Col sm={2} componentClass={ControlLabel} htmlFor="lat">
-        {LAT_LON_LABEL}
+        {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
       <Col sm={7}>
@@ -340,10 +336,11 @@ const CoordinateActionButtons = ({
           disabled={isSubmitting || disabled}
         />
       </Tooltip2>
-      <AllFormatsInfo coordinates={coordinates} inForm />
-      <SelectLocationFormat
+      <AllFormatsInfo
+        coordinates={coordinates}
         locationFormat={locationFormat}
         setLocationFormat={setLocationFormat}
+        inForm
       />
     </Col>
   )
@@ -365,7 +362,12 @@ CoordinateActionButtons.defaultProps = {
 
 /* ======================= AllFormatsInfo ============================ */
 
-const AllFormatsInfo = ({ coordinates, inForm }) => {
+const AllFormatsInfo = ({
+  coordinates,
+  locationFormat,
+  setLocationFormat,
+  inForm
+}) => {
   const { lat, lng } = coordinates
   if (!inForm && ((!lat && lat !== 0) || (!lng && lng !== 0))) {
     return null
@@ -383,19 +385,47 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
             <thead>
               <tr>
                 <th colSpan="2" className="text-center">
-                  All Coordinate Formats
+                  All coordinate formats (click to change format)
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ whiteSpace: "nowrap" }}>{LAT_LON_LABEL}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <button
+                    type="button"
+                    name="location"
+                    onClick={() =>
+                      setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)
+                    }
+                  >
+                    {
+                      Location.LOCATION_FORMAT_LABELS[
+                        Location.LOCATION_FORMATS.LAT_LON
+                      ]
+                    }
+                  </button>
+                </td>
                 <td>
                   <LatLonFormField coordinates={coordinates} />
                 </td>
               </tr>
               <tr>
-                <td style={{ whiteSpace: "nowrap" }}>{MGRS_LABEL}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <button
+                    type="button"
+                    name="location"
+                    onClick={() =>
+                      setLocationFormat(Location.LOCATION_FORMATS.MGRS)
+                    }
+                  >
+                    {
+                      Location.LOCATION_FORMAT_LABELS[
+                        Location.LOCATION_FORMATS.MGRS
+                      ]
+                    }
+                  </button>
+                </td>
                 <td>
                   <MGRSFormField coordinates={coordinates} />
                 </td>
@@ -421,6 +451,8 @@ const AllFormatsInfo = ({ coordinates, inForm }) => {
 
 AllFormatsInfo.propTypes = {
   coordinates: CoordinatesPropType,
+  locationFormat: PropTypes.string.isRequired,
+  setLocationFormat: PropTypes.func.isRequired,
   inForm: PropTypes.bool
 }
 
