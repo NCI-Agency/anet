@@ -44,6 +44,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const [error, setError] = useState(null)
   const [person, setPerson] = useState(position && position.person)
   const [doSave, setDoSave] = useState(false)
+  const [removeUser, setRemoveUser] = useState(false)
 
   const save = useCallback(() => {
     let graphql, variables
@@ -94,9 +95,17 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
         </>
       )
       newError = { message: errorMessage }
+    } else if (!isAdvisor() && (removeUser || !person)) {
+      const errorMessage = (
+        <>
+          If you save, type of the <b>{position.name}</b> position is going to
+          be converted to <b>{Position.TYPE.ADVISOR}</b>.
+        </>
+      )
+      newError = { message: errorMessage }
     }
     setError(newError)
-  }, [person, position.uuid])
+  }, [person, position.uuid, removeUser])
 
   const personSearchQuery = {
     status: Model.STATUS.ACTIVE,
@@ -124,90 +133,137 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       <Modal.Body>
         {position.person.uuid && (
           <div style={{ textAlign: "center" }}>
-            <Button
-              bsStyle="danger"
-              onClick={() => {
-                setPerson(null)
-                setDoSave(true)
-              }}
-            >
-              Remove{" "}
-              <LinkTo
-                modelType="Person"
-                model={position.person}
-                isLink={false}
-              />{" "}
-              from{" "}
-              <LinkTo modelType="Position" model={position} isLink={false} />
-            </Button>
-            <hr className="assignModalSplit" />
+            {!removeUser && (
+              <>
+                <Button
+                  bsStyle="danger"
+                  onClick={() => {
+                    if (isAdvisor()) {
+                      setPerson(null)
+                      setDoSave(true)
+                    } else {
+                      setRemoveUser(true)
+                      setPerson(position.person)
+                    }
+                  }}
+                >
+                  Remove{" "}
+                  <LinkTo
+                    modelType="Person"
+                    model={position.person}
+                    isLink={false}
+                  />{" "}
+                  from{" "}
+                  <LinkTo
+                    modelType="Position"
+                    model={position}
+                    isLink={false}
+                  />
+                </Button>
+                <hr className="assignModalSplit" />
+              </>
+            )}
+            {removeUser && <Messages error={error} />}
           </div>
         )}
-        <Grid fluid>
-          <Row>
-            <Col md={12}>
-              <FormGroup controlId="person">
-                <AdvancedSingleSelect
-                  fieldName="person"
-                  fieldLabel="Select a person"
-                  placeholder="Select a person for this position"
-                  value={person}
-                  overlayColumns={["Name"]}
-                  overlayRenderRow={PersonSimpleOverlayRow}
-                  filterDefs={personFilters}
-                  onChange={value => setPerson(value)}
-                  objectType={Person}
-                  valueKey="name"
-                  fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
-                  addon={PEOPLE_ICON}
-                  vertical
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          {person && person.uuid && (
-            <Table striped condensed hover responsive>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Name</th>
-                  <th>Current Position</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{person.rank}</td>
-                  <td>{person.name}</td>
-                  <td>
-                    {person.position ? (
-                      person.position.name
-                    ) : person.uuid === position.person.uuid ? (
-                      position.name
-                    ) : (
-                      <i>None</i>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          )}
-          <Messages error={error} />
-        </Grid>
+        {!removeUser && (
+          <Grid fluid>
+            <Row>
+              <Col md={12}>
+                <FormGroup controlId="person" required>
+                  <AdvancedSingleSelect
+                    fieldName="person"
+                    fieldLabel="Select a person"
+                    placeholder="Select a person for this position"
+                    value={person}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={PersonSimpleOverlayRow}
+                    filterDefs={personFilters}
+                    onChange={value => setPerson(value)}
+                    objectType={Person}
+                    valueKey="name"
+                    fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
+                    addon={PEOPLE_ICON}
+                    vertical
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            {person && person.uuid && (
+              <Table striped condensed hover responsive>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Current Position</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{person.rank}</td>
+                    <td>{person.name}</td>
+                    <td>
+                      {person.position ? (
+                        person.position.name
+                      ) : person.uuid === position.person.uuid ? (
+                        position.name
+                      ) : (
+                        <i>None</i>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            )}
+            {(removeUser || !person) && <Messages error={error} />}
+            {person && <Messages error={error} />}
+          </Grid>
+        )}
       </Modal.Body>
       <Modal.Footer>
-        <Button className="pull-left" onClick={closeModal}>
+        <Button
+          className="pull-left"
+          onClick={() => {
+            removeUser ? setRemoveUser(false) : closeModal()
+          }}
+        >
           Cancel
         </Button>
-        <Button onClick={save} bsStyle="primary" className="save-button">
+        <Button
+          onClick={() => {
+            if (removeUser) {
+              Position.downgradePermission(latestPositionProp.current)
+              setPerson(null)
+              setDoSave(true)
+              setRemoveUser(false)
+            } else if (!removeUser && !person) {
+              setPerson(null)
+              setDoSave(true)
+              Position.downgradePermission(latestPositionProp.current)
+              setRemoveUser(false)
+            } else {
+              save()
+              setRemoveUser(false)
+            }
+          }}
+          bsStyle="primary"
+          className="save-button"
+          type="submit"
+        >
           Save
         </Button>
       </Modal.Footer>
     </Modal>
   )
 
+  function isAdvisor() {
+    return latestPositionProp.current.type === Position.TYPE.ADVISOR
+  }
+
   function closeModal() {
     // Reset state before closing (cancel)
     setPerson(position.person)
+    setRemoveUser(false)
     onCancel()
   }
 }
