@@ -121,6 +121,7 @@ export const NOTE_TYPE = {
 
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
+export const NOTES_FIELD = "notes"
 
 export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
@@ -688,5 +689,23 @@ export default class Model {
         note.type !== NOTE_TYPE.FREE_TEXT &&
         (note.customFields = utils.parseJsonSafe(note.text))
     )
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    NOTES_FIELD,
+    DEFAULT_CUSTOM_FIELDS_PARENT /* , others */
+  ]
+
+  static getObjClientSideFieldsFiltered(obj, ...additionalFields) {
+    // filter common fields here
+    return Object.without(
+      obj,
+      ...Model.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  getObjClientSideFieldsFiltered(...additionalFields) {
+    return Model.getObjClientSideFieldsFiltered(this, ...additionalFields)
   }
 }
