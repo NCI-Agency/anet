@@ -697,7 +697,6 @@ export default class Model {
   ]
 
   static getObjClientSideFieldsFiltered(obj, ...additionalFields) {
-    // filter common fields here
     return Object.without(
       obj,
       ...Model.FILTERED_CLIENT_SIDE_FIELDS,

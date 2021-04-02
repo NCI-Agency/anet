@@ -13,7 +13,7 @@ import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
@@ -307,12 +307,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values) {
-    const location = Object.without(
-      new Location(values),
-      "notes",
-      "displayedCoordinate",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
+    const location = new Location(values).getObjClientSideFieldsFiltered(
+      "customFields"
     )
     location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
