@@ -53,10 +53,13 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
   const [error, setError] = useState(null)
   const [position, setPosition] = useState(person && person.position)
   const [doSave, setDoSave] = useState(false)
+  const [removeUser, setRemoveUser] = useState(false)
 
   const save = useCallback(() => {
     let graphql, variables
     if (position === null) {
+      !isAdvisor() &&
+        Position.downgradePermission(latestPersonProp.current.position)
       graphql = GQL_DELETE_PERSON_FROM_POSITION
       variables = {
         uuid: person.position.uuid
@@ -104,9 +107,17 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
         </>
       )
       newError = { message: errorMessage }
+    } else if (!isAdvisor() && (removeUser || !position)) {
+      const errorMessage = (
+        <>
+          If you save, type of the <b>{person.position.name}</b> position is
+          going to be converted to <b>{Position.TYPE.ADVISOR}</b>.
+        </>
+      )
+      newError = { message: errorMessage }
     }
     setError(newError)
-  }, [position, person.uuid])
+  }, [position, person.uuid, removeUser])
 
   const newPosition = position ? new Position(position) : new Position()
 
@@ -146,94 +157,134 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       <Modal.Body>
         {person.position.uuid && (
           <div style={{ textAlign: "center" }}>
-            <Button
-              bsStyle="danger"
-              onClick={() => {
-                setPosition(null)
-                setDoSave(true)
-              }}
-              className="remove-person-from-position"
-            >
-              Remove <LinkTo modelType="Person" model={person} isLink={false} />{" "}
-              from{" "}
-              <LinkTo
-                modelType="Position"
-                model={person.position}
-                isLink={false}
-              />
-            </Button>
-            <hr className="assignModalSplit" />
+            {!removeUser && (
+              <>
+                <Button
+                  bsStyle="danger"
+                  onClick={() => {
+                    if (isAdvisor()) {
+                      setPosition(null)
+                      setDoSave(true)
+                    } else {
+                      setRemoveUser(true)
+                      setPosition(person.position)
+                    }
+                  }}
+                  className="remove-person-from-position"
+                >
+                  Remove{" "}
+                  <LinkTo modelType="Person" model={person} isLink={false} />{" "}
+                  from{" "}
+                  <LinkTo
+                    modelType="Position"
+                    model={person.position}
+                    isLink={false}
+                  />
+                </Button>
+                <hr className="assignModalSplit" />
+              </>
+            )}
+            {removeUser && <Messages error={error} />}
           </div>
         )}
-        <Grid fluid>
-          <Row>
-            <Col md={12}>
-              <FormGroup controlId="position">
-                <AdvancedSingleSelect
-                  fieldName="position"
-                  fieldLabel="Select a position"
-                  placeholder="Select a position for this person"
-                  value={position}
-                  overlayColumns={[
-                    "Position",
-                    "Organization",
-                    "Current Occupant"
-                  ]}
-                  overlayRenderRow={PositionOverlayRow}
-                  filterDefs={positionsFilters}
-                  onChange={value => setPosition(value)}
-                  objectType={Position}
-                  valueKey="name"
-                  fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
-                  addon={POSITIONS_ICON}
-                  vertical
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          {newPosition.uuid && (
-            <Table striped condensed hover responsive>
-              <thead>
-                <tr>
-                  <th>Organization</th>
-                  <th>Type</th>
-                  <th>Current Person</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{newPosition.organization.shortName}</td>
-                  <td>{newPosition.humanNameOfType()}</td>
-                  <td>
-                    {newPosition.person ? (
-                      newPosition.person.name
-                    ) : newPosition.uuid === person.position.uuid ? (
-                      person.name
-                    ) : (
-                      <i>Unfilled</i>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          )}
-          <Messages error={error} />
-        </Grid>
+        {!removeUser && (
+          <Grid fluid>
+            <Row>
+              <Col md={12}>
+                <FormGroup controlId="position">
+                  <AdvancedSingleSelect
+                    fieldName="position"
+                    fieldLabel="Select a position"
+                    placeholder="Select a position for this person"
+                    value={position}
+                    overlayColumns={[
+                      "Position",
+                      "Organization",
+                      "Current Occupant"
+                    ]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
+                    onChange={value => setPosition(value)}
+                    objectType={Position}
+                    valueKey="name"
+                    fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
+                    addon={POSITIONS_ICON}
+                    vertical
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            {newPosition.uuid && (
+              <Table striped condensed hover responsive>
+                <thead>
+                  <tr>
+                    <th>Organization</th>
+                    <th>Type</th>
+                    <th>Current Person</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{newPosition.organization.shortName}</td>
+                    <td>{newPosition.humanNameOfType()}</td>
+                    <td>
+                      {newPosition.person ? (
+                        newPosition.person.name
+                      ) : newPosition.uuid === person.position.uuid ? (
+                        person.name
+                      ) : (
+                        <i>Unfilled</i>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            )}
+            {(removeUser || !position) && <Messages error={error} />}
+            {position && <Messages error={error} />}
+          </Grid>
+        )}
       </Modal.Body>
       <Modal.Footer>
-        <Button className="pull-left" onClick={closeModal}>
+        <Button
+          className="pull-left"
+          onClick={() => {
+            removeUser ? setRemoveUser(false) : closeModal()
+          }}
+        >
           Cancel
         </Button>
-        <Button onClick={save} bsStyle="primary">
+        <Button
+          onClick={() => {
+            if (removeUser) {
+              setPosition(null)
+              setDoSave(true)
+              setRemoveUser(false)
+            } else if (!removeUser && !position) {
+              setPosition(null)
+              setDoSave(true)
+              setRemoveUser(false)
+            } else {
+              save()
+              setRemoveUser(false)
+            }
+          }}
+          bsStyle="primary"
+        >
           Save
         </Button>
       </Modal.Footer>
     </Modal>
   )
 
+  function isAdvisor() {
+    return latestPersonProp.current.position.type === Position.TYPE.ADVISOR
+  }
+
   function closeModal() {
     // Reset state before closing (cancel)
     setPosition(person.position)
+    setRemoveUser(false)
     onCancel()
   }
 }

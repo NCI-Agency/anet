@@ -49,6 +49,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const save = useCallback(() => {
     let graphql, variables
     if (person === null) {
+      !isAdvisor() && Position.downgradePermission(latestPositionProp.current)
       graphql = GQL_DELETE_PERSON_FROM_POSITION
       variables = {
         uuid: position.uuid
@@ -232,14 +233,12 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
         <Button
           onClick={() => {
             if (removeUser) {
-              Position.downgradePermission(latestPositionProp.current)
               setPerson(null)
               setDoSave(true)
               setRemoveUser(false)
             } else if (!removeUser && !person) {
               setPerson(null)
               setDoSave(true)
-              Position.downgradePermission(latestPositionProp.current)
               setRemoveUser(false)
             } else {
               save()
