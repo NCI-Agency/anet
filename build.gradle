@@ -641,6 +641,8 @@ task dockerTestJupyter(dependsOn: dockerInstallJupyterDevDependencies, type: com
 	description = "Run tests inside Jupyter Environment."
 	targetContainerId { jupyterContainerName }
 		commands = [ ["/bin/bash", "-c", "python -m unittest discover -s /home/jovyan/work/tests/integration/"] as String[] ]
+}
+
 // Add the generated sources as a Java test source folder
 sourceSets.test.java.srcDirs += 'build/generated/generateClientCode'
 // And remove the auto-added generated sources from the main Java source
