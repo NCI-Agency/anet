@@ -55,6 +55,8 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
         uuid: position.uuid
       }
     } else {
+      Position.carryPermission(latestPositionProp.current, person)
+      Position.downgradePermission(person.position)
       graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
         uuid: position.uuid,
@@ -183,7 +185,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPerson(value)}
                     objectType={Person}
                     valueKey="name"
-                    fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type }"
+                    fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type, organization {uuid} }"
                     addon={PEOPLE_ICON}
                     vertical
                   />

@@ -223,47 +223,51 @@ export default class Position extends Model {
         .then(res => {
           res &&
             toast.success(
-              `Type of the ${position.name} position is converted to ${Position.TYPE.ADVISOR}`
+              `Type of the ${position.name} position is converted to ${Position.TYPE.ADVISOR}.`
             )
         })
         .catch(error => {
           API._handleError(error)
           toast.error(
-            `Type of the ${position.name} position remained as ${Position.TYPE.SUPER_USER}`
+            `Type of the ${position.name} position remained as ${Position.TYPE.SUPER_USER}.`
           )
         })
     }
   }
 
-  static carryPermission = ({ position, person }) => {
-    const updatePositionObject = Object.without(
-      new Position(position),
-      "previousPeople",
-      "notes",
-      "formCustomFields", // initial JSON from the db
-      "responsibleTasks" // Only for querying
-    )
-    updatePositionObject.type = person.role
+  static carryPermission = (position, person) => {
+    if (
+      person.position.type === Position.TYPE.SUPER_USER ||
+      person.position.type === Position.TYPE.ADMINISTRATOR
+    ) {
+      const updatePositionObject = Object.without(
+        new Position(position),
+        "previousPeople",
+        "notes",
+        "formCustomFields", // initial JSON from the db
+        "responsibleTasks" // Only for querying
+      )
+      updatePositionObject.type = person.position.type || Position.TYPE.ADVISOR
 
-    const queryResult = Promise.resolve(
-      API.mutation(Position.GQL_UPDATE_POSITION, {
-        position: updatePositionObject
-      })
-    )
-
-    queryResult
-      .then(res => {
-        res &&
-          toast.success(
-            `Type of the ${position.name} position is converted to ${Position.TYPE.ADVISOR}`
+      const queryResult = Promise.resolve(
+        API.mutation(Position.GQL_UPDATE_POSITION, {
+          position: updatePositionObject
+        })
+      )
+      queryResult
+        .then(res => {
+          res &&
+            toast.success(
+              `Type of the ${position.name} position is converted to ${updatePositionObject.type}.`
+            )
+        })
+        .catch(error => {
+          API._handleError(error)
+          toast.error(
+            `Type of the ${position.name} position remained as ${position.type}.`
           )
-      })
-      .catch(error => {
-        API._handleError(error)
-        toast.error(
-          `Type of the ${position.name} position remained as ${Position.TYPE.SUPER_USER}`
-        )
-      })
+        })
+    }
   }
 
   iconUrl() {

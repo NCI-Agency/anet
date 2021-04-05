@@ -65,6 +65,8 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
         uuid: person.position.uuid
       }
     } else {
+      Position.carryPermission(position, latestPersonProp.current)
+      Position.downgradePermission(latestPersonProp.current.position)
       graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
         uuid: position.uuid,
