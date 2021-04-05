@@ -2,24 +2,21 @@ import uuid
 
 from sqlalchemy import and_
 
-allowed_tables = ["positions", "people", "locations", "organizations", "reports"]
 
 class base_methods:
     """ Base methods used in src.core.business_logic package
     """
     @staticmethod
     def check_if_entity_allowed(entity):
-        if entity.__tablename__ not in allowed_tables:
+        if entity.__tablename__ not in ["positions", "people", "locations", "organizations", "reports"]:
             raise Exception(f"You can not import to {entity.__tablename__} table!")
 
     @staticmethod
     def has_entity_relation(entity, rel_attr):
-        if not hasattr(entity, rel_attr):
-            return False
-        if getattr(entity, rel_attr) is None or getattr(entity, rel_attr) == []:
-            return False
-        else:
+        if getattr(entity, rel_attr):
             return True
+        else:
+            return False
 
     @staticmethod
     def has_entity_uuid(entity):
@@ -43,21 +40,20 @@ class base_methods:
         return entity
 
     @staticmethod
-    def query_with_rules(entity, update_rules):
+    def query_with_rules(entity, update_rules, session):
         query_result_list = list()
         for update_rule in update_rules["tables"]:
             if entity.__tablename__ == update_rule["name"]:
-                query_result_list = entity.session \
-                                        .query(entity.__class__) \
+                query_result_list = session.query(entity.__class__) \
                                         .filter(and_(getattr(entity.__class__, attr_name) == getattr(entity, attr_name) for attr_name in tuple(update_rule["columns"]))) \
                                         .all()
                 break
         return query_result_list
 
     @classmethod
-    def is_entity_update(cls, entity, update_rules):
+    def is_entity_update(cls, entity, update_rules, session):
         if cls.has_entity_uuid(entity):
-            query_result = type(entity).find(entity.uuid)
+            query_result = session.query(type(entity)).get(entity.uuid)
             if query_result is None:
                 return False
             else:
@@ -66,17 +62,13 @@ class base_methods:
             entity.uuid = cls.get_new_uuid()
             return False
         else:
-            query_result_list = cls.query_with_rules(entity, update_rules)
+            query_result_list = cls.query_with_rules(entity, update_rules, session)
             if len(query_result_list) == 1:
                 entity.uuid = query_result_list[0].uuid
                 return True
             else:
                 cls.set_new_uuid(entity)
                 return False
-
-    @classmethod
-    def set_uuid(cls, entity, update_rules):
-        cls.is_entity_update(entity, update_rules)
 
     @staticmethod
     def is_entity_single(entity):
