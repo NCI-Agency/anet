@@ -7,22 +7,6 @@ class helper_methods:
     """
     @staticmethod
     def generate_custom_field(configuration_list_json, row):
-        # configuration_list_json template
-        # configuration_list_json = [
-        #   {
-        #       "source_field_name" : source_field_name,
-        #       "target_field_name" : target_field_name,
-        #       "data_type"         : data_type_str,
-        #   }, 
-        #   .
-        #   .
-        #   .
-        #   {
-        #       "source_field_name" : source_field_name,
-        #       "target_field_name" : target_field_name,
-        #       "data_type"         : data_type_str,
-        #   }
-        # ]
         custom_field = {}
         for configuration in configuration_list_json:
             if not type(row[configuration["source_field_name"]]) is configuration["data_type"]:

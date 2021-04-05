@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.core.business_logic.base.db import db
+from src.core.database.db import db
 
 
 class db_dataframe(db):
