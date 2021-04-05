@@ -225,7 +225,7 @@ const MergeLocations = ({ pageDispatchers }) => {
             </>
           )}
         </Col>
-        <Col md={4} id="left-merge-loc-col">
+        <Col md={4} id="right-merge-loc-col">
           <LocationColumn
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
