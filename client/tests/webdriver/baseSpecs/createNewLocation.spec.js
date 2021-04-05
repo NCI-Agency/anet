@@ -3,7 +3,8 @@ import CreateNewLocation from "../pages/location/createNewLocation.page"
 import {
   BAD_LAT_LNG_VAL,
   LOCATION_COORDS,
-  LOCATION_NAME
+  LOCATION_NAME,
+  SIMILAR_LOCATION
 } from "./locationUtils"
 
 describe("When creating a new Location", () => {
@@ -12,6 +13,18 @@ describe("When creating a new Location", () => {
     CreateNewLocation.createButton.click()
     CreateNewLocation.nameRequiredError.waitForExist()
     CreateNewLocation.nameRequiredError.waitForDisplayed()
+  })
+
+  it("Should display possible duplicates with similar names", () => {
+    CreateNewLocation.nameField.setValue(SIMILAR_LOCATION.name)
+    CreateNewLocation.duplicatesButton.waitForDisplayed()
+    CreateNewLocation.duplicatesButton.click()
+    CreateNewLocation.modalContent.waitForDisplayed()
+    const similar = CreateNewLocation.similarLocation.getText()
+    CreateNewLocation.modalCloseButton.waitForDisplayed()
+    CreateNewLocation.modalCloseButton.click()
+    CreateNewLocation.modalContent.waitForDisplayed({ reverse: true })
+    expect(similar).to.equal("Kabul Hospital")
   })
 
   it("Should not accept invalid latitude-longitude inputs", () => {

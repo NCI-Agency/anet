@@ -444,7 +444,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate]
+        required: [firstName, lastName, domainUsername, openIdSubject, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, position, prevPositions]
         properties:
           firstName:
             type: string
@@ -454,10 +454,22 @@ properties:
             type: string
             title: The label for a person's last name
             description: Used in the UI where a person's last name is shown.
+          position:
+            type: string
+            title: The label for person's current position
+            description: Used in Person page UI where a person's position is shown.
+          prevPositions:
+            type: string
+            title: The label for person's previous positions
+            description: Used in Person page UI where a person's previous positions are shown.
           domainUsername:
             type: string
             title: The label for a person's domain username
             description: Used in the UI where a person's domain username is shown.
+          openIdSubject:
+            type: string
+            title: The label for a person's OpenID subject
+            description: Used in the UI where a person's OpenID subject is shown.
           emailAddress:
             "$ref": "#/$defs/inputField"
           phoneNumber:
@@ -490,6 +502,10 @@ properties:
             type: string
             title: The label for a person's end of tour date
             description: Used in the UI where a person's end of tour date is shown.
+          biography:
+            type: string
+            title: The label for a person's biography
+            description: Used in the UI where a person's biography is shown.
           customFields:
             type: object
             additionalProperties:
@@ -502,8 +518,8 @@ properties:
         properties:
           format:
             type: string
+            title: Default format for location
             enum: [LAT_LON, MGRS]
-            title: Coordinate format for location
             description: Used in the UI where a location's coordinate is shown. Defaults to LAT_LON.
           customFields:
             type: object
@@ -551,7 +567,7 @@ properties:
           person:
             type: object
             additionalProperties: false
-            required: [name, countries]
+            required: [name, countries, numberOfFieldsInLeftColumn, showPageOrderedFields]
             properties:
               name:
                 type: string
@@ -566,7 +582,16 @@ properties:
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for
                     a person inside an advisor organization.
-
+              showPageOrderedFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  description: Ordered fields to show in Person Page in the Person info section
+              numberOfFieldsInLeftColumn:
+                type: number
+                description: Used for dividing fields into 2 columns, make sure the columns are balanced
           position:
             type: object
             additionalProperties: false
@@ -610,7 +635,7 @@ properties:
           person:
             type: object
             additionalProperties: false
-            required: [name, countries]
+            required: [name, countries, numberOfFieldsInLeftColumn, showPageOrderedFields]
             properties:
               name:
                 type: string
@@ -624,6 +649,16 @@ properties:
                   type: string
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
+              showPageOrderedFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  description: Ordered fields to show in Person Page in the Person info section
+              numberOfFieldsInLeftColumn:
+                type: number
+                description: Used for dividing fields into 2 columns, make sure the columns are balanced
               assessments:
                 type: array
                 items:

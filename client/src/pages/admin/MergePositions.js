@@ -341,6 +341,7 @@ const MergePositions = ({ pageDispatchers }) => {
 
     const winnerPosition = Object.without(
       mergedPosition,
+      "notes",
       DEFAULT_CUSTOM_FIELDS_PARENT
     )
     API.mutation(GQL_MERGE_POSITION, {

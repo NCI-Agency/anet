@@ -20,6 +20,7 @@ import React, { useState } from "react"
 import { Button, Panel } from "react-bootstrap"
 import { toast } from "react-toastify"
 import REMOVE_ICON from "resources/delete.png"
+import Settings from "settings"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -58,7 +59,11 @@ const PeriodicAssessment = ({
         }}
       >
         <>
-          <i>{moment(note.updatedAt).fromNow()}</i>{" "}
+          <i>
+            {moment(note.updatedAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )}
+          </i>{" "}
           <LinkTo
             modelType="Person"
             model={note.author}

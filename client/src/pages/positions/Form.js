@@ -1,3 +1,5 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import {
@@ -17,6 +19,7 @@ import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
@@ -42,11 +45,13 @@ const GQL_UPDATE_POSITION = gql`
     updatePosition(position: $position)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 3
 
 const PositionForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
+  const [showSimilarPositions, setShowSimilarPositions] = useState(false)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -257,11 +262,26 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.InputField}
                 />
 
-                <FastField
+                <Field
                   name="name"
                   component={FieldHelper.InputField}
                   label={Settings.fields.position.name}
                   placeholder="Name/Description of Position"
+                  extraColElem={
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                      <>
+                        <Button onClick={() => setShowSimilarPositions(true)}>
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={Icon.SIZE_STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
                 />
 
                 {!isPrincipal && (
@@ -313,6 +333,16 @@ const PositionForm = ({ edit, title, initialValues }) => {
                     }}
                   />
                 </Fieldset>
+              )}
+              {showSimilarPositions && (
+                <SimilarObjectsModal
+                  objectType="Position"
+                  userInput={`${values.name}`}
+                  onCancel={() => {
+                    setShowSimilarPositions(false)
+                  }}
+                >
+                </SimilarObjectsModal>
               )}
               <div className="submit-buttons">
                 <div>

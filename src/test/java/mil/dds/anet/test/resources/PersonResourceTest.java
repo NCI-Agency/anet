@@ -125,9 +125,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 
-    final PositionInput newPosInput =
-        PositionInput.builder().withType(PositionType.ADVISOR).withName("Test Position")
-            .withOrganization(getOrganizationInput(org)).withStatus(Status.ACTIVE).build();
+    final PositionInput newPosInput = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("Test Position").withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position newPos = adminMutationExecutor.createPosition(POSITION_FIELDS, newPosInput);
     assertThat(newPos).isNotNull();
     assertThat(newPos.getUuid()).isNotNull();
@@ -143,9 +143,9 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // Change this person w/ a new position, and ensure it gets changed.
 
-    final PositionInput newPos2Input =
-        PositionInput.builder().withType(PositionType.ADVISOR).withName("A Second Test Position")
-            .withOrganization(getOrganizationInput(org)).withStatus(Status.ACTIVE).build();
+    final PositionInput newPos2Input = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("A Second Test Position").withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position newPos2 = adminMutationExecutor.createPosition(POSITION_FIELDS, newPos2Input);
     assertThat(newPos2).isNotNull();
     assertThat(newPos2.getUuid()).isNotNull();
@@ -317,6 +317,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
         TestData.createAdvisorOrganizationInput(true));
     testInput.setOrganization(getOrganizationInput(ao));
+    testInput.setLocation(getLocationInput(getGeneralHospital()));
 
     final Position created = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput);
     assertThat(created).isNotNull();
@@ -386,9 +387,9 @@ public class PersonResourceTest extends AbstractResourceTest {
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
     assertThat(org.getUuid()).isNotNull();
 
-    final PositionInput newPosInput =
-        PositionInput.builder().withType(PositionType.ADVISOR).withName("Test Position")
-            .withOrganization(getOrganizationInput(org)).withStatus(Status.ACTIVE).build();
+    final PositionInput newPosInput = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("Test Position").withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position retPos = adminMutationExecutor.createPosition(POSITION_FIELDS, newPosInput);
     assertThat(retPos).isNotNull();
     assertThat(retPos.getUuid()).isNotNull();

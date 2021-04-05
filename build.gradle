@@ -2,8 +2,8 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
-	id "com.diffplug.spotless" version "5.11.0"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.12.5"
+	id "com.diffplug.spotless" version "5.11.1"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.13"
 	id "org.beryx.runtime" version "1.12.1"
 	id "nebula.ospackage" version "8.5.0"
 }
@@ -128,7 +128,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.12.5'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.13'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.0'
 
@@ -657,7 +657,10 @@ generateClientCodeConf {
 	schemaFileFolder = 'src/test/resources/'
 	schemaFilePattern = 'anet.graphql'
 	packageName = 'mil.dds.anet.test.client'
+	// Set recommended parameters to respect the future 2.x behavior
 	separateUtilityClasses = true
+	copyRuntimeSources = false
+	generateDeprecatedRequestResponse = false
 	customScalars = [
 		[
 			graphQLTypeName: "Instant",
@@ -680,9 +683,6 @@ generateClientCodeConf {
 			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.Object"
 		]
 	]
-	// The parameters below change the 1.x default behavior to respect the future 2.x behavior
-	//copyRuntimeSources = false
-	//generateDeprecatedRequestResponse = false
 }
 
 jar.dependsOn buildClient

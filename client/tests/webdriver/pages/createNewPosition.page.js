@@ -10,6 +10,22 @@ class CreatePosition extends Page {
     return browser.$("#name")
   }
 
+  get duplicatesButton() {
+    return browser.$('//button[text()="Possible Duplicates"]')
+  }
+
+  get modalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  get modalCloseButton() {
+    return this.modalContent.$("button.close")
+  }
+
+  get similarPosition() {
+    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  }
+
   get positionNameHelpBlock() {
     return browser.$("#fg-name .help-block")
   }
@@ -33,6 +49,20 @@ class CreatePosition extends Page {
   get orgAdvancedSelectFirstItem() {
     return browser.$(
       "#organization-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  get locationInput() {
+    return browser.$("#location")
+  }
+
+  get locationHelpBlock() {
+    return browser.$("#fg-location .help-block")
+  }
+
+  get locAdvancedSelectFirstItem() {
+    return browser.$(
+      "#location-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 

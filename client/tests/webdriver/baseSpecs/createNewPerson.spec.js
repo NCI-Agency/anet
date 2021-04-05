@@ -11,6 +11,11 @@ const VALID_PERSON_ADVISOR = {
   emailAddress: "test@NATO.INT"
 }
 
+const SIMILAR_PERSON_ADVISOR = {
+  lastName: "ERINSON",
+  firstName: "Erin"
+}
+
 describe("Create new Person form page", () => {
   describe("When creating a Principle user", () => {
     beforeEach("On the create person page...", () => {
@@ -94,6 +99,24 @@ describe("Create new Person form page", () => {
   })
 
   describe("When creating an Advisor user", () => {
+    it("Should display possible duplicates with similar names", () => {
+      CreatePerson.openAsAdmin()
+      CreatePerson.form.waitForExist()
+      CreatePerson.form.waitForDisplayed()
+      CreatePerson.lastName.waitForDisplayed()
+      CreatePerson.lastName.setValue(SIMILAR_PERSON_ADVISOR.lastName)
+      CreatePerson.firstName.waitForDisplayed()
+      CreatePerson.firstName.setValue(SIMILAR_PERSON_ADVISOR.firstName)
+      CreatePerson.duplicatesButton.waitForDisplayed()
+      CreatePerson.duplicatesButton.click()
+      CreatePerson.modalContent.waitForDisplayed()
+      CreatePerson.similarPerson.waitForDisplayed()
+      const similar = CreatePerson.similarPerson.getText()
+      CreatePerson.modalCloseButton.waitForDisplayed()
+      CreatePerson.modalCloseButton.click()
+      CreatePerson.modalContent.waitForDisplayed({ reverse: true })
+      expect(similar).to.equal("CIV ERINSON, Erin")
+    })
     it("Should display a warning message specific for duplicate accounts", () => {
       // Only admin users can create an advisor user
       CreatePerson.openAsAdmin()

@@ -1,3 +1,5 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
@@ -17,6 +19,7 @@ import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -49,6 +52,7 @@ const GQL_UPDATE_PERSON = gql`
     updatePerson(person: $person)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 2
 
 const PersonForm = ({ edit, title, saveText, initialValues }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
@@ -58,6 +62,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
   const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
   const [showWrongPersonModal, setShowWrongPersonModal] = useState(false)
   const [wrongPersonOptionValue, setWrongPersonOptionValue] = useState(null)
+  const [showSimilarPeople, setShowSimilarPeople] = useState(false)
   // redirect first time users to the homepage in order to be able to use onboarding
   const [onSaveRedirectToHome, setOnSaveRedirectToHome] = useState(
     Person.isPendingVerification(initialValues)
@@ -216,6 +221,21 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       />
                     </Col>
                   </Col>
+                  {!edit &&
+                    values.firstName.length >= MIN_CHARS_FOR_DUPLICATES &&
+                    values.lastName.length >= MIN_CHARS_FOR_DUPLICATES && (
+                      <Col sm={1}>
+                        <Button onClick={() => setShowSimilarPeople(true)}>
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={Icon.SIZE_STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </Col>
+                  )}
 
                   {edit && (
                     <>
@@ -490,10 +510,10 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 />
               </Fieldset>
 
-              {Settings.fields.person.customFields && (
+              {!_isEmpty(Person.customFields) && (
                 <Fieldset title="Person information" id="custom-fields">
                   <CustomFieldsContainer
-                    fieldsConfig={Settings.fields.person.customFields}
+                    fieldsConfig={Person.customFields}
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
@@ -502,6 +522,16 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     }}
                   />
                 </Fieldset>
+              )}
+              {showSimilarPeople && (
+                <SimilarObjectsModal
+                  objectType="Person"
+                  userInput={`${values.lastName} ${values.firstName}`}
+                  onCancel={() => {
+                    setShowSimilarPeople(false)
+                  }}
+                >
+                </SimilarObjectsModal>
               )}
 
               <div className="submit-buttons">
