@@ -6,7 +6,7 @@ from src.core.model.base.base_model import BaseModel
 class PeoplePositions(BaseModel):
     """ Association object holds many-to-many 
     relationship between people and position
-    """    
+    """
     __tablename__ = "peoplePositions"
 
     createdAt = Column('createdAt', DateTime)
@@ -26,7 +26,7 @@ class PeoplePositions(BaseModel):
 class ReportPeople(BaseModel):
     """ Association object holds many-to-many 
     relationship between people and report
-    """    
+    """
     __tablename__ = "reportPeople"
 
     isPrimary = Column('isPrimary', Boolean, server_default=text("false"))
@@ -41,3 +41,7 @@ class ReportPeople(BaseModel):
 
     person = relationship("People", back_populates="reports")
     report = relationship("Reports", back_populates="people")
+
+    def __eq__(self, other):
+        # Check if two ReportPeople objects have same person uuid
+        return self.person.uuid == other.person.uuid
