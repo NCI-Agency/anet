@@ -5,10 +5,9 @@ import datetime
 from sqlalchemy.orm import sessionmaker
 import unittest
 
-from src.core.business_logic.base.db import db
-from src.core.model.annotated.anet import People, Positions, Locations, Organizations
-from src.core.model.annotated.association import PeoplePositions
-from src.core.model.base.base_model import BaseModel
+from src.core.database.db import db
+from src.core.model.annotated.anet import People, Positions, Locations, Organizations, Reports
+from src.core.model.annotated.association import PeoplePositions, ReportPeople
 
 # new db instance to get new engine using env vars
 db_obj = db(use_env=True)
@@ -25,20 +24,18 @@ class BaseTestFixture(unittest.TestCase):
         self.trans = self.connection.begin()
         # bind an individual Session to the connection
         self.session = Session(bind=self.connection)
-        # get new uuid
-        self.new_uuid = str(uuid.uuid4())
         # get utc_now
         self.utc_now = datetime.datetime.now()
         # initialize update rules
         self.update_rules = {"tables": []}
         # Set entity classes as class attribute and set the same session to all by BaseModel
         self.PeoplePositions = PeoplePositions
+        self.ReportPeople = ReportPeople
         self.Position = Positions
         self.Person = People
         self.Location = Locations
         self.Organization = Organizations
-        self.BaseModel = BaseModel
-        self.BaseModel.set_session(self.session)
+        self.Report = Reports
     
     # tearDown method will work after each test method
     def tearDown(self):
