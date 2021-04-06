@@ -29,6 +29,7 @@
     "@graphql-codegen/schema-ast": "1.18.1",
     "@storybook/addon-essentials": "6.2.3",
     "@storybook/addon-links": "6.2.3",
+    "@storybook/addon-postcss": "2.0.0",
     "@storybook/react": "6.2.3",
     "@testing-library/jest-dom": "5.11.10",
     "@testing-library/react": "11.2.6",
