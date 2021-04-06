@@ -7,6 +7,7 @@ import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/Advanced
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { customFieldsJSONString } from "components/CustomFields"
+import EditHistory from "components/EditHistory"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import PersonField from "components/MergeField"
@@ -22,6 +23,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import PreviousPositions from "components/PreviousPositions"
 import useMergeObjects, {
   areAllSet,
   getActionButton,
@@ -210,6 +212,39 @@ const MergePeople = ({ pageDispatchers }) => {
                   dispatchMergeActions(setAMergedField("position", {}, null))
                 )}
                 fieldName="position"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <PersonField
+                label="Previous Positions"
+                value={
+                  <>
+                    <PreviousPositions
+                      history={mergedPerson.previousPositions}
+                    />
+                    <EditHistory
+                      history1={person1.previousPositions}
+                      history2={person2.previousPositions}
+                      initialHistory={mergedPerson.previousPositions}
+                      historyComp={PreviousPositions}
+                      currentlyOccupyingEntity={mergedPerson.position}
+                      historyEntityType="position"
+                      title="Pick and Choose positions and dates for Positions History"
+                      setHistory={history =>
+                        dispatchMergeActions(
+                          setAMergedField("previousPositions", history, null)
+                        )
+                      }
+                    />
+                  </>
+                }
+                align="column"
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("previousPositions", [], null)
+                  )
+                )}
+                fieldName="previousPositions"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -592,6 +627,28 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               align,
               mergeState,
               "position"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <PersonField
+            label="Previous Positions"
+            fieldName="previousPositions"
+            value={<PreviousPositions history={person.previousPositions} />}
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "previousPositions",
+                    person.previousPositions,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "previousPositions"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

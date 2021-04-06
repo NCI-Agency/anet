@@ -177,10 +177,10 @@ export default class Person extends Model {
     name
     rank
     role
-    emailAddress
-    phoneNumber
     status
     pendingVerification
+    emailAddress
+    phoneNumber
     domainUsername
     biography
     country
@@ -196,6 +196,30 @@ export default class Person extends Model {
         uuid
         shortName
         identificationCode
+      }
+      associatedPositions {
+        uuid
+        name
+        type
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+        organization {
+          uuid
+          shortName
+        }
+      }
+    }
+    previousPositions {
+      startTime
+      endTime
+      position {
+        uuid
+        name
       }
     }
     customFields
