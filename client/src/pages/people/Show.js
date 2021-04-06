@@ -21,12 +21,12 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
-import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
@@ -472,37 +472,7 @@ const PersonShow = ({ pageDispatchers }) => {
   }
 
   function getPrevPositionsHumanValue() {
-    return _isEmpty(person.previousPositions) ? (
-      <em>No positions found</em>
-    ) : (
-      <Table id="previous-positions">
-        <thead>
-          <tr>
-            <th>Position</th>
-            <th>Dates</th>
-          </tr>
-        </thead>
-        <tbody>
-          {person.previousPositions.map((pp, idx) => (
-            <tr key={idx} id={`previousPosition_${idx}`}>
-              <td>
-                <LinkTo modelType="Position" model={pp.position} />
-              </td>
-              <td>
-                {moment(pp.startTime).format(
-                  Settings.dateFormats.forms.displayShort.date
-                )}{" "}
-                - &nbsp;
-                {pp.endTime &&
-                  moment(pp.endTime).format(
-                    Settings.dateFormats.forms.displayShort.date
-                  )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    )
+    return <PreviousPositions history={person.previousPositions} />
   }
 
   function renderCounterparts(position) {
