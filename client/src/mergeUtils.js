@@ -6,15 +6,17 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Location } from "models"
+import Person from "models/Person"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
-import RemoveButton from "./components/RemoveButton"
+import Settings from "settings"
 
 export const MERGE_SIDES = {
   LEFT: "left",
@@ -181,7 +183,7 @@ const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
   [MODEL_TO_OBJECT_TYPE.Location]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Organization]: null,
-  [MODEL_TO_OBJECT_TYPE.Person]: () => true,
+  [MODEL_TO_OBJECT_TYPE.Person]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
   [MODEL_TO_OBJECT_TYPE.Task]: null
@@ -241,6 +243,37 @@ export function unassignedPerson(position1, position2, mergedPosition) {
     return true
   } else {
     return false
+  }
+}
+
+export function mergedPersonIsValid(mergedPerson) {
+  let msg
+  if (!mergedPerson.role) {
+    msg = "Merged person must have a role"
+  } else if (!mergedPerson.status) {
+    msg = "Merged person must have a status"
+  } else if (!mergedPerson.rank) {
+    msg = `Merged person must have a ${Settings.fields.person.rank}`
+  } else if (!mergedPerson.gender) {
+    msg = `Merged person must have a ${Settings.fields.person.gender}`
+  } else if (!mergedPerson.country) {
+    msg = `Merged person must have a ${Settings.fields.person.country}`
+  } else if (mergedPerson.role === Person.ROLE.ADVISOR) {
+    if (!mergedPerson.emailAddress) {
+      msg = `${
+        Settings.fields.person.emailAddress.label
+      } is required for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)}`
+    } else if (!mergedPerson.endOfTourDate) {
+      msg = `${
+        Settings.fields.person.endOfTourDate
+      } is required for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)}`
+    }
+  }
+  if (msg) {
+    toast(msg)
+    return false
+  } else {
+    return true
   }
 }
 
