@@ -1,17 +1,23 @@
 import { Button, Callout } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
+import API from "api"
+import { gql } from "apollo-boost"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import { customFieldsJSONString } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import PersonField from "components/MergeField"
+import Messages from "components/Messages"
 import {
   CUSTOM_FIELD_TYPE_DEFAULTS,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
@@ -23,6 +29,7 @@ import useMergeObjects, {
   getClearButton,
   getInfoButton,
   getOtherSide,
+  mergedPersonIsValid,
   selectAllFields,
   setAMergedField,
   setMergeable
@@ -30,14 +37,26 @@ import useMergeObjects, {
 import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useState } from "react"
 import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
+import { useHistory } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
 
+const GQL_MERGE_PERSON = gql`
+  mutation($loserUuid: String!, $winnerPerson: PersonInput!) {
+    mergePeople(loserUuid: $loserUuid, winnerPerson: $winnerPerson) {
+      uuid
+    }
+  }
+`
+
 const MergePeople = ({ pageDispatchers }) => {
+  const history = useHistory()
+  const [saveError, setSaveError] = useState(null)
+
   const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Person
   )
@@ -52,13 +71,10 @@ const MergePeople = ({ pageDispatchers }) => {
   const person2 = mergeState[mergeSides[1]]
   const mergedPerson = mergeState.merged
 
-  console.log("person1: ", person1)
-  console.log("person2: ", person2)
-  console.log("mergedPerson: ", mergedPerson)
-
   return (
     <Grid fluid>
       <Row>
+        <Messages error={saveError} />
         <h2>Merge People Tool</h2>
       </Row>
       <Row>
@@ -102,10 +118,30 @@ const MergePeople = ({ pageDispatchers }) => {
           {areAllSet(person1, person2, !mergedPerson) && (
             <div style={{ padding: "16px 5%" }}>
               <Callout intent="primary">
-                - You must choose a <strong>name</strong> field. It
-                automatically fills organization and type
-                <br />- You also need to select the person from the filled
-                position
+                - You must choose a <strong>name</strong> field.
+                <br />- Required fields for{" "}
+                {Person.humanNameOfRole(person1.role)} are
+                {person1.role === Person.ROLE.ADVISOR ? (
+                  <ul>
+                    <li>Name</li>
+                    <li>Role</li>
+                    <li>Status</li>
+                    <li>{Settings.fields.person.emailAddress.label}</li>
+                    <li>{Settings.fields.person.rank}</li>
+                    <li>{Settings.fields.person.gender}</li>
+                    <li>{Settings.fields.person.country}</li>
+                    <li>{Settings.fields.person.endOfTourDate}</li>
+                  </ul>
+                ) : (
+                  <ul>
+                    <li>Name</li>
+                    <li>Role</li>
+                    <li>Status</li>
+                    <li>{Settings.fields.person.rank}</li>
+                    <li>{Settings.fields.person.gender}</li>
+                    <li>{Settings.fields.person.country}</li>
+                  </ul>
+                )}
               </Callout>
             </div>
           )}
@@ -126,6 +162,9 @@ const MergePeople = ({ pageDispatchers }) => {
                   />
                 }
                 align="center"
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("avatar", null, null))
+                )}
                 fieldName="avatar"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -136,6 +175,19 @@ const MergePeople = ({ pageDispatchers }) => {
                 align="center"
                 action={getInfoButton("Name is required.")}
                 fieldName="name"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <PersonField
+                label="Domain username"
+                value={mergedPerson.domainUsername}
+                align="center"
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("domainUsername", "", null)
+                  )
+                )}
+                fieldName="domainUsername"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -154,7 +206,9 @@ const MergePeople = ({ pageDispatchers }) => {
                   <LinkTo modelType="Position" model={mergedPerson.position} />
                 }
                 align="center"
-                action={getInfoButton("Role is required.")}
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("position", {}, null))
+                )}
                 fieldName="position"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -187,7 +241,9 @@ const MergePeople = ({ pageDispatchers }) => {
                 align="center"
                 action={
                   mergedPerson.role === Person.ROLE.ADVISOR
-                    ? getInfoButton("Role is required.")
+                    ? getInfoButton(
+                      `${Settings.fields.person.emailAddress.label} is required.`
+                    )
                     : getClearButton(() =>
                       dispatchMergeActions(
                         setAMergedField("emailAddress", "", null)
@@ -259,14 +315,28 @@ const MergePeople = ({ pageDispatchers }) => {
                   Settings.dateFormats.forms.displayShort.date
                 )}
                 align="center"
+                action={
+                  mergedPerson.role === Person.ROLE.ADVISOR
+                    ? getInfoButton(
+                      `${Settings.fields.person.endOfTourDate} is required`
+                    )
+                    : getClearButton(() =>
+                      dispatchMergeActions(
+                        setAMergedField("endOfTourDate", null, null)
+                      )
+                    )
+                }
                 fieldName="endOfTourDate"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
               <PersonField
                 label="Biography"
-                value={mergedPerson.biography}
+                value={parseHtmlWithLinkTo(mergedPerson.biography)}
                 align="center"
+                action={getClearButton(() =>
+                  dispatchMergeActions(setAMergedField("biography", "", null))
+                )}
                 fieldName="biography"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
@@ -316,10 +386,39 @@ const MergePeople = ({ pageDispatchers }) => {
           large
           intent="primary"
           text="Merge People"
+          onClick={mergePeople}
+          disabled={!areAllSet(person1, person2, mergedPerson?.name)}
         />
       </Row>
     </Grid>
   )
+
+  function mergePeople() {
+    if (!mergedPersonIsValid(mergedPerson)) {
+      return
+    }
+    const loser = mergedPerson.uuid === person1.uuid ? person2 : person1
+    mergedPerson.customFields = customFieldsJSONString(mergedPerson)
+    const winnerPerson = Object.without(
+      mergedPerson,
+      DEFAULT_CUSTOM_FIELDS_PARENT
+    )
+    API.mutation(GQL_MERGE_PERSON, {
+      loserUuid: loser.uuid,
+      winnerPerson
+    })
+      .then(res => {
+        if (res.mergePeople) {
+          history.push(Person.pathFor({ uuid: res.mergePeople.uuid }), {
+            success: "People merged. Displaying merged Person below."
+          })
+        }
+      })
+      .catch(error => {
+        setSaveError(error)
+        jumpToTop()
+      })
+  }
 }
 
 MergePeople.propTypes = {
@@ -352,7 +451,7 @@ function getPersonFilters(mergeState, align) {
 const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
   const person = mergeState[align]
   const idForPerson = label.replace(/\s+/g, "")
-  console.log("person: ", person)
+
   return (
     <PersonCol>
       <label htmlFor={idForPerson} style={{ textAlign: align }}>
@@ -424,10 +523,35 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 dispatchMergeActions(
                   setAMergedField("name", person.name, align)
                 )
+                dispatchMergeActions(
+                  setAMergedField("uuid", person.uuid, align)
+                )
               },
               align,
               mergeState,
               "name"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <PersonField
+            label="Domain username"
+            fieldName="domainUsername"
+            value={person.domainUsername}
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "domainUsername",
+                    person.domainUsername,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "domainUsername"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
@@ -617,7 +741,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           <PersonField
             label="Biography"
             fieldName="biography"
-            value={person.biography}
+            value={parseHtmlWithLinkTo(person.biography)}
             align={align}
             action={getActionButton(
               () => {
