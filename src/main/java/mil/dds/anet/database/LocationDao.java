@@ -67,23 +67,23 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
     final String loserLocationUuid = loserLocation.getUuid();
     final String winnerLocationUuid = winnerLocation.getUuid();
 
-    // Update Locations
+    // Update location
     update(winnerLocation);
 
     // Update approvalSteps
     updateForMerge("approvalSteps", "relatedObjectUuid", winnerLocationUuid, loserLocationUuid);
 
-    // Update reports location
+    // Update reports
     updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
 
-    // update positions location
+    // Update positions
     updateForMerge("positions", "locationUuid", winnerLocationUuid, loserLocationUuid);
 
-    // update noteRelatedObjects location
+    // Update notes
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerLocationUuid,
         loserLocationUuid);
 
-    // finally delete the location!
+    // Finally, delete the location
     return deleteForMerge("locations", "uuid", loserLocationUuid);
   }
 
