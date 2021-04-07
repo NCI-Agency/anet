@@ -5,7 +5,9 @@ import API from "api"
 import { gql } from "apollo-boost"
 import { LocationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import ApprovalSteps from "components/ApprovalSteps"
 import { customFieldsJSONString } from "components/CustomFields"
+import BaseGeoLocation from "components/GeoLocation"
 import LocationField from "components/MergeField"
 import Messages from "components/Messages"
 import {
@@ -19,7 +21,9 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import { convertLatLngToMGRS } from "geoUtils"
 import useMergeObjects, {
+  areAllSet,
   getActionButton,
   getActivationButton,
   getClearButton,
@@ -38,10 +42,6 @@ import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import Settings from "settings"
 import utils from "utils"
-import { convertLatLngToMGRS } from "../../geoUtils"
-import { areAllSet } from "../../mergeUtils"
-import ApprovalSteps from "../locations/ApprovalSteps"
-import { BaseGeoLocation } from "../locations/GeoLocation"
 
 const GQL_MERGE_LOCATION = gql`
   mutation($loserUuid: String!, $winnerLocation: LocationInput!) {

@@ -10,6 +10,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -25,7 +26,6 @@ import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
-import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
   mutation($location: LocationInput!) {
