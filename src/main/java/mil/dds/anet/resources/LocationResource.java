@@ -111,7 +111,7 @@ public class LocationResource {
     AuthUtils.assertAdministrator(user);
     // Check that given two locations can be merged
     areLocationsMergeable(winnerLocation, loserLocation);
-    validateLocation(user, winnerLocation);
+    validateLocation(winnerLocation);
 
     int numRows = dao.mergeLocations(loserLocation, winnerLocation);
     if (numRows == 0) {
@@ -123,7 +123,7 @@ public class LocationResource {
     return winnerLocation;
   }
 
-  private void validateLocation(Person user, Location winnerLocation) {
+  private void validateLocation(Location winnerLocation) {
     if (winnerLocation.getName() == null || winnerLocation.getName().trim().length() == 0) {
       throw new WebApplicationException("Location Name must not be null", Status.BAD_REQUEST);
     }
