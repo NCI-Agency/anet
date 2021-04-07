@@ -41,7 +41,7 @@ import utils from "utils"
 import { convertLatLngToMGRS } from "../../geoUtils"
 import { areAllSet } from "../../mergeUtils"
 import ApprovalSteps from "../locations/ApprovalSteps"
-import GeoLocation from "../locations/GeoLocation"
+import { BaseGeoLocation } from "../locations/GeoLocation"
 
 const GQL_MERGE_LOCATION = gql`
   mutation($loserUuid: String!, $winnerLocation: LocationInput!) {
@@ -54,6 +54,8 @@ const GQL_MERGE_LOCATION = gql`
 const MergeLocations = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
+  const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
+  const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
   const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Location
   )
@@ -81,8 +83,10 @@ const MergeLocations = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={mergeSides[0]}
             label="Location 1"
-          >
-          </LocationColumn>
+            locationFormat={locationFormat}
+            setLocationFormat={setLocationFormat}
+            locationFormatLabel={locationFormatLabel}
+          />
         </Col>
         <Col md={4} id="mid-merge-loc-col">
           <MidColTitle>
@@ -125,10 +129,13 @@ const MergeLocations = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               <LocationField
-                label="Latitude, Longitude"
+                label={locationFormatLabel}
                 fieldName="displayedCoordinate"
                 value={
-                  <GeoLocation
+                  <BaseGeoLocation
+                    locationFormat={locationFormat}
+                    setLocationFormat={setLocationFormat}
+                    label={locationFormatLabel}
                     editable={false}
                     coordinates={{
                       lat: mergedLocation.lat,
@@ -231,8 +238,10 @@ const MergeLocations = ({ pageDispatchers }) => {
             dispatchMergeActions={dispatchMergeActions}
             align={mergeSides[1]}
             label="Location 2"
-          >
-          </LocationColumn>
+            locationFormat={locationFormat}
+            setLocationFormat={setLocationFormat}
+            locationFormatLabel={locationFormatLabel}
+          />
         </Col>
       </Row>
       <Row>
@@ -301,7 +310,15 @@ function getLocationFilters() {
   return locationFilters
 }
 
-const LocationColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
+const LocationColumn = ({
+  align,
+  label,
+  mergeState,
+  dispatchMergeActions,
+  locationFormat,
+  setLocationFormat,
+  locationFormatLabel
+}) => {
   const location = mergeState[align]
   const idForLocation = label.replace(/\s+/g, "")
   return (
@@ -363,10 +380,13 @@ const LocationColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           />
 
           <LocationField
-            label="Latitude, Longitude"
+            label={locationFormatLabel}
             fieldName="displayedCoordinate"
             value={
-              <GeoLocation
+              <BaseGeoLocation
+                locationFormat={locationFormat}
+                setLocationFormat={setLocationFormat}
+                label={locationFormatLabel}
                 coordinates={{
                   lat: location.lat,
                   lng: location.lng,
@@ -503,7 +523,10 @@ LocationColumn.propTypes = {
   align: PropTypes.oneOf(["left", "right"]).isRequired,
   label: PropTypes.string.isRequired,
   mergeState: PropTypes.object,
-  dispatchMergeActions: PropTypes.func
+  dispatchMergeActions: PropTypes.func,
+  locationFormat: PropTypes.oneOf(Location.LOCATION_FORMATS).isRequired,
+  setLocationFormat: PropTypes.func.isRequired,
+  locationFormatLabel: PropTypes.string.isRequired
 }
 
 export default connect(null, mapPageDispatchersToProps)(MergeLocations)
