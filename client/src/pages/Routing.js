@@ -4,6 +4,7 @@ import AuthorizationGroupNew from "pages/admin/authorizationgroup/New"
 import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
+import MergeLocations from "pages/admin/MergeLocations"
 import MergePeople from "pages/admin/MergePeople"
 import MergePositions from "pages/admin/MergePositions"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
@@ -134,6 +135,10 @@ const Routing = () => {
               <Route
                 path={`${url}/mergePositions`}
                 component={MergePositions}
+              />
+              <Route
+                path={`${url}/mergeLocations`}
+                component={MergeLocations}
               />
               <Route
                 exact
