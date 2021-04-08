@@ -332,8 +332,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       Position.isEqual(member, currentUser.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
-  // Approved reports for not future engagements may be published by an admin user
-  const canPublish = !report.isFuture() && report.isApproved() && isAdmin
+  // Approved reports may be published by an admin user
+  const canPublish = report.isApproved() && isAdmin
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
@@ -475,18 +475,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {report.isApproved() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">This {reportType} is APPROVED.</h4>
-                {!report.isFuture() && (
-                  <p>
-                    This report has been approved and will be automatically
-                    published to the ANET community in{" "}
-                    {moment(report.getReportApprovedAt())
-                      .add(
-                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                        "hours"
-                      )
-                      .toNow(true)}
-                  </p>
-                )}
+                <p>
+                  This report has been approved and will be automatically
+                  published to the ANET community in{" "}
+                  {moment(report.getReportApprovedAt())
+                    .add(
+                      Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                      "hours"
+                    )
+                    .toNow(true)}
+                </p>
                 {canPublish && (
                   <p>
                     You can also {renderPublishButton(!isValid)} it immediately.

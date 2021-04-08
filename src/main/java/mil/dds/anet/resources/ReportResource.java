@@ -529,8 +529,8 @@ public class ReportResource {
     logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // Only admin may publish a report, and only for non future engagements
-    if (!AuthUtils.isAdmin(user) || r.isFutureEngagement()) {
+    // Only admin may publish a report
+    if (!AuthUtils.isAdmin(user)) {
       logger.info("User {} cannot publish report UUID {}", user, r.getUuid());
       throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
     }
