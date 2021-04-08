@@ -120,7 +120,8 @@ export const CoordinatesPropType = PropTypes.shape({
 })
 
 BaseGeoLocation.propTypes = {
-  locationFormat: PropTypes.oneOf(Location.LOCATION_FORMATS).isRequired,
+  locationFormat: PropTypes.oneOf(Object.keys(Location.LOCATION_FORMATS))
+    .isRequired,
   setLocationFormat: PropTypes.func.isRequired,
   label: PropTypes.string,
   coordinates: CoordinatesPropType,
