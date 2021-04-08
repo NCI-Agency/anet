@@ -53,12 +53,7 @@ class MergeLocations extends Page {
     this.locationHeaderFromPopover.waitForDisplayed()
 
     browser.waitUntil(
-      () => {
-        console.log("gettext: ", this.firstItemFromAdvancedSelect.getText())
-        console.log("compareStr: ", compareStr)
-
-        return this.firstItemFromAdvancedSelect.getText() === compareStr
-      },
+      () => this.firstItemFromAdvancedSelect.getText() === compareStr,
       {
         timeout: 5000,
         timeoutMsg: "Couldn't find the searched location in time"
