@@ -84,8 +84,8 @@ export default class Position extends Model {
             Position.TYPE.ADMINISTRATOR
           ].includes(type)
             ? schema.required(
-              `Location is required for ${advisorPosition.name}`
-            )
+                `Location is required for ${advisorPosition.name}`
+              )
             : schema.nullable()
         )
     })
@@ -237,8 +237,9 @@ export default class Position extends Model {
 
   static carryPermission = (position, person) => {
     if (
-      person.position.type === Position.TYPE.SUPER_USER ||
-      person.position.type === Position.TYPE.ADMINISTRATOR
+      position.type !== person.position.type &&
+      person.position.type !== undefined &&
+      person.position.type !== null
     ) {
       const updatePositionObject = Object.without(
         new Position(position),
