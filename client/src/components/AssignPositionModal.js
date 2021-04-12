@@ -266,8 +266,17 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
               setDoSave(true)
               setRemoveUser(false)
             } else {
-              save()
-              setRemoveUser(false)
+              if (
+                position.person !== undefined &&
+                position.person !== null &&
+                position.person !== latestPersonProp.current.name
+              ) {
+                save()
+                setRemoveUser(false)
+              } else {
+                setRemoveUser(false)
+                closeModal()
+              }
             }
           }}
           bsStyle="primary"
