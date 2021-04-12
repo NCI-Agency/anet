@@ -84,8 +84,8 @@ export default class Position extends Model {
             Position.TYPE.ADMINISTRATOR
           ].includes(type)
             ? schema.required(
-                `Location is required for ${advisorPosition.name}`
-              )
+              `Location is required for ${advisorPosition.name}`
+            )
             : schema.nullable()
         )
     })

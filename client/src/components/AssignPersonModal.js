@@ -108,7 +108,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       newError = { message: errorMessage }
     }
     setError(newError)
-  }, [person, position.uuid, removeUser])
+  }, [person, position.uuid, position.name, removeUser])
 
   const personSearchQuery = {
     status: Model.STATUS.ACTIVE,
@@ -218,8 +218,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 </tbody>
               </Table>
             )}
-            {(removeUser || !person) && <Messages error={error} />}
-            {person && <Messages error={error} />}
+            {<Messages error={error} />}
           </Grid>
         )}
       </Modal.Body>
@@ -238,7 +237,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
               setPerson(null)
               setDoSave(true)
               setRemoveUser(false)
-            } else if (!removeUser && !person) {
+            } else if (!person) {
               setPerson(null)
               setDoSave(true)
               setRemoveUser(false)

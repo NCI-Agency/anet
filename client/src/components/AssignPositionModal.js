@@ -119,7 +119,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       newError = { message: errorMessage }
     }
     setError(newError)
-  }, [position, person.uuid, removeUser])
+  }, [position, person.uuid, person.position.name, removeUser])
 
   const newPosition = position ? new Position(position) : new Position()
 
@@ -242,8 +242,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
                 </tbody>
               </Table>
             )}
-            {(removeUser || !position) && <Messages error={error} />}
-            {position && <Messages error={error} />}
+            {<Messages error={error} />}
           </Grid>
         )}
       </Modal.Body>
@@ -262,7 +261,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
               setPosition(null)
               setDoSave(true)
               setRemoveUser(false)
-            } else if (!removeUser && !position) {
+            } else if (!position) {
               setPosition(null)
               setDoSave(true)
               setRemoveUser(false)
