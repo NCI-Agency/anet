@@ -199,7 +199,7 @@ const ApprovalsDefinition = ({
           component={FieldHelper.SpecialField}
           onChange={value => {
             value = value.map(position =>
-              Position.getObjClientSideFieldsFiltered(position)
+              Position.filterClientSideFields(position)
             ) // remove formCustomFields to prevent errors when sending data to server
             // validation will be done by setFieldValue
             setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option

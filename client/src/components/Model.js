@@ -693,10 +693,10 @@ export default class Model {
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
     NOTES_FIELD,
-    DEFAULT_CUSTOM_FIELDS_PARENT /* , others */
+    DEFAULT_CUSTOM_FIELDS_PARENT
   ]
 
-  static getObjClientSideFieldsFiltered(obj, ...additionalFields) {
+  static filterClientSideFields(obj, ...additionalFields) {
     return Object.without(
       obj,
       ...Model.FILTERED_CLIENT_SIDE_FIELDS,
@@ -704,7 +704,7 @@ export default class Model {
     )
   }
 
-  getObjClientSideFieldsFiltered(...additionalFields) {
-    return Model.getObjClientSideFieldsFiltered(this, ...additionalFields)
+  filterClientSideFields(...additionalFields) {
+    return Model.filterClientSideFields(this, ...additionalFields)
   }
 }

@@ -307,9 +307,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values) {
-    const location = new Location(values).getObjClientSideFieldsFiltered(
-      "customFields"
-    )
+    const location = new Location(values).filterClientSideFields("customFields")
     location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location

@@ -234,11 +234,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
       "notes"
     )
     authorizationGroup.positions = values.positions.map(pos =>
-      Position.getObjClientSideFieldsFiltered(
-        pos,
-        "previousPeople",
-        "customFields"
-      )
+      Position.filterClientSideFields(pos, "previousPeople", "customFields")
     )
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,

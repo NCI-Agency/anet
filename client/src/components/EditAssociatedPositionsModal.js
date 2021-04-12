@@ -185,7 +185,7 @@ const EditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = new Position(values).getObjClientSideFieldsFiltered(
+    const newPosition = new Position(values).filterClientSideFields(
       "previousPeople",
       "person",
       "responsibleTasks"

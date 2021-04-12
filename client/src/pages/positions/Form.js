@@ -400,7 +400,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const position = new Position(values).getObjClientSideFieldsFiltered(
+    const position = new Position(values).filterClientSideFields(
       "previousPeople",
       "customFields",
       "responsibleTasks"

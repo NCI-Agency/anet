@@ -201,25 +201,24 @@ export default class Position extends Model {
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
-    /* fill if necessary */
+    // Fill if necessary
   ]
 
-  static getObjClientSideFieldsFiltered(obj, ...additionalFields) {
-    // filter commons first
+  static filterClientSideFields(obj, ...additionalFields) {
+    // Filter formCustomFields in associatedPositions
     if (obj.associatedPositions) {
       obj.associatedPositions = obj.associatedPositions.map(ap =>
-        Position.getObjClientSideFieldsFiltered(ap)
+        Position.filterClientSideFields(ap)
       )
     }
-    // Also filter for position specific if there is any
-    return Model.getObjClientSideFieldsFiltered(
+    return Model.filterClientSideFields(
       obj,
       ...Position.FILTERED_CLIENT_SIDE_FIELDS,
       ...additionalFields
     )
   }
 
-  getObjClientSideFieldsFiltered(...additionalFields) {
-    return Position.getObjClientSideFieldsFiltered(this, ...additionalFields)
+  filterClientSideFields(...additionalFields) {
+    return Position.filterClientSideFields(this, ...additionalFields)
   }
 }

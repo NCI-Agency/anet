@@ -224,15 +224,15 @@ export default class Location extends Model {
 
   static FILTERED_CLIENT_SIDE_FIELDS = ["displayedCoordinate"]
 
-  static getObjClientSideFieldsFiltered(obj, ...additionalFields) {
-    return Model.getObjClientSideFieldsFiltered(
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
       obj,
       ...Location.FILTERED_CLIENT_SIDE_FIELDS,
       ...additionalFields
     )
   }
 
-  getObjClientSideFieldsFiltered(...additionalFields) {
-    return Location.getObjClientSideFieldsFiltered(this, ...additionalFields)
+  filterClientSideFields(...additionalFields) {
+    return Location.filterClientSideFields(this, ...additionalFields)
   }
 }
