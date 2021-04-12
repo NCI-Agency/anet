@@ -19,7 +19,6 @@ import {
   Row,
   Table
 } from "react-bootstrap"
-import { toast } from "react-toastify"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
@@ -29,82 +28,12 @@ const GQL_DELETE_PERSON_FROM_POSITION = gql`
     deletePersonFromPosition(uuid: $uuid)
   }
 `
+
 const GQL_PUT_PERSON_IN_POSITION = gql`
   mutation($uuid: String!, $person: PersonInput!) {
     putPersonInPosition(uuid: $uuid, person: $person)
   }
 `
-
-const GQL_UPDATE_POSITION = gql`
-  mutation($position: PositionInput!) {
-    updatePosition(position: $position)
-  }
-`
-
-const downgradePermission = position => {
-  if (
-    position.type === Position.TYPE.SUPER_USER ||
-    position.type === Position.TYPE.ADMINISTRATOR
-  ) {
-    const updatePositionObject = Object.without(
-      new Position(position),
-      "previousPeople",
-      "notes",
-      "formCustomFields", // initial JSON from the db
-      "responsibleTasks" // Only for querying
-    )
-    updatePositionObject.type = Position.TYPE.ADVISOR
-
-    API.mutation(GQL_UPDATE_POSITION, {
-      position: updatePositionObject
-    })
-      .then(res => {
-        res &&
-          toast.success(
-            `Type of the ${position.name} position is converted to ${Position.TYPE.ADVISOR}.`
-          )
-      })
-      .catch(error => {
-        API._handleError(error)
-        toast.error(
-          `Type of the ${position.name} position remained as ${Position.TYPE.SUPER_USER}.`
-        )
-      })
-  }
-}
-
-const carryPermission = (position, person) => {
-  if (
-    position.type !== person.position.type &&
-    person.position.type !== undefined &&
-    person.position.type !== null
-  ) {
-    const updatePositionObject = Object.without(
-      new Position(position),
-      "previousPeople",
-      "notes",
-      "formCustomFields", // initial JSON from the db
-      "responsibleTasks" // Only for querying
-    )
-    updatePositionObject.type = person.position.type || Position.TYPE.ADVISOR
-
-    API.mutation(GQL_UPDATE_POSITION, {
-      position: updatePositionObject
-    })
-      .then(res => {
-        res &&
-          toast.success(
-            `Type of the ${position.name} position is converted to ${updatePositionObject.type}.`
-          )
-      })
-      .catch(error => {
-        API._handleError(error)
-        toast.error(
-          `Type of the ${position.name} position remained as ${position.type}.`
-        )
-      })
-  }
-}
 
 const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const latestPositionProp = useRef(position)
@@ -122,30 +51,21 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const save = useCallback(() => {
     let graphql, variables
     if (person === null) {
-      if (
-        !Position.isAdvisor(latestPositionProp.current) &&
-        !Position.isPrincipal(latestPositionProp.current)
-      ) {
-        downgradePermission(latestPositionProp.current)
-      }
       graphql = GQL_DELETE_PERSON_FROM_POSITION
       variables = {
         uuid: position.uuid
       }
     } else {
-      if (!Position.isPrincipal(latestPositionProp.current)) {
-        carryPermission(latestPositionProp.current, person)
-        downgradePermission(person.position)
-      }
       graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
         uuid: position.uuid,
         person: { uuid: person.uuid }
       }
     }
-
     API.mutation(graphql, variables)
-      .then(data => onSuccess())
+      .then(data => {
+        onSuccess()
+      })
       .catch(error => {
         setError(error)
       })
@@ -175,7 +95,25 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This person is currently in another position. By selecting this
-          person, <b>{person.position.name}</b> will be left unfilled.
+          person, <b>{person.position.name}</b> will be left unfilled
+          {person.position.type !== Position.TYPE.ADVISOR ? (
+            <>
+              &nbsp;and the permission of <b>{person.position.name}</b> position{" "}
+              is going to be converted from{" "}
+              <b>{Position.convertType(person.position.type)}</b> to{" "}
+              <b>{Settings.fields.advisor.position.type}</b>.
+            </>
+          ) : (
+            <>.</>
+          )}
+          {position.type !== person.position.type && (
+            <>
+              &nbsp;Furthermore, permission of <b>{position.name}</b> position
+              is going to be converted from{" "}
+              <b>{Position.convertType(position.type)}</b> to{" "}
+              <b>{Position.convertType(person.position.type)}</b>.
+            </>
+          )}
         </>
       )
       newError = { message: errorMessage }
@@ -184,16 +122,18 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       !Position.isPrincipal(latestPositionProp.current) &&
       (removeUser || !person)
     ) {
+      console.log(position)
       const errorMessage = (
         <>
           If you save, type of the <b>{position.name}</b> position is going to
-          be converted to <b>{Settings.fields.advisor.position.name}</b>.
+          be converted from <b>{Position.convertType(position.type)}</b> to{" "}
+          <b>{Settings.fields.advisor.position.type}</b>.
         </>
       )
       newError = { message: errorMessage }
     }
     setError(newError)
-  }, [person, position.uuid, position.name, removeUser])
+  }, [person, position, removeUser])
 
   const personSearchQuery = {
     status: Model.STATUS.ACTIVE,

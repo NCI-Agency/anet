@@ -27,6 +27,21 @@ export default class Position extends Model {
     ADMINISTRATOR: "ADMINISTRATOR"
   }
 
+  static convertType(type) {
+    switch (type) {
+      case "ADVISOR":
+        return Settings.fields.advisor.position.type
+      case "PRINCIPAL":
+        return Settings.fields.principal.position.type
+      case "SUPER_USER":
+        return Settings.fields.superUser.position.type
+      case "ADMINISTRATOR":
+        return Settings.fields.administrator.position.type
+      default:
+        return "Default Case"
+    }
+  }
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.position.customFields
