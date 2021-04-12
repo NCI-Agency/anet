@@ -8,7 +8,7 @@
                 <Style id="icon">
                     <IconStyle>
                         <Icon>
-                            <href>assets/img/anet-circle.png</href>
+                            <href>assets/img/anet-circle.svg</href>
                         </Icon>
                     </IconStyle>
                 </Style>
@@ -16,7 +16,7 @@
                 <ScreenOverlay>
                     <name>ANET Legend </name>
                     <Icon>
-                        <href>assets/img/anet.png</href>
+                        <href>assets/img/anet.svg</href>
                     </Icon>
                     <overlayXY x="0" y="0" xunits="fraction" yunits="fraction"/>
                     <screenXY x="25" y="25" xunits="pixels" yunits="pixels"/>

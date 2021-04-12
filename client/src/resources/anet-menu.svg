@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 176.69 84.96">
+  <defs>
+    <radialGradient id="a" cx="42.63" cy="48.08" r="43.27" gradientUnits="userSpaceOnUse">
+      <stop offset="0.73" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.84" stop-color="#fefefe" stop-opacity="0.01"/>
+      <stop offset="0.88" stop-color="#f9f9f9" stop-opacity="0.06"/>
+      <stop offset="0.91" stop-color="#f0f0f0" stop-opacity="0.14"/>
+      <stop offset="0.94" stop-color="#e4e4e4" stop-opacity="0.25"/>
+      <stop offset="0.95" stop-color="#d4d4d4" stop-opacity="0.4"/>
+      <stop offset="0.97" stop-color="silver" stop-opacity="0.59"/>
+      <stop offset="0.99" stop-color="#aaa" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#949494"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <circle cx="42.48" cy="42.48" r="38.29" style="fill: url(#a)"/>
+    <path d="M42.48,0A42.48,42.48,0,0,0,0,43.21C.4,66.5,19.89,85,43.18,85H176.69V0Zm0,80.77A38.29,38.29,0,1,1,80.77,42.48,38.29,38.29,0,0,1,42.48,80.77Z" style="fill: #0071bc"/>
+    <path d="M50.89,49.26a4.2,4.2,0,0,0-3.27,1.59l-12.44-7a4.21,4.21,0,0,0,.26-1.42,3.94,3.94,0,0,0-.27-1.42l12.45-7a4.21,4.21,0,0,0,7.5-2.64,4.23,4.23,0,1,0-8.19,1.42l-12.45,7a4.18,4.18,0,0,0-3.27-1.59,4.23,4.23,0,1,0,3.28,6.87l12.44,7a4.22,4.22,0,1,0,4-2.81Z" style="fill: #0071bc"/>
+    <path d="M63,21.66c-10.64-12.13-30.14-11.83-40.87,0-14.55,15.66-6.33,41.46,14.34,46v-.08c-19.21-4.7-25.26-29.23-10.68-42.3,9.28-8.61,24.13-8.26,33.51,0C72,36,69.09,57.28,54.69,65.18c0-.13.15.44.11.35C71.48,57.6,75.27,35.43,63,21.66Z" style="fill: #0071bc"/>
+    <path d="M51.86,62.84c2.07-.67,3,.54,3.49,2.15s.44,3.13-1.58,3.77h0c-.65-.41-.9-.75-1.32-.48a1.1,1.1,0,0,0-.41.85c-2.76.43-6.34.37-6.75-.91s2.46-3.41,5-4.67a1.1,1.1,0,0,0,.83.45C51.57,64,51.57,63.56,51.86,62.84Z" style="fill: #0170bc"/>
+    <rect x="107.66" y="5.49" width="63.71" height="73.98" rx="3" style="fill: #fff"/>
+    <rect x="113.6" y="37.85" width="51.84" height="9.26" rx="3" style="fill: #0071bc"/>
+    <rect x="113.6" y="57.62" width="51.84" height="9.26" rx="3" style="fill: #0071bc"/>
+    <rect x="113.6" y="18.08" width="51.84" height="9.26" rx="3" style="fill: #0071bc"/>
+  </g>
+</svg>
