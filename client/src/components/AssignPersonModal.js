@@ -19,7 +19,9 @@ import {
   Row,
   Table
 } from "react-bootstrap"
+import { toast } from "react-toastify"
 import PEOPLE_ICON from "resources/people.png"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -32,6 +34,77 @@ const GQL_PUT_PERSON_IN_POSITION = gql`
     putPersonInPosition(uuid: $uuid, person: $person)
   }
 `
+
+const GQL_UPDATE_POSITION = gql`
+  mutation($position: PositionInput!) {
+    updatePosition(position: $position)
+  }
+`
+
+const downgradePermission = position => {
+  if (
+    position.type === Position.TYPE.SUPER_USER ||
+    position.type === Position.TYPE.ADMINISTRATOR
+  ) {
+    const updatePositionObject = Object.without(
+      new Position(position),
+      "previousPeople",
+      "notes",
+      "formCustomFields", // initial JSON from the db
+      "responsibleTasks" // Only for querying
+    )
+    updatePositionObject.type = Position.TYPE.ADVISOR
+
+    API.mutation(GQL_UPDATE_POSITION, {
+      position: updatePositionObject
+    })
+      .then(res => {
+        res &&
+          toast.success(
+            `Type of the ${position.name} position is converted to ${Position.TYPE.ADVISOR}.`
+          )
+      })
+      .catch(error => {
+        API._handleError(error)
+        toast.error(
+          `Type of the ${position.name} position remained as ${Position.TYPE.SUPER_USER}.`
+        )
+      })
+  }
+}
+
+const carryPermission = (position, person) => {
+  if (
+    position.type !== person.position.type &&
+    person.position.type !== undefined &&
+    person.position.type !== null
+  ) {
+    const updatePositionObject = Object.without(
+      new Position(position),
+      "previousPeople",
+      "notes",
+      "formCustomFields", // initial JSON from the db
+      "responsibleTasks" // Only for querying
+    )
+    updatePositionObject.type = person.position.type || Position.TYPE.ADVISOR
+
+    API.mutation(GQL_UPDATE_POSITION, {
+      position: updatePositionObject
+    })
+      .then(res => {
+        res &&
+          toast.success(
+            `Type of the ${position.name} position is converted to ${updatePositionObject.type}.`
+          )
+      })
+      .catch(error => {
+        API._handleError(error)
+        toast.error(
+          `Type of the ${position.name} position remained as ${position.type}.`
+        )
+      })
+  }
+}
 
 const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const latestPositionProp = useRef(position)
@@ -49,20 +122,28 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   const save = useCallback(() => {
     let graphql, variables
     if (person === null) {
-      !isAdvisor() && Position.downgradePermission(latestPositionProp.current)
+      if (
+        !Position.isAdvisor(latestPositionProp.current) &&
+        !Position.isPrincipal(latestPositionProp.current)
+      ) {
+        downgradePermission(latestPositionProp.current)
+      }
       graphql = GQL_DELETE_PERSON_FROM_POSITION
       variables = {
         uuid: position.uuid
       }
     } else {
-      Position.carryPermission(latestPositionProp.current, person)
-      Position.downgradePermission(person.position)
+      if (!Position.isPrincipal(latestPositionProp.current)) {
+        carryPermission(latestPositionProp.current, person)
+        downgradePermission(person.position)
+      }
       graphql = GQL_PUT_PERSON_IN_POSITION
       variables = {
         uuid: position.uuid,
         person: { uuid: person.uuid }
       }
     }
+
     API.mutation(graphql, variables)
       .then(data => onSuccess())
       .catch(error => {
@@ -98,11 +179,15 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
         </>
       )
       newError = { message: errorMessage }
-    } else if (!isAdvisor() && (removeUser || !person)) {
+    } else if (
+      !Position.isAdvisor(latestPositionProp.current) &&
+      !Position.isPrincipal(latestPositionProp.current) &&
+      (removeUser || !person)
+    ) {
       const errorMessage = (
         <>
           If you save, type of the <b>{position.name}</b> position is going to
-          be converted to <b>{Position.TYPE.ADVISOR}</b>.
+          be converted to <b>{Settings.fields.advisor.position.name}</b>.
         </>
       )
       newError = { message: errorMessage }
@@ -141,7 +226,10 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 <Button
                   bsStyle="danger"
                   onClick={() => {
-                    if (isAdvisor()) {
+                    if (
+                      Position.isAdvisor(latestPositionProp.current) ||
+                      Position.isPrincipal(latestPositionProp.current)
+                    ) {
                       setPerson(null)
                       setDoSave(true)
                     } else {
@@ -166,7 +254,10 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                 <hr className="assignModalSplit" />
               </>
             )}
-            {removeUser && <Messages error={error} />}
+            {removeUser &&
+              !Position.isPrincipal(latestPositionProp.current) && (
+                <Messages error={error} />
+            )}
           </div>
         )}
         {!removeUser && (
@@ -185,7 +276,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
                     onChange={value => setPerson(value)}
                     objectType={Person}
                     valueKey="name"
-                    fields="uuid, name, rank, role, avatar(size: 32), position { uuid, name, type, organization {uuid} }"
+                    fields="uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} }"
                     addon={PEOPLE_ICON}
                     vertical
                   />
@@ -233,23 +324,15 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
         </Button>
         <Button
           onClick={() => {
-            if (removeUser) {
+            if (removeUser || !person) {
               setPerson(null)
               setDoSave(true)
-              setRemoveUser(false)
-            } else if (!person) {
-              setPerson(null)
+            } else if (person.name !== latestPositionProp.current.person.name) {
               setDoSave(true)
-              setRemoveUser(false)
             } else {
-              if (person.name !== latestPositionProp.current.person.name) {
-                save()
-                setRemoveUser(false)
-              } else {
-                setRemoveUser(false)
-                closeModal()
-              }
+              closeModal()
             }
+            setRemoveUser(false)
           }}
           bsStyle="primary"
           className="save-button"
@@ -260,10 +343,6 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       </Modal.Footer>
     </Modal>
   )
-
-  function isAdvisor() {
-    return latestPositionProp.current.type === Position.TYPE.ADVISOR
-  }
 
   function closeModal() {
     // Reset state before closing (cancel)

@@ -1,10 +1,7 @@
-import API from "api"
-import { gql } from "apollo-boost"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS
 } from "components/Model"
-import { toast } from "react-toastify"
 import AFG_ICON from "resources/afg_small.png"
 import POSITIONS_ICON from "resources/positions.png"
 import RS_ICON from "resources/rs_small.png"
@@ -29,12 +26,6 @@ export default class Position extends Model {
     SUPER_USER: "SUPER_USER",
     ADMINISTRATOR: "ADMINISTRATOR"
   }
-
-  static GQL_UPDATE_POSITION = gql`
-    mutation($position: PositionInput!) {
-      updatePosition(position: $position)
-    }
-  `
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
@@ -199,76 +190,12 @@ export default class Position extends Model {
     return this.name
   }
 
-  static downgradePermission = position => {
-    if (
-      position.type === Position.TYPE.SUPER_USER ||
-      position.type === Position.TYPE.ADMINISTRATOR
-    ) {
-      const updatePositionObject = Object.without(
-        new Position(position),
-        "previousPeople",
-        "notes",
-        "formCustomFields", // initial JSON from the db
-        "responsibleTasks" // Only for querying
-      )
-      updatePositionObject.type = Position.TYPE.ADVISOR
-
-      const queryResult = Promise.resolve(
-        API.mutation(Position.GQL_UPDATE_POSITION, {
-          position: updatePositionObject
-        })
-      )
-
-      queryResult
-        .then(res => {
-          res &&
-            toast.success(
-              `Type of the ${position.name} position is converted to ${Position.TYPE.ADVISOR}.`
-            )
-        })
-        .catch(error => {
-          API._handleError(error)
-          toast.error(
-            `Type of the ${position.name} position remained as ${Position.TYPE.SUPER_USER}.`
-          )
-        })
-    }
+  static isAdvisor = position => {
+    return position.type === Position.TYPE.ADVISOR
   }
 
-  static carryPermission = (position, person) => {
-    if (
-      position.type !== person.position.type &&
-      person.position.type !== undefined &&
-      person.position.type !== null
-    ) {
-      const updatePositionObject = Object.without(
-        new Position(position),
-        "previousPeople",
-        "notes",
-        "formCustomFields", // initial JSON from the db
-        "responsibleTasks" // Only for querying
-      )
-      updatePositionObject.type = person.position.type || Position.TYPE.ADVISOR
-
-      const queryResult = Promise.resolve(
-        API.mutation(Position.GQL_UPDATE_POSITION, {
-          position: updatePositionObject
-        })
-      )
-      queryResult
-        .then(res => {
-          res &&
-            toast.success(
-              `Type of the ${position.name} position is converted to ${updatePositionObject.type}.`
-            )
-        })
-        .catch(error => {
-          API._handleError(error)
-          toast.error(
-            `Type of the ${position.name} position remained as ${position.type}.`
-          )
-        })
-    }
+  static isPrincipal = position => {
+    return position.type === Position.TYPE.PRINCIPAL
   }
 
   iconUrl() {
