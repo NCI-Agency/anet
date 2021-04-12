@@ -170,7 +170,7 @@ const useMergeObjects = mergeableType => {
 // FIXME: Fill when ready
 const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
-  [MODEL_TO_OBJECT_TYPE.Location]: null,
+  [MODEL_TO_OBJECT_TYPE.Location]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Organization]: null,
   [MODEL_TO_OBJECT_TYPE.Person]: null,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,

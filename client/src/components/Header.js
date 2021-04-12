@@ -4,8 +4,8 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Col, Grid, Row } from "react-bootstrap"
 import { Link } from "react-router-dom"
-import menuLogo from "resources/anet-menu.png"
-import logo from "resources/logo.png"
+import menuLogo from "resources/anet-menu.svg"
+import logo from "resources/logo.svg"
 
 const backgroundCss = {
   background: "#fff",

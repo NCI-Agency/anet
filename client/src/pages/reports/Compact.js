@@ -37,7 +37,7 @@ import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { Link, useHistory, useLocation, useParams } from "react-router-dom"
-import anetLogo from "resources/logo.png"
+import anetLogo from "resources/logo.svg"
 import Settings from "settings"
 import utils from "utils"
 

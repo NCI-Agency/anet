@@ -2,8 +2,8 @@ import "@testing-library/jest-dom/extend-expect"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { Form, Formik } from "formik"
 import React from "react"
+import GeoLocation from "../../src/components/GeoLocation"
 import { convertLatLngToMGRS } from "../../src/geoUtils"
-import GeoLocation from "../../src/pages/locations/GeoLocation"
 
 const GeoLocationTest = () => {
   return (
