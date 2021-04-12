@@ -244,6 +244,9 @@ const TaskForm = ({ edit, title, initialValues }) => {
                   dictProps={Settings.fields.task.responsiblePositions}
                   onChange={value => {
                     // validation will be done by setFieldValue
+                    value = value.map(position =>
+                      Position.filterClientSideFields(position)
+                    )
                     setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("responsiblePositions", value)
                   }}

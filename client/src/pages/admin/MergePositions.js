@@ -339,11 +339,7 @@ const MergePositions = ({ pageDispatchers }) => {
     // serialize form custom fields before query, and remove unserialized field
     mergedPosition.customFields = customFieldsJSONString(mergedPosition)
 
-    const winnerPosition = Object.without(
-      mergedPosition,
-      "notes",
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const winnerPosition = Position.filterClientSideFields(mergedPosition)
     API.mutation(GQL_MERGE_POSITION, {
       loserUuid: loser.uuid,
       winnerPosition

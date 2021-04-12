@@ -5,7 +5,7 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -233,15 +233,9 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
       new AuthorizationGroup(values),
       "notes"
     )
-    authorizationGroup.positions = values.positions.map(pos => {
-      const p = Object.without(
-        pos,
-        "previousPeople",
-        "customFields",
-        DEFAULT_CUSTOM_FIELDS_PARENT
-      )
-      return p
-    })
+    authorizationGroup.positions = values.positions.map(pos =>
+      Position.filterClientSideFields(pos, "previousPeople", "customFields")
+    )
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
       { authorizationGroup }

@@ -199,4 +199,26 @@ export default class Position extends Model {
       return POSITIONS_ICON
     }
   }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    // Fill if necessary
+  ]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    // Filter formCustomFields in associatedPositions
+    if (obj.associatedPositions) {
+      obj.associatedPositions = obj.associatedPositions.map(ap =>
+        Position.filterClientSideFields(ap)
+      )
+    }
+    return Model.filterClientSideFields(
+      obj,
+      ...Position.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Position.filterClientSideFields(this, ...additionalFields)
+  }
 }

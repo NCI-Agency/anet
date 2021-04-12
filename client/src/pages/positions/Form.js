@@ -16,7 +16,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
@@ -400,14 +400,12 @@ const PositionForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const position = Object.without(
-      new Position(values),
+    const position = new Position(values).filterClientSideFields(
       "previousPeople",
-      "notes",
-      "customFields", // initial JSON from the db
-      "responsibleTasks", // Only for querying
-      DEFAULT_CUSTOM_FIELDS_PARENT
+      "customFields",
+      "responsibleTasks"
     )
+
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }
