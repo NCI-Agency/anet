@@ -94,12 +94,13 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
     ) {
       const errorMessage = (
         <>
-          This person is currently in another position. By selecting this
-          person, <b>{person.position.name}</b> will be left unfilled
-          {person.position.type !== Position.TYPE.ADVISOR ? (
+          <b>{`${person.rank} ${person.name}`}</b> is currently assigned to the{" "}
+          <b>{person.position.name}</b> position. By selecting them, the{" "}
+          <b>{person.position.name}</b> position will be left unfilled
+          {person.position.type !== Position.TYPE.ADVISOR && person.position.type !== Position.TYPE.PRINCIPAL ? (
             <>
-              &nbsp;and the permission of <b>{person.position.name}</b> position{" "}
-              is going to be converted from{" "}
+              {" "}
+              and the position's permissions will be converted from{" "}
               <b>{Position.convertType(person.position.type)}</b> to{" "}
               <b>{Settings.fields.advisor.position.type}</b>.
             </>
@@ -108,8 +109,9 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           )}
           {position.type !== person.position.type && (
             <>
-              &nbsp;Furthermore, permission of <b>{position.name}</b> position
-              is going to be converted from{" "}
+              {" "}
+              Furthermore, permissions of the <b>{position.name}</b> position
+              will be converted from{" "}
               <b>{Position.convertType(position.type)}</b> to{" "}
               <b>{Position.convertType(person.position.type)}</b>.
             </>
@@ -122,10 +124,9 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
       !Position.isPrincipal(latestPositionProp.current) &&
       (removeUser || !person)
     ) {
-      console.log(position)
       const errorMessage = (
         <>
-          If you save, type of the <b>{position.name}</b> position is going to
+          If you save, permissions of the <b>{position.name}</b> position will
           be converted from <b>{Position.convertType(position.type)}</b> to{" "}
           <b>{Settings.fields.advisor.position.type}</b>.
         </>
@@ -154,8 +155,9 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
     <Modal show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
-          Set Person for{" "}
-          <LinkTo modelType="Position" model={position} isLink={false} />
+          Assign Person to the{" "}
+          <LinkTo modelType="Position" model={position} isLink={false} />{" "}
+          Position
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

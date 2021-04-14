@@ -106,23 +106,27 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
           this position, they will be removed.
           {person.position.type !== position.type ? (
             <>
-              &nbsp;Permission of <b>{position.name}</b> position is going to be
+              {" "}
+              Permissions of the <b>{position.name}</b> position will be
               converted from <b>{Position.convertType(position.type)}</b> to{" "}
               <b>{Position.convertType(person.position.type)}</b>.
               {person.position.type !== Position.TYPE.ADVISOR && (
                 <>
-                  &nbsp;Furthermore, permission of <b>{person.position.name}</b>{" "}
-                  position is going to be converted from{" "}
+                  {" "}
+                  Furthermore, permissions of the
+                  <b>{person.position.name}</b> position will be converted from{" "}
                   <b>{Position.convertType(person.position.type)}</b> to{" "}
                   <b>{Settings.fields.advisor.position.type}</b>.
                 </>
               )}
             </>
           ) : (
-            person.position.type !== Position.TYPE.ADVISOR && (
+            person.position.type !== Position.TYPE.ADVISOR &&
+            person.position.type !== Position.TYPE.PRINCIPAL && (
               <>
-                &nbsp;Permission of <b>{person.position.name}</b> position is
-                going to be converted from{" "}
+                {" "}
+                Permissions of the <b>{person.position.name}</b> position will
+                be converted from{" "}
                 <b>{Position.convertType(person.position.type)}</b> to{" "}
                 <b>{Settings.fields.advisor.position.type}</b>.
               </>
@@ -141,14 +145,14 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
     ) {
       const errorMessage = (
         <>
-          Permission of <b>{person.position.name}</b> position is going to be
+          Permissions of the <b>{person.position.name}</b> position will be
           converted from <b>{Position.convertType(person.position.type)}</b> to{" "}
           <b>{Settings.fields.advisor.position.type}</b>
           {person.position.type !== Position.TYPE.ADVISOR ? (
             <>
-              &nbsp;and the permission of <b>{position.name}</b> position is
-              going to be converted to{" "}
-              <b>{Position.convertType(person.position.type)}</b>.
+              {" "}
+              and permissions of the <b>{position.name}</b> position will be
+              converted to <b>{Position.convertType(person.position.type)}</b>.
             </>
           ) : (
             <>.</>
@@ -159,12 +163,13 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
     } else if (
       !Position.isAdvisor(latestPersonProp.current.position) &&
       !Position.isPrincipal(latestPersonProp.current.position) &&
+      !_isEmpty(person.position) &&
       (removeUser || !position)
     ) {
       const errorMessage = (
         <>
-          If you save, type of the <b>{person.position.name}</b> position is
-          going to be converted from{" "}
+          If you save, permissions of the <b>{person.position.name}</b> position
+          will be converted from{" "}
           <b>{Position.convertType(person.position.type)}</b> to{" "}
           <b>{Settings.fields.advisor.position.type}</b>.
         </>
