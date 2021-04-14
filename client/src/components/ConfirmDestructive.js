@@ -4,8 +4,9 @@ import React from "react"
 import { Button } from "react-bootstrap"
 import Confirm from "react-confirm-bootstrap"
 
-const ConfirmDelete = ({
-  onConfirmDelete,
+const ConfirmDestructive = ({
+  onConfirm,
+  operation,
   objectType,
   objectDisplay,
   bsStyle,
@@ -13,16 +14,16 @@ const ConfirmDelete = ({
   children,
   ...otherProps
 }) => {
-  const confirmDeleteText = `Yes, I am sure that I want to delete ${objectType} ${objectDisplay}`
-  const title = `Confirm to delete ${objectType}`
-  const body = `Are you sure you want to delete this ${objectType}? This cannot be undone.`
+  const confirmText = `Yes, I am sure that I want to ${operation} ${objectType} ${objectDisplay}`
+  const title = `Confirm to ${operation} ${objectType}`
+  const body = `Are you sure you want to ${operation} this ${objectType}? This cannot be undone.`
 
   return (
     <Confirm
-      onConfirm={onConfirmDelete}
+      onConfirm={onConfirm}
       title={title}
       body={body}
-      confirmText={confirmDeleteText}
+      confirmText={confirmText}
       cancelText="No, I am not entirely sure at this point"
       dialogClassName="react-confirm-bootstrap-modal"
       confirmBSStyle="primary"
@@ -34,13 +35,17 @@ const ConfirmDelete = ({
     </Confirm>
   )
 }
-ConfirmDelete.propTypes = {
-  onConfirmDelete: PropTypes.func,
-  objectType: PropTypes.string,
-  objectDisplay: PropTypes.string,
+ConfirmDestructive.propTypes = {
+  onConfirm: PropTypes.func.isRequired,
+  objectType: PropTypes.string.isRequired,
+  operation: PropTypes.string.isRequired,
+  objectDisplay: PropTypes.string.isRequired,
   bsStyle: PropTypes.string,
   buttonLabel: PropTypes.string,
   children: PropTypes.node
 }
+ConfirmDestructive.defaultProps = {
+  operation: "delete"
+}
 
-export default ConfirmDelete
+export default ConfirmDestructive

@@ -161,7 +161,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
         getFutureDate(), null, Lists.newArrayList(advisor, principal)));
 
     // Submit the report
-    authorMutationExecutor.submitReport("{ uuid }", draftReport.getUuid());
+    authorMutationExecutor.submitReport("", draftReport.getUuid());
     // This planned report gets approved automatically
     final Report submittedReport = testReportState(draftReport.getUuid(), ReportState.APPROVED);
 
@@ -182,7 +182,7 @@ public class FutureEngagementWorkerTest extends AbstractResourceTest {
     final Report redraftedReport = testReportDraft(updatedReport.getUuid());
 
     // Submit the report
-    authorMutationExecutor.submitReport("{ uuid }", redraftedReport.getUuid());
+    authorMutationExecutor.submitReport("", redraftedReport.getUuid());
     // This should send an email to the approver
     expectedIds.add("hunter+jacob");
     // State should be PENDING_APPROVAL

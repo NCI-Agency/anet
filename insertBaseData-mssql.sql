@@ -708,6 +708,22 @@ INSERT INTO reportTasks (taskUuid, reportUuid)
 INSERT INTO reportTasks (taskUuid, reportUuid)
   VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
+SET @reportUuid = lower(newid());
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report to be unpublished from Arthur', '',
+	'I need to edit this report so unpublish it please','have reports in organizations', 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
+	(SELECT uuid FROM organizations where shortName = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@example.com'), @reportUuid, 1, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
 

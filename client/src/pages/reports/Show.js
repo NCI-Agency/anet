@@ -8,7 +8,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
@@ -229,6 +229,11 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
+const GQL_UNPUBLISH_REPORT = gql`
+  mutation($uuid: String!) {
+    unpublishReport(uuid: $uuid)
+  }
+`
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
     emailReport(uuid: $uuid, email: $email)
@@ -236,16 +241,12 @@ const GQL_EMAIL_REPORT = gql`
 `
 const GQL_SUBMIT_REPORT = gql`
   mutation($uuid: String!) {
-    submitReport(uuid: $uuid) {
-      uuid
-    }
+    submitReport(uuid: $uuid)
   }
 `
 const GQL_PUBLISH_REPORT = gql`
   mutation($uuid: String!) {
-    publishReport(uuid: $uuid) {
-      uuid
-    }
+    publishReport(uuid: $uuid)
   }
 `
 const GQL_ADD_REPORT_COMMENT = gql`
@@ -257,16 +258,12 @@ const GQL_ADD_REPORT_COMMENT = gql`
 `
 const GQL_REJECT_REPORT = gql`
   mutation($uuid: String!, $comment: CommentInput!) {
-    rejectReport(uuid: $uuid, comment: $comment) {
-      uuid
-    }
+    rejectReport(uuid: $uuid, comment: $comment)
   }
 `
 const GQL_APPROVE_REPORT = gql`
   mutation($uuid: String!, $comment: CommentInput!) {
-    approveReport(uuid: $uuid, comment: $comment) {
-      uuid
-    }
+    approveReport(uuid: $uuid, comment: $comment)
   }
 `
 
@@ -335,8 +332,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       Position.isEqual(member, currentUser.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
-  // Approved reports for not future engagements may be published by an admin user
-  const canPublish = !report.isFuture() && report.isApproved() && isAdmin
+  // Approved reports may be published by an admin user
+  const canPublish = report.isApproved() && isAdmin
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
@@ -478,18 +475,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {report.isApproved() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">This {reportType} is APPROVED.</h4>
-                {!report.isFuture() && (
-                  <p>
-                    This report has been approved and will be automatically
-                    published to the ANET community in{" "}
-                    {moment(report.getReportApprovedAt())
-                      .add(
-                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                        "hours"
-                      )
-                      .toNow(true)}
-                  </p>
-                )}
+                <p>
+                  This report has been approved and will be automatically
+                  published to the ANET community in{" "}
+                  {moment(report.getReportApprovedAt())
+                    .add(
+                      Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                      "hours"
+                    )
+                    .toNow(true)}
+                </p>
                 {canPublish && (
                   <p>
                     You can also {renderPublishButton(!isValid)} it immediately.
@@ -793,9 +788,23 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
             {currentUser.isAdmin() && (
               <div className="submit-buttons">
+                {report.isPublished() &&
+                  Settings.fields.report.canUnpublishReports && (
+                    <div>
+                      <ConfirmDestructive
+                        onConfirm={onConfirmUnpublish}
+                        objectType="report"
+                        operation="unpublish"
+                        objectDisplay={"#" + uuid}
+                        bsStyle="warning"
+                        buttonLabel={`Unpublish ${reportType}`}
+                        className="pull-left"
+                      />
+                    </div>
+                )}
                 <div>
-                  <ConfirmDelete
-                    onConfirmDelete={onConfirmDelete}
+                  <ConfirmDestructive
+                    onConfirm={onConfirmDelete}
                     objectType="report"
                     objectDisplay={"#" + uuid}
                     bsStyle="warning"
@@ -843,6 +852,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         </div>
       )
     }
+  }
+  function onConfirmUnpublish() {
+    API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
+      .then(data => {
+        history.push("/", {
+          success: `${reportTypeUpperFirst} unpublished`
+        })
+      })
+      .catch(error => {
+        setSaveSuccess(null)
+        setSaveError(error)
+        jumpToTop()
+      })
   }
 
   function onConfirmDelete() {

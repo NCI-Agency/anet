@@ -434,6 +434,11 @@ properties:
         additionalProperties: false
         required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
         properties:
+          canUnpublishReports:
+            type: boolean
+            default: false
+            title: Whether reports can be unpublished
+            description: Used for reports; if set to `true`, admins can change report state from published to draft
           intent:
             type: string
             title: The label for a report's intent

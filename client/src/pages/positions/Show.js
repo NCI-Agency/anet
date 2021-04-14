@@ -3,7 +3,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
@@ -302,8 +302,8 @@ const PositionShow = ({ pageDispatchers }) => {
             {canDelete && (
               <div className="submit-buttons">
                 <div>
-                  <ConfirmDelete
-                    onConfirmDelete={onConfirmDelete}
+                  <ConfirmDestructive
+                    onConfirm={onConfirmDelete}
                     objectType="position"
                     objectDisplay={"#" + position.uuid}
                     bsStyle="warning"

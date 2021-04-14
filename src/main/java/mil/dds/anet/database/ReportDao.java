@@ -249,8 +249,8 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   }
 
   @InTransaction
-  public void updateToDraftState(Report r) {
-    getDbHandle().createUpdate(
+  public int updateToDraftState(Report r) {
+    return getDbHandle().createUpdate(
         "/* UpdateFutureEngagementToDraft */ UPDATE reports SET state = :state , \"approvalStepUuid\" = NULL "
             + "WHERE uuid = :reportUuid")
         .bind("state", DaoUtils.getEnumId(ReportState.DRAFT)).bind("reportUuid", r.getUuid())

@@ -337,7 +337,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "submitReport")
-  public Report submitReport(@GraphQLRootContext Map<String, Object> context,
+  public int submitReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
@@ -388,7 +388,7 @@ public class ReportResource {
 
     AnetAuditLogger.log("report {} submitted by author {}", r.getUuid(), user.getUuid());
     // GraphQL mutations *have* to return something, we return the report
-    return r;
+    return numRows;
   }
 
   static class ReportComment {
@@ -402,7 +402,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "approveReport")
-  public Report approveReport(@GraphQLRootContext Map<String, Object> context,
+  public int approveReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "comment") Comment comment) {
     Person approver = DaoUtils.getUserFromContext(context);
@@ -442,11 +442,11 @@ public class ReportResource {
 
     AnetAuditLogger.log("Report {} approved by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
-    return r;
+    return numRows;
   }
 
   @GraphQLMutation(name = "rejectReport")
-  public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
+  public int rejectReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid,
       @GraphQLArgument(name = "comment") Comment reason) {
     Person approver = DaoUtils.getUserFromContext(context);
@@ -503,7 +503,7 @@ public class ReportResource {
     sendReportRejectEmail(r, approver, reason1);
     AnetAuditLogger.log("report {} has requested changes by {}", r.getUuid(), approver);
     // GraphQL mutations *have* to return something
-    return r;
+    return numRows;
   }
 
   private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {
@@ -519,7 +519,7 @@ public class ReportResource {
   }
 
   @GraphQLMutation(name = "publishReport")
-  public Report publishReport(@GraphQLRootContext Map<String, Object> context,
+  public int publishReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
     Person user = DaoUtils.getUserFromContext(context);
     final Report r = dao.getByUuid(uuid);
@@ -529,8 +529,8 @@ public class ReportResource {
     logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}",
         r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-    // Only admin may publish a report, and only for non future engagements
-    if (!AuthUtils.isAdmin(user) || r.isFutureEngagement()) {
+    // Only admin may publish a report
+    if (!AuthUtils.isAdmin(user)) {
       logger.info("User {} cannot publish report UUID {}", user, r.getUuid());
       throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
     }
@@ -542,7 +542,43 @@ public class ReportResource {
 
     AnetAuditLogger.log("report {} published by admin {}", r.getUuid(), user);
     // GraphQL mutations *have* to return something
-    return r;
+    return numRows;
+  }
+
+  @GraphQLMutation(name = "unpublishReport")
+  public Integer unpublishReport(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "uuid") String uuid) {
+    // TODO: Do we need a reason here (like with rejectReport)?
+    final Person unpublisher = DaoUtils.getUserFromContext(context);
+    AuthUtils.assertAdministrator(unpublisher);
+    final Report r = dao.getByUuid(uuid);
+    if (r == null) {
+      throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+    }
+
+    if (r.getState() != ReportState.PUBLISHED) {
+      logger.info("Report UUID {} cannot be unpublished", r.getUuid());
+      throw new WebApplicationException("This report is not published", Status.BAD_REQUEST);
+    }
+
+    // Write the unpublish action
+    final ReportAction unpublish = new ReportAction();
+    unpublish.setReportUuid(r.getUuid());
+    unpublish.setPersonUuid(unpublisher.getUuid());
+    unpublish.setType(ActionType.UNPUBLISH);
+    unpublish.setPlanned(r.isFutureEngagement());
+    engine.getReportActionDao().insert(unpublish);
+
+    // Update the report
+    final int numRows = dao.updateToDraftState(r);
+    if (numRows == 0) {
+      throw new WebApplicationException("Couldn't process report unpublication", Status.NOT_FOUND);
+    }
+
+    // TODO: Do we need to send email?
+    AnetAuditLogger.log("report {} was unpublished by {}", r.getUuid(), unpublisher);
+    // GraphQL mutations *have* to return something
+    return numRows;
   }
 
   @GraphQLMutation(name = "addComment")
