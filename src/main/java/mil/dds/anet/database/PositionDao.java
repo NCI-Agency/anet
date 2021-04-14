@@ -308,22 +308,15 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 
-    String insertSql;
-    if (DaoUtils.isMsSql()) {
-      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(NULL, "
-          + "(SELECT TOP(1) \"personUuid\" FROM \"peoplePositions\""
-          + " WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC),"
-          + " :createdAt)";
-    } else {
-      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(NULL, "
-          + "(SELECT \"personUuid\" FROM \"peoplePositions\""
-          + " WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC LIMIT 1),"
-          + " :createdAt)";
+    if (position.getCurrentPersonUuid() != null) {
+      // Update position history for this person
+      getDbHandle()
+          .createUpdate("/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES(NULL, :personUuid, :createdAt)")
+          .bind("personUuid", position.getCurrentPersonUuid())
+          .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
     }
-    getDbHandle().createUpdate(insertSql).bind("positionUuid", positionUuid)
-        .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
 
     // Update position history for the position
     final int nr = getDbHandle()
