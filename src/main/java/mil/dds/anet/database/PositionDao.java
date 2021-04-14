@@ -181,6 +181,11 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
+    // Get new position data from database (we need its type)
+    final Position newPos = getByUuid(positionUuid);
+    if (newPos == null) {
+      return 0;
+    }
     // Find out if person already holds a position (we also need its type later on)
     final Position currPos = getDbHandle()
         .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
@@ -239,8 +244,6 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
           .execute();
     }
 
-    // Get new position data from database (we need its type)
-    final Position newPos = getByUuid(positionUuid);
     // Now put the person in their new position
     getDbHandle()
         .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
