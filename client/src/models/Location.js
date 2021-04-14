@@ -147,12 +147,56 @@ export default class Location extends Model {
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
+  static allFieldsQuery = `
+    uuid
+    name
+    lat
+    lng
+    status
+    planningApprovalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+    }
+    approvalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+    }
+    customFields
+    ${GRAPHQL_NOTES_FIELDS}
+  `
+
   static hasCoordinates(location) {
     return (
       location &&
       typeof location.lat === "number" &&
       typeof location.lng === "number"
     )
+  }
+
+  static isActive(loc) {
+    return loc.status === Location.STATUS.ACTIVE
   }
 
   static humanNameOfStatus(status) {

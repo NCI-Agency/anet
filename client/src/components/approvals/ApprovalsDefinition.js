@@ -5,7 +5,7 @@ import { ApproverOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
+import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import { FastField, FieldArray } from "formik"
 import { Position } from "models"
@@ -198,6 +198,9 @@ const ApprovalsDefinition = ({
           label="Add an approver"
           component={FieldHelper.SpecialField}
           onChange={value => {
+            value = value.map(position =>
+              Object.without(position, DEFAULT_CUSTOM_FIELDS_PARENT)
+            ) // remove formCustomFields to prevent errors when sending data to server
             // validation will be done by setFieldValue
             setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
             setFieldValue(`${fieldName}.${index}.approvers`, value)

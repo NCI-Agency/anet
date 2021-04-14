@@ -29,7 +29,24 @@ const DEFAULT_COORDINATES = {
   lng: null,
   displayedCoordinate: null
 }
-const GeoLocation = ({
+
+const GeoLocation = props => {
+  const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
+  const label = Location.LOCATION_FORMAT_LABELS[locationFormat]
+  return (
+    <BaseGeoLocation
+      locationFormat={locationFormat}
+      setLocationFormat={setLocationFormat}
+      label={label}
+      {...props}
+    />
+  )
+}
+
+export const BaseGeoLocation = ({
+  locationFormat,
+  setLocationFormat,
+  label,
   coordinates,
   editable,
   setFieldValue,
@@ -37,9 +54,6 @@ const GeoLocation = ({
   isSubmitting,
   displayType
 }) => {
-  const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
-
-  const label = Location.LOCATION_FORMAT_LABELS[locationFormat]
   const CoordinatesFormField =
     locationFormat === Location.LOCATION_FORMATS.MGRS
       ? MGRSFormField
@@ -105,7 +119,11 @@ export const CoordinatesPropType = PropTypes.shape({
   displayedCoordinate: PropTypes.string
 })
 
-GeoLocation.propTypes = {
+BaseGeoLocation.propTypes = {
+  locationFormat: PropTypes.oneOf(Object.keys(Location.LOCATION_FORMATS))
+    .isRequired,
+  setLocationFormat: PropTypes.func.isRequired,
+  label: PropTypes.string,
   coordinates: CoordinatesPropType,
   editable: PropTypes.bool,
   setFieldValue: utils.fnRequiredWhen.bind(null, "editable"),
@@ -117,7 +135,7 @@ GeoLocation.propTypes = {
   ])
 }
 
-GeoLocation.defaultProps = {
+BaseGeoLocation.defaultProps = {
   coordinates: DEFAULT_COORDINATES,
   editable: false,
   isSubmitting: false,

@@ -6,6 +6,7 @@ import Approvals from "components/approvals/Approvals"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -28,7 +29,6 @@ import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
-import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "./GeoLocation"
 
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
