@@ -32,7 +32,6 @@ class Location(Base):
     status = Column(Integer, nullable=False, server_default=text("0"))
     uuid = Column(String(36), primary_key=True)
     customFields = Column(Text)
-    full_text = Column(TSVECTOR, Computed('setweight((to_tsvector(\'anet\'::regconfig, (COALESCE(name, \'\'::character varying))::text) || to_tsvector(\'simple\'::regconfig, (COALESCE(name, \'\'::character varying))::text)), \'A\'::"char")', persisted=True))
 
 
 class Organization(Base):
@@ -48,7 +47,6 @@ class Organization(Base):
     uuid = Column(String(36), primary_key=True)
     parentOrgUuid = Column(ForeignKey('organizations.uuid'), index=True)
     customFields = Column(Text)
-    full_text = Column(TSVECTOR, Computed('((setweight(to_tsvector(\'simple\'::regconfig, (COALESCE("identificationCode", \'\'::character varying))::text), \'A\'::"char") || setweight(to_tsvector(\'simple\'::regconfig, (COALESCE("shortName", \'\'::character varying))::text), \'A\'::"char")) || setweight((to_tsvector(\'anet\'::regconfig, (COALESCE("longName", \'\'::character varying))::text) || to_tsvector(\'simple\'::regconfig, (COALESCE("longName", \'\'::character varying))::text)), \'B\'::"char"))', persisted=True))
 
     parent = relationship('Organization', remote_side=[uuid])
 
@@ -58,7 +56,7 @@ class Person(Base):
 
     name = Column(String(255), index=True)
     status = Column(Integer)
-    emailAddress = Column(String(255))
+    emailAddress = Column(String(255), index=True)
     phoneNumber = Column(String(100))
     rank = Column(String(255), index=True)
     biography = Column(Text)
@@ -66,7 +64,7 @@ class Person(Base):
     updatedAt = Column(DateTime)
     role = Column(Integer, nullable=False)
     pendingVerification = Column(Boolean, server_default=text("false"))
-    domainUsername = Column(String(512))
+    domainUsername = Column(String(512), index=True)
     country = Column(String(500))
     gender = Column(String(64))
     endOfTourDate = Column(DateTime)
@@ -74,7 +72,7 @@ class Person(Base):
     code = Column(String(100))
     customFields = Column(Text)
     avatar = Column(LargeBinary)
-    full_text = Column(TSVECTOR, Computed('(((((setweight(to_tsvector(\'simple\'::regconfig, (COALESCE(name, \'\'::character varying))::text), \'A\'::"char") || setweight(to_tsvector(\'simple\'::regconfig, (COALESCE(code, \'\'::character varying))::text), \'A\'::"char")) || setweight(to_tsvector(\'simple\'::regconfig, (COALESCE("domainUsername", \'\'::character varying))::text), \'A\'::"char")) || setweight(to_tsvector(\'simple\'::regconfig, (COALESCE("emailAddress", \'\'::character varying))::text), \'A\'::"char")) || setweight(to_tsvector(\'simple\'::regconfig, (COALESCE("phoneNumber", \'\'::character varying))::text), \'A\'::"char")) || setweight((to_tsvector(\'anet\'::regconfig, COALESCE(biography, \'\'::text)) || to_tsvector(\'simple\'::regconfig, COALESCE(biography, \'\'::text))), \'B\'::"char"))', persisted=True))
+    openIdSubject = Column(String(255), index=True)
 
 
 class Position(Base):
@@ -90,7 +88,6 @@ class Position(Base):
     currentPersonUuid = Column(ForeignKey('people.uuid'), unique=True)
     locationUuid = Column(ForeignKey('locations.uuid'), index=True)
     organizationUuid = Column(ForeignKey('organizations.uuid'), index=True)
-    full_text = Column(TSVECTOR, Computed('(setweight(to_tsvector(\'simple\'::regconfig, (COALESCE(code, \'\'::character varying))::text), \'A\'::"char") || setweight((to_tsvector(\'anet\'::regconfig, (COALESCE(name, \'\'::character varying))::text) || to_tsvector(\'simple\'::regconfig, (COALESCE(name, \'\'::character varying))::text)), \'A\'::"char"))', persisted=True))
     customFields = Column(Text)
 
     person = relationship('Person')
@@ -122,7 +119,6 @@ class Report(Base):
     legacyId = Column(Integer)
     duration = Column(Integer)
     customFields = Column(Text)
-    full_text = Column(TSVECTOR, Computed('(((setweight((to_tsvector(\'anet\'::regconfig, COALESCE(intent, \'\'::text)) || to_tsvector(\'simple\'::regconfig, COALESCE(intent, \'\'::text))), \'A\'::"char") || setweight((to_tsvector(\'anet\'::regconfig, COALESCE("keyOutcomes", \'\'::text)) || to_tsvector(\'simple\'::regconfig, COALESCE("keyOutcomes", \'\'::text))), \'A\'::"char")) || setweight((to_tsvector(\'anet\'::regconfig, COALESCE("nextSteps", \'\'::text)) || to_tsvector(\'simple\'::regconfig, COALESCE("nextSteps", \'\'::text))), \'A\'::"char")) || setweight((to_tsvector(\'anet\'::regconfig, COALESCE(text, \'\'::text)) || to_tsvector(\'simple\'::regconfig, COALESCE(text, \'\'::text))), \'B\'::"char"))', persisted=True))
 
     organization = relationship('Organization', primaryjoin='Report.advisorOrganizationUuid == Organization.uuid')
     approvalStep = relationship('ApprovalStep')
