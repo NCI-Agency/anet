@@ -2,10 +2,12 @@ from src.core.business_logic.base.base_mixin import base_mixin
 from src.core.business_logic.base.base_methods import base_methods
 from src.core.model.annotated.association import PeoplePositions, ReportPeople
 
+
 class report_mixin(base_mixin):
     """ Inherits from base_mixin
         Overrides business logic methods for report objects
     """
+
     __abstract__ = True
 
     def update_entity(self, utc_now, session):
@@ -14,16 +16,18 @@ class report_mixin(base_mixin):
         obj = session.query(type(self)).get(self.uuid)
         self.updatedAt = utc_now
         for attr, value in self.__dict__.items():
-            if attr not in ["_sa_instance_state", 
-                            "organization", 
-                            "organization1", 
-                            "approvalStep", 
-                            "location", 
-                            "people"]:
+            if attr not in [
+                "_sa_instance_state",
+                "organization",
+                "organization1",
+                "approvalStep",
+                "location",
+                "people",
+            ]:
                 setattr(obj, attr, value)
         session.flush()
         return obj
-    
+
     def associate_location(self, loc):
         self.location = loc
 
@@ -35,8 +39,7 @@ class report_mixin(base_mixin):
         """
         new_obj = self.__class__()
         for key, value in self.__dict__.items():
-            if key not in ["_sa_instance_state", "people", "organization",
-                            "location", "organization1"]:
+            if key not in ["_sa_instance_state", "people", "organization", "location", "organization1"]:
                 setattr(new_obj, key, value)
         return new_obj
 
@@ -83,18 +86,23 @@ class report_mixin(base_mixin):
                     upd_person = rp.person.update_entity(utc_now, session)
                     # Check updated person was in report before
                     if rp not in rep.people:
-                        rep.people.append(ReportPeople(isPrimary = rp.isPrimary, 
-                                                    isAttendee = rp.isAttendee, 
-                                                    isAuthor = rp.isAuthor, 
-                                                    person = upd_person))
+                        rep.people.append(
+                            ReportPeople(
+                                isPrimary=rp.isPrimary,
+                                isAttendee=rp.isAttendee,
+                                isAuthor=rp.isAuthor,
+                                person=upd_person,
+                            )
+                        )
                 else:
                     # Associate new person with report from db
                     fresh_person = rp.person.get_fresh_one()
                     fresh_person.positions.append(PeoplePositions(createdAt=utc_now))
-                    rep.people.append(ReportPeople(isPrimary = rp.isPrimary, 
-                                                    isAttendee = rp.isAttendee, 
-                                                    isAuthor = rp.isAuthor, 
-                                                    person = fresh_person))
+                    rep.people.append(
+                        ReportPeople(
+                            isPrimary=rp.isPrimary, isAttendee=rp.isAttendee, isAuthor=rp.isAuthor, person=fresh_person
+                        )
+                    )
         else:
             # Loop through people of report (from user) (rp -> ReportPeople object)
             for rp in self.people:
@@ -115,7 +123,7 @@ class report_mixin(base_mixin):
             rp.person.is_update = base_methods.is_entity_update(rp.person, update_rules, session)
         if base_methods.has_entity_relation(self, "location"):
             self.location.is_update = base_methods.is_entity_update(self.location, update_rules, session)
-        if base_methods.has_entity_relation(self, "organization"):       
+        if base_methods.has_entity_relation(self, "organization"):
             self.organization.is_update = base_methods.is_entity_update(self.organization, update_rules, session)
 
         # Check if position (from user) has related person and associate

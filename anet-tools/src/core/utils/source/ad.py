@@ -6,6 +6,7 @@ import ldap
 class ad:
     """ Read data from active directory
     """
+
     def __init__(self, ldap_config_json):
         self.ldap_config_json = ldap_config_json
         print("Active directory object is created")
@@ -22,5 +23,7 @@ class ad:
 
     def search(self, search_filter, search_attribute):
         # ldap response sample
-        result = self.conn.search_s(self.ldap_config_json["BASE_DN"], ldap.SCOPE_SUBTREE, search_filter, search_attribute)  
+        result = self.conn.search_s(
+            self.ldap_config_json["BASE_DN"], ldap.SCOPE_SUBTREE, search_filter, search_attribute
+        )
         self.data_list = ast.literal_eval(str(result))

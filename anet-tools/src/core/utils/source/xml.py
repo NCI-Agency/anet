@@ -3,6 +3,7 @@ from xml.etree import ElementTree
 
 class xml:
     """ Read and parse xml file """
+
     def __init__(self, file_path):
         self.file_path = file_path
         # Extension of file

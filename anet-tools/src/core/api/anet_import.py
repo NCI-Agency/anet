@@ -11,7 +11,7 @@ class anet_import(db):
     """ User interface of import framework.
     """
 
-    def __init__(self, hash_path, log_path, use_env = False, conn_json = {}):
+    def __init__(self, hash_path, log_path, use_env=False, conn_json={}):
         super().__init__(use_env=use_env, conn_json=conn_json)
         self.log_path = log_path
         self.hash_full_path = os.path.join(hash_path, "hashvalues.txt")
@@ -86,9 +86,9 @@ class anet_import(db):
 
     def write_objects_to_csv(self, obj_list, name):
         if obj_list:
-            pd.DataFrame([vars(obj) for obj in obj_list]) \
-                .drop(columns = ["_sa_instance_state"], errors = 'ignore') \
-                    .to_csv(os.path.join(self.log_path, name + self.utc_now_str + ".csv"))
+            pd.DataFrame([vars(obj) for obj in obj_list]).drop(columns=["_sa_instance_state"], errors="ignore").to_csv(
+                os.path.join(self.log_path, name + self.utc_now_str + ".csv")
+            )
 
     def log_result(self):
         if self.log:
@@ -102,14 +102,19 @@ class anet_import(db):
 
     def hashes_from_obj_list(self, obj_list):
         if obj_list:
-            list_of_drop_cols = ["_sa_instance_state", "person",
-                                    "people", "organization",
-                                    "location", "organization1",
-                                    "positions", "reports", "parent"
-                                    "uuid"]
-            models_df = pd.DataFrame([vars(obj) for obj in obj_list]) \
-                        .drop(columns = list_of_drop_cols, errors = 'ignore')
-            hashes = pd.util.hash_pandas_object(models_df, index = False)
+            list_of_drop_cols = [
+                "_sa_instance_state",
+                "person",
+                "people",
+                "organization",
+                "location",
+                "organization1",
+                "positions",
+                "reports",
+                "parent" "uuid",
+            ]
+            models_df = pd.DataFrame([vars(obj) for obj in obj_list]).drop(columns=list_of_drop_cols, errors="ignore")
+            hashes = pd.util.hash_pandas_object(models_df, index=False)
             return hashes
 
     def write_hash(self):
@@ -124,13 +129,13 @@ class anet_import(db):
         if not self.objects_from_user:
             raise Exception("There is no object to import!")
 
-    def start_import(self, objects, remember_hash = False, log = True ):
+    def start_import(self, objects, remember_hash=False, log=True):
         # Framework is started
         print("\n*** DATA IMPORT AND MANIPULATION FRAMEWORK ***\n")
         # Update api parameters
-        self.update_parameters(objects_from_user = objects, remember_hash = remember_hash, log = log)
+        self.update_parameters(objects_from_user=objects, remember_hash=remember_hash, log=log)
         self.check_parameters()
-        # Exclude previously processed models 
+        # Exclude previously processed models
         self.remember_with_hash()
         # Connect to db and initializa a session
         self.connect()

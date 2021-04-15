@@ -6,8 +6,9 @@ class base_mixin(BaseModel):
     """ Includes common methods for all of the annotated ANET models.
         Base class for model mixins (e.g. people_mixin.py, report_mixin.py in src.core.business_logic.overriden)
     """
+
     __abstract__ = True
-    
+
     def import_entity(self, utc_now, update_rules, session):
         """Starting point of mixins. Decide what will be next.
         """

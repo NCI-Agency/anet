@@ -4,10 +4,12 @@ from src.core.business_logic.base.base_mixin import base_mixin
 from src.core.business_logic.base.base_methods import base_methods
 from src.core.model.annotated.association import PeoplePositions
 
+
 class position_mixin(base_mixin):
     """ Inherits from base_mixin
         Overrides business logic methods for position objects
     """
+
     __abstract__ = True
 
     def update_entity(self, utc_now, session):
@@ -16,11 +18,7 @@ class position_mixin(base_mixin):
         obj = session.query(type(self)).get(self.uuid)
         self.updatedAt = utc_now
         for attr, value in self.__dict__.items():
-            if attr not in ["_sa_instance_state",
-                             "people",
-                             "person",
-                             "location",
-                             "organization"]:
+            if attr not in ["_sa_instance_state", "people", "person", "location", "organization"]:
                 setattr(obj, attr, value)
         session.flush()
         return obj
@@ -30,14 +28,14 @@ class position_mixin(base_mixin):
         for pp in self.people:
             if pp.endedAt is None and pp.person is self.person:
                 pp.endedAt = utc_now - datetime.timedelta(0, 2)
-        self.people.append(PeoplePositions(createdAt = utc_now - datetime.timedelta(0, 1)))
-        self.person.positions.append(PeoplePositions(createdAt = utc_now - datetime.timedelta(0, 1)))
+        self.people.append(PeoplePositions(createdAt=utc_now - datetime.timedelta(0, 1)))
+        self.person.positions.append(PeoplePositions(createdAt=utc_now - datetime.timedelta(0, 1)))
         self.person = None
 
     def associate_new_person(self, person, utc_now):
         # Insert to peoplePositions
-        self.people.append(PeoplePositions(createdAt = utc_now))
-        self.people.append(PeoplePositions(createdAt = utc_now, person = person))
+        self.people.append(PeoplePositions(createdAt=utc_now))
+        self.people.append(PeoplePositions(createdAt=utc_now, person=person))
         # Update currentPersonUuid
         self.person = person
 
@@ -56,8 +54,7 @@ class position_mixin(base_mixin):
         """
         new_obj = self.__class__()
         for key, value in self.__dict__.items():
-            if key not in ["_sa_instance_state", "people",
-                             "person", "location", "organization"]:
+            if key not in ["_sa_instance_state", "people", "person", "location", "organization"]:
                 setattr(new_obj, key, value)
         return new_obj
 
@@ -96,11 +93,11 @@ class position_mixin(base_mixin):
                     # Associate new person to existing position
                     pos.deassociate_current_person(utc_now)
                 pos.associate_new_person(self.person, utc_now)
-                pos.person.positions.append(PeoplePositions(createdAt = utc_now))
+                pos.person.positions.append(PeoplePositions(createdAt=utc_now))
             else:
-                self.person.positions.append(PeoplePositions(createdAt = utc_now))
-                self.people.append(PeoplePositions(createdAt = utc_now))
-                self.people.append(PeoplePositions(createdAt = utc_now, person = self.person))
+                self.person.positions.append(PeoplePositions(createdAt=utc_now))
+                self.people.append(PeoplePositions(createdAt=utc_now))
+                self.people.append(PeoplePositions(createdAt=utc_now, person=self.person))
 
     def associate_location_to_position(self, utc_now, session):
         # If position exists in ANET
@@ -139,7 +136,7 @@ class position_mixin(base_mixin):
             self.person.is_update = base_methods.is_entity_update(self.person, update_rules, session)
         if base_methods.has_entity_relation(self, "location"):
             self.location.is_update = base_methods.is_entity_update(self.location, update_rules, session)
-        if base_methods.has_entity_relation(self, "organization"):       
+        if base_methods.has_entity_relation(self, "organization"):
             self.organization.is_update = base_methods.is_entity_update(self.organization, update_rules, session)
 
         # Check if position (from user) has related person and associate

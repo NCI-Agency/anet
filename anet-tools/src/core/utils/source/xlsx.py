@@ -5,6 +5,7 @@ class xlsx:
     """ Read and parse xlsx file to pandas dataframe
     by specifying sheet name
     """
+
     def __init__(self, file_path):
         self.file_path = file_path
         # Extension of file

@@ -6,6 +6,7 @@ from src.core.database.db import db
 class db_dataframe(db):
     """ Read table from database as pandas dataframe object
     """
+
     def __init__(self, use_env, conn_json):
         super().__init__(use_env=use_env, conn_json=conn_json)
 

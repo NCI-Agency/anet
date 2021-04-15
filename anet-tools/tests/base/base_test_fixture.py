@@ -36,7 +36,7 @@ class BaseTestFixture(unittest.TestCase):
         self.Location = Locations
         self.Organization = Organizations
         self.Report = Reports
-    
+
     # tearDown method will work after each test method
     def tearDown(self):
         self.session.close()

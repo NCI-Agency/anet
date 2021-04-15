@@ -3,7 +3,7 @@ from src.core.model.annotated.anet import People
 from src.core.model.annotated.enums.enums import person_status
 
 # Create new anet_import object with env vars only in dev environment.
-anet_import_obj = anet_import(use_env=True, conn_json = {}, hash_path = "./", log_path = "/")
+anet_import_obj = anet_import(use_env=True, conn_json={}, hash_path="./", log_path="/")
 
 # Create object list
 obj_list = list()
@@ -18,4 +18,4 @@ person.status = person_status.ACTIVE
 obj_list.append(person)
 
 # Start import process
-anet_import_obj.start_import(obj_list, remember_hash = True, log = True)
+anet_import_obj.start_import(obj_list, remember_hash=True, log=True)

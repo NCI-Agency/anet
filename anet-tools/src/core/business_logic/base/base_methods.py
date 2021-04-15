@@ -6,6 +6,7 @@ from sqlalchemy import and_
 class base_methods:
     """ Base methods used in src.core.business_logic package
     """
+
     @staticmethod
     def check_if_entity_allowed(entity):
         if entity.__tablename__ not in ["positions", "people", "locations", "organizations", "reports"]:
@@ -44,9 +45,16 @@ class base_methods:
         query_result_list = list()
         for update_rule in update_rules["tables"]:
             if entity.__tablename__ == update_rule["name"]:
-                query_result_list = session.query(entity.__class__) \
-                                        .filter(and_(getattr(entity.__class__, attr_name) == getattr(entity, attr_name) for attr_name in tuple(update_rule["columns"]))) \
-                                        .all()
+                query_result_list = (
+                    session.query(entity.__class__)
+                    .filter(
+                        and_(
+                            getattr(entity.__class__, attr_name) == getattr(entity, attr_name)
+                            for attr_name in tuple(update_rule["columns"])
+                        )
+                    )
+                    .all()
+                )
                 break
         return query_result_list
 
@@ -76,9 +84,11 @@ class base_methods:
             return True
         else:
             if entity.__tablename__ == "positions":
-                if base_methods.has_entity_relation(entity, "person") or \
-                    base_methods.has_entity_relation(entity, "location") or \
-                    base_methods.has_entity_relation(entity, "organization"):
+                if (
+                    base_methods.has_entity_relation(entity, "person")
+                    or base_methods.has_entity_relation(entity, "location")
+                    or base_methods.has_entity_relation(entity, "organization")
+                ):
                     return False
                 else:
                     return True
@@ -87,5 +97,5 @@ class base_methods:
                     return True
                 else:
                     return False
-            else: raise Exception(f"Logic is not implemented for {entity.__tablename__} table!")
-                
+            else:
+                raise Exception(f"Logic is not implemented for {entity.__tablename__} table!")

@@ -1,10 +1,12 @@
 from src.core.business_logic.base.base_mixin import base_mixin
 from src.core.model.annotated.association import PeoplePositions
 
+
 class people_mixin(base_mixin):
     """ Inherits from base_mixin
         Overrides business logic methods for people objects
     """
+
     __abstract__ = True
 
     def insert_entity(self, utc_now, session):
@@ -38,4 +40,3 @@ class people_mixin(base_mixin):
 
     def __eq__(self, other_person):
         return self.uuid == other_person.uuid
-

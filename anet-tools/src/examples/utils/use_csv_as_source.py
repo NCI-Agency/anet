@@ -13,10 +13,9 @@ csv_obj = csv(csv_full_path)
 csv_obj.read_csv_file()
 
 # Create new anet_import object with env vars only in dev environment.
-anet_import = anet_import(use_env=True,
-                            conn_json={}, 
-                            hash_path="/home/jovyan/work/datasamples/", 
-                            log_path="/home/jovyan/work/datasamples/")
+anet_import = anet_import(
+    use_env=True, conn_json={}, hash_path="/home/jovyan/work/datasamples/", log_path="/home/jovyan/work/datasamples/"
+)
 
 # Create entity_list object
 obj_list = list()
@@ -49,4 +48,4 @@ anet_import.print_update_rules()
 # anet_import.clear_update_rules()
 
 # Start import
-anet_import.start_import(obj_list, remember_hash = True, log = True)
+anet_import.start_import(obj_list, remember_hash=True, log=True)

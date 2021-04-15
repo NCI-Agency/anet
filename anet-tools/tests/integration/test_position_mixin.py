@@ -5,7 +5,6 @@ from tests.base import base_test_fixture
 
 
 class TestPositionMixin(base_test_fixture.BaseTestFixture):
-    
     def test_associate_existing_person_to_existing_position_case1(self):
         print("Tests: Associate existing person (has no former position) with existing position (has no former person)")
 
@@ -20,12 +19,13 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "locations", "columns": ["name"]})
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == person.uuid, 
-                            self.PeoplePositions.positionUuid == position.uuid) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
@@ -53,16 +53,17 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "locations", "columns": ["name"]})
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        former_pos_uuid = self.session.query(self.Position) \
-                            .filter(self.Position.currentPersonUuid == person.uuid) \
-                            .all()[0].uuid
-                            
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == person.uuid, 
-                            self.PeoplePositions.positionUuid == position.uuid) \
-                    .all()
+        former_pos_uuid = (
+            self.session.query(self.Position).filter(self.Position.currentPersonUuid == person.uuid).all()[0].uuid
+        )
+
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
@@ -76,29 +77,41 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         expected = location.uuid
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == None,
-                            self.PeoplePositions.positionUuid == former_pos_uuid, 
-                            self.PeoplePositions.endedAt == None) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == None,
+                self.PeoplePositions.positionUuid == former_pos_uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == None,
-                        self.PeoplePositions.positionUuid == position.uuid,
-                        self.PeoplePositions.endedAt == None) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == None,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == person.uuid,
-                        self.PeoplePositions.positionUuid == position.uuid,
-                        self.PeoplePositions.endedAt == None) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == person.uuid,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
@@ -117,13 +130,17 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "organizations", "columns": ["shortName"]})
 
-        former_person_uuid = self.session.query(self.Position) \
-                            .filter(self.Position.name == position.name).all()[0].currentPersonUuid
+        former_person_uuid = (
+            self.session.query(self.Position).filter(self.Position.name == position.name).all()[0].currentPersonUuid
+        )
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions).filter(
-            self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid).all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
@@ -137,29 +154,41 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         expected = organization.uuid
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == former_person_uuid,
-                            self.PeoplePositions.positionUuid == None,
-                            self.PeoplePositions.endedAt == None) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == former_person_uuid,
+                self.PeoplePositions.positionUuid == None,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == None,
-                            self.PeoplePositions.positionUuid == position.uuid, 
-                            self.PeoplePositions.endedAt == None) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == None,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 2
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                    .filter(self.PeoplePositions.personUuid == person.uuid,
-                            self.PeoplePositions.positionUuid == position.uuid,
-                            self.PeoplePositions.endedAt == None) \
-                    .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == person.uuid,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
@@ -174,32 +203,29 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         position.person = person
         position.location = location
 
-        self.update_rules["tables"].append({"name": "positions","columns": ["name"]})
+        self.update_rules["tables"].append({"name": "positions", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "locations", "columns": ["name"]})
-       
-        person_uuid = self.session.query(self.Person) \
-                        .filter(self.Person.name == person.name) \
-                        .all()[0].uuid
-        
-        pos_uuid = self.session.query(self.Position) \
-                        .filter(self.Position.name == position.name) \
-                        .all()[0].uuid
 
-        former_pos_uuid = self.session.query(self.Position) \
-                        .filter(self.Position.currentPersonUuid == person_uuid) \
-                        .all()[0].uuid
+        person_uuid = self.session.query(self.Person).filter(self.Person.name == person.name).all()[0].uuid
 
-        former_person_uuid = self.session.query(self.Position) \
-                            .filter(self.Position.uuid == pos_uuid) \
-                            .all()[0].currentPersonUuid
+        pos_uuid = self.session.query(self.Position).filter(self.Position.name == position.name).all()[0].uuid
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        former_pos_uuid = (
+            self.session.query(self.Position).filter(self.Position.currentPersonUuid == person_uuid).all()[0].uuid
+        )
 
-        pp = self.session.query(self.PeoplePositions) \
-                .filter(self.PeoplePositions.personUuid == person.uuid,
-                        self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        former_person_uuid = (
+            self.session.query(self.Position).filter(self.Position.uuid == pos_uuid).all()[0].currentPersonUuid
+        )
+
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
+
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
@@ -213,38 +239,54 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         expected = location.uuid
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                .filter(self.PeoplePositions.personUuid == former_person_uuid,
-                        self.PeoplePositions.positionUuid == None,
-                        self.PeoplePositions.endedAt == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == former_person_uuid,
+                self.PeoplePositions.positionUuid == None,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                .filter(self.PeoplePositions.personUuid == None,
-                        self.PeoplePositions.positionUuid == former_pos_uuid,
-                        self.PeoplePositions.endedAt == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == None,
+                self.PeoplePositions.positionUuid == former_pos_uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                .filter(self.PeoplePositions.personUuid == None,
-                        self.PeoplePositions.positionUuid == position.uuid, 
-                        self.PeoplePositions.endedAt == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == None,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 2
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                .filter(self.PeoplePositions.personUuid == person.uuid,
-                        self.PeoplePositions.positionUuid == position.uuid, 
-                        self.PeoplePositions.endedAt == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == person.uuid,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
@@ -263,12 +305,13 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "organizations", "columns": ["shortName"]})
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
@@ -282,11 +325,15 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         expected = organization.uuid
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == None,
-                                self.PeoplePositions.positionUuid == position.uuid, 
-                                self.PeoplePositions.endedAt == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == None,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt == None,
+            )
+            .all()
+        )
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
@@ -305,38 +352,39 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         self.update_rules["tables"].append({"name": "people", "columns": ["name"]})
         self.update_rules["tables"].append({"name": "location", "columns": ["name"]})
 
-        person_uuid = self.session.query(self.Person) \
-                        .filter(self.Person.name == person.name) \
-                        .all()[0].uuid
+        person_uuid = self.session.query(self.Person).filter(self.Person.name == person.name).all()[0].uuid
 
-        former_pos_uuid = self.session.query(self.Position) \
-                                .filter(self.Position.currentPersonUuid == person_uuid) \
-                                .all()[0].uuid
+        former_pos_uuid = (
+            self.session.query(self.Position).filter(self.Position.currentPersonUuid == person_uuid).all()[0].uuid
+        )
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == None,
-                                self.PeoplePositions.positionUuid == former_pos_uuid) \
-                        .all()
-
-        result = len(pp)
-        expected = 1
-        self.assertEqual(result, expected)
-
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == None,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == None, self.PeoplePositions.positionUuid == former_pos_uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == None, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
+
+        result = len(pp)
+        expected = 1
+        self.assertEqual(result, expected)
+
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
@@ -347,7 +395,6 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
         result = loc_uuid
         expected = location.uuid
         self.assertEqual(result, expected)
-
 
     def test_associate_new_person_to_existing_position_case1(self):
         print("Tests: Associate new person with existing position (has no former person)")
@@ -361,43 +408,45 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
 
         self.update_rules["tables"].append({"name": "positions", "columns": ["name"]})
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == None,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
-
-        result = len(pp)
-        expected = 1
-        self.assertEqual(result, expected)
-
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == None, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == None)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
-        
-        location_uuid = self.session.query(self.Position) \
-                        .filter(self.Position.name == position.name) \
-                        .all()[0].locationUuid
+
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
+
+        result = len(pp)
+        expected = 1
+        self.assertEqual(result, expected)
+
+        location_uuid = (
+            self.session.query(self.Position).filter(self.Position.name == position.name).all()[0].locationUuid
+        )
 
         result = location_uuid
         expected = location.uuid
         self.assertEqual(result, expected)
-
 
     def test_associate_new_person_to_existing_position_case2(self):
         print("Tests: Associate new person with existing position (has former person)")
@@ -411,100 +460,108 @@ class TestPositionMixin(base_test_fixture.BaseTestFixture):
 
         self.update_rules["tables"].append({"name": "positions", "columns": ["name"]})
 
-        former_person_uuid = self.session.query(self.Position) \
-                                .filter(self.Position.name == position.name) \
-                                .all()[0].currentPersonUuid
+        former_person_uuid = (
+            self.session.query(self.Position).filter(self.Position.name == position.name).all()[0].currentPersonUuid
+        )
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == former_person_uuid,
-                                self.PeoplePositions.positionUuid == position.uuid,
-                                self.PeoplePositions.endedAt != None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(
+                self.PeoplePositions.personUuid == former_person_uuid,
+                self.PeoplePositions.positionUuid == position.uuid,
+                self.PeoplePositions.endedAt != None,
+            )
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == None,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == None, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 2
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == former_person_uuid,
-                                self.PeoplePositions.positionUuid == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == former_person_uuid, self.PeoplePositions.positionUuid == None)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == None) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == None)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
-
-
 
     def test_associate_new_person_to_new_position(self):
         print("Tests: Associate new person with new position")
 
         position = self.Position(name="new position", type=0, status=0)
-        person = self.Person(name="new person", role=0, status = 0)
+        person = self.Person(name="new person", role=0, status=0)
         location = self.Location(name="new location", status=1)
 
         position.person = person
         position.location = location
 
-        position.import_entity(utc_now = self.utc_now, update_rules = self.update_rules, session = self.session)
+        position.import_entity(utc_now=self.utc_now, update_rules=self.update_rules, session=self.session)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == None) \
-                        .all()
-
-        result = len(pp)
-        expected = 1
-        self.assertEqual(result, expected)
-
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == None,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == None)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
-        pp = self.session.query(self.PeoplePositions) \
-                        .filter(self.PeoplePositions.personUuid == person.uuid,
-                                self.PeoplePositions.positionUuid == position.uuid) \
-                        .all()
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == None, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
 
         result = len(pp)
         expected = 1
         self.assertEqual(result, expected)
 
+        pp = (
+            self.session.query(self.PeoplePositions)
+            .filter(self.PeoplePositions.personUuid == person.uuid, self.PeoplePositions.positionUuid == position.uuid)
+            .all()
+        )
+
+        result = len(pp)
+        expected = 1
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":
-    unittest.main(argv=['ignored', '-v'], exit=False)
+    unittest.main(argv=["ignored", "-v"], exit=False)

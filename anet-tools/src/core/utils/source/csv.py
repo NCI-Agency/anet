@@ -4,7 +4,8 @@ import numpy as np
 
 class csv:
     """ Read and parse csv file to pandas dataframe
-    """    
+    """
+
     def __init__(self, file_path):
         self.file_path = file_path
         # Extension of file
@@ -21,4 +22,4 @@ class csv:
             print(f"EXCEPTION: {str(e)}")
 
     def convert_nan_to_empty_string(self):
-        self.df.replace(np.nan, '', regex=True, inplace=True)
+        self.df.replace(np.nan, "", regex=True, inplace=True)
