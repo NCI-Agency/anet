@@ -48,7 +48,7 @@ The framework saves the data samples encountered with errors during import into 
 You can use the import framework in a production environment using the [python executable (pex)](https://pypi.org/project/pex/) file which contains the framework and dependencies.
 
 #### What are the system requirements
-To use the import framework in a production environment, make sure you have [python3.6](https://www.python.org/) and [pex](https://pypi.org/project/pex/) installed on your system.
+To use the import framework in a production environment, make sure you have [python3.8](https://www.python.org/) and [pex](https://pypi.org/project/pex/) installed on your system.
 
 #### How to create pex file
 To create this file, you must first run the `./gradlew dockerCreateJupyter` and `./gradle dockerStartJupyter` tasks respectively. Subsequently, when an ANET distribution is created using the `./gradlew build` task, the import framework pex file is automatically created and copied to the `lib/` directory inside the distribution zip file.
