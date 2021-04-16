@@ -605,22 +605,7 @@ task dockerInstallJupyterDevDependencies(type: com.bmuschko.gradle.docker.tasks.
 	group = "jupyter container"
 	description = "Installs Python dependencies."
 	targetContainerId { jupyterContainerName }
-	commands = [ ["/bin/bash", "-c", "apt update && " +
-			"apt install -y gnupg gnupg2 gnupg1 && " +
-			"apt install -y curl && " +
-			"curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && " +
-			"curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && " +
-			"apt update && " +
-			"ACCEPT_EULA=Y apt-get install -y msodbcsql17 && " +
-			"apt-get install -y dialog apt-utils && " +
-			"sudo ACCEPT_EULA=Y apt-get install mssql-tools && " +
-			"echo 'export PATH=\"\$PATH:/opt/mssql-tools/bin\"' >> ~/.bash_profile && " +
-			"echo 'export PATH=\"\$PATH:/opt/mssql-tools/bin\"' >> ~/.bashrc && " +
-			"source ~/.bashrc && " +
-			"apt install -y unixodbc-dev && " +
-			"apt install -y libsasl2-dev libldap2-dev libssl-dev && " +
-			"pip install pipenv && " +
-			"pipenv install --system --skip-lock" ] as String[] ]
+	commands = [ ["/bin/bash", "-c", "./install_dependencies.sh" ] as String[] ]
 }
 
 task dockerPackJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
