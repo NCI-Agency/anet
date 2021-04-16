@@ -40,10 +40,26 @@ class MergePositions extends Page {
     return browser.$(`#mid-merge-pos-col ${button} > button`)
   }
 
-  getColumnPositionName(side) {
+  getColumnContent(side, text) {
     return browser.$(
-      `//div[@id="${side}-merge-pos-col"]//div[text()="Name"]/following-sibling::div`
+      `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]/following-sibling::div`
     )
+  }
+
+  getAssociatedPosition(side, text) {
+    const mapper = text === "Name" ? 1 : 2
+    const associatedPositionElement = browser.$(
+      `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]/following-sibling::div/table/tbody/tr/td[${mapper}]`
+    )
+    return associatedPositionElement.$("a")
+  }
+
+  getPreviousPeople(side, text) {
+    const mapper = text === "Name" ? 1 : 2
+    const previousPeopleElement = browser.$(
+      `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div/table/tbody/tr/td[${mapper}]`
+    )
+    return mapper === 1 ? previousPeopleElement.$("a") : previousPeopleElement
   }
 
   waitForAdvancedSelectLoading(compareStr) {
@@ -63,8 +79,8 @@ class MergePositions extends Page {
     )
   }
 
-  waitForColumnToChange(compareStr, side) {
-    const field = this.getColumnPositionName(side)
+  waitForColumnToChange(compareStr, side, text) {
+    const field = this.getColumnContent(side, text)
 
     browser.waitUntil(
       () => {
