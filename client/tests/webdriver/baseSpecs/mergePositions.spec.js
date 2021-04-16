@@ -131,15 +131,44 @@ describe("Merge positions page", () => {
 
   it("Should be able to select all fields from left position", () => {
     MergePositions.getUseAllButton("left").click()
+
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.left.fullName,
       "mid",
-      "Name",
-      "regular"
+      "Name"
     )
-
     expect(MergePositions.getColumnContent("mid", "Name").getText()).to.eq(
       EXAMPLE_POSITIONS.left.fullName
+    )
+    expect(
+      MergePositions.getColumnContent("mid", "Organization").getText()
+    ).to.eq(EXAMPLE_POSITIONS.left.Organization)
+    expect(MergePositions.getColumnContent("mid", "Type").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.Type
+    )
+    expect(MergePositions.getColumnContent("mid", "Code").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.Code
+    )
+    expect(MergePositions.getColumnContent("mid", "Status").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.Status
+    )
+    expect(MergePositions.getColumnContent("mid", "Person").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.Person
+    )
+    expect(MergePositions.getAssociatedPosition("mid", "Name").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.AssociatedPositions.Name
+    )
+    expect(
+      MergePositions.getAssociatedPosition("mid", "Position").getText()
+    ).to.eq(EXAMPLE_POSITIONS.left.AssociatedPositions.Position)
+    expect(MergePositions.getPreviousPeople("mid", "Name").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.PreviousPeople.Name
+    )
+    expect(
+      MergePositions.getPreviousPeople("mid", "Dates").getText()
+    ).to.include(EXAMPLE_POSITIONS.left.PreviousPeople.Dates())
+    expect(MergePositions.getColumnContent("mid", "Location").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.Location
     )
   })
 
@@ -148,12 +177,25 @@ describe("Merge positions page", () => {
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.right.fullName,
       "mid",
-      "Name",
-      "regular"
+      "Name"
     )
-
     expect(MergePositions.getColumnContent("mid", "Name").getText()).to.eq(
       EXAMPLE_POSITIONS.right.fullName
+    )
+    expect(
+      MergePositions.getColumnContent("mid", "Organization").getText()
+    ).to.eq(EXAMPLE_POSITIONS.right.Organization)
+    expect(MergePositions.getColumnContent("mid", "Type").getText()).to.eq(
+      EXAMPLE_POSITIONS.right.Type
+    )
+    expect(MergePositions.getColumnContent("mid", "Code").getText()).to.eq(
+      EXAMPLE_POSITIONS.right.Code
+    )
+    expect(MergePositions.getColumnContent("mid", "Person").getText()).to.eq(
+      EXAMPLE_POSITIONS.right.Person
+    )
+    expect(MergePositions.getColumnContent("mid", "Location").getText()).to.eq(
+      EXAMPLE_POSITIONS.right.Location
     )
   })
 
@@ -162,8 +204,7 @@ describe("Merge positions page", () => {
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.left.fullName,
       "mid",
-      "Name",
-      "regular"
+      "Name"
     )
 
     MergePositions.mergePositionsButton.click()
