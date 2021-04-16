@@ -38,5 +38,8 @@ class people_mixin(base_mixin):
                 setattr(new_obj, key, value)
         return new_obj
 
+    def initialize_empty_position_history(self, utc_now):
+        self.positions.append(PeoplePositions(createdAt=utc_now))
+
     def __eq__(self, other_person):
         return self.uuid == other_person.uuid

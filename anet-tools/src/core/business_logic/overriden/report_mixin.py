@@ -1,6 +1,6 @@
 from src.core.business_logic.base.base_mixin import base_mixin
 from src.core.business_logic.base.base_methods import base_methods
-from src.core.model.annotated.association import PeoplePositions, ReportPeople
+from src.core.model.annotated.association import ReportPeople
 
 
 class report_mixin(base_mixin):
@@ -97,7 +97,7 @@ class report_mixin(base_mixin):
                 else:
                     # Associate new person with report from db
                     fresh_person = rp.person.get_fresh_one()
-                    fresh_person.positions.append(PeoplePositions(createdAt=utc_now))
+                    fresh_person.initialize_empty_position_history(utc_now)
                     rep.people.append(
                         ReportPeople(
                             isPrimary=rp.isPrimary, isAttendee=rp.isAttendee, isAuthor=rp.isAuthor, person=fresh_person
@@ -114,7 +114,7 @@ class report_mixin(base_mixin):
                     rp.person = upd_person
                 else:
                     # Create fresh person and associate with report (from user)
-                    rp.person.positions.append(PeoplePositions(createdAt=utc_now))
+                    rp.person.initialize_empty_position_history(utc_now)
 
     def insert_update_nested_entity(self, utc_now, update_rules, session):
         # Set is_update attr for report and relations
@@ -126,14 +126,19 @@ class report_mixin(base_mixin):
         if base_methods.has_entity_relation(self, "organization"):
             self.organization.is_update = base_methods.is_entity_update(self.organization, update_rules, session)
 
+        self.initialize_times(utc_now)
         # Check if position (from user) has related person and associate
         if base_methods.has_entity_relation(self, "people"):
+            for rp in self.people:
+                rp.person.initialize_times(utc_now)
             self.associate_people_to_report(utc_now, session)
         # Check if position (from user) has related location and associate
         if base_methods.has_entity_relation(self, "location"):
+            self.location.initialize_times(utc_now)
             self.associate_location_to_report(utc_now, session)
         # Check if position (from user) has related organization and associate
         if base_methods.has_entity_relation(self, "organization"):
+            self.organization.initialize_times(utc_now)
             self.associate_organization_to_report(utc_now, session)
 
         if not self.is_update:

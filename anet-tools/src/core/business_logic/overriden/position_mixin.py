@@ -139,14 +139,18 @@ class position_mixin(base_mixin):
         if base_methods.has_entity_relation(self, "organization"):
             self.organization.is_update = base_methods.is_entity_update(self.organization, update_rules, session)
 
+        self.initialize_times(utc_now)
         # Check if position (from user) has related person and associate
         if base_methods.has_entity_relation(self, "person"):
+            self.person.initialize_times(utc_now)
             self.associate_person_to_position(utc_now, session)
         # Check if position (from user) has related location and associate
         if base_methods.has_entity_relation(self, "location"):
+            self.location.initialize_times(utc_now)
             self.associate_location_to_position(utc_now, session)
         # Check if position (from user) has related organization and associate
         if base_methods.has_entity_relation(self, "organization"):
+            self.organization.initialize_times(utc_now)
             self.associate_organization_to_position(utc_now, session)
         if not self.is_update:
             session.add(self)

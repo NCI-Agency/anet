@@ -42,3 +42,7 @@ class base_mixin(BaseModel):
                 setattr(obj, attr, value)
         session.flush()
         return obj
+
+    def initialize_times(self, utc_now):
+        self.createdAt = utc_now
+        self.updatedAt = utc_now
