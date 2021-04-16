@@ -111,7 +111,8 @@ class anet_import(db):
                 "organization1",
                 "positions",
                 "reports",
-                "parent" "uuid",
+                "parent",
+                "uuid"
             ]
             models_df = pd.DataFrame([vars(obj) for obj in obj_list]).drop(columns=list_of_drop_cols, errors="ignore")
             hashes = pd.util.hash_pandas_object(models_df, index=False)
