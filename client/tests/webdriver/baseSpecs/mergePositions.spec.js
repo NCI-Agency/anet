@@ -42,7 +42,8 @@ const EXAMPLE_POSITIONS = {
       Name: "",
       Dates: ""
     },
-    Location: "Unspecified"
+    Location: "Unspecified",
+    posUuid: "61371573-eefc-4b85-81a0-27d6c0b78c58"
   }
 }
 
@@ -232,5 +233,13 @@ describe("Merge positions page", () => {
     MergePositions.mergePositionsButton.click()
 
     MergePositions.waitForSuccessAlert()
+  })
+
+  it("Should be able to delete the loser position", () => {
+    MergePositions.openPage(`/positions/${EXAMPLE_POSITIONS.right.posUuid}`)
+    MergePositions.errorTitle.waitForExist()
+    expect(MergePositions.errorTitle.getText()).to.equal(
+      `Position #${EXAMPLE_POSITIONS.right.posUuid} not found.`
+    )
   })
 })
