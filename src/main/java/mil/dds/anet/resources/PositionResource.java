@@ -130,7 +130,7 @@ public class PositionResource {
       final Position current = dao.getByUuid(pos.getUuid());
       if (current != null) {
         // Run the diff and see if anything changed and update.
-        if (pos.getPersonUuid() != null) {
+        if (pos.getPerson() != null) {
           if (pos.getPersonUuid() == null) {
             // Intentionally remove the person
             dao.removePersonFromPosition(current.getUuid());

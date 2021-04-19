@@ -3,7 +3,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import AssessmentModal from "components/assessments/AssessmentModal"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
@@ -79,8 +79,8 @@ const PeriodicAssessment = ({
               >
                 <Icon icon={IconNames.EDIT} />
               </Button>
-              <ConfirmDelete
-                onConfirmDelete={() => deleteNote(note.uuid)}
+              <ConfirmDestructive
+                onConfirm={() => deleteNote(note.uuid)}
                 objectType="note"
                 objectDisplay={"#" + note.uuid}
                 title="Delete assessment"
@@ -88,7 +88,7 @@ const PeriodicAssessment = ({
                 bsStyle="primary"
               >
                 <img src={REMOVE_ICON} height={14} alt="Delete" />
-              </ConfirmDelete>
+              </ConfirmDestructive>
               <AssessmentModal
                 showModal={showAssessmentModalKey === note.uuid}
                 note={note}

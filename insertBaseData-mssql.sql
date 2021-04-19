@@ -62,6 +62,8 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 		(lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@example.com', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', 'erin', '04c29bab-7b20-4ff2-8583-8ad3dbcff4d6', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', '5b585887-1c3d-4f47-bccb-cdfebfd6e919', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'DVISOR, A', 0, 0, 'hunter+aDvisor@example.com', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'd09a55cf-6aa4-4bbf-8bf3-055ddcb4d27c', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'BRATTON, Creed', 0, 0, 'creed+bratton@example.com', '+444-44-4444', 'CIV', 'Let me first settle in.', 'creed', NULL, 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'MALONE, Kevin', 0, 0, 'kevin+malone@example.com', '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', 'kevin', NULL, 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Advisor with no position for testing
 		(lower(newid()), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Principals
@@ -74,8 +76,11 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 		(lower(newid()), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', '9eb4b898-6fe4-40f8-abca-e893424d75d1', 'Germany', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'SCHRUTE, Dwight', 0, 0, 'dwight+schrute@example.com', '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', NULL, 'dwight', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'HALPERT, Jim', 0, 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', 'halpert', NULL, 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Administrator
 		(lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', 'arthur', 'abc72322-1452-4222-bb71-a0b3db435175', 'Albania', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'SCOTT, Michael', '0', '0', 'michael+scott@example.com', NULL, 'CIV', 'Worlds best boss.', 'michael', NULL, 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 --People
 		(lower(newid()), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -148,6 +153,11 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid
 		(lower(newid()), 'EF 4.1 Advisor on Software Engineering', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 4.1 Advisor E', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 4.1 Advisor old - dont use', 0, 1, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5 Admin', 3, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Advisor Quality Assurance', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Advisor Accounting', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Super User Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Super User Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 9 Advisor <empty>', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Andrew in the EF 1 Manager Billet
@@ -211,6 +221,30 @@ INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'ANET Administrator'), (SELECT uuid from people where emailAddress = 'hunter+arthur@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+arthur@example.com') WHERE name = 'ANET Administrator';
 
+-- Put Creed into the EF 5.1 Quality Ensurance
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Advisor Quality Assurance'), (SELECT uuid from people where emailAddress = 'creed+bratton@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'creed+bratton@example.com') WHERE name = 'EF 5.1 Advisor Quality Assurance';
+
+-- Put Kevin into the EF 5.1 Accounting
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Advisor Accounting'), (SELECT uuid from people where emailAddress = 'kevin+malone@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'kevin+malone@example.com') WHERE name = 'EF 5.1 Advisor Accounting';
+
+-- Put Jim into the EF 5.1 Sales 1
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Super User Sales 1'), (SELECT uuid from people where emailAddress = 'jim+halpert@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'jim+halpert@example.com') WHERE name = 'EF 5.1 Super User Sales 1';
+
+-- Put Dwight into the EF 5.1 Sales 2
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Super User Sales 2'), (SELECT uuid from people where emailAddress = 'dwight+schrute@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'dwight+schrute@example.com') WHERE name = 'EF 5.1 Super User Sales 2';
+
+-- Put Michael into the EF 5 Admin
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where emailAddress = 'michael+scott@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'michael+scott@example.com') WHERE name = 'EF 5 Admin';
 
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANET Administrators','', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -241,7 +275,7 @@ INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 5', '', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
-		VALUES (lower(newid()), 'EF 5.1', '', 0 , (SELECT uuid FROM organizations WHERE shortName = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		VALUES (lower(newid()), 'EF 5.1', '', 0 , (SELECT uuid FROM organizations WHERE shortName = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
 		VALUES (lower(newid()), 'EF 5.2', '', 0 , (SELECT uuid FROM organizations WHERE shortName = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
@@ -280,6 +314,8 @@ UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE sh
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 2.2') WHERE name LIKE 'EF 2.2%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 3') WHERE name LIKE 'EF 3%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 4') WHERE name LIKE 'EF 4%';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 5') WHERE name LIKE 'EF 5%';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 5.1') WHERE name LIKE 'EF 5.1%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName='ANET Administrators') where name = 'ANET Administrator';
 
 -- Create the EF 1.1 approval process
@@ -678,6 +714,22 @@ SET @reportUuid = lower(newid());
 INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
 	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report from Arthur', '',
 	'keep on testing!','have reports in organizations', 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
+	(SELECT uuid FROM organizations where shortName = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@example.com'), @reportUuid, 1, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+
+SET @reportUuid = lower(newid());
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report to be unpublished from Arthur', '',
+	'I need to edit this report so unpublish it please','have reports in organizations', 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
 	(SELECT uuid FROM organizations where shortName = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@example.com'), @reportUuid, 1, 1);

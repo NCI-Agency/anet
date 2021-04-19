@@ -12,7 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -1081,8 +1081,8 @@ const ReportForm = ({
                     </div>
                   )}
                   {canDelete && (
-                    <ConfirmDelete
-                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
+                    <ConfirmDestructive
+                      onConfirm={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"

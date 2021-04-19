@@ -148,6 +148,7 @@ fields:
       placeholder: Search for a position...
 
   report:
+    canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details

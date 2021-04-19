@@ -190,6 +190,29 @@ export default class Position extends Model {
     return this.name
   }
 
+  static convertType(type) {
+    switch (type) {
+      case "ADVISOR":
+        return Settings.fields.advisor.position.type
+      case "PRINCIPAL":
+        return Settings.fields.principal.position.type
+      case "SUPER_USER":
+        return Settings.fields.superUser.position.type
+      case "ADMINISTRATOR":
+        return Settings.fields.administrator.position.type
+      default:
+        return "Default Case"
+    }
+  }
+
+  static isAdvisor(position) {
+    return position.type === Position.TYPE.ADVISOR
+  }
+
+  static isPrincipal(position) {
+    return position.type === Position.TYPE.PRINCIPAL
+  }
+
   iconUrl() {
     if (this.isAdvisor()) {
       return RS_ICON
@@ -198,5 +221,27 @@ export default class Position extends Model {
     } else {
       return POSITIONS_ICON
     }
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    // Fill if necessary
+  ]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    // Filter formCustomFields in associatedPositions
+    if (obj.associatedPositions) {
+      obj.associatedPositions = obj.associatedPositions.map(ap =>
+        Position.filterClientSideFields(ap)
+      )
+    }
+    return Model.filterClientSideFields(
+      obj,
+      ...Position.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Position.filterClientSideFields(this, ...additionalFields)
   }
 }

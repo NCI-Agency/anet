@@ -4,7 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -216,8 +216,8 @@ const RelatedObjectNotes = ({
                         onSuccess={hideEditRelatedObjectNoteModal}
                         onDelete={hideDeleteRelatedObjectNoteModal}
                       />
-                      <ConfirmDelete
-                        onConfirmDelete={() => deleteNote(note.uuid)}
+                      <ConfirmDestructive
+                        onConfirm={() => deleteNote(note.uuid)}
                         objectType="note"
                         objectDisplay={"#" + note.uuid}
                         title="Delete note"
@@ -225,7 +225,7 @@ const RelatedObjectNotes = ({
                         bsStyle="primary"
                       >
                         <img src={REMOVE_ICON} height={14} alt="Delete" />
-                      </ConfirmDelete>
+                      </ConfirmDestructive>
                     </>
                   )}
                 </Panel.Heading>

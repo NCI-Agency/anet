@@ -197,6 +197,7 @@ fields:
               height: 200px
 
   report:
+    canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details

@@ -13,6 +13,10 @@ class EditReport extends Page {
     )
   }
 
+  get unpublishButton() {
+    return browser.$('//button[text()="Unpublish report"]')
+  }
+
   get alertSuccess() {
     return browser.$(".alert-success")
   }
@@ -20,6 +24,12 @@ class EditReport extends Page {
   confirmDeleteButton(uuid) {
     return browser.$(
       `//div[@class="modal-footer"]//button[text()="Yes, I am sure that I want to delete report ${uuid}"]`
+    )
+  }
+
+  confirmUnpublishButton(uuid) {
+    return browser.$(
+      `//div[@class="modal-footer"]//button[text()="Yes, I am sure that I want to unpublish report #${uuid}"]`
     )
   }
 
@@ -31,6 +41,17 @@ class EditReport extends Page {
     this.confirmDeleteButton(uuid).waitForClickable()
     browser.pause(300) // wait for modal animation to finish
     this.confirmDeleteButton(uuid).click()
+    this.waitForAlertSuccessToLoad()
+  }
+
+  unpublishReport(uuid) {
+    this.unpublishButton.click()
+    browser.pause(300) // wait for modal animation to finish
+    this.confirmUnpublishButton(uuid).waitForExist()
+    this.confirmUnpublishButton(uuid).waitForDisplayed()
+    this.confirmUnpublishButton(uuid).waitForClickable()
+    browser.pause(300) // wait for modal animation to finish
+    this.confirmUnpublishButton(uuid).click()
     this.waitForAlertSuccessToLoad()
   }
 
