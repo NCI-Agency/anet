@@ -62,7 +62,8 @@ String keycloakVersion = "12.0.4"
 
 String jupyterContainerName = "jupyter_scipy_notebook"
 String importFrameworkVersion = "0.1.0"
-String pexFilename = "data_import_framework_" + importFrameworkVersion + ".pex"
+String jupyterWorkDir = "/home/jovyan/work"
+String pexFileName = "data_import_framework_${importFrameworkVersion}-${run.environment['DB_DRIVER']}.pex"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -563,7 +564,7 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	imageId = dockerPullJupyter.getImage()
 	containerName = jupyterContainerName
 	description = "Creates an ANET jupyter_scipy container named " + jupyterContainerName + ". DB env is ${dbType}"
-	hostConfig.binds = ["${projectDir}/anet-tools":"/home/jovyan/work"] + run.environment.get("DOCKER_MOUNTS", [:])
+	hostConfig.binds = ["${projectDir}/anet-tools":jupyterWorkDir] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isJupyterLabEnabled){
 		withEnvVar('JUPYTER_ENABLE_LAB', "yes")
 	}
@@ -575,12 +576,12 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	withEnvVar('ANET_DB_EXPOSED_PORT', run.environment["ANET_DB_EXPOSED_PORT"])
 	withEnvVar('GRANT_SUDO', "yes")
 	withEnvVar('JUPYTER_TOKEN', "anet")
-	withEnvVar('PYTHONPATH', "/home/jovyan/work")
+	withEnvVar('PYTHONPATH', jupyterWorkDir)
 	withEnvVar('LOCAL_IP', getIpAddress())
 	withEnvVar('IMPORT_FRAMEWORK_VERSION', importFrameworkVersion)
 	hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
 	user = "root"
-	workingDir = "/home/jovyan/work"
+	workingDir = jupyterWorkDir
 }
 
 task dockerStartJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
@@ -605,27 +606,21 @@ task dockerInstallJupyterDevDependencies(type: com.bmuschko.gradle.docker.tasks.
 	group = "jupyter container"
 	description = "Installs Python dependencies."
 	targetContainerId { jupyterContainerName }
-	commands = [ ["/bin/bash", "-c", "./install_dependencies.sh" ] as String[] ]
+	commands = [ ["./install_dependencies.sh" ] as String[] ]
 }
 
 task dockerPackJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	group = "jupyter container"
 	description = "Packs Jupyter Environment. Generates PEX file"
 	targetContainerId { jupyterContainerName }
-		commands = [ ["/bin/bash", "-c", "pip install virtualenv pipenv && " +
-				"virtualenv .ve && " +
-				"source .ve/bin/activate && " +
-				"pipenv install --skip-lock && " +
-				"pex \$(pip freeze) . -o ./pex/" + pexFilename + " --disable-cache && " +
-				"deactivate &&" +
-				"rm -r .ve"] as String[] ]
+	commands = [ ["./generate_pex.sh", pexFileName] as String[] ]
 }
 
 task dockerTestJupyter(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	group = "jupyter container"
 	description = "Run tests inside Jupyter Environment."
 	targetContainerId { jupyterContainerName }
-		commands = [ ["/bin/bash", "-c", "python -m unittest discover -s /home/jovyan/work/tests/integration/"] as String[] ]
+	commands = [ ["python", "-m", "unittest", "discover", "-s", "${jupyterWorkDir}/tests/integration/"] as String[] ]
 }
 
 // Add the generated sources as a Java test source folder
@@ -715,7 +710,7 @@ distributions {
 				from('prepare-mssql.sql')
 			}
 			into('lib/') {
-				from('anet-tools/pex/' + pexFilename)
+				from("anet-tools/pex/${pexFileName}")
 			}
 		}
 	}
