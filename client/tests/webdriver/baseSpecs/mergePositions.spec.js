@@ -199,6 +199,28 @@ describe("Merge positions page", () => {
     )
   })
 
+  it("Sould be able to select from both left and right side.", () => {
+    MergePositions.getSelectButton("left", "Code").click()
+    MergePositions.waitForColumnToChange(
+      EXAMPLE_POSITIONS.left.Code,
+      "mid",
+      "Code"
+    )
+    expect(MergePositions.getColumnContent("mid", "Code").getText()).to.eq(
+      EXAMPLE_POSITIONS.left.Code
+    )
+
+    MergePositions.getSelectButton("left", "Person").click()
+    MergePositions.waitForColumnToChange(
+      EXAMPLE_POSITIONS.left.Person,
+      "mid",
+      "Person"
+    )
+    expect(MergePositions.getColumnContent("mid", "Person").getText()).to.equal(
+      EXAMPLE_POSITIONS.left.Person
+    )
+  })
+
   it("Should be able to merge both positions when winner is left position", () => {
     MergePositions.getUseAllButton("left").click()
     MergePositions.waitForColumnToChange(

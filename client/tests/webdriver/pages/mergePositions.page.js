@@ -40,6 +40,14 @@ class MergePositions extends Page {
     return browser.$(`#mid-merge-pos-col ${button} > button`)
   }
 
+  getSelectButton(side, text) {
+    const buttonDiv = browser.$(
+      `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]`
+    )
+    const button = buttonDiv.$("..").$("..")
+    return button.$("small > button")
+  }
+
   getColumnContent(side, text) {
     return browser.$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]/following-sibling::div`
