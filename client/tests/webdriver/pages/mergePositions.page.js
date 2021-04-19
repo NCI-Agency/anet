@@ -7,6 +7,14 @@ class MergePositions extends Page {
     super.openAsAdminUser(PATH)
   }
 
+  openPage(path) {
+    super.openAsAdminUser(path)
+  }
+
+  get errorTitle() {
+    return browser.$("//h1")
+  }
+
   get title() {
     return browser.$('//h2[contains(text(),"Merge Positions")]')
   }
