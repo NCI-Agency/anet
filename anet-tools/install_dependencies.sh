@@ -6,9 +6,9 @@
 # Update packages
 sudo apt-get update
 # Requirements for curl command
-sudo apt install -y curl
-sudo apt install -y gnupg gnupg2 gnupg1
-sudo curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+sudo apt-get install -y curl
+sudo apt-get install -y gnupg gnupg2 gnupg1
+sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 
 # Download appropriate package for the OS version
 # Ubuntu 18.04
