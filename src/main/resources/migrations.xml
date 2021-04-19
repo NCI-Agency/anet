@@ -3965,4 +3965,12 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="delete-null-peoplePositions" author="gjvoosten">
+		<sql>
+			DELETE FROM "peoplePositions"
+			WHERE "positionUuid" IS NULL
+			AND "personUuid" IS NULL;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

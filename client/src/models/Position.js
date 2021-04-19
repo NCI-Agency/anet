@@ -190,6 +190,29 @@ export default class Position extends Model {
     return this.name
   }
 
+  static convertType(type) {
+    switch (type) {
+      case "ADVISOR":
+        return Settings.fields.advisor.position.type
+      case "PRINCIPAL":
+        return Settings.fields.principal.position.type
+      case "SUPER_USER":
+        return Settings.fields.superUser.position.type
+      case "ADMINISTRATOR":
+        return Settings.fields.administrator.position.type
+      default:
+        return "Default Case"
+    }
+  }
+
+  static isAdvisor(position) {
+    return position.type === Position.TYPE.ADVISOR
+  }
+
+  static isPrincipal(position) {
+    return position.type === Position.TYPE.PRINCIPAL
+  }
+
   iconUrl() {
     if (this.isAdvisor()) {
       return RS_ICON

@@ -181,7 +181,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int setPersonInPosition(String personUuid, String positionUuid) {
-    // Find out if person already holds a position
+    // Get new position data from database (we need its type)
+    final Position newPos = getByUuid(positionUuid);
+    if (newPos == null) {
+      return 0;
+    }
+    // Find out if person already holds a position (we also need its type later on)
     final Position currPos = getDbHandle()
         .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
@@ -225,10 +230,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
           .execute();
 
       getDbHandle()
-          .createUpdate(
-              "/* positionSetPerson.remove1 */ UPDATE positions set \"currentPersonUuid\" = NULL "
-                  + "WHERE \"currentPersonUuid\" = :personUuid")
-          .bind("personUuid", personUuid).execute();
+          .createUpdate("/* positionSetPerson.remove1 */ UPDATE positions "
+              + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
+              + "WHERE \"currentPersonUuid\" = :personUuid")
+          .bind("type", DaoUtils.getEnumId(revokePrivilege(currPos)))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+          .execute();
 
       getDbHandle()
           .createUpdate("/* positionSetPerson.remove2 */ INSERT INTO \"peoplePositions\" "
@@ -241,8 +248,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Now put the person in their new position
     getDbHandle()
         .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
-            + "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
-        .bind("personUuid", personUuid).bind("positionUuid", positionUuid).execute();
+            + "SET \"currentPersonUuid\" = :personUuid, type = :type, \"updatedAt\" = :updatedAt "
+            + "WHERE uuid = :positionUuid")
+        .bind("personUuid", personUuid)
+        .bind("type", DaoUtils.getEnumId(keepPrivilege(newPos, currPos)))
+        .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
+        .execute();
     // And update the history
     final int nr = getDbHandle()
         .createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
@@ -260,13 +271,19 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
   @InTransaction
   public int removePersonFromPosition(String positionUuid) {
-    Instant now = Instant.now();
+    // Get original position data from database (we need its type)
+    final Position position = getByUuid(positionUuid);
+    if (position == null) {
+      return 0;
+    }
+    final Instant now = Instant.now();
     getDbHandle()
         .createUpdate("/* positionRemovePerson.update */ UPDATE positions "
-            + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
+            + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
             + "WHERE uuid = :positionUuid")
-        .bind("personUuid", (String) null).bind("updatedAt", DaoUtils.asLocalDateTime(now))
-        .bind("positionUuid", positionUuid).execute();
+        .bind("type", DaoUtils.getEnumId(revokePrivilege(position)))
+        .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
+        .execute();
 
     final String updateSql;
     // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
@@ -295,23 +312,17 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 
-    String insertSql;
-    if (DaoUtils.isMsSql()) {
-      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(NULL, "
-          + "(SELECT TOP(1) \"personUuid\" FROM \"peoplePositions\""
-          + " WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC),"
-          + " :createdAt)";
-    } else {
-      insertSql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-          + "(\"positionUuid\", \"personUuid\", \"createdAt\") VALUES(NULL, "
-          + "(SELECT \"personUuid\" FROM \"peoplePositions\""
-          + " WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC LIMIT 1),"
-          + " :createdAt)";
+    if (position.getCurrentPersonUuid() != null) {
+      // Update position history for this person
+      getDbHandle()
+          .createUpdate("/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES(NULL, :personUuid, :createdAt)")
+          .bind("personUuid", position.getCurrentPersonUuid())
+          .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
     }
-    getDbHandle().createUpdate(insertSql).bind("positionUuid", positionUuid)
-        .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
 
+    // Update position history for the position
     final int nr = getDbHandle()
         .createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
@@ -322,6 +333,19 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Evict the person (previously) holding this position from the domain users cache
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
     return nr;
+  }
+
+  private PositionType keepPrivilege(final Position newPosition, final Position oldPosition) {
+    // Keep type from previous position if it exists
+    return oldPosition != null ? oldPosition.getType() : newPosition.getType();
+  }
+
+  private PositionType revokePrivilege(final Position position) {
+    // Revoke privilege from old position;
+    // if this was a SUPER_USER or ADMINISTRATOR, change to ADVISOR
+    return (position.getType() == PositionType.SUPER_USER
+        || position.getType() == PositionType.ADMINISTRATOR) ? PositionType.ADVISOR
+            : position.getType();
   }
 
   public CompletableFuture<List<Position>> getAssociatedPositions(Map<String, Object> context,
