@@ -233,8 +233,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
           .createUpdate("/* positionSetPerson.remove1 */ UPDATE positions "
               + "SET \"currentPersonUuid\" = NULL, type = :type, \"updatedAt\" = :updatedAt "
               + "WHERE \"currentPersonUuid\" = :personUuid")
-          .bind("personUuid", personUuid).bind("type", DaoUtils.getEnumId(revokePrivilege(currPos)))
-          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).execute();
+          .bind("type", DaoUtils.getEnumId(revokePrivilege(currPos)))
+          .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("personUuid", personUuid)
+          .execute();
 
       getDbHandle()
           .createUpdate("/* positionSetPerson.remove2 */ INSERT INTO \"peoplePositions\" "
