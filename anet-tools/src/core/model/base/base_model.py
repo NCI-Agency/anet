@@ -6,5 +6,5 @@ class BaseModel(Base):
     """ Base model for all ANET objects
         Third party mixin library
     """
-    
+
     __abstract__ = True
