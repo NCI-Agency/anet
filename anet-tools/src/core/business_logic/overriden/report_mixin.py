@@ -44,33 +44,40 @@ class report_mixin(base_mixin):
         return new_obj
 
     def associate_location_to_report(self, utc_now, session):
-        # If report exists in ANET
-        if self.is_update:
-            rep = self.update_entity(utc_now, session)
         # If location exists in ANET
         if self.location.is_update:
             loc = self.location.update_entity(utc_now, session)
+            # If report exists in ANET
             if self.is_update:
+                # Query report from ANET
+                rep = self.update_entity(utc_now, session)
                 rep.associate_location(loc)
             else:
                 self.associate_location(loc)
         else:
+            # If report exists in ANET
             if self.is_update:
+                # Query report from ANET
+                rep = self.update_entity(utc_now, session)
                 rep.associate_location(self.location)
 
     def associate_organization_to_report(self, utc_now, session):
-        # If report exists in ANET
-        if self.is_update:
-            rep = self.update_entity(utc_now, session)
         # If organization exists in ANET
         if self.organization.is_update:
+            # Query organization with updated attributes
             org = self.organization.update_entity(utc_now, session)
+            # If report exists in ANET
             if self.is_update:
+                # Query report from ANET
+                rep = self.update_entity(utc_now, session)
                 rep.associate_organization(org)
             else:
                 self.associate_organization(org)
         else:
+            # If report exists in ANET
             if self.is_update:
+                # Query report from ANET
+                rep = self.update_entity(utc_now, session)
                 rep.associate_organization(self.organization)
 
     def associate_people_to_report(self, utc_now, session):

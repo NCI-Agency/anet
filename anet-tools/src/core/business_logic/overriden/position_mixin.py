@@ -59,36 +59,38 @@ class position_mixin(base_mixin):
         return new_obj
 
     def associate_person_to_position(self, utc_now, session):
-        # If position (from user) exists in ANET
-        if self.is_update:
-            # Query position from ANET
-            pos = self.update_entity(utc_now, session)
         # If person exists in ANET
         if self.person.is_update:
             # Query person from ANET
             per = self.person.update_entity(utc_now, session)
-            former_pos = session.query(type(self)).filter(type(self).currentPersonUuid == per.uuid).first()
+            current_pos = session.query(type(self)).filter(type(self).currentPersonUuid == per.uuid).first()
+            # If position (from user) exists in ANET
             if self.is_update:
-                # If person's former position exists
-                if former_pos:
-                    # If person's former position is not same with new one
-                    if former_pos is not pos:
-                        # Deassociate if related person has different former position in ANET
-                        former_pos.deassociate_current_person(utc_now)
+                # Query position from ANET
+                pos = self.update_entity(utc_now, session)
+                # If person has current position
+                if current_pos:
+                    # If person's current position is not same with new one
+                    if current_pos is not pos:
+                        # Deassociate if related person has different current position in ANET
+                        current_pos.deassociate_current_person(utc_now)
                 if pos.person:
-                    # If position (from user) has different former person
+                    # If position (from user) has different current person
                     if pos.person is not per:
                         # Deassociate positions current person
                         pos.deassociate_current_person(utc_now)
                 if pos.person is not per:
                     pos.associate_new_person(per, utc_now)
             else:
-                if former_pos:
-                    former_pos.deassociate_current_person(utc_now)
+                if current_pos:
+                    current_pos.deassociate_current_person(utc_now)
                 self.person = None
                 self.associate_new_person(per, utc_now)
         else:
+            # If position (from user) exists in ANET
             if self.is_update:
+                # Query position from ANET
+                pos = self.update_entity(utc_now, session)
                 if pos.person:
                     # Associate new person to existing position
                     pos.deassociate_current_person(utc_now)
@@ -100,33 +102,39 @@ class position_mixin(base_mixin):
                 self.people.append(PeoplePositions(createdAt=utc_now, person=self.person))
 
     def associate_location_to_position(self, utc_now, session):
-        # If position exists in ANET
-        if self.is_update:
-            pos = self.update_entity(utc_now, session)
         # If location exists in ANET
         if self.location.is_update:
             loc = self.location.update_entity(utc_now, session)
+            # If position (from user) exists in ANET
             if self.is_update:
+                # Query position from ANET
+                pos = self.update_entity(utc_now, session)
                 pos.associate_location(loc)
             else:
                 self.associate_location(loc)
         else:
+            # If position (from user) exists in ANET
             if self.is_update:
+                # Query position from ANET
+                pos = self.update_entity(utc_now, session)
                 pos.associate_location(self.location)
 
     def associate_organization_to_position(self, utc_now, session):
-        # If position exists in ANET
-        if self.is_update:
-            pos = self.update_entity(utc_now, session)
         # If organization exists in ANET
         if self.organization.is_update:
             org = self.organization.update_entity(utc_now, session)
+            # If position (from user) exists in ANET
             if self.is_update:
+                # Query position from ANET
+                pos = self.update_entity(utc_now, session)
                 pos.associate_organization(org)
             else:
                 self.associate_organization(org)
         else:
+            # If position (from user) exists in ANET
             if self.is_update:
+                # Query position from ANET
+                pos = self.update_entity(utc_now, session)
                 pos.associate_organization(self.organization)
 
     def insert_update_nested_entity(self, utc_now, update_rules, session):

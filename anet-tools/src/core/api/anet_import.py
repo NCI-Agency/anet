@@ -101,22 +101,21 @@ class anet_import(db):
             print(f"Previous: {len(self.previous_objects)}")
 
     def hashes_from_obj_list(self, obj_list):
-        if obj_list:
-            list_of_drop_cols = [
-                "_sa_instance_state",
-                "person",
-                "people",
-                "organization",
-                "location",
-                "organization1",
-                "positions",
-                "reports",
-                "parent",
-                "uuid",
-            ]
-            models_df = pd.DataFrame([vars(obj) for obj in obj_list]).drop(columns=list_of_drop_cols, errors="ignore")
-            hashes = pd.util.hash_pandas_object(models_df, index=False)
-            return hashes
+        list_of_drop_cols = [
+            "_sa_instance_state",
+            "person",
+            "people",
+            "organization",
+            "location",
+            "organization1",
+            "positions",
+            "reports",
+            "parent",
+            "uuid",
+        ]
+        models_df = pd.DataFrame([vars(obj) for obj in obj_list]).drop(columns=list_of_drop_cols, errors="ignore")
+        hashes = pd.util.hash_pandas_object(models_df, index=False)
+        return hashes
 
     def write_hash(self):
         if self.imported_objects and self.remember_hash:
