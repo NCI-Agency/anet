@@ -100,11 +100,11 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           {person.position.type !== Position.TYPE.ADVISOR &&
           person.position.type !== Position.TYPE.PRINCIPAL ? (
             <>
-                {" "}
-                and the position's permissions will be converted from{" "}
-                <b>{Position.convertType(person.position.type)}</b> to{" "}
-                <b>{Settings.fields.advisor.position.type}</b>.
-              </>
+              {" "}
+              and the position's permissions will be converted from{" "}
+              <b>{Position.convertType(person.position.type)}</b> to{" "}
+              <b>{Settings.fields.advisor.position.type}</b>.
+            </>
             ) : (
               <>.</>
             )}
