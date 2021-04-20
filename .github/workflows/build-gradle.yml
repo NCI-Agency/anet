@@ -134,6 +134,8 @@ jobs:
         key: ${{ runner.os }}-node
         restore-keys: |
           ${{ runner.os }}-node
+    - name: Setup kernel for a.o. Storybook, increase number of file watches
+      run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
     - run: ./gradlew yarnSetup
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path

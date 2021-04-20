@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
-	id "com.diffplug.spotless" version "5.11.1"
+	id "com.diffplug.spotless" version "5.12.1"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14"
 }
 
@@ -76,14 +76,14 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre8'
 	implementation 'org.postgresql:postgresql:42.2.19' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.2'
+	implementation 'org.liquibase:liquibase-core:4.3.3'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.2'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:6.5.0'
+	implementation 'org.simplejavamail:simple-java-mail:6.5.2'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
@@ -112,7 +112,7 @@ dependencies {
 	// including the plugin runtime
 	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14'
 	// We use some extended scalars in `generateClientCodeConf` below
-	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.0'
+	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
 	testImplementation 'io.dropwizard:dropwizard-testing:2.0.21'
 	testImplementation 'io.dropwizard:dropwizard-client:2.0.21'
