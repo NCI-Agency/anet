@@ -524,7 +524,8 @@ LocationColumn.propTypes = {
   label: PropTypes.string.isRequired,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func,
-  locationFormat: PropTypes.oneOf(Location.LOCATION_FORMATS).isRequired,
+  locationFormat: PropTypes.oneOf(Object.keys(Location.LOCATION_FORMATS))
+    .isRequired,
   setLocationFormat: PropTypes.func.isRequired,
   locationFormatLabel: PropTypes.string.isRequired
 }
