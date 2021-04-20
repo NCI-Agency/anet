@@ -1,10 +1,10 @@
 from sqlalchemy.orm import relationship
 
-from src.core.business_logic.overriden.location_mixin import location_mixin
-from src.core.business_logic.overriden.organization_mixin import organization_mixin
-from src.core.business_logic.overriden.people_mixin import people_mixin
-from src.core.business_logic.overriden.position_mixin import position_mixin
-from src.core.business_logic.overriden.report_mixin import report_mixin
+from src.core.business_logic.overridden.location_mixin import location_mixin
+from src.core.business_logic.overridden.organization_mixin import organization_mixin
+from src.core.business_logic.overridden.people_mixin import people_mixin
+from src.core.business_logic.overridden.position_mixin import position_mixin
+from src.core.business_logic.overridden.report_mixin import report_mixin
 
 
 class Positions(position_mixin):
