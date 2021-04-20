@@ -97,16 +97,17 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           <b>{`${person.rank} ${person.name}`}</b> is currently assigned to the{" "}
           <b>{person.position.name}</b> position. By selecting them, the{" "}
           <b>{person.position.name}</b> position will be left unfilled
-          {person.position.type !== Position.TYPE.ADVISOR && person.position.type !== Position.TYPE.PRINCIPAL ? (
+          {person.position.type !== Position.TYPE.ADVISOR &&
+          person.position.type !== Position.TYPE.PRINCIPAL ? (
             <>
-              {" "}
-              and the position's permissions will be converted from{" "}
-              <b>{Position.convertType(person.position.type)}</b> to{" "}
-              <b>{Settings.fields.advisor.position.type}</b>.
-            </>
-          ) : (
-            <>.</>
-          )}
+                {" "}
+                and the position's permissions will be converted from{" "}
+                <b>{Position.convertType(person.position.type)}</b> to{" "}
+                <b>{Settings.fields.advisor.position.type}</b>.
+              </>
+            ) : (
+              <>.</>
+            )}
           {position.type !== person.position.type && (
             <>
               {" "}
