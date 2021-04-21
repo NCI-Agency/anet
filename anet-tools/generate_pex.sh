@@ -8,9 +8,10 @@ then
 fi
 
 TMPDIR=`mktemp -d`
-pip install virtualenv pipenv
 virtualenv "$TMPDIR"
 source "$TMPDIR/bin/activate"
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 pipenv install --skip-lock
 pex $(pip freeze) . -o "./pex/$PEXFILENAME" --disable-cache
 deactivate

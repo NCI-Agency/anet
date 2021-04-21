@@ -148,7 +148,7 @@ jobs:
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
     - run: ./gradlew -PtestEnv dockerCreateKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
-    - run: ./gradlew -PtestEnv dockerCreateJupyter dockerStartJupyter
+    - run: ./gradlew -PtestEnv dockerCreateJupyterTest dockerStartJupyterTest
     - run: ./gradlew -PtestEnv jar
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
     - run: ./gradlew -PtestEnv check test jacocoTestReport

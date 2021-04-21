@@ -60,7 +60,8 @@ String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-
 String keycloakContainerName = "keycloak-server"
 String keycloakVersion = "12.0.4"
 
-String jupyterContainerName = "jupyter_scipy_notebook"
+String jupyterDevContainerName = "jupyter_scipy_notebook"
+String jupyterTestContainerName = "jupyter_test"
 String importFrameworkVersion = "0.1.0"
 String jupyterWorkDir = "/home/jovyan/work"
 String pexFileName = "data_import_framework_${importFrameworkVersion}-${run.environment['DB_DRIVER']}.pex"
@@ -553,17 +554,23 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
-task dockerPullJupyter(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
-	group = "jupyter container"
+task dockerPullJupyterDev(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "jupyter dev container"
 	image = "jupyter/scipy-notebook:5811dcb711ba" // jupyter/scipy-notebook image with python 3.6 as a base
 	description = "Pulls a docker image for the python jupyter environment from ${image}."
 }
 
-task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
-	group = "jupyter container"
-	imageId = dockerPullJupyter.getImage()
-	containerName = jupyterContainerName
-	description = "Creates an ANET jupyter_scipy container named " + jupyterContainerName + ". DB env is ${dbType}"
+task dockerPullJupyterTest(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "jupyter test container"
+	image = "ubuntu:18.04"
+	description = "Pulls a docker image for the python jupyter test environment from ${image}."
+}
+
+task dockerCreateJupyterDev(dependsOn: dockerPullJupyterDev, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "jupyter dev container"
+	imageId = dockerPullJupyterDev.getImage()
+	containerName = jupyterDevContainerName
+	description = "Creates an ANET jupyter_scipy container named " + jupyterDevContainerName + ". DB env is ${dbType}"
 	hostConfig.binds = ["${projectDir}/anet-tools":jupyterWorkDir] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isJupyterLabEnabled){
 		withEnvVar('JUPYTER_ENABLE_LAB', "yes")
@@ -584,43 +591,95 @@ task dockerCreateJupyter(dependsOn: dockerPullJupyter, type: com.bmuschko.gradle
 	workingDir = jupyterWorkDir
 }
 
-task dockerStartJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
-	group = "jupyter container"
-	description = "Starts " + jupyterContainerName + " container."
-	targetContainerId { jupyterContainerName }
+task dockerCreateJupyterTest(dependsOn: dockerPullJupyterTest, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "jupyter test container"
+	imageId = dockerPullJupyterTest.getImage()
+	attachStdin = true
+	stdinOpen = true
+	containerName = jupyterTestContainerName
+	description = "Creates an Ubuntu container named " + jupyterTestContainerName + ". DB env is ${dbType}"
+	hostConfig.binds = ["${projectDir}/anet-tools":jupyterWorkDir] + run.environment.get("DOCKER_MOUNTS", [:])
+	// if (isJupyterLabEnabled){
+	// 	withEnvVar('JUPYTER_ENABLE_LAB', "yes")
+	// }
+	withEnvVar('DB_DRIVER', run.environment["DB_DRIVER"])
+	withEnvVar('ANET_DB_SERVER', run.environment["ANET_DB_SERVER"])
+	withEnvVar('ANET_DB_NAME', run.environment["ANET_DB_NAME"])
+	withEnvVar('ANET_DB_USERNAME', run.environment["ANET_DB_USERNAME"])
+	withEnvVar('ANET_DB_PASSWORD', run.environment["ANET_DB_PASSWORD"])
+	withEnvVar('ANET_DB_EXPOSED_PORT', run.environment["ANET_DB_EXPOSED_PORT"])
+	withEnvVar('GRANT_SUDO', "yes")
+	// withEnvVar('JUPYTER_TOKEN', "anet")
+	withEnvVar('PYTHONPATH', jupyterWorkDir)
+	withEnvVar('LOCAL_IP', getIpAddress())
+	withEnvVar('IMPORT_FRAMEWORK_VERSION', importFrameworkVersion)
+	// hostConfig.portBindings = [run.environment["ANET_JUPYTER_PORT"] + ":" + "8888"]
+	user = "root"
+	workingDir = jupyterWorkDir
 }
 
-task dockerStopJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
-	group = "jupyter container"
-	description = "Stops " + jupyterContainerName + " container."
-	targetContainerId { jupyterContainerName }
+task dockerStartJupyterDev(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	group = "jupyter dev container"
+	description = "Starts " + jupyterDevContainerName + " container."
+	targetContainerId { jupyterDevContainerName }
 }
 
-task dockerRemoveJupyter(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
-	group = "jupyter container"
-	description = "Removes " + jupyterContainerName + " container."
-	targetContainerId { jupyterContainerName }
+task dockerStartJupyterTest(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	group = "jupyter test container"
+	description = "Starts " + jupyterTestContainerName + " container."
+	targetContainerId { jupyterTestContainerName }
+}
+
+task dockerStopJupyterDev(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	group = "jupyter dev container"
+	description = "Stops " + jupyterDevContainerName + " container."
+	targetContainerId { jupyterDevContainerName }
+}
+
+task dockerStopJupyterTest(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	group = "jupyter test container"
+	description = "Stops " + jupyterTestContainerName + " container."
+	targetContainerId { jupyterTestContainerName }
+}
+
+task dockerRemoveJupyterDev(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	group = "jupyter dev container"
+	description = "Removes " + jupyterDevContainerName + " container."
+	targetContainerId { jupyterDevContainerName }
+}
+
+task dockerRemoveJupyterTest(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	group = "jupyter test container"
+	description = "Removes " + jupyterTestContainerName + " container."
+	targetContainerId { jupyterTestContainerName }
 }
 
 task dockerInstallJupyterDevDependencies(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "jupyter container"
+	group = "jupyter dev container"
 	description = "Installs Python dependencies."
-	targetContainerId { jupyterContainerName }
-	commands = [ ["./install_dependencies.sh" ] as String[] ]
+	targetContainerId { jupyterDevContainerName }
+	commands = [ ["./install_dependencies.sh", "dev" ] as String[] ]
 }
 
-task dockerPackJupyterEnv(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "jupyter container"
+task dockerInstallJupyterTestDependencies(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "jupyter test container"
+	description = "Installs test environment dependencies."
+	targetContainerId { jupyterTestContainerName }
+	commands = [ ["./install_dependencies.sh", "test" ] as String[] ]
+}
+
+task dockerPackJupyterEnv(dependsOn: dockerInstallJupyterTestDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "jupyter test container"
 	description = "Packs Jupyter Environment. Generates PEX file"
-	targetContainerId { jupyterContainerName }
+	targetContainerId { jupyterTestContainerName }
 	commands = [ ["./generate_pex.sh", pexFileName] as String[] ]
 }
 
-task dockerTestJupyter(dependsOn: dockerInstallJupyterDevDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "jupyter container"
+task dockerTestJupyter(dependsOn: dockerInstallJupyterTestDependencies, type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "jupyter test container"
 	description = "Run tests inside Jupyter Environment."
-	targetContainerId { jupyterContainerName }
-	commands = [ ["python", "-m", "unittest", "discover", "-s", "${jupyterWorkDir}/tests/integration/"] as String[] ]
+	targetContainerId { jupyterTestContainerName }
+	commands = [ ["python3", "-m", "unittest", "discover", "-s", "${jupyterWorkDir}/tests/integration/"] as String[] ]
 }
 
 // Add the generated sources as a Java test source folder
