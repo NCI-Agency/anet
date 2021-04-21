@@ -168,7 +168,7 @@ proc.waitFor();
 project.version = proc.text.trim();
 
 runtime {
-    options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+	options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
 	modules = [
 		'java.sql',
 		'java.desktop',
@@ -182,11 +182,12 @@ runtime {
 		'java.security.sasl',
 		'java.instrument',
 		'java.scripting',
-		'java.xml.crypto']
+		'java.xml.crypto'
+	]
 
-		jpackage {
-		    appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
-		}
+	jpackage {
+	    appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
+	}
 }
 
 processResources {
@@ -655,20 +656,20 @@ ospackage {
 	from('anet-dictionary.yml') {
 		rename('anet-dictionary.yml', 'anet-dictionary.yml.template')
 		into 'anet/docs'
-		}
+	}
 	from('prepare-psql.sql') {
 		into 'anet/docs'
 	}
 	from('prepare-mssql.sql') {
 		into 'anet/docs'
-			}
 	}
+}
 
-task distDeb(dependsOn: "jpackageImage",type: Deb) {
+task distDeb(dependsOn: "jpackageImage", type: Deb) {
 	arch = 'amd64'
 }
 
-task distRpm(dependsOn: "jpackageImage",type: Rpm) {
+task distRpm(dependsOn: "jpackageImage", type: Rpm) {
 	prefix '/opt' // Relocations: /opt
 	arch = 'x86_64'
 }
