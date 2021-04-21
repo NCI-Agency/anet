@@ -4,8 +4,8 @@ plugins {
 	id "com.github.node-gradle.node" version "3.0.1"
 	id "com.diffplug.spotless" version "5.11.1"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14"
-	id "org.beryx.runtime" version "1.12.1"
-	id "nebula.ospackage" version "8.5.0"
+	id "org.beryx.runtime" version "1.12.4"
+	id "nebula.ospackage" version "8.5.6"
 }
 
 apply plugin: 'java'
