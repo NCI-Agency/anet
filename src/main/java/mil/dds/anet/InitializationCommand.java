@@ -38,9 +38,16 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
 
     final PersonSearchQuery psq = new PersonSearchQuery();
     final List<Person> currPeople = engine.getPersonDao().search(psq).getList();
-    if (!currPeople.isEmpty()) {
-      System.out.println("ERROR: Data detected in database");
-      System.out.println("\tThis task can only be run on an empty database");
+    if (currPeople.isEmpty()) {
+      System.out.println("ERROR: ANET Importer missing from database");
+      System.out.println("\tYou should run all migrations first");
+      System.exit(1);
+      return;
+    }
+    // Only person should be "ANET Importer"
+    if (currPeople.size() != 1 || !"ANET Importer".equals(currPeople.get(0).getName())) {
+      System.out.println("ERROR: Other people besides ANET Importer detected in database");
+      System.out.println("\tThis task can only be run on an otherwise empty database");
       System.exit(1);
       return;
     }
