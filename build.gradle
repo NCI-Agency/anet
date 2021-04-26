@@ -1,9 +1,9 @@
 plugins {
-	id "org.kordamp.markdown.convert" version "1.2.0"
+	id "org.kordamp.gradle.markdown" version "2.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
-	id "com.diffplug.spotless" version "5.12.1"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14"
+	id "com.diffplug.spotless" version "5.12.4"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.1"
 	id "org.beryx.runtime" version "1.12.4"
 	id "nebula.ospackage" version "8.5.6"
 }
@@ -60,7 +60,6 @@ String keycloakVersion = "12.0.4"
 // In this section you declare where to find the dependencies of your project
 repositories {
 	mavenCentral()
-	jcenter()
 	maven { url 'https://jitpack.io' }
 }
 
@@ -80,11 +79,11 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre11'
-	implementation 'org.postgresql:postgresql:42.2.19' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.3'
+	implementation 'org.postgresql:postgresql:42.2.20' // If using postgresql
+	implementation 'org.liquibase:liquibase-core:4.3.4'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation 'org.ehcache:ehcache:3.9.2'
+	implementation 'org.ehcache:ehcache:3.9.3'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
@@ -111,7 +110,8 @@ dependencies {
 	implementation 'org.apache.poi:poi-ooxml:5.0.0'
 
 	// For Java 9+
-	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.4'
+	runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.13.1'
@@ -121,7 +121,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14.1'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -141,10 +141,10 @@ dependencies {
 
 configurations {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
-	compile.exclude module: 'xalan'
+	implementation.exclude module: 'xalan'
 	// Also exclude XML API's to avoid (Eclipse) warnings like
 	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
-	compile.exclude group: 'xml-apis'
+	implementation.exclude group: 'xml-apis'
 }
 
 test {
