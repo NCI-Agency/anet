@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.markdown.convert" version "1.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
-	id "com.diffplug.spotless" version "5.12.1"
+	id "com.diffplug.spotless" version "5.12.4"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.1"
 }
 
@@ -74,11 +74,11 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre8'
-	implementation 'org.postgresql:postgresql:42.2.19' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.3'
+	implementation 'org.postgresql:postgresql:42.2.20' // If using postgresql
+	implementation 'org.liquibase:liquibase-core:4.3.4'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation 'org.ehcache:ehcache:3.9.2'
+	implementation 'org.ehcache:ehcache:3.9.3'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
