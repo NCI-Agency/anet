@@ -84,6 +84,18 @@ const LocationForm = ({ edit, title, initialValues }) => {
     }
   }
 
+  // Location types to be shown to admins in the new location page.
+  const locationTypesAdmin = [
+    "Geographical Area",
+    "Pinpoint Location",
+    "Advisor Location",
+    "Principal Location",
+    "Virtual Location"
+  ]
+
+  // Location types to be shown to super users in the new location page.
+  const locationTypesSuperUser = ["Advisor Location", "Principal Location"]
+
   return (
     <Formik
       enableReinitialize
@@ -110,6 +122,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
         const marker = {
           id: values.uuid || 0,
           name: _escape(values.name) || "", // escape HTML in location name!
+          type: _escape(values.type) || "", // escape HTML in location type!
           draggable: true,
           autoPan: true,
           onMove: (event, map) => {
@@ -176,6 +189,12 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
+                />
+
+                <FastField
+                  name="type"
+                  options={getDropdownOptionsForUser(currentUser)}
+                  component={FieldHelper.DropdownField}
                 />
 
                 <GeoLocation
@@ -273,6 +292,23 @@ const LocationForm = ({ edit, title, initialValues }) => {
       }}
     </Formik>
   )
+
+  /**
+   * Depending on the position type of the logged in user, return corresponding
+   * location type list shown at create a new location page.
+   * @param {Object} user current user logged in to the system.
+   * @returns Object[]
+   */
+  function getDropdownOptionsForUser(user) {
+    switch (user.position.type) {
+      case Position.TYPE.ADMINISTRATOR:
+        return locationTypesAdmin
+      case Position.TYPE.SUPER_USER:
+        return locationTypesSuperUser
+      default:
+        return []
+    }
+  }
 
   function onCancel() {
     history.goBack()

@@ -46,6 +46,7 @@ export default class Location extends Model {
         .string()
         .required()
         .default(() => Model.STATUS.ACTIVE),
+      type: yup.string().required(),
       lat: yup
         .number()
         .nullable()

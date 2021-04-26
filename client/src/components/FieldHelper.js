@@ -289,6 +289,67 @@ ReadonlyField.propTypes = {
   labelColumnWidth: PropTypes.number
 }
 
+export const DropdownField = ({
+  field, // { name, value, onChange, onBlur }
+  form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
+  label,
+  inputType,
+  children,
+  extraColElem,
+  addon,
+  vertical,
+  extraAddon,
+  options,
+  ...otherProps
+}) => {
+  const widgetElem = useMemo(
+    () => (
+      <FormControl
+        componentClass="select"
+        placeholder="Please select a location type from the list."
+        onChange={form.handleChange}
+      >
+        <option value="">Please select a location type</option>
+        {options.map(option => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </FormControl>
+    ),
+    [form.handleChange, options]
+  )
+  return (
+    <Field
+      field={field}
+      form={form}
+      label={label}
+      widgetElem={widgetElem}
+      children={children}
+      extraColElem={extraColElem}
+      addon={addon}
+      vertical={vertical}
+      extraAddon={extraAddon}
+    />
+  )
+}
+DropdownField.propTypes = {
+  props: PropTypes.object,
+  field: PropTypes.object,
+  form: PropTypes.object,
+  label: PropTypes.string,
+  inputType: PropTypes.string,
+  children: PropTypes.any,
+  extraColElem: PropTypes.object,
+  addon: PropTypes.object,
+  vertical: PropTypes.bool,
+  humanValue: PropTypes.any,
+  isCompact: PropTypes.bool,
+  labelColumnWidth: PropTypes.number,
+  extraAddon: PropTypes.object,
+  options: PropTypes.array
+}
+
 export const SpecialField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
