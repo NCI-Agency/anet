@@ -129,7 +129,7 @@ dependencies {
 
 configurations {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
-	compile.exclude module: 'xalan'
+	implementation.exclude module: 'xalan'
 }
 
 test {
