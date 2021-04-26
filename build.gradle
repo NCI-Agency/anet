@@ -3,7 +3,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.0.1"
 	id "com.diffplug.spotless" version "5.12.1"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.1"
 }
 
 apply plugin: 'java'
@@ -55,7 +55,6 @@ String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-
 // In this section you declare where to find the dependencies of your project
 repositories {
 	mavenCentral()
-	jcenter()
 	maven { url 'https://jitpack.io' }
 }
 
@@ -110,7 +109,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14.1'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -130,7 +129,7 @@ dependencies {
 
 configurations {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
-	compile.exclude module: 'xalan'
+	implementation.exclude module: 'xalan'
 }
 
 test {
