@@ -3,7 +3,7 @@ import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
-import { Radio, Table } from "react-bootstrap"
+import { Badge, Radio, Table } from "react-bootstrap"
 
 const AdvancedSelectOverlayTable = ({
   fieldName,
@@ -44,6 +44,7 @@ const AdvancedSelectOverlayTable = ({
             >
               <td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
               {renderRow(item)}
+              <td>{fieldName === "location" && <Badge>Type</Badge>}</td>
             </tr>
           )
         })}
