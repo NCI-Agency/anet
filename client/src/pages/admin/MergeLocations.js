@@ -128,6 +128,15 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
+
+              <LocationField
+                label="Location Type"
+                align={"center"}
+                fieldName="locationType"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+
               <LocationField
                 label={locationFormatLabel}
                 fieldName="displayedCoordinate"
@@ -374,6 +383,20 @@ const LocationColumn = ({
               align,
               mergeState,
               "name"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+
+          <LocationField
+            label="Location Type"
+            fieldName="locationType"
+            align={align}
+            action={getActionButton(
+              () => {},
+              align,
+              mergeState,
+              "locationType"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
