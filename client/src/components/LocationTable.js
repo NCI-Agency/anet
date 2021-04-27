@@ -112,6 +112,7 @@ const BaseLocationTable = ({
           <thead>
             <tr>
               <th>Name</th>
+              <th>Type</th>
             </tr>
           </thead>
           <tbody>
@@ -120,6 +121,7 @@ const BaseLocationTable = ({
                 <td>
                   <LinkTo modelType="Location" model={loc} />
                 </td>
+                <td>Location Type</td>
               </tr>
             ))}
           </tbody>

@@ -508,7 +508,29 @@ export const searchFilters = function() {
   }
 
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
-    filters: {}
+    filters: {
+      "Location Type": {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "type",
+          options: [
+            "Geographical Area",
+            "Pinpoint Location",
+            "Advisor Location",
+            "Principal Location",
+            "Virtual Location"
+          ],
+          labels: [
+            "Geographical Area",
+            "Pinpoint Location",
+            "Advisor Location",
+            "Principal Location",
+            "Virtual Location"
+          ]
+        }
+      }
+    }
   }
 
   // Task filters
