@@ -35,6 +35,7 @@ const GQL_GET_LOCATION = gql`
     location(uuid: $uuid) {
       uuid
       name
+      type
       lat
       lng
       status
@@ -108,7 +109,8 @@ const LocationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const marker = {
           id: location.uuid || 0,
-          name: _escape(location.name) || "" // escape HTML in location name!
+          name: _escape(location.name) || "", // escape HTML in location name!
+          type: _escape(location.type) || "" // escape HTML in location name!
         }
         if (Location.hasCoordinates(location)) {
           Object.assign(marker, {
@@ -150,6 +152,8 @@ const LocationShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
                 />
+
+                <Field name="type" component={FieldHelper.ReadonlyField} />
 
                 <GeoLocation
                   coordinates={{
