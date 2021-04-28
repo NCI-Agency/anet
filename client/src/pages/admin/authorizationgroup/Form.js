@@ -229,10 +229,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const authorizationGroup = Object.without(
-      new AuthorizationGroup(values),
-      "notes"
-    )
+    const authorizationGroup = AuthorizationGroup.filterClientSideFields(values)
     authorizationGroup.positions = values.positions.map(pos =>
       Position.filterClientSideFields(pos, "previousPeople", "customFields")
     )

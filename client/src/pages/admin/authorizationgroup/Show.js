@@ -12,9 +12,6 @@ import {
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -53,7 +50,6 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         }
       }
       status
-      ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
@@ -101,16 +97,6 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
         )
         return (
           <div>
-            <RelatedObjectNotes
-              notes={authorizationGroup.notes}
-              relatedObject={
-                authorizationGroup.uuid && {
-                  relatedObjectType: AuthorizationGroup.relatedObjectType,
-                  relatedObjectUuid: authorizationGroup.uuid,
-                  relatedObject: authorizationGroup
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
