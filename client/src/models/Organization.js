@@ -155,4 +155,18 @@ export default class Organization extends Model {
         organization.identificationCode || ""
       }`
   }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = ["childrenOrgs", "positions", "tasks"]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Organization.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Organization.filterClientSideFields(this, ...additionalFields)
+  }
 }

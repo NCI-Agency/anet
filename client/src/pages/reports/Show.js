@@ -362,7 +362,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   if (hasAssessments) {
     report = Object.assign(report, report.getTasksEngagementAssessments())
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
-    relatedObject = Report.getCleanReport(report)
+    relatedObject = Report.filterClientSideFields(report)
   }
 
   return (

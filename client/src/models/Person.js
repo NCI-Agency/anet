@@ -402,4 +402,18 @@ export default class Person extends Model {
     }
     return config || []
   }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = ["firstName", "lastName"]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Person.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Person.filterClientSideFields(this, ...additionalFields)
+  }
 }

@@ -16,7 +16,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
@@ -426,14 +426,8 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const organization = Object.without(
-      new Organization(values),
-      "notes",
-      "childrenOrgs",
-      "positions",
-      "tasks",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
+    const organization = Organization.filterClientSideFields(
+      new Organization(values)
     )
     // strip tasks fields not in data model
     organization.tasks = values.tasks.map(t => utils.getReference(t))

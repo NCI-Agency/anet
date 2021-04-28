@@ -13,7 +13,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -624,14 +624,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
 
   function save(values, form) {
     values.avatar = currentAvatar
-    const person = Object.without(
-      new Person(values),
-      "notes",
-      "firstName",
-      "lastName",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const person = Person.filterClientSideFields(new Person(values))
     if (values.pendingVerification) {
       person.pendingVerification = false
     }
