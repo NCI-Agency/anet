@@ -24,7 +24,7 @@ import DictionaryField from "HOC/DictionaryField"
 import { Position } from "models"
 import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -197,7 +197,13 @@ const PositionShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkTo modelType="Location" model={position.location} />
+                      <>
+                        <LinkTo
+                          modelType="Location"
+                          model={position.location}
+                        />{" "}
+                        <Badge>Location Type</Badge>
+                      </>
                     )
                   }
                 />
