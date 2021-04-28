@@ -3,8 +3,14 @@ package mil.dds.anet.views;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Note;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +23,8 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private String customFields;
+  // annotated below
+  private List<Note> notes;
 
   public String getCustomFields() {
     return customFields;
@@ -24,6 +32,27 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
 
   public void setCustomFields(String customFields) {
     this.customFields = Utils.trimStringReturnNull(customFields);
+  }
+
+  @GraphQLQuery(name = "notes")
+  public CompletableFuture<List<Note>> loadNotes(@GraphQLRootContext Map<String, Object> context) {
+    if (notes != null) {
+      return CompletableFuture.completedFuture(notes);
+    }
+    return AnetObjectEngine.getInstance().getNoteDao().getNotesForRelatedObject(context, uuid)
+        .thenApply(o -> {
+          notes = o;
+          return o;
+        });
+  }
+
+  public List<Note> getNotes() {
+    return notes;
+  }
+
+  @GraphQLInputField(name = "notes")
+  public void setNotes(List<Note> notes) {
+    this.notes = notes;
   }
 
   public void checkAndFixCustomFields() {
