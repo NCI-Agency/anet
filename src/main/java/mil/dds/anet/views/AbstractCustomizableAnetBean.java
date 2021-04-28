@@ -46,15 +46,6 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
         });
   }
 
-  public List<Note> getNotes() {
-    return notes;
-  }
-
-  @GraphQLInputField(name = "notes")
-  public void setNotes(List<Note> notes) {
-    this.notes = notes;
-  }
-
   public void checkAndFixCustomFields() {
     try {
       setCustomFields(Utils.sanitizeJson(getCustomFields()));
