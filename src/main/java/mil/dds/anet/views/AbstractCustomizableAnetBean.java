@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
@@ -25,6 +26,8 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
   private String customFields;
   // annotated below
   private List<Note> notes;
+  // annotated below
+  private List<CustomSensitiveInformation> customSensitiveInformation;
 
   public String getCustomFields() {
     return customFields;
@@ -44,6 +47,29 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
           notes = o;
           return o;
         });
+  }
+
+  @GraphQLQuery(name = "customSensitiveInformation")
+  public CompletableFuture<List<CustomSensitiveInformation>> loadCustomSensitiveInformation(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (customSensitiveInformation != null) {
+      return CompletableFuture.completedFuture(customSensitiveInformation);
+    }
+    return AnetObjectEngine.getInstance().getCustomSensitiveInformationDao()
+        .getCustomSensitiveInformationForRelatedObject(context, uuid).thenApply(o -> {
+          customSensitiveInformation = o;
+          return o;
+        });
+  }
+
+  public List<CustomSensitiveInformation> getCustomSensitiveInformation() {
+    return customSensitiveInformation;
+  }
+
+  @GraphQLInputField(name = "customSensitiveInformation")
+  public void setCustomSensitiveInformation(
+      List<CustomSensitiveInformation> customSensitiveInformation) {
+    this.customSensitiveInformation = customSensitiveInformation;
   }
 
   public void checkAndFixCustomFields() {

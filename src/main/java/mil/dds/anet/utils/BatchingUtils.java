@@ -10,6 +10,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
@@ -156,6 +157,14 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
+          @Override
+          public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_PLANNING_APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
           @Override
@@ -165,12 +174,14 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
+    dataLoaderRegistry.register(
+        FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION.toString(),
+        new DataLoader<>(new BatchLoader<String, List<CustomSensitiveInformation>>() {
           @Override
-          public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService);
+          public CompletionStage<List<List<CustomSensitiveInformation>>> load(
+              List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(() -> engine.getCustomSensitiveInformationDao()
+                .getCustomSensitiveInformation(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE.toString(),
