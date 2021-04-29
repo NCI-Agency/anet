@@ -114,6 +114,7 @@ public class CustomSensitiveInformationDao
   private boolean canUpdateCustomSensitiveInformation(final Person user,
       final CustomSensitiveInformation csi) {
     // FIXME: check against dictionary whether user has access to csi
+    // Note that a `null` user means this is called through a merge function, by an admin
     return true;
   }
 

@@ -579,6 +579,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     updateM2mForMerge("authorizationGroupPositions", "authorizationGroupUuid", "positionUuid",
         winnerUuid, loserUuid);
 
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
+        winner.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
+
     // Finally, delete loser
     final int nr = deleteForMerge("positions", "uuid", loserUuid);
 

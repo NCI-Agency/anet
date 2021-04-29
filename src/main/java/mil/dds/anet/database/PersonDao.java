@@ -398,6 +398,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     // update notes
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
 
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
+        winner.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
+
     // finally, delete the person!
     final int nr = deleteForMerge("people", "uuid", loserUuid);
     // E.g. positions may have been updated, so evict from the cache
