@@ -19,6 +19,14 @@ import * as yup from "yup"
 export const REPORT_RELATED_OBJECT_TYPE = "reports"
 export const REPORT_STATE_PUBLISHED = "PUBLISHED"
 
+export const GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS = /* GraphQL */ `
+  customSensitiveInformation {
+    uuid
+    customFieldName
+    customFieldValue
+  }
+`
+
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
   createdAt
