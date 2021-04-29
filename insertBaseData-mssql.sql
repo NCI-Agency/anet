@@ -22,6 +22,7 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE authorizationGroupPositions;
 --DROP TABLE authorizationGroups;
 --DROP TABLE reportAuthorizationGroups;
+--DROP TABLE customSensitiveInformation;
 --DROP TABLE notes;
 --DROP TABLE noteRelatedObjects;
 --DROP TABLE DATABASECHANGELOG;
@@ -52,6 +53,7 @@ DELETE FROM locations;
 DELETE FROM organizations;
 DELETE FROM adminSettings;
 DELETE FROM authorizationGroups;
+DELETE FROM customSensitiveInformation;
 
 --Advisors
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
@@ -79,11 +81,11 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES (lower(newid()), 'REPORTGIRL, Ima', 0, 0, 'ima+reportgirl@example.com', '+444-44-4545', 'CIV', 'I need a career change', 'nopos', 'Mexico', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Principals
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'STEVESON, Steve', 0, 1, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('90fa5784-9e63-4353-8119-357bcd88e287', 'STEVESON, Steve', 0, 1, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ROGWELL, Roger', 0, 1, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'ROGWELL, Roger', 0, 1, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('237e8bf7-2ae4-4d49-b7c8-eca6a92d4767', 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'CHRISVILLE, Chris', 0, 1, 'chrisville+chris@example.com', '+1-412-7324', 'Maj', 'Chris is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
@@ -901,30 +903,27 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 
 -- Authorization groups
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Authorization group positions
 INSERT INTO authorizationGroupPositions (authorizationGroupUuid, positionUuid)
-  SELECT a.uuid, p.uuid
-  FROM authorizationGroups a, positions p
-  WHERE a.name LIKE 'EF 1.1%'
-  AND p.name LIKE 'EF 1.1%';
+  SELECT '1050c9e3-e679-4c60-8bdc-5139fbc1c10b', p.uuid
+  FROM positions p
+  WHERE p.name LIKE 'EF 1.1%';
 INSERT INTO authorizationGroupPositions (authorizationGroupUuid, positionUuid)
-  SELECT a.uuid, p.uuid
-  FROM authorizationGroups a, positions p
-  WHERE a.name LIKE 'EF 2.1%'
-  AND p.name LIKE 'EF 2.1%';
+  SELECT '39a78d51-c351-452c-9206-4305ec8dd76d', p.uuid
+  FROM positions p
+  WHERE p.name LIKE 'EF 2.1%';
 INSERT INTO authorizationGroupPositions (authorizationGroupUuid, positionUuid)
-  SELECT a.uuid, p.uuid
-  FROM authorizationGroups a, positions p
-  WHERE a.name LIKE 'EF 2.2%'
-  AND p.name LIKE 'EF 2.2%';
+  SELECT 'c21e7321-7ec5-4837-8805-a302f9575754', p.uuid
+  FROM positions p
+  WHERE p.name LIKE 'EF 2.2%';
 
 -- Report authorization groups
 INSERT INTO reportAuthorizationGroups (reportUuid, authorizationGroupUuid)
@@ -940,6 +939,16 @@ INSERT INTO reportAuthorizationGroups (reportUuid, authorizationGroupUuid)
     WHERE rap.reportUuid = rp.reportUuid
     AND rap.authorizationGroupUuid = agp.authorizationGroupUuid
   );
+
+-- Create customSensitiveInformation for some principals
+INSERT INTO customSensitiveInformation (uuid, customFieldName, customFieldValue, relatedObjectType, relatedObjectUuid, createdAt, updatedAt)
+	VALUES
+		-- Steve
+		(N'4263793a-18bc-4cef-a535-0116615301e1', 'birthday', '{"birthday":"1999-09-09T00:00:00.000Z"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c9ca5fd9-699e-4643-8025-91a2f2e0cd77', 'idCard', '{"idCard":"A123456"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		-- Roger
+		(N'84b46418-4350-4b52-8789-2b292fc0ab60', 'birthday', '{"birthday":"2001-01-01T00:00:00.000Z"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'810cf44b-91f6-474a-b522-5ba822ccfc1c', 'idCard', '{"idCard":"B987654"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add some notes and link them to the objects they relate to
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');
