@@ -92,7 +92,7 @@ public class ReportResource {
   public Report createReport(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "report") Report r) {
     r.checkAndFixCustomFields();
-    Person author = DaoUtils.getUserFromContext(context);
+    final Person author = DaoUtils.getUserFromContext(context);
     if (r.getState() == null) {
       r.setState(ReportState.DRAFT);
     }
@@ -121,9 +121,13 @@ public class ReportResource {
     r.setReportText(
         Utils.isEmptyHtml(r.getReportText()) ? null : Utils.sanitizeHtml(r.getReportText()));
 
-    r = dao.insert(r, author);
-    AnetAuditLogger.log("Report {} created by author {} ", r, author);
-    return r;
+    final Report created = dao.insert(r, author);
+
+    DaoUtils.saveCustomSensitiveInformation(author, ReportDao.TABLE_NAME, created.getUuid(),
+        r.getCustomSensitiveInformation());
+
+    AnetAuditLogger.log("Report {} created by author {} ", created, author);
+    return created;
   }
 
   @GraphQLMutation(name = "updateReport")
@@ -293,6 +297,9 @@ public class ReportResource {
         dao.removeAuthorizationGroupFromReport(t, r);
       }
     }
+
+    DaoUtils.saveCustomSensitiveInformation(editor, ReportDao.TABLE_NAME, r.getUuid(),
+        r.getCustomSensitiveInformation());
 
     // Clear and re-load sensitive information; needed in case of autoSave by the client form, or
     // when sensitive info is 'empty' HTML

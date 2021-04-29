@@ -5,12 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.CustomSensitiveInformation;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.CustomSensitiveInformationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class CustomSensitiveInformationDao
@@ -64,10 +67,13 @@ public class CustomSensitiveInformationDao
 
   public CompletableFuture<List<CustomSensitiveInformation>> getCustomSensitiveInformationForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
-    // FIXME: check whether DaoUtils.getUserFromContext(context) has access to elements in the
-    // resulting list
-    return new ForeignKeyFetcher<CustomSensitiveInformation>().load(context,
-        FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION, relatedObjectUuid);
+    final Person user = DaoUtils.getUserFromContext(context);
+    return new ForeignKeyFetcher<CustomSensitiveInformation>()
+        .load(context, FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION,
+            relatedObjectUuid)
+        .thenApply(csiList -> csiList.stream()
+            .filter(csi -> canUpdateCustomSensitiveInformation(user, csi))
+            .collect(Collectors.toList()));
   }
 
   static class SensitiveInformationBatcher extends ForeignKeyBatcher<CustomSensitiveInformation> {
@@ -86,6 +92,29 @@ public class CustomSensitiveInformationDao
     final ForeignKeyBatcher<CustomSensitiveInformation> notesBatcher =
         AnetObjectEngine.getInstance().getInjector().getInstance(SensitiveInformationBatcher.class);
     return notesBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  public void insertOrUpdateCustomSensitiveInformation(final Person user, final String tableName,
+      final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
+    if (!Utils.isEmptyOrNull(customSensitiveInformation)) {
+      for (final CustomSensitiveInformation csi : customSensitiveInformation) {
+        csi.setRelatedObjectType(tableName);
+        csi.setRelatedObjectUuid(uuid);
+        if (canUpdateCustomSensitiveInformation(user, csi)) {
+          if (DaoUtils.getUuid(csi) == null) {
+            insert(csi);
+          } else {
+            update(csi);
+          }
+        }
+      }
+    }
+  }
+
+  private boolean canUpdateCustomSensitiveInformation(final Person user,
+      final CustomSensitiveInformation csi) {
+    // FIXME: check against dictionary whether user has access to csi
+    return true;
   }
 
 }
