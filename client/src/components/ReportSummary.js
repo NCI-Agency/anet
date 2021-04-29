@@ -12,7 +12,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Col, Grid, Label, Row } from "react-bootstrap"
+import { Badge, Col, Grid, Label, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -267,6 +267,8 @@ const ReportSummaryRow = ({ report }) => {
             <span>
               <strong>Location: </strong>
               <LinkTo modelType="Location" model={report.location} />
+              {"  "}
+              <Badge>Location Type</Badge>
             </span>
           </Col>
         </Row>
