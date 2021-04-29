@@ -306,8 +306,23 @@ const ReportForm = ({
           currentUser.position && currentUser.position.organization
         const locationFilters = {
           activeLocations: {
-            label: "Active locations",
+            label: "All",
             queryVars: { status: Model.STATUS.ACTIVE }
+          },
+          geographical: {
+            label: "Geographical"
+          },
+          pinpoint: {
+            label: "Pinpoint"
+          },
+          advisor: {
+            label: "Advisor"
+          },
+          principal: {
+            label: "Principal"
+          },
+          virtual: {
+            label: "Virtual"
           }
         }
 
