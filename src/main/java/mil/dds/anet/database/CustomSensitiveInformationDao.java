@@ -4,17 +4,25 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.CustomSensitiveInformationMapper;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class CustomSensitiveInformationDao
     extends AnetBaseDao<CustomSensitiveInformation, AbstractSearchQuery<?>> {
@@ -72,7 +80,7 @@ public class CustomSensitiveInformationDao
         .load(context, FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION,
             relatedObjectUuid)
         .thenApply(csiList -> csiList.stream()
-            .filter(csi -> canUpdateCustomSensitiveInformation(user, csi))
+            .filter(csi -> hasCustomSensitiveInformationAuthorization(user, csi))
             .collect(Collectors.toList()));
   }
 
@@ -100,7 +108,7 @@ public class CustomSensitiveInformationDao
       for (final CustomSensitiveInformation csi : customSensitiveInformation) {
         csi.setRelatedObjectType(tableName);
         csi.setRelatedObjectUuid(uuid);
-        if (canUpdateCustomSensitiveInformation(user, csi)) {
+        if (hasCustomSensitiveInformationAuthorization(user, csi)) {
           if (DaoUtils.getUuid(csi) == null) {
             insert(csi);
           } else {
@@ -111,11 +119,94 @@ public class CustomSensitiveInformationDao
     }
   }
 
-  private boolean canUpdateCustomSensitiveInformation(final Person user,
+  @InTransaction
+  public boolean hasCustomSensitiveInformationAuthorization(final Person user,
       final CustomSensitiveInformation csi) {
-    // FIXME: check against dictionary whether user has access to csi
+    // Admins always have access
     // Note that a `null` user means this is called through a merge function, by an admin
-    return true;
+    if (user == null || AuthUtils.isAdmin(user)) {
+      return true;
+    }
+
+    // Check for the user's counterparts
+    final boolean isForPosition = PositionDao.TABLE_NAME.equals(csi.getRelatedObjectType());
+    final boolean isForPerson = PersonDao.TABLE_NAME.equals(csi.getRelatedObjectType());
+    if (isForPosition || isForPerson) {
+      final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+      final Position currentPosition = user.loadPosition();
+      if (currentPosition != null) {
+        final List<Position> associatedPositions =
+            currentPosition.loadAssociatedPositions(engine.getContext()).join();
+        if (associatedPositions.stream()
+            .anyMatch(ap -> (isForPosition && csi.getRelatedObjectUuid().equals(ap.getUuid()))
+                || (isForPerson && csi.getRelatedObjectUuid().equals(ap.getCurrentPersonUuid())))) {
+          // Is one of the user's counterparts
+          return true;
+        }
+      }
+    }
+
+    // If this is for a report, check whether the user is an author
+    if (ReportDao.TABLE_NAME.equals(csi.getRelatedObjectType())) {
+      final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+      final Report report = engine.getReportDao().getByUuid(csi.getRelatedObjectUuid());
+      if (report != null) {
+        final List<ReportPerson> authors = report.loadAuthors(engine.getContext()).join();
+        if (authors.stream().anyMatch(author -> author.getUuid().equals(DaoUtils.getUuid(user)))) {
+          // User is an author of this report
+          return true;
+        }
+      }
+    }
+
+    // Check against the dictionary whether the user is authorized
+    final List<String> authorizationGroupUuids =
+        getAuthorizationGroupUuids(csi.getRelatedObjectType(), csi.getCustomFieldName());
+    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
+      // No authorization groups defined for this field
+      return false;
+    }
+
+    // Check against authorization groups
+    final Query query = getDbHandle()
+        .createQuery("/* checkCustomSensitiveInformationAuthorization */ SELECT COUNT(*) AS count"
+            + " FROM \"authorizationGroupPositions\" agp"
+            + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\""
+            + " WHERE agp.\"authorizationGroupUuid\" IN ( <authorizationGroupUuids> )"
+            + " AND p.\"currentPersonUuid\" = :userUuid")
+        .bindList("authorizationGroupUuids", authorizationGroupUuids)
+        .bind("userUuid", DaoUtils.getUuid(user));
+    final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
+    return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
+  }
+
+  private List<String> getAuthorizationGroupUuids(final String tableName, final String fieldName) {
+    final String keyPath =
+        String.format("fields.%1$s.customSensitiveInformation.%2$s.authorizationGroupUuids",
+            getObjectType(tableName), fieldName);
+    @SuppressWarnings("unchecked")
+    final List<String> authorizationGroupUuids =
+        (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+    return authorizationGroupUuids;
+  }
+
+  private String getObjectType(final String tableName) {
+    switch (tableName) {
+      case LocationDao.TABLE_NAME:
+        return "location";
+      case OrganizationDao.TABLE_NAME:
+        return "organization";
+      case PersonDao.TABLE_NAME:
+        return "person";
+      case PositionDao.TABLE_NAME:
+        return "position";
+      case ReportDao.TABLE_NAME:
+        return "report";
+      case TaskDao.TABLE_NAME:
+        return "task";
+      default:
+        return null;
+    }
   }
 
 }
