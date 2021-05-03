@@ -72,4 +72,10 @@ public class CustomSensitiveInformation extends AbstractAnetBean {
         });
   }
 
+  @Override
+  public String toString() {
+    return String.format("[uuid:%s customFieldName:%s relatedObjectType:%s relatedObjectUuid:%s]",
+        uuid, customFieldName, relatedObjectType, relatedObjectUuid);
+  }
+
 }

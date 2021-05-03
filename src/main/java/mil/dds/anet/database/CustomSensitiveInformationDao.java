@@ -15,6 +15,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.CustomSensitiveInformationMapper;
+import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
@@ -102,20 +103,62 @@ public class CustomSensitiveInformationDao
     return notesBatcher.getByForeignKeys(foreignKeys);
   }
 
-  public void insertOrUpdateCustomSensitiveInformation(final Person user, final String tableName,
-      final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
+  public void insertOrUpdateCustomSensitiveInformation(final Person user,
+      final String relatedObjectType, final String relatedObjectUuid,
+      final List<CustomSensitiveInformation> customSensitiveInformation) {
     if (!Utils.isEmptyOrNull(customSensitiveInformation)) {
       for (final CustomSensitiveInformation csi : customSensitiveInformation) {
-        csi.setRelatedObjectType(tableName);
-        csi.setRelatedObjectUuid(uuid);
-        if (hasCustomSensitiveInformationAuthorization(user, csi)) {
-          if (DaoUtils.getUuid(csi) == null) {
-            insert(csi);
-          } else {
-            update(csi);
-          }
+        // Set relatedObject ourselves (ignore what was passed by the client)
+        csi.setRelatedObjectType(relatedObjectType);
+        csi.setRelatedObjectUuid(relatedObjectUuid);
+        if (DaoUtils.getUuid(csi) == null) {
+          checkAndInsert(user, relatedObjectType, relatedObjectUuid, csi);
+        } else {
+          checkAndUpdate(user, relatedObjectType, relatedObjectUuid, csi);
         }
       }
+    }
+  }
+
+  private void checkAndInsert(final Person user, final String relatedObjectType,
+      final String relatedObjectUuid, final CustomSensitiveInformation csi) {
+    if (!hasCustomSensitiveInformationAuthorization(user, csi)) {
+      // Audit and ignore
+      AnetAuditLogger.log("Person {} tried to insert CustomSensitiveInformation {}"
+          + " which they don't have access to, refused", user, csi);
+    } else {
+      // Insert and audit
+      insert(csi);
+      AnetAuditLogger.log("Person {} inserted CustomSensitiveInformation {}", user, csi);
+    }
+  }
+
+  private void checkAndUpdate(final Person user, final String relatedObjectType,
+      final String relatedObjectUuid, final CustomSensitiveInformation csi) {
+    // Retrieve existing and check
+    final CustomSensitiveInformation existingCsi = getByUuid(csi.getUuid());
+    if (existingCsi == null) {
+      // Audit and ignore
+      AnetAuditLogger.log(
+          "Person {} tried to update non-existing CustomSensitiveInformation {}, refused", user,
+          csi.getUuid());
+    } else if (!existingCsi.getCustomFieldName().equals(csi.getCustomFieldName())) {
+      // Audit and ignore
+      AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
+          + " with a different customFieldName to {}, refused", user, existingCsi, csi);
+    } else if (!existingCsi.getRelatedObjectType().equals(relatedObjectType)
+        || !existingCsi.getRelatedObjectUuid().equals(relatedObjectUuid)) {
+      // Audit and ignore
+      AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
+          + " with a different relatedObject to {}, refused", user, existingCsi, csi);
+    } else if (!hasCustomSensitiveInformationAuthorization(user, csi)) {
+      // Audit and ignore
+      AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
+          + " which they don't have access to, refused", user, csi);
+    } else {
+      // Update and audit
+      update(csi);
+      AnetAuditLogger.log("Person {} updated CustomSensitiveInformation {}", user, csi);
     }
   }
 
