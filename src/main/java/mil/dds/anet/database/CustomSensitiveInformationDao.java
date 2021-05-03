@@ -77,7 +77,8 @@ public class CustomSensitiveInformationDao
   @InTransaction
   public int deleteFor(String relatedObjectUuid) {
     return getDbHandle().execute(
-        "DELETE FROM \"customSensitiveInformation\" WHERE \"relatedObjectUuid\" = ?",
+        "/* deleteCustomSensitiveInformation */ "
+            + "DELETE FROM \"customSensitiveInformation\" WHERE \"relatedObjectUuid\" = ?",
         relatedObjectUuid);
   }
 
