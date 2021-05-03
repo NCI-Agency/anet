@@ -484,6 +484,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         "DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?",
         positionUuid, positionUuid);
 
+    // delete customSensitiveInformation for this position
+    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(positionUuid);
+
     final int nr = getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
         .bind("positionUuid", positionUuid).execute();
     // Evict the person (previously) holding this position from the domain users cache

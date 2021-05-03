@@ -74,6 +74,13 @@ public class CustomSensitiveInformationDao
         .bindBean(csi).bind("updatedAt", DaoUtils.asLocalDateTime(csi.getUpdatedAt())).execute();
   }
 
+  @InTransaction
+  public int deleteFor(String relatedObjectUuid) {
+    return getDbHandle().execute(
+        "DELETE FROM \"customSensitiveInformation\" WHERE \"relatedObjectUuid\" = ?",
+        relatedObjectUuid);
+  }
+
   public CompletableFuture<List<CustomSensitiveInformation>> getCustomSensitiveInformationForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
