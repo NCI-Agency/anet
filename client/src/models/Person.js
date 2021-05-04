@@ -366,7 +366,8 @@ export default class Person extends Model {
     return fieldsArrayFromConfig.filter(field => {
       if (
         Settings.fields.person[field] ||
-        Settings.fields.person?.customFields?.[field]
+        Settings.fields.person?.customFields?.[field] ||
+        Settings.fields.person?.customSensitiveInformation?.[field]
       ) {
         return true
       }

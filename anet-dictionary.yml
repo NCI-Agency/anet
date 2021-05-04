@@ -880,13 +880,14 @@ fields:
                   color: '#0000ff'
       # number of fields after Avatar in the left column for principals
       # adjust this number if two columns are not balanced on the Person Page
-      numberOfFieldsInLeftColumn: 6
+      numberOfFieldsInLeftColumn: 7
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
         - prevPositions
         - phoneNumber
         - country
+        - idCard
         - colourOptions
         - textareaFieldName
         - domainUsername
@@ -894,6 +895,7 @@ fields:
         - multipleButtons
         - inputFieldName
         - code
+        - birthday
         - rank
         - numberFieldName
         - nlt

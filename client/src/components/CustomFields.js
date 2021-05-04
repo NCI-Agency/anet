@@ -1082,10 +1082,22 @@ export const mapReadonlyCustomFieldsToComps = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
-  extraColElem,
   labelColumnWidth
 }) => {
   return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
+    let extraColElem = null
+    if (fieldConfig.authorizationGroupUuids) {
+      extraColElem = (
+        <div>
+          <Tooltip2
+            content="You are authorized to see this field"
+            intent={Intent.WARNING}
+          >
+            <Icon icon={IconNames.ERROR} intent={Intent.WARNING} />
+          </Tooltip2>
+        </div>
+      )
+    }
     const fieldName = `${parentFieldName}.${key}`
     const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
     const { type } = fieldConfig

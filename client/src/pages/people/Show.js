@@ -135,6 +135,15 @@ const PersonShow = ({ pageDispatchers }) => {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
+    if (data.person.customSensitiveInformation) {
+      // Add sensitive information fields to formCustomFields
+      data.person[
+        DEFAULT_CUSTOM_FIELDS_PARENT
+      ] = utils.addCustomSensitiveInformation(
+        data.person[DEFAULT_CUSTOM_FIELDS_PARENT],
+        data.person.customSensitiveInformation
+      )
+    }
   }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -344,6 +353,25 @@ const PersonShow = ({ pageDispatchers }) => {
             ? privilegedAccessedFields[key].accessCond
             : true
         )
+        // filter out unauthorized sensitive fields
+        .filter(key => {
+          if (
+            Object.keys(
+              Settings.fields.person.customSensitiveInformation
+            ).includes(key)
+          ) {
+            if (
+              person.customSensitiveInformation.find(
+                sensitiveInfo => sensitiveInfo.customFieldName === key
+              )
+            ) {
+              return true
+            } else {
+              return false
+            }
+          }
+          return true
+        })
         // Also filter if somehow there is no field in both maps
         .filter(key => mappedNonCustomFields[key] || mappedCustomFields[key])
         // then map it to components and keys, keys used for React list rendering
@@ -354,7 +382,7 @@ const PersonShow = ({ pageDispatchers }) => {
         .map(([el, key]) =>
           React.cloneElement(el, {
             key,
-            extraColElem: extraColElems[key] || null, // null needed for empty space
+            extraColElem: extraColElems[key] || el.props.extraColElem,
             labelColumnWidth: 4
           })
         )
