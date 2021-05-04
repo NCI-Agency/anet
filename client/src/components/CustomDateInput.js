@@ -27,6 +27,7 @@ const CustomDateInput = ({
   id,
   disabled,
   showIcon,
+  placement,
   withTime,
   value,
   onChange,
@@ -74,7 +75,7 @@ const CustomDateInput = ({
       showActionsBar
       closeOnSelection={!withTime}
       timePickerProps={timePickerProps}
-      popoverProps={{ usePortal: false }}
+      popoverProps={{ usePortal: true, placement }}
       disabled={disabled}
     />
   )
@@ -83,6 +84,7 @@ CustomDateInput.propTypes = {
   id: PropTypes.string,
   disabled: PropTypes.bool,
   showIcon: PropTypes.bool,
+  placement: PropTypes.string,
   withTime: PropTypes.bool,
   value: PropTypes.oneOfType([
     PropTypes.string,
@@ -95,6 +97,7 @@ CustomDateInput.propTypes = {
 CustomDateInput.defaultProps = {
   disabled: false,
   showIcon: true,
+  placement: "auto",
   withTime: false
 }
 

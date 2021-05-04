@@ -137,6 +137,7 @@ const DateRangeFilter = ({
           value.relative === ON) && (
           <CustomDateInput
             showIcon={false}
+            placement="right"
             value={dateStart}
             onChange={handleChangeStart}
           />
@@ -147,6 +148,7 @@ const DateRangeFilter = ({
         {(value.relative === BETWEEN || value.relative === BEFORE) && (
           <CustomDateInput
             showIcon={false}
+            placement="left"
             value={dateEnd}
             onChange={handleChangeEnd}
           />
