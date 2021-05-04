@@ -1,3 +1,6 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -839,6 +842,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     typeError,
     placeholder,
     helpText,
+    authorizationGroupUuids,
     validations,
     visibleWhen,
     test,
@@ -853,9 +857,26 @@ const CustomField = ({
   fieldName,
   formikProps,
   invisibleFields,
-  vertical
+  vertical,
+  disabled
 }) => {
-  const { type, helpText } = fieldConfig
+  const { type, helpText, authorizationGroupUuids } = fieldConfig
+  let extraColElem
+  if (authorizationGroupUuids) {
+    if (fieldConfig.authorizationGroupUuids) {
+      disabled = false
+      extraColElem = (
+        <div>
+          <Tooltip2
+            content="You are authorized to edit this field"
+            intent={Intent.WARNING}
+          >
+            <Icon icon={IconNames.ERROR} intent={Intent.WARNING} />
+          </Tooltip2>
+        </div>
+      )
+    }
+  }
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
   const validateFormDebounced = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
@@ -874,7 +895,10 @@ const CustomField = ({
     },
     [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
-  const FieldComponent = FIELD_COMPONENTS[type]
+  // Show readonly components for disabled fields
+  const FieldComponent = disabled
+    ? READONLY_FIELD_COMPONENTS[type]
+    : FIELD_COMPONENTS[type]
   const extraProps = useMemo(() => {
     switch (type) {
       case CUSTOM_FIELD_TYPE.SPECIAL_FIELD:
@@ -907,6 +931,7 @@ const CustomField = ({
       name={fieldName}
       onChange={handleChange}
       vertical={vertical}
+      extraColElem={extraColElem}
       {...fieldProps}
       {...extraProps}
     >
@@ -927,7 +952,8 @@ CustomField.propTypes = {
   fieldName: PropTypes.string.isRequired,
   formikProps: PropTypes.object,
   invisibleFields: PropTypes.array,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  disabled: PropTypes.bool
 }
 
 const CustomFields = ({
@@ -935,7 +961,8 @@ const CustomFields = ({
   formikProps,
   parentFieldName,
   invisibleFields,
-  vertical
+  vertical,
+  disabled
 }) => {
   return (
     <>
@@ -949,6 +976,7 @@ const CustomFields = ({
             formikProps={formikProps}
             invisibleFields={invisibleFields}
             vertical={vertical}
+            disabled={disabled}
           />
         )
       })}
@@ -960,11 +988,13 @@ CustomFields.propTypes = {
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
   invisibleFields: PropTypes.array,
-  vertical: PropTypes.bool
+  vertical: PropTypes.bool,
+  disabled: PropTypes.bool
 }
 CustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false
+  vertical: false,
+  disabled: false
 }
 
 const READONLY_FIELD_COMPONENTS = {

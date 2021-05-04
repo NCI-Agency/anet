@@ -35,7 +35,11 @@ export default class Person extends Model {
   static principalAssessmentConfig =
     Settings.fields.principal.person.assessments
 
-  static customFields = Settings.fields.person.customFields
+  static customFields = {
+    ...Settings.fields.person.customFields,
+    ...Settings.fields.person.customSensitiveInformation
+  }
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
 
@@ -223,6 +227,12 @@ export default class Person extends Model {
       this.position &&
       (this.position.type === Position.TYPE.SUPER_USER ||
         this.position.type === Position.TYPE.ADMINISTRATOR)
+    )
+  }
+
+  isCounterpart(position) {
+    return position.associatedPositions.find(
+      pos => pos.uuid === this.position.uuid
     )
   }
 

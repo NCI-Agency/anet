@@ -86,6 +86,15 @@ const PersonEdit = ({ pageDispatchers }) => {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
+    if (data.person.customSensitiveInformation) {
+      // Add sensitive information fields to formCustomFields
+      data.person[
+        DEFAULT_CUSTOM_FIELDS_PARENT
+      ] = utils.addCustomSensitiveInformation(
+        data.person[DEFAULT_CUSTOM_FIELDS_PARENT],
+        data.person.customSensitiveInformation
+      )
+    }
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isPendingVerification()

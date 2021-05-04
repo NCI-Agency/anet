@@ -152,6 +152,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const isAdmin = currentUser && currentUser.isAdmin()
   const hasPosition = position && position.uuid
   const canEdit =
+    (currentUser && currentUser.isCounterpart(position)) ||
     Person.isEqual(currentUser, person) ||
     isAdmin ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
