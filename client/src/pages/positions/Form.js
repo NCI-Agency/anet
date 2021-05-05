@@ -1,4 +1,4 @@
-import { Icon, Intent } from "@blueprintjs/core"
+import { Icon, IconSize, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -274,7 +274,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                           <Icon
                             icon={IconNames.WARNING_SIGN}
                             intent={Intent.WARNING}
-                            iconSize={Icon.SIZE_STANDARD}
+                            iconSize={IconSize.STANDARD}
                             style={{ margin: "0 6px" }}
                           />
                           Possible Duplicates

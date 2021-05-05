@@ -1,4 +1,4 @@
-import { Icon, Tooltip } from "@blueprintjs/core"
+import { Icon, IconSize, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -424,7 +424,7 @@ const PersonShow = ({ pageDispatchers }) => {
             showIcon={false}
             showAvatar={false}
           >
-            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EDIT} />
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
           </LinkTo>
         </Tooltip>
       ) : null
@@ -437,7 +437,7 @@ const PersonShow = ({ pageDispatchers }) => {
             bsStyle="primary"
             className="change-assigned-position"
           >
-            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EXCHANGE} />
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.EXCHANGE} />
           </Button>
         </Tooltip>
       ) : null
@@ -452,7 +452,7 @@ const PersonShow = ({ pageDispatchers }) => {
             onClick={() => setShowAssignPositionModal(true)}
             bsStyle="primary"
           >
-            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.INSERT} />
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.INSERT} />
           </Button>
         </Tooltip>
       ) : null
