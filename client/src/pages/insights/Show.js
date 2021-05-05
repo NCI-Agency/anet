@@ -237,9 +237,10 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   }
 
   function setInsightDefaultSearchQuery() {
+    const insightConfig = INSIGHT_DETAILS[insight]
     const queryParams = insightDefaultQueryParams[insight]
     deserializeQueryParams(
-      SEARCH_OBJECT_TYPES.POSITIONS,
+      insightConfig.searchProps.searchObjectTypes[0],
       queryParams,
       deserializeCallback
     )

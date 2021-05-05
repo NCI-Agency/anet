@@ -1,4 +1,4 @@
-import { Classes, Icon } from "@blueprintjs/core"
+import { Classes, Icon, IconSize } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
@@ -47,7 +47,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
     return (
       <div className={classNames(Classes.NAVBAR)}>
         <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
-          <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.MENU} />
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.MENU} />
           <button
             className={classNames(Classes.BUTTON)}
             onClick={autoArrange}
