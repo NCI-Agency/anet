@@ -617,8 +617,7 @@ distributions {
 			into('docs/') {
 				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
 				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
-				from('docs/INSTALL.md')
-				from('docs/TROUBLESHOOT.md')
+				from(markdownToHtml)
 				from('prepare-psql.sql')
 				from('prepare-mssql.sql')
 			}
@@ -635,6 +634,13 @@ startScripts {
 	}
 }
 
+//Configure Markdown plugin
+allprojects {
+	markdownToHtml.sourceDir = file("docs")
+	markdownToHtml.outputDir = file("$buildDir/documentation")
+	markdownToHtml.hardwraps = true
+}
+
 node {
 	nodeProjectDir = file("${project.projectDir}/client")
 	version = '14.16.0'
@@ -647,21 +653,12 @@ ospackage {
 	os = LINUX
 	into '/opt'
 	from(jpackageImage.outputs.files)
-	from('anet.yml') {
-		rename('anet.yml', 'anet.yml.template')
-		into 'anet/docs'
-	}
-	from('docs/INSTALL.md') { into 'anet/docs' }
-	from('docs/TROUBLESHOOT.md') { into 'anet/docs' }
-	from('anet-dictionary.yml') {
-		rename('anet-dictionary.yml', 'anet-dictionary.yml.template')
-		into 'anet/docs'
-	}
-	from('prepare-psql.sql') {
-		into 'anet/docs'
-	}
-	from('prepare-mssql.sql') {
-		into 'anet/docs'
+	into('anet/docs/') {
+		from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+		from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
+		from(markdownToHtml)
+		from('prepare-psql.sql')
+		from('prepare-mssql.sql')
 	}
 }
 
