@@ -192,7 +192,7 @@ export default {
     return typeof result === "object" ? result || {} : {}
   },
 
-  addCustomSensitiveInformation(formCustomFields, customSensitiveInformation) {
+  parseSensitiveFields: function(customSensitiveInformation) {
     const sensitiveInformationObjects = customSensitiveInformation.map(
       sensitiveInfo => this.parseJsonSafe(sensitiveInfo.customFieldValue)
     )
@@ -203,7 +203,7 @@ export default {
       },
       {}
     )
-    return { ...formCustomFields, ...allSensitiveFields }
+    return allSensitiveFields
   },
 
   arrayOfNumbers: function(arr) {

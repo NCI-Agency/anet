@@ -14,7 +14,7 @@ import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -546,6 +546,22 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   />
                 </Fieldset>
               )}
+
+              {!_isEmpty(Person.customSensitiveInformation) && (
+                <Fieldset title="Sensitive information" id="sensitive-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={Person.customSensitiveInformation}
+                    parentFieldName={SENSITIVE_CUSTOM_FIELDS_PARENT}
+                    disabled={!canEditNonSensitiveFields}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
               {showSimilarPeople && (
                 <SimilarObjectsModal
                   objectType="Person"
@@ -655,11 +671,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
-    person.customSensitiveInformation.forEach(sensitiveField => {
-      sensitiveField.customFieldValue = customFieldsJSONString(
-        values[DEFAULT_CUSTOM_FIELDS_PARENT][sensitiveField.customFieldName]
-      )
-    })
     person.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person

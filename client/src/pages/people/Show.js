@@ -17,7 +17,8 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -137,10 +138,7 @@ const PersonShow = ({ pageDispatchers }) => {
     )
     if (data.person.customSensitiveInformation) {
       // Add sensitive information fields to formCustomFields
-      data.person[
-        DEFAULT_CUSTOM_FIELDS_PARENT
-      ] = utils.addCustomSensitiveInformation(
-        data.person[DEFAULT_CUSTOM_FIELDS_PARENT],
+      data.person[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
         data.person.customSensitiveInformation
       )
     }
@@ -332,6 +330,11 @@ const PersonShow = ({ pageDispatchers }) => {
       fieldsConfig: person.getCustomFieldsOrderedAsObject(),
       values: person
     })
+    const mappedSensitiveFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getSensitiveFieldsOrderedAsObject(),
+      parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
+      values: person
+    })
     const mappedNonCustomFields = mapNonCustomFields()
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
@@ -364,10 +367,17 @@ const PersonShow = ({ pageDispatchers }) => {
             )
         )
         // Also filter if somehow there is no field in both maps
-        .filter(key => mappedNonCustomFields[key] || mappedCustomFields[key])
+        .filter(
+          key =>
+            mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key]
+        )
         // then map it to components and keys, keys used for React list rendering
         .map(key => [
-          mappedNonCustomFields[key] || mappedCustomFields[key],
+          mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key],
           key
         ])
         .map(([el, key]) =>

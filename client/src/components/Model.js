@@ -128,6 +128,7 @@ export const NOTE_TYPE = {
 }
 
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
+export const SENSITIVE_CUSTOM_FIELDS_PARENT = "formSensitiveFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
 export const NOTES_FIELD = "notes"
 
@@ -701,7 +702,8 @@ export default class Model {
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
     NOTES_FIELD,
-    DEFAULT_CUSTOM_FIELDS_PARENT
+    DEFAULT_CUSTOM_FIELDS_PARENT,
+    SENSITIVE_CUSTOM_FIELDS_PARENT
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {

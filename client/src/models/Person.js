@@ -35,10 +35,10 @@ export default class Person extends Model {
   static principalAssessmentConfig =
     Settings.fields.principal.person.assessments
 
-  static customFields = {
-    ...Settings.fields.person.customFields,
-    ...Settings.fields.person.customSensitiveInformation
-  }
+  static customFields = Settings.fields.person.customFields
+
+  static customSensitiveInformation =
+    Settings.fields.person.customSensitiveInformation
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
@@ -387,7 +387,11 @@ export default class Person extends Model {
     return (
       this.getShowPageFieldsOrdered()
         // filter out custom fields
-        .filter(key => !Person?.customFields?.[key])
+        .filter(
+          key =>
+            !Person?.customFields?.[key] &&
+            !Person?.customSensitiveInformation?.[key]
+        )
     )
   }
 
@@ -399,6 +403,19 @@ export default class Person extends Model {
         .filter(key => Person?.customFields?.[key])
         .reduce((accum, key) => {
           accum[key] = Person.customFields[key]
+          return accum
+        }, {})
+    )
+  }
+
+  // we want custom fields as an object not array so we can parse it using existing code
+  getSensitiveFieldsOrderedAsObject() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out non-custom fields
+        .filter(key => Person?.customSensitiveInformation?.[key])
+        .reduce((accum, key) => {
+          accum[key] = Person.customSensitiveInformation[key]
           return accum
         }, {})
     )

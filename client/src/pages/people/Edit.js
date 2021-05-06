@@ -4,7 +4,8 @@ import { gql } from "apollo-boost"
 import { initInvisibleFields } from "components/CustomFields"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -88,10 +89,7 @@ const PersonEdit = ({ pageDispatchers }) => {
     )
     if (data.person.customSensitiveInformation) {
       // Add sensitive information fields to formCustomFields
-      data.person[
-        DEFAULT_CUSTOM_FIELDS_PARENT
-      ] = utils.addCustomSensitiveInformation(
-        data.person[DEFAULT_CUSTOM_FIELDS_PARENT],
+      data.person[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
         data.person.customSensitiveInformation
       )
     }
@@ -106,6 +104,7 @@ const PersonEdit = ({ pageDispatchers }) => {
 
   // mutates the object
   initInvisibleFields(person, Settings.fields.person.customFields)
+  initInvisibleFields(person, Settings.fields.person.customSensitiveInformation)
 
   return (
     <div>
