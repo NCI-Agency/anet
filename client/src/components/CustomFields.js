@@ -1103,16 +1103,23 @@ export const mapReadonlyCustomFieldsToComps = ({
       extraColElem = (
         <div>
           <Tooltip2
-            content="You are authorized to see this field"
+            content="This field contains sensitive information!"
             intent={Intent.WARNING}
           >
-            <Icon icon={IconNames.ERROR} intent={Intent.WARNING} />
+            <Icon
+              icon={IconNames.INFO_SIGN}
+              intent={Intent.PRIMARY}
+              className="sensitive-information-icon"
+            />
           </Tooltip2>
         </div>
       )
     }
     const fieldName = `${parentFieldName}.${key}`
     const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+    if (fieldConfig.authorizationGroupUuids) {
+      fieldProps.className = "sensitive-information"
+    }
     const { type } = fieldConfig
     let extraProps = {}
     if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
