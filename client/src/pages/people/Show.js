@@ -354,24 +354,15 @@ const PersonShow = ({ pageDispatchers }) => {
             : true
         )
         // filter out unauthorized sensitive fields
-        .filter(key => {
-          if (
-            Object.keys(
+        .filter(
+          key =>
+            !Object.keys(
               Settings.fields.person.customSensitiveInformation
-            ).includes(key)
-          ) {
-            if (
-              person.customSensitiveInformation.find(
-                sensitiveInfo => sensitiveInfo.customFieldName === key
-              )
-            ) {
-              return true
-            } else {
-              return false
-            }
-          }
-          return true
-        })
+            ).includes(key) ||
+            person.customSensitiveInformation.find(
+              sensitiveInfo => sensitiveInfo.customFieldName === key
+            )
+        )
         // Also filter if somehow there is no field in both maps
         .filter(key => mappedNonCustomFields[key] || mappedCustomFields[key])
         // then map it to components and keys, keys used for React list rendering
