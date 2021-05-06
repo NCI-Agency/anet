@@ -145,7 +145,8 @@ const ReadonlyTextField = fieldProps => {
     vertical,
     isCompact,
     extraColElem,
-    labelColumnWidth
+    labelColumnWidth,
+    className
   } = fieldProps
   return (
     <FastField
@@ -156,6 +157,7 @@ const ReadonlyTextField = fieldProps => {
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       component={FieldHelper.ReadonlyField}
+      className={className}
     />
   )
 }
@@ -180,7 +182,8 @@ const ReadonlyDateField = fieldProps => {
     isCompact,
     withTime,
     extraColElem,
-    labelColumnWidth
+    labelColumnWidth,
+    className
   } = fieldProps
   return (
     <FastField
@@ -199,6 +202,7 @@ const ReadonlyDateField = fieldProps => {
             : Settings.dateFormats.forms.displayShort.date
         )
       }
+      className={className}
     />
   )
 }
@@ -242,7 +246,8 @@ const ReadonlyJsonField = ({
   label,
   values,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const value = Object.get(values, name) || {}
   return (
@@ -253,6 +258,7 @@ const ReadonlyJsonField = ({
       humanValue={JSON.stringify(value)}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -261,7 +267,8 @@ ReadonlyJsonField.propTypes = {
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const EnumField = fieldProps => {
@@ -292,7 +299,8 @@ const ReadonlyEnumField = fieldProps => {
     isCompact,
     choices,
     extraColElem,
-    labelColumnWidth
+    labelColumnWidth,
+    className
   } = fieldProps
   return (
     <FastField
@@ -305,6 +313,7 @@ const ReadonlyEnumField = fieldProps => {
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -564,7 +573,8 @@ const ReadonlyAnetObjectField = ({
   values,
   isCompact,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
@@ -589,6 +599,7 @@ const ReadonlyAnetObjectField = ({
       }
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -598,7 +609,8 @@ ReadonlyAnetObjectField.propTypes = {
   values: PropTypes.object.isRequired,
   isCompact: PropTypes.bool,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -684,7 +696,8 @@ const ReadonlyArrayOfAnetObjectsField = ({
   values,
   isCompact,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const fieldValue = Object.get(values, name) || []
   return (
@@ -710,6 +723,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
       }
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -719,7 +733,8 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
   values: PropTypes.object.isRequired,
   isCompact: PropTypes.bool,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const FIELD_COMPONENTS = {
