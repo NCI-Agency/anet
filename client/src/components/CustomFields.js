@@ -955,10 +955,9 @@ const CustomField = ({
   ) : (
     <FastField
       name={fieldName}
-      label={fieldProps.label}
-      vertical={fieldProps.vertical}
       component={FieldHelper.ReadonlyField}
       humanValue={<i>Missing FieldComponent for {type}</i>}
+      {...fieldProps}
     />
   )
 }
@@ -1064,13 +1063,12 @@ export const ReadonlyCustomFields = ({
           <FastField
             key={key}
             name={fieldName}
-            label={fieldProps.label}
-            vertical={fieldProps.vertical}
             isCompact={isCompact}
             component={FieldHelper.ReadonlyField}
             humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
             extraColElem={extraColElem}
             labelColumnWidth={labelColumnWidth}
+            {...fieldProps}
           />
         )
       })}
@@ -1138,12 +1136,11 @@ export const mapReadonlyCustomFieldsToComps = ({
       <FastField
         key={key}
         name={fieldName}
-        label={fieldProps.label}
-        vertical={fieldProps.vertical}
         component={FieldHelper.ReadonlyField}
         humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
         extraColElem={extraColElem}
         labelColumnWidth={labelColumnWidth}
+        {...fieldProps}
       />
     )
 
