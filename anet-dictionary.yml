@@ -485,10 +485,12 @@ fields:
         type: date
         label: Date of birth
         authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d', 'c21e7321-7ec5-4837-8805-a302f9575754']
+        tooltipText: This field contains sensitive information!
       idCard:
         type: text
         label: ID card
         authorizationGroupUuids: ['1050c9e3-e679-4c60-8bdc-5139fbc1c10b']
+        tooltipText: This field contains sensitive information!
 
   location:
     format: LAT_LON

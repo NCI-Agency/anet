@@ -858,6 +858,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     placeholder,
     helpText,
     authorizationGroupUuids,
+    tooltipText,
     validations,
     visibleWhen,
     test,
@@ -882,10 +883,7 @@ const CustomField = ({
       disabled = false
       extraColElem = (
         <div>
-          <Tooltip2
-            content="You are authorized to edit this field"
-            intent={Intent.WARNING}
-          >
+          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
             <Icon icon={IconNames.ERROR} intent={Intent.WARNING} />
           </Tooltip2>
         </div>
@@ -1102,10 +1100,7 @@ export const mapReadonlyCustomFieldsToComps = ({
     if (fieldConfig.authorizationGroupUuids) {
       extraColElem = (
         <div>
-          <Tooltip2
-            content="This field contains sensitive information!"
-            intent={Intent.WARNING}
-          >
+          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
             <Icon
               icon={IconNames.INFO_SIGN}
               intent={Intent.PRIMARY}
