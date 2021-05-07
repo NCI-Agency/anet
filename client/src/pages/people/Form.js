@@ -8,7 +8,8 @@ import AvatarEditModal from "components/AvatarEditModal"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString
+  customFieldsJSONString,
+  updateCustomSensitiveInformation
 } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
@@ -670,6 +671,11 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
     person.name = Person.fullName(
       { firstName: values.firstName, lastName: values.lastName },
       true
+    )
+    updateCustomSensitiveInformation(
+      Person.customSensitiveInformation,
+      person.customSensitiveInformation,
+      values.formSensitiveFields
     )
     person.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {

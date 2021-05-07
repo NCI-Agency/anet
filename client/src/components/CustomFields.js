@@ -1172,3 +1172,31 @@ export const customFieldsJSONString = (
     return JSON.stringify(filteredCustomFieldsValues)
   }
 }
+
+// customSensitiveInformation should be changed according to formSensitiveField values
+// When field is not initialized new field object should be pushed to customSensitiveInformation
+export const updateCustomSensitiveInformation = (
+  allSensitiveFields,
+  customSensitiveInformation,
+  formSensitiveFields
+) => {
+  const allSensitiveInformationNames = Object.keys(allSensitiveFields)
+  allSensitiveInformationNames.forEach(sensitiveFieldName => {
+    const newFormFieldValue = formSensitiveFields?.[sensitiveFieldName]
+    const newSensitiveFieldValue = JSON.stringify({
+      [sensitiveFieldName]: newFormFieldValue
+    })
+    const correspondingSensitiveField = customSensitiveInformation.find(
+      field => field.customFieldName === sensitiveFieldName
+    )
+    if (!correspondingSensitiveField) {
+      const newSensitiveField = {
+        customFieldName: sensitiveFieldName,
+        customFieldValue: newSensitiveFieldValue
+      }
+      customSensitiveInformation.push(newSensitiveField)
+    } else {
+      correspondingSensitiveField.customFieldValue = newSensitiveFieldValue
+    }
+  })
+}
