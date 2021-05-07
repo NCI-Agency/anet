@@ -873,18 +873,16 @@ const CustomField = ({
   fieldName,
   formikProps,
   invisibleFields,
-  vertical,
-  disabled
+  vertical
 }) => {
   const { type, helpText, authorizationGroupUuids } = fieldConfig
   let extraColElem
   if (authorizationGroupUuids) {
     if (fieldConfig.authorizationGroupUuids) {
-      disabled = false
       extraColElem = (
         <div>
           <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
-            <Icon icon={IconNames.ERROR} intent={Intent.WARNING} />
+            <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
           </Tooltip2>
         </div>
       )
@@ -908,10 +906,7 @@ const CustomField = ({
     },
     [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
-  // Show readonly components for disabled fields
-  const FieldComponent = disabled
-    ? READONLY_FIELD_COMPONENTS[type]
-    : FIELD_COMPONENTS[type]
+  const FieldComponent = FIELD_COMPONENTS[type]
   const extraProps = useMemo(() => {
     switch (type) {
       case CUSTOM_FIELD_TYPE.SPECIAL_FIELD:
@@ -964,8 +959,7 @@ CustomField.propTypes = {
   fieldName: PropTypes.string.isRequired,
   formikProps: PropTypes.object,
   invisibleFields: PropTypes.array,
-  vertical: PropTypes.bool,
-  disabled: PropTypes.bool
+  vertical: PropTypes.bool
 }
 
 const CustomFields = ({
@@ -973,8 +967,7 @@ const CustomFields = ({
   formikProps,
   parentFieldName,
   invisibleFields,
-  vertical,
-  disabled
+  vertical
 }) => {
   return (
     <>
@@ -988,7 +981,6 @@ const CustomFields = ({
             formikProps={formikProps}
             invisibleFields={invisibleFields}
             vertical={vertical}
-            disabled={disabled}
           />
         )
       })}
@@ -1000,13 +992,11 @@ CustomFields.propTypes = {
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
   invisibleFields: PropTypes.array,
-  vertical: PropTypes.bool,
-  disabled: PropTypes.bool
+  vertical: PropTypes.bool
 }
 CustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
-  vertical: false,
-  disabled: false
+  vertical: false
 }
 
 const READONLY_FIELD_COMPONENTS = {

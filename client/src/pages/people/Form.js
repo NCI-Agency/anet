@@ -11,7 +11,6 @@ import {
   customFieldsJSONString,
   updateCustomSensitiveInformation
 } from "components/CustomFields"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -130,7 +129,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       }) => {
         const isSelf = Person.isEqual(currentUser, values)
         const isAdmin = currentUser && currentUser.isAdmin()
-        const isSuperUser = currentUser && currentUser.isSuperUser()
         const isAdvisor = Person.isAdvisor(values)
         const isPendingVerification = Person.isPendingVerification(values)
         const endOfTourDateInPast = values.endOfTourDate
@@ -156,12 +154,9 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
           ((isPendingVerification || !edit) &&
             currentUser &&
             (currentUser.isSuperUser() || isSelf))
-        const canEditNonSensitiveFields = isAdmin || isSuperUser
         // admins and super users with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
-          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) ||
-          isSelf ||
-          !canEditNonSensitiveFields
+          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         const fullName = Person.fullName(Person.parseFullName(values.name))
         const nameMessage = "This is not " + (isSelf ? "me" : fullName)
         const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
@@ -198,7 +193,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 <AvatarEditModal
                   title="Edit avatar"
                   onAvatarUpdate={onAvatarUpdate}
-                  disabled={!canEditNonSensitiveFields}
                 />
                 <FormGroup>
                   <Col sm={2} componentClass={ControlLabel} htmlFor="lastName">
@@ -390,7 +384,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     component={FieldHelper.RadioButtonToggleGroupField}
                     buttons={statusButtons}
                     onChange={value => setFieldValue("status", value)}
-                    disabled={!canEditNonSensitiveFields}
                   >
                     {willAutoKickPosition && (
                       <HelpBlock>
@@ -427,19 +420,16 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       : ""
                   }
                   component={FieldHelper.InputField}
-                  disabled={!canEditNonSensitiveFields}
                 />
                 <FastField
                   name="phoneNumber"
                   label={Settings.fields.person.phoneNumber}
                   component={FieldHelper.InputField}
-                  disabled={!canEditNonSensitiveFields}
                 />
                 <FastField
                   name="rank"
                   label={Settings.fields.person.rank}
                   component={FieldHelper.SpecialField}
-                  disabled={!canEditNonSensitiveFields}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -456,7 +446,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   name="gender"
                   label={Settings.fields.person.gender}
                   component={FieldHelper.SpecialField}
-                  disabled={!canEditNonSensitiveFields}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -469,7 +458,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   name="country"
                   label={Settings.fields.person.country}
                   component={FieldHelper.SpecialField}
-                  disabled={!canEditNonSensitiveFields}
                   widget={
                     <FastField component="select" className="form-control">
                       <option />
@@ -495,7 +483,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   onChange={value => setFieldValue("endOfTourDate", value)}
                   onBlur={() => setFieldTouched("endOfTourDate")}
                   widget={<CustomDateInput id="endOfTourDate" />}
-                  disabled={!canEditNonSensitiveFields}
                 >
                   {isAdvisor && endOfTourDateInPast && (
                     <Alert bsStyle="warning">
@@ -503,41 +490,31 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     </Alert>
                   )}
                 </FastField>
-                {canEditNonSensitiveFields ? (
-                  <FastField
-                    name="biography"
-                    component={FieldHelper.SpecialField}
-                    disabled={!canEditNonSensitiveFields}
-                    onChange={value => {
-                      // prevent initial unnecessary render of RichTextEditor
-                      if (!_isEqual(value, values.biography)) {
-                        setFieldValue("biography", value)
-                      }
-                    }}
-                    widget={
-                      <RichTextEditor
-                        className="biography"
-                        onHandleBlur={() => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("biography", true, false)
-                        }}
-                      />
+                <FastField
+                  name="biography"
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(value, values.biography)) {
+                      setFieldValue("biography", value)
                     }
-                  />
-                ) : (
-                  <FastField
-                    name="biography"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={parseHtmlWithLinkTo(values.biography)}
-                  />
-                )}
+                  }}
+                  widget={
+                    <RichTextEditor
+                      className="biography"
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("biography", true, false)
+                      }}
+                    />
+                  }
+                />
               </Fieldset>
 
               {!_isEmpty(Person.customFields) && (
                 <Fieldset title="Person information" id="custom-fields">
                   <CustomFieldsContainer
                     fieldsConfig={Person.customFields}
-                    disabled={!canEditNonSensitiveFields}
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,
@@ -553,7 +530,6 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   <CustomFieldsContainer
                     fieldsConfig={Person.customSensitiveInformation}
                     parentFieldName={SENSITIVE_CUSTOM_FIELDS_PARENT}
-                    disabled={!canEditNonSensitiveFields}
                     formikProps={{
                       setFieldTouched,
                       setFieldValue,

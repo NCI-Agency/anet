@@ -3,15 +3,13 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 
-const AvatarEditModal = ({ title, onAvatarUpdate, disabled }) => {
+const AvatarEditModal = ({ title, onAvatarUpdate }) => {
   const [showModal, setShowModal] = useState(false)
   const [currentPreview, setCurrentPreview] = useState(null)
 
   return (
     <div>
-      <button disabled={disabled} onClick={open}>
-        {title}
-      </button>
+      <button onClick={open}>{title}</button>
 
       <Modal show={showModal} onHide={close}>
         <Modal.Header closeButton>
@@ -43,8 +41,7 @@ const AvatarEditModal = ({ title, onAvatarUpdate, disabled }) => {
 }
 AvatarEditModal.propTypes = {
   title: PropTypes.string.isRequired,
-  onAvatarUpdate: PropTypes.func.isRequired,
-  disabled: PropTypes.bool
+  onAvatarUpdate: PropTypes.func.isRequired
 }
 
 export default AvatarEditModal

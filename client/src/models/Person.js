@@ -230,12 +230,6 @@ export default class Person extends Model {
     )
   }
 
-  isCounterpart(position) {
-    return position.associatedPositions.find(
-      pos => pos.uuid === this.position.uuid
-    )
-  }
-
   hasAssignedPosition() {
     // has a non-empty position with a non-zero uuid
     return !_isEmpty(this.position) && !!this.position.uuid
