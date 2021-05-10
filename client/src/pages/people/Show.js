@@ -358,12 +358,10 @@ const PersonShow = ({ pageDispatchers }) => {
         // filter out unauthorized sensitive fields
         .filter(
           key =>
-            !Object.keys(
-              Settings.fields.person.customSensitiveInformation
-            ).includes(key) ||
-            person.customSensitiveInformation.find(
-              sensitiveInfo => sensitiveInfo.customFieldName === key
-            )
+            !Object.keys(Person.customSensitiveInformation).includes(key) ||
+            currentUser.isAdmin() ||
+            currentUser.isCounterpart(position) ||
+            currentUser.isAuthorized(key)
         )
         // Also filter if somehow there is no field in both maps
         .filter(
