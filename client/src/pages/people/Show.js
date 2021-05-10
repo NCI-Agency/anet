@@ -359,9 +359,11 @@ const PersonShow = ({ pageDispatchers }) => {
         .filter(
           key =>
             !Object.keys(Person.customSensitiveInformation).includes(key) ||
-            currentUser.isAdmin() ||
-            currentUser.isCounterpart(position) ||
-            currentUser.isAuthorized(key)
+            Person.isAuthorized(
+              currentUser,
+              Person.customSensitiveInformation?.[key],
+              position
+            )
         )
         // Also filter if somehow there is no field in both maps
         .filter(

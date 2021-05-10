@@ -230,21 +230,6 @@ export default class Person extends Model {
     )
   }
 
-  isCounterpart(position) {
-    return position.associatedPositions.find(
-      pos => pos.uuid === this.position.uuid
-    )
-  }
-
-  isAuthorized(key) {
-    const currentUserAuthGroups = this.position.authorizationGroups.map(
-      ag => ag.uuid
-    )
-    const fieldAuthGroups =
-      Person.customSensitiveInformation[key].authorizationGroupUuids
-    return fieldAuthGroups.some(k => currentUserAuthGroups.includes(k))
-  }
-
   hasAssignedPosition() {
     // has a non-empty position with a non-zero uuid
     return !_isEmpty(this.position) && !!this.position.uuid
@@ -467,5 +452,15 @@ export default class Person extends Model {
 
   filterClientSideFields(...additionalFields) {
     return Person.filterClientSideFields(this, ...additionalFields)
+  }
+
+  static isAuthorized(user, customSensitiveInformationField, position) {
+    if (Model.isAuthorized(user, customSensitiveInformationField)) {
+      return true
+    }
+    // Else user has to be counterpart
+    return user?.position?.associatedPositions?.find(
+      pos => pos.uuid === position.uuid
+    )
   }
 }

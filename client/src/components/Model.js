@@ -717,4 +717,17 @@ export default class Model {
   filterClientSideFields(...additionalFields) {
     return Model.filterClientSideFields(this, ...additionalFields)
   }
+
+  static isAuthorized(user, customSensitiveInformationField) {
+    // Admins are always allowed
+    if (user?.isAdmin()) {
+      return true
+    }
+    // Else user has to be in the authorizationGroups
+    const userAuthGroupUuids =
+      user?.position?.authorizationGroups.map(ag => ag.uuid) || []
+    const fieldAuthGroupUuids =
+      customSensitiveInformationField?.authorizationGroupUuids || []
+    return fieldAuthGroupUuids.some(uuid => userAuthGroupUuids.includes(uuid))
+  }
 }
