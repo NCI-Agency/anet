@@ -503,6 +503,7 @@ enum PersonSearchSortBy {
 
 type Position {
   associatedPositions: [Position]
+  authorizationGroups: [AuthorizationGroup]
   code: String
   createdAt: Instant
   customFields: String
