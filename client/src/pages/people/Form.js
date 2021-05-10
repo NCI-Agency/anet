@@ -141,6 +141,11 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
         const warnDomainUsername =
           values.status === Model.STATUS.INACTIVE &&
           !_isEmpty(values.domainUsername)
+        const authorizedSensitiveFields =
+          currentUser &&
+          currentUser.getAuthorizedSensitiveFields(
+            Person.customSensitiveInformation
+          )
         const ranks = Settings.fields.person.ranks || []
         const roleButtons = isAdmin ? adminRoleButtons : userRoleButtons
         const countries = getCountries(values.role)
@@ -525,10 +530,10 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 </Fieldset>
               )}
 
-              {!_isEmpty(Person.customSensitiveInformation) && (
+              {!_isEmpty(authorizedSensitiveFields) && (
                 <Fieldset title="Sensitive information" id="sensitive-fields">
                   <CustomFieldsContainer
-                    fieldsConfig={Person.customSensitiveInformation}
+                    fieldsConfig={authorizedSensitiveFields}
                     parentFieldName={SENSITIVE_CUSTOM_FIELDS_PARENT}
                     formikProps={{
                       setFieldTouched,
