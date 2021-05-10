@@ -9,6 +9,7 @@ public enum FkDataLoaderKey {
   PERSON_ORGANIZATIONS, // person.organizations
   PERSON_PERSON_POSITION_HISTORY, // person.personPositionHistory
   POSITION_ASSOCIATED_POSITIONS, // position.associatedPositions
+  POSITION_AUTHORIZATION_GROUPS, // position.authorizatonGroups
   POSITION_CURRENT_POSITION_FOR_PERSON, // position.currentPositionForPerson
   POSITION_PERSON_POSITION_HISTORY, // position.personPositionHistory
   RELATED_OBJECT_APPROVAL_STEPS, // <relatedObject, e.g. organization or task>.approvalSteps

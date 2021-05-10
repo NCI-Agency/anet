@@ -243,6 +243,15 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<AuthorizationGroup>>() {
+          @Override
+          public CompletionStage<List<List<AuthorizationGroup>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getAuthorizationGroupDao().getAuthorizationGroups(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.POSITION_CURRENT_POSITION_FOR_PERSON.toString(),
         new DataLoader<>(new BatchLoader<String, List<Position>>() {
           @Override
