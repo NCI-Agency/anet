@@ -143,8 +143,10 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
           !_isEmpty(values.domainUsername)
         const authorizedSensitiveFields =
           currentUser &&
-          currentUser.getAuthorizedSensitiveFields(
-            Person.customSensitiveInformation
+          Person.getAuthorizedSensitiveFields(
+            currentUser,
+            Person.customSensitiveInformation,
+            values.position
           )
         const ranks = Settings.fields.person.ranks || []
         const roleButtons = isAdmin ? adminRoleButtons : userRoleButtons

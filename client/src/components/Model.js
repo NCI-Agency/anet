@@ -730,4 +730,18 @@ export default class Model {
       customSensitiveInformationField?.authorizationGroupUuids || []
     return fieldAuthGroupUuids.some(uuid => userAuthGroupUuids.includes(uuid))
   }
+
+  static getAuthorizedSensitiveFields(
+    isAuthorizedCallback,
+    user,
+    customSensitiveInformation,
+    ...args
+  ) {
+    const authorizedFieldsConfig = {}
+    Object.entries(customSensitiveInformation).forEach(([k, v]) => {
+      isAuthorizedCallback(user, customSensitiveInformation[k], ...args) &&
+        (authorizedFieldsConfig[k] = v)
+    })
+    return authorizedFieldsConfig
+  }
 }

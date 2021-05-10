@@ -271,21 +271,6 @@ export default class Person extends Model {
     return orgUuids.includes(org.uuid)
   }
 
-  getAuthorizedSensitiveFields(customSensitiveInformation) {
-    if (this.isAdmin()) {
-      return customSensitiveInformation
-    }
-    const currentUserAuthGroups = this.position.authorizationGroups.map(
-      ag => ag.uuid
-    )
-    const authorizedFieldsConfig = {}
-    Object.entries(customSensitiveInformation).forEach(([k, v]) => {
-      v.authorizationGroupUuids.some(r => currentUserAuthGroups.includes(r)) &&
-        (authorizedFieldsConfig[k] = v)
-    })
-    return authorizedFieldsConfig
-  }
-
   iconUrl() {
     if (this.isAdvisor()) {
       return RS_ICON
@@ -461,6 +446,19 @@ export default class Person extends Model {
     // Else user has to be counterpart
     return user?.position?.associatedPositions?.find(
       pos => pos.uuid === position.uuid
+    )
+  }
+
+  static getAuthorizedSensitiveFields(
+    user,
+    customSensitiveInformation,
+    position
+  ) {
+    return Model.getAuthorizedSensitiveFields(
+      Person.isAuthorized,
+      user,
+      customSensitiveInformation,
+      position
     )
   }
 }
