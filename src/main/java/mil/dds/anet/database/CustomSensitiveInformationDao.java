@@ -128,6 +128,7 @@ public class CustomSensitiveInformationDao
     }
   }
 
+  @SuppressWarnings("lgtm[java/unused-parameter]") // match the signature of checkAndUpdate
   private void checkAndInsert(final Person user, final String relatedObjectType,
       final String relatedObjectUuid, final CustomSensitiveInformation csi) {
     if (!hasCustomSensitiveInformationAuthorization(user, csi)) {
