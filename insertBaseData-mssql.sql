@@ -945,10 +945,10 @@ INSERT INTO customSensitiveInformation (uuid, customFieldName, customFieldValue,
 	VALUES
 		-- Steve
 		(N'4263793a-18bc-4cef-a535-0116615301e1', 'birthday', '{"birthday":"1999-09-09T00:00:00.000Z"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'c9ca5fd9-699e-4643-8025-91a2f2e0cd77', 'idCard', '{"idCard":"A123456"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c9ca5fd9-699e-4643-8025-91a2f2e0cd77', 'politicalPosition', '{"politicalPosition":"LEFT"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		-- Roger
 		(N'84b46418-4350-4b52-8789-2b292fc0ab60', 'birthday', '{"birthday":"2001-01-01T00:00:00.000Z"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'810cf44b-91f6-474a-b522-5ba822ccfc1c', 'idCard', '{"idCard":"B987654"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(N'810cf44b-91f6-474a-b522-5ba822ccfc1c', 'politicalPosition', '{"politicalPosition":"RIGHT"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add some notes and link them to the objects they relate to
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');

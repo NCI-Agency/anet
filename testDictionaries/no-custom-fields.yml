@@ -240,10 +240,22 @@ fields:
         type: date
         label: Date of birth
         authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d', 'c21e7321-7ec5-4837-8805-a302f9575754']
-      idCard:
-        type: text
-        label: ID card
+        tooltipText: This field contains sensitive information!
+      politicalPosition:
+        type: enum
+        label: Position on the political spectrum
         authorizationGroupUuids: ['1050c9e3-e679-4c60-8bdc-5139fbc1c10b']
+        tooltipText: This field contains sensitive information!
+        choices:
+          LEFT:
+            label: Left
+            color: 'salmon'
+          MIDDLE:
+            label: Middle
+            color: 'gold'
+          RIGHT:
+            label: Right
+            color: 'skyblue'
 
   location:
     format: LAT_LON
@@ -264,7 +276,7 @@ fields:
                   Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
       # number of fields after Avatar in the left column for advisors
       # adjust this number if two columns are not balanced on the Person Page
-      numberOfFieldsInLeftColumn: 6
+      numberOfFieldsInLeftColumn: 7
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
@@ -275,9 +287,11 @@ fields:
         - inputFieldName
         - phoneNumber
         - country
+        - birthday
         - colourOptions
         - textareaFieldName
         - code
+        - politicalPosition
         - rank
         - numberFieldName
         - nlt

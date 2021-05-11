@@ -52,7 +52,7 @@ import org.junit.jupiter.api.Test;
 public class PersonResourceTest extends AbstractResourceTest {
 
   private static final String BIRTHDAY_FIELD = "birthday";
-  private static final String ID_CARD_FIELD = "idCard";
+  private static final String POLITICAL_POSITION_FIELD = "politicalPosition";
   private static final String _CUSTOM_SENSITIVE_INFORMATION_FIELDS =
       "customSensitiveInformation { uuid customFieldName customFieldValue"
           + " relatedObjectType relatedObjectUuid createdAt updatedAt }";
@@ -542,7 +542,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final String steveUuid = getSteveSteveson().getUuid();
     // Elizabeth can read all sensitive data of her counterpart Steve
     checkSensitiveInformation(steveUuid, "elizabeth",
-        ImmutableList.of(BIRTHDAY_FIELD, ID_CARD_FIELD));
+        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD));
     // Jim has no access to Steve's sensitive data
     checkSensitiveInformation(steveUuid, "jim", ImmutableList.of());
   }
@@ -554,11 +554,12 @@ public class PersonResourceTest extends AbstractResourceTest {
     final String christopfUuid = getChristopfTopferness().getUuid();
     // Admin has access to everything
     checkSensitiveInformationEdit(christopfUuid, adminUser,
-        ImmutableList.of(BIRTHDAY_FIELD, ID_CARD_FIELD), true);
+        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), true);
     // Henry has access to Christopf's birthday
     checkSensitiveInformationEdit(christopfUuid, "henry", ImmutableList.of(BIRTHDAY_FIELD), true);
-    // Bob has access to Christopf's idCard
-    checkSensitiveInformationEdit(christopfUuid, "bob", ImmutableList.of(ID_CARD_FIELD), true);
+    // Bob has access to Christopf's politicalPosition
+    checkSensitiveInformationEdit(christopfUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
+        true);
   }
 
   @Test
@@ -568,11 +569,12 @@ public class PersonResourceTest extends AbstractResourceTest {
     final String steveUuid = getSteveSteveson().getUuid();
     // Admin has access to everything
     checkSensitiveInformationEdit(steveUuid, adminUser,
-        ImmutableList.of(BIRTHDAY_FIELD, ID_CARD_FIELD), false);
+        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), false);
     // Henry has access to Steve's birthday
     checkSensitiveInformationEdit(steveUuid, "henry", ImmutableList.of(BIRTHDAY_FIELD), false);
-    // Bob has access to Steve's idCard
-    checkSensitiveInformationEdit(steveUuid, "bob", ImmutableList.of(ID_CARD_FIELD), false);
+    // Bob has access to Steve's politicalPosition
+    checkSensitiveInformationEdit(steveUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
+        false);
   }
 
   private Person checkSensitiveInformation(final String personUuid, final String user,
@@ -652,8 +654,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Try to do some updates that are not allowed
     final String steveUuid = getSteveSteveson().getUuid();
     // Henry only has access to Steve's birthday
-    checkUnauthorizedSensitiveInformation(steveUuid, "henry", ImmutableList.of(ID_CARD_FIELD));
-    // Bob only has access to Steve's idCard
+    checkUnauthorizedSensitiveInformation(steveUuid, "henry",
+        ImmutableList.of(POLITICAL_POSITION_FIELD));
+    // Bob only has access to Steve's politicalPosition
     checkUnauthorizedSensitiveInformation(steveUuid, "bob", ImmutableList.of(BIRTHDAY_FIELD));
   }
 
@@ -704,7 +707,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     personInput = getInput(person, PersonInput.class);
     personInput.getCustomSensitiveInformation().stream()
         .forEach(csiInput -> csiInput.setCustomFieldName(
-            BIRTHDAY_FIELD.equals(csiInput.getCustomFieldName()) ? ID_CARD_FIELD : BIRTHDAY_FIELD));
+            BIRTHDAY_FIELD.equals(csiInput.getCustomFieldName()) ? POLITICAL_POSITION_FIELD
+                : BIRTHDAY_FIELD));
     checkIllegalSensitiveInformation(person, personInput, personInput);
 
     // Test with wrong relatedObjectUuid
