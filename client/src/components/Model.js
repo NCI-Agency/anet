@@ -314,10 +314,14 @@ export const createAssessmentSchema = (
   })
 }
 
-export const createCustomFieldsSchema = customFieldsConfig =>
+export const createCustomFieldsSchema = (
+  customFieldsConfig,
+  customFieldsParent = DEFAULT_CUSTOM_FIELDS_PARENT
+) =>
   yup.object().shape({
-    [DEFAULT_CUSTOM_FIELDS_PARENT]: createYupObjectShape(
-      customFieldsConfig
+    [customFieldsParent]: createYupObjectShape(
+      customFieldsConfig,
+      customFieldsParent
     ).nullable()
   })
 

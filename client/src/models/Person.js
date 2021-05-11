@@ -2,6 +2,7 @@ import API from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -42,6 +43,10 @@ export default class Person extends Model {
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
+  static sensitiveFieldsSchema = createCustomFieldsSchema(
+    Person.customSensitiveInformation,
+    SENSITIVE_CUSTOM_FIELDS_PARENT
+  )
 
   static principalShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
   static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
@@ -161,6 +166,7 @@ export default class Person extends Model {
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)
+    .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
