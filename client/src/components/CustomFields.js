@@ -12,7 +12,8 @@ import Model, {
   createYupObjectShape,
   CUSTOM_FIELD_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD
+  INVISIBLE_CUSTOM_FIELDS_FIELD,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
@@ -1166,27 +1167,22 @@ export const customFieldsJSONString = (
 // customSensitiveInformation should be changed according to formSensitiveField values
 // When field is not initialized new field object should be pushed to customSensitiveInformation
 export const updateCustomSensitiveInformation = (
-  allSensitiveFields,
-  customSensitiveInformation,
-  formSensitiveFields
+  values,
+  parentFieldName = SENSITIVE_CUSTOM_FIELDS_PARENT
 ) => {
-  const allSensitiveInformationNames = Object.keys(allSensitiveFields)
-  allSensitiveInformationNames.forEach(sensitiveFieldName => {
-    const newFormFieldValue = formSensitiveFields?.[sensitiveFieldName]
-    const newSensitiveFieldValue = JSON.stringify({
-      [sensitiveFieldName]: newFormFieldValue
-    })
-    const correspondingSensitiveField = customSensitiveInformation.find(
-      field => field.customFieldName === sensitiveFieldName
+  const customSensitiveInformation = []
+  const sensitiveFieldValues = Object.get(values, parentFieldName) || []
+  Object.keys(sensitiveFieldValues).forEach(sensitiveFieldName => {
+    const existingField = values.customSensitiveInformation?.find(
+      sf => sf.customFieldName === sensitiveFieldName
     )
-    if (!correspondingSensitiveField) {
-      const newSensitiveField = {
-        customFieldName: sensitiveFieldName,
-        customFieldValue: newSensitiveFieldValue
-      }
-      customSensitiveInformation.push(newSensitiveField)
-    } else {
-      correspondingSensitiveField.customFieldValue = newSensitiveFieldValue
-    }
+    customSensitiveInformation.push({
+      customFieldName: sensitiveFieldName,
+      customFieldValue: JSON.stringify({
+        [sensitiveFieldName]: sensitiveFieldValues[sensitiveFieldName]
+      }),
+      uuid: existingField?.uuid
+    })
   })
+  return customSensitiveInformation
 }

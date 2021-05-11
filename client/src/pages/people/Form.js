@@ -655,11 +655,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
-    updateCustomSensitiveInformation(
-      Person.customSensitiveInformation,
-      person.customSensitiveInformation,
-      values.formSensitiveFields
-    )
+    person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person
