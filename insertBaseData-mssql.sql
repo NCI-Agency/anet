@@ -104,7 +104,7 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'SCHRUTE, Dwight', 0, 0, 'dwight+schrute@example.com', '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', 'dwight', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'HALPERT, Jim', 0, 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', 'halpert', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (lower(newid()), 'HALPERT, Jim', 0, 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', 'jim', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Administrator
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', 'arthur', 'Albania', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
