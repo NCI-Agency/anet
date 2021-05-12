@@ -105,7 +105,7 @@
     "@apollo/react-hooks": "3.1.5",
     "@blueprintjs/core": "3.44.2",
     "@blueprintjs/datetime": "3.23.2",
-    "@blueprintjs/popover2": "0.7.3",
+    "@blueprintjs/popover2": "0.8.0",
     "@emotion/react": "11.4.0",
     "@emotion/styled": "11.3.0",
     "@fullcalendar/core": "4.4.2",

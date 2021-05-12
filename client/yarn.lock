@@ -1491,10 +1491,10 @@
     classnames "^2.2"
     tslib "~1.13.0"
 
-"@blueprintjs/popover2@0.7.3":
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-0.7.3.tgz#33be4973c202d23757f6f54eb0d5418a090371fe"
-  integrity sha512-ixs7bTTsulq82UlZIewGp+nCl9ttkL5rKlaQG19zpbivQDWsgb02XxAI0VUB0/BAttq4Zj5Na7/90BRQuHQeLQ==
+"@blueprintjs/popover2@0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-0.8.0.tgz#6412cf5eb92766a069c544cb6424a05f7bb3091d"
+  integrity sha512-fN1CBR7GdCGInipdaghq1SCEc9/gvUXx9i18LSiytAd3Chr//E3WgvvyTUDEeYQAoMz54oGoV8ostas2sqSyRw==
   dependencies:
     "@blueprintjs/core" "^3.44.2"
     "@popperjs/core" "^2.5.4"
