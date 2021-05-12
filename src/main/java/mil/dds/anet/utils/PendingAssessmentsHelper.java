@@ -39,7 +39,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.emails.PendingAssessmentsNotificationEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -504,12 +504,12 @@ public class PendingAssessmentsHelper {
 
   private CompletableFuture<Boolean> processExistingAssessments(final Map<String, Object> context,
       final Instant now, final Set<Recurrence> recurrenceSet,
-      final Map<? extends AbstractAnetBean, Set<Recurrence>> objectsToAssess) {
+      final Map<? extends AbstractCustomizableAnetBean, Set<Recurrence>> objectsToAssess) {
     final CompletableFuture<?>[] allFutures = objectsToAssess.entrySet().stream().map(e -> {
-      final AbstractAnetBean entryKey = e.getKey();
+      final AbstractCustomizableAnetBean entryKey = e.getKey();
       final Set<Recurrence> periods = e.getValue();
       // For positions, the current person holding it gets assessed (otherwise the object itself)
-      final AbstractAnetBean ota =
+      final AbstractCustomizableAnetBean ota =
           entryKey instanceof Position ? ((Position) entryKey).getPerson() : entryKey;
       return ota.loadNotes(context).thenApply(notes -> {
         final Map<Recurrence, Instant> assessmentsByRecurrence = new HashMap<>();

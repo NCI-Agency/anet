@@ -19,6 +19,14 @@ import * as yup from "yup"
 export const REPORT_RELATED_OBJECT_TYPE = "reports"
 export const REPORT_STATE_PUBLISHED = "PUBLISHED"
 
+export const GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS = /* GraphQL */ `
+  customSensitiveInformation {
+    uuid
+    customFieldName
+    customFieldValue
+  }
+`
+
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
   createdAt
@@ -120,6 +128,7 @@ export const NOTE_TYPE = {
 }
 
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
+export const SENSITIVE_CUSTOM_FIELDS_PARENT = "formSensitiveFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
 export const NOTES_FIELD = "notes"
 
@@ -305,10 +314,14 @@ export const createAssessmentSchema = (
   })
 }
 
-export const createCustomFieldsSchema = customFieldsConfig =>
+export const createCustomFieldsSchema = (
+  customFieldsConfig,
+  customFieldsParent = DEFAULT_CUSTOM_FIELDS_PARENT
+) =>
   yup.object().shape({
-    [DEFAULT_CUSTOM_FIELDS_PARENT]: createYupObjectShape(
-      customFieldsConfig
+    [customFieldsParent]: createYupObjectShape(
+      customFieldsConfig,
+      customFieldsParent
     ).nullable()
   })
 
@@ -693,7 +706,8 @@ export default class Model {
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
     NOTES_FIELD,
-    DEFAULT_CUSTOM_FIELDS_PARENT
+    DEFAULT_CUSTOM_FIELDS_PARENT,
+    SENSITIVE_CUSTOM_FIELDS_PARENT
   ]
 
   static filterClientSideFields(obj, ...additionalFields) {
@@ -706,5 +720,32 @@ export default class Model {
 
   filterClientSideFields(...additionalFields) {
     return Model.filterClientSideFields(this, ...additionalFields)
+  }
+
+  static isAuthorized(user, customSensitiveInformationField) {
+    // Admins are always allowed
+    if (user?.isAdmin()) {
+      return true
+    }
+    // Else user has to be in the authorizationGroups
+    const userAuthGroupUuids =
+      user?.position?.authorizationGroups.map(ag => ag.uuid) || []
+    const fieldAuthGroupUuids =
+      customSensitiveInformationField?.authorizationGroupUuids || []
+    return fieldAuthGroupUuids.some(uuid => userAuthGroupUuids.includes(uuid))
+  }
+
+  static getAuthorizedSensitiveFields(
+    isAuthorizedCallback,
+    user,
+    customSensitiveInformation,
+    ...args
+  ) {
+    const authorizedFieldsConfig = {}
+    Object.entries(customSensitiveInformation).forEach(([k, v]) => {
+      isAuthorizedCallback(user, customSensitiveInformation[k], ...args) &&
+        (authorizedFieldsConfig[k] = v)
+    })
+    return authorizedFieldsConfig
   }
 }

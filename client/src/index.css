@@ -152,6 +152,16 @@ fieldset.danger {
   width: 10em;
 }
 
+.sensitive-information {
+  background-color: cornsilk;
+}
+.sensitive-information.form-group {
+  min-height: 34px;
+}
+.sensitive-information-icon svg {
+  height: 34px;
+}
+
 .shortcut-list {
   margin-top: -4px;
 }

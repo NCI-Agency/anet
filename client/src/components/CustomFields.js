@@ -1,3 +1,6 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -9,7 +12,8 @@ import Model, {
   createYupObjectShape,
   CUSTOM_FIELD_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD
+  INVISIBLE_CUSTOM_FIELDS_FIELD,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
@@ -142,7 +146,8 @@ const ReadonlyTextField = fieldProps => {
     vertical,
     isCompact,
     extraColElem,
-    labelColumnWidth
+    labelColumnWidth,
+    className
   } = fieldProps
   return (
     <FastField
@@ -153,6 +158,7 @@ const ReadonlyTextField = fieldProps => {
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
       component={FieldHelper.ReadonlyField}
+      className={className}
     />
   )
 }
@@ -177,7 +183,8 @@ const ReadonlyDateField = fieldProps => {
     isCompact,
     withTime,
     extraColElem,
-    labelColumnWidth
+    labelColumnWidth,
+    className
   } = fieldProps
   return (
     <FastField
@@ -196,6 +203,7 @@ const ReadonlyDateField = fieldProps => {
             : Settings.dateFormats.forms.displayShort.date
         )
       }
+      className={className}
     />
   )
 }
@@ -239,7 +247,8 @@ const ReadonlyJsonField = ({
   label,
   values,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const value = Object.get(values, name) || {}
   return (
@@ -250,6 +259,7 @@ const ReadonlyJsonField = ({
       humanValue={JSON.stringify(value)}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -258,7 +268,8 @@ ReadonlyJsonField.propTypes = {
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const EnumField = fieldProps => {
@@ -289,7 +300,8 @@ const ReadonlyEnumField = fieldProps => {
     isCompact,
     choices,
     extraColElem,
-    labelColumnWidth
+    labelColumnWidth,
+    className
   } = fieldProps
   return (
     <FastField
@@ -302,6 +314,7 @@ const ReadonlyEnumField = fieldProps => {
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -561,7 +574,8 @@ const ReadonlyAnetObjectField = ({
   values,
   isCompact,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
@@ -586,6 +600,7 @@ const ReadonlyAnetObjectField = ({
       }
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -595,7 +610,8 @@ ReadonlyAnetObjectField.propTypes = {
   values: PropTypes.object.isRequired,
   isCompact: PropTypes.bool,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -681,7 +697,8 @@ const ReadonlyArrayOfAnetObjectsField = ({
   values,
   isCompact,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const fieldValue = Object.get(values, name) || []
   return (
@@ -707,6 +724,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
       }
       extraColElem={extraColElem}
       labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -716,7 +734,8 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
   values: PropTypes.object.isRequired,
   isCompact: PropTypes.bool,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const FIELD_COMPONENTS = {
@@ -839,6 +858,8 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     typeError,
     placeholder,
     helpText,
+    authorizationGroupUuids,
+    tooltipText,
     validations,
     visibleWhen,
     test,
@@ -855,7 +876,19 @@ const CustomField = ({
   invisibleFields,
   vertical
 }) => {
-  const { type, helpText } = fieldConfig
+  const { type, helpText, authorizationGroupUuids } = fieldConfig
+  let extraColElem
+  if (authorizationGroupUuids) {
+    if (fieldConfig.authorizationGroupUuids) {
+      extraColElem = (
+        <div>
+          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+            <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+          </Tooltip2>
+        </div>
+      )
+    }
+  }
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
   const validateFormDebounced = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
@@ -907,6 +940,7 @@ const CustomField = ({
       name={fieldName}
       onChange={handleChange}
       vertical={vertical}
+      extraColElem={extraColElem}
       {...fieldProps}
       {...extraProps}
     >
@@ -915,10 +949,9 @@ const CustomField = ({
   ) : (
     <FastField
       name={fieldName}
-      label={fieldProps.label}
-      vertical={fieldProps.vertical}
       component={FieldHelper.ReadonlyField}
       humanValue={<i>Missing FieldComponent for {type}</i>}
+      {...fieldProps}
     />
   )
 }
@@ -1019,13 +1052,12 @@ export const ReadonlyCustomFields = ({
           <FastField
             key={key}
             name={fieldName}
-            label={fieldProps.label}
-            vertical={fieldProps.vertical}
             isCompact={isCompact}
             component={FieldHelper.ReadonlyField}
             humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
             extraColElem={extraColElem}
             labelColumnWidth={labelColumnWidth}
+            {...fieldProps}
           />
         )
       })}
@@ -1052,12 +1084,28 @@ export const mapReadonlyCustomFieldsToComps = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
-  extraColElem,
   labelColumnWidth
 }) => {
   return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
+    let extraColElem = null
+    if (fieldConfig.authorizationGroupUuids) {
+      extraColElem = (
+        <div>
+          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+            <Icon
+              icon={IconNames.INFO_SIGN}
+              intent={Intent.PRIMARY}
+              className="sensitive-information-icon"
+            />
+          </Tooltip2>
+        </div>
+      )
+    }
     const fieldName = `${parentFieldName}.${key}`
     const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+    if (fieldConfig.authorizationGroupUuids) {
+      fieldProps.className = "sensitive-information"
+    }
     const { type } = fieldConfig
     let extraProps = {}
     if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
@@ -1081,12 +1129,11 @@ export const mapReadonlyCustomFieldsToComps = ({
       <FastField
         key={key}
         name={fieldName}
-        label={fieldProps.label}
-        vertical={fieldProps.vertical}
         component={FieldHelper.ReadonlyField}
         humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
         extraColElem={extraColElem}
         labelColumnWidth={labelColumnWidth}
+        {...fieldProps}
       />
     )
 
@@ -1115,4 +1162,27 @@ export const customFieldsJSONString = (
     }
     return JSON.stringify(filteredCustomFieldsValues)
   }
+}
+
+// customSensitiveInformation should be changed according to formSensitiveField values
+// When field is not initialized new field object should be pushed to customSensitiveInformation
+export const updateCustomSensitiveInformation = (
+  values,
+  parentFieldName = SENSITIVE_CUSTOM_FIELDS_PARENT
+) => {
+  const customSensitiveInformation = []
+  const sensitiveFieldValues = Object.get(values, parentFieldName) || []
+  Object.keys(sensitiveFieldValues).forEach(sensitiveFieldName => {
+    const existingField = values.customSensitiveInformation?.find(
+      sf => sf.customFieldName === sensitiveFieldName
+    )
+    customSensitiveInformation.push({
+      customFieldName: sensitiveFieldName,
+      customFieldValue: JSON.stringify({
+        [sensitiveFieldName]: sensitiveFieldValues[sensitiveFieldName]
+      }),
+      uuid: existingField?.uuid
+    })
+  })
+  return customSensitiveInformation
 }

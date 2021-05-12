@@ -44,19 +44,20 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY
-  public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
+  public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
+  public static final String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
       "biography", "country", "gender", "endOfTourDate", "domainUsername", "openIdSubject",
       "pendingVerification", "code", "updatedAt", "customFields"};
   // "avatar" has its own batcher
-  public static String[] avatarFields = {"uuid", "avatar"};
+  public static final String[] avatarFields = {"uuid", "avatar"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
-  public static String TABLE_NAME = "people";
-  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
-  public static String PERSON_AVATAR_FIELDS =
+  public static final String TABLE_NAME = "people";
+  public static final String PERSON_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
+  public static final String PERSON_AVATAR_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, avatarFields, true);
-  public static String PERSON_FIELDS_NOAS =
+  public static final String PERSON_FIELDS_NOAS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
@@ -436,6 +437,12 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
 
     // update notes
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
+
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
+        winner.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
     // finally, delete the person!
     final int nr = deleteForMerge("people", "uuid", loserUuid);

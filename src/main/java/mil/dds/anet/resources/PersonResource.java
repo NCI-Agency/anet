@@ -77,6 +77,9 @@ public class PersonResource {
           DaoUtils.getUuid(created.getPosition()));
     }
 
+    DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
+        p.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Person {} created by {}", created, user);
     return created;
   }
@@ -185,6 +188,10 @@ public class PersonResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
     }
+
+    DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
+        p.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

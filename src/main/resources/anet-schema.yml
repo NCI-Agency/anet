@@ -217,6 +217,21 @@ $defs:
         additionalProperties:
           "$ref": "#/$defs/customField"
 
+# definition for custom sensitive information
+  customSensitiveInformation:
+    allOf:
+    - "$ref": "#/$defs/customField"
+    - properties:
+        tooltipText:
+          type: string
+        authorizationGroupUuids:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            type: string
+            description: The list of authorizationGroup uuid's that have access to this custom sensitive information
+
 #########################################################
 ### schema root
 #########################################################
@@ -515,6 +530,10 @@ properties:
             type: object
             additionalProperties:
               "$ref": "#/$defs/customField"
+          customSensitiveInformation:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/customSensitiveInformation"
 
       location:
         type: object

@@ -33,10 +33,11 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
 
-  public static String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
+  public static final String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid", "customFields"};
-  public static String TABLE_NAME = "positions";
-  public static String POSITIONS_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String TABLE_NAME = "positions";
+  public static final String POSITIONS_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
   public Position insertInternal(Position p) {
@@ -483,6 +484,9 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
         "DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?",
         positionUuid, positionUuid);
 
+    // delete customSensitiveInformation for this position
+    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(positionUuid);
+
     final int nr = getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
         .bind("positionUuid", positionUuid).execute();
     // Evict the person (previously) holding this position from the domain users cache
@@ -578,6 +582,12 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
     // Update authorizationGroupPositions
     updateM2mForMerge("authorizationGroupPositions", "authorizationGroupUuid", "positionUuid",
         winnerUuid, loserUuid);
+
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
+        winner.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
     // Finally, delete loser
     final int nr = deleteForMerge("positions", "uuid", loserUuid);

@@ -76,7 +76,11 @@ public class TaskResource {
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
-    AnetAuditLogger.log("Task {} created by {}", t, user);
+
+    DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, created.getUuid(),
+        t.getCustomSensitiveInformation());
+
+    AnetAuditLogger.log("Task {} created by {}", created, user);
     return created;
   }
 
@@ -150,6 +154,10 @@ public class TaskResource {
           existing.loadApprovalSteps(engine.getContext()).join();
       Utils.updateApprovalSteps(t, t.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
           t.getApprovalSteps(), existingApprovalSteps);
+
+      DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, t.getUuid(),
+          t.getCustomSensitiveInformation());
+
       AnetAuditLogger.log("Task {} updatedby {}", t, user);
 
       // GraphQL mutations *have* to return something, so we return the number of updated rows
