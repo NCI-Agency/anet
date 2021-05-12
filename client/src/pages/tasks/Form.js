@@ -17,11 +17,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Model, {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_NOTE_FIELDS,
-  NOTE_TYPE
-} from "components/Model"
+import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
@@ -503,13 +499,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const task = Object.without(
-      new Task(values),
-      "notes",
-      "assessment_customFieldEnum1",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const task = Task.filterClientSideFields(new Task(values))
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)
     const variables = { task: task }

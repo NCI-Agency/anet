@@ -3973,4 +3973,25 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-customSensitiveInformation-table" author="gjvoosten">
+		<createTable tableName="customSensitiveInformation">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="customFieldName" type="${long_text_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="customFieldValue" type="${long_text_type}" />
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
 </databaseChangeLog>

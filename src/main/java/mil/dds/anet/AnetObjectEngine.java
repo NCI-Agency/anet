@@ -28,6 +28,7 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
+import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
@@ -65,6 +66,7 @@ public class AnetObjectEngine {
   private final SavedSearchDao savedSearchDao;
   private final EmailDao emailDao;
   private final ReportSensitiveInformationDao reportSensitiveInformationDao;
+  private final CustomSensitiveInformationDao customSensitiveInformationDao;
   private final AuthorizationGroupDao authorizationGroupDao;
   private final NoteDao noteDao;
   private final JobHistoryDao jobHistoryDao;
@@ -95,6 +97,7 @@ public class AnetObjectEngine {
     adminDao = injector.getInstance(AdminDao.class);
     savedSearchDao = injector.getInstance(SavedSearchDao.class);
     reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
+    customSensitiveInformationDao = injector.getInstance(CustomSensitiveInformationDao.class);
     emailDao = injector.getInstance(EmailDao.class);
     authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
     noteDao = injector.getInstance(NoteDao.class);
@@ -159,6 +162,10 @@ public class AnetObjectEngine {
 
   public ReportSensitiveInformationDao getReportSensitiveInformationDao() {
     return reportSensitiveInformationDao;
+  }
+
+  public CustomSensitiveInformationDao getCustomSensitiveInformationDao() {
+    return customSensitiveInformationDao;
   }
 
   public AuthorizationGroupDao getAuthorizationGroupDao() {

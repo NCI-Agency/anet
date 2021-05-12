@@ -71,7 +71,8 @@ const Field = ({
   vertical,
   isCompact,
   extraAddon,
-  labelColumnWidth
+  labelColumnWidth,
+  className
 }) => {
   const id = getFieldId(field)
   const widget = useMemo(
@@ -102,6 +103,7 @@ const Field = ({
     return (
       <CompactRow
         label={label}
+        className={className}
         content={
           <>
             {widget}
@@ -114,7 +116,12 @@ const Field = ({
   }
 
   return (
-    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
+    <FormGroup
+      id={`fg-${id}`}
+      controlId={id}
+      validationState={validationState}
+      className={className}
+    >
       {vertical ? (
         <>
           <div>{label !== null && <ControlLabel>{label}</ControlLabel>}</div>
@@ -153,7 +160,8 @@ Field.propTypes = {
   vertical: PropTypes.bool,
   extraAddon: PropTypes.object,
   isCompact: PropTypes.bool,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 Field.defaultProps = {
   vertical: false, // default direction of label and input = horizontal
@@ -253,6 +261,7 @@ export const ReadonlyField = ({
   isCompact,
   ...otherProps
 }) => {
+  const { className } = otherProps
   const widgetElem = useMemo(
     () => (
       <FormControl.Static componentClass="div" {...field} {...otherProps}>
@@ -273,6 +282,7 @@ export const ReadonlyField = ({
       addon={addon}
       vertical={vertical}
       isCompact={isCompact}
+      className={className}
     />
   )
 }

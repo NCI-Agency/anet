@@ -15,7 +15,6 @@ type Activity {
 type AdminSetting {
   createdAt: Instant
   key: String
-  notes: [Note]
   updatedAt: Instant
   value: String
 }
@@ -23,7 +22,6 @@ type AdminSetting {
 input AdminSettingInput {
   createdAt: Instant
   key: String
-  notes: [NoteInput]
   updatedAt: Instant
   value: String
 }
@@ -100,7 +98,6 @@ type ApprovalStep {
   createdAt: Instant
   name: String
   nextStepUuid: String
-  notes: [Note]
   relatedObjectUuid: String
   restrictedApproval: Boolean!
   type: ApprovalStepType
@@ -113,7 +110,6 @@ input ApprovalStepInput {
   createdAt: Instant
   name: String
   nextStepUuid: String
-  notes: [NoteInput]
   relatedObjectUuid: String
   restrictedApproval: Boolean
   type: ApprovalStepType
@@ -136,7 +132,6 @@ type AuthorizationGroup {
   createdAt: Instant
   description: String
   name: String
-  notes: [Note]
   positions: [Position]
   status: Status
   updatedAt: Instant
@@ -147,7 +142,6 @@ input AuthorizationGroupInput {
   createdAt: Instant
   description: String
   name: String
-  notes: [NoteInput]
   positions: [PositionInput]
   status: Status
   updatedAt: Instant
@@ -174,7 +168,6 @@ enum AuthorizationGroupSearchSortBy {
 type Comment {
   author: Person
   createdAt: Instant
-  notes: [Note]
   reportUuid: String
   text: String
   updatedAt: Instant
@@ -184,9 +177,29 @@ type Comment {
 input CommentInput {
   author: PersonInput
   createdAt: Instant
-  notes: [NoteInput]
   reportUuid: String
   text: String
+  updatedAt: Instant
+  uuid: String
+}
+
+type CustomSensitiveInformation {
+  createdAt: Instant
+  customFieldName: String
+  customFieldValue: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+  updatedAt: Instant
+  uuid: String
+}
+
+input CustomSensitiveInformationInput {
+  createdAt: Instant
+  customFieldName: String
+  customFieldValue: String
+  relatedObjectType: String
+  relatedObjectUuid: String
   updatedAt: Instant
   uuid: String
 }
@@ -203,6 +216,7 @@ type Location {
   approvalSteps: [ApprovalStep]
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   lat: Float
   lng: Float
   name: String
@@ -217,10 +231,10 @@ input LocationInput {
   approvalSteps: [ApprovalStepInput]
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   lat: Float
   lng: Float
   name: String
-  notes: [NoteInput]
   planningApprovalSteps: [ApprovalStepInput]
   status: Status
   updatedAt: Instant
@@ -290,7 +304,6 @@ type Note {
   author: Person
   createdAt: Instant
   noteRelatedObjects: [NoteRelatedObject]
-  notes: [Note]
   text: String
   type: NoteType
   updatedAt: Instant
@@ -301,7 +314,6 @@ input NoteInput {
   author: PersonInput
   createdAt: Instant
   noteRelatedObjects: [NoteRelatedObjectInput]
-  notes: [NoteInput]
   text: String
   type: NoteType
   updatedAt: Instant
@@ -334,6 +346,7 @@ type Organization {
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   identificationCode: String
   longName: String
@@ -353,9 +366,9 @@ input OrganizationInput {
   approvalSteps: [ApprovalStepInput]
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   identificationCode: String
   longName: String
-  notes: [NoteInput]
   parentOrg: OrganizationInput
   planningApprovalSteps: [ApprovalStepInput]
   shortName: String
@@ -400,6 +413,7 @@ type Person {
   country: String
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   domainUsername: String
   emailAddress: String
   endOfTourDate: Instant
@@ -424,12 +438,12 @@ input PersonInput {
   country: String
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   domainUsername: String
   emailAddress: String
   endOfTourDate: Instant
   gender: String
   name: String
-  notes: [NoteInput]
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -444,7 +458,6 @@ input PersonInput {
 type PersonPositionHistory {
   createdAt: Instant
   endTime: Instant
-  notes: [Note]
   person: Person
   position: Position
   startTime: Instant
@@ -454,7 +467,6 @@ type PersonPositionHistory {
 input PersonPositionHistoryInput {
   createdAt: Instant
   endTime: Instant
-  notes: [NoteInput]
   person: PersonInput
   position: PositionInput
   startTime: Instant
@@ -491,9 +503,11 @@ enum PersonSearchSortBy {
 
 type Position {
   associatedPositions: [Position]
+  authorizationGroups: [AuthorizationGroup]
   code: String
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   isApprover: Boolean
   location: Location
   name: String
@@ -513,9 +527,9 @@ input PositionInput {
   code: String
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   location: LocationInput
   name: String
-  notes: [NoteInput]
   organization: OrganizationInput
   person: PersonInput
   previousPeople: [PersonPositionHistoryInput]
@@ -609,6 +623,7 @@ type Report {
   comments: [Comment]
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   duration: Int
   engagementDate: Instant
   engagementDayOfWeek: Int
@@ -635,7 +650,6 @@ type Report {
 
 type ReportAction {
   createdAt: Instant
-  notes: [Note]
   person: Person
   planned: Boolean!
   report: Report
@@ -666,6 +680,7 @@ input ReportInput {
   comments: [CommentInput]
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   duration: Int
   engagementDate: Instant
   engagementDayOfWeek: Int
@@ -674,7 +689,6 @@ input ReportInput {
   keyOutcomes: String
   location: LocationInput
   nextSteps: String
-  notes: [NoteInput]
   principalOrg: OrganizationInput
   releasedAt: Instant
   reportPeople: [ReportPersonInput]
@@ -697,6 +711,7 @@ type ReportPerson {
   country: String
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   domainUsername: String
   emailAddress: String
   endOfTourDate: Instant
@@ -724,12 +739,12 @@ input ReportPersonInput {
   country: String
   createdAt: Instant
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   domainUsername: String
   emailAddress: String
   endOfTourDate: Instant
   gender: String
   name: String
-  notes: [NoteInput]
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -790,7 +805,6 @@ enum ReportSearchSortBy {
 
 type ReportSensitiveInformation {
   createdAt: Instant
-  notes: [Note]
   text: String
   updatedAt: Instant
   uuid: String
@@ -798,7 +812,6 @@ type ReportSensitiveInformation {
 
 input ReportSensitiveInformationInput {
   createdAt: Instant
-  notes: [NoteInput]
   text: String
   updatedAt: Instant
   uuid: String
@@ -828,7 +841,6 @@ type RollupGraph {
 type SavedSearch {
   createdAt: Instant
   name: String
-  notes: [Note]
   objectType: SearchObjectType
   owner: Person
   query: String
@@ -839,7 +851,6 @@ type SavedSearch {
 input SavedSearchInput {
   createdAt: Instant
   name: String
-  notes: [NoteInput]
   objectType: SearchObjectType
   owner: PersonInput
   query: String
@@ -875,6 +886,7 @@ type Task {
   customFieldEnum2: String
   customFieldRef1: Task
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
   longName: String
   notes: [Note]
   plannedCompletion: Instant
@@ -898,8 +910,8 @@ input TaskInput {
   customFieldEnum2: String
   customFieldRef1: TaskInput
   customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
   longName: String
-  notes: [NoteInput]
   plannedCompletion: Instant
   planningApprovalSteps: [ApprovalStepInput]
   projectedCompletion: Instant

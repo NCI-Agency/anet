@@ -3,6 +3,7 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import com.google.common.collect.ImmutableList;
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.io.File;
@@ -16,13 +17,17 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
+import mil.dds.anet.test.client.CustomSensitiveInformation;
+import mil.dds.anet.test.client.CustomSensitiveInformationInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.OrganizationType;
@@ -46,15 +51,20 @@ import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
+  private static final String BIRTHDAY_FIELD = "birthday";
+  private static final String POLITICAL_POSITION_FIELD = "politicalPosition";
+  private static final String _CUSTOM_SENSITIVE_INFORMATION_FIELDS =
+      "customSensitiveInformation { uuid customFieldName customFieldValue"
+          + " relatedObjectType relatedObjectUuid createdAt updatedAt }";
   private static final String _POSITION_FIELDS = "uuid name code type status organization { uuid }";
   private static final String _PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
           + " customFields";
-  private static final String POSITION_FIELDS =
-      "{ " + _POSITION_FIELDS + " person { " + _PERSON_FIELDS + " } }";
-  private static final String FIELDS =
-      "{ " + _PERSON_FIELDS + " position { " + _POSITION_FIELDS + " } }";
+  private static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
+      _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
+  private static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
+      _POSITION_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
 
   // 200 x 200 avatar
   final File DEFAULT_AVATAR =
@@ -522,6 +532,234 @@ public class PersonResourceTest extends AbstractResourceTest {
       userMutationExecutor.createPerson(FIELDS, advisorPosition2Input);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
+    }
+  }
+
+  @Test
+  public void testReadCustomSensitiveInformation()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Steve already has sensitive data
+    final String steveUuid = getSteveSteveson().getUuid();
+    // Elizabeth can read all sensitive data of her counterpart Steve
+    checkSensitiveInformation(steveUuid, "elizabeth",
+        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD));
+    // Jim has no access to Steve's sensitive data
+    checkSensitiveInformation(steveUuid, "jim", ImmutableList.of());
+  }
+
+  @Test
+  public void testInsertCustomSensitiveInformation()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Christopf has no sensitive data yet
+    final String christopfUuid = getChristopfTopferness().getUuid();
+    // Admin has access to everything
+    checkSensitiveInformationEdit(christopfUuid, adminUser,
+        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), true);
+    // Henry has access to Christopf's birthday
+    checkSensitiveInformationEdit(christopfUuid, "henry", ImmutableList.of(BIRTHDAY_FIELD), true);
+    // Bob has access to Christopf's politicalPosition
+    checkSensitiveInformationEdit(christopfUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
+        true);
+  }
+
+  @Test
+  public void testUpdateCustomSensitiveInformation()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Steve already has sensitive data
+    final String steveUuid = getSteveSteveson().getUuid();
+    // Admin has access to everything
+    checkSensitiveInformationEdit(steveUuid, adminUser,
+        ImmutableList.of(BIRTHDAY_FIELD, POLITICAL_POSITION_FIELD), false);
+    // Henry has access to Steve's birthday
+    checkSensitiveInformationEdit(steveUuid, "henry", ImmutableList.of(BIRTHDAY_FIELD), false);
+    // Bob has access to Steve's politicalPosition
+    checkSensitiveInformationEdit(steveUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
+        false);
+  }
+
+  private Person checkSensitiveInformation(final String personUuid, final String user,
+      // List should be in alphabetical order
+      final ImmutableList<String> customSensitiveFields)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final QueryExecutor queryExecutor = getQueryExecutor(user);
+    final int size = customSensitiveFields.size();
+
+    final Person person = queryExecutor.person(FIELDS, personUuid);
+    assertThat(person).isNotNull();
+    assertThat(person.getCustomSensitiveInformation()).hasSize(size);
+    assertThat(person.getCustomSensitiveInformation())
+        .allMatch(csi -> customSensitiveFields.contains(csi.getCustomFieldName()));
+
+    return person;
+  }
+
+  private void checkSensitiveInformationEdit(final String personUuid, final String user,
+      // List should be in alphabetical order
+      final ImmutableList<String> customSensitiveFields, final boolean doInsert)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Person person = checkSensitiveInformation(personUuid, user,
+        doInsert ? ImmutableList.of() : customSensitiveFields);
+
+    final QueryExecutor queryExecutor = getQueryExecutor(user);
+    final MutationExecutor mutationExecutor = getMutationExecutor(user);
+    final int size = customSensitiveFields.size();
+
+    final PersonInput personInput = getInput(person, PersonInput.class);
+    if (doInsert) {
+      final List<CustomSensitiveInformationInput> csiInput = customSensitiveFields.stream()
+          .map(csf -> CustomSensitiveInformationInput.builder().withCustomFieldName(csf)
+              .withCustomFieldValue(UUID.randomUUID().toString()).build())
+          .collect(Collectors.toList());
+      personInput.setCustomSensitiveInformation(csiInput);
+    } else {
+      personInput.getCustomSensitiveInformation().stream()
+          .forEach(csiInput -> csiInput.setCustomFieldValue(UUID.randomUUID().toString()));
+    }
+    final Integer nrUpdated = mutationExecutor.updatePerson("", personInput);
+    assertThat(nrUpdated).isEqualTo(1);
+    final Person personUpdated = queryExecutor.person(FIELDS, personInput.getUuid());
+    assertThat(personUpdated).isNotNull();
+    assertThat(personUpdated.getCustomSensitiveInformation()).hasSize(size);
+    for (int i = 0; i < size; i++) {
+      final CustomSensitiveInformationInput csiInput =
+          personInput.getCustomSensitiveInformation().get(i);
+      final CustomSensitiveInformation csiUpdated =
+          personUpdated.getCustomSensitiveInformation().get(i);
+      if (doInsert) {
+        assertThat(csiUpdated.getUpdatedAt()).isNotNull();
+      } else {
+        assertThat(csiUpdated.getUpdatedAt()).isAfter(csiInput.getUpdatedAt());
+      }
+      assertThat(csiUpdated.getCustomFieldValue()).isEqualTo(csiInput.getCustomFieldValue());
+    }
+
+    if (doInsert) {
+      // Delete customSensitiveInformation again
+      final int nrDeleted =
+          AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(personUuid);
+      assertThat(nrDeleted).isEqualTo(size);
+    } else {
+      // Restore previous values
+      final PersonInput personInputRestore = getInput(person, PersonInput.class);
+      personInput.getCustomSensitiveInformation().stream()
+          .forEach(csiInput -> csiInput.setCustomFieldValue(UUID.randomUUID().toString()));
+      final Integer nrUpdatedRestore = mutationExecutor.updatePerson("", personInputRestore);
+      assertThat(nrUpdatedRestore).isEqualTo(1);
+    }
+  }
+
+  @Test
+  public void testUnauthorizedCustomSensitiveInformation()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Try to do some updates that are not allowed
+    final String steveUuid = getSteveSteveson().getUuid();
+    // Henry only has access to Steve's birthday
+    checkUnauthorizedSensitiveInformation(steveUuid, "henry",
+        ImmutableList.of(POLITICAL_POSITION_FIELD));
+    // Bob only has access to Steve's politicalPosition
+    checkUnauthorizedSensitiveInformation(steveUuid, "bob", ImmutableList.of(BIRTHDAY_FIELD));
+  }
+
+  private void checkUnauthorizedSensitiveInformation(final String personUuid, final String user,
+      // List should be in alphabetical order
+      final ImmutableList<String> customSensitiveFields)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final QueryExecutor queryExecutor = getQueryExecutor(user);
+    final MutationExecutor mutationExecutor = getMutationExecutor(user);
+
+    final Person person = queryExecutor.person(FIELDS, personUuid);
+    assertThat(person).isNotNull();
+    assertThat(person.getCustomSensitiveInformation())
+        .noneMatch(csi -> customSensitiveFields.contains(csi.getCustomFieldName()));
+
+    final String customFieldValue = "__UPDATE_NOT_ALLOWED__";
+    final PersonInput personInput = getInput(person, PersonInput.class);
+    final List<CustomSensitiveInformationInput> csiInput = customSensitiveFields.stream()
+        .map(csf -> CustomSensitiveInformationInput.builder().withCustomFieldName(csf)
+            .withCustomFieldValue(customFieldValue).build())
+        .collect(Collectors.toList());
+    personInput.setCustomSensitiveInformation(csiInput);
+    final Instant beforeUpdate = Instant.now();
+    final Integer nrUpdated = mutationExecutor.updatePerson("", personInput);
+    assertThat(nrUpdated).isEqualTo(1);
+    final Person personUpdated = adminQueryExecutor.person(FIELDS, personInput.getUuid());
+    assertThat(personUpdated).isNotNull();
+    assertThat(personUpdated.getCustomSensitiveInformation())
+        .allMatch(csi -> !customFieldValue.equals(csi.getCustomFieldValue())
+            && beforeUpdate.isAfter(csi.getUpdatedAt()));
+  }
+
+  @Test
+  public void testIllegalCustomSensitiveInformation()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Try to do some updates that are illegal
+    final Person person = adminQueryExecutor.person(FIELDS, getSteveSteveson().getUuid());
+    assertThat(person).isNotNull();
+    assertThat(person.getCustomSensitiveInformation()).isNotEmpty();
+
+    // Test with non-existing UUID
+    PersonInput personInput = getInput(person, PersonInput.class);
+    personInput.getCustomSensitiveInformation().stream()
+        .forEach(csiInput -> csiInput.setUuid(UUID.randomUUID().toString()));
+    checkIllegalSensitiveInformation(person, personInput, personInput);
+
+    // Test with wrong customFieldName
+    personInput = getInput(person, PersonInput.class);
+    personInput.getCustomSensitiveInformation().stream()
+        .forEach(csiInput -> csiInput.setCustomFieldName(
+            BIRTHDAY_FIELD.equals(csiInput.getCustomFieldName()) ? POLITICAL_POSITION_FIELD
+                : BIRTHDAY_FIELD));
+    checkIllegalSensitiveInformation(person, personInput, personInput);
+
+    // Test with wrong relatedObjectUuid
+    personInput = getInput(person, PersonInput.class);
+    final PersonInput otherPersonInput = getInput(getNickNicholson(), PersonInput.class);
+    otherPersonInput.setCustomSensitiveInformation(personInput.getCustomSensitiveInformation());
+    checkIllegalSensitiveInformation(person, otherPersonInput, personInput);
+    final Person otherPersonUpdated = adminQueryExecutor.person(FIELDS, otherPersonInput.getUuid());
+    assertThat(otherPersonUpdated).isNotNull();
+    assertThat(otherPersonUpdated.getCustomSensitiveInformation()).isEmpty();
+
+    // Test with wrong relatedObjectType
+    personInput = getInput(person, PersonInput.class);
+    final PositionInput positionInput = personInput.getPosition();
+    positionInput.setCustomSensitiveInformation(personInput.getCustomSensitiveInformation());
+    final Integer nrUpdated = adminMutationExecutor.updatePosition("", positionInput);
+    assertThat(nrUpdated).isEqualTo(1);
+    final Position positionUpdated =
+        adminQueryExecutor.position(POSITION_FIELDS, positionInput.getUuid());
+    assertThat(positionUpdated).isNotNull();
+    assertThat(positionUpdated.getCustomSensitiveInformation()).isEmpty();
+    final Person personUpdated = adminQueryExecutor.person(FIELDS, personInput.getUuid());
+    assertThat(personUpdated).isNotNull();
+    assertCsi(personUpdated.getCustomSensitiveInformation(),
+        person.getCustomSensitiveInformation());
+  }
+
+  private void checkIllegalSensitiveInformation(final Person person,
+      final PersonInput personToUpdate, final PersonInput personToCheck)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Integer nrUpdated = adminMutationExecutor.updatePerson("", personToUpdate);
+    assertThat(nrUpdated).isEqualTo(1);
+    final Person personUpdated = adminQueryExecutor.person(FIELDS, personToCheck.getUuid());
+    assertThat(personUpdated).isNotNull();
+    assertCsi(personUpdated.getCustomSensitiveInformation(),
+        person.getCustomSensitiveInformation());
+  }
+
+  private void assertCsi(final List<CustomSensitiveInformation> csiList1,
+      List<CustomSensitiveInformation> csiList2) {
+    assertThat(csiList1).hasSameSizeAs(csiList2);
+    for (int i = 0; i < csiList1.size(); i++) {
+      final CustomSensitiveInformation csi1 = csiList1.get(i);
+      final CustomSensitiveInformation csi2 = csiList2.get(i);
+      assertThat(csi1.getUuid()).isEqualTo(csi2.getUuid());
+      assertThat(csi1.getCustomFieldName()).isEqualTo(csi2.getCustomFieldName());
+      assertThat(csi1.getCustomFieldValue()).isEqualTo(csi2.getCustomFieldValue());
+      assertThat(csi1.getRelatedObjectType()).isEqualTo(csi2.getRelatedObjectType());
+      assertThat(csi1.getRelatedObjectUuid()).isEqualTo(csi2.getRelatedObjectUuid());
+      assertThat(csi1.getCreatedAt()).isEqualTo(csi2.getCreatedAt());
+      assertThat(csi1.getUpdatedAt()).isEqualTo(csi2.getUpdatedAt());
     }
   }
 

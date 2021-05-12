@@ -8,12 +8,13 @@ import AvatarEditModal from "components/AvatarEditModal"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString
+  customFieldsJSONString,
+  updateCustomSensitiveInformation
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, { SENSITIVE_CUSTOM_FIELDS_PARENT } from "components/Model"
 import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
@@ -140,6 +141,13 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
         const warnDomainUsername =
           values.status === Model.STATUS.INACTIVE &&
           !_isEmpty(values.domainUsername)
+        const authorizedSensitiveFields =
+          currentUser &&
+          Person.getAuthorizedSensitiveFields(
+            currentUser,
+            Person.customSensitiveInformation,
+            values.position
+          )
         const ranks = Settings.fields.person.ranks || []
         const roleButtons = isAdmin ? adminRoleButtons : userRoleButtons
         const countries = getCountries(values.role)
@@ -147,15 +155,15 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
           // Assign default country if there's only one
           values.country = countries[0]
         }
-        // anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
-        const disableStatusChange =
-          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         // admins can edit all persons, new users can be edited by super users or themselves
         const canEditName =
           isAdmin ||
           ((isPendingVerification || !edit) &&
             currentUser &&
             (currentUser.isSuperUser() || isSelf))
+        // admins and super users with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
+        const disableStatusChange =
+          (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         const fullName = Person.fullName(Person.parseFullName(values.name))
         const nameMessage = "This is not " + (isSelf ? "me" : fullName)
         const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
@@ -523,6 +531,21 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   />
                 </Fieldset>
               )}
+
+              {!_isEmpty(authorizedSensitiveFields) && (
+                <Fieldset title="Sensitive information" id="sensitive-fields">
+                  <CustomFieldsContainer
+                    fieldsConfig={authorizedSensitiveFields}
+                    parentFieldName={SENSITIVE_CUSTOM_FIELDS_PARENT}
+                    formikProps={{
+                      setFieldTouched,
+                      setFieldValue,
+                      values,
+                      validateForm
+                    }}
+                  />
+                </Fieldset>
+              )}
               {showSimilarPeople && (
                 <SimilarObjectsModal
                   objectType="Person"
@@ -624,14 +647,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
 
   function save(values, form) {
     values.avatar = currentAvatar
-    const person = Object.without(
-      new Person(values),
-      "notes",
-      "firstName",
-      "lastName",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const person = Person.filterClientSideFields(new Person(values))
     if (values.pendingVerification) {
       person.pendingVerification = false
     }
@@ -639,6 +655,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
       { firstName: values.firstName, lastName: values.lastName },
       true
     )
+    person.customSensitiveInformation = updateCustomSensitiveInformation(values)
     person.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_PERSON : GQL_CREATE_PERSON, {
       person

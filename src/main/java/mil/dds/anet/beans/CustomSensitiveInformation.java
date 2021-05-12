@@ -1,23 +1,22 @@
 package mil.dds.anet.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class NoteRelatedObject extends AbstractAnetBean {
+public class CustomSensitiveInformation extends AbstractAnetBean {
 
   @GraphQLQuery
   @GraphQLInputField
-  private String noteUuid;
+  private String customFieldName;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String customFieldValue;
   @GraphQLQuery
   @GraphQLInputField
   private String relatedObjectType;
@@ -27,48 +26,20 @@ public class NoteRelatedObject extends AbstractAnetBean {
   // annotated below
   private RelatableObject relatedObject;
 
-  @Override
-  @JsonIgnore
-  @GraphQLIgnore
-  public String getUuid() {
-    throw new WebApplicationException("no UUID field on NoteRelatedObject");
+  public String getCustomFieldName() {
+    return customFieldName;
   }
 
-  @Override
-  public void setUuid(String uuid) {
-    // just ignore
+  public void setCustomFieldName(String customFieldName) {
+    this.customFieldName = customFieldName;
   }
 
-  @Override
-  @JsonIgnore
-  @GraphQLIgnore
-  public Instant getCreatedAt() {
-    throw new WebApplicationException("no createdAt field on NoteRelatedObject");
+  public String getCustomFieldValue() {
+    return customFieldValue;
   }
 
-  @Override
-  public void setCreatedAt(Instant createdAt) {
-    // just ignore
-  }
-
-  @Override
-  @JsonIgnore
-  @GraphQLIgnore
-  public Instant getUpdatedAt() {
-    throw new WebApplicationException("no updatedAt field on NoteRelatedObject");
-  }
-
-  @Override
-  public void setUpdatedAt(Instant updatedAt) {
-    // just ignore
-  }
-
-  public String getNoteUuid() {
-    return noteUuid;
-  }
-
-  public void setNoteUuid(String noteUuid) {
-    this.noteUuid = noteUuid;
+  public void setCustomFieldValue(String customFieldValue) {
+    this.customFieldValue = customFieldValue;
   }
 
   public String getRelatedObjectType() {
@@ -100,4 +71,11 @@ public class NoteRelatedObject extends AbstractAnetBean {
           return relatedObject;
         });
   }
+
+  @Override
+  public String toString() {
+    return String.format("[uuid:%s customFieldName:%s relatedObjectType:%s relatedObjectUuid:%s]",
+        uuid, customFieldName, relatedObjectType, relatedObjectUuid);
+  }
+
 }

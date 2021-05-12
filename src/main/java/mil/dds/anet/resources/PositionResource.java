@@ -76,14 +76,17 @@ public class PositionResource {
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
 
-    final Position position = dao.insert(pos);
+    final Position created = dao.insert(pos);
 
     if (pos.getPersonUuid() != null) {
-      dao.setPersonInPosition(pos.getPersonUuid(), position.getUuid());
+      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid());
     }
 
-    AnetAuditLogger.log("Position {} created by {}", position, user);
-    return position;
+    DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, created.getUuid(),
+        pos.getCustomSensitiveInformation());
+
+    AnetAuditLogger.log("Position {} created by {}", created, user);
+    return created;
   }
 
   @GraphQLMutation(name = "updateAssociatedPosition")
@@ -125,6 +128,9 @@ public class PositionResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
+
+    DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
+        pos.getCustomSensitiveInformation());
 
     if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
       final Position current = dao.getByUuid(pos.getUuid());

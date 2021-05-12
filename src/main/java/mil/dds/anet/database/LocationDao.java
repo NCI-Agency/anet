@@ -83,6 +83,12 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerLocationUuid,
         loserLocationUuid);
 
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, LocationDao.TABLE_NAME, winnerLocationUuid,
+        winnerLocation.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserLocationUuid);
+
     // Finally, delete the location
     return deleteForMerge("locations", "uuid", loserLocationUuid);
   }

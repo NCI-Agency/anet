@@ -6,9 +6,6 @@ import {
   mapPageDispatchersToProps,
   useBoilerplate
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
 import { AuthorizationGroup } from "models"
 import React from "react"
 import { connect } from "react-redux"
@@ -40,7 +37,6 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
         }
       }
       status
-      ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
@@ -70,16 +66,6 @@ const AuthorizationGroupEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={authorizationGroup.notes}
-        relatedObject={
-          authorizationGroup.uuid && {
-            relatedObjectType: AuthorizationGroup.relatedObjectType,
-            relatedObjectUuid: authorizationGroup.uuid,
-            relatedObject: authorizationGroup
-          }
-        }
-      />
       <AuthorizationGroupForm
         edit
         initialValues={authorizationGroup}
