@@ -70,7 +70,7 @@ $defs:
 # definition for custom fields
   customField:
     type: object
-    unevaluatedProperties: false
+    unevaluatedProperties: true # FIXME: ugly work-around for customSensitiveInformation
     required: [type]
     properties:
       test:
