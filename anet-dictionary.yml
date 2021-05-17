@@ -403,6 +403,28 @@ fields:
     endOfTourDate: End of tour
     biography: Biography
     customFields:
+      regionOfBirth:
+        type: anet_object
+        label: Region of birth
+        helpText: Here you can link to the person's region of birth
+        types:
+          - Location
+        filters:
+          - Location:
+              typeFilter:
+                filterField: type
+                filterValue: [GEOGRAPHICAL_AREA]
+      regionOfResidence:
+        type: anet_object
+        label: Region of residence
+        helpText: Here you can link to the person's region of residence
+        types:
+          - Location
+        filters:
+          - Location:
+              typeFilter:
+                  filterField: type
+                  filterValue: [GEOGRAPHICAL_AREA]
       multipleButtons:
         type: enumset
         label: Choose one or more of the options
@@ -900,6 +922,8 @@ fields:
         - phoneNumber
         - country
         - birthday
+        - regionOfBirth
+        - regionOfResidence
         - colourOptions
         - textareaFieldName
         - domainUsername
