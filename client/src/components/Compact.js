@@ -1,7 +1,127 @@
 // Print friendly table layout for pages
 import styled from "@emotion/styled"
+import AppContext from "components/AppContext"
+import LinkTo from "components/LinkTo"
+import {
+  CompactSecurityBanner,
+  SETTING_KEY_COLOR
+} from "components/SecurityBanner"
+import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
+import { Link, useLocation } from "react-router-dom"
+import anetLogo from "resources/logo.svg"
+import Settings from "settings"
+
+export const CompactHeaderContent = ({ object }) => {
+  const location = useLocation()
+  const { appSettings } = useContext(AppContext)
+  return (
+    <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
+      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <ClassificationBanner />
+      <span style={{ fontSize: "12px" }}>
+        <Link to={location.pathname}>{object.uuid}</Link>
+      </span>
+    </HeaderContentS>
+  )
+}
+
+CompactHeaderContent.propTypes = {
+  object: PropTypes.object
+}
+
+export const CompactFooterContent = () => {
+  const { currentUser, appSettings } = useContext(AppContext)
+  return (
+    <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
+      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <ClassificationBanner />
+      <PrintedByBoxS>
+        <div>
+          printed by <LinkTo modelType="Person" model={currentUser} />
+        </div>
+        <div>
+          {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
+        </div>
+      </PrintedByBoxS>
+    </FooterContentS>
+  )
+}
+
+const PrintedByBoxS = styled.span`
+  align-self: flex-start;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  font-size: 10px;
+  & > span {
+    display: inline-block;
+    text-align: right;
+  }
+`
+
+// background color of banner makes reading blue links hard. Force white color
+const HF_COMMON_STYLE = `
+  position: absolute;
+  left: 0mm;
+  display: flex;
+  width: 100%;
+  max-height: 50px;
+  margin: 10px auto;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  -webkit-print-color-adjust: exact !important;
+  color-adjust: exact !important;
+  img {
+    max-width: 50px !important;
+    max-height: 24px !important;
+  }
+  & * {
+    color: white !important;
+  }
+  @media print {
+    position: fixed;
+    max-height: 70px;
+  }
+`
+
+const HeaderContentS = styled.div`
+  ${HF_COMMON_STYLE};
+  top: 0mm;
+  border-bottom: 1px solid black;
+  background-color: ${props => props.bgc} !important;
+`
+
+const FooterContentS = styled.div`
+  ${HF_COMMON_STYLE};
+  bottom: 0mm;
+  border-top: 1px solid black;
+  background-color: ${props => props.bgc} !important;
+`
+
+const ClassificationBanner = () => {
+  return (
+    <ClassificationBannerS>
+      <CompactSecurityBanner />
+    </ClassificationBannerS>
+  )
+}
+
+const ClassificationBannerS = styled.div`
+  width: auto;
+  max-width: 67%;
+  text-align: center;
+  display: inline-block;
+  & > .banner {
+    padding: 2px 4px;
+  }
+`
 
 const CompactTable = ({ children }) => {
   return (
