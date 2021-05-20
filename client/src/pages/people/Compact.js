@@ -1,0 +1,463 @@
+import styled from "@emotion/styled"
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import API from "api"
+import { gql } from "apollo-boost"
+import AppContext from "components/AppContext"
+import AvatarDisplayComponent from "components/AvatarDisplayComponent"
+import CompactTable, {
+  CompactFooterContent,
+  CompactHeaderContent
+} from "components/Compact"
+import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
+import * as FieldHelper from "components/FieldHelper"
+import LinkTo from "components/LinkTo"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
+} from "components/Model"
+import {
+  mapPageDispatchersToProps,
+  PageDispatchersPropType,
+  useBoilerplate
+} from "components/Page"
+import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
+import { Field, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
+import { Person } from "models"
+import moment from "moment"
+import PropTypes from "prop-types"
+import React, { useContext } from "react"
+import { Button, Table } from "react-bootstrap"
+import { connect } from "react-redux"
+import { useHistory, useParams } from "react-router-dom"
+import Settings from "settings"
+import utils from "utils"
+
+const GQL_GET_PERSON = gql`
+  query($uuid: String!) {
+    person(uuid: $uuid) {
+      uuid
+      name
+      rank
+      role
+      status
+      pendingVerification
+      emailAddress
+      phoneNumber
+      domainUsername
+      biography
+      country
+      gender
+      endOfTourDate
+      avatar(size: 256)
+      code
+      position {
+        uuid
+        name
+        type
+        organization {
+          uuid
+          shortName
+          identificationCode
+        }
+        associatedPositions {
+          uuid
+          name
+          type
+          person {
+            uuid
+            name
+            rank
+            role
+            avatar(size: 32)
+          }
+          organization {
+            uuid
+            shortName
+          }
+        }
+      }
+      previousPositions {
+        startTime
+        endTime
+        position {
+          uuid
+          name
+        }
+      }
+      customFields
+      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
+      ${GRAPHQL_NOTES_FIELDS}
+    }
+  }
+`
+
+const CompactPersonView = ({ pageDispatchers }) => {
+  const { currentUser } = useContext(AppContext)
+  const history = useHistory()
+  const { uuid } = useParams()
+  const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
+    uuid
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    modelName: "Person",
+    uuid,
+    pageProps: DEFAULT_PAGE_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
+    pageDispatchers
+  })
+  if (done) {
+    return result
+  }
+  if (data) {
+    data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
+      data.person.customFields
+    )
+    if (data.person.customSensitiveInformation) {
+      // Add sensitive information fields to formCustomFields
+      data.person[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
+        data.person.customSensitiveInformation
+      )
+    }
+  }
+  const person = new Person(data ? data.person : {})
+  const isAdmin = currentUser && currentUser.isAdmin()
+  const position = person.position
+  const hasPosition = position && position.uuid
+  const emailHumanValue = (
+    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
+  )
+  const orderedFields = orderPersonFields()
+  const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
+  const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
+  const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+  const leftColum = [
+    <tr key="avatar">
+      <td colSpan="4">
+        <AvatarDisplayComponent
+          avatar={person.avatar}
+          height={256}
+          width={256}
+          style={{
+            maxWidth: "100%",
+            display: "block",
+            margin: "0 auto",
+            marginBottom: "10px"
+          }}
+        />
+      </td>
+    </tr>,
+    ...leftColumUnderAvatar
+  ]
+
+  return (
+    <Formik
+      validationSchema={Person.yupSchema}
+      validateOnMount
+      initialValues={person}
+    >
+      {() => (
+        <>
+          <CompactPersonViewHeader
+            onPrintClick={printPerson}
+            returnToDefaultPage={returnToDefaultPage}
+            optionalFields={{}}
+          />
+
+          <CompactPersonViewS className="compact-view">
+            <CompactHeaderContent object={person} />
+            <CompactTable>{leftColum}</CompactTable>
+            <CompactTable>{rightColum}</CompactTable>
+            <CompactFooterContent />
+          </CompactPersonViewS>
+        </>
+      )}
+    </Formik>
+  )
+
+  function returnToDefaultPage() {
+    history.push(`/people/${person.uuid}`)
+  }
+
+  function orderPersonFields() {
+    const mappedCustomFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getCustomFieldsOrderedAsObject(),
+      values: person,
+      isCompact: true
+    })
+    const mappedSensitiveFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getSensitiveFieldsOrderedAsObject(),
+      parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
+      values: person,
+      isCompact: true
+    })
+    const mappedNonCustomFields = mapNonCustomFields()
+    // map fields that have privileged access check to the condition
+    const privilegedAccessedFields = {
+      domainUsername: {
+        accessCond: isAdmin
+      }
+    }
+
+    const extraColElems = {}
+
+    return (
+      person
+        .getShowPageFieldsOrdered()
+        // first filter if there is privileged accessed fields and its access condition is true
+        .filter(key =>
+          privilegedAccessedFields[key]
+            ? privilegedAccessedFields[key].accessCond
+            : true
+        )
+        // filter out unauthorized sensitive fields
+        .filter(
+          key =>
+            !Object.keys(Person.customSensitiveInformation).includes(key) ||
+            Person.isAuthorized(
+              currentUser,
+              Person.customSensitiveInformation?.[key],
+              position
+            )
+        )
+        // Also filter if somehow there is no field in both maps
+        .filter(
+          key =>
+            mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key]
+        )
+        // then map it to components and keys, keys used for React list rendering
+        .map(key => [
+          mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key],
+          key
+        ])
+        .map(([el, key]) =>
+          React.cloneElement(el, {
+            key,
+            extraColElem: extraColElems[key] || el.props.extraColElem,
+            labelColumnWidth: 4
+          })
+        )
+    )
+  }
+
+  function mapNonCustomFields() {
+    const classNameExceptions = {
+      biography: "biography"
+    }
+
+    const idExceptions = {
+      position: "current-position"
+    }
+    // map fields that have specific human person
+    const humanValuesExceptions = {
+      biography: parseHtmlWithLinkTo(person.biography),
+      emailAddress: emailHumanValue,
+      endOfTourDate:
+        person.endOfTourDate &&
+        moment(person.endOfTourDate).format(
+          Settings.dateFormats.forms.displayShort.date
+        ),
+      position: getPositionHumanValue(),
+      prevPositions: getPrevPositionsHumanValue(),
+      role: Person.humanNameOfRole(person.role),
+      status: Person.humanNameOfStatus(person.status)
+    }
+    return person.getNormalFieldsOrdered().reduce((accum, key) => {
+      accum[key] = (
+        <Field
+          name={key}
+          label={
+            Settings.fields.person[key]?.label || Settings.fields.person[key]
+          }
+          component={FieldHelper.ReadonlyField}
+          humanValue={humanValuesExceptions[key]}
+          className={classNameExceptions[key]}
+          id={idExceptions[key]}
+          isCompact={true}
+        />
+      )
+
+      return accum
+    }, {})
+  }
+
+  function getPositionHumanValue() {
+    return hasPosition ? (
+      <>
+        <LinkTo
+          modelType="Position"
+          model={position}
+          className="position-name"
+        />{" "}
+        (
+        <LinkTo modelType="Organization" model={position.organization} />)
+      </>
+    ) : (
+      "<none>"
+    )
+  }
+
+  function getPrevPositionsHumanValue() {
+    return _isEmpty(person.previousPositions) ? (
+      <em>No positions found</em>
+    ) : (
+      <Table id="previous-positions">
+        <thead>
+          <tr>
+            <th>Position</th>
+            <th>Dates</th>
+          </tr>
+        </thead>
+        <tbody>
+          {person.previousPositions.map((pp, idx) => (
+            <tr key={idx} id={`previousPosition_${idx}`}>
+              <td>
+                <LinkTo modelType="Position" model={pp.position} />
+              </td>
+              <td>
+                {moment(pp.startTime).format(
+                  Settings.dateFormats.forms.displayShort.date
+                )}{" "}
+                - &nbsp;
+                {pp.endTime &&
+                  moment(pp.endTime).format(
+                    Settings.dateFormats.forms.displayShort.date
+                  )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    )
+  }
+
+  function printPerson() {
+    if (typeof window.print === "function") {
+      window.print()
+    } else {
+      alert("Press CTRL+P to print this report")
+    }
+  }
+}
+
+CompactPersonView.propTypes = {
+  pageDispatchers: PageDispatchersPropType
+}
+
+export default connect(null, mapPageDispatchersToProps)(CompactPersonView)
+
+const CompactPersonViewS = styled.div`
+  position: relative;
+  outline: 2px solid grey;
+  padding: 0 1rem;
+  width: 21cm;
+  display: flex;
+  @media print {
+    position: fixed;
+    left: 0mm;
+    outline: none;
+    &[data-draft="draft"]:before {
+      top: 40%;
+      position: fixed;
+    }
+    .banner {
+      display: inline-block !important;
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact !important;
+    }
+    .workflow-action .btn {
+      display: inline-block !important;
+    }
+  }
+`
+
+const CompactPersonViewHeader = ({
+  onPrintClick,
+  returnToDefaultPage,
+  noPerson,
+  optionalFields,
+  setOptionalFields
+}) => {
+  return (
+    <Header>
+      <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <SimpleMultiCheckboxDropdown
+        label="Optional Fields ⇓"
+        options={optionalFields}
+        setOptions={setOptionalFields}
+      />
+      <Buttons>
+        {!noPerson && (
+          <Button
+            value="print"
+            type="button"
+            bsStyle="primary"
+            onClick={onPrintClick}
+          >
+            Print
+          </Button>
+        )}
+        <Button
+          value="detailedView"
+          type="button"
+          bsStyle="primary"
+          onClick={returnToDefaultPage}
+        >
+          Detailed View
+        </Button>
+      </Buttons>
+    </Header>
+  )
+}
+
+CompactPersonViewHeader.propTypes = {
+  onPrintClick: PropTypes.func,
+  returnToDefaultPage: PropTypes.func,
+  noPerson: PropTypes.bool,
+  optionalFields: PropTypes.objectOf(
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      active: PropTypes.bool.isRequired
+    })
+  ).isRequired,
+  setOptionalFields: PropTypes.func
+}
+
+CompactPersonViewHeader.defaultProps = {
+  noReport: false
+}
+
+const HeaderTitle = styled.h3`
+  margin: 0;
+  @media print {
+    display: none;
+  }
+`
+
+const Header = styled.header`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 21cm;
+`
+
+const Buttons = styled.div`
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  button {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+`

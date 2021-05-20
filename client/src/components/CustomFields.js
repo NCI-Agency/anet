@@ -1084,7 +1084,8 @@ export const mapReadonlyCustomFieldsToComps = ({
   parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
-  labelColumnWidth
+  labelColumnWidth,
+  isCompact
 }) => {
   return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
     let extraColElem = null
@@ -1122,6 +1123,7 @@ export const mapReadonlyCustomFieldsToComps = ({
         vertical={vertical}
         extraColElem={extraColElem}
         labelColumnWidth={labelColumnWidth}
+        isCompact={isCompact}
         {...fieldProps}
         {...extraProps}
       />
@@ -1133,6 +1135,7 @@ export const mapReadonlyCustomFieldsToComps = ({
         humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
         extraColElem={extraColElem}
         labelColumnWidth={labelColumnWidth}
+        isCompact={isCompact}
         {...fieldProps}
       />
     )

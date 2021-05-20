@@ -23,6 +23,7 @@ import OrganizationEdit from "pages/organizations/Edit"
 import OrganizationNew from "pages/organizations/New"
 import OrganizationShow from "pages/organizations/Show"
 import PageMissing from "pages/PageMissing"
+import PersonCompact from "pages/people/Compact"
 import PersonEdit from "pages/people/Edit"
 import PersonNew from "pages/people/New"
 import PersonShow from "pages/people/Show"
@@ -71,6 +72,7 @@ const Routing = () => {
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={PersonNew} />
+            <Route path={`${url}/:uuid/compact`} component={PersonCompact} />
             <Route path={`${url}/:uuid/edit`} component={PersonEdit} />
             <Route path={`${url}/:uuid`} component={PersonShow} />
           </Switch>
