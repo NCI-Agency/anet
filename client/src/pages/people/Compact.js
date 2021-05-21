@@ -94,6 +94,11 @@ const GQL_GET_PERSON = gql`
     }
   }
 `
+const PAGE_SIZES = {
+  A4: { name: "A4", width: "210mm", height: "297mm" },
+  A5: { name: "A5", width: "148mm", height: "210mm" }
+}
+
 // Redundant fields to print
 const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "gender",
@@ -177,6 +182,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const { uuid } = useParams()
+  const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
   const [optionalFields, setOptionalFields] = useState(ALL_FIELD_OPTIONS)
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
@@ -256,9 +262,10 @@ const CompactPersonView = ({ pageDispatchers }) => {
             returnToDefaultPage={returnToDefaultPage}
             optionalFields={optionalFields}
             setOptionalFields={setOptionalFields}
+            setPageSize={setPageSize}
           />
 
-          <CompactPersonViewS className="compact-view">
+          <CompactPersonViewS className="compact-view" pageSize={pageSize}>
             <CompactHeaderContent object={person} />
             <CompactTable>{leftColum}</CompactTable>
             <CompactTable>{rightColum}</CompactTable>
@@ -450,11 +457,17 @@ const CompactPersonViewS = styled.div`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
-  width: 21cm;
+  width: ${props => {
+    return props.pageSize.width
+  }};
+  height: ${props => {
+    return props.pageSize.height
+  }};
   display: flex;
   @media print {
     position: fixed;
     left: 0mm;
+    top: 0mm;
     outline: none;
     &[data-draft="draft"]:before {
       top: 40%;
@@ -476,11 +489,27 @@ const CompactPersonViewHeader = ({
   returnToDefaultPage,
   noPerson,
   optionalFields,
-  setOptionalFields
+  setOptionalFields,
+  setPageSize
 }) => {
   return (
     <Header>
       <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <DropdownButton
+        title="Page Size"
+        bsStyle="primary"
+        id="pageSizeButton"
+        onSelect={setPageSize}
+      >
+        {Object.keys(PAGE_SIZES).map(pageSize => (
+          <MenuItem
+            key={PAGE_SIZES[pageSize].name}
+            eventKey={PAGE_SIZES[pageSize]}
+          >
+            {PAGE_SIZES[pageSize].name}
+          </MenuItem>
+        ))}
+      </DropdownButton>
       <DropdownButton
         title="Presets"
         bsStyle="primary"
@@ -534,7 +563,8 @@ CompactPersonViewHeader.propTypes = {
       active: PropTypes.bool.isRequired
     })
   ).isRequired,
-  setOptionalFields: PropTypes.func
+  setOptionalFields: PropTypes.func,
+  setPageSize: PropTypes.func
 }
 
 CompactPersonViewHeader.defaultProps = {
