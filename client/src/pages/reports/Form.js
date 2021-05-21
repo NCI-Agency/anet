@@ -310,19 +310,43 @@ const ReportForm = ({
             queryVars: { status: Model.STATUS.ACTIVE }
           },
           geographical: {
-            label: "Geographical"
+            label: Location.LOCATION_TYPE.GEOGRAPHICAL,
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.locationTypeMapper(
+                Location.LOCATION_TYPE.GEOGRAPHICAL
+              )
+            }
           },
           pinpoint: {
-            label: "Pinpoint"
+            label: Location.LOCATION_TYPE.PINPOINT,
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.locationTypeMapper(Location.LOCATION_TYPE.PINPOINT)
+            }
           },
           advisor: {
-            label: "Advisor"
+            label: Location.LOCATION_TYPE.ADVISOR,
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.locationTypeMapper(Location.LOCATION_TYPE.ADVISOR)
+            }
           },
           principal: {
-            label: "Principal"
+            label: Location.LOCATION_TYPE.PRINCIPAL,
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.locationTypeMapper(
+                Location.LOCATION_TYPE.PRINCIPAL
+              )
+            }
           },
           virtual: {
-            label: "Virtual"
+            label: Location.LOCATION_TYPE.VIRTUAL,
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.locationTypeMapper(Location.LOCATION_TYPE.VIRTUAL)
+            }
           }
         }
 

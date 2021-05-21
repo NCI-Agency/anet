@@ -130,9 +130,11 @@ const MergeLocations = ({ pageDispatchers }) => {
               />
 
               <LocationField
-                label="Location Type"
+                label="Type"
+                value={Location.locationTypeToString(mergedLocation.type)}
                 align={"center"}
-                fieldName="locationType"
+                action={getInfoButton("Type is required.")}
+                fieldName="type"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -389,14 +391,19 @@ const LocationColumn = ({
           />
 
           <LocationField
-            label="Location Type"
-            fieldName="locationType"
+            label="Type"
+            fieldName="type"
+            value={Location.locationTypeToString(location.type)}
             align={align}
             action={getActionButton(
-              () => {},
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("type", location.type, align)
+                )
+              },
               align,
               mergeState,
-              "locationType"
+              "type"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

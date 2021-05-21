@@ -313,6 +313,7 @@ export function getLeafletMap(mapId, location) {
         {
           id: "marker-" + mapId,
           name: _escape(location?.name) || "", // escape HTML in location name!
+          type: _escape(location?.type) || "", // escape HTML in location name!
           lat: Location.hasCoordinates(location) ? location.lat : null,
           lng: Location.hasCoordinates(location) ? location.lng : null
         }
