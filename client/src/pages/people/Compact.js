@@ -30,7 +30,7 @@ import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, Table } from "react-bootstrap"
+import { Button, DropdownButton, MenuItem, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -94,23 +94,39 @@ const GQL_GET_PERSON = gql`
     }
   }
 `
+// Redundant fields to print
+const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
+  "gender",
+  "emailAddress",
+  "phone",
+  "code",
+  "endOfTour"
+]
+
 const NORMAL_FIELD_OPTIONS = Object.entries(
   Object.without(
     Settings.fields.person,
     "ranks",
     "customFields",
-    "customSensitiveInformation"
+    "customSensitiveInformation",
+    "lastName",
+    "firstName"
   )
 ).reduce((accum, [k, v]) => {
-  accum[k] = { text: v?.label || v, active: true }
+  accum[k] = {
+    text: v?.label || v,
+    active: !DEFAULT_FIELD_GROUP_EXCEPTIONS.find(field => field === k)
+  }
   return accum
 }, {})
+
 const CUSTOM_FIELD_OPTIONS = Object.entries(
   Settings.fields.person.customFields || {}
 ).reduce((accum, [k, v]) => {
   accum[k] = { text: v.label, active: true }
   return accum
 }, {})
+
 const SENSITIVE_FIELD_OPTIONS = Object.entries(
   Settings.fields.person.customSensitiveInformation
 ).reduce((accum, [k, v]) => {
@@ -118,11 +134,44 @@ const SENSITIVE_FIELD_OPTIONS = Object.entries(
   return accum
 }, {})
 
+const OTHER_FIELD_OPTIONS = {
+  name: {
+    text: "Name",
+    active: true
+  },
+  avatar: {
+    text: "Avatar",
+    active: true
+  }
+}
+
 const ALL_FIELD_OPTIONS = {
   ...NORMAL_FIELD_OPTIONS,
   ...CUSTOM_FIELD_OPTIONS,
-  ...SENSITIVE_FIELD_OPTIONS
+  ...SENSITIVE_FIELD_OPTIONS,
+  ...OTHER_FIELD_OPTIONS
 }
+
+const PRESETS = [
+  {
+    name: "default",
+    label: "Default",
+    fields: {
+      ...Object.without(ALL_FIELD_OPTIONS, ...DEFAULT_FIELD_GROUP_EXCEPTIONS)
+    }
+  },
+  {
+    name: "noSensitiveFields",
+    label: "Exclude sensitive fields",
+    fields: {
+      ...Object.without(
+        ALL_FIELD_OPTIONS,
+        ...DEFAULT_FIELD_GROUP_EXCEPTIONS,
+        ...Object.keys(SENSITIVE_FIELD_OPTIONS)
+      )
+    }
+  }
+]
 
 const CompactPersonView = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
@@ -167,21 +216,30 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
   const leftColum = [
-    <tr key="avatar">
-      <td colSpan="4">
-        <AvatarDisplayComponent
-          avatar={person.avatar}
-          height={256}
-          width={256}
-          style={{
-            maxWidth: "100%",
-            display: "block",
-            margin: "0 auto",
-            marginBottom: "10px"
-          }}
-        />
-      </td>
-    </tr>,
+    optionalFields.name.active && (
+      <tr key="fullName">
+        <td colSpan="4">
+          <Name>{`${person.rank} ${person.name}`}</Name>
+        </td>
+      </tr>
+    ),
+    optionalFields.avatar.active && (
+      <tr key="avatar">
+        <td colSpan="4">
+          <AvatarDisplayComponent
+            avatar={person.avatar}
+            height={256}
+            width={256}
+            style={{
+              maxWidth: "100%",
+              display: "block",
+              margin: "0 auto",
+              marginBottom: "10px"
+            }}
+          />
+        </td>
+      </tr>
+    ),
     ...leftColumUnderAvatar
   ]
 
@@ -423,6 +481,20 @@ const CompactPersonViewHeader = ({
   return (
     <Header>
       <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <DropdownButton
+        title="Presets"
+        bsStyle="primary"
+        id="presetsButton"
+        onSelect={fields =>
+          onPresetSelect(fields, optionalFields, setOptionalFields)
+        }
+      >
+        {PRESETS.map(preset => (
+          <MenuItem key={preset.name} eventKey={preset.fields}>
+            {preset.label}
+          </MenuItem>
+        ))}
+      </DropdownButton>
       <SimpleMultiCheckboxDropdown
         label="Optional Fields ⇓"
         options={optionalFields}
@@ -469,6 +541,17 @@ CompactPersonViewHeader.defaultProps = {
   noReport: false
 }
 
+function onPresetSelect(fields, optionalFields, setOptionalFields) {
+  const activeFields = { ...optionalFields }
+  Object.keys(activeFields).forEach(
+    fieldName => (activeFields[fieldName].active = false)
+  )
+  Object.keys(fields).forEach(
+    fieldName => (activeFields[fieldName].active = true)
+  )
+  setOptionalFields({ ...activeFields })
+}
+
 const HeaderTitle = styled.h3`
   margin: 0;
   @media print {
@@ -493,4 +576,10 @@ const Buttons = styled.div`
     margin-left: 5px;
     margin-right: 5px;
   }
+`
+
+const Name = styled.span`
+  font-family: "Times New Roman", Times, serif;
+  font-weight: bold;
+  font-size: large;
 `
