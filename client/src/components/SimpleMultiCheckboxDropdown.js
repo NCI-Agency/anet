@@ -59,12 +59,12 @@ const DropdownButton = styled.span`
   z-index: 102;
   & > div {
     position: relative;
-    width: 100%;
+    width: 200%;
   }
   & > div > div {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-flow: row wrap;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
 
@@ -76,7 +76,8 @@ const DropdownButton = styled.span`
     left: 0;
 
     label {
-      width: 100%;
+      flex: 1 1 1;
+      width: 48%;
       display: flex;
       flex-direction: row;
       justify-content: space-around;
@@ -85,7 +86,7 @@ const DropdownButton = styled.span`
 
     input {
       margin-left: auto;
-      width: 16px;
+      min-width: 16px;
       height: 16px;
     }
   }

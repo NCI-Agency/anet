@@ -29,7 +29,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
@@ -94,11 +94,41 @@ const GQL_GET_PERSON = gql`
     }
   }
 `
+const NORMAL_FIELD_OPTIONS = Object.entries(
+  Object.without(
+    Settings.fields.person,
+    "ranks",
+    "customFields",
+    "customSensitiveInformation"
+  )
+).reduce((accum, [k, v]) => {
+  accum[k] = { text: v?.label || v, active: true }
+  return accum
+}, {})
+const CUSTOM_FIELD_OPTIONS = Object.entries(
+  Settings.fields.person.customFields || {}
+).reduce((accum, [k, v]) => {
+  accum[k] = { text: v.label, active: true }
+  return accum
+}, {})
+const SENSITIVE_FIELD_OPTIONS = Object.entries(
+  Settings.fields.person.customSensitiveInformation
+).reduce((accum, [k, v]) => {
+  accum[k] = { text: v.label, active: false }
+  return accum
+}, {})
+
+const ALL_FIELD_OPTIONS = {
+  ...NORMAL_FIELD_OPTIONS,
+  ...CUSTOM_FIELD_OPTIONS,
+  ...SENSITIVE_FIELD_OPTIONS
+}
 
 const CompactPersonView = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const { uuid } = useParams()
+  const [optionalFields, setOptionalFields] = useState(ALL_FIELD_OPTIONS)
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
   })
@@ -166,7 +196,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
           <CompactPersonViewHeader
             onPrintClick={printPerson}
             returnToDefaultPage={returnToDefaultPage}
-            optionalFields={{}}
+            optionalFields={optionalFields}
+            setOptionalFields={setOptionalFields}
           />
 
           <CompactPersonViewS className="compact-view">
@@ -225,6 +256,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
               position
             )
         )
+        // Filter marked fields
+        .filter(key => optionalFields?.[key]?.active)
         // Also filter if somehow there is no field in both maps
         .filter(
           key =>
