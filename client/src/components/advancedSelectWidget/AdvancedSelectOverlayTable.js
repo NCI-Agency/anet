@@ -1,6 +1,7 @@
 import Checkbox from "components/Checkbox"
 import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
+import { Location } from "models"
 import PropTypes from "prop-types"
 import React from "react"
 import { Badge, Radio, Table } from "react-bootstrap"
@@ -44,7 +45,11 @@ const AdvancedSelectOverlayTable = ({
             >
               <td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
               {renderRow(item)}
-              <td>{fieldName === "location" && <Badge>Type</Badge>}</td>
+              <td>
+                {fieldName === "location" && (
+                  <Badge>{Location.locationTypeToString(item.type)}</Badge>
+                )}
+              </td>
             </tr>
           )
         })}

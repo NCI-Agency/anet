@@ -153,7 +153,11 @@ const LocationShow = ({ pageDispatchers }) => {
                   humanValue={Location.humanNameOfStatus}
                 />
 
-                <Field name="type" component={FieldHelper.ReadonlyField} />
+                <Field
+                  name="type"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Location.locationTypeToString(location.type)}
+                />
 
                 <GeoLocation
                   coordinates={{

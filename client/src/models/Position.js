@@ -141,6 +141,7 @@ export default class Position extends Model {
       name
       lat
       lng
+      type
     }
     customFields
     ${GRAPHQL_NOTES_FIELDS}

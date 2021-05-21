@@ -515,18 +515,18 @@ export const searchFilters = function() {
         props: {
           queryKey: "type",
           options: [
-            "Geographical Area",
-            "Pinpoint Location",
-            "Advisor Location",
-            "Principal Location",
-            "Virtual Location"
+            Location.locationTypeMapper(Location.LOCATION_TYPE.GEOGRAPHICAL),
+            Location.locationTypeMapper(Location.LOCATION_TYPE.PINPOINT),
+            Location.locationTypeMapper(Location.LOCATION_TYPE.ADVISOR),
+            Location.locationTypeMapper(Location.LOCATION_TYPE.PRINCIPAL),
+            Location.locationTypeMapper(Location.LOCATION_TYPE.VIRTUAL)
           ],
           labels: [
-            "Geographical Area",
-            "Pinpoint Location",
-            "Advisor Location",
-            "Principal Location",
-            "Virtual Location"
+            Location.LOCATION_TYPE.GEOGRAPHICAL,
+            Location.LOCATION_TYPE.PINPOINT,
+            Location.LOCATION_TYPE.ADVISOR,
+            Location.LOCATION_TYPE.PRINCIPAL,
+            Location.LOCATION_TYPE.VIRTUAL
           ]
         }
       }

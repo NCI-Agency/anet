@@ -86,15 +86,18 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
   // Location types to be shown to admins in the new location page.
   const locationTypesAdmin = [
-    "Geographical Area",
-    "Pinpoint Location",
-    "Advisor Location",
-    "Principal Location",
-    "Virtual Location"
+    Location.LOCATION_TYPE.GEOGRAPHICAL,
+    Location.LOCATION_TYPE.PINPOINT,
+    Location.LOCATION_TYPE.ADVISOR,
+    Location.LOCATION_TYPE.PRINCIPAL,
+    Location.LOCATION_TYPE.VIRTUAL
   ]
 
   // Location types to be shown to super users in the new location page.
-  const locationTypesSuperUser = ["Advisor Location", "Principal Location"]
+  const locationTypesSuperUser = [
+    Location.LOCATION_TYPE.ADVISOR,
+    Location.LOCATION_TYPE.PRINCIPAL
+  ]
 
   return (
     <Formik

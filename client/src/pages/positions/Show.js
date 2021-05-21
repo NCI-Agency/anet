@@ -21,7 +21,7 @@ import {
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import { Position } from "models"
+import { Location, Position } from "models"
 import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
 import { Badge, Button } from "react-bootstrap"
@@ -202,7 +202,11 @@ const PositionShow = ({ pageDispatchers }) => {
                           modelType="Location"
                           model={position.location}
                         />{" "}
-                        <Badge>Location Type</Badge>
+                        <Badge>
+                          {Location.locationTypeToString(
+                            position.location.type
+                          )}
+                        </Badge>
                       </>
                     )
                   }

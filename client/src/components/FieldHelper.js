@@ -2,6 +2,7 @@ import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
+import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -311,7 +312,7 @@ export const DropdownField = ({
       >
         <option value="">Please select a location type</option>
         {options.map(option => (
-          <option key={option} value={option}>
+          <option key={option} value={Location.locationTypeMapper(option)}>
             {option}
           </option>
         ))}
