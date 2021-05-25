@@ -103,7 +103,7 @@
   },
   "dependencies": {
     "@apollo/react-hooks": "3.1.5",
-    "@blueprintjs/core": "3.44.2",
+    "@blueprintjs/core": "3.44.3",
     "@blueprintjs/datetime": "3.23.3",
     "@blueprintjs/popover2": "0.8.0",
     "@emotion/react": "11.4.0",
