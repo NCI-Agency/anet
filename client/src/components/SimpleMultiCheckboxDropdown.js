@@ -45,6 +45,32 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
               />
             </label>
           ))}
+          <div>
+            <button
+              className="btn btn-primary"
+              onClick={() =>
+                setOptions(prev => {
+                  const newer = { ...prev }
+                  Object.keys(newer).forEach(key => (newer[key].active = true))
+                  return newer
+                })
+              }
+            >
+              Select All
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() =>
+                setOptions(prev => {
+                  const newer = { ...prev }
+                  Object.keys(newer).forEach(key => (newer[key].active = false))
+                  return newer
+                })
+              }
+            >
+              Clear All
+            </button>
+          </div>
         </div>
       </div>
     </DropdownButton>
@@ -88,6 +114,14 @@ const DropdownButton = styled.span`
       margin-left: auto;
       min-width: 16px;
       height: 16px;
+    }
+
+    div {
+      width: 100%;
+
+      button {
+        width: 50%;
+      }
     }
   }
   & > div {

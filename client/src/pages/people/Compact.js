@@ -234,8 +234,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
         <td colSpan="4">
           <AvatarDisplayComponent
             avatar={person.avatar}
-            height={256}
-            width={256}
+            height={pageSize.name === "A4" ? 256 : 200}
+            width={pageSize.name === "A4" ? 256 : 200}
             style={{
               maxWidth: "100%",
               display: "block",
