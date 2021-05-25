@@ -62,7 +62,7 @@ repositories {
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
 	implementation 'io.dropwizard:dropwizard-core:2.0.21'
-	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.21'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.22'
 	implementation 'io.dropwizard:dropwizard-migrations:2.0.21'
 	implementation 'io.dropwizard:dropwizard-auth:2.0.21'
 	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.21'
