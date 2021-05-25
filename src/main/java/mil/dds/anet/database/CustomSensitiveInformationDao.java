@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
 import java.util.List;
@@ -116,13 +117,22 @@ public class CustomSensitiveInformationDao
       final List<CustomSensitiveInformation> customSensitiveInformation) {
     if (!Utils.isEmptyOrNull(customSensitiveInformation)) {
       for (final CustomSensitiveInformation csi : customSensitiveInformation) {
-        // Set relatedObject ourselves (ignore what was passed by the client)
-        csi.setRelatedObjectType(relatedObjectType);
-        csi.setRelatedObjectUuid(relatedObjectUuid);
-        if (DaoUtils.getUuid(csi) == null) {
-          checkAndInsert(user, relatedObjectType, relatedObjectUuid, csi);
-        } else {
-          checkAndUpdate(user, relatedObjectType, relatedObjectUuid, csi);
+        try {
+          // Sanitize JSON
+          csi.setCustomFieldValue(Utils.sanitizeJson(csi.getCustomFieldValue()));
+          // Set relatedObject ourselves (ignore what was passed by the client)
+          csi.setRelatedObjectType(relatedObjectType);
+          csi.setRelatedObjectUuid(relatedObjectUuid);
+          if (DaoUtils.getUuid(csi) == null) {
+            checkAndInsert(user, relatedObjectType, relatedObjectUuid, csi);
+          } else {
+            checkAndUpdate(user, relatedObjectType, relatedObjectUuid, csi);
+          }
+        } catch (JsonProcessingException e) {
+          // Audit and ignore
+          AnetAuditLogger.log("Person {} tried to insert CustomSensitiveInformation {}"
+              + " with invalid JSON, refused", user, csi);
+          csi.setCustomFieldValue(null);
         }
       }
     }
