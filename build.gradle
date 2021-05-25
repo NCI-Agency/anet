@@ -3,7 +3,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.0"
 	id "com.diffplug.spotless" version "5.12.5"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.2"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.16"
 }
 
 apply plugin: 'java'
@@ -113,7 +113,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14.2'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.16'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
