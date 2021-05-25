@@ -60,7 +60,7 @@
     "dotenv": "9.0.2",
     "eslint": "7.26.0",
     "eslint-config-react-app": "6.0.0",
-    "eslint-config-standard": "16.0.2",
+    "eslint-config-standard": "16.0.3",
     "eslint-config-standard-react": "11.0.1",
     "eslint-plugin-chai-expect": "2.2.0",
     "eslint-plugin-flowtype": "5.7.2",
