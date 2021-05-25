@@ -1455,12 +1455,12 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@blueprintjs/core@3.44.2", "@blueprintjs/core@^3.44.2":
-  version "3.44.2"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.44.2.tgz#6b6502a7d26128ccf795b79a0c10aa6b9fd863f7"
-  integrity sha512-rxw0KU0Trdnf5HoILyWrEYpfubC1+VyfpbqcD4pG3iA79oGfo1q5x4S16YTeZpVXRm8VK3TBob4RDRXDd+/4PQ==
+"@blueprintjs/core@3.44.3", "@blueprintjs/core@^3.44.3":
+  version "3.44.3"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.44.3.tgz#112364fe9cbf5b943cf7571d9a5caa50b6304958"
+  integrity sha512-95BYF5xI7d47jKJKQFXJ+UkJ8pS6qT6/U4Hj/UCuHPJhtBTfUQKaCeHYroA+LtCAEEb9p9oFkQwlXI+QHMmZeA==
   dependencies:
-    "@blueprintjs/icons" "^3.26.0"
+    "@blueprintjs/icons" "^3.26.1"
     "@types/dom4" "^2.0.1"
     classnames "^2.2"
     dom4 "^2.1.5"
@@ -1472,12 +1472,12 @@
     resize-observer-polyfill "^1.5.1"
     tslib "~1.13.0"
 
-"@blueprintjs/core@^3.44.3":
-  version "3.44.3"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.44.3.tgz#112364fe9cbf5b943cf7571d9a5caa50b6304958"
-  integrity sha512-95BYF5xI7d47jKJKQFXJ+UkJ8pS6qT6/U4Hj/UCuHPJhtBTfUQKaCeHYroA+LtCAEEb9p9oFkQwlXI+QHMmZeA==
+"@blueprintjs/core@^3.44.2":
+  version "3.44.2"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.44.2.tgz#6b6502a7d26128ccf795b79a0c10aa6b9fd863f7"
+  integrity sha512-rxw0KU0Trdnf5HoILyWrEYpfubC1+VyfpbqcD4pG3iA79oGfo1q5x4S16YTeZpVXRm8VK3TBob4RDRXDd+/4PQ==
   dependencies:
-    "@blueprintjs/icons" "^3.26.1"
+    "@blueprintjs/icons" "^3.26.0"
     "@types/dom4" "^2.0.1"
     classnames "^2.2"
     dom4 "^2.1.5"
