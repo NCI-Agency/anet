@@ -3973,4 +3973,51 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-type-to-location" author="ceyhunyilmaz">
+		<addColumn tableName="locations">
+			<column name="type" type="varchar(64)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="update-locations-null-type-field-ppa" author="ceyhunyilmaz">
+		<sql>
+			UPDATE "locations"
+			SET "type" = 'PPA'
+			FROM "locations" l
+			INNER JOIN Positions p
+			ON l.uuid=p.locationUuid
+			WHERE p.type=0 and l.type IS NULL
+		</sql>
+	</changeSet>
+
+	<changeSet id="update-locations-null-type-field-ppp" author="ceyhunyilmaz">
+		<sql>
+			UPDATE "locations"
+			SET "type" = 'PPP'
+			FROM "locations" l
+			INNER JOIN Positions p
+			ON l.uuid=p.locationUuid
+			WHERE p.type=1 and l.type IS NULL
+		</sql>
+	</changeSet>
+
+	<changeSet id="update-locations-null-type-field-virtual" author="ceyhunyilmaz">
+		<sql>
+			UPDATE "locations"
+			SET "type" = 'V'
+			FROM "locations" l
+			LEFT JOIN Positions p
+			ON l.uuid=p.locationUuid
+			WHERE lat IS NULL and lng IS NULL and l.type IS NULL
+		</sql>
+	</changeSet>
+
+	<changeSet id="update-locations-null-type-field-pp" author="ceyhunyilmaz">
+		<sql>
+			UPDATE "locations"
+			SET "type" = 'PP'
+			WHERE type IS NULL
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

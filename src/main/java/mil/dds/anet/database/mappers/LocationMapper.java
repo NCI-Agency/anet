@@ -17,6 +17,7 @@ public class LocationMapper implements RowMapper<Location> {
     // preserve NULL values; when NULL there are no coordinates set:
     l.setLat(MapperUtils.getOptionalDouble(rs, "lat"));
     l.setLng(MapperUtils.getOptionalDouble(rs, "lng"));
+    l.setType(rs.getString("type"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

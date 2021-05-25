@@ -206,6 +206,7 @@ type Location {
   lat: Float
   lng: Float
   name: String
+  type: String
   notes: [Note]
   planningApprovalSteps: [ApprovalStep]
   status: Status
@@ -223,6 +224,7 @@ input LocationInput {
   notes: [NoteInput]
   planningApprovalSteps: [ApprovalStepInput]
   status: Status
+  type: String
   updatedAt: Instant
   uuid: String
 }
@@ -234,6 +236,7 @@ input LocationSearchQueryInput {
   sortBy: LocationSearchSortBy
   sortOrder: SortOrder
   status: Status
+  type: String
   text: String
 }
 

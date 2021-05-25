@@ -28,6 +28,7 @@ public abstract class AbstractLocationSearcher
     qb.addTotalCount();
     qb.addFromClause("locations");
     qb.addEnumEqualsClause("status", "locations.status", query.getStatus());
+    qb.addLikeClause("type", "locations.type", query.getType());
 
     if (hasTextQuery(query)) {
       addTextQuery(query);

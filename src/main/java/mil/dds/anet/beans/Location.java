@@ -28,6 +28,9 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
   @GraphQLQuery
   @GraphQLInputField
   private Double lng;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String type;
   /* The following are all Lazy Loaded */
   // annotated below
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
@@ -66,6 +69,14 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
 
   public void setLng(Double lng) {
     this.lng = lng;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
   @GraphQLQuery(name = "planningApprovalSteps")
@@ -121,12 +132,12 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
     return super.equals(o) && Objects.equals(other.getUuid(), uuid)
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)
-        && Objects.equals(other.getCreatedAt(), createdAt);
+        && Objects.equals(other.getType(), type) && Objects.equals(other.getCreatedAt(), createdAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, lat, lng, createdAt);
+    return Objects.hash(super.hashCode(), uuid, name, type, status, lat, lng, createdAt);
   }
 
   @Override
