@@ -7,6 +7,11 @@ const INVISIBLE_CUSTOM_FIELDS = {
   number: "formCustomFields.numberFieldName"
 }
 
+const SENSITIVE_CUSTOM_FIELDS = {
+  birthday: "formSensitiveFields.birthday",
+  politicalPosition: "formSensitiveFields.politicalPosition"
+}
+
 class CreatePerson extends Page {
   get form() {
     return browser.$("form.form-horizontal")
@@ -128,8 +133,42 @@ class CreatePerson extends Page {
     )
   }
 
+  get sensitiveFieldsContainer() {
+    return browser.$("#sensitive-fields")
+  }
+
+  get birthdaySensitiveFieldContainer() {
+    return this.getSensitiveFieldContainerByName(
+      SENSITIVE_CUSTOM_FIELDS.birthday
+    )
+  }
+
+  get politicalPositionSensitiveFieldContainer() {
+    return this.getSensitiveFieldContainerByName(
+      SENSITIVE_CUSTOM_FIELDS.politicalPosition
+    )
+  }
+
+  get birthday() {
+    return this.sensitiveFieldsContainer.$(
+      'input[id="formSensitiveFields.birthday'
+    )
+  }
+
+  get leftButton() {
+    return this.sensitiveFieldsContainer.$('label[id="LEFT"]')
+  }
+
+  get middleButton() {
+    return this.sensitiveFieldsContainer.$('label[id="MIDDLE"]')
+  }
+
   getCustomFieldContainerByName(name) {
     return this.customFieldsContainer.$(`div[id="fg-${name}"]`)
+  }
+
+  getSensitiveFieldContainerByName(name) {
+    return this.sensitiveFieldsContainer.$(`div[id="fg-${name}"]`)
   }
 
   openAsSuperUser() {
