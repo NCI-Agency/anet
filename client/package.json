@@ -95,7 +95,7 @@
     "thread-loader": "3.0.4",
     "wdio-chromedriver-service": "7.0.0",
     "webdriverio": "7.5.7",
-    "webpack": "5.37.0",
+    "webpack": "5.37.1",
     "webpack-cli": "4.7.0",
     "webpack-dev-server": "3.11.2",
     "webpack-merge": "5.7.3",
