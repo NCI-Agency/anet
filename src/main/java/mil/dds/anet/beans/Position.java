@@ -41,15 +41,17 @@ public class Position extends AbstractCustomizableAnetBean implements RelatableO
   // annotated below
   private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>(); // The Current person.
   // annotated below
-  List<Position> associatedPositions;
+  private List<Position> associatedPositions;
   // annotated below
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
   // annotated below
-  List<PersonPositionHistory> previousPeople;
+  private List<PersonPositionHistory> previousPeople;
   // annotated below
-  Boolean isApprover;
+  private Boolean isApprover;
   // annotated below
-  List<Task> responsibleTasks;
+  private List<Task> responsibleTasks;
+  // annotated below
+  private List<AuthorizationGroup> authorizationGroups;
 
   public String getName() {
     return name;
@@ -259,6 +261,19 @@ public class Position extends AbstractCustomizableAnetBean implements RelatableO
     return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query)
         .thenApply(o -> {
           responsibleTasks = o;
+          return o;
+        });
+  }
+
+  @GraphQLQuery(name = "authorizationGroups")
+  public CompletableFuture<List<AuthorizationGroup>> loadAuthorizationGroups(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (authorizationGroups != null) {
+      return CompletableFuture.completedFuture(authorizationGroups);
+    }
+    return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
+        .getAuthorizationGroupsForPosition(context, uuid).thenApply(o -> {
+          authorizationGroups = o;
           return o;
         });
   }

@@ -1,4 +1,4 @@
-import { Icon, Tooltip } from "@blueprintjs/core"
+import { Icon, IconSize, Tooltip } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -15,7 +15,11 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -98,6 +102,7 @@ const GQL_GET_PERSON = gql`
         }
       }
       customFields
+      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -131,6 +136,12 @@ const PersonShow = ({ pageDispatchers }) => {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
+    if (data.person.customSensitiveInformation) {
+      // Add sensitive information fields to formCustomFields
+      data.person[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
+        data.person.customSensitiveInformation
+      )
+    }
   }
   const person = new Person(data ? data.person : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -318,6 +329,11 @@ const PersonShow = ({ pageDispatchers }) => {
       fieldsConfig: person.getCustomFieldsOrderedAsObject(),
       values: person
     })
+    const mappedSensitiveFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getSensitiveFieldsOrderedAsObject(),
+      parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
+      values: person
+    })
     const mappedNonCustomFields = mapNonCustomFields()
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
@@ -339,17 +355,34 @@ const PersonShow = ({ pageDispatchers }) => {
             ? privilegedAccessedFields[key].accessCond
             : true
         )
+        // filter out unauthorized sensitive fields
+        .filter(
+          key =>
+            !Object.keys(Person.customSensitiveInformation).includes(key) ||
+            Person.isAuthorized(
+              currentUser,
+              Person.customSensitiveInformation?.[key],
+              position
+            )
+        )
         // Also filter if somehow there is no field in both maps
-        .filter(key => mappedNonCustomFields[key] || mappedCustomFields[key])
+        .filter(
+          key =>
+            mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key]
+        )
         // then map it to components and keys, keys used for React list rendering
         .map(key => [
-          mappedNonCustomFields[key] || mappedCustomFields[key],
+          mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key],
           key
         ])
         .map(([el, key]) =>
           React.cloneElement(el, {
             key,
-            extraColElem: extraColElems[key] || null, // null needed for empty space
+            extraColElem: extraColElems[key] || el.props.extraColElem,
             labelColumnWidth: 4
           })
         )
@@ -424,7 +457,7 @@ const PersonShow = ({ pageDispatchers }) => {
             showIcon={false}
             showAvatar={false}
           >
-            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EDIT} />
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
           </LinkTo>
         </Tooltip>
       ) : null
@@ -437,7 +470,7 @@ const PersonShow = ({ pageDispatchers }) => {
             bsStyle="primary"
             className="change-assigned-position"
           >
-            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EXCHANGE} />
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.EXCHANGE} />
           </Button>
         </Tooltip>
       ) : null
@@ -452,7 +485,7 @@ const PersonShow = ({ pageDispatchers }) => {
             onClick={() => setShowAssignPositionModal(true)}
             bsStyle="primary"
           >
-            <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.INSERT} />
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.INSERT} />
           </Button>
         </Tooltip>
       ) : null

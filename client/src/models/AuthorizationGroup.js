@@ -13,18 +13,17 @@ export default class AuthorizationGroup extends Model {
     return "Authorization Group"
   }
 
-  static yupSchema = yup
-    .object()
-    .shape({
-      name: yup.string().required().default(""),
-      description: yup.string().required().default(""),
-      status: yup
-        .string()
-        .required()
-        .default(() => Model.STATUS.ACTIVE),
-      positions: yup.array().nullable().default([])
-    })
-    .concat(Model.yupSchema)
+  static schema = {}
+
+  static yupSchema = yup.object().shape({
+    name: yup.string().required().default(""),
+    description: yup.string().required().default(""),
+    status: yup
+      .string()
+      .required()
+      .default(() => Model.STATUS.ACTIVE),
+    positions: yup.array().nullable().default([])
+  })
 
   static autocompleteQuery = "uuid, name, description"
 

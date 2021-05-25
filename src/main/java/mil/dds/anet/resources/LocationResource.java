@@ -73,8 +73,11 @@ public class LocationResource {
       }
     }
 
-    AnetAuditLogger.log("Location {} created by {}", l, user);
-    return l;
+    DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, created.getUuid(),
+        l.getCustomSensitiveInformation());
+
+    AnetAuditLogger.log("Location {} created by {}", created, user);
+    return created;
   }
 
   @GraphQLMutation(name = "updateLocation")
@@ -96,6 +99,10 @@ public class LocationResource {
         existing.loadApprovalSteps(engine.getContext()).join();
     Utils.updateApprovalSteps(l, l.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
         l.getApprovalSteps(), existingApprovalSteps);
+
+    DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, l.getUuid(),
+        l.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Location {} updated by {}", l, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

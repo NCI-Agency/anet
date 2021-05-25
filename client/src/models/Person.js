@@ -2,6 +2,7 @@ import API from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -36,8 +37,16 @@ export default class Person extends Model {
     Settings.fields.principal.person.assessments
 
   static customFields = Settings.fields.person.customFields
+
+  static customSensitiveInformation =
+    Settings.fields.person.customSensitiveInformation
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
+  static sensitiveFieldsSchema = createCustomFieldsSchema(
+    Person.customSensitiveInformation,
+    SENSITIVE_CUSTOM_FIELDS_PARENT
+  )
 
   static principalShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
   static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
@@ -157,6 +166,7 @@ export default class Person extends Model {
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)
+    .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
@@ -356,7 +366,8 @@ export default class Person extends Model {
     return fieldsArrayFromConfig.filter(field => {
       if (
         Settings.fields.person[field] ||
-        Settings.fields.person?.customFields?.[field]
+        Settings.fields.person?.customFields?.[field] ||
+        Settings.fields.person?.customSensitiveInformation?.[field]
       ) {
         return true
       }
@@ -376,7 +387,11 @@ export default class Person extends Model {
     return (
       this.getShowPageFieldsOrdered()
         // filter out custom fields
-        .filter(key => !Person?.customFields?.[key])
+        .filter(
+          key =>
+            !Person?.customFields?.[key] &&
+            !Person?.customSensitiveInformation?.[key]
+        )
     )
   }
 
@@ -393,6 +408,19 @@ export default class Person extends Model {
     )
   }
 
+  // we want custom fields as an object not array so we can parse it using existing code
+  getSensitiveFieldsOrderedAsObject() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out non-custom fields
+        .filter(key => Person?.customSensitiveInformation?.[key])
+        .reduce((accum, key) => {
+          accum[key] = Person.customSensitiveInformation[key]
+          return accum
+        }, {})
+    )
+  }
+
   generalAssessmentsConfig() {
     let config
     if (this.isAdvisor()) {
@@ -401,5 +429,42 @@ export default class Person extends Model {
       config = Person.principalAssessmentConfig
     }
     return config || []
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = ["firstName", "lastName"]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Person.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Person.filterClientSideFields(this, ...additionalFields)
+  }
+
+  static isAuthorized(user, customSensitiveInformationField, position) {
+    if (Model.isAuthorized(user, customSensitiveInformationField)) {
+      return true
+    }
+    // Else user has to be counterpart
+    return user?.position?.associatedPositions?.find(
+      pos => pos.uuid === position.uuid
+    )
+  }
+
+  static getAuthorizedSensitiveFields(
+    user,
+    customSensitiveInformation,
+    position
+  ) {
+    return Model.getAuthorizedSensitiveFields(
+      Person.isAuthorized,
+      user,
+      customSensitiveInformation,
+      position
+    )
   }
 }

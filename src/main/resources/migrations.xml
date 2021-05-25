@@ -3973,46 +3973,58 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="add-type-to-location" author="ceyhunyilmaz">
+	<changeSet id="add-customSensitiveInformation-table" author="gjvoosten">
+		<createTable tableName="customSensitiveInformation">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="customFieldName" type="${long_text_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="customFieldValue" type="${long_text_type}" />
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add-type-to-location" author="bssimsoft">
 		<addColumn tableName="locations">
 			<column name="type" type="varchar(64)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="update-locations-null-type-field-ppa" author="ceyhunyilmaz">
+	<changeSet id="update-locations-null-type-field-ppa" author="bssimsoft">
 		<sql>
-			UPDATE "locations"
+			UPDATE locations l
 			SET "type" = 'PPA'
-			FROM "locations" l
-			INNER JOIN Positions p
-			ON l.uuid=p.locationUuid
-			WHERE p.type=0 and l.type IS NULL
+			where l.uuid in (select distinct(p."locationUuid") from positions p where p.type = 0) and l.type is NULL;
 		</sql>
 	</changeSet>
 
-	<changeSet id="update-locations-null-type-field-ppp" author="ceyhunyilmaz">
+	<changeSet id="update-locations-null-type-field-ppp" author="bssimsoft">
 		<sql>
-			UPDATE "locations"
-			SET "type" = 'PPP'
-			FROM "locations" l
-			INNER JOIN Positions p
-			ON l.uuid=p.locationUuid
-			WHERE p.type=1 and l.type IS NULL
+			UPDATE locations l
+			SET "type" = 'PPA'
+			where l.uuid in (select distinct(p."locationUuid") from positions p where p.type = 1) and l.type is NULL;
 		</sql>
 	</changeSet>
 
-	<changeSet id="update-locations-null-type-field-virtual" author="ceyhunyilmaz">
+	<changeSet id="update-locations-null-type-field-virtual" author="bssimsoft">
 		<sql>
-			UPDATE "locations"
+			UPDATE "locations" l
 			SET "type" = 'V'
-			FROM "locations" l
-			LEFT JOIN Positions p
-			ON l.uuid=p.locationUuid
-			WHERE lat IS NULL and lng IS NULL and l.type IS NULL
+			WHERE l.lat IS NULL and l.lng IS NULL and l.type IS NULL
 		</sql>
 	</changeSet>
 
-	<changeSet id="update-locations-null-type-field-pp" author="ceyhunyilmaz">
+	<changeSet id="update-locations-null-type-field-pp" author="bssimsoft">
 		<sql>
 			UPDATE "locations"
 			SET "type" = 'PP'

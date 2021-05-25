@@ -32,7 +32,7 @@ describe("When creating a new Location", () => {
     CreateNewLocation.latField.setValue(BAD_LAT_LNG_VAL)
     CreateNewLocation.lngField.setValue(BAD_LAT_LNG_VAL)
     // trigger onblur effect
-    browser.keys(["Tab"])
+    CreateNewLocation.nameField.click()
 
     CreateNewLocation.latLngErrorsDisplayed()
   })

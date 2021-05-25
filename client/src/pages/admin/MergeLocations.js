@@ -272,12 +272,7 @@ const MergeLocations = ({ pageDispatchers }) => {
     const loser = mergedLocation.uuid === location1.uuid ? location2 : location1
     mergedLocation.customFields = customFieldsJSONString(mergedLocation)
 
-    const winnerLocation = Object.without(
-      mergedLocation,
-      "notes",
-      "displayedCoordinate",
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const winnerLocation = Location.filterClientSideFields(mergedLocation)
 
     API.mutation(GQL_MERGE_LOCATION, {
       loserUuid: loser.uuid,

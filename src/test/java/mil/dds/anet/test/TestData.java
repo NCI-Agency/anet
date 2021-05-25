@@ -53,7 +53,7 @@ public class TestData {
 
   public static LocationInput createLocationInput(String name, Double lat, Double lng) {
     return LocationInput.builder().withName(name).withStatus(Status.ACTIVE).withLat(lat)
-        .withLng(lng).build();
+        .withType("PP").withLng(lng).build();
   }
 
   public static PositionInput createPositionInput() {

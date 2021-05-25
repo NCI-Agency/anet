@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core"
+import { IconSize } from "@blueprintjs/core"
 import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
 import * as changeCase from "change-case"
 import parseAddressList from "email-addresses"
@@ -192,6 +192,20 @@ export default {
     return typeof result === "object" ? result || {} : {}
   },
 
+  parseSensitiveFields: function(customSensitiveInformation) {
+    const sensitiveInformationObjects = customSensitiveInformation.map(
+      sensitiveInfo => this.parseJsonSafe(sensitiveInfo.customFieldValue)
+    )
+    const allSensitiveFields = sensitiveInformationObjects.reduce(
+      (accum, key) => {
+        accum = { ...accum, ...key }
+        return accum
+      },
+      {}
+    )
+    return allSensitiveFields
+  },
+
   arrayOfNumbers: function(arr) {
     return (
       arr &&
@@ -263,14 +277,14 @@ Promise.prototype.log = function () {
 
 export const renderBlueprintIconAsSvg = (
   iconName,
-  iconSize = Icon.SIZE_STANDARD
+  iconSize = IconSize.STANDARD
 ) => {
   // choose which pixel grid is most appropriate for given icon size
   const pixelGridSize =
-    iconSize >= Icon.SIZE_LARGE ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD
+    iconSize >= IconSize.LARGE ? IconSize.LARGE : IconSize.STANDARD
   const viewBox = `0 0 ${pixelGridSize} ${pixelGridSize}`
   const svgPathsRecord =
-    pixelGridSize === Icon.SIZE_STANDARD ? IconSvgPaths16 : IconSvgPaths20
+    pixelGridSize === IconSize.STANDARD ? IconSvgPaths16 : IconSvgPaths20
   const pathStrings = svgPathsRecord[iconName]
   const paths =
     pathStrings === null

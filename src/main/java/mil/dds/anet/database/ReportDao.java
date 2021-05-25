@@ -375,7 +375,7 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     getDbHandle().execute(
         "/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", reportUuid);
 
-    // Delete \"reportActions\"
+    // Delete reportActions
     getDbHandle().execute(
         "/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?",
         reportUuid);
@@ -384,6 +384,9 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     getDbHandle().execute(
         "/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?",
         reportUuid);
+
+    // Delete customSensitiveInformation
+    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(reportUuid);
 
     // Delete report
     // GraphQL mutations *have* to return something, so we return the number of deleted report rows
