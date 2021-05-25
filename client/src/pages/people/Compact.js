@@ -95,8 +95,36 @@ const GQL_GET_PERSON = gql`
   }
 `
 const PAGE_SIZES = {
-  A4: { name: "A4", width: "210mm", height: "297mm" },
-  A5: { name: "A5", width: "148mm", height: "210mm" }
+  A4: {
+    name: "A4 (210 x 297 mm)",
+    width: "210mm",
+    height: "297mm",
+    avatarSize: 256
+  },
+  A5: {
+    name: "A5 (148 x 210 mm)",
+    width: "148mm",
+    height: "210mm",
+    avatarSize: 128
+  },
+  letter: {
+    name: "Letter (8.5 x 11 inches)",
+    width: "216mm",
+    height: "279mm",
+    avatarSize: 256
+  },
+  juniorLegal: {
+    name: "Junior Legal (5 x 8 inches)",
+    width: "127mm",
+    height: "203mm",
+    avatarSize: 128
+  },
+  legal: {
+    name: "Legal (8.5 x 14 inches)",
+    width: "216mm",
+    height: "356mm",
+    avatarSize: 256
+  }
 }
 
 // Redundant fields to print
@@ -182,6 +210,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const { uuid } = useParams()
+  const [leftColumnFields, setLeftColumnFields] = useState("6")
   const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
   const [optionalFields, setOptionalFields] = useState(ALL_FIELD_OPTIONS)
   const { loading, error, data } = API.useApiQuery(GQL_GET_PERSON, {
@@ -218,7 +247,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
   const orderedFields = orderPersonFields()
-  const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
+  const numberOfFieldsUnderAvatar = leftColumnFields || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
   const leftColum = [
@@ -234,8 +263,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
         <td colSpan="4">
           <AvatarDisplayComponent
             avatar={person.avatar}
-            height={pageSize.name === "A4" ? 256 : 200}
-            width={pageSize.name === "A4" ? 256 : 200}
+            height={pageSize.avatarSize}
+            width={pageSize.avatarSize}
             style={{
               maxWidth: "100%",
               display: "block",
@@ -257,18 +286,22 @@ const CompactPersonView = ({ pageDispatchers }) => {
     >
       {() => (
         <>
+          <HeaderTitle value="title">Summary / Print</HeaderTitle>
           <CompactPersonViewHeader
             onPrintClick={printPerson}
             returnToDefaultPage={returnToDefaultPage}
             optionalFields={optionalFields}
             setOptionalFields={setOptionalFields}
             setPageSize={setPageSize}
+            leftColumnFields={leftColumnFields}
+            setLeftColumnFields={setLeftColumnFields}
           />
-
           <CompactPersonViewS className="compact-view" pageSize={pageSize}>
             <CompactHeaderContent object={person} />
-            <CompactTable>{leftColum}</CompactTable>
-            <CompactTable>{rightColum}</CompactTable>
+            <TwoColumnLayout>
+              <CompactTable>{leftColum}</CompactTable>
+              <CompactTable>{rightColum}</CompactTable>
+            </TwoColumnLayout>
             <CompactFooterContent />
           </CompactPersonViewS>
         </>
@@ -490,11 +523,31 @@ const CompactPersonViewHeader = ({
   noPerson,
   optionalFields,
   setOptionalFields,
-  setPageSize
+  setPageSize,
+  leftColumnFields,
+  setLeftColumnFields
 }) => {
   return (
     <Header>
-      <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <label
+        htmlFor="leftColumnNumber"
+        key="lefColumnNumber"
+        style={{
+          display: "flex",
+          alignItems: "center"
+        }}
+      >
+        Left Column Fields
+        <input
+          type="number"
+          id="leftColumnNumber"
+          min="0"
+          className="form-control"
+          style={{ width: "60px", marginLeft: "5px" }}
+          value={leftColumnFields}
+          onChange={e => setLeftColumnFields(e.target.value)}
+        />
+      </label>
       <DropdownButton
         title="Page Size"
         bsStyle="primary"
@@ -564,7 +617,9 @@ CompactPersonViewHeader.propTypes = {
     })
   ).isRequired,
   setOptionalFields: PropTypes.func,
-  setPageSize: PropTypes.func
+  setPageSize: PropTypes.func,
+  leftColumnFields: PropTypes.string,
+  setLeftColumnFields: PropTypes.func
 }
 
 CompactPersonViewHeader.defaultProps = {
@@ -581,6 +636,13 @@ function onPresetSelect(fields, optionalFields, setOptionalFields) {
   )
   setOptionalFields({ ...activeFields })
 }
+
+const TwoColumnLayout = styled.div`
+  display: flex;
+  & div {
+    flex-basis: 1;
+  }
+`
 
 const HeaderTitle = styled.h3`
   margin: 0;
