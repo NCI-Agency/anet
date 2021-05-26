@@ -182,7 +182,7 @@ function getPositionType(organizationType) {
  * @param {*} user The user that creates the position
  */
 const _createPosition = async function(user) {
-  const position = Object.without(new Position(), "formCustomFields")
+  const position = Position.filterClientSideFields(new Position())
   const organization = await getRandomObject(
     user,
     "organizations",
