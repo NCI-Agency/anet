@@ -19,6 +19,14 @@ class CreateNewLocation extends Page {
     return this.form.$("input#name")
   }
 
+  get typeRequiredError() {
+    return browser.$('//span[contains(text(),"type is a required field")]')
+  }
+
+  get typeField() {
+    return this.form.$("select#type")
+  }
+
   get duplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
