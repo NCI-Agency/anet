@@ -13,22 +13,28 @@ import { Link, useLocation } from "react-router-dom"
 import anetLogo from "resources/logo.svg"
 import Settings from "settings"
 
-export const CompactHeaderContent = ({ object }) => {
+export const CompactHeaderContent = ({ object, sensitiveInformation }) => {
   const location = useLocation()
   const { appSettings } = useContext(AppContext)
   return (
     <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
       <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner />
+      <ClassificationBoxS>
+        <ClassificationBanner />
+        {sensitiveInformation && (
+          <span>{Settings.printOptions.sensitiveInformationText}</span>
+        )}
+      </ClassificationBoxS>
       <span style={{ fontSize: "12px" }}>
-        <Link to={location.pathname}>{object.uuid}</Link>
+        ANET Uuid: <Link to={location.pathname}>{object.uuid}</Link>
       </span>
     </HeaderContentS>
   )
 }
 
 CompactHeaderContent.propTypes = {
-  object: PropTypes.object
+  object: PropTypes.object,
+  sensitiveInformation: PropTypes.bool
 }
 
 export const CompactFooterContent = () => {
@@ -48,6 +54,14 @@ export const CompactFooterContent = () => {
     </FooterContentS>
   )
 }
+
+const ClassificationBoxS = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  min-width: 235px;
+`
 
 const PrintedByBoxS = styled.span`
   align-self: flex-start;

@@ -23,6 +23,10 @@ dateFormats:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
 
+printOptions:
+  sensitiveInformationText: Sensitive Information
+
+
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48

@@ -247,6 +247,9 @@ const CompactPersonView = ({ pageDispatchers }) => {
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
   const orderedFields = orderPersonFields()
+  const containsSensitiveInformation = !!orderedFields.find(field =>
+    Object.keys(Person.customSensitiveInformation).includes(field.key)
+  )
   const numberOfFieldsUnderAvatar = leftColumnFields || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
@@ -297,7 +300,10 @@ const CompactPersonView = ({ pageDispatchers }) => {
             setLeftColumnFields={setLeftColumnFields}
           />
           <CompactPersonViewS className="compact-view" pageSize={pageSize}>
-            <CompactHeaderContent object={person} />
+            <CompactHeaderContent
+              object={person}
+              sensitiveInformation={containsSensitiveInformation}
+            />
             <TwoColumnLayout>
               <CompactTable>{leftColum}</CompactTable>
               <CompactTable>{rightColum}</CompactTable>
