@@ -355,7 +355,9 @@ const AdvancedSelect = ({
                 placement="bottom"
                 modifiers={{
                   preventOverflow: {
-                    enabled: false
+                    options: {
+                      rootBoundary: "viewport"
+                    }
                   },
                   hide: {
                     enabled: false
