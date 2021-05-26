@@ -25,6 +25,7 @@ const GQL_GET_LOCATION = gql`
       uuid
       name
       status
+      type
       lat
       lng
       planningApprovalSteps {
