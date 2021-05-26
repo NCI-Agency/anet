@@ -19,11 +19,7 @@ async function populateLocation(location, user) {
 }
 
 const _createLocation = async function(user) {
-  const location = Object.without(
-    new Location(),
-    "displayedCoordinate",
-    "formCustomFields"
-  )
+  const location = Location.filterClientSideFields(new Location())
   if (await populateLocation(location, user)) {
     console.debug(`Creating location ${location.name}`)
 
