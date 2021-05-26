@@ -167,7 +167,7 @@ const updatePerson = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.random.number({ max: totalCount - 1 })
+  const random = faker.datatype.number({ max: totalCount - 1 })
   const people = (
     await runGQL(user, {
       query: `
@@ -254,7 +254,7 @@ const _deletePerson = async function(user) {
   }
   let person0
   for (let i = 0; i < Math.max(totalCount, 10); i++) {
-    const random = faker.random.number({ max: totalCount - 1 })
+    const random = faker.datatype.number({ max: totalCount - 1 })
     const people = (
       await runGQL(user, {
         query: `

@@ -90,7 +90,7 @@ async function listOrganizations(user) {
   ).data.organizationList.totalCount
   let organizations = null
   if (totalCount > 0) {
-    const random = faker.random.number({ max: totalCount - 1 })
+    const random = faker.datatype.number({ max: totalCount - 1 })
     organizations = (
       await runGQL(user, {
         query: `
@@ -781,7 +781,7 @@ async function getRandomPosition(user, variables) {
   ).data.positionList.totalCount
   let positions = null
   if (totalCount > 0) {
-    positionsQuery.pageNum = faker.random.number({ max: totalCount - 1 })
+    positionsQuery.pageNum = faker.datatype.number({ max: totalCount - 1 })
     positions = (
       await runGQL(user, {
         query: `
