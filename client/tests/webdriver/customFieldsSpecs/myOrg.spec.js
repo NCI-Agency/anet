@@ -16,7 +16,7 @@ describe("My Organization page", () => {
       // database, and in that case we have more reports in the statistics
       MyOrg.engagementDateStatistics.waitForDisplayed()
       const daysWithEvent = MyOrg.engagementDateStatistics.$$(
-        ".fc-event-container"
+        ".fc-event-title-container"
       )
       // There is at least one date with events in the calendar
       expect(daysWithEvent).to.have.length.above(0)

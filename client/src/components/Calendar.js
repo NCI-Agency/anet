@@ -1,12 +1,8 @@
-import "@fullcalendar/core/main.css"
+import FullCalendar from "@fullcalendar/react" // needs to be imported first, before plugins
 import dayGridPlugin from "@fullcalendar/daygrid"
-import "@fullcalendar/daygrid/main.css"
 import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
 import listPlugin from "@fullcalendar/list"
-import "@fullcalendar/list/main.css"
-import FullCalendar from "@fullcalendar/react"
 import timeGridPlugin from "@fullcalendar/timegrid"
-import "@fullcalendar/timegrid/main.css"
 import PropTypes from "prop-types"
 import React from "react"
 import "./Calendar.css"
@@ -14,24 +10,24 @@ import "./Calendar.css"
 const Calendar = ({ events, eventClick, calendarComponentRef }) => (
   <FullCalendar
     plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-    header={{
-      left: "prev,next today filterDraft",
+    headerToolbar={{
+      left: "prev,next today",
       center: "title",
       right: "dayGridMonth,timeGridWeek,timeGridDay,listDay"
     }}
     buttonText={{
       listDay: "list day"
     }}
-    defaultView="dayGridMonth"
+    initialView="dayGridMonth"
     views={{
       timeGridWeek: {
-        eventLimitClick: "day"
+        moreLinkClick: "day"
       },
       dayGrid: {
-        eventLimitClick: "popover"
+        moreLinkClick: "popover"
       }
     }}
-    allDayDefault={false}
+    defaultAllDay={false}
     eventTimeFormat={{
       hour: "2-digit",
       minute: "2-digit",
@@ -48,11 +44,12 @@ const Calendar = ({ events, eventClick, calendarComponentRef }) => (
     }}
     height="auto" // assume a natural height, no scrollbars will be used
     aspectRatio={3} // ratio of width-to-height
-    timeGridEventMinHeight={20}
     ref={calendarComponentRef}
+    dayMaxEvents={3} // workaround for https://github.com/fullcalendar/fullcalendar/issues/5595
+    eventMaxStack={3}
     events={events}
     eventOverlap
-    eventLimit
+    eventDisplay="block"
     eventClick={eventClick}
     dateClick={info => {
       const calendarApi = calendarComponentRef.current.getApi()
