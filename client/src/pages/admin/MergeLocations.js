@@ -35,7 +35,7 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Location } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -69,6 +69,18 @@ const MergeLocations = ({ pageDispatchers }) => {
   const location1 = mergeState[mergeSides[0]]
   const location2 = mergeState[mergeSides[1]]
   const mergedLocation = mergeState.merged
+
+  useEffect(() => {
+    if (location1 && location2 && location1.type !== location2.type) {
+      setSaveError(prevValues => ({
+        ...prevValues,
+        message: `Positions you are about to merge have different types. Before continuing,
+          please be aware that this merge operation might cause problems in the future!`
+      }))
+    } else {
+      setSaveError(null)
+    }
+  }, [location1, location2])
 
   return (
     <Grid fluid>

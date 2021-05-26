@@ -515,10 +515,10 @@ export const searchFilters = function() {
         props: {
           queryKey: "type",
           options: [
-            Location.locationTypeMapper(Location.LOCATION_TYPE.GEOGRAPHICAL),
-            Location.locationTypeMapper(Location.LOCATION_TYPE.PINPOINT),
             Location.locationTypeMapper(Location.LOCATION_TYPE.ADVISOR),
             Location.locationTypeMapper(Location.LOCATION_TYPE.PRINCIPAL),
+            Location.locationTypeMapper(Location.LOCATION_TYPE.PINPOINT),
+            Location.locationTypeMapper(Location.LOCATION_TYPE.GEOGRAPHICAL),
             Location.locationTypeMapper(Location.LOCATION_TYPE.VIRTUAL)
           ],
           labels: [
