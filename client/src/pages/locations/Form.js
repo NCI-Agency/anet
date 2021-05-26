@@ -1,4 +1,4 @@
-import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { Icon, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
@@ -86,10 +86,10 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
   // Location types to be shown to admins in the new location page.
   const locationTypesAdmin = [
-    Location.LOCATION_TYPE.GEOGRAPHICAL,
-    Location.LOCATION_TYPE.PINPOINT,
     Location.LOCATION_TYPE.ADVISOR,
     Location.LOCATION_TYPE.PRINCIPAL,
+    Location.LOCATION_TYPE.PINPOINT,
+    Location.LOCATION_TYPE.GEOGRAPHICAL,
     Location.LOCATION_TYPE.VIRTUAL
   ]
 
@@ -177,7 +177,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                           <Icon
                             icon={IconNames.WARNING_SIGN}
                             intent={Intent.WARNING}
-                            iconSize={IconSize.STANDARD}
+                            iconSize={Icon.SIZE_STANDARD}
                             style={{ margin: "0 6px" }}
                           />
                           Possible Duplicates

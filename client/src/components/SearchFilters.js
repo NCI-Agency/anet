@@ -509,7 +509,7 @@ export const searchFilters = function() {
 
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
     filters: {
-      "Location Type": {
+      Type: {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         props: {
@@ -522,10 +522,10 @@ export const searchFilters = function() {
             Location.locationTypeMapper(Location.LOCATION_TYPE.VIRTUAL)
           ],
           labels: [
-            Location.LOCATION_TYPE.GEOGRAPHICAL,
-            Location.LOCATION_TYPE.PINPOINT,
             Location.LOCATION_TYPE.ADVISOR,
             Location.LOCATION_TYPE.PRINCIPAL,
+            Location.LOCATION_TYPE.PINPOINT,
+            Location.LOCATION_TYPE.GEOGRAPHICAL,
             Location.LOCATION_TYPE.VIRTUAL
           ]
         }

@@ -4002,25 +4002,25 @@
 
 	<changeSet id="update-locations-null-type-field-ppa" author="bssimsoft">
 		<sql>
-			UPDATE locations l
+			UPDATE "locations"
 			SET "type" = 'PPA'
-			where l.uuid in (select distinct(p."locationUuid") from positions p where p.type = 0) and l.type is NULL;
+			where uuid in (select distinct(p."locationUuid") from positions p where p.type = 0) and type is NULL;
 		</sql>
 	</changeSet>
 
 	<changeSet id="update-locations-null-type-field-ppp" author="bssimsoft">
 		<sql>
-			UPDATE locations l
-			SET "type" = 'PPA'
-			where l.uuid in (select distinct(p."locationUuid") from positions p where p.type = 1) and l.type is NULL;
+			UPDATE "locations"
+			SET "type" = 'PPP'
+			where uuid in (select distinct(p."locationUuid") from positions p where p.type = 1) and type is NULL;
 		</sql>
 	</changeSet>
 
 	<changeSet id="update-locations-null-type-field-virtual" author="bssimsoft">
 		<sql>
-			UPDATE "locations" l
+			UPDATE "locations"
 			SET "type" = 'V'
-			WHERE l.lat IS NULL and l.lng IS NULL and l.type IS NULL
+			WHERE lat IS NULL and lng IS NULL and type IS NULL
 		</sql>
 	</changeSet>
 
