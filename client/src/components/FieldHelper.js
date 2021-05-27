@@ -311,11 +311,16 @@ export const DropdownField = ({
   vertical,
   extraAddon,
   options,
+  disabled,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
     () => (
-      <FormControl componentClass="select" onChange={form.handleChange}>
+      <FormControl
+        disabled={disabled}
+        componentClass="select"
+        onChange={form.handleChange}
+      >
         <option hidden={field.value} value={!field.value ? "" : field.value}>
           {!field.value
             ? "Please select a location type"
@@ -329,7 +334,7 @@ export const DropdownField = ({
         ))}
       </FormControl>
     ),
-    [form.handleChange, options, field.value]
+    [form.handleChange, options, field.value, disabled]
   )
   return (
     <Field
@@ -359,7 +364,8 @@ DropdownField.propTypes = {
   isCompact: PropTypes.bool,
   labelColumnWidth: PropTypes.number,
   extraAddon: PropTypes.object,
-  options: PropTypes.array
+  options: PropTypes.array,
+  disabled: PropTypes.bool
 }
 
 export const SpecialField = ({

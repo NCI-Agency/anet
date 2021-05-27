@@ -196,8 +196,9 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
                 <FastField
                   name="type"
-                  options={getDropdownOptionsForUser(currentUser)}
                   component={FieldHelper.DropdownField}
+                  disabled={!canEditName}
+                  options={getDropdownOptionsForUser(currentUser)}
                 />
 
                 <GeoLocation
