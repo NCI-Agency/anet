@@ -896,11 +896,6 @@ header.searchPagination {
   padding: 15px;
 }
 
-.advanced-search-content {
-  max-height: 40vh;
-  overflow: auto;
-}
-
 .advanced-search-content .form-group {
   margin: 0 0 15px !important;
 }
