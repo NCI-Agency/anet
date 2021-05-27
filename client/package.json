@@ -57,7 +57,7 @@
     "cross-fetch": "3.1.4",
     "cross-spawn": "7.0.3",
     "css-loader": "5.2.6",
-    "dotenv": "9.0.2",
+    "dotenv": "10.0.0",
     "eslint": "7.27.0",
     "eslint-config-react-app": "6.0.0",
     "eslint-config-standard": "16.0.3",
