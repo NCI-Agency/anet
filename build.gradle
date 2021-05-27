@@ -61,11 +61,11 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	implementation 'io.dropwizard:dropwizard-core:2.0.21'
-	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.21'
-	implementation 'io.dropwizard:dropwizard-migrations:2.0.21'
-	implementation 'io.dropwizard:dropwizard-auth:2.0.21'
-	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.21'
+	implementation 'io.dropwizard:dropwizard-core:2.0.22'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.22'
+	implementation 'io.dropwizard:dropwizard-migrations:2.0.22'
+	implementation 'io.dropwizard:dropwizard-auth:2.0.22'
+	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.22'
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.3.0-1'
@@ -117,8 +117,8 @@ dependencies {
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
-	testImplementation 'io.dropwizard:dropwizard-testing:2.0.21'
-	testImplementation 'io.dropwizard:dropwizard-client:2.0.21'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.22'
+	testImplementation 'io.dropwizard:dropwizard-client:2.0.22'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
 	testImplementation 'org.assertj:assertj-core:3.19.0'
@@ -131,9 +131,12 @@ dependencies {
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 }
 
-configurations {
+configurations.all {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
-	implementation.exclude module: 'xalan'
+	exclude module: 'xalan'
+
+	// Force this transitive dependency to the pre-v3 version for Java 8:
+	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.1'
 }
 
 test {
