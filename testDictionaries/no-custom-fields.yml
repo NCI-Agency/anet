@@ -290,11 +290,9 @@ fields:
         - inputFieldName
         - phoneNumber
         - country
-        - birthday
         - colourOptions
         - textareaFieldName
         - code
-        - politicalPosition
         - rank
         - numberFieldName
         - nlt
@@ -426,6 +424,7 @@ fields:
         - prevPositions
         - phoneNumber
         - country
+        - birthday
         - colourOptions
         - textareaFieldName
         - domainUsername
@@ -433,6 +432,7 @@ fields:
         - multipleButtons
         - inputFieldName
         - code
+        - politicalPosition
         - rank
         - numberFieldName
         - nlt

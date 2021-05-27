@@ -179,7 +179,12 @@ const PersonShow = ({ pageDispatchers }) => {
 
   const action = (
     <div>
-      <Button bsStyle="primary" onClick={onCompactClick}>
+      <Button
+        value="compactView"
+        type="button"
+        bsStyle="primary"
+        onClick={onCompactClick}
+      >
         Summary / Print
       </Button>
       {canEdit && (

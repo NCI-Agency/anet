@@ -305,8 +305,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
               sensitiveInformation={containsSensitiveInformation}
             />
             <TwoColumnLayout>
-              <CompactTable>{leftColum}</CompactTable>
-              <CompactTable>{rightColum}</CompactTable>
+              <CompactTable className="left-table">{leftColum}</CompactTable>
+              <CompactTable className="right-table">{rightColum}</CompactTable>
             </TwoColumnLayout>
             <CompactFooterContent />
           </CompactPersonViewS>

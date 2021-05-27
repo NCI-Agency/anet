@@ -137,9 +137,9 @@ const ClassificationBannerS = styled.div`
   }
 `
 
-const CompactTable = ({ children }) => {
+const CompactTable = ({ className, children }) => {
   return (
-    <CompactTableS>
+    <CompactTableS className={className}>
       <thead>
         <tr>
           <EmptySpaceTdS colSpan="2" />
@@ -156,6 +156,7 @@ const CompactTable = ({ children }) => {
 }
 
 CompactTable.propTypes = {
+  className: PropTypes.string,
   children: PropTypes.node
 }
 
