@@ -3,7 +3,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.0"
 	id "com.diffplug.spotless" version "5.12.5"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.2"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.16"
 }
 
 apply plugin: 'java'
@@ -113,7 +113,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14.2'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.16'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -458,12 +458,9 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
-// Add the generated sources as a Java test source folder
-sourceSets.test.java.srcDirs += 'build/generated/generateClientCode'
-// And remove the auto-added generated sources from the main Java source
-def mainSrcDirs = sourceSets.main.java.srcDirs.toList()
-mainSrcDirs.removeAll { it.name == 'generateClientCode' || it.name == 'generateServerCode' }
-sourceSets.main.java.srcDirs = mainSrcDirs
+// Add the generated (re)sources as a Java test (re)source folder
+sourceSets.test.java.srcDirs += 'build/generated/sources/graphqlGradlePlugin'
+sourceSets.test.resources.srcDirs += 'build/generated/resources/graphqlGradlePlugin'
 
 // Execute the GraphQL plugin before Java compiles, so that all test sources are generated on time
 compileTestJava.dependsOn generateClientCode
@@ -478,6 +475,7 @@ generateClientCodeConf {
 	separateUtilityClasses = true
 	copyRuntimeSources = false
 	generateDeprecatedRequestResponse = false
+	skipGenerationIfSchemaHasNotChanged = true
 	customScalars = [
 		[
 			graphQLTypeName: "Instant",
