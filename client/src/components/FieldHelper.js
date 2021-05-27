@@ -2,7 +2,6 @@ import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
-import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -312,8 +311,15 @@ export const DropdownField = ({
   extraAddon,
   options,
   disabled,
+  placeholder,
+  humanReadableFunction,
   ...otherProps
 }) => {
+  const humanReadableValue = useCallback(
+    value => (humanReadableFunction ? humanReadableFunction(value) : value),
+    [humanReadableFunction]
+  )
+
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -322,18 +328,23 @@ export const DropdownField = ({
         onChange={form.handleChange}
       >
         <option hidden={field.value} value={!field.value ? "" : field.value}>
-          {!field.value
-            ? "Please select a location type"
-            : Location.humanNameOfType(field.value)}
+          {!field.value ? placeholder : humanReadableValue(field.value)}
         </option>
         {options.map(option => (
           <option key={option} value={option}>
-            {Location.humanNameOfType(option)}
+            {humanReadableValue(option)}
           </option>
         ))}
       </FormControl>
     ),
-    [form.handleChange, options, field.value, disabled]
+    [
+      form.handleChange,
+      options,
+      field.value,
+      disabled,
+      placeholder,
+      humanReadableValue
+    ]
   )
   return (
     <Field
@@ -364,7 +375,9 @@ DropdownField.propTypes = {
   labelColumnWidth: PropTypes.number,
   extraAddon: PropTypes.object,
   options: PropTypes.array,
-  disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  placeholder: PropTypes.string,
+  humanReadableFunction: PropTypes.func
 }
 
 export const SpecialField = ({

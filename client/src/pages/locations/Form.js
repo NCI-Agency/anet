@@ -199,6 +199,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.DropdownField}
                   disabled={!canEditName}
                   options={getDropdownOptionsForUser(currentUser)}
+                  placeholder={"Please select a location type"}
+                  humanReadableFunction={Location.humanNameOfType}
                 />
 
                 <GeoLocation
