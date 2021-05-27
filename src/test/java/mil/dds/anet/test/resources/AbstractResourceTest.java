@@ -65,7 +65,6 @@ public abstract class AbstractResourceTest {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final JerseyClientConfiguration config = new JerseyClientConfiguration();
-  private static final ObjectMapper defaultMapper = MapperUtils.getDefaultMapper();
   private static final ObjectMapper ignoringMapper = MapperUtils.getDefaultMapper()
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -412,16 +411,16 @@ public abstract class AbstractResourceTest {
   }
 
   protected static QueryExecutor getQueryExecutor(String user) {
-    return new QueryExecutor(getGraphQlEndpoint(), getClient(user), defaultMapper);
+    return new QueryExecutor(getGraphQlEndpoint(), getClient(user));
   }
 
   protected static MutationExecutor getMutationExecutor(String user) {
-    return new MutationExecutor(getGraphQlEndpoint(), getClient(user), defaultMapper);
+    return new MutationExecutor(getGraphQlEndpoint(), getClient(user));
   }
 
   @SuppressWarnings("deprecation")
   private static GraphQLConfiguration getGraphQlConfiguration(String user) {
-    return new GraphQLConfiguration(getGraphQlEndpoint(), getClient(user), defaultMapper);
+    return new GraphQLConfiguration(getGraphQlEndpoint(), getClient(user));
   }
 
   private static String getGraphQlEndpoint() {

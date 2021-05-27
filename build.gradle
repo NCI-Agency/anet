@@ -2,8 +2,8 @@ plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.0"
-	id "com.diffplug.spotless" version "5.12.4"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.14.2"
+	id "com.diffplug.spotless" version "5.12.5"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.16"
 	id "org.beryx.runtime" version "1.12.4"
 	id "nebula.ospackage" version "8.5.6"
 }
@@ -66,11 +66,11 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	implementation 'io.dropwizard:dropwizard-core:2.0.21'
-	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.21'
-	implementation 'io.dropwizard:dropwizard-migrations:2.0.21'
-	implementation 'io.dropwizard:dropwizard-auth:2.0.21'
-	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.21'
+	implementation 'io.dropwizard:dropwizard-core:2.0.22'
+	implementation 'io.dropwizard:dropwizard-jdbi3:2.0.22'
+	implementation 'io.dropwizard:dropwizard-migrations:2.0.22'
+	implementation 'io.dropwizard:dropwizard-auth:2.0.22'
+	implementation 'io.dropwizard:dropwizard-views-freemarker:2.0.22'
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
 	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.3.0-1'
@@ -83,18 +83,18 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation 'org.ehcache:ehcache:3.9.3'
+	implementation 'org.ehcache:ehcache:3.9.4'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:6.5.3'
+	implementation 'org.simplejavamail:simple-java-mail:6.5.4'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.11.2'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
-	implementation 'com.mikesamuel:json-sanitizer:1.2.2'
+	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 	// Authentication
 	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.2.0'
 	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
@@ -121,12 +121,12 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.14.2'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.16'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
-	testImplementation 'io.dropwizard:dropwizard-testing:2.0.21'
-	testImplementation 'io.dropwizard:dropwizard-client:2.0.21'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.22'
+	testImplementation 'io.dropwizard:dropwizard-client:2.0.22'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
 	testImplementation 'org.assertj:assertj-core:3.19.0'
@@ -135,16 +135,19 @@ dependencies {
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 }
 
-configurations {
+configurations.all {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
-	implementation.exclude module: 'xalan'
+	exclude module: 'xalan'
 	// Also exclude XML API's to avoid (Eclipse) warnings like
 	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
-	implementation.exclude group: 'xml-apis'
+	exclude group: 'xml-apis'
+
+	// Force this transitive dependency to the pre-v3 version for Java 8:
+	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.1'
 }
 
 test {
@@ -537,12 +540,9 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
-// Add the generated sources as a Java test source folder
-sourceSets.test.java.srcDirs += 'build/generated/generateClientCode'
-// And remove the auto-added generated sources from the main Java source
-def mainSrcDirs = sourceSets.main.java.srcDirs.toList()
-mainSrcDirs.removeAll { it.name == 'generateClientCode' || it.name == 'generateServerCode' }
-sourceSets.main.java.srcDirs = mainSrcDirs
+// Add the generated (re)sources as a Java test (re)source folder
+sourceSets.test.java.srcDirs += 'build/generated/sources/graphqlGradlePlugin'
+sourceSets.test.resources.srcDirs += 'build/generated/resources/graphqlGradlePlugin'
 
 // Execute the GraphQL plugin before Java compiles, so that all test sources are generated on time
 compileTestJava.dependsOn generateClientCode
@@ -557,6 +557,7 @@ generateClientCodeConf {
 	separateUtilityClasses = true
 	copyRuntimeSources = false
 	generateDeprecatedRequestResponse = false
+	skipGenerationIfSchemaHasNotChanged = true
 	customScalars = [
 		[
 			graphQLTypeName: "Instant",

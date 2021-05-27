@@ -1,6 +1,10 @@
 import Page from "./page"
 
 class ShowPerson extends Page {
+  get editButton() {
+    return browser.$("div a.edit-person")
+  }
+
   get assessmentsTable() {
     return this.quarterlyAssessmentContainer.$("table.assessments-table")
   }
@@ -42,6 +46,14 @@ class ShowPerson extends Page {
 
   get quarterlyAssessmentContainer() {
     return browser.$("#entity-assessments-results-quarterly")
+  }
+
+  get politicalPosition() {
+    return browser.$('div[name="formSensitiveFields.politicalPosition"]')
+  }
+
+  get birthday() {
+    return browser.$('div[name="formSensitiveFields.birthday"]')
   }
 
   waitForAssessmentModalForm(reverse = false) {

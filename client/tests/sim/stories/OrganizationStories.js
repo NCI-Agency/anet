@@ -104,12 +104,7 @@ async function createHierarchy(user, grow, args) {
     const level = path.length
 
     // create and fill an organization object
-    const org = Object.without(
-      new Organization(),
-      "childrenOrgs",
-      "positions",
-      "formCustomFields"
-    )
+    const org = Organization.filterClientSideFields(new Organization())
     if (level === 0) {
       org.longName = longName
     } else if (level === 1) {
@@ -183,13 +178,7 @@ async function gqlCreateOrganization(user, org) {
 
 const createOrganization = async function(user, parentOrg, path) {
   const randomOrg = randomOrganization()
-  const org = Object.without(new Organization(), "formCustomFields")
-
-  // org = Object.without(org, 'childrenOrgs', 'positions')
-  delete org.childrenOrgs
-  delete org.positions
-
-  // org.parentOrg = utils.getReference(org.parentOrg)
+  const org = Organization.filterClientSideFields(new Organization())
   randomOrg.parentOrg = utils.getReference(parentOrg)
 
   if (path.length > 1) {

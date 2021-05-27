@@ -608,12 +608,13 @@ public class PersonResourceTest extends AbstractResourceTest {
     if (doInsert) {
       final List<CustomSensitiveInformationInput> csiInput = customSensitiveFields.stream()
           .map(csf -> CustomSensitiveInformationInput.builder().withCustomFieldName(csf)
-              .withCustomFieldValue(UUID.randomUUID().toString()).build())
+              .withCustomFieldValue(getCustomFieldValue(csf, UUID.randomUUID().toString())).build())
           .collect(Collectors.toList());
       personInput.setCustomSensitiveInformation(csiInput);
     } else {
       personInput.getCustomSensitiveInformation().stream()
-          .forEach(csiInput -> csiInput.setCustomFieldValue(UUID.randomUUID().toString()));
+          .forEach(csiInput -> csiInput.setCustomFieldValue(
+              getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
     }
     final Integer nrUpdated = mutationExecutor.updatePerson("", personInput);
     assertThat(nrUpdated).isEqualTo(1);
@@ -642,10 +643,15 @@ public class PersonResourceTest extends AbstractResourceTest {
       // Restore previous values
       final PersonInput personInputRestore = getInput(person, PersonInput.class);
       personInput.getCustomSensitiveInformation().stream()
-          .forEach(csiInput -> csiInput.setCustomFieldValue(UUID.randomUUID().toString()));
+          .forEach(csiInput -> csiInput.setCustomFieldValue(
+              getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
       final Integer nrUpdatedRestore = mutationExecutor.updatePerson("", personInputRestore);
       assertThat(nrUpdatedRestore).isEqualTo(1);
     }
+  }
+
+  private String getCustomFieldValue(String fieldName, String value) {
+    return String.format("{\"%1$s\":\"%2$s\"}", fieldName, value);
   }
 
   @Test
@@ -676,7 +682,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final PersonInput personInput = getInput(person, PersonInput.class);
     final List<CustomSensitiveInformationInput> csiInput = customSensitiveFields.stream()
         .map(csf -> CustomSensitiveInformationInput.builder().withCustomFieldName(csf)
-            .withCustomFieldValue(customFieldValue).build())
+            .withCustomFieldValue(getCustomFieldValue(csf, customFieldValue)).build())
         .collect(Collectors.toList());
     personInput.setCustomSensitiveInformation(csiInput);
     final Instant beforeUpdate = Instant.now();
