@@ -28,7 +28,7 @@ public abstract class AbstractLocationSearcher
     qb.addTotalCount();
     qb.addFromClause("locations");
     qb.addEnumEqualsClause("status", "locations.status", query.getStatus());
-    qb.addLikeClause("type", "locations.type", query.getType());
+    qb.addLikeClause("type", "locations.type", DaoUtils.getEnumString(query.getType()));
 
     if (hasTextQuery(query)) {
       addTextQuery(query);

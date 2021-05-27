@@ -220,10 +220,10 @@ type Location {
   lat: Float
   lng: Float
   name: String
-  type: String
   notes: [Note]
   planningApprovalSteps: [ApprovalStep]
   status: Status
+  type: LocationType
   updatedAt: Instant
   uuid: String
 }
@@ -238,7 +238,7 @@ input LocationInput {
   name: String
   planningApprovalSteps: [ApprovalStepInput]
   status: Status
-  type: String
+  type: LocationType
   updatedAt: Instant
   uuid: String
 }
@@ -250,14 +250,23 @@ input LocationSearchQueryInput {
   sortBy: LocationSearchSortBy
   sortOrder: SortOrder
   status: Status
-  type: String
   text: String
+  type: LocationType
 }
 
 enum LocationSearchSortBy {
   CREATED_AT
   NAME
   RECENT
+}
+
+enum LocationType {
+  ADVISOR_LOCATION
+  GEOGRAPHICAL_AREA
+  PHYSICAL_LOCATION
+  PINPOINT_LOCATION
+  PRINCIPAL_LOCATION
+  VIRTUAL_LOCATION
 }
 
 """Mutation root"""

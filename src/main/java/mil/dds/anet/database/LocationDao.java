@@ -44,7 +44,8 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
             + ":updatedAt, :customFields)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
-        .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+        .bind("status", DaoUtils.getEnumId(l.getStatus()))
+        .bind("type", DaoUtils.getEnumString(l.getType())).execute();
     return l;
   }
 
@@ -54,7 +55,8 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
         + "SET name = :name, type = :type, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
         + "\"customFields\" = :customFields WHERE uuid = :uuid").bindBean(l)
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
-        .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+        .bind("status", DaoUtils.getEnumId(l.getStatus()))
+        .bind("type", DaoUtils.getEnumString(l.getType())).execute();
   }
 
   @Override

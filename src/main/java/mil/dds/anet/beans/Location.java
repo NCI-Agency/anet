@@ -3,6 +3,7 @@ package mil.dds.anet.beans;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,33 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
 
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";
+
+  public enum LocationType {
+    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), PINPOINT_LOCATION("PP"),
+    ADVISOR_LOCATION("PPA"), PRINCIPAL_LOCATION("PPP"), VIRTUAL_LOCATION("V");
+
+    private static final Map<String, LocationType> BY_CODE = new HashMap<>();
+    static {
+      for (final LocationType e : values()) {
+        BY_CODE.put(e.code, e);
+      }
+    }
+
+    public static LocationType valueOfCode(String code) {
+      return BY_CODE.get(code);
+    }
+
+    private String code;
+
+    private LocationType(String code) {
+      this.code = code;
+    }
+
+    @Override
+    public String toString() {
+      return code;
+    }
+  }
 
   @GraphQLQuery
   @GraphQLInputField
@@ -30,7 +58,7 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
   private Double lng;
   @GraphQLQuery
   @GraphQLInputField
-  private String type;
+  private LocationType type;
   /* The following are all Lazy Loaded */
   // annotated below
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
@@ -71,11 +99,11 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
     this.lng = lng;
   }
 
-  public String getType() {
+  public LocationType getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public void setType(LocationType type) {
     this.type = type;
   }
 

@@ -3,6 +3,7 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Location.LocationType;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 
@@ -17,7 +18,7 @@ public class LocationMapper implements RowMapper<Location> {
     // preserve NULL values; when NULL there are no coordinates set:
     l.setLat(MapperUtils.getOptionalDouble(rs, "lat"));
     l.setLng(MapperUtils.getOptionalDouble(rs, "lng"));
-    l.setType(rs.getString("type"));
+    l.setType(LocationType.valueOfCode(rs.getString("type")));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));
