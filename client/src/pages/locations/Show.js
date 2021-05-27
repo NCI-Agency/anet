@@ -156,7 +156,7 @@ const LocationShow = ({ pageDispatchers }) => {
                 <Field
                   name="type"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={Location.locationTypeToString(location.type)}
+                  humanValue={Location.humanNameOfType(location.type)}
                 />
 
                 <GeoLocation

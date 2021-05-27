@@ -309,42 +309,48 @@ const ReportForm = ({
             queryVars: { status: Model.STATUS.ACTIVE }
           },
           geographical: {
-            label: Location.LOCATION_TYPE.GEOGRAPHICAL,
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.GEOGRAPHICAL_AREA
+            ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.locationTypeMapper(
-                Location.LOCATION_TYPE.GEOGRAPHICAL
-              )
+              type: Location.LOCATION_TYPES.GEOGRAPHICAL_AREA
             }
           },
           pinpoint: {
-            label: Location.LOCATION_TYPE.PINPOINT,
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PINPOINT_LOCATION
+            ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.locationTypeMapper(Location.LOCATION_TYPE.PINPOINT)
+              type: Location.LOCATION_TYPES.PINPOINT_LOCATION
             }
           },
           advisor: {
-            label: Location.LOCATION_TYPE.ADVISOR,
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.ADVISOR_LOCATION
+            ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.locationTypeMapper(Location.LOCATION_TYPE.ADVISOR)
+              type: Location.LOCATION_TYPES.ADVISOR_LOCATION
             }
           },
           principal: {
-            label: Location.LOCATION_TYPE.PRINCIPAL,
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+            ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.locationTypeMapper(
-                Location.LOCATION_TYPE.PRINCIPAL
-              )
+              type: Location.LOCATION_TYPES.PRINCIPAL_LOCATION
             }
           },
           virtual: {
-            label: Location.LOCATION_TYPE.VIRTUAL,
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.VIRTUAL_LOCATION
+            ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.locationTypeMapper(Location.LOCATION_TYPE.VIRTUAL)
+              type: Location.LOCATION_TYPES.VIRTUAL_LOCATION
             }
           }
         }

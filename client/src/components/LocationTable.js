@@ -123,7 +123,7 @@ const BaseLocationTable = ({
                 <td>
                   <LinkTo modelType="Location" model={loc} />
                 </td>
-                <td>{Location.locationTypeToString(loc.type)}</td>
+                <td>{Location.humanNameOfType(loc.type)}</td>
               </tr>
             ))}
           </tbody>

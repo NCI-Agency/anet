@@ -269,9 +269,7 @@ const ReportSummaryRow = ({ report }) => {
               <strong>Location: </strong>
               <LinkTo modelType="Location" model={report.location} />
               {"  "}
-              <Badge>
-                {Location.locationTypeToString(report.location.type)}
-              </Badge>
+              <Badge>{Location.humanNameOfType(report.location.type)}</Badge>
             </span>
           </Col>
         </Row>

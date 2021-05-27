@@ -38,72 +38,13 @@ export default class Location extends Model {
   static locationFormat =
     Settings.fields.location.format || Location.LOCATION_FORMATS.LAT_LON
 
-  static LOCATION_TYPE_ABBREVIATION = {
-    PHYSICAL: "P",
-    GEOGRAPHICAL: "PA",
-    PINPOINT: "PP",
-    ADVISOR: "PPA",
-    PRINCIPAL: "PPP",
-    VIRTUAL: "V"
-  }
-
-  static LOCATION_TYPE = {
-    PHYSICAL: "Physical Location",
-    GEOGRAPHICAL: "Geographical Area",
-    PINPOINT: "Pinpoint Location",
-    ADVISOR: "Advisor Location",
-    PRINCIPAL: "Principal Location",
-    VIRTUAL: "Virtual Location"
-  }
-
-  /**
-   * Takes the location type displayed in the UI and converts it to an
-   * abbreviation to be stored in the database.
-   * @param   {String} locationTypeLabel Location type displayed in the UI, e.g., Advisor Location, ...etc.
-   * @returns {String} The return result could be one of the following P, PA, PP, PPA, PPP & V.
-   */
-  static locationTypeMapper(locationTypeLabel) {
-    switch (locationTypeLabel) {
-      case this.LOCATION_TYPE.PHYSICAL:
-        return this.LOCATION_TYPE_ABBREVIATION.PHYSICAL
-      case this.LOCATION_TYPE.GEOGRAPHICAL:
-        return this.LOCATION_TYPE_ABBREVIATION.GEOGRAPHICAL
-      case this.LOCATION_TYPE.PINPOINT:
-        return this.LOCATION_TYPE_ABBREVIATION.PINPOINT
-      case this.LOCATION_TYPE.ADVISOR:
-        return this.LOCATION_TYPE_ABBREVIATION.ADVISOR
-      case this.LOCATION_TYPE.PRINCIPAL:
-        return this.LOCATION_TYPE_ABBREVIATION.PRINCIPAL
-      case this.LOCATION_TYPE.VIRTUAL:
-        return this.LOCATION_TYPE_ABBREVIATION.VIRTUAL
-      default:
-        return ""
-    }
-  }
-
-  /**
-   * Takes the location type abbreviation returned from the server and converts it to a string
-   * to be used in the UI.
-   * @param {String} locationTypeAbbreviation Could be one of the following P, PA, PP, PPA, PPP & V.
-   * @returns {String} Location type string to be displayed in the UI.
-   */
-  static locationTypeToString(locationTypeAbbreviation) {
-    switch (locationTypeAbbreviation) {
-      case this.LOCATION_TYPE_ABBREVIATION.PHYSICAL:
-        return Location.LOCATION_TYPE.PHYSICAL
-      case this.LOCATION_TYPE_ABBREVIATION.GEOGRAPHICAL:
-        return Location.LOCATION_TYPE.GEOGRAPHICAL
-      case this.LOCATION_TYPE_ABBREVIATION.PINPOINT:
-        return Location.LOCATION_TYPE.PINPOINT
-      case this.LOCATION_TYPE_ABBREVIATION.ADVISOR:
-        return Location.LOCATION_TYPE.ADVISOR
-      case this.LOCATION_TYPE_ABBREVIATION.PRINCIPAL:
-        return Location.LOCATION_TYPE.PRINCIPAL
-      case this.LOCATION_TYPE_ABBREVIATION.VIRTUAL:
-        return Location.LOCATION_TYPE.VIRTUAL
-      default:
-        return ""
-    }
+  static LOCATION_TYPES = {
+    PHYSICAL_LOCATION: "PHYSICAL_LOCATION",
+    GEOGRAPHICAL_AREA: "GEOGRAPHICAL_AREA",
+    PINPOINT_LOCATION: "PINPOINT_LOCATION",
+    ADVISOR_LOCATION: "ADVISOR_LOCATION",
+    PRINCIPAL_LOCATION: "PRINCIPAL_LOCATION",
+    VIRTUAL_LOCATION: "VIRTUAL_LOCATION"
   }
 
   static yupSchema = yup
@@ -271,6 +212,10 @@ export default class Location extends Model {
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
+  }
+
+  static humanNameOfType(type) {
+    return utils.sentenceCase(type)
   }
 
   constructor(props) {

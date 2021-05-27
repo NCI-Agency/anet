@@ -47,7 +47,7 @@ const AdvancedSelectOverlayTable = ({
               {renderRow(item)}
               <td>
                 {fieldName === "location" && (
-                  <Badge>{Location.locationTypeToString(item.type)}</Badge>
+                  <Badge>{Location.humanNameOfType(item.type)}</Badge>
                 )}
               </td>
             </tr>

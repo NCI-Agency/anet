@@ -15,5 +15,5 @@ export const SIMILAR_LOCATION = {
 }
 export const LOCATION_TYPE = {
   index: 1,
-  type: "PPA"
+  type: "ADVISOR_LOCATION"
 }

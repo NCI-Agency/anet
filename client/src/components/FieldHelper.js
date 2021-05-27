@@ -324,12 +324,11 @@ export const DropdownField = ({
         <option hidden={field.value} value={!field.value ? "" : field.value}>
           {!field.value
             ? "Please select a location type"
-            : Location.locationTypeToString(field.value)}
+            : Location.humanNameOfType(field.value)}
         </option>
-        )
         {options.map(option => (
-          <option key={option} value={Location.locationTypeMapper(option)}>
-            {option}
+          <option key={option} value={option}>
+            {Location.humanNameOfType(option)}
           </option>
         ))}
       </FormControl>

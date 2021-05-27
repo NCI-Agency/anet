@@ -507,6 +507,13 @@ export const searchFilters = function() {
     }
   }
 
+  const locationTypeOptions = [
+    Location.LOCATION_TYPES.ADVISOR_LOCATION,
+    Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
+    Location.LOCATION_TYPES.PINPOINT_LOCATION,
+    Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+    Location.LOCATION_TYPES.VIRTUAL_LOCATION
+  ]
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
     filters: {
       Type: {
@@ -514,20 +521,8 @@ export const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
-          options: [
-            Location.locationTypeMapper(Location.LOCATION_TYPE.ADVISOR),
-            Location.locationTypeMapper(Location.LOCATION_TYPE.PRINCIPAL),
-            Location.locationTypeMapper(Location.LOCATION_TYPE.PINPOINT),
-            Location.locationTypeMapper(Location.LOCATION_TYPE.GEOGRAPHICAL),
-            Location.locationTypeMapper(Location.LOCATION_TYPE.VIRTUAL)
-          ],
-          labels: [
-            Location.LOCATION_TYPE.ADVISOR,
-            Location.LOCATION_TYPE.PRINCIPAL,
-            Location.LOCATION_TYPE.PINPOINT,
-            Location.LOCATION_TYPE.GEOGRAPHICAL,
-            Location.LOCATION_TYPE.VIRTUAL
-          ]
+          options: locationTypeOptions,
+          labels: locationTypeOptions.map(lt => Location.humanNameOfType(lt))
         }
       }
     }

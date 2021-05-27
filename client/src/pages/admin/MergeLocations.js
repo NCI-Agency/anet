@@ -143,7 +143,7 @@ const MergeLocations = ({ pageDispatchers }) => {
 
               <LocationField
                 label="Type"
-                value={Location.locationTypeToString(mergedLocation.type)}
+                value={Location.humanNameOfType(mergedLocation.type)}
                 align={"center"}
                 action={getInfoButton("Type is required.")}
                 fieldName="type"
@@ -400,7 +400,7 @@ const LocationColumn = ({
           <LocationField
             label="Type"
             fieldName="type"
-            value={Location.locationTypeToString(location.type)}
+            value={Location.humanNameOfType(location.type)}
             align={align}
             action={getActionButton(
               () => {

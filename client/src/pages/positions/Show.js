@@ -203,9 +203,7 @@ const PositionShow = ({ pageDispatchers }) => {
                           model={position.location}
                         />{" "}
                         <Badge>
-                          {Location.locationTypeToString(
-                            position.location.type
-                          )}
+                          {Location.humanNameOfType(position.location.type)}
                         </Badge>
                       </>
                     )
