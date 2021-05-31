@@ -4000,35 +4000,36 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="update-locations-null-type-field-ppa" author="bssimsoft">
+	<changeSet id="update-locations-type" author="bssimsoft">
 		<sql>
-			UPDATE "locations"
-			SET "type" = 'PPA'
-			where uuid in (select distinct(p."locationUuid") from positions p where p.type = 0) and type is NULL;
-		</sql>
-	</changeSet>
-
-	<changeSet id="update-locations-null-type-field-ppp" author="bssimsoft">
-		<sql>
-			UPDATE "locations"
-			SET "type" = 'PPP'
-			where uuid in (select distinct(p."locationUuid") from positions p where p.type = 1) and type is NULL;
-		</sql>
-	</changeSet>
-
-	<changeSet id="update-locations-null-type-field-virtual" author="bssimsoft">
-		<sql>
-			UPDATE "locations"
-			SET "type" = 'V'
-			WHERE lat IS NULL and lng IS NULL and type IS NULL
-		</sql>
-	</changeSet>
-
-	<changeSet id="update-locations-null-type-field-pp" author="bssimsoft">
-		<sql>
-			UPDATE "locations"
-			SET "type" = 'PP'
+			-- Set type to PPA for locations linked with advisor positions
+			UPDATE locations
+			SET type = 'PPA'
 			WHERE type IS NULL
+			AND uuid IN (SELECT DISTINCT(p."locationUuid") FROM positions p WHERE p.type = 0);
+
+			-- Set type to PPP for locations linked with principal positions
+			UPDATE locations
+			SET type = 'PPP'
+			WHERE type IS NULL
+			AND uuid IN (SELECT DISTINCT(p."locationUuid") FROM positions p WHERE p.type = 1);
+
+			-- Set type to PA for locations that have both 'District' and 'Province' in their name
+			UPDATE locations
+			SET type = 'PA'
+			WHERE type IS NULL
+			AND name LIKE '%District%' AND name LIKE '%Province%';
+
+			-- Set type to V for locations without coordinates
+			UPDATE locations
+			SET type = 'V'
+			WHERE type IS NULL
+			AND lat IS NULL AND lng IS NULL;
+
+			-- Set all remaining locations to type PP
+			UPDATE locations
+			SET type = 'PP'
+			WHERE type IS NULL;
 		</sql>
 	</changeSet>
 
