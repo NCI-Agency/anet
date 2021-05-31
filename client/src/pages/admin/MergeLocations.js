@@ -274,7 +274,14 @@ const MergeLocations = ({ pageDispatchers }) => {
           intent="primary"
           text="Merge Locations"
           onClick={mergeLocations}
-          disabled={!areAllSet(location1, location2, mergedLocation?.name)}
+          disabled={
+            !areAllSet(
+              location1,
+              location2,
+              mergedLocation?.name,
+              mergedLocation?.type
+            )
+          }
         />
       </Row>
     </Grid>

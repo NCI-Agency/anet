@@ -30,15 +30,17 @@ describe("When editing a location", () => {
     EditLocation.locationTypeLabel.waitForExist()
     EditLocation.locationTypeLabel.waitForDisplayed()
 
-    expect(EditLocation.locationTypeField.getValue()).equal(LOCATION_TYPE.type)
+    expect(EditLocation.locationTypeField.getValue()).to.equal(
+      LOCATION_TYPE.type
+    )
   })
 
   it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", () => {
     EditLocation.latLngLabel.waitForExist()
     EditLocation.latLngLabel.waitForDisplayed()
 
-    expect(EditLocation.latInputField.getValue()).equal(LOCATION_COORDS.lat)
-    expect(EditLocation.lngInputField.getValue()).equal(LOCATION_COORDS.lng)
+    expect(EditLocation.latInputField.getValue()).to.equal(LOCATION_COORDS.lat)
+    expect(EditLocation.lngInputField.getValue()).to.equal(LOCATION_COORDS.lng)
   })
 
   it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", () => {
@@ -47,16 +49,18 @@ describe("When editing a location", () => {
     EditLocation.allFormatsPopoverLat.waitForExist()
     EditLocation.allFormatsPopoverMGRS.waitForExist()
 
-    expect(EditLocation.allFormatsPopoverLat.getText()).equal(NEW_COORDS.lat)
-    expect(EditLocation.allFormatsPopoverLng.getText()).equal(NEW_COORDS.lng)
-    expect(EditLocation.allFormatsPopoverMGRS.getText()).equal(NEW_COORDS.mgrs)
+    expect(EditLocation.allFormatsPopoverLat.getText()).to.equal(NEW_COORDS.lat)
+    expect(EditLocation.allFormatsPopoverLng.getText()).to.equal(NEW_COORDS.lng)
+    expect(EditLocation.allFormatsPopoverMGRS.getText()).to.equal(
+      NEW_COORDS.mgrs
+    )
 
     EditLocation.saveLocationButton.click()
     ShowLocation.successMsg.waitForExist()
     ShowLocation.successMsg.waitForDisplayed()
 
-    expect(ShowLocation.latField.getText()).equal(NEW_COORDS.lat)
-    expect(ShowLocation.lngField.getText()).equal(NEW_COORDS.lng)
+    expect(ShowLocation.latField.getText()).to.equal(NEW_COORDS.lat)
+    expect(ShowLocation.lngField.getText()).to.equal(NEW_COORDS.lng)
   })
 })
 

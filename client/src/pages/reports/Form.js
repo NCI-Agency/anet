@@ -304,19 +304,6 @@ const ReportForm = ({
         const currentOrg =
           currentUser.position && currentUser.position.organization
         const locationFilters = {
-          activeLocations: {
-            label: "All",
-            queryVars: { status: Model.STATUS.ACTIVE }
-          },
-          geographical: {
-            label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.GEOGRAPHICAL_AREA
-            ),
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.GEOGRAPHICAL_AREA
-            }
-          },
           pinpoint: {
             label: Location.humanNameOfType(
               Location.LOCATION_TYPES.PINPOINT_LOCATION
