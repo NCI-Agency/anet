@@ -132,24 +132,24 @@ INSERT INTO locations (uuid, type, name, lat, lng, createdAt, updatedAt)
 		(N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'PPP', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, type, name, createdAt, updatedAt)
 	VALUES
-		(N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'V', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'V', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'V', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'0585f158-5121-46a2-b099-799fe980aa9c', 'V', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'053ab2ad-132a-4a62-8cbb-20827f50ec34', 'V', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'V', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'6465dd40-9fec-41db-a3b9-652fa52c7d21', 'V', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'V', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'V', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'8a34768c-aa15-41e4-ab79-6cf2740d555e', 'V', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'9f364c59-953e-4c17-919c-648ea3a74e36', 'V', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'dfc3918d-c2e3-4308-b161-2445cde77b3f', 'V', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'3652e114-ad16-43f0-b179-cc1bce6958d5', 'V', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'5ac4078d-d445-416a-a93e-5941562359bb', 'V', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'22b0137c-4d89-43eb-ac95-a9f68aba884f', 'V', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'60f4084f-3304-4cd5-89df-353edef07d18', 'V', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'V', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'V', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'PPP', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'PPP', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'PPP', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'0585f158-5121-46a2-b099-799fe980aa9c', 'PPP', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'053ab2ad-132a-4a62-8cbb-20827f50ec34', 'PPP', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'PPP', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'6465dd40-9fec-41db-a3b9-652fa52c7d21', 'PPP', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'PPP', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'PPP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'8a34768c-aa15-41e4-ab79-6cf2740d555e', 'PPP', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'9f364c59-953e-4c17-919c-648ea3a74e36', 'PPP', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'dfc3918d-c2e3-4308-b161-2445cde77b3f', 'PPP', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'3652e114-ad16-43f0-b179-cc1bce6958d5', 'PPP', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'5ac4078d-d445-416a-a93e-5941562359bb', 'PPP', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'22b0137c-4d89-43eb-ac95-a9f68aba884f', 'PPP', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'60f4084f-3304-4cd5-89df-353edef07d18', 'PPP', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'PPP', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PPP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Create advisor positions
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid, createdAt, updatedAt)
