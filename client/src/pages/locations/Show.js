@@ -109,8 +109,7 @@ const LocationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const marker = {
           id: location.uuid || 0,
-          name: _escape(location.name) || "", // escape HTML in location name!
-          type: _escape(location.type) || "" // escape HTML in location name!
+          name: _escape(location.name) || "" // escape HTML in location name!
         }
         if (Location.hasCoordinates(location)) {
           Object.assign(marker, {

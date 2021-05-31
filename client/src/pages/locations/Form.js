@@ -125,13 +125,10 @@ const LocationForm = ({ edit, title, initialValues }) => {
         const marker = {
           id: values.uuid || 0,
           name: _escape(values.name) || "", // escape HTML in location name!
-          type: _escape(values.type) || "", // escape HTML in location type!
           draggable: true,
           autoPan: true,
-          onMove: (event, map) => {
-            const latLng = map.wrapLatLng(event.target.getLatLng())
-            updateCoordinateFields(values, latLng)
-          }
+          onMove: (event, map) =>
+            updateCoordinateFields(map.wrapLatLng(event.target.getLatLng()))
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
@@ -196,11 +193,25 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
                 <FastField
                   name="type"
-                  component={FieldHelper.DropdownField}
+                  component={FieldHelper.SpecialField}
                   disabled={!canEditName}
-                  options={getDropdownOptionsForUser(currentUser)}
-                  placeholder={"Please select a location type"}
-                  humanReadableFunction={Location.humanNameOfType}
+                  onChange={event => {
+                    // validation will be done by setFieldValue
+                    setFieldValue("type", event.target.value, true)
+                  }}
+                  widget={
+                    <FastField
+                      component="select"
+                      className="location-type-form-group form-control"
+                    >
+                      <option value="">Please select a location type</option>
+                      {getDropdownOptionsForUser(currentUser).map(type => (
+                        <option key={type} value={type}>
+                          {Location.humanNameOfType(type)}
+                        </option>
+                      ))}
+                    </FastField>
+                  }
                 />
 
                 <GeoLocation
@@ -215,10 +226,9 @@ const LocationForm = ({ edit, title, initialValues }) => {
               <h3>Drag the marker below to set the location</h3>
               <Leaflet
                 markers={[marker]}
-                onMapClick={(event, map) => {
-                  const latLng = map.wrapLatLng(event.latlng)
-                  updateCoordinateFields(values, latLng)
-                }}
+                onMapClick={(event, map) =>
+                  updateCoordinateFields(map.wrapLatLng(event.latlng))
+                }
               />
 
               <ApprovalsDefinition
@@ -285,15 +295,15 @@ const LocationForm = ({ edit, title, initialValues }) => {
           </div>
         )
 
-        function updateCoordinateFields(values, latLng) {
+        function updateCoordinateFields(latLng) {
           const parsedLat = parseCoordinate(latLng.lat)
           const parsedLng = parseCoordinate(latLng.lng)
-          setValues({
-            ...values,
-            lat: parsedLat,
-            lng: parsedLng,
-            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
-          })
+          setFieldValue("lat", parsedLat)
+          setFieldValue("lng", parsedLng)
+          setFieldValue(
+            "displayedCoordinate",
+            convertLatLngToMGRS(parsedLat, parsedLng)
+          )
         }
       }}
     </Formik>

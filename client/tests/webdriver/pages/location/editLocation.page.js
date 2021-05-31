@@ -51,7 +51,7 @@ class EditLocation extends Page {
   }
 
   get locationTypeField() {
-    return browser.$("select#type")
+    return browser.$("select.location-type-form-group")
   }
 
   get latInputField() {

@@ -24,7 +24,7 @@ class CreateNewLocation extends Page {
   }
 
   get typeField() {
-    return this.form.$("select#type")
+    return this.form.$("select.location-type-form-group")
   }
 
   get duplicatesButton() {
