@@ -516,7 +516,7 @@ export const searchFilters = function() {
   ]
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
     filters: {
-      Type: {
+      "Location Type": {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         props: {
