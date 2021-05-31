@@ -4032,4 +4032,11 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="set-locations-type-notnull-constraint" author="gjvoosten">
+		<addNotNullConstraint
+			columnDataType="varchar(64)"
+			columnName="type"
+			tableName="locations" />
+	</changeSet>
+
 </databaseChangeLog>
