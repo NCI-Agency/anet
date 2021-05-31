@@ -207,7 +207,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
   public final void addLikeClause(String paramName, String fieldName, String fieldValue) {
     if (fieldValue != null) {
       whereClauses.add(getLikeClause(fieldName, paramName));
-      sqlArgs.put(paramName, fieldValue);
+      sqlArgs.put(paramName, getLikeQuery(fieldValue));
     }
   }
 
