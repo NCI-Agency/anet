@@ -121,6 +121,7 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 -- Create locations
 INSERT INTO locations (uuid, type, name, lat, lng, createdAt, updatedAt)
 	VALUES
+		(N'e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'PA', 'Antarctica', -90, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'PPA', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'PPA', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'PPA', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -132,6 +133,7 @@ INSERT INTO locations (uuid, type, name, lat, lng, createdAt, updatedAt)
 		(N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'PPP', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (uuid, type, name, createdAt, updatedAt)
 	VALUES
+		(N'283797ec-7077-49b2-87b8-9afd5499b6f3', 'V', 'VTC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'PPP', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'PPP', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'PPP', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
