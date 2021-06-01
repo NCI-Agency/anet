@@ -54,6 +54,7 @@ const GQL_MERGE_LOCATION = gql`
 const MergeLocations = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
+  const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
   const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
@@ -72,20 +73,19 @@ const MergeLocations = ({ pageDispatchers }) => {
 
   useEffect(() => {
     if (location1 && location2 && location1.type !== location2.type) {
-      setSaveError(prevValues => ({
-        ...prevValues,
-        message: `Positions you are about to merge have different types. Before continuing,
+      setSaveWarning(
+        `Positions you are about to merge have different types. Before continuing,
           please be aware that this merge operation might cause problems in the future!`
-      }))
+      )
     } else {
-      setSaveError(null)
+      setSaveWarning(null)
     }
   }, [location1, location2])
 
   return (
     <Grid fluid>
       <Row>
-        <Messages error={saveError} />
+        <Messages error={saveError} warning={saveWarning} />
         <h2>Merge Locations Tool</h2>
       </Row>
       <Row>
