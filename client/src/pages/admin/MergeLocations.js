@@ -74,7 +74,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   useEffect(() => {
     if (location1 && location2 && location1.type !== location2.type) {
       setSaveWarning(
-        `Positions you are about to merge have different types. Before continuing,
+        `Locations you are about to merge have different types. Before continuing,
           please be aware that this merge operation might cause problems in the future!`
       )
     } else {

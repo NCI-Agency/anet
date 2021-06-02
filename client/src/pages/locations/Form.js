@@ -41,6 +41,21 @@ const GQL_UPDATE_LOCATION = gql`
 `
 const MIN_CHARS_FOR_DUPLICATES = 3
 
+// Location types to be shown to admins in the new location page.
+const LOCATION_TYPES_ADMIN = [
+  Location.LOCATION_TYPES.ADVISOR_LOCATION,
+  Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
+  Location.LOCATION_TYPES.PINPOINT_LOCATION,
+  Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+  Location.LOCATION_TYPES.VIRTUAL_LOCATION
+]
+
+// Location types to be shown to super users in the new location page.
+const LOCATION_TYPES_SUPER_USER = [
+  Location.LOCATION_TYPES.ADVISOR_LOCATION,
+  Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+]
+
 const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -83,21 +98,6 @@ const LocationForm = ({ edit, title, initialValues }) => {
       }
     }
   }
-
-  // Location types to be shown to admins in the new location page.
-  const locationTypesAdmin = [
-    Location.LOCATION_TYPES.ADVISOR_LOCATION,
-    Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
-    Location.LOCATION_TYPES.PINPOINT_LOCATION,
-    Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
-    Location.LOCATION_TYPES.VIRTUAL_LOCATION
-  ]
-
-  // Location types to be shown to super users in the new location page.
-  const locationTypesSuperUser = [
-    Location.LOCATION_TYPES.ADVISOR_LOCATION,
-    Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-  ]
 
   return (
     <Formik
@@ -318,9 +318,9 @@ const LocationForm = ({ edit, title, initialValues }) => {
   function getDropdownOptionsForUser(user) {
     switch (user.position.type) {
       case Position.TYPE.ADMINISTRATOR:
-        return locationTypesAdmin
+        return LOCATION_TYPES_ADMIN
       case Position.TYPE.SUPER_USER:
-        return locationTypesSuperUser
+        return LOCATION_TYPES_SUPER_USER
       default:
         return []
     }

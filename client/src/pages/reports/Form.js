@@ -304,22 +304,13 @@ const ReportForm = ({
         const currentOrg =
           currentUser.position && currentUser.position.organization
         const locationFilters = {
-          pinpoint: {
+          virtual: {
             label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.PINPOINT_LOCATION
+              Location.LOCATION_TYPES.VIRTUAL_LOCATION
             ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.PINPOINT_LOCATION
-            }
-          },
-          advisor: {
-            label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.ADVISOR_LOCATION
-            ),
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.ADVISOR_LOCATION
+              type: Location.LOCATION_TYPES.VIRTUAL_LOCATION
             }
           },
           principal: {
@@ -331,13 +322,22 @@ const ReportForm = ({
               type: Location.LOCATION_TYPES.PRINCIPAL_LOCATION
             }
           },
-          virtual: {
+          advisor: {
             label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.VIRTUAL_LOCATION
+              Location.LOCATION_TYPES.ADVISOR_LOCATION
             ),
             queryVars: {
               status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.VIRTUAL_LOCATION
+              type: Location.LOCATION_TYPES.ADVISOR_LOCATION
+            }
+          },
+          pinpoint: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PINPOINT_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.PINPOINT_LOCATION
             }
           }
         }
