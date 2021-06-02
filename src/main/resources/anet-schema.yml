@@ -372,6 +372,10 @@ properties:
         type: string
         title: Classification text for printed documents
         description: Used to indicate the printed document contains sensitive information
+      sensitiveInformationTooltipText:
+        type: string
+        title: Tooltip text for extra information about releasability
+        description: Used to inform the user about the releasability of the document
 
   reportWorkflow:
     type: object

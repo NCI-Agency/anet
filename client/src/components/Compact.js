@@ -1,4 +1,7 @@
 // Print friendly table layout for pages
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
@@ -20,9 +23,7 @@ export const CompactHeaderContent = ({ sensitiveInformation }) => {
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBoxS>
         <ClassificationBanner />
-        {sensitiveInformation && (
-          <span>{Settings.printOptions.sensitiveInformationText}</span>
-        )}
+        {sensitiveInformation && <ReleasabilityInformation />}
       </ClassificationBoxS>
     </HeaderContentS>
   )
@@ -37,7 +38,7 @@ export const CompactFooterContent = ({ object }) => {
   const { currentUser, appSettings } = useContext(AppContext)
   return (
     <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
-      <span style={{ fontSize: "12px" }}>
+      <span style={{ fontSize: "10px" }}>
         uuid: <Link to={location.pathname}>{object.uuid}</Link>
       </span>
       <ClassificationBanner />
@@ -57,11 +58,39 @@ CompactFooterContent.propTypes = {
   object: PropTypes.object
 }
 
+const ReleasabilityInformation = () => {
+  return (
+    <ReleasabilityInformationS>
+      <span className="releasability-information">
+        {" "}
+        - {Settings.printOptions.sensitiveInformationText}
+      </span>
+      <span className="releasability-tooltip">
+        <Tooltip2
+          content={Settings.printOptions.sensitiveInformationTooltipText}
+          intent={Intent.WARNING}
+        >
+          <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+        </Tooltip2>
+      </span>
+    </ReleasabilityInformationS>
+  )
+}
+
+const ReleasabilityInformationS = styled.div`
+  .releasability-tooltip {
+    padding: 0 1rem;
+    @media print {
+      display: none;
+    }
+  }
+`
+
 const ClassificationBoxS = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  font-size: 12px;
+  font-size: 18px;
   min-width: 235px;
   text-align: center;
   margin: auto;
@@ -149,7 +178,13 @@ const CompactTable = ({ className, children }) => {
           <EmptySpaceTdS colSpan="2" />
         </tr>
       </thead>
-      <tbody>{children}</tbody>
+      {
+        <tbody>
+          <tr>
+            <td>{children}</td>
+          </tr>
+        </tbody>
+      }
       <tfoot>
         <tr>
           <EmptySpaceTdS colSpan="2" />
@@ -223,10 +258,18 @@ const RowLabelS = styled.th`
 `
 
 export const CompactRowContentS = styled.td`
+  display: flex;
+  justify-content: space-between;
   padding: 4px 1rem;
   & .form-control-static {
     margin-bottom: 0;
     padding-top: 0;
+  }
+  & .bp3-popover2-target {
+    padding: 0 1rem;
+    @media print {
+      display: none;
+    }
   }
 `
 

@@ -108,6 +108,7 @@ const Field = ({
           <>
             {widget}
             {getHelpBlock(field, form)}
+            {extraColElem}
             {children}
           </>
         }

@@ -136,6 +136,9 @@ const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "endOfTour"
 ]
 
+// Large fields that will be displayed at the end
+const WHOLE_WIDTH_FIELDS = ["biography"]
+
 const NORMAL_FIELD_OPTIONS = Object.entries(
   Object.without(
     Settings.fields.person,
@@ -246,14 +249,19 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const emailHumanValue = (
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
-  const orderedFields = orderPersonFields()
+  const orderedFields = orderPersonFields().filter(
+    field => !WHOLE_WIDTH_FIELDS.includes(field.key)
+  )
+  const twoColumnFields = orderPersonFields().filter(field =>
+    WHOLE_WIDTH_FIELDS.includes(field.key)
+  )
   const containsSensitiveInformation = !!orderedFields.find(field =>
     Object.keys(Person.customSensitiveInformation).includes(field.key)
   )
   const numberOfFieldsUnderAvatar = leftColumnFields || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
-  const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
-  const leftColum = [
+  const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
+  const leftColumn = [
     optionalFields.name.active && (
       <tr key="fullName">
         <td colSpan="4">
@@ -303,11 +311,29 @@ const CompactPersonView = ({ pageDispatchers }) => {
             <CompactHeaderContent
               sensitiveInformation={containsSensitiveInformation}
             />
-            <TwoColumnLayout>
-              <CompactTable className="left-table">{leftColum}</CompactTable>
-              <CompactTable className="right-table">{rightColum}</CompactTable>
-            </TwoColumnLayout>
             <CompactFooterContent object={person} />
+            <CompactTable
+              children={
+                <>
+                  <PersonContainer>
+                    {(_isEmpty(rightColumn) && (
+                      <FullColumn className="full-table">
+                        {leftColumn}
+                      </FullColumn>
+                    )) || (
+                      <>
+                        <HalfColumn>{leftColumn}</HalfColumn>
+                        <HalfColumn>{rightColumn}</HalfColumn>
+                      </>
+                    )}
+                  </PersonContainer>
+                  <table>
+                    <tbody>{twoColumnFields}</tbody>
+                  </table>
+                </>
+              }
+            >
+            </CompactTable>
           </CompactPersonViewS>
         </>
       )}
@@ -495,31 +521,32 @@ const CompactPersonViewS = styled.div`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
-  width: ${props => {
-    return props.pageSize.width
-  }};
-  height: ${props => {
-    return props.pageSize.height
-  }};
-  display: flex;
+  width: ${props => props.pageSize.width};
   @media print {
-    position: fixed;
-    left: 0mm;
-    top: 0mm;
     outline: none;
-    &[data-draft="draft"]:before {
-      top: 40%;
-      position: fixed;
-    }
     .banner {
       display: inline-block !important;
       -webkit-print-color-adjust: exact;
       color-adjust: exact !important;
     }
-    .workflow-action .btn {
-      display: inline-block !important;
+    table {
+      page-break-inside: auto;
+    }
+    tr {
+      page-break-inside: auto;
+    }
+    @page {
+      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
     }
   }
+`
+
+const HalfColumn = styled.tbody`
+  flex: 1 1 50%;
+`
+
+const FullColumn = styled.tbody`
+  flex: 1 1 100%;
 `
 
 const CompactPersonViewHeader = ({
@@ -647,11 +674,11 @@ function onPresetSelect(fields, optionalFields, setOptionalFields) {
   setOptionalFields({ ...activeFields })
 }
 
-const TwoColumnLayout = styled.div`
+const PersonContainer = styled.table`
   display: flex;
-  & div {
-    flex-basis: 1;
-  }
+  flex-flow: row wrap;
+  width: 100%;
+  margin-bottom: 10px;
 `
 
 const HeaderTitle = styled.h3`
@@ -667,6 +694,9 @@ const Header = styled.header`
   justify-content: space-between;
   width: 100%;
   max-width: 21cm;
+  @media print {
+    display: none;
+  }
 `
 
 const Buttons = styled.div`

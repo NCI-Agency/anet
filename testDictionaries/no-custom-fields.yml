@@ -24,6 +24,7 @@ dateFormats:
 
 printOptions:
   sensitiveInformationText: Sensitive Information
+  sensitiveInformationTooltipText: Releasability Information
 
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
