@@ -301,14 +301,13 @@ const CompactPersonView = ({ pageDispatchers }) => {
           />
           <CompactPersonViewS className="compact-view" pageSize={pageSize}>
             <CompactHeaderContent
-              object={person}
               sensitiveInformation={containsSensitiveInformation}
             />
             <TwoColumnLayout>
               <CompactTable className="left-table">{leftColum}</CompactTable>
               <CompactTable className="right-table">{rightColum}</CompactTable>
             </TwoColumnLayout>
-            <CompactFooterContent />
+            <CompactFooterContent object={person} />
           </CompactPersonViewS>
         </>
       )}
@@ -564,6 +563,7 @@ const CompactPersonViewHeader = ({
           <MenuItem
             key={PAGE_SIZES[pageSize].name}
             eventKey={PAGE_SIZES[pageSize]}
+            style={{ minWidth: "205px" }}
           >
             {PAGE_SIZES[pageSize].name}
           </MenuItem>
@@ -578,7 +578,11 @@ const CompactPersonViewHeader = ({
         }
       >
         {PRESETS.map(preset => (
-          <MenuItem key={preset.name} eventKey={preset.fields}>
+          <MenuItem
+            key={preset.name}
+            eventKey={preset.fields}
+            style={{ minWidth: "185px" }}
+          >
             {preset.label}
           </MenuItem>
         ))}

@@ -272,7 +272,7 @@ const CompactReportView = ({ pageDispatchers }) => {
             setOptionalFields={setOptionalFields}
           />
           <CompactReportViewS className="compact-view" data-draft={draftAttr}>
-            <CompactHeaderContent object={report} />
+            <CompactHeaderContent />
             <CompactTable>
               <CompactTitle label={getReportTitle()} className="reportField" />
               <CompactSubTitle
@@ -352,7 +352,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                 />
               ) : null}
             </CompactTable>
-            <CompactFooterContent />
+            <CompactFooterContent object={report} />
           </CompactReportViewS>
         </>
       )}

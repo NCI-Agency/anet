@@ -13,8 +13,7 @@ import { Link, useLocation } from "react-router-dom"
 import anetLogo from "resources/logo.svg"
 import Settings from "settings"
 
-export const CompactHeaderContent = ({ object, sensitiveInformation }) => {
-  const location = useLocation()
+export const CompactHeaderContent = ({ sensitiveInformation }) => {
   const { appSettings } = useContext(AppContext)
   return (
     <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
@@ -25,23 +24,22 @@ export const CompactHeaderContent = ({ object, sensitiveInformation }) => {
           <span>{Settings.printOptions.sensitiveInformationText}</span>
         )}
       </ClassificationBoxS>
-      <span style={{ fontSize: "12px" }}>
-        ANET Uuid: <Link to={location.pathname}>{object.uuid}</Link>
-      </span>
     </HeaderContentS>
   )
 }
 
 CompactHeaderContent.propTypes = {
-  object: PropTypes.object,
   sensitiveInformation: PropTypes.bool
 }
 
-export const CompactFooterContent = () => {
+export const CompactFooterContent = ({ object }) => {
+  const location = useLocation()
   const { currentUser, appSettings } = useContext(AppContext)
   return (
     <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
+      <span style={{ fontSize: "12px" }}>
+        uuid: <Link to={location.pathname}>{object.uuid}</Link>
+      </span>
       <ClassificationBanner />
       <PrintedByBoxS>
         <div>
@@ -55,12 +53,18 @@ export const CompactFooterContent = () => {
   )
 }
 
+CompactFooterContent.propTypes = {
+  object: PropTypes.object
+}
+
 const ClassificationBoxS = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 12px;
   min-width: 235px;
+  text-align: center;
+  margin: auto;
 `
 
 const PrintedByBoxS = styled.span`
@@ -84,7 +88,7 @@ const HF_COMMON_STYLE = `
   left: 0mm;
   display: flex;
   width: 100%;
-  max-height: 50px;
+  max-height: 80px;
   margin: 10px auto;
   flex-direction: row;
   justify-content: space-between;
@@ -101,7 +105,7 @@ const HF_COMMON_STYLE = `
   }
   @media print {
     position: fixed;
-    max-height: 70px;
+    max-height: 80px;
   }
 `
 
@@ -186,16 +190,13 @@ export const CompactRow = ({ label, content, ...otherProps }) => {
   const CustomStyled = styled(CompactRowS)`
     ${style};
   `
-  // lower case if string
-  const lowerLabel =
-    typeof label === "string" ? label.toLocaleLowerCase() : label
 
   // top level th have different width
   const isTopLevelTh = className === "reportField"
 
   return (
     <CustomStyled className={className || null}>
-      <RowLabelS isTopLevelTh={isTopLevelTh}>{lowerLabel}</RowLabelS>
+      <RowLabelS isTopLevelTh={isTopLevelTh}>{label}</RowLabelS>
       <CompactRowContentS>{content}</CompactRowContentS>
     </CustomStyled>
   )

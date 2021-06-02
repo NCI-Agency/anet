@@ -26,7 +26,6 @@ dateFormats:
 printOptions:
   sensitiveInformationText: Sensitive Information
 
-
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48
