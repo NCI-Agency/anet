@@ -6,50 +6,50 @@ import ShowPerson from "../pages/showPerson.page"
 const SOME_FIELDS = {
   currentPosition: {
     id: "position",
-    fieldLabel: "current position"
+    fieldLabel: "Current Position"
   },
   previousPositions: {
     id: "prevPositions",
-    fieldLabel: "previous positions"
+    fieldLabel: "Previous Positions"
   },
   phone: {
     id: "phoneNumber",
-    fieldLabel: "phone"
+    fieldLabel: "Phone"
   },
   domainUsername: {
     id: "domainUsername",
-    fieldLabel: "domain username"
+    fieldLabel: "Domain username"
   },
   gender: {
     id: "gender",
-    fieldLabel: "gender"
+    fieldLabel: "Gender"
   },
   birthday: {
     id: "birthday",
-    fieldLabel: "date of birth"
+    fieldLabel: "Date of birth"
   }
 }
 
 const PRESET_DEFAULT_LABELS = [
-  "current position",
-  "previous positions",
-  "phone",
-  "nationality",
-  "date of birth",
-  "domain username",
-  "position on the political spectrum",
-  "rank",
-  "biography"
+  "Current Position",
+  "Previous Positions",
+  "Phone",
+  "Nationality",
+  "Date of birth",
+  "Domain username",
+  "Position on the political spectrum",
+  "Rank",
+  "Biography"
 ]
 
 const PRESET_WITHOUT_SENSITIVE_LABELS = [
-  "current position",
-  "previous positions",
-  "phone",
-  "nationality",
-  "domain username",
-  "rank",
-  "biography"
+  "Current Position",
+  "Previous Positions",
+  "Phone",
+  "Nationality",
+  "Domain username",
+  "Rank",
+  "Biography"
 ]
 
 describe("Show person page", () => {

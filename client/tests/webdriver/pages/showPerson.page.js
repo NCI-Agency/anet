@@ -54,7 +54,7 @@ class ShowPerson extends Page {
   }
 
   get leftTableFields() {
-    return this.compactView.$$(".left-table > tbody > tr")
+    return this.compactView.$$(".left-table > tr")
   }
 
   get assessmentsTable() {

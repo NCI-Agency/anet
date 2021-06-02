@@ -322,8 +322,12 @@ const CompactPersonView = ({ pageDispatchers }) => {
                       </FullColumn>
                     )) || (
                       <>
-                        <HalfColumn>{leftColumn}</HalfColumn>
-                        <HalfColumn>{rightColumn}</HalfColumn>
+                        <HalfColumn className="left-table">
+                          {leftColumn}
+                        </HalfColumn>
+                        <HalfColumn className="right-table">
+                          {rightColumn}
+                        </HalfColumn>
                       </>
                     )}
                   </PersonContainer>
