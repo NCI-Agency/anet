@@ -35,7 +35,7 @@ import useMergeObjects, {
 } from "mergeUtils"
 import { Location } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Col, FormGroup, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -54,6 +54,7 @@ const GQL_MERGE_LOCATION = gql`
 const MergeLocations = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
+  const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
   const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
@@ -70,10 +71,21 @@ const MergeLocations = ({ pageDispatchers }) => {
   const location2 = mergeState[mergeSides[1]]
   const mergedLocation = mergeState.merged
 
+  useEffect(() => {
+    if (location1 && location2 && location1.type !== location2.type) {
+      setSaveWarning(
+        `Locations you are about to merge have different types. Before continuing,
+          please be aware that this merge operation might cause problems in the future!`
+      )
+    } else {
+      setSaveWarning(null)
+    }
+  }, [location1, location2])
+
   return (
     <Grid fluid>
       <Row>
-        <Messages error={saveError} />
+        <Messages error={saveError} warning={saveWarning} />
         <h2>Merge Locations Tool</h2>
       </Row>
       <Row>
@@ -128,6 +140,17 @@ const MergeLocations = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
+
+              <LocationField
+                label="Type"
+                value={Location.humanNameOfType(mergedLocation.type)}
+                align={"center"}
+                action={getInfoButton("Type is required.")}
+                fieldName="type"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+
               <LocationField
                 label={locationFormatLabel}
                 fieldName="displayedCoordinate"
@@ -251,7 +274,14 @@ const MergeLocations = ({ pageDispatchers }) => {
           intent="primary"
           text="Merge Locations"
           onClick={mergeLocations}
-          disabled={!areAllSet(location1, location2, mergedLocation?.name)}
+          disabled={
+            !areAllSet(
+              location1,
+              location2,
+              mergedLocation?.name,
+              mergedLocation?.type
+            )
+          }
         />
       </Row>
     </Grid>
@@ -369,6 +399,25 @@ const LocationColumn = ({
               align,
               mergeState,
               "name"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+
+          <LocationField
+            label="Type"
+            fieldName="type"
+            value={Location.humanNameOfType(location.type)}
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("type", location.type, align)
+                )
+              },
+              align,
+              mergeState,
+              "type"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

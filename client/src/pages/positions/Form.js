@@ -295,7 +295,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <FastField
+                <Field
                   name="location"
                   label="Location"
                   component={FieldHelper.SpecialField}
@@ -314,7 +314,13 @@ const PositionForm = ({ edit, title, initialValues }) => {
                       filterDefs={locationFilters}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
-                      queryParams={{ status: Model.STATUS.ACTIVE }}
+                      queryParams={{
+                        status: Model.STATUS.ACTIVE,
+                        type:
+                          values.type === Position.TYPE.ADVISOR
+                            ? Location.LOCATION_TYPES.ADVISOR_LOCATION
+                            : Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+                      }}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
                     />

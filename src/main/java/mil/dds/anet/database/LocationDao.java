@@ -39,22 +39,24 @@ public class LocationDao extends AnetBaseDao<Location, LocationSearchQuery> {
   @Override
   public Location insertInternal(Location l) {
     getDbHandle().createUpdate(
-        "/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", "
-            + "\"updatedAt\", \"customFields\") VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, "
+        "/* locationInsert */ INSERT INTO locations (uuid, name, type, status, lat, lng, \"createdAt\", "
+            + "\"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :status, :lat, :lng, :createdAt, "
             + ":updatedAt, :customFields)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
-        .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+        .bind("status", DaoUtils.getEnumId(l.getStatus()))
+        .bind("type", DaoUtils.getEnumString(l.getType())).execute();
     return l;
   }
 
   @Override
   public int updateInternal(Location l) {
     return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
-        + "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
+        + "SET name = :name, type = :type, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
         + "\"customFields\" = :customFields WHERE uuid = :uuid").bindBean(l)
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
-        .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+        .bind("status", DaoUtils.getEnumId(l.getStatus()))
+        .bind("type", DaoUtils.getEnumString(l.getType())).execute();
   }
 
   @Override

@@ -7,6 +7,10 @@ class EditLocation extends Page {
     return browser.$('//button[text()="Save Location"]')
   }
 
+  get locationTypeLabel() {
+    return browser.$("label*=Type")
+  }
+
   get latLngLabel() {
     return browser.$("label*=Latitude")
   }
@@ -44,6 +48,10 @@ class EditLocation extends Page {
       .$("td*=MGRS")
       .$("..")
       .$("span:first-child")
+  }
+
+  get locationTypeField() {
+    return browser.$("select.location-type-form-group")
   }
 
   get latInputField() {

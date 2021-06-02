@@ -304,9 +304,41 @@ const ReportForm = ({
         const currentOrg =
           currentUser.position && currentUser.position.organization
         const locationFilters = {
-          activeLocations: {
-            label: "Active locations",
-            queryVars: { status: Model.STATUS.ACTIVE }
+          virtual: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.VIRTUAL_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.VIRTUAL_LOCATION
+            }
+          },
+          principal: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+            }
+          },
+          advisor: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.ADVISOR_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.ADVISOR_LOCATION
+            }
+          },
+          pinpoint: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PINPOINT_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.PINPOINT_LOCATION
+            }
           }
         }
 

@@ -7,12 +7,12 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import { Report } from "models"
+import { Location, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Col, Grid, Label, Row } from "react-bootstrap"
+import { Badge, Col, Grid, Label, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -58,6 +58,7 @@ const GQL_GET_REPORT_LIST = gql`
           name
           lat
           lng
+          type
         }
         tasks {
           uuid
@@ -267,6 +268,8 @@ const ReportSummaryRow = ({ report }) => {
             <span>
               <strong>Location: </strong>
               <LinkTo modelType="Location" model={report.location} />
+              {"  "}
+              <Badge>{Location.humanNameOfType(report.location.type)}</Badge>
             </span>
           </Col>
         </Row>

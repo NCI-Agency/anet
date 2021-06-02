@@ -35,6 +35,7 @@ const GQL_GET_LOCATION = gql`
     location(uuid: $uuid) {
       uuid
       name
+      type
       lat
       lng
       status
@@ -149,6 +150,12 @@ const LocationShow = ({ pageDispatchers }) => {
                   name="status"
                   component={FieldHelper.ReadonlyField}
                   humanValue={Location.humanNameOfStatus}
+                />
+
+                <Field
+                  name="type"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={Location.humanNameOfType(location.type)}
                 />
 
                 <GeoLocation

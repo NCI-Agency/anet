@@ -12,6 +12,7 @@ import mil.dds.anet.test.client.AnetBeanList_Location;
 import mil.dds.anet.test.client.Location;
 import mil.dds.anet.test.client.LocationInput;
 import mil.dds.anet.test.client.LocationSearchQueryInput;
+import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionType;
@@ -22,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
-  private static final String FIELDS = "{ uuid name status lat lng }";
+  private static final String FIELDS = "{ uuid name type status lat lng }";
 
   @Test
   public void locationTestGraphQL()
@@ -130,18 +131,18 @@ public class LocationResourceTest extends AbstractResourceTest {
   public void mergeLocationTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create Loser Location
-    final LocationInput firstLocationInput =
-        LocationInput.builder().withName("MergeLocationsTest First Location").withLat(47.613442)
-            .withLng(-52.740936).withStatus(Status.ACTIVE).build();
+    final LocationInput firstLocationInput = LocationInput.builder()
+        .withName("MergeLocationsTest First Location").withType(LocationType.PINPOINT_LOCATION)
+        .withLat(47.613442).withLng(-52.740936).withStatus(Status.ACTIVE).build();
 
     final Location firstLocation = adminMutationExecutor.createLocation(FIELDS, firstLocationInput);
     assertThat(firstLocation).isNotNull();
     assertThat(firstLocation.getUuid()).isNotNull();
 
     // Create Winner Location
-    final LocationInput secondLocationInput =
-        LocationInput.builder().withName("MergeLocationsTest Second Location").withLat(47.561517)
-            .withLng(-52.70876).withStatus(Status.ACTIVE).build();
+    final LocationInput secondLocationInput = LocationInput.builder()
+        .withName("MergeLocationsTest Second Location").withType(LocationType.PINPOINT_LOCATION)
+        .withLat(47.561517).withLng(-52.70876).withStatus(Status.ACTIVE).build();
 
     final Location secondLocation =
         adminMutationExecutor.createLocation(FIELDS, secondLocationInput);
