@@ -374,6 +374,20 @@ properties:
                 title: The long date/time format if `engagementsIncludeTimeAndDuration` is `true`
                 description: Used to show the report engagement date/time in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998 @ 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
 
+  printOptions:
+    type: object
+    additionalProperties: false
+    required: [sensitiveInformationText]
+    properties:
+      sensitiveInformationText:
+        type: string
+        title: Classification text for printed documents
+        description: Used to indicate the printed document contains sensitive information
+      sensitiveInformationTooltipText:
+        type: string
+        title: Tooltip text for extra information about releasability
+        description: Used to inform the user about the releasability of the document
+
   reportWorkflow:
     type: object
     additionalProperties: false

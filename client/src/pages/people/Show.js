@@ -45,7 +45,7 @@ import {
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -110,6 +110,7 @@ const GQL_GET_PERSON = gql`
 
 const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
+  const history = useHistory()
   const routerLocation = useLocation()
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
@@ -178,6 +179,14 @@ const PersonShow = ({ pageDispatchers }) => {
 
   const action = (
     <div>
+      <Button
+        value="compactView"
+        type="button"
+        bsStyle="primary"
+        onClick={onCompactClick}
+      >
+        Summary / Print
+      </Button>
       {canEdit && (
         <LinkTo
           modelType="Person"
@@ -595,6 +604,12 @@ const PersonShow = ({ pageDispatchers }) => {
     setShowAssociatedPositionsModal(false)
     if (success) {
       refetch()
+    }
+  }
+
+  function onCompactClick() {
+    if (!_isEmpty(person)) {
+      history.push(`${person.uuid}/compact`)
     }
   }
 }

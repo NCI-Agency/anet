@@ -25,12 +25,12 @@ describe("Show print report page", () => {
     it("We should see the correct report fields", () => {
       const mustHaveFieldTexts = [
         "purpose",
-        "key outcomes",
-        "next steps",
+        "Key outcomes",
+        "Next steps",
         "principals",
         "advisors",
-        "atmospherics",
-        "efforts"
+        "Atmospherics",
+        "Efforts"
       ]
       const fields = ShowReport.compactReportFields
       const fieldTexts = Array.from(fields).map(field => field.getText())
