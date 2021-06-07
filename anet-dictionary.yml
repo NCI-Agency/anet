@@ -403,10 +403,10 @@ fields:
     endOfTourDate: End of tour
     biography: Biography
     customFields:
-      regionOfBirth:
+      placeOfBirth:
         type: anet_object
-        label: Region of birth
-        helpText: Here you can link to the person's region of birth
+        label: Place of birth
+        helpText: Here you can link to the person's place of birth
         types:
           - Location
         filters:
@@ -414,10 +414,10 @@ fields:
               typeFilter:
                 filterField: type
                 filterValue: [GEOGRAPHICAL_AREA]
-      regionOfResidence:
+      placeOfResidence:
         type: anet_object
-        label: Region of residence
-        helpText: Here you can link to the person's region of residence
+        label: Place of residence
+        helpText: Here you can link to the person's place of residence
         types:
           - Location
         filters:
@@ -922,8 +922,8 @@ fields:
         - phoneNumber
         - country
         - birthday
-        - regionOfBirth
-        - regionOfResidence
+        - placeOfBirth
+        - placeOfResidence
         - colourOptions
         - textareaFieldName
         - domainUsername
