@@ -55,6 +55,13 @@ public class DaoUtils {
     return o.ordinal();
   }
 
+  public static String getEnumString(Enum<?> o) {
+    if (o == null) {
+      return null;
+    }
+    return o.toString();
+  }
+
   /* This never changes during execution, so statically cache it. */
   private static DbType DB_TYPE = null;
 

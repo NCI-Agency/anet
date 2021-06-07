@@ -507,8 +507,25 @@ export const searchFilters = function() {
     }
   }
 
+  const locationTypeOptions = [
+    Location.LOCATION_TYPES.ADVISOR_LOCATION,
+    Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
+    Location.LOCATION_TYPES.PINPOINT_LOCATION,
+    Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+    Location.LOCATION_TYPES.VIRTUAL_LOCATION
+  ]
   filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
-    filters: {}
+    filters: {
+      "Location Type": {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "type",
+          options: locationTypeOptions,
+          labels: locationTypeOptions.map(lt => Location.humanNameOfType(lt))
+        }
+      }
+    }
   }
 
   // Task filters

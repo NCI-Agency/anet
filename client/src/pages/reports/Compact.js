@@ -2,8 +2,9 @@ import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import { gql } from "apollo-boost"
-import AppContext from "components/AppContext"
 import CompactTable, {
+  CompactFooterContent,
+  CompactHeaderContent,
   CompactRow,
   CompactRowContentS,
   CompactRowS,
@@ -22,10 +23,6 @@ import {
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
-import {
-  CompactSecurityBanner,
-  SETTING_KEY_COLOR
-} from "components/SecurityBanner"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
 import _groupBy from "lodash/groupBy"
@@ -33,11 +30,10 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { Link, useHistory, useLocation, useParams } from "react-router-dom"
-import anetLogo from "resources/logo.svg"
+import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -276,7 +272,7 @@ const CompactReportView = ({ pageDispatchers }) => {
             setOptionalFields={setOptionalFields}
           />
           <CompactReportViewS className="compact-view" data-draft={draftAttr}>
-            <CompactReportHeaderContent report={report} />
+            <CompactHeaderContent />
             <CompactTable>
               <CompactTitle label={getReportTitle()} className="reportField" />
               <CompactSubTitle
@@ -356,7 +352,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                 />
               ) : null}
             </CompactTable>
-            <CompactReportFooterContent report={report} />
+            <CompactFooterContent object={report} />
           </CompactReportViewS>
         </>
       )}
@@ -622,8 +618,8 @@ const CompactReportViewS = styled.div`
     transform: rotateZ(-45deg);
   }
   @media print {
-    position: static;
-    padding: 0;
+    position: fixed;
+    left: 0mm;
     outline: none;
     &[data-draft="draft"]:before {
       top: 40%;
@@ -719,114 +715,6 @@ const Buttons = styled.div`
   button {
     margin-left: 5px;
     margin-right: 5px;
-  }
-`
-
-const CompactReportHeaderContent = ({ report }) => {
-  const location = useLocation()
-  const { appSettings } = useContext(AppContext)
-  return (
-    <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner />
-      <span style={{ fontSize: "12px" }}>
-        <Link to={location.pathname}>{report.uuid}</Link>
-      </span>
-    </HeaderContentS>
-  )
-}
-
-CompactReportHeaderContent.propTypes = {
-  report: PropTypes.object
-}
-
-const CompactReportFooterContent = () => {
-  const { currentUser, appSettings } = useContext(AppContext)
-  return (
-    <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner />
-      <PrintedByBoxS>
-        <div>
-          printed by <LinkTo modelType="Person" model={currentUser} />
-        </div>
-        <div>{moment().format(Report.getEngagementDateFormat())}</div>
-      </PrintedByBoxS>
-    </FooterContentS>
-  )
-}
-
-// background color of banner makes reading blue links hard. Force white color
-const HF_COMMON_STYLE = `
-  position: absolute;
-  left: 0mm;
-  display: flex;
-  width: 100%;
-  max-height: 50px;
-  margin: 10px auto;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  -webkit-print-color-adjust: exact !important;
-  color-adjust: exact !important;
-  img {
-    max-width: 50px !important;
-    max-height: 24px !important;
-  }
-  & * {
-    color: white !important;
-  }
-  @media print {
-    position: fixed;
-    max-height: 70px;
-  }
-`
-
-const HeaderContentS = styled.div`
-  ${HF_COMMON_STYLE};
-  top: 0mm;
-  border-bottom: 1px solid black;
-  background-color: ${props => props.bgc} !important;
-`
-
-const FooterContentS = styled.div`
-  ${HF_COMMON_STYLE};
-  bottom: 0mm;
-  border-top: 1px solid black;
-  background-color: ${props => props.bgc} !important;
-`
-
-const PrintedByBoxS = styled.span`
-  align-self: flex-start;
-  width: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  font-size: 10px;
-  & > span {
-    display: inline-block;
-    text-align: right;
-  }
-`
-
-const ClassificationBanner = () => {
-  return (
-    <ClassificationBannerS>
-      <CompactSecurityBanner />
-    </ClassificationBannerS>
-  )
-}
-
-const ClassificationBannerS = styled.div`
-  width: auto;
-  max-width: 67%;
-  text-align: center;
-  display: inline-block;
-  & > .banner {
-    padding: 2px 4px;
   }
 `
 

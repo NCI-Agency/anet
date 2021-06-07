@@ -13,3 +13,7 @@ export const NEW_COORDS = {
 export const SIMILAR_LOCATION = {
   name: "Kabul Hospital"
 }
+export const LOCATION_TYPE = {
+  index: 1,
+  type: "ADVISOR_LOCATION"
+}

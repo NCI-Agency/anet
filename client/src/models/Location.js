@@ -38,6 +38,15 @@ export default class Location extends Model {
   static locationFormat =
     Settings.fields.location.format || Location.LOCATION_FORMATS.LAT_LON
 
+  static LOCATION_TYPES = {
+    PHYSICAL_LOCATION: "PHYSICAL_LOCATION",
+    GEOGRAPHICAL_AREA: "GEOGRAPHICAL_AREA",
+    PINPOINT_LOCATION: "PINPOINT_LOCATION",
+    ADVISOR_LOCATION: "ADVISOR_LOCATION",
+    PRINCIPAL_LOCATION: "PRINCIPAL_LOCATION",
+    VIRTUAL_LOCATION: "VIRTUAL_LOCATION"
+  }
+
   static yupSchema = yup
     .object()
     .shape({
@@ -46,6 +55,7 @@ export default class Location extends Model {
         .string()
         .required()
         .default(() => Model.STATUS.ACTIVE),
+      type: yup.string().required().default(""),
       lat: yup
         .number()
         .nullable()
@@ -143,13 +153,14 @@ export default class Location extends Model {
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid, name"
+  static autocompleteQuery = "uuid, name, type"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
   static allFieldsQuery = `
     uuid
     name
+    type
     lat
     lng
     status
@@ -201,6 +212,10 @@ export default class Location extends Model {
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
+  }
+
+  static humanNameOfType(type) {
+    return utils.sentenceCase(type)
   }
 
   constructor(props) {

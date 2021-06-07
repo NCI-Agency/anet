@@ -3,6 +3,7 @@ package mil.dds.anet.beans;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +17,33 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";
 
+  public enum LocationType {
+    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), PINPOINT_LOCATION("PP"),
+    ADVISOR_LOCATION("PPA"), PRINCIPAL_LOCATION("PPP"), VIRTUAL_LOCATION("V");
+
+    private static final Map<String, LocationType> BY_CODE = new HashMap<>();
+    static {
+      for (final LocationType e : values()) {
+        BY_CODE.put(e.code, e);
+      }
+    }
+
+    public static LocationType valueOfCode(String code) {
+      return BY_CODE.get(code);
+    }
+
+    private String code;
+
+    private LocationType(String code) {
+      this.code = code;
+    }
+
+    @Override
+    public String toString() {
+      return code;
+    }
+  }
+
   @GraphQLQuery
   @GraphQLInputField
   private String name;
@@ -28,6 +56,9 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
   @GraphQLQuery
   @GraphQLInputField
   private Double lng;
+  @GraphQLQuery
+  @GraphQLInputField
+  private LocationType type;
   /* The following are all Lazy Loaded */
   // annotated below
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
@@ -66,6 +97,14 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
 
   public void setLng(Double lng) {
     this.lng = lng;
+  }
+
+  public LocationType getType() {
+    return type;
+  }
+
+  public void setType(LocationType type) {
+    this.type = type;
   }
 
   @GraphQLQuery(name = "planningApprovalSteps")
@@ -121,12 +160,12 @@ public class Location extends AbstractCustomizableAnetBean implements RelatableO
     return super.equals(o) && Objects.equals(other.getUuid(), uuid)
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)
-        && Objects.equals(other.getCreatedAt(), createdAt);
+        && Objects.equals(other.getType(), type) && Objects.equals(other.getCreatedAt(), createdAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, status, lat, lng, createdAt);
+    return Objects.hash(super.hashCode(), uuid, name, type, status, lat, lng, createdAt);
   }
 
   @Override

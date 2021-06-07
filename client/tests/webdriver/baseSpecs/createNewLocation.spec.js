@@ -4,19 +4,23 @@ import {
   BAD_LAT_LNG_VAL,
   LOCATION_COORDS,
   LOCATION_NAME,
+  LOCATION_TYPE,
   SIMILAR_LOCATION
 } from "./locationUtils"
 
 describe("When creating a new Location", () => {
-  it("Should not create a location without name input", () => {
+  it("Should not create a location without name & type input", () => {
     CreateNewLocation.open()
     CreateNewLocation.createButton.click()
     CreateNewLocation.nameRequiredError.waitForExist()
     CreateNewLocation.nameRequiredError.waitForDisplayed()
+    CreateNewLocation.typeRequiredError.waitForExist()
+    CreateNewLocation.typeRequiredError.waitForDisplayed()
   })
 
   it("Should display possible duplicates with similar names", () => {
     CreateNewLocation.nameField.setValue(SIMILAR_LOCATION.name)
+    CreateNewLocation.typeField.selectByIndex(LOCATION_TYPE.index)
     CreateNewLocation.duplicatesButton.waitForDisplayed()
     CreateNewLocation.duplicatesButton.click()
     CreateNewLocation.modalContent.waitForDisplayed()

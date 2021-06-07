@@ -23,6 +23,10 @@ dateFormats:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
 
+printOptions:
+  sensitiveInformationText: Sensitive Information
+  sensitiveInformationTooltipText: Releasability Information
+
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48
@@ -404,6 +408,28 @@ fields:
     endOfTourDate: End of tour
     biography: Biography
     customFields:
+      placeOfBirth:
+        type: anet_object
+        label: Place of birth
+        helpText: Here you can link to the person's place of birth
+        types:
+          - Location
+        filters:
+          - Location:
+              typeFilter:
+                filterField: type
+                filterValue: [GEOGRAPHICAL_AREA]
+      placeOfResidence:
+        type: anet_object
+        label: Place of residence
+        helpText: Here you can link to the person's place of residence
+        types:
+          - Location
+        filters:
+          - Location:
+              typeFilter:
+                  filterField: type
+                  filterValue: [GEOGRAPHICAL_AREA]
       multipleButtons:
         type: enumset
         label: Choose one or more of the options
@@ -902,6 +928,8 @@ fields:
         - phoneNumber
         - country
         - birthday
+        - placeOfBirth
+        - placeOfResidence
         - colourOptions
         - textareaFieldName
         - domainUsername

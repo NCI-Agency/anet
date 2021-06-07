@@ -8,6 +8,7 @@ import {
 } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _get from "lodash/get"
+import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
@@ -24,6 +25,7 @@ const GQL_GET_LOCATION_LIST = gql`
         name
         lat
         lng
+        type
       }
     }
   }
@@ -112,6 +114,7 @@ const BaseLocationTable = ({
           <thead>
             <tr>
               <th>Name</th>
+              <th>Type</th>
             </tr>
           </thead>
           <tbody>
@@ -120,6 +123,7 @@ const BaseLocationTable = ({
                 <td>
                   <LinkTo modelType="Location" model={loc} />
                 </td>
+                <td>{Location.humanNameOfType(loc.type)}</td>
               </tr>
             ))}
           </tbody>

@@ -41,6 +41,21 @@ const GQL_UPDATE_LOCATION = gql`
 `
 const MIN_CHARS_FOR_DUPLICATES = 3
 
+// Location types to be shown to admins in the new location page.
+const LOCATION_TYPES_ADMIN = [
+  Location.LOCATION_TYPES.ADVISOR_LOCATION,
+  Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
+  Location.LOCATION_TYPES.PINPOINT_LOCATION,
+  Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+  Location.LOCATION_TYPES.VIRTUAL_LOCATION
+]
+
+// Location types to be shown to super users in the new location page.
+const LOCATION_TYPES_SUPER_USER = [
+  Location.LOCATION_TYPES.ADVISOR_LOCATION,
+  Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+]
+
 const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -112,10 +127,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
           name: _escape(values.name) || "", // escape HTML in location name!
           draggable: true,
           autoPan: true,
-          onMove: (event, map) => {
-            const latLng = map.wrapLatLng(event.target.getLatLng())
-            updateCoordinateFields(values, latLng)
-          }
+          onMove: (event, map) =>
+            updateCoordinateFields(map.wrapLatLng(event.target.getLatLng()))
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
@@ -178,6 +191,29 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   onChange={value => setFieldValue("status", value)}
                 />
 
+                <FastField
+                  name="type"
+                  component={FieldHelper.SpecialField}
+                  disabled={!canEditName}
+                  onChange={event => {
+                    // validation will be done by setFieldValue
+                    setFieldValue("type", event.target.value, true)
+                  }}
+                  widget={
+                    <FastField
+                      component="select"
+                      className="location-type-form-group form-control"
+                    >
+                      <option value="">Please select a location type</option>
+                      {getDropdownOptionsForUser(currentUser).map(type => (
+                        <option key={type} value={type}>
+                          {Location.humanNameOfType(type)}
+                        </option>
+                      ))}
+                    </FastField>
+                  }
+                />
+
                 <GeoLocation
                   editable
                   coordinates={coordinates}
@@ -190,10 +226,9 @@ const LocationForm = ({ edit, title, initialValues }) => {
               <h3>Drag the marker below to set the location</h3>
               <Leaflet
                 markers={[marker]}
-                onMapClick={(event, map) => {
-                  const latLng = map.wrapLatLng(event.latlng)
-                  updateCoordinateFields(values, latLng)
-                }}
+                onMapClick={(event, map) =>
+                  updateCoordinateFields(map.wrapLatLng(event.latlng))
+                }
               />
 
               <ApprovalsDefinition
@@ -260,19 +295,36 @@ const LocationForm = ({ edit, title, initialValues }) => {
           </div>
         )
 
-        function updateCoordinateFields(values, latLng) {
+        function updateCoordinateFields(latLng) {
           const parsedLat = parseCoordinate(latLng.lat)
           const parsedLng = parseCoordinate(latLng.lng)
-          setValues({
-            ...values,
-            lat: parsedLat,
-            lng: parsedLng,
-            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
-          })
+          setFieldValue("lat", parsedLat)
+          setFieldValue("lng", parsedLng)
+          setFieldValue(
+            "displayedCoordinate",
+            convertLatLngToMGRS(parsedLat, parsedLng)
+          )
         }
       }}
     </Formik>
   )
+
+  /**
+   * Depending on the position type of the logged in user, return corresponding
+   * location type list shown at create a new location page.
+   * @param {Object} user current user logged in to the system.
+   * @returns Object[]
+   */
+  function getDropdownOptionsForUser(user) {
+    switch (user.position.type) {
+      case Position.TYPE.ADMINISTRATOR:
+        return LOCATION_TYPES_ADMIN
+      case Position.TYPE.SUPER_USER:
+        return LOCATION_TYPES_SUPER_USER
+      default:
+        return []
+    }
+  }
 
   function onCancel() {
     history.goBack()

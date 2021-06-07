@@ -6,6 +6,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.test.client.CommentInput;
 import mil.dds.anet.test.client.LocationInput;
+import mil.dds.anet.test.client.LocationType;
 import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Position;
@@ -53,7 +54,7 @@ public class TestData {
 
   public static LocationInput createLocationInput(String name, Double lat, Double lng) {
     return LocationInput.builder().withName(name).withStatus(Status.ACTIVE).withLat(lat)
-        .withLng(lng).build();
+        .withType(LocationType.PINPOINT_LOCATION).withLng(lng).build();
   }
 
   public static PositionInput createPositionInput() {

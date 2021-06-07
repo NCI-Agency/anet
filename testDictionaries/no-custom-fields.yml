@@ -22,6 +22,10 @@ dateFormats:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
 
+printOptions:
+  sensitiveInformationText: Sensitive Information
+  sensitiveInformationTooltipText: Releasability Information
+
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48
@@ -289,11 +293,9 @@ fields:
         - inputFieldName
         - phoneNumber
         - country
-        - birthday
         - colourOptions
         - textareaFieldName
         - code
-        - politicalPosition
         - rank
         - numberFieldName
         - nlt
@@ -425,6 +427,7 @@ fields:
         - prevPositions
         - phoneNumber
         - country
+        - birthday
         - colourOptions
         - textareaFieldName
         - domainUsername
@@ -433,6 +436,7 @@ fields:
         - multipleButtons
         - inputFieldName
         - code
+        - politicalPosition
         - rank
         - numberFieldName
         - nlt
