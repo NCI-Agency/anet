@@ -88,11 +88,29 @@ const widgetPropsPosition = {
   addon: POSITIONS_ICON
 }
 
+const generateLocationFilters = filter => {
+  if (!filter?.typeFilter) {
+    return entityFilters
+  } else {
+    const locationFilters = {}
+    Object.entries(filter.typeFilter.filterValue).forEach((element, index) => {
+      locationFilters[index] = {
+        label: Models.Location.humanNameOfType(element[1]),
+        queryVars: {
+          status: Model.STATUS.ACTIVE,
+          [filter.typeFilter.filterField]: element[1]
+        }
+      }
+    })
+    return locationFilters
+  }
+}
+
 const widgetPropsLocation = {
   objectType: Models.Location,
   overlayRenderRow: LocationOverlayRow,
   overlayColumns: ["Name"],
-  filterDefs: entityFilters,
+  filterDefs: generateLocationFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Location.autocompleteQueryWithNotes,
   addon: LOCATIONS_ICON
@@ -123,7 +141,8 @@ const MultiTypeAdvancedSelectComponent = ({
   objectType,
   entityTypes,
   value,
-  isMultiSelect
+  isMultiSelect,
+  filters
 }) => {
   const [entityType, setEntityType] = useState(
     objectType ||
@@ -148,6 +167,11 @@ const MultiTypeAdvancedSelectComponent = ({
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
   const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
+  const filterDefs =
+    typeof advancedSelectProps.filterDefs === "function"
+      ? advancedSelectProps.filterDefs(filters[0]?.[entityType])
+      : advancedSelectProps.filterDefs
+
   return (
     <>
       {entityTypes.length > 1 && (
@@ -174,7 +198,7 @@ const MultiTypeAdvancedSelectComponent = ({
         showEmbedded
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
-        filterDefs={advancedSelectProps.filterDefs}
+        filterDefs={filterDefs}
         onChange={value => onConfirm(value, entityType)}
         objectType={advancedSelectProps.objectType}
         queryParams={advancedSelectProps.queryParams}
@@ -185,19 +209,20 @@ const MultiTypeAdvancedSelectComponent = ({
     </>
   )
 }
-
 MultiTypeAdvancedSelectComponent.propTypes = {
   fieldName: PropTypes.string,
   onConfirm: PropTypes.func,
   objectType: PropTypes.string,
   entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  isMultiSelect: PropTypes.bool.isRequired
+  isMultiSelect: PropTypes.bool.isRequired,
+  filters: PropTypes.array
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
   fieldName: "entitySelect",
   entityTypes: Object.values(ENTITY_TYPES),
-  isMultiSelect: false
+  isMultiSelect: false,
+  filters: []
 }
 
 export default MultiTypeAdvancedSelectComponent

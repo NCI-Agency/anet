@@ -94,6 +94,17 @@ $defs:
         type: string
       componentClass:
         type: string
+      filters:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          title: filterType
+          properties:
+            filterField:
+              type: string
+            filterValue:
+              type: [array, string, number, boolean]
       validations:
         type: array
         items:

@@ -458,7 +458,7 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
       index={index}
       vertical={vertical}
       extraColElem={extraColElem}
-      abelColumnWidth={labelColumnWidth}
+      labelColumnWidth={labelColumnWidth}
     />
   ))
 
@@ -532,7 +532,7 @@ const AnetObjectField = ({
           onConfirm={(value, entityType) =>
             setFieldValue(name, {
               type: entityType,
-              uuid: value.uuid
+              uuid: value?.uuid
             })
           }
         />
