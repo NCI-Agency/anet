@@ -80,6 +80,9 @@ const ReleasabilityInformation = () => {
 const ReleasabilityInformationS = styled.div`
   .releasability-tooltip {
     padding: 0 1rem;
+    svg {
+      height: 20px;
+    }
     @media print {
       display: none;
     }
@@ -267,6 +270,9 @@ export const CompactRowContentS = styled.td`
   }
   & .bp3-popover2-target {
     padding: 0 1rem;
+    svg {
+      height: 16px;
+    }
     @media print {
       display: none;
     }
