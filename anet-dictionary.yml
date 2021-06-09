@@ -427,8 +427,8 @@ fields:
         filters:
           - Location:
               typeFilter:
-                  filterField: type
-                  filterValue: [GEOGRAPHICAL_AREA]
+                filterField: type
+                filterValue: [GEOGRAPHICAL_AREA]
       multipleButtons:
         type: enumset
         label: Choose one or more of the options
