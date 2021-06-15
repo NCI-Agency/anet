@@ -8,7 +8,7 @@
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["*"],
+      "matchPackagePatterns": ["*"],
       "minor": {
         "groupName": "most non-major dependencies",
         "groupSlug": "most-minor-patch"
