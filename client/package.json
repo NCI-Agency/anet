@@ -176,7 +176,7 @@
     "redux": "4.1.0",
     "redux-persist": "6.0.0",
     "resize-observer-polyfill": "1.5.1",
-    "use-debounce": "6.0.1",
+    "use-debounce": "7.0.0",
     "yup": "0.31.0"
   },
   "resolutions": {
