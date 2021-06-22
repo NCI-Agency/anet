@@ -119,7 +119,7 @@
     "@projectstorm/react-diagrams-defaults": "6.5.2",
     "@projectstorm/react-diagrams-routing": "6.5.2",
     "apollo-boost": "0.4.9",
-    "bootstrap": "3.4.1",
+    "bootstrap": "5.0.2",
     "change-case": "4.1.2",
     "classnames": "2.3.1",
     "closest": "0.0.1",
