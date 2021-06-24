@@ -77,7 +77,7 @@
     "graphql-cli": "4.1.0",
     "handlebars": "4.7.7",
     "handlebars-loader": "1.7.1",
-    "html-webpack-plugin": "5.3.1",
+    "html-webpack-plugin": "5.3.2",
     "i18n-iso-countries": "6.7.0",
     "ignore-loader": "0.1.2",
     "jest": "27.0.5",
