@@ -117,7 +117,7 @@ dependencies {
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
-	testImplementation 'io.dropwizard:dropwizard-testing:2.0.22'
+	testImplementation 'io.dropwizard:dropwizard-testing:2.0.23'
 	testImplementation 'io.dropwizard:dropwizard-client:2.0.22'
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
