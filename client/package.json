@@ -94,7 +94,7 @@
     "selenium-webdriver": "4.0.0-beta.4",
     "style-loader": "2.0.0",
     "thread-loader": "3.0.4",
-    "wdio-chromedriver-service": "7.1.0",
+    "wdio-chromedriver-service": "7.1.1",
     "webdriverio": "7.7.3",
     "webpack": "5.38.1",
     "webpack-cli": "4.7.2",
