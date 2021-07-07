@@ -3,8 +3,8 @@ import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
-import { Report, Person, Position } from "models"
-import { fuzzy, runGQL, populate } from "../simutils"
+import { Location, Person, Position, Report } from "models"
+import { fuzzy, populate, runGQL } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
 const getRandomPerson = async function(user, hasPosition, type, role) {
@@ -35,7 +35,12 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
 
 async function populateReport(report, user, args) {
   const location = await getRandomObject(user, "locations", {
-    status: Model.STATUS.ACTIVE
+    status: Model.STATUS.ACTIVE,
+    type: fuzzy.withProbability(0.75)
+      ? Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+      : fuzzy.withProbability(0.95)
+        ? Location.LOCATION_TYPES.ADVISOR_LOCATION
+        : Location.LOCATION_TYPES.VIRTUAL_LOCATION
   })
   async function getAttendees() {
     const reportPeople = []
