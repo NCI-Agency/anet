@@ -1,7 +1,7 @@
 import Model from "components/Model"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
-import { Organization, Person, Position } from "models"
+import { Location, Organization, Person, Position } from "models"
 import { fuzzy, identity, populate, runGQL, specialUser } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
@@ -200,7 +200,12 @@ const _createPosition = async function(user) {
       randomObject?.uuid === user.uuid ||
       randomObject?.domainUsername === specialUser.name
   )
-  const location = await getRandomObject(user, "locations")
+  const location = await getRandomObject(user, "locations", {
+    type:
+      organization.type === Organization.TYPE.ADVISOR_ORG
+        ? Location.LOCATION_TYPES.ADVISOR_LOCATION
+        : Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+  })
   const template = {
     name: () => faker.name.jobTitle(),
     code: () => faker.lorem.slug(),

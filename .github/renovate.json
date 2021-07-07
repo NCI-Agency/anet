@@ -8,18 +8,18 @@
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["*"],
+      "matchPackagePatterns": ["*"],
       "minor": {
         "groupName": "most non-major dependencies",
         "groupSlug": "most-minor-patch"
       }
     },
     {
-      "packageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
+      "matchPackageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
       "allowedVersions": "/^.*\\.jre11$/"
     },
     {
-      "packageNames": [
+      "matchPackageNames": [
         "autoprefixer",
         "com.networknt:json-schema-validator",
         "draft-js",
@@ -27,7 +27,7 @@
         "react-tooltip",
         "yup"
       ],
-      "packagePatterns": ["^@fullcalendar/"],
+      "matchPackagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],
