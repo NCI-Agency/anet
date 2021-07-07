@@ -75,7 +75,7 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre8'
-	implementation 'org.postgresql:postgresql:42.2.22' // If using postgresql
+	implementation 'org.postgresql:postgresql:42.2.23' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
