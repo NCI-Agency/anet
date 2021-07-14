@@ -205,8 +205,8 @@
   },
   "jest": {
     "moduleDirectories": [
-      "src",
       "platform/node",
+      "src",
       "node_modules"
     ],
     "moduleFileExtensions": [
