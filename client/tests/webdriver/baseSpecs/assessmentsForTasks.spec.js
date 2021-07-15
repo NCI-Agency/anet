@@ -77,6 +77,7 @@ describe("For the periodic task assessments", () => {
               ADVISOR_1_TASK_EDIT_DETAILS[index])
         )
       })
+      ShowTask.logout()
     })
   })
 
@@ -117,6 +118,7 @@ describe("For the periodic task assessments", () => {
               ADMIN_TASK_EDIT_DETAILS[index])
         )
       })
+      ShowTask.logout()
     })
   })
 
@@ -165,6 +167,7 @@ describe("For the periodic task assessments", () => {
       ShowTask.deleteMonthlyAssessmentButton.click()
       ShowTask.confirmDelete()
       ShowTask.waitForDeletedAssessmentToDisappear()
+      ShowTask.logout()
     })
   })
 })

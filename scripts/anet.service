@@ -1,0 +1,7 @@
+[Unit]
+Description = ANET (Advisor Network) Service
+[Service]
+ExecStart = /opt/anet/bin/anet server anet.yml
+WorkingDirectory = /opt/anet
+[Install]
+WantedBy = multi-user.target

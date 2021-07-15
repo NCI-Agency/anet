@@ -5,17 +5,17 @@ export const sleep = seconds => {
 }
 
 async function runGQL(user, query) {
-  const result = await fetch(
-    `${process.env.SERVER_URL}/graphql?user=${user.name}&pass=${user.password}`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(query)
-    }
-  )
+  const result = await fetch(`${process.env.SERVER_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization:
+        "Basic " +
+        Buffer.from(`${user.name}:${user.password}`).toString("base64")
+    },
+    body: JSON.stringify(query)
+  })
   const json = await result.json()
   if (json.errors) {
     // const x = query.query.split('\n').filter((s, i) => i && s.trim().length).map((s) => s.match(/^\s*/)[0].length).reduce((r, d) => Math.min(r, d), 40)

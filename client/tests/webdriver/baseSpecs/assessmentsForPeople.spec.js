@@ -76,6 +76,7 @@ describe("For the periodic person assessments", () => {
               ADVISOR_1_PERSON_EDIT_DETAILS[index])
         )
       })
+      ShowPerson.logout()
     })
   })
 
@@ -125,6 +126,7 @@ describe("For the periodic person assessments", () => {
       ShowPerson.deleteAssessmentButton.click()
       ShowPerson.confirmDelete()
       ShowPerson.waitForDeletedAssessmentToDisappear()
+      ShowPerson.logout()
     })
   })
 })

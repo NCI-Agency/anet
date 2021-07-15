@@ -9,6 +9,5 @@ const anetConfig = jsyaml.load(
   )
 )
 const Settings = anetConfig
-const Version = "Storybook-Mode"
 
-export { Version, Settings as default }
+export default Settings

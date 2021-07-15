@@ -61,6 +61,7 @@ const GQL_GET_PERSON = gql`
       emailAddress
       phoneNumber
       domainUsername
+      openIdSubject
       biography
       country
       gender
@@ -347,6 +348,9 @@ const PersonShow = ({ pageDispatchers }) => {
     // map fields that have privileged access check to the condition
     const privilegedAccessedFields = {
       domainUsername: {
+        accessCond: isAdmin
+      },
+      openIdSubject: {
         accessCond: isAdmin
       }
     }

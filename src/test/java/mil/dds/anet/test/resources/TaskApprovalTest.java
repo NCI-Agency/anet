@@ -58,7 +58,8 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS =
       "{ uuid name code type status organization " + ORGANIZATION_FIELDS + " }";
   private static final String PERSON_FIELDS =
-      "{ uuid name status role rank domainUsername emailAddress position " + POSITION_FIELDS + " }";
+      "{ uuid name status role rank domainUsername openIdSubject emailAddress position "
+          + POSITION_FIELDS + " }";
   private static final String APPROVAL_STEP_FIELDS =
       "{ uuid name restrictedApproval relatedObjectUuid nextStepUuid approvers"
           + " { uuid name person { uuid name rank role } } }";

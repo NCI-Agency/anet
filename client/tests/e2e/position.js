@@ -170,6 +170,8 @@ test("Move someone in and out of a position", async t => {
     foundCorrectRow,
     `Could not find ${positionName} and ${personName} in the supported positions table`
   )
+
+  await t.context.logout()
 })
 
 test("Update permissions while changing positions", async t => {

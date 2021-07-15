@@ -29,6 +29,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       domainUsername
+      openIdSubject
       avatar(size: 256)
       code
       position {

@@ -36,6 +36,7 @@ const GQL_GET_PERSON = gql`
       status
       pendingVerification
       domainUsername
+      openIdSubject
       biography
       country
       gender

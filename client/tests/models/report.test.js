@@ -1,5 +1,5 @@
 import moment from "moment"
-import Settings from "../../platform/node/settings"
+import Settings from "settings"
 import Report from "../../src/models/Report"
 
 const uuidv4 = require("uuid/v4")

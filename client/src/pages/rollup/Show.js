@@ -268,7 +268,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   const [focusedOrg, setFocusedOrg] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
-  const previewPlaceholderUrl = API.addAuthParams("/help")
+  const previewPlaceholderUrl = "/help"
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: DEFAULT_SEARCH_PROPS,

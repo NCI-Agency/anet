@@ -78,7 +78,7 @@ public class ViewResponseFilter implements ContainerResponseFilter {
                       : "-",
                   getCurrentMinute());
           AnetObjectEngine.getInstance().getPersonDao()
-              .logActivitiesByDomainUsername(person.getDomainUsername(), activity);
+              .logActivitiesByOpenIdSubject(person.getOpenIdSubject(), activity);
         }
       }
     } else {

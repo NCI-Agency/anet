@@ -11,6 +11,7 @@ test("Report 404", async t => {
     await $(".not-found-text"),
     "Report #555 not found."
   )
+  await t.context.logout()
 })
 
 test("Organization 404", async t => {
@@ -24,6 +25,7 @@ test("Organization 404", async t => {
     await $(".not-found-text"),
     "Organization #555 not found."
   )
+  await t.context.logout()
 })
 
 test("People 404", async t => {
@@ -33,6 +35,7 @@ test("People 404", async t => {
 
   await t.context.get("/people/555")
   await assertElementText(t, await $(".not-found-text"), "User #555 not found.")
+  await t.context.logout()
 })
 
 test("Tasks 404", async t => {
@@ -42,6 +45,7 @@ test("Tasks 404", async t => {
 
   await t.context.get("/tasks/555")
   await assertElementText(t, await $(".not-found-text"), "Task #555 not found.")
+  await t.context.logout()
 })
 
 test("Positions 404", async t => {
@@ -55,4 +59,5 @@ test("Positions 404", async t => {
     await $(".not-found-text"),
     "Position #555 not found."
   )
+  await t.context.logout()
 })

@@ -4,6 +4,8 @@ plugins {
 	id "com.github.node-gradle.node" version "3.1.0"
 	id "com.diffplug.spotless" version "5.14.1"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.16"
+	id "org.beryx.runtime" version "1.12.4"
+	id "nebula.ospackage" version "8.5.6"
 }
 
 apply plugin: 'java'
@@ -15,7 +17,8 @@ apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 apply plugin: 'com.graphql_java_generator.graphql-gradle-plugin'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.0.23"
@@ -52,6 +55,8 @@ run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] 
 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "fake-smtp-test-server" : "fake-smtp-server"
+String keycloakContainerName = "keycloak-server"
+String keycloakVersion = "14.0.0"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -74,7 +79,7 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre8'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre11'
 	implementation 'org.postgresql:postgresql:42.2.23' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
@@ -87,16 +92,19 @@ dependencies {
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
 	implementation 'ch.qos.logback:logback-core:1.2.3'
 	implementation 'ch.qos.logback:logback-access:1.2.3'
-	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.11.2'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
+	// Authentication
+	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.2.0'
+	implementation "org.keycloak:keycloak-jetty94-adapter:${keycloakVersion}"
+	implementation "org.keycloak:keycloak-jaxrs-oauth-client:${keycloakVersion}"
 
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	implementation 'com.networknt:json-schema-validator:1.0.47'
+	implementation 'com.qindesign:snowy-json:0.15.0'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.0.0'
@@ -135,6 +143,9 @@ dependencies {
 configurations.all {
 	// Exclude transitive dependency Apache Xalan (e.g. through poi-ooxml), so we use the TransformerFactoryImpl from the JVM
 	exclude module: 'xalan'
+	// Also exclude XML API's to avoid (Eclipse) warnings like
+	//   "The package org.w3c.dom is accessible from more than one module: <unnamed>, java.xml"
+	exclude group: 'xml-apis'
 
 	// Force this transitive dependency to the pre-v3 version for Java 8:
 	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.1'
@@ -159,6 +170,29 @@ jacocoTestReport {
 def proc = "git describe".execute(null, projectDir);
 proc.waitFor();
 project.version = proc.text.trim();
+
+runtime {
+	options = ['--vm=server', '--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+	modules = [
+		'java.sql',
+		'java.desktop',
+		'java.xml',
+		'java.logging',
+		'java.management',
+		'jdk.unsupported',
+		'java.security.jgss',
+		'java.naming',
+		'java.transaction.xa',
+		'java.security.sasl',
+		'java.instrument',
+		'java.scripting',
+		'java.xml.crypto'
+	]
+
+	jpackage {
+	    appVersion = project.version.replace("-",".") // rpmbuild doesn't like versions with dashes
+	}
+}
 
 processResources {
 	filesMatching('**/version.properties') {
@@ -358,6 +392,8 @@ task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImag
 	images = ["ncia/anet-app-server:${project.version}"]
 }
 
+// Database containers (Microsoft SQL Server and PostgreSQL)
+
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "database container"
 	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgres:latest"
@@ -404,7 +440,53 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	targetContainerId { dbContainerName }
 }
 
-// fake-smtp-server tasks
+// Keycloak container
+
+task dockerPullKeycloak(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "keycloak container"
+	image = "jboss/keycloak:${keycloakVersion}"
+	description = "Pulls a docker image for keycloak from ${image}."
+}
+
+task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "keycloak container"
+	imageId = dockerPullKeycloak.getImage()
+	containerName = keycloakContainerName
+	description = "Creates a keycloak container named " + keycloakContainerName + "."
+	hostConfig.portBindings = ["9080:8080", "9443:8443"]
+	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+        withEnvVar("KEYCLOAK_USER", "admin")
+        withEnvVar("KEYCLOAK_PASSWORD", "admin")
+        withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
+}
+
+task dockerStartKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	group = "keycloak container"
+	description = "Starts " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+}
+
+task dockerExportKeycloakRealm(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "keycloak container"
+	description = "Epxorts ANET-Realm from " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+	commands = [ ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.socket.binding.port-offset=100", "-Dkeycloak.migration.action=export", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.realmName=ANET-Realm", "-Dkeycloak.migration.file=/hostdata/ANET-Realm-export.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"] as String[] ]
+}
+
+task dockerStopKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	group = "keycloak container"
+	description = "Stops " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+}
+
+task dockerRemoveKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	group = "keycloak container"
+	description = "Removes " + keycloakContainerName + " container."
+	targetContainerId { keycloakContainerName }
+}
+
+// Fake SMTP server container
+
 task dockerPullFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
 	group = "fake-smtp-server container"
 	image = "devoto13/fake-smtp-server:0.1.0" // No 'latest' available yet
@@ -538,9 +620,8 @@ distributions {
 				from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
 				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
 				from(markdownToHtml)
-			}
-			into('lib/') {
-				from('lib/sqljdbc_auth.dll')
+				from('prepare-psql.sql')
+				from('prepare-mssql.sql')
 			}
 		}
 	}
@@ -567,4 +648,27 @@ node {
 	version = '14.17.0'
 	yarnVersion = '1.22.10'
 	download = true
+}
+
+ospackage {
+	release = '2'
+	os = LINUX
+	into '/opt'
+	from(jpackageImage.outputs.files)
+	into('anet/docs/') {
+		from('anet.yml') { rename('anet.yml', 'anet.yml.template') }
+		from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
+		from(markdownToHtml)
+		from('prepare-psql.sql')
+		from('prepare-mssql.sql')
+	}
+}
+
+task distDeb(dependsOn: "jpackageImage", type: Deb) {
+	arch = 'amd64'
+}
+
+task distRpm(dependsOn: "jpackageImage", type: Rpm) {
+	prefix '/opt' // Relocations: /opt
+	arch = 'x86_64'
 }

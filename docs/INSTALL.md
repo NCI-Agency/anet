@@ -6,24 +6,23 @@ This document covers the steps required to deploy ANET to a server environment.
 ## Environment
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
-	- 1x Windows Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
-	- 1x Microsoft SQL Server (2016 or greater) Database Server. 
+	- 1x RHEL (7.6 or newer) Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
+	- 1x Microsoft SQL Server (2016 or greater) or Postgres (9.5 or greater, preferably 12 or greater) Database Server. 
 - **Software**: Software requirements: 
-	- Java JRE 1.8 installed on the Application Server
-	- Administration Privileges to run processes on restricted ports (80/443)
+	- Administration Privileges
 	- Optional: A valid SSL certificate for the domain name of the application server.
 	- Microsoft SQL Server 2016 or greater. The MS SQL database should be configured to:
 		- allow connections on a static TCP/IP port `1433`
 		- fulltext module should be installed. This can be done by:
 			1. Open the Programs and Features control panel.
 			2. Select `Microsoft SQL Server 2016` and click `Change`.
-			3. When prompted to `Add/Repair/Remove`, select `Add` and provide intallation media.
+			3. When prompted to `Add/Repair/Remove`, select `Add` and provide installation media.
 			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
 and Semantic Extractions for Search`.
 	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported although performance may degrade and support will be discontinued beyond Q3 2019
 	- A service manager, such as [NSSM](https://nssm.cc/) , can be used to install ANET as a service on Windows
 - **Network Accessibility**
-	- Users will access the Application Server over HTTP/HTTPS (`80`/`443`)
+	- Users will access the Application Server over HTTPS (`443`)
 	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
 	- The Application Server will need to access an Active Directory server for authentication
 	- The Application Server will need to access an SMTP server for email sending. 
@@ -38,11 +37,13 @@ There is no software to install on client computers, only a modern web browser (
 
 You should have the following information on hand for the installation:
 
-- **A Build of ANET**. This comes in the form of a `.zip` file. See BUILD.md for details on how to create this file. 
+- **A Build of ANET**. This comes in the form of a `anet-<version>.rpm` file. See BUILD.md for details on how to create this file.
 - **Microsoft SQL Server**: Your Database Administrator should be able to provide you with these settings. Just ask for an empty database. If you have access to your SQL Server directly, the command to create an empty database is `CREATE DATABASE database_name_here`. Alternatively, a database can be created using the SQL Management tool. 300Mb can be used as an initial database and logs size
 	- hostname
 	- username / password
 	- database name
+- **Postgres**:
+  - if you have just created a fresh postgres database, apply the content of `/opt/anet/doc/prepare-psql.sql`
 - **SMTP Server**
 	- hostname
 	- username / password (if necessary)
@@ -51,67 +52,46 @@ You should have the following information on hand for the installation:
 - **Information about who will Administer** your ANET instance. 
 
 ## Server Installation Procedures
-Create a folder for the application, for example: `c:\anet`. In that location: 
-
-1. Unzip anet.zip. You'll find three folders directly under the application folder:
+1. run `sudo yum localinstall anet-<version>.rpm`. This will create the following structure in `/opt/anet`:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
 	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
-2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
+2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
-4. Verify that your configuration file is valid with ```bin\anet.bat check anet.yml```
-5. Install Database Schema: Run ```bin\anet.bat db migrate anet.yml```
-6. Seed the Database: Run ```bin\anet.bat init anet.yml```. This will ask you the following questions:
+4. Verify that your configuration file is valid with ```bin/anet check anet.yml```
+5. Install Database Schema: Run ```bin/anet db migrate anet.yml```
+6. Seed the Database: Run ```bin/anet init anet.yml```. This will ask you the following questions:
 	* _Classification String_: This is the message that will appear in the top security banner on the screen. For demo instances you should use `FOR DEMO USE ONLY`.
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
 	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
 	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
-	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
+	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumably are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
-8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
+8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
-10. You can either add a start-up task for ANET, or skip to step 11, if you wish to install it as a service:
-	* Open Task Scheduler
-	* Create task
-	* Name it "ANET"
-	* Under Security Options, select the service account
-	* Under Security Options, check "run when user is logged on or not"
-	* Add a new trigger: "at startup"
-	* Add a new "Start a Program" Action:
-		* Start a program/script: `c:\anet\bin\anet.bat`
-		* Add arguments: `server anet.yml`
-		* Start in: `c:\anet`
 11. If you have opted to install ANET as a service:
-	* Install `nssm` or other service manager
-	* Create a serive named `anet`, with:
-    *  `c:\anet` as start-up directory 
-    *  `c:\anet\bin\anet.bat` as application path
-    *  and `server anet.yml` as arguments
-    *  add the sql service as a dependency
+	* `sudo systemctl enable anet`
+	* anet can be now started/stopped with `sudo systemctl start anet` and `sudo systemctl stop anet`
 
 # ANET Upgrade Documentation
 On the ANET server: 
-- Stop the `"bin/anet" server anet.yml` process. This is typically done by killing the java process from the task manager, or if a service is installed by running `net stop anet`
+- Stop the anet with `sudo systemctl stop anet`. 
 - Take a complete backup of your SQL Database
-- Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
-- Unzip the provided ANET distribution zip. Copy the `bin`, `lib` and `doc` from the distribution into the anet application folder, typically `c:\anet`
+- install the new rpm with `sudo yum localinstall anet-<version>.rpm`
 - Make any required changes or upgrades to your `anet.yml` file
-- Run `bin/anet.bat check anet.yml` to verify that anet is configured correctly
-- Run `bin/anet.bat db migrate anet.yml` to migrate your database
-- Start the server, if it has been installed as a service, run `net stop anet`
+- Run `bin/anet check anet.yml` to verify that anet is configured correctly
+- Run `bin/anet db migrate anet.yml` to migrate your database
+- Start the server, if it has been installed as a service, run `sudo systemctl start anet`
 - Run through verification testing to ensure there are no issues
 
 Alternatively, an experimental service update script is available in the `doc` folder. 
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/1.3.5/docs/manual/core.html#configuration). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
-	- Authentication: When development mode is `true`, ANET will use basic Authentication checking only that the username provided is equal to the `domainUsername` column of a valid user in the database. In the event that there is not a matching user, but the provided password is equal to the username, ANET will simulate the first-time log in of a new user (ie a user who passes windows authentication but has never logged into ANET before).
-		- ex: To Log in as `Jack Jackson` from the development data set, just type in a username of `jack` when prompted.
-		- ex: To simulate a new user type in the same name for both the username and password when prompted (ie un: `hunter`, pw: `hunter` will create a new user with Domain Username of `hunter`).
-	- GraphQL: When development mode is `true`, ANET will re-compute the GraphQL graph on every API call, this allows you to rapidly develop on changes without restarting the server.
+	- account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
 - **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). 
 - **smtp**: This section controls the configuration for how ANET sends emails.
 	- **hostname**: The Fully Qualified Domain Name of your SMTP Server
@@ -120,10 +100,11 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **password**: Your password to your SMTP server.
 	- **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
 	- **disabled**: Set to true to disable sending email completely; most useful in development context.
-	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
+	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, e.g.: `"https://anet.example.com"`.
-- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional Instructions can be found here instructions [here](https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html) for avaiable configuration options for the database connection.
+- **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
+- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
@@ -140,28 +121,30 @@ database:
 #   date_string_format: 
 #   date_class:
 ```
-- **timeWaffleRequests**: set to `true` to report timings of Waffle request methods:
-```yaml
-timeWaffleRequests: false
+
+- **keycloakConfiguration**: ANET uses the open source Keycloak server to perform Authentication ( https://www.keycloak.org/ ). It can be configured to authenticate via Keycloak in the following manner:
+
+```
+keycloakConfiguration:
+  realm: ANET-Realm
+  auth-server-url: http://localhost:9080/auth  # for development; should point to the real Keycloak URL in production (can be relative if ANET and Keycloak and running on the same server, e.g. just /auth )
+  ssl-required: none  # for development; should be all in production
+  confidential-port: 443
+  disable-trust-manager: false  # set to true if e.g. you're using self-signed certificates (which you obviously shouldn't do in production)
+  register-node-at-startup: true
+  register-node-period: 600
+  resource: ANET-Client
+  show-logout-link: true  # for development; should be false in production when using SSO
+  enable-basic-auth: true  # for development; should be false in production
+  credentials:
+    secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9
 ```
 
-- **waffleConfig**: ANET uses the open source [WAFFLE framework](https://github.com/Waffle/waffle) to perform Windows Authentication. It can be configured to authenticate via AD in the following manner:
-```yaml
-waffleConfig:
-  principalFormat: fqn
-  roleFormat: both
-  allowGuestLogin: false
-  impersonate: false
-  securityFilterProviders: "waffle.servlet.spi.BasicSecurityFilterProvider waffle.servlet.spi.NegotiateSecurityFilterProvider"
-  "waffle.servlet.spi.NegotiateSecurityFilterProvider/protocols": NTLM
-  "waffle.servlet.spi.BasicSecurityFilterProvider/realm": ANET
-```
+ANET needs *two* clients under the Keycloak realm with the name given under the **realm** property, a *confidential* one with the name given under the **resource** property (and you should copy the **secret** from the *Credentials* tab under the client in the Keycloak realm) and a *public* one with the `-public` added at the end of the name (so for the `ANET-Client` given in the example above, it would be `ANET-Client-public`). See [Keycloak authentication server](keycloak.md) for some guidance.
 
-If needed, see [WAFFLE documentation: _Servlet Single-SignOn Security Filter_](https://github.com/Waffle/waffle/blob/master/Docs/ServletSingleSignOnSecurityFilter.md) on the available configuration options.
+- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls the protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
 
-- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls ths protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.  
-
-- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` paramters to the location that you want the logs to appear.  
+- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` parameters to the location that you want the logs to appear.
 
 Finally, you can define a deployment-specific dictionary inside the `anet-dictionary.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
@@ -1097,9 +1080,9 @@ dashboards:
 As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
 # How to enable SSL
-Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/1.3.5/docs/manual/core.html#ssl
+Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/en/latest/manual/configuration.html#https
 
-SSL support is built into Dropwizard. You will need to provide your own java keystore, which is outside the scope of this document (keytool is the command you need, and Jetty’s documentation can get you started). There is a test keystore you can use in the Dropwizard example project.
+SSL support is built into Dropwizard. You will need to provide your own Java keystore, which is outside the scope of this document (keytool is the command you need, and Jetty’s documentation can get you started). There is a test keystore you can use in the Dropwizard example project.
 
 ```
 server:
@@ -1119,11 +1102,11 @@ Administrator should request certificates.
 ## Self signed certificates
 If needed, self-signed certificates can be created and used as follows:
 
-1. Open a command line in `c:\anet`
-2. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048`
-3. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -export -alias anetkey -file anetkey.crt -keystore keystore.jks`
-4. cd to the directory with cacerts, usually `c:\Program Files\Java\jre1.8.0_121\lib\security`
-5. run `c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -import -trustcacerts -alias selfsigned -file c:\anet\anetkey.crt -keystore cacerts`
+1. Open a command line in `/opt/anet`
+2. run `/opt/anet/lib/runtime/bin/keytool -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048`
+3. run `/opt/anet/lib/runtime/bin/keytool -export -alias anetkey -file anetkey.crt -keystore keystore.jks`
+4. cd to the directory with cacerts, usually `/opt/anet`
+5. run `/opt/anet/lib/runtime/bin/keytool -import -trustcacerts -alias selfsigned -file /opt/anet/anetkey.crt -keystore cacerts`
 6. update `anet.yml` with keyStore and trustStore information
  
 

@@ -31,7 +31,7 @@ jobs:
     - uses: actions/setup-java@v2
       with:
         distribution: "zulu"
-        java-version: "8"
+        java-version: 15
     - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
     - name: cache gradle
       uses: actions/cache@v2
@@ -118,7 +118,7 @@ jobs:
     - uses: actions/setup-java@v2
       with:
         distribution: "zulu"
-        java-version: "8"
+        java-version: 15
     - run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
     - name: cache gradle
       uses: actions/cache@v2
@@ -148,6 +148,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
+    - run: ./gradlew -PtestEnv dockerCreateKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
     - run: ./gradlew -PtestEnv jar
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad

@@ -169,6 +169,7 @@ fields:
     position: Current Position
     prevPositions: Previous Positions
     domainUsername: Domain username
+    openIdSubject: OpenID subject
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
@@ -286,6 +287,7 @@ fields:
         - position
         - prevPositions
         - domainUsername
+        - openIdSubject
         - emailAddress
         - multipleButtons
         - inputFieldName
@@ -429,6 +431,7 @@ fields:
         - colourOptions
         - textareaFieldName
         - domainUsername
+        - openIdSubject
         - emailAddress
         - multipleButtons
         - inputFieldName

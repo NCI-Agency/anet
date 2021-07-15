@@ -10,6 +10,11 @@ import CreateNewLocation from "../pages/location/createNewLocation.page"
 // Forms should work just fine without custom fields
 
 describe("When looking at anet object forms with dictionary that doesn't include custom fields", () => {
+  afterEach("On the form page...", () => {
+    // No Logout link, so just call logout directly
+    browser.url("/api/logout")
+  })
+
   it("Should see that report form successfully loads", () => {
     CreateReport.open()
     CreateReport.form.waitForExist()

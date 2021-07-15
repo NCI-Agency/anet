@@ -1,8 +1,12 @@
-export function loadFileAjaxSync(filePath, mimeType, body) {
+export function loadFileAjaxSync(filePath, mimeType, body, authorization) {
   const xmlhttp = new XMLHttpRequest()
   if (body) {
     xmlhttp.open("POST", filePath, false)
     xmlhttp.setRequestHeader("Content-Type", mimeType)
+    if (authorization) {
+      xmlhttp.setRequestHeader("Credentials", "same-origin")
+      xmlhttp.setRequestHeader("Authorization", `Bearer ${authorization}`)
+    }
     xmlhttp.send(body)
   } else {
     xmlhttp.open("GET", filePath, false)

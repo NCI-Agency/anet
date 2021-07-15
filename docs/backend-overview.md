@@ -1,7 +1,7 @@
 # Java Application Server
 This section will describe how the ANET Application Server works and the various components.  Two major frameworks that we use are:
 
-- [**Dropwizard**](http://www.dropwizard.io/1.0.5/docs/) is a framework for developing java-based web applications.  It is a collection of other industry standard, open source, libraries to handle things like JSON parsing, HTTP multi-threading, Authentication, Authorization, Database access, etc.  We highly recommend you read the getting started guide and briefly scan the user manual.
+- [**Dropwizard**](https://www.dropwizard.io/en/latest/index.html) is a framework for developing java-based web applications.  It is a collection of other industry standard, open source, libraries to handle things like JSON parsing, HTTP multi-threading, Authentication, Authorization, Database access, etc.  We highly recommend you read the getting started guide and briefly scan the user manual.
 - [**GraphQL**](http://graphql.org/) is a query language developed by Facebook to allow API consumers to explore a 'Graph' without requiring the server to have implemented every possible API call ahead of time.  The client developer can ask for what data they want, and the GraphQL layer will figure out what data it needs to fetch and then fetch specifcally that data.
 
 Throughout the next several sections, we were refer to the *core ANET object types*. These are:
