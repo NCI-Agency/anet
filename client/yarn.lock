@@ -1819,13 +1819,13 @@
   optionalDependencies:
     subscriptions-transport-ws "^0.9.18"
 
-"@graphql-cli/codegen@1.17.25":
-  version "1.17.25"
-  resolved "https://registry.yarnpkg.com/@graphql-cli/codegen/-/codegen-1.17.25.tgz#8a333cea1db96c3c30c763f4bf8ea9f35375e4a8"
-  integrity sha512-mkt/7mTz/2kT7wofNmdMHAJbrV5d74UNyFSSqF2jEF/4WExoDRJQ0UrsdJ9iHN9TPRdAKsqvocm0oLazf63l8Q==
+"@graphql-cli/codegen@1.17.26":
+  version "1.17.26"
+  resolved "https://registry.yarnpkg.com/@graphql-cli/codegen/-/codegen-1.17.26.tgz#2b87944f92ec0aebe34abc1eb19e793d95ee415d"
+  integrity sha512-J5vbsBV8Exryyc6Fy/4JxqCW32K42f5haiSG9NubgoezMpjZRFOk24Iu2EEwJqc/6QxFcRGrnpuU0UFTKH9i3A==
   dependencies:
     "@graphql-cli/common" "4.1.0"
-    "@graphql-codegen/cli" "1.21.6"
+    "@graphql-codegen/cli" "1.21.7"
 
 "@graphql-cli/common@4.1.0":
   version "4.1.0"
@@ -1859,13 +1859,13 @@
     tmp "0.2.1"
     tslib "2.0.2"
 
-"@graphql-codegen/cli@1.21.6":
-  version "1.21.6"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/cli/-/cli-1.21.6.tgz#d06b5f6cb625541f3981d69f99966e520b958072"
-  integrity sha512-wtBk4lk/YxG6MrxnBOxE9nCfR9PNDjaqA8CF9hi6Q8jiSl4sV03tC2R+gE7+2EI8J6Xa1bxZe15LnBhVwb/mUA==
+"@graphql-codegen/cli@1.21.7":
+  version "1.21.7"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/cli/-/cli-1.21.7.tgz#ac90afdf0d166bc725c60d2269482e65af1c7848"
+  integrity sha512-6EOS3hMDFeLPO6OopASvXbQirhrHjFd0Qb4iGLnueW/WIETk8mOsbyfqlBnm6uehW6bUjdLDu25MUjo+4rkOvA==
   dependencies:
     "@graphql-codegen/core" "1.17.10"
-    "@graphql-codegen/plugin-helpers" "^1.18.7"
+    "@graphql-codegen/plugin-helpers" "^1.18.8"
     "@graphql-tools/apollo-engine-loader" "^6.2.5"
     "@graphql-tools/code-file-loader" "^6.3.1"
     "@graphql-tools/git-loader" "^6.2.6"
@@ -1924,6 +1924,17 @@
     import-from "3.0.0"
     lodash "~4.17.0"
     tslib "~2.2.0"
+
+"@graphql-codegen/plugin-helpers@^1.18.8":
+  version "1.18.8"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/plugin-helpers/-/plugin-helpers-1.18.8.tgz#39aac745b9e22e28c781cc07cf74836896a3a905"
+  integrity sha512-mb4I9j9lMGqvGggYuZ0CV+Hme08nar68xkpPbAVotg/ZBmlhZIok/HqW2BcMQi7Rj+Il5HQMeQ1wQ1M7sv/TlQ==
+  dependencies:
+    "@graphql-tools/utils" "^7.9.1"
+    common-tags "1.8.0"
+    import-from "4.0.0"
+    lodash "~4.17.0"
+    tslib "~2.3.0"
 
 "@graphql-codegen/schema-ast@1.18.3":
   version "1.18.3"
@@ -10853,6 +10864,11 @@ import-from@3.0.0:
   integrity sha512-CiuXOFFSzkU5x/CR0+z7T91Iht4CXgfCxVOFRhh2Zyhg5wOpWvvDLQUsWl+gcN+QscYBjez8hDCt85O7RLDttQ==
   dependencies:
     resolve-from "^5.0.0"
+
+import-from@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/import-from/-/import-from-4.0.0.tgz#2710b8d66817d232e16f4166e319248d3d5492e2"
+  integrity sha512-P9J71vT5nLlDeV8FHs5nNxaLbrpfAV5cF5srvbZfpwpcJoM/xZR3hiv+q+SAnuSmuGbXMWud063iIMx/V/EWZQ==
 
 import-lazy@^2.1.0:
   version "2.1.0"

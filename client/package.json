@@ -25,7 +25,7 @@
     "@babel/preset-react": "7.14.5",
     "@babel/register": "7.14.5",
     "@babel/runtime": "7.14.6",
-    "@graphql-cli/codegen": "1.17.25",
+    "@graphql-cli/codegen": "1.17.26",
     "@graphql-codegen/schema-ast": "1.18.3",
     "@storybook/addon-essentials": "6.3.4",
     "@storybook/addon-links": "6.3.4",
