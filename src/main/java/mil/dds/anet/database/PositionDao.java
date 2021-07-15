@@ -537,37 +537,19 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
       }
     }
 
-    // Update positionRelationships with given input on winnerPosition
-    final Set<String> existingApUuids =
-        existingAssociatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
-    final Set<String> winnerApUuids =
-        Utils.isEmptyOrNull(winner.getAssociatedPositions()) ? Collections.emptySet()
-            : winner.getAssociatedPositions().stream().map(ap -> ap.getUuid())
-                .collect(Collectors.toSet());
-    if (!existingApUuids.equals(winnerApUuids)) {
-      // set winner's old positionRelationships to deleted
-      getDbHandle()
-          .createUpdate("UPDATE \"positionRelationships\""
-              + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
-              + " WHERE \"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid")
-          .bind("deleted", true).bind("winnerUuid", winnerUuid)
-          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-      if (!winnerApUuids.isEmpty()) {
-        // update loser's positionRelationships
-        getDbHandle()
-            .createUpdate("UPDATE \"positionRelationships\""
-                + " SET \"positionUuid_a\" = :winnerUuid, \"updatedAt\" = :updatedAt"
-                + " WHERE \"positionUuid_a\" = :loserUuid")
-            .bind("deleted", true).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-            .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-        getDbHandle()
-            .createUpdate("UPDATE \"positionRelationships\""
-                + " SET \"positionUuid_b\" = :winnerUuid, \"updatedAt\" = :updatedAt"
-                + " WHERE \"positionUuid_b\" = :loserUuid")
-            .bind("deleted", true).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-            .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-      }
-    }
+    // update positionRelationships
+    getDbHandle()
+        .createUpdate("UPDATE \"positionRelationships\""
+            + " SET \"positionUuid_a\" = :winnerUuid, \"updatedAt\" = :updatedAt"
+            + " WHERE \"positionUuid_a\" = :loserUuid")
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+    getDbHandle()
+        .createUpdate("UPDATE \"positionRelationships\""
+            + " SET \"positionUuid_b\" = :winnerUuid, \"updatedAt\" = :updatedAt"
+            + " WHERE \"positionUuid_b\" = :loserUuid")
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
 
     // Update notes
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
