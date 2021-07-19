@@ -139,7 +139,7 @@
     "hopscotch": "0.3.1",
     "html-react-parser": "1.2.7",
     "jsonpath-plus": "6.0.1",
-    "leaflet": "1.6.0",
+    "leaflet": "1.7.1",
     "leaflet-defaulticon-compatibility": "0.1.1",
     "leaflet-geosearch": "3.3.2",
     "leaflet-gesture-handling": "1.2.1",
@@ -178,9 +178,6 @@
     "resize-observer-polyfill": "1.5.1",
     "use-debounce": "7.0.0",
     "yup": "0.31.0"
-  },
-  "resolutions": {
-    "leaflet": "1.6.0"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --config config/webpack.client.prod.js",
