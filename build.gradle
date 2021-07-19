@@ -141,16 +141,16 @@ configurations.all {
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+	toolVersion = "0.8.6"
 }
 
 jacocoTestReport {
-    reports {
-        xml.enabled true
+	reports {
+		xml.enabled true
 		html.enabled false
 	}
 }
