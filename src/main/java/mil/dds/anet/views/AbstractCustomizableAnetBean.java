@@ -28,6 +28,8 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
   private List<Note> notes;
   // annotated below
   private List<CustomSensitiveInformation> customSensitiveInformation;
+  // annotated below
+  private Boolean isSubscribed;
 
   public String getCustomFields() {
     return customFields;
@@ -70,6 +72,15 @@ public abstract class AbstractCustomizableAnetBean extends AbstractAnetBean {
   public void setCustomSensitiveInformation(
       List<CustomSensitiveInformation> customSensitiveInformation) {
     this.customSensitiveInformation = customSensitiveInformation;
+  }
+
+  @GraphQLQuery(name = "isSubscribed")
+  public synchronized Boolean isSubscribed(@GraphQLRootContext Map<String, Object> context) {
+    if (isSubscribed == null) {
+      isSubscribed =
+          AnetObjectEngine.getInstance().getSubscriptionDao().isSubscribedObject(context, uuid);
+    }
+    return isSubscribed;
   }
 
   public void checkAndFixCustomFields() {

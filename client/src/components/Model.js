@@ -131,6 +131,7 @@ export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
 export const SENSITIVE_CUSTOM_FIELDS_PARENT = "formSensitiveFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
 export const NOTES_FIELD = "notes"
+export const IS_SUBSCRIBED_FIELD = "isSubscribed"
 
 export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
@@ -706,6 +707,7 @@ export default class Model {
 
   static FILTERED_CLIENT_SIDE_FIELDS = [
     NOTES_FIELD,
+    IS_SUBSCRIBED_FIELD,
     DEFAULT_CUSTOM_FIELDS_PARENT,
     SENSITIVE_CUSTOM_FIELDS_PARENT
   ]
