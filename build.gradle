@@ -115,7 +115,7 @@ dependencies {
 	runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.13.1'
+	implementation 'org.jsoup:jsoup:1.14.1'
 
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.14'
@@ -152,16 +152,16 @@ configurations.all {
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 jacoco {
-    toolVersion = "0.8.6"
+	toolVersion = "0.8.6"
 }
 
 jacocoTestReport {
-    reports {
-        xml.enabled true
+	reports {
+		xml.enabled true
 		html.enabled false
 	}
 }

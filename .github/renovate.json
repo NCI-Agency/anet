@@ -20,14 +20,9 @@
     },
     {
       "matchPackageNames": [
-        "autoprefixer",
         "com.networknt:json-schema-validator",
-        "draft-js",
-        "leaflet",
-        "react-tooltip",
-        "yup"
+        "draft-js"
       ],
-      "matchPackagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],
