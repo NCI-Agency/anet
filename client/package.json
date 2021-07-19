@@ -89,7 +89,7 @@
     "moment-timezone": "0.5.33",
     "postcss": "8.3.5",
     "postcss-flexbugs-fixes": "5.0.2",
-    "postcss-loader": "4.3.0",
+    "postcss-loader": "6.1.1",
     "prettier-eslint-cli": "5.0.1",
     "react-is": "16.13.1",
     "react-test-renderer": "16.14.0",
