@@ -21,8 +21,7 @@
     {
       "matchPackageNames": [
         "com.networknt:json-schema-validator",
-        "draft-js",
-        "yup"
+        "draft-js"
       ],
       "enabled": false
     }
