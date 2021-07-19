@@ -20,7 +20,6 @@
     },
     {
       "matchPackageNames": [
-        "autoprefixer",
         "com.networknt:json-schema-validator",
         "draft-js",
         "leaflet",
