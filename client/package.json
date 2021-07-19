@@ -177,7 +177,7 @@
     "redux-persist": "6.0.0",
     "resize-observer-polyfill": "1.5.1",
     "use-debounce": "7.0.0",
-    "yup": "0.31.0"
+    "yup": "0.32.9"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --config config/webpack.client.prod.js",
