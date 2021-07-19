@@ -23,7 +23,6 @@
         "autoprefixer",
         "com.networknt:json-schema-validator",
         "draft-js",
-        "react-tooltip",
         "yup"
       ],
       "enabled": false
