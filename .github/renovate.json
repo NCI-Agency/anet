@@ -26,7 +26,6 @@
         "react-tooltip",
         "yup"
       ],
-      "matchPackagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],
