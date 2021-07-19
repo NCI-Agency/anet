@@ -12,7 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -23,7 +23,6 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
-  DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -305,9 +304,41 @@ const ReportForm = ({
         const currentOrg =
           currentUser.position && currentUser.position.organization
         const locationFilters = {
-          activeLocations: {
-            label: "Active locations",
-            queryVars: { status: Model.STATUS.ACTIVE }
+          virtual: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.VIRTUAL_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.VIRTUAL_LOCATION
+            }
+          },
+          principal: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+            }
+          },
+          advisor: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.ADVISOR_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.ADVISOR_LOCATION
+            }
+          },
+          pinpoint: {
+            label: Location.humanNameOfType(
+              Location.LOCATION_TYPES.PINPOINT_LOCATION
+            ),
+            queryVars: {
+              status: Model.STATUS.ACTIVE,
+              type: Location.LOCATION_TYPES.PINPOINT_LOCATION
+            }
           }
         }
 
@@ -421,7 +452,7 @@ const ReportForm = ({
         const hasAssessments = values.engagementDate && !isFutureEngagement
         let relatedObject
         if (hasAssessments) {
-          relatedObject = Report.getCleanReport(values)
+          relatedObject = Report.filterClientSideFields(new Report(values))
         }
 
         return (
@@ -861,7 +892,7 @@ const ReportForm = ({
                 {!isFutureEngagement && (
                   <FastField
                     name="nextSteps"
-                    label={Settings.fields.report.nextSteps}
+                    label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
                     componentClass="textarea"
                     onChange={event => {
@@ -869,19 +900,24 @@ const ReportForm = ({
                       setFieldValue("nextSteps", event.target.value, false)
                       validateFieldDebounced("nextSteps")
                     }}
-                    maxLength={Settings.maxTextFieldLength}
+                    maxLength={utils.getMaxTextFieldLength(
+                      Settings.fields.report.nextSteps
+                    )}
                     onKeyUp={event =>
                       countCharsLeft(
                         "nextStepsCharsLeft",
-                        Settings.maxTextFieldLength,
+                        utils.getMaxTextFieldLength(
+                          Settings.fields.report.nextSteps
+                        ),
                         event
                       )
                     }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.nextSteps.length}
+                          {utils.getMaxTextFieldLength(
+                            Settings.fields.report.nextSteps
+                          ) - initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </>
@@ -1076,8 +1112,8 @@ const ReportForm = ({
                     </div>
                   )}
                   {canDelete && (
-                    <ConfirmDelete
-                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
+                    <ConfirmDestructive
+                      onConfirm={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
                       bsStyle="warning"
@@ -1325,13 +1361,7 @@ const ReportForm = ({
   }
 
   function save(values, sendEmail) {
-    const report = Object.without(
-      Report.getCleanReport(values),
-      "cancelled",
-      "reportPeople",
-      "tasks",
-      "customFields" // initial JSON from the db
-    )
+    const report = Report.filterClientSideFields(new Report(values))
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
       // They might have been set before the report has been marked as future.
@@ -1352,13 +1382,10 @@ const ReportForm = ({
     }
     // strip reportPeople fields not in data model
     report.reportPeople = values.reportPeople.map(reportPerson => {
-      const rp = Object.without(
+      const rp = Person.filterClientSideFields(
         reportPerson,
-        "firstName",
-        "lastName",
         "position",
-        "customFields",
-        DEFAULT_CUSTOM_FIELDS_PARENT
+        "customFields"
       )
       rp.author = !!reportPerson.author
       rp.attendee = !!reportPerson.attendee

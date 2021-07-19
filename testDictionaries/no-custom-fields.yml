@@ -22,6 +22,10 @@ dateFormats:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
 
+printOptions:
+  sensitiveInformationText: Sensitive Information
+  sensitiveInformationTooltipText: Releasability Information
+
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48
@@ -148,17 +152,22 @@ fields:
       placeholder: Search for a position...
 
   report:
+    canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details
     cancelled: ''
-    nextSteps: Next steps
+    nextSteps:
+      label: Next steps
+      maxTextFieldLength: 1000
     keyOutcomes: Key outcomes
     reportText: Key details
 
   person:
     firstName: First name
     lastName: Last name
+    position: Current Position
+    prevPositions: Previous Positions
     domainUsername: Domain username
     emailAddress:
       label: Email
@@ -228,7 +237,29 @@ fields:
         description: the rank of OF-9
         app6Modifier: K
     gender: Gender
+    biography: Biography
     endOfTourDate: End of tour
+    customSensitiveInformation:
+      birthday:
+        type: date
+        label: Date of birth
+        authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d', 'c21e7321-7ec5-4837-8805-a302f9575754']
+        tooltipText: This field contains sensitive information!
+      politicalPosition:
+        type: enum
+        label: Position on the political spectrum
+        authorizationGroupUuids: ['1050c9e3-e679-4c60-8bdc-5139fbc1c10b']
+        tooltipText: This field contains sensitive information!
+        choices:
+          LEFT:
+            label: Left
+            color: 'salmon'
+          MIDDLE:
+            label: Middle
+            color: 'gold'
+          RIGHT:
+            label: Right
+            color: 'skyblue'
 
   location:
     format: LAT_LON
@@ -247,7 +278,30 @@ fields:
       countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
                   Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
                   Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
-
+      # number of fields after Avatar in the left column for advisors
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 7
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: NATO Billet
       type: ANET User
@@ -362,6 +416,32 @@ fields:
                   label: 👍
                   color: '#0000ff'
 
+      # number of fields after Avatar in the left column for principals
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 6
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - phoneNumber
+        - country
+        - birthday
+        - colourOptions
+        - textareaFieldName
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - code
+        - politicalPosition
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: Afghan Tashkil
       type: Afghan Partner

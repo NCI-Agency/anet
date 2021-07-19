@@ -1,6 +1,62 @@
 import Page from "./page"
 
 class ShowPerson extends Page {
+  get editButton() {
+    return browser.$("div a.edit-person")
+  }
+
+  get compactView() {
+    return browser.$(".compact-view")
+  }
+
+  get compactViewButton() {
+    return browser.$("button[value='compactView']")
+  }
+
+  get printButton() {
+    return browser.$("button[value='print']")
+  }
+
+  get detailedViewButton() {
+    return browser.$("button[value='detailedView']")
+  }
+
+  get optionalFieldsButton() {
+    return browser.$('//button[text()="Optional Fields ⇓"]')
+  }
+
+  get clearAllButton() {
+    return browser.$('//button[text()="Clear All"]')
+  }
+
+  get selectAllButton() {
+    return browser.$('//button[text()="Select All"]')
+  }
+
+  get presetsButton() {
+    return browser.$("#presetsButton")
+  }
+
+  get defaultPreset() {
+    return browser.$('//a[text()="Default"]')
+  }
+
+  get withoutSensitivePreset() {
+    return browser.$('//a[text()="Exclude sensitive fields"]')
+  }
+
+  get sensitiveInformationWarning() {
+    return this.compactView.$('//span[text()="Sensitive Information"]')
+  }
+
+  get leftColumnNumber() {
+    return browser.$("#leftColumnNumber")
+  }
+
+  get leftTableFields() {
+    return this.compactView.$$(".left-table > tr")
+  }
+
   get assessmentsTable() {
     return this.quarterlyAssessmentContainer.$("table.assessments-table")
   }
@@ -42,6 +98,26 @@ class ShowPerson extends Page {
 
   get quarterlyAssessmentContainer() {
     return browser.$("#entity-assessments-results-quarterly")
+  }
+
+  get politicalPosition() {
+    return browser.$('div[name="formSensitiveFields.politicalPosition"]')
+  }
+
+  get birthday() {
+    return browser.$('div[name="formSensitiveFields.birthday"]')
+  }
+
+  pickACompactField(field) {
+    browser.$(`#${field}`).click()
+  }
+
+  waitForCompactField(reverse, ...fields) {
+    fields.forEach(field => {
+      this.compactView
+        .$(`//th[text()="${field}"]`)
+        .waitForDisplayed({ reverse: reverse })
+    })
   }
 
   waitForAssessmentModalForm(reverse = false) {

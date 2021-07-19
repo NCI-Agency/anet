@@ -7,7 +7,7 @@ import {
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
@@ -348,8 +348,8 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
             <Button style={{ marginRight: 12 }} onClick={showSearch}>
               Show Search
             </Button>
-            <ConfirmDelete
-              onConfirmDelete={onConfirmDelete}
+            <ConfirmDestructive
+              onConfirm={onConfirmDelete}
               objectType="search"
               objectDisplay={selectedSearch.name}
               bsStyle="danger"

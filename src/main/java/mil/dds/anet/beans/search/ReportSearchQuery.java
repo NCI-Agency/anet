@@ -108,6 +108,7 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
   @GraphQLInputField
   private Boolean sensitiveInfo;
   // internal search parameter:
+  @JsonIgnore
   private boolean systemSearch;
 
   public ReportSearchQuery() {
@@ -347,12 +348,10 @@ public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearc
     this.sensitiveInfo = sensitiveInfo;
   }
 
-  @JsonIgnore
   public boolean isSystemSearch() {
     return systemSearch;
   }
 
-  @JsonIgnore
   public void setSystemSearch(boolean systemSearch) {
     this.systemSearch = systemSearch;
   }

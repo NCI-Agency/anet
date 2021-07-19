@@ -8,6 +8,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
@@ -19,6 +20,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   }
 
   static class SelfIdBatcher extends IdBatcher<Location> {
+
     private static final String sql =
         "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
 
@@ -37,27 +39,60 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   @Override
   public Location insertInternal(Location l) {
     getDbHandle().createUpdate(
-        "/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", "
-            + "\"updatedAt\", \"customFields\") VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, "
+        "/* locationInsert */ INSERT INTO locations (uuid, name, type, status, lat, lng, \"createdAt\", "
+            + "\"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :status, :lat, :lng, :createdAt, "
             + ":updatedAt, :customFields)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
-        .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+        .bind("status", DaoUtils.getEnumId(l.getStatus()))
+        .bind("type", DaoUtils.getEnumString(l.getType())).execute();
     return l;
   }
 
   @Override
   public int updateInternal(Location l) {
     return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
-        + "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
+        + "SET name = :name, type = :type, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
         + "\"customFields\" = :customFields WHERE uuid = :uuid").bindBean(l)
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
-        .bind("status", DaoUtils.getEnumId(l.getStatus())).execute();
+        .bind("status", DaoUtils.getEnumId(l.getStatus()))
+        .bind("type", DaoUtils.getEnumString(l.getType())).execute();
   }
 
   @Override
   public AnetBeanList<Location> search(LocationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getLocationSearcher().runSearch(query);
+  }
+
+  @InTransaction
+  public int mergeLocations(Location loserLocation, Location winnerLocation) {
+    final String loserLocationUuid = loserLocation.getUuid();
+    final String winnerLocationUuid = winnerLocation.getUuid();
+
+    // Update location
+    update(winnerLocation);
+
+    // Update approvalSteps
+    updateForMerge("approvalSteps", "relatedObjectUuid", winnerLocationUuid, loserLocationUuid);
+
+    // Update reports
+    updateForMerge("reports", "locationUuid", winnerLocationUuid, loserLocationUuid);
+
+    // Update positions
+    updateForMerge("positions", "locationUuid", winnerLocationUuid, loserLocationUuid);
+
+    // Update notes
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerLocationUuid,
+        loserLocationUuid);
+
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, LocationDao.TABLE_NAME, winnerLocationUuid,
+        winnerLocation.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserLocationUuid);
+
+    // Finally, delete the location
+    return deleteForMerge("locations", "uuid", loserLocationUuid);
   }
 
   // TODO: Don't delete any location if any references exist.

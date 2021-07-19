@@ -44,19 +44,20 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY
-  public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
+  public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
+  public static final String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
       "biography", "country", "gender", "endOfTourDate", "domainUsername", "pendingVerification",
       "code", "updatedAt", "customFields"};
   // "avatar" has its own batcher
-  public static String[] avatarFields = {"uuid", "avatar"};
+  public static final String[] avatarFields = {"uuid", "avatar"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
-  public static String TABLE_NAME = "people";
-  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
-  public static String PERSON_AVATAR_FIELDS =
+  public static final String TABLE_NAME = "people";
+  public static final String PERSON_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
+  public static final String PERSON_AVATAR_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, avatarFields, true);
-  public static String PERSON_FIELDS_NOAS =
+  public static final String PERSON_FIELDS_NOAS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
@@ -363,8 +364,10 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
         + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
     // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
+    final String winnerUuid = winner.getUuid();
+    final String loserUuid = loser.getUuid();
     getDbHandle().createUpdate(String.format(sqlUpd, DaoUtils.isMsSql() ? "|" : "OR"))
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
     // 2. delete the loser so we don't have duplicates
     final String sqlDel = "WITH dups AS ( SELECT"
         + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
@@ -376,51 +379,34 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
     // MS SQL and PostgreSQL have slightly different DELETE syntax
     getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
 
     // update report people, should now be unique
-    getDbHandle().createUpdate(
-        "UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
 
     // update approvals this person might have done
-    getDbHandle().createUpdate(
-        "UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("reportActions", "personUuid", winnerUuid, loserUuid);
 
-    // comment author update
-    getDbHandle()
-        .createUpdate(
-            "UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // update comment authors
+    updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
 
     // update position history
-    getDbHandle().createUpdate(
-        "UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
 
     // update note authors
-    getDbHandle()
-        .createUpdate(
-            "UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
 
-    // update note related objects where we don't already have the same note for the winnerUuid
-    getDbHandle().createUpdate(
-        "UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
-            + " AND \"noteUuid\" NOT IN ("
-            + "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
-            + ")")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // update notes
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
 
-    // now delete obsolete note related objects
-    getDbHandle()
-        .createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
-        .bind("loserUuid", loser.getUuid()).execute();
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
+        winner.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
-    // delete the person!
-    final int nr = getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
-        .bind("loserUuid", loser.getUuid()).execute();
+    // finally, delete the person!
+    final int nr = deleteForMerge("people", "uuid", loserUuid);
     // E.g. positions may have been updated, so evict from the cache
     evictFromCache(winner);
     evictFromCache(loser);

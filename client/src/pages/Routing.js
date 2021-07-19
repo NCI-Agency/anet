@@ -4,7 +4,9 @@ import AuthorizationGroupNew from "pages/admin/authorizationgroup/New"
 import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
+import MergeLocations from "pages/admin/MergeLocations"
 import MergePeople from "pages/admin/MergePeople"
+import MergePositions from "pages/admin/MergePositions"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
@@ -21,6 +23,7 @@ import OrganizationEdit from "pages/organizations/Edit"
 import OrganizationNew from "pages/organizations/New"
 import OrganizationShow from "pages/organizations/Show"
 import PageMissing from "pages/PageMissing"
+import PersonCompact from "pages/people/Compact"
 import PersonEdit from "pages/people/Edit"
 import PersonNew from "pages/people/New"
 import PersonShow from "pages/people/Show"
@@ -69,6 +72,7 @@ const Routing = () => {
         render={({ match: { url } }) => (
           <Switch>
             <Route path={`${url}/new`} component={PersonNew} />
+            <Route path={`${url}/:uuid/compact`} component={PersonCompact} />
             <Route path={`${url}/:uuid/edit`} component={PersonEdit} />
             <Route path={`${url}/:uuid`} component={PersonShow} />
           </Switch>
@@ -130,6 +134,14 @@ const Routing = () => {
             <Switch>
               <Route exact path={`${url}/`} component={AdminIndex} />
               <Route path={`${url}/mergePeople`} component={MergePeople} />
+              <Route
+                path={`${url}/mergePositions`}
+                component={MergePositions}
+              />
+              <Route
+                path={`${url}/mergeLocations`}
+                component={MergeLocations}
+              />
               <Route
                 exact
                 path={`${url}/authorizationGroups`}

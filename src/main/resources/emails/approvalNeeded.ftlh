@@ -136,7 +136,7 @@ Dear ${approvalStepName},
       </#if>
     </#if>
     <#if report.nextSteps??>
-      <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>
+      <p><strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}</p>
     </#if>
   </div>
 </div>

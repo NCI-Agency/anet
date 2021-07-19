@@ -3,78 +3,80 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
+import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
+import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import javax.ws.rs.ForbiddenException;
-import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.LocationSearchQuery;
+import javax.ws.rs.NotFoundException;
 import mil.dds.anet.test.TestData;
-import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.test.client.AnetBeanList_Location;
+import mil.dds.anet.test.client.Location;
+import mil.dds.anet.test.client.LocationInput;
+import mil.dds.anet.test.client.LocationSearchQueryInput;
+import mil.dds.anet.test.client.LocationType;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.util.MutationExecutor;
+import mil.dds.anet.test.client.util.QueryExecutor;
 import org.junit.jupiter.api.Test;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
-  private static final String FIELDS = "uuid name status lat lng";
+  private static final String FIELDS = "{ uuid name type status lat lng }";
 
   @Test
   public void locationTestGraphQL()
-      throws IllegalAccessException, InvocationTargetException, InstantiationException {
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create
-    final Location l = TestData.createLocation("The Boat Dock", 43.21, -87.65);
-    final String lUuid = graphQLHelper.createObject(admin, "createLocation", "location",
-        "LocationInput", l, new TypeReference<GraphQlResponse<Location>>() {});
-    assertThat(lUuid).isNotNull();
-    final Location created = graphQLHelper.getObjectById(admin, "location", FIELDS, lUuid,
-        new TypeReference<GraphQlResponse<Location>>() {});
-    assertThat(created.getName()).isEqualTo(l.getName());
-    assertThat(created).isNotEqualTo(l);
+    final LocationInput lInput = TestData.createLocationInput("The Boat Dock", 43.21, -87.65);
+    final Location created = adminMutationExecutor.createLocation(FIELDS, lInput);
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(created.getName()).isEqualTo(lInput.getName());
 
     // Search
     // You cannot search for the Boat Dock location, because full-text indexing
-    // is done in asynchronously and is not guaranteed to be done
+    // is done asynchronously and is not guaranteed to be done
     // so we search for a record in the base data set.
-    final LocationSearchQuery query = new LocationSearchQuery();
-    query.setText("Police");
-    final AnetBeanList<Location> searchObjects =
-        graphQLHelper.searchObjects(admin, "locationList", "query", "LocationSearchQueryInput",
-            FIELDS, query, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    final LocationSearchQueryInput query =
+        LocationSearchQueryInput.builder().withText("Police").build();
+    final AnetBeanList_Location searchObjects =
+        adminQueryExecutor.locationList(getListFields(FIELDS), query);
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
 
     // Update
     created.setName("Down by the Bay");
-    final Integer nrUpdated =
-        graphQLHelper.updateObject(admin, "updateLocation", "location", "LocationInput", created);
+    final Integer nrUpdated = adminMutationExecutor.updateLocation("", getLocationInput(created));
     assertThat(nrUpdated).isEqualTo(1);
-    final Location updated = graphQLHelper.getObjectById(admin, "location", FIELDS, lUuid,
-        new TypeReference<GraphQlResponse<Location>>() {});
-    assertThat(updated).isEqualTo(created);
+    final Location updated = adminQueryExecutor.location(FIELDS, created.getUuid());
+    assertThat(updated.getName()).isEqualTo(created.getName());
   }
 
   @Test
-  public void locationCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+  public void locationCreateSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createLocation(getSuperUser());
   }
 
   @Test
-  public void locationCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+  public void locationCreateRegularUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createLocation(getRegularUser());
   }
 
-  private void createLocation(Person user) {
+  private void createLocation(Person user)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
-    final Location l2 = TestData.createLocation("The Boat Dock2", 43.21, -87.65);
+    final LocationInput lInput = TestData.createLocationInput("The Boat Dock2", 43.21, -87.65);
     try {
-      final String lUuid = graphQLHelper.createObject(user, "createLocation", "location",
-          "LocationInput", l2, new TypeReference<GraphQlResponse<Location>>() {});
+      final Location l = userMutationExecutor.createLocation(FIELDS, lInput);
       if (isSuperUser) {
-        assertThat(lUuid).isNotNull();
+        assertThat(l).isNotNull();
+        assertThat(l.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -86,30 +88,33 @@ public class LocationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void locationUpdateSuperUserPermissionTest() throws UnsupportedEncodingException {
+  public void locationUpdateSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     updateLocation(getSuperUser());
   }
 
   @Test
-  public void locationUpdateRegularUserPermissionTest() throws UnsupportedEncodingException {
+  public void locationUpdateRegularUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     updateLocation(getRegularUser());
   }
 
-  private void updateLocation(Person user) {
+  private void updateLocation(Person user)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
+    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
-    final LocationSearchQuery query = new LocationSearchQuery();
-    query.setText("Police");
-    final AnetBeanList<Location> searchObjects =
-        graphQLHelper.searchObjects(admin, "locationList", "query", "LocationSearchQueryInput",
-            FIELDS, query, new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
+    final LocationSearchQueryInput query =
+        LocationSearchQueryInput.builder().withText("Police").build();
+    final AnetBeanList_Location searchObjects =
+        userQueryExecutor.locationList(getListFields(FIELDS), query);
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     final Location l = searchObjects.getList().get(0);
 
     try {
-      final Integer nrUpdated =
-          graphQLHelper.updateObject(user, "updateLocation", "location", "LocationInput", l);
+      final Integer nrUpdated = userMutationExecutor.updateLocation("", getLocationInput(l));
       if (isSuperUser) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
@@ -119,6 +124,44 @@ public class LocationResourceTest extends AbstractResourceTest {
       if (isSuperUser) {
         fail("Unexpected ForbiddenException");
       }
+    }
+  }
+
+  @Test
+  public void mergeLocationTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Create Loser Location
+    final LocationInput firstLocationInput = LocationInput.builder()
+        .withName("MergeLocationsTest First Location").withType(LocationType.PINPOINT_LOCATION)
+        .withLat(47.613442).withLng(-52.740936).withStatus(Status.ACTIVE).build();
+
+    final Location firstLocation = adminMutationExecutor.createLocation(FIELDS, firstLocationInput);
+    assertThat(firstLocation).isNotNull();
+    assertThat(firstLocation.getUuid()).isNotNull();
+
+    // Create Winner Location
+    final LocationInput secondLocationInput = LocationInput.builder()
+        .withName("MergeLocationsTest Second Location").withType(LocationType.PINPOINT_LOCATION)
+        .withLat(47.561517).withLng(-52.70876).withStatus(Status.ACTIVE).build();
+
+    final Location secondLocation =
+        adminMutationExecutor.createLocation(FIELDS, secondLocationInput);
+    assertThat(secondLocation).isNotNull();
+    assertThat(secondLocation.getUuid()).isNotNull();
+
+    final LocationInput mergedLocationInput = getLocationInput(firstLocation);
+    mergedLocationInput.setStatus(secondLocation.getStatus());
+
+    final Location mergedLocation =
+        adminMutationExecutor.mergeLocations(FIELDS, secondLocation.getUuid(), mergedLocationInput);
+    assertThat(mergedLocation).isNotNull();
+    assertThat(mergedLocation.getUuid()).isNotNull();
+
+    // Assert that loser is gone.
+    try {
+      adminQueryExecutor.location(FIELDS, secondLocation.getUuid());
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
     }
   }
 

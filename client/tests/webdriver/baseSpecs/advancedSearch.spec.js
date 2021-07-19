@@ -16,7 +16,7 @@ const ANET_OBJECT_TYPES = {
     sampleFilter: "Position Type"
   },
   Locations: {
-    sampleFilter: null
+    sampleFilter: "Location Type"
   },
   "Objective / Efforts": {
     sampleFilter: "Project status"
@@ -29,9 +29,6 @@ const PERSON_DEFAULT_FILTER = "Pending Verification"
 const PERSON_INDEX = 1
 
 const ADD_FILTER_BUTTON_TEXT = "+ Add another filter"
-
-const NO_ADDITIONAL_FILTERS_TEXT = "No additional filters available"
-
 describe("When using advanced search", () => {
   it("Should show a link like button with correct text under search bar that opens a popover", () => {
     Home.open()
@@ -93,17 +90,9 @@ describe("When using advanced search", () => {
       button.click()
       AdvancedSearch.addFilterButtonText.waitForExist()
       AdvancedSearch.addFilterButtonText.waitForDisplayed()
-
-      // Types other than Locations have additional filters
-      if (getObjectType(i) !== "Locations") {
-        expect(AdvancedSearch.addFilterButtonText.getText()).to.equal(
-          ADD_FILTER_BUTTON_TEXT
-        )
-      } else {
-        expect(AdvancedSearch.addFilterButtonText.getText()).to.equal(
-          NO_ADDITIONAL_FILTERS_TEXT
-        )
-      }
+      expect(AdvancedSearch.addFilterButtonText.getText()).to.equal(
+        ADD_FILTER_BUTTON_TEXT
+      )
     })
   })
 
@@ -112,17 +101,12 @@ describe("When using advanced search", () => {
       button.click()
       AdvancedSearch.addFilterButtonText.waitForExist()
       AdvancedSearch.addFilterButtonText.waitForDisplayed()
-      // If there is no additional filters for an object, it should display something different
-      // And we shouldn't try to open additional filters popover
-      // Types other than Locations have additional filters
-      if (getObjectType(i) !== "Locations") {
-        AdvancedSearch.addFilterButton.click()
-        AdvancedSearch.addFilterPopover.waitForExist()
-        AdvancedSearch.addFilterPopover.waitForDisplayed()
-        expect(AdvancedSearch.addFilterPopover.getText()).to.match(
-          new RegExp(ANET_OBJECT_TYPES[getObjectType(i)].sampleFilter)
-        )
-      }
+      AdvancedSearch.addFilterButton.click()
+      AdvancedSearch.addFilterPopover.waitForExist()
+      AdvancedSearch.addFilterPopover.waitForDisplayed()
+      expect(AdvancedSearch.addFilterPopover.getText()).to.match(
+        new RegExp(ANET_OBJECT_TYPES[getObjectType(i)].sampleFilter)
+      )
     })
   })
 })

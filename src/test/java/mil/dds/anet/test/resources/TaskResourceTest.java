@@ -3,136 +3,124 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import java.io.UnsupportedEncodingException;
+import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
+import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.test.TestData;
-import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.test.client.AnetBeanList_Organization;
+import mil.dds.anet.test.client.AnetBeanList_Task;
+import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.OrganizationSearchQueryInput;
+import mil.dds.anet.test.client.OrganizationType;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.Task;
+import mil.dds.anet.test.client.TaskInput;
+import mil.dds.anet.test.client.TaskSearchQueryInput;
+import mil.dds.anet.test.client.util.MutationExecutor;
+import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
   private static final String FIELDS =
-      "uuid shortName longName category customFieldRef1 { uuid } taskedOrganizations { uuid }"
-          + " status customFields";
+      "{ uuid shortName longName category customFieldRef1 { uuid } taskedOrganizations { uuid }"
+          + " status customFields }";
 
   @Test
-  public void taskTest() {
-    final Person jack = getJackJackson();
-
-    final String aUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("TestF1", "Do a thing with a person", "Test-EF",
+  public void taskTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Task taskA = adminMutationExecutor.createTask(FIELDS,
+        TestData.createTaskInput("TestF1", "Do a thing with a person", "Test-EF",
             // set JSON of customFields
-            UtilsTest.getCombinedJsonTestCase().getInput()),
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(aUuid).isNotNull();
-    final Task a = graphQLHelper.getObjectById(admin, "task", FIELDS, aUuid,
-        new TypeReference<GraphQlResponse<Task>>() {});
+            UtilsTest.getCombinedJsonTestCase().getInput()));
+    assertThat(taskA).isNotNull();
+    assertThat(taskA.getUuid()).isNotNull();
     // check that JSON of customFields is sanitized after create
-    assertThat(a.getCustomFields()).isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+    assertThat(taskA.getCustomFields()).isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
-    final String bUuid = graphQLHelper.createObject(
-        admin, "createTask", "task", "TaskInput", TestData.createTask("TestM1",
-            "Teach a person how to fish", "Test-Milestone", a, null, Task.Status.ACTIVE),
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(bUuid).isNotNull();
+    final TaskInput taskAInput = getTaskInput(taskA);
 
-    final String cUuid = graphQLHelper.createObject(
-        admin, "createTask", "task", "TaskInput", TestData.createTask("TestM2",
-            "Watch the person fishing", "Test-Milestone", a, null, Task.Status.ACTIVE),
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(cUuid).isNotNull();
+    final Task createdB =
+        adminMutationExecutor.createTask(FIELDS, TestData.createTaskInput("TestM1",
+            "Teach a person how to fish", "Test-Milestone", taskAInput, null, Status.ACTIVE));
+    assertThat(createdB).isNotNull();
+    assertThat(createdB.getUuid()).isNotNull();
 
-    final String dUuid =
-        graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-            TestData.createTask("TestM3", "Have the person go fishing without you",
-                "Test-Milestone", a, null, Task.Status.ACTIVE),
-            new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(dUuid).isNotNull();
+    final Task createdC =
+        adminMutationExecutor.createTask(FIELDS, TestData.createTaskInput("TestM2",
+            "Watch the person fishing", "Test-Milestone", taskAInput, null, Status.ACTIVE));
+    assertThat(createdC).isNotNull();
+    assertThat(createdC.getUuid()).isNotNull();
 
-    final String eUuid = graphQLHelper.createObject(
-        admin, "createTask", "task", "TaskInput", TestData.createTask("TestF2",
-            "Be a thing in a test case", "Test-EF", null, null, Task.Status.ACTIVE),
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(eUuid).isNotNull();
+    final Task createdD = adminMutationExecutor.createTask(FIELDS,
+        TestData.createTaskInput("TestM3", "Have the person go fishing without you",
+            "Test-Milestone", taskAInput, null, Status.ACTIVE));
+    assertThat(createdD).isNotNull();
+    assertThat(createdD.getUuid()).isNotNull();
+
+    final Task createdE =
+        adminMutationExecutor.createTask(FIELDS, TestData.createTaskInput("TestF2",
+            "Be a thing in a test case", "Test-EF", null, null, Status.ACTIVE));
+    assertThat(createdE).isNotNull();
+    assertThat(createdE.getUuid()).isNotNull();
 
     // modify a task.
-    a.setLongName("Do a thing with a person modified");
+    taskAInput.setLongName("Do a thing with a person modified");
     // update JSON of customFields
-    a.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
-    final Integer nrUpdated =
-        graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
+    taskAInput.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
+    final Integer nrUpdated = adminMutationExecutor.updateTask("", taskAInput);
     assertThat(nrUpdated).isEqualTo(1);
-    final Task returned = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid,
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(returned.getLongName()).isEqualTo(a.getLongName());
+    final Task returnedA = adminQueryExecutor.task(FIELDS, taskA.getUuid());
+    assertThat(returnedA.getLongName()).isEqualTo(taskAInput.getLongName());
     // check that JSON of customFields is sanitized after update
-    assertThat(returned.getCustomFields())
+    assertThat(returnedA.getCustomFields())
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Assign the Task to the AO
-    final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF8");
-    final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
-        "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
-    Organization ef8 =
+    final OrganizationSearchQueryInput queryOrgs =
+        OrganizationSearchQueryInput.builder().withText("EF8").build();
+    final AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), queryOrgs);
+    final Organization ef8 =
         orgs.getList().stream().filter(o -> o.getShortName().equals("EF8")).findFirst().get();
     assertThat(ef8).isNotNull();
 
-    a.setTaskedOrganizations(Collections.singletonList(ef8));
-    final Integer nrUpdated2 =
-        graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
+    taskAInput.setTaskedOrganizations(Collections.singletonList(getOrganizationInput(ef8)));
+    final Integer nrUpdated2 = adminMutationExecutor.updateTask("", taskAInput);
     assertThat(nrUpdated2).isEqualTo(1);
-    final Task returned2 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid,
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(returned2.getTaskedOrganizations().iterator().next().getUuid())
+    final Task returnedA2 = jackQueryExecutor.task(FIELDS, taskA.getUuid());
+    assertThat(returnedA2.getTaskedOrganizations().iterator().next().getUuid())
         .isEqualTo(ef8.getUuid());
 
-    // Fetch the tasks off the organization
-    final TaskSearchQuery queryTasks = new TaskSearchQuery();
-    queryTasks.setTaskedOrgUuid(ef8.getUuid());
-    final AnetBeanList<Task> tasks =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            queryTasks, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
-    assertThat(tasks.getList()).contains(returned);
-
-    // Search for the task:
+    // Fetch the tasks of the organization
+    final TaskSearchQueryInput queryTasks =
+        TaskSearchQueryInput.builder().withTaskedOrgUuid(ef8.getUuid()).build();
+    final AnetBeanList_Task tasks = jackQueryExecutor.taskList(getListFields(FIELDS), queryTasks);
+    assertThat(tasks.getList()).anyMatch(t -> t.getUuid().equals(returnedA.getUuid()));
 
     // set task to inactive
-    a.setStatus(Task.Status.INACTIVE);
-    final Integer nrUpdated3 =
-        graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
+    taskAInput.setStatus(Status.INACTIVE);
+    final Integer nrUpdated3 = adminMutationExecutor.updateTask("", taskAInput);
     assertThat(nrUpdated3).isEqualTo(1);
-    final Task returned3 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid,
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(returned3.getStatus()).isEqualTo(Task.Status.INACTIVE);
+    final Task returnedA3 = jackQueryExecutor.task(FIELDS, taskA.getUuid());
+    assertThat(returnedA3.getStatus()).isEqualTo(Status.INACTIVE);
   }
 
   @Test
-  public void searchTest() {
-    Person jack = getJackJackson();
-
-    TaskSearchQuery query = new TaskSearchQuery();
-    query.setText("Budget");
-    final AnetBeanList<Task> searchObjects =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+  public void searchTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("Budget").build();
+    final AnetBeanList_Task searchObjects =
+        jackQueryExecutor.taskList(getListFields(FIELDS), query);
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
     final List<Task> searchResults = searchObjects.getList();
@@ -141,20 +129,18 @@ public class TaskResourceTest extends AbstractResourceTest {
         .count()).isEqualTo(searchResults.size());
 
     // Search for a task by the organization
-    final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
-    queryOrgs.setText("EF 2");
-    final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
-        "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
-    Organization ef2 =
+    final OrganizationSearchQueryInput queryOrgs =
+        OrganizationSearchQueryInput.builder().withText("EF 2").build();
+    final AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), queryOrgs);
+    final Organization ef2 =
         orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2")).findFirst().get();
     assertThat(ef2).isNotNull();
 
     query.setText(null);
     query.setTaskedOrgUuid(ef2.getUuid());
-    final AnetBeanList<Task> searchObjects2 =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final AnetBeanList_Task searchObjects2 =
+        jackQueryExecutor.taskList(getListFields(FIELDS), query);
     assertThat(searchObjects2).isNotNull();
     assertThat(searchObjects2.getList()).isNotEmpty();
     final List<Task> searchResults2 = searchObjects2.getList();
@@ -168,32 +154,28 @@ public class TaskResourceTest extends AbstractResourceTest {
     query.setTaskedOrgUuid(null);
     query.setText("expenses");
     query.setCategory("Milestone");
-    final AnetBeanList<Task> searchObjects3 =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final AnetBeanList_Task searchObjects3 =
+        jackQueryExecutor.taskList(getListFields(FIELDS), query);
     assertThat(searchObjects3).isNotNull();
     assertThat(searchObjects3.getList()).isNotEmpty();
     final List<Task> searchResults3 = searchObjects3.getList();
     assertThat(searchResults3).isNotEmpty();
 
     // Search by responsible position
-    final Position jackPosition = jack.getPosition();
+    final Position jackPosition = getJackJackson().getPosition();
     query.setResponsiblePositionUuid(jackPosition.getUuid());
     query.setText("");
-    final AnetBeanList<Task> searchObjects4 =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final AnetBeanList_Task searchObjects4 =
+        jackQueryExecutor.taskList(getListFields(FIELDS), query);
     assertThat(searchObjects4).isNotNull();
     assertThat(searchObjects4.getList()).isNotEmpty();
     final List<Task> searchResults4 = searchObjects4.getList();
     assertThat(searchResults4).isNotEmpty();
 
     // Autocomplete
-    query = new TaskSearchQuery();
-    query.setText("1.1*");
-    final AnetBeanList<Task> searchObjects5 =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    query = TaskSearchQueryInput.builder().withText("1.1*").build();
+    final AnetBeanList_Task searchObjects5 =
+        jackQueryExecutor.taskList(getListFields(FIELDS), query);
     assertThat(searchObjects5).isNotNull();
     assertThat(searchObjects5.getList()).isNotEmpty();
     final List<Task> searchResults5 = searchObjects5.getList();
@@ -205,9 +187,8 @@ public class TaskResourceTest extends AbstractResourceTest {
         .isEqualTo(1);
 
     query.setText("1.1.A*");
-    final AnetBeanList<Task> searchObjects6 =
-        graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final AnetBeanList_Task searchObjects6 =
+        jackQueryExecutor.taskList(getListFields(FIELDS), query);
     assertThat(searchObjects6).isNotNull();
     assertThat(searchObjects6.getList()).isNotEmpty();
     final List<Task> searchResults6 = searchObjects6.getList();
@@ -216,61 +197,67 @@ public class TaskResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void duplicateTaskTest() {
-    final String aUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        TestData.createTask("DupTest", "Test dups", "Test-EF"),
-        new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(aUuid).isNotNull();
+  public void duplicateTaskTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Task created = adminMutationExecutor.createTask(FIELDS,
+        TestData.createTaskInput("DupTest", "Test dups", "Test-EF"));
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
 
     // Trying to create another task with the same shortName should fail
     try {
-      graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-          TestData.createTask("DupTest", "Test dups", "Test-EF"),
-          new TypeReference<GraphQlResponse<Task>>() {});
+      adminMutationExecutor.createTask(FIELDS,
+          TestData.createTaskInput("DupTest", "Test dups", "Test-EF"));
       fail("Expected ClientErrorException");
     } catch (ClientErrorException expectedException) {
     }
   }
 
   @Test
-  public void taskCreateAdminPermissionTest() throws UnsupportedEncodingException {
+  public void taskCreateAdminPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createTask(admin);
   }
 
   @Test
-  public void taskCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+  public void taskCreateSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createTask(getSuperUser());
   }
 
   @Test
-  public void taskCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+  public void taskCreateRegularUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createTask(getRegularUser());
   }
 
-  private void createTask(Person user) {
-    final String orgFields = "uuid shortName longName status identificationCode type";
+  private void createTask(Person user)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
+    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
+    final String orgFields = "{ uuid shortName longName status identificationCode type }";
     final Position position = user.getPosition();
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
     final Organization organization = position.getOrganization();
 
     // principal organization
-    final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setType(OrganizationType.PRINCIPAL_ORG);
-    final AnetBeanList<Organization> principalOrgs = graphQLHelper.searchObjects(user,
-        "organizationList", "query", "OrganizationSearchQueryInput", orgFields, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    final OrganizationSearchQueryInput query =
+        OrganizationSearchQueryInput.builder().withType(OrganizationType.PRINCIPAL_ORG).build();
+    final AnetBeanList_Organization principalOrgs =
+        userQueryExecutor.organizationList(getListFields(orgFields), query);
     assertThat(principalOrgs).isNotNull();
     assertThat(principalOrgs.getList()).isNotEmpty();
     final Organization principalOrg = principalOrgs.getList().get(0);
-    final Task taskPrincipal =
-        TestData.createTask("Test task principal " + UUID.randomUUID().toString(),
+    final TaskInput taskPrincipalInput =
+        TestData.createTaskInput("Test task principal " + UUID.randomUUID().toString(),
             "Test permissions principal org", "Test-PT-Principal");
-    taskPrincipal.setTaskedOrganizations(Collections.singletonList(principalOrg));
+    taskPrincipalInput
+        .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(principalOrg)));
     try {
-      final String tPrincipalUuid = graphQLHelper.createObject(user, "createTask", "task",
-          "TaskInput", taskPrincipal, new TypeReference<GraphQlResponse<Task>>() {});
+      final Task createdTask = userMutationExecutor.createTask(FIELDS, taskPrincipalInput);
       if (isAdmin) {
-        assertThat(tPrincipalUuid).isNotNull();
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -281,14 +268,15 @@ public class TaskResourceTest extends AbstractResourceTest {
     }
 
     // own organization
-    final Task taskOwn = TestData.createTask("Test task own " + UUID.randomUUID().toString(),
-        "Test permissions own org", "Test-PT-Own");
-    taskOwn.setTaskedOrganizations(Collections.singletonList(organization));
+    final TaskInput taskOwnInput = TestData.createTaskInput(
+        "Test task own " + UUID.randomUUID().toString(), "Test permissions own org", "Test-PT-Own");
+    taskPrincipalInput
+        .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(organization)));
     try {
-      final String tOwnUuid = graphQLHelper.createObject(user, "createTask", "task", "TaskInput",
-          taskOwn, new TypeReference<GraphQlResponse<Task>>() {});
+      final Task createdTask = userMutationExecutor.createTask(FIELDS, taskOwnInput);
       if (isAdmin) {
-        assertThat(tOwnUuid).isNotNull();
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
@@ -299,23 +287,23 @@ public class TaskResourceTest extends AbstractResourceTest {
     }
 
     // other advisor organization
-    final OrganizationSearchQuery query2 = new OrganizationSearchQuery();
-    query2.setType(OrganizationType.ADVISOR_ORG);
-    final AnetBeanList<Organization> advisorOrgs = graphQLHelper.searchObjects(user,
-        "organizationList", "query", "OrganizationSearchQueryInput", orgFields, query2,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    final OrganizationSearchQueryInput query2 =
+        OrganizationSearchQueryInput.builder().withType(OrganizationType.ADVISOR_ORG).build();
+    final AnetBeanList_Organization advisorOrgs =
+        userQueryExecutor.organizationList(getListFields(orgFields), query2);
     assertThat(advisorOrgs).isNotNull();
     assertThat(advisorOrgs.getList()).isNotEmpty();
     final Optional<Organization> foundOrg = advisorOrgs.getList().stream()
         .filter(o -> !organization.getUuid().equals(o.getUuid())).findFirst();
     assertThat(foundOrg.isPresent()).isTrue();
     final Organization advisorOrg = foundOrg.get();
-    final Task taskOther = TestData.createTask("Test task other " + UUID.randomUUID().toString(),
-        "Test permissions other org", "Test-PT-Other");
-    taskOther.setTaskedOrganizations(Collections.singletonList(advisorOrg));
+    final TaskInput taskOtherInput =
+        TestData.createTaskInput("Test task other " + UUID.randomUUID().toString(),
+            "Test permissions other org", "Test-PT-Other");
+    taskOtherInput
+        .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(advisorOrg)));
     try {
-      graphQLHelper.createObject(user, "createTask", "task", "TaskInput", taskOther,
-          new TypeReference<GraphQlResponse<Task>>() {});
+      userMutationExecutor.createTask(FIELDS, taskOtherInput);
     } catch (ForbiddenException expectedException) {
     }
   }

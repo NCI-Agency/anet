@@ -32,7 +32,7 @@ AdvancedSelectTarget.propTypes = {
 
 const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
-    <Col md={2} xsHidden smHidden>
+    <Col md={3} xsHidden smHidden>
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.entries(items).map(([filterType, filter]) => (
           <li
@@ -219,10 +219,7 @@ const AdvancedSelect = ({
     ]
   )
 
-  const { callback: fetchResultsDebounced } = useDebouncedCallback(
-    fetchResults,
-    400
-  )
+  const fetchResultsDebounced = useDebouncedCallback(fetchResults, 400)
 
   useEffect(() => {
     if (
@@ -314,7 +311,7 @@ const AdvancedSelect = ({
                       handleOnChange={handleOnChangeSelect}
                     />
 
-                    <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
+                    <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
                       <OverlayTable
                         fieldName={fieldName}
                         items={items}
@@ -358,7 +355,9 @@ const AdvancedSelect = ({
                 placement="bottom"
                 modifiers={{
                   preventOverflow: {
-                    enabled: false
+                    options: {
+                      rootBoundary: "viewport"
+                    }
                   },
                   hide: {
                     enabled: false

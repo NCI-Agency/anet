@@ -1,7 +1,6 @@
 package mil.dds.anet.beans.search;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Objects;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import mil.dds.anet.beans.Person;
 
-@JsonIgnoreProperties({"user", "pass"})
 public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQuery<T>, Cloneable {
 
   protected final T defaultSortBy;
@@ -36,6 +34,7 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   @GraphQLInputField
   private Boolean inMyReports;
   // internal search parameter:
+  @JsonIgnore
   private Person user;
 
   public AbstractSearchQuery(T defaultSortBy) {
@@ -195,12 +194,10 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
     return clone;
   }
 
-  @JsonIgnore
   public Person getUser() {
     return user;
   }
 
-  @JsonIgnore
   public void setUser(Person user) {
     this.user = user;
   }

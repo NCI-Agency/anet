@@ -114,6 +114,7 @@ const GQL_GET_LOCATION_LIST = gql`
         name
         lat
         lng
+        type
       }
     }
   }

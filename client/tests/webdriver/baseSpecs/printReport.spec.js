@@ -6,7 +6,9 @@ import ShowReport from "../pages/showReport.page"
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open()
-    ShowReport.openAsAdminUser(MyReports.reportWithAssessmentsUrl)
+    ShowReport.openAsAdminUser(
+      MyReports.getReportUrl("A test report from Arthur")
+    )
     ShowReport.compactViewButton.click()
     ShowReport.compactView.waitForExist()
     ShowReport.compactView.waitForDisplayed()
@@ -23,12 +25,12 @@ describe("Show print report page", () => {
     it("We should see the correct report fields", () => {
       const mustHaveFieldTexts = [
         "purpose",
-        "key outcomes",
-        "next steps",
+        "Key outcomes",
+        "Next steps",
         "principals",
         "advisors",
-        "atmospherics",
-        "efforts"
+        "Atmospherics",
+        "Efforts"
       ]
       const fields = ShowReport.compactReportFields
       const fieldTexts = Array.from(fields).map(field => field.getText())

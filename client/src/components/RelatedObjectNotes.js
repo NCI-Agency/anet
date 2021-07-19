@@ -4,7 +4,7 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -23,6 +23,7 @@ import { Button, Panel } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
+import Settings from "settings"
 import utils from "utils"
 import "./BlueprintOverrides.css"
 
@@ -158,7 +159,9 @@ const RelatedObjectNotes = ({
           }}
         >
           {notes.map(note => {
-            const updatedAt = moment(note.updatedAt).fromNow()
+            const updatedAt = moment(note.updatedAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )
             const byMe = Person.isEqual(currentUser, note.author)
             const canEdit =
               note.type !== NOTE_TYPE.PARTNER_ASSESSMENT &&
@@ -213,8 +216,8 @@ const RelatedObjectNotes = ({
                         onSuccess={hideEditRelatedObjectNoteModal}
                         onDelete={hideDeleteRelatedObjectNoteModal}
                       />
-                      <ConfirmDelete
-                        onConfirmDelete={() => deleteNote(note.uuid)}
+                      <ConfirmDestructive
+                        onConfirm={() => deleteNote(note.uuid)}
                         objectType="note"
                         objectDisplay={"#" + note.uuid}
                         title="Delete note"
@@ -222,7 +225,7 @@ const RelatedObjectNotes = ({
                         bsStyle="primary"
                       >
                         <img src={REMOVE_ICON} height={14} alt="Delete" />
-                      </ConfirmDelete>
+                      </ConfirmDestructive>
                     </>
                   )}
                 </Panel.Heading>
@@ -301,6 +304,7 @@ const RelatedObjectNotes = ({
   return notesElem && ReactDOM.createPortal(renderPortal(), notesElem)
 
   function toggleHidden() {
+    notesElem.classList.toggle("notes-hidden")
     setHidden(!hidden)
   }
 

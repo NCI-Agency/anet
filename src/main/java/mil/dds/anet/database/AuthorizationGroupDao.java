@@ -123,4 +123,30 @@ public class AuthorizationGroupDao
         .runSearch(query);
   }
 
+  static class AuthorizationGroupsBatcher extends ForeignKeyBatcher<AuthorizationGroup> {
+    private static final String sql =
+        "/* batch.getAuthorizationGroupsByPosition */ SELECT * FROM \"authorizationGroupPositions\""
+            + " INNER JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid"
+            + " = \"authorizationGroupPositions\".\"authorizationGroupUuid\""
+            + " WHERE \"authorizationGroupPositions\".\"positionUuid\" IN ( <foreignKeys> )"
+            + " ORDER BY \"authorizationGroupPositions\".\"positionUuid\","
+            + " \"authorizationGroups\".name, \"authorizationGroups\".uuid";
+
+    public AuthorizationGroupsBatcher() {
+      super(sql, "foreignKeys", new AuthorizationGroupMapper(), "positionUuid");
+    }
+  }
+
+  public List<List<AuthorizationGroup>> getAuthorizationGroups(List<String> foreignKeys) {
+    final ForeignKeyBatcher<AuthorizationGroup> authorizationGroupsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(AuthorizationGroupsBatcher.class);
+    return authorizationGroupsBatcher.getByForeignKeys(foreignKeys);
+  }
+
+  public CompletableFuture<List<AuthorizationGroup>> getAuthorizationGroupsForPosition(
+      Map<String, Object> context, String positionUuid) {
+    return new ForeignKeyFetcher<AuthorizationGroup>().load(context,
+        FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS, positionUuid);
+  }
+
 }

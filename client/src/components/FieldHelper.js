@@ -70,7 +70,9 @@ const Field = ({
   addon,
   vertical,
   isCompact,
-  extraAddon
+  extraAddon,
+  labelColumnWidth,
+  className
 }) => {
   const id = getFieldId(field)
   const widget = useMemo(
@@ -92,17 +94,21 @@ const Field = ({
   }
   // setting label or extraColElem explicitly to null will completely remove these columns!
   const widgetWidth =
-    12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
+    12 -
+    (label === null ? 0 : labelColumnWidth) -
+    (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
 
   if (isCompact) {
     return (
       <CompactRow
         label={label}
+        className={className}
         content={
           <>
             {widget}
             {getHelpBlock(field, form)}
+            {extraColElem}
             {children}
           </>
         }
@@ -111,7 +117,12 @@ const Field = ({
   }
 
   return (
-    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
+    <FormGroup
+      id={`fg-${id}`}
+      controlId={id}
+      validationState={validationState}
+      className={className}
+    >
       {vertical ? (
         <>
           <div>{label !== null && <ControlLabel>{label}</ControlLabel>}</div>
@@ -122,7 +133,7 @@ const Field = ({
       ) : (
         <>
           {label !== null && (
-            <Col sm={2} componentClass={ControlLabel}>
+            <Col sm={labelColumnWidth} componentClass={ControlLabel}>
               {label}
             </Col>
           )}
@@ -149,10 +160,13 @@ Field.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   extraAddon: PropTypes.object,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 Field.defaultProps = {
-  vertical: false // default direction of label and input = horizontal
+  vertical: false, // default direction of label and input = horizontal
+  labelColumnWidth: 2
 }
 
 export const InputField = ({
@@ -241,12 +255,14 @@ export const ReadonlyField = ({
   label,
   children,
   extraColElem,
+  labelColumnWidth,
   addon,
   vertical,
   humanValue,
   isCompact,
   ...otherProps
 }) => {
+  const { className } = otherProps
   const widgetElem = useMemo(
     () => (
       <FormControl.Static componentClass="div" {...field} {...otherProps}>
@@ -263,9 +279,11 @@ export const ReadonlyField = ({
       widgetElem={widgetElem}
       children={children}
       extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       addon={addon}
       vertical={vertical}
       isCompact={isCompact}
+      className={className}
     />
   )
 }
@@ -278,7 +296,8 @@ ReadonlyField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   humanValue: PropTypes.any,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  labelColumnWidth: PropTypes.number
 }
 
 export const SpecialField = ({

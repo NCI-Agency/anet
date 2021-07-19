@@ -3,31 +3,35 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.inject.Injector;
+import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
+import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Note;
-import mil.dds.anet.beans.NoteRelatedObject;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.Report;
-import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.client.AnetBeanList_Task;
+import mil.dds.anet.test.client.Note;
+import mil.dds.anet.test.client.NoteInput;
+import mil.dds.anet.test.client.NoteRelatedObjectInput;
+import mil.dds.anet.test.client.NoteType;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Report;
+import mil.dds.anet.test.client.ReportInput;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.Task;
+import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.integration.utils.TestApp;
-import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.assertj.core.util.Lists;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -39,11 +43,13 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class NoteResourceTest extends AbstractResourceTest {
 
-  private static final String NOTE_FIELDS = "uuid type text author { uuid }"
-      + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }";
-  private static final String NOTES_FIELDS = "notes { " + NOTE_FIELDS + " }";
-  private static final String POSITION_FIELDS = "uuid name type status " + NOTES_FIELDS;
-  private static final String REPORT_FIELDS = "uuid intent state " + NOTES_FIELDS;
+  private static final String NOTE_FIELDS = "{ uuid type text author { uuid }"
+      + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }";
+  private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
+  private static final String POSITION_FIELDS = String.format(
+      "{ uuid name type status organization { uuid } location { uuid } %1$s }", _NOTES_FIELDS);
+  private static final String REPORT_FIELDS =
+      String.format("{ uuid intent state %1$s }", _NOTES_FIELDS);
 
   private static NoteCounterDao noteCounterDao;
 
@@ -54,51 +60,52 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testDeleteDanglingPositionNote() {
+  public void testDeleteDanglingPositionNote()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create test position
-    final Position testPosition = new Position();
-    testPosition.setName("a test position created by testDeleteDanglingPositionNote");
-    testPosition.setType(PositionType.ADVISOR);
-    testPosition.setStatus(Position.Status.INACTIVE);
-    testPosition.setOrganization(admin.getPosition().getOrganization());
-    final String testPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", testPosition, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(testPositionUuid).isNotNull();
+    final PositionInput testPositionInput = PositionInput.builder()
+        .withName("a test position created by testDeleteDanglingPositionNote")
+        .withType(PositionType.ADVISOR).withStatus(Status.INACTIVE)
+        .withOrganization(getOrganizationInput(admin.getPosition().getOrganization()))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
+    final Position testPosition =
+        adminMutationExecutor.createPosition(POSITION_FIELDS, testPositionInput);
+    assertThat(testPosition).isNotNull();
+    assertThat(testPosition.getUuid()).isNotNull();
 
-    final Position createdPosition = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS,
-        testPositionUuid, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(createdPosition.getName()).isEqualTo(testPosition.getName());
+    final Position createdPosition =
+        adminQueryExecutor.position(POSITION_FIELDS, testPosition.getUuid());
+    assertThat(createdPosition.getName()).isEqualTo(testPositionInput.getName());
     assertThat(createdPosition.getNotes()).isEmpty();
 
     // Attach note to test position
-    final Note testNote = new Note();
-    testNote.setType(Note.NoteType.FREE_TEXT);
-    testNote.setText("a position test note created by testDeleteDanglingPositionNote");
-    final NoteRelatedObject testNro = new NoteRelatedObject();
-    testNro.setRelatedObjectType(PositionDao.TABLE_NAME);
-    testNro.setRelatedObjectUuid(testPositionUuid);
-    testNote.setNoteRelatedObjects(Collections.singletonList(testNro));
-    final String createdNoteUuid = graphQLHelper.createObject(admin, "createNote", "note",
-        "NoteInput", testNote, new TypeReference<GraphQlResponse<Note>>() {});
-    assertThat(createdNoteUuid).isNotNull();
+    final NoteRelatedObjectInput testNroInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(PositionDao.TABLE_NAME)
+            .withRelatedObjectUuid(testPosition.getUuid()).build();
+    final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.FREE_TEXT)
+        .withText("a position test note created by testDeleteDanglingPositionNote")
+        .withNoteRelatedObjects(Collections.singletonList(testNroInput)).build();
+    final Note createdNote = adminMutationExecutor.createNote(NOTE_FIELDS, testNoteInput);
+    assertThat(createdNote).isNotNull();
+    assertThat(createdNote.getUuid()).isNotNull();
 
-    final Position updatedPosition = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS,
-        testPositionUuid, new TypeReference<GraphQlResponse<Position>>() {});
+    final Position updatedPosition =
+        adminQueryExecutor.position(POSITION_FIELDS, testPosition.getUuid());
     assertThat(updatedPosition.getNotes()).hasSize(1);
-    final Note createdNote = updatedPosition.getNotes().get(0);
-    assertThat(createdNote.getText()).isEqualTo(testNote.getText());
-    assertThat(createdNote.getNoteRelatedObjects()).hasSize(1);
+    final Note positionNote = updatedPosition.getNotes().get(0);
+    assertThat(positionNote.getText()).isEqualTo(testNoteInput.getText());
+    assertThat(positionNote.getNoteRelatedObjects()).hasSize(1);
 
     // Delete test position
     final int nrNotes = countNotes();
-    final Integer nrDeleted = graphQLHelper.deleteObject(admin, "deletePosition", testPositionUuid);
+    final Integer nrDeleted = adminMutationExecutor.deletePosition("", testPosition.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
     assertThat(nrNotes).isEqualTo(countNotes());
 
     // The note should still be there, try to update it
-    createdNote.setText("a position est note updated by testDeleteDanglingPositionNote");
-    final Note updatedNote = graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS,
-        "NoteInput", createdNote, new TypeReference<GraphQlResponse<Note>>() {});
+    createdNote.setText("a position test note updated by testDeleteDanglingPositionNote");
+    final Note updatedNote =
+        adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(createdNote));
     assertThat(updatedNote).isNotNull();
     assertThat(updatedNote.getText()).isEqualTo(createdNote.getText());
     assertThat(updatedNote.getNoteRelatedObjects()).hasSize(1);
@@ -111,8 +118,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // The note should no longer be there, updating it should fail
     updatedNote.setText("a position test note updated twice by testDeleteDanglingPositionNote");
     try {
-      graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS, "NoteInput", updatedNote,
-          new TypeReference<GraphQlResponse<Note>>() {});
+      adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(updatedNote));
       fail("Expected exception updating deleted note");
     } catch (Exception expected) {
       // OK
@@ -120,49 +126,49 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testDeleteDanglingReportNote() {
+  public void testDeleteDanglingReportNote()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create test report
-    final Report testReport = new Report();
-    testReport.setIntent("a test report created by testDeleteDanglingReportNote");
-    testReport.setReportPeople(Collections.singletonList(PersonTest.personToReportAuthor(admin)));
-    final String testReportUuid = graphQLHelper.createObject(admin, "createReport", "report",
-        "ReportInput", testReport, new TypeReference<GraphQlResponse<Report>>() {});
-    assertThat(testReportUuid).isNotNull();
+    final ReportInput testReportInput =
+        ReportInput.builder().withIntent("a test report created by testDeleteDanglingReportNote")
+            .withReportPeople(
+                getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
+            .build();
+    final Report testReport = adminMutationExecutor.createReport(REPORT_FIELDS, testReportInput);
+    assertThat(testReport).isNotNull();
+    assertThat(testReport.getUuid()).isNotNull();
 
-    final Report createdReport = graphQLHelper.getObjectById(admin, "report", REPORT_FIELDS,
-        testReportUuid, new TypeReference<GraphQlResponse<Report>>() {});
-    assertThat(createdReport.getIntent()).isEqualTo(testReport.getIntent());
+    final Report createdReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
+    assertThat(createdReport.getIntent()).isEqualTo(testReportInput.getIntent());
     assertThat(createdReport.getNotes()).isEmpty();
 
     // Attach note to test report
-    final Note testNote = new Note();
-    testNote.setType(Note.NoteType.FREE_TEXT);
-    testNote.setText("a report test note created by testDeleteDanglingReportNote");
-    final NoteRelatedObject testNro = new NoteRelatedObject();
-    testNro.setRelatedObjectType(ReportDao.TABLE_NAME);
-    testNro.setRelatedObjectUuid(testReportUuid);
-    testNote.setNoteRelatedObjects(Collections.singletonList(testNro));
-    final String createdNoteUuid = graphQLHelper.createObject(admin, "createNote", "note",
-        "NoteInput", testNote, new TypeReference<GraphQlResponse<Note>>() {});
-    assertThat(createdNoteUuid).isNotNull();
+    final NoteRelatedObjectInput testNroInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(ReportDao.TABLE_NAME)
+            .withRelatedObjectUuid(testReport.getUuid()).build();
+    final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.FREE_TEXT)
+        .withText("a report test note created by testDeleteDanglingReportNote")
+        .withNoteRelatedObjects(Collections.singletonList(testNroInput)).build();
+    final Note createdNote = adminMutationExecutor.createNote(NOTE_FIELDS, testNoteInput);
+    assertThat(createdNote).isNotNull();
+    assertThat(createdNote.getUuid()).isNotNull();
 
-    final Report updatedReport = graphQLHelper.getObjectById(admin, "report", REPORT_FIELDS,
-        testReportUuid, new TypeReference<GraphQlResponse<Report>>() {});
+    final Report updatedReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
     assertThat(updatedReport.getNotes()).hasSize(1);
-    final Note createdNote = updatedReport.getNotes().get(0);
-    assertThat(createdNote.getText()).isEqualTo(testNote.getText());
-    assertThat(createdNote.getNoteRelatedObjects()).hasSize(1);
+    final Note reportNote = updatedReport.getNotes().get(0);
+    assertThat(reportNote.getText()).isEqualTo(testNoteInput.getText());
+    assertThat(reportNote.getNoteRelatedObjects()).hasSize(1);
 
     // Delete test report
     final int nrNotes = countNotes();
-    final Integer nrDeleted = graphQLHelper.deleteObject(admin, "deleteReport", testReportUuid);
+    final Integer nrDeleted = adminMutationExecutor.deleteReport("", testReport.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
     assertThat(nrNotes).isEqualTo(countNotes());
 
     // The note should still be there, try to update it
     createdNote.setText("a report test note updated by testDeleteDanglingReportNote");
-    final Note updatedNote = graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS,
-        "NoteInput", createdNote, new TypeReference<GraphQlResponse<Note>>() {});
+    final Note updatedNote =
+        adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(createdNote));
     assertThat(updatedNote).isNotNull();
     assertThat(updatedNote.getText()).isEqualTo(createdNote.getText());
     assertThat(updatedNote.getNoteRelatedObjects()).hasSize(1);
@@ -175,8 +181,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     // The note should no longer be there, updating it should fail
     updatedNote.setText("a report test note updated twice by testDeleteDanglingReportNote");
     try {
-      graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS, "NoteInput", updatedNote,
-          new TypeReference<GraphQlResponse<Note>>() {});
+      adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(updatedNote));
       fail("Expected exception updating deleted note");
     } catch (Exception expected) {
       // OK
@@ -184,63 +189,61 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testDeleteDanglingReportTaskAssessment() {
+  public void testDeleteDanglingReportTaskAssessment()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create test report
-    final Report testReport = new Report();
-    testReport.setIntent("a test report created by testDeleteDanglingReportTaskAssessment");
-    testReport.setReportPeople(Collections.singletonList(PersonTest.personToReportAuthor(admin)));
-    final String testReportUuid = graphQLHelper.createObject(admin, "createReport", "report",
-        "ReportInput", testReport, new TypeReference<GraphQlResponse<Report>>() {});
-    assertThat(testReportUuid).isNotNull();
+    final ReportInput testReportInput =
+        ReportInput.builder()
+            .withIntent("a test report created by testDeleteDanglingReportTaskAssessment")
+            .withReportPeople(
+                getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
+            .build();
+    final Report testReport = adminMutationExecutor.createReport(REPORT_FIELDS, testReportInput);
+    assertThat(testReport).isNotNull();
+    assertThat(testReport.getUuid()).isNotNull();
 
-    final Report createdReport = graphQLHelper.getObjectById(admin, "report", REPORT_FIELDS,
-        testReportUuid, new TypeReference<GraphQlResponse<Report>>() {});
-    assertThat(createdReport.getIntent()).isEqualTo(testReport.getIntent());
+    final Report createdReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
+    assertThat(createdReport.getIntent()).isEqualTo(testReportInput.getIntent());
     assertThat(createdReport.getNotes()).isEmpty();
 
     // Attach task assessment to test report
-    final TaskSearchQuery query = new TaskSearchQuery();
-    query.setText("Budget");
-    final AnetBeanList<Task> tasks =
-        graphQLHelper.searchObjects(admin, "taskList", "query", "TaskSearchQueryInput", "uuid",
-            query, new TypeReference<GraphQlResponse<AnetBeanList<Task>>>() {});
+    final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("Budget").build();
+    final AnetBeanList_Task tasks = adminQueryExecutor.taskList(getListFields("{ uuid }"), query);
     assertThat(tasks).isNotNull();
     assertThat(tasks.getList()).isNotEmpty();
     final Task task = tasks.getList().get(0);
 
-    final Note testNote = new Note();
-    testNote.setType(Note.NoteType.ASSESSMENT);
-    testNote.setText("{\"text\":"
-        + "\"a report test task assessment created by testDeleteDanglingReportTaskAssessment\"}");
-    final NoteRelatedObject testNroReport = new NoteRelatedObject();
-    testNroReport.setRelatedObjectType(ReportDao.TABLE_NAME);
-    testNroReport.setRelatedObjectUuid(testReportUuid);
-    final NoteRelatedObject testNroTask = new NoteRelatedObject();
-    testNroTask.setRelatedObjectType(TaskDao.TABLE_NAME);
-    testNroTask.setRelatedObjectUuid(task.getUuid());
-    testNote.setNoteRelatedObjects(Lists.newArrayList(testNroReport, testNroTask));
-    final String createdNoteUuid = graphQLHelper.createObject(admin, "createNote", "note",
-        "NoteInput", testNote, new TypeReference<GraphQlResponse<Note>>() {});
-    assertThat(createdNoteUuid).isNotNull();
+    final NoteRelatedObjectInput testNroReportInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(ReportDao.TABLE_NAME)
+            .withRelatedObjectUuid(testReport.getUuid()).build();
+    final NoteRelatedObjectInput testNroTaskInput = NoteRelatedObjectInput.builder()
+        .withRelatedObjectType(TaskDao.TABLE_NAME).withRelatedObjectUuid(task.getUuid()).build();
+    final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.ASSESSMENT)
+        .withText("{\"text\":"
+            + "\"a report test task assessment created by testDeleteDanglingReportTaskAssessment\"}")
+        .withNoteRelatedObjects(Lists.newArrayList(testNroReportInput, testNroTaskInput)).build();
 
-    final Report updatedReport = graphQLHelper.getObjectById(admin, "report", REPORT_FIELDS,
-        testReportUuid, new TypeReference<GraphQlResponse<Report>>() {});
+    final Note createdNote = adminMutationExecutor.createNote(NOTE_FIELDS, testNoteInput);
+    assertThat(createdNote).isNotNull();
+    assertThat(createdNote.getUuid()).isNotNull();
+
+    final Report updatedReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
     assertThat(updatedReport.getNotes()).hasSize(1);
-    final Note createdNote = updatedReport.getNotes().get(0);
-    assertThat(createdNote.getText()).isEqualTo(testNote.getText());
-    assertThat(createdNote.getNoteRelatedObjects()).hasSize(2);
+    final Note reportNote = updatedReport.getNotes().get(0);
+    assertThat(reportNote.getText()).isEqualTo(testNoteInput.getText());
+    assertThat(reportNote.getNoteRelatedObjects()).hasSize(2);
 
     // Delete test report
     final int nrNotes = countNotes();
-    final Integer nrDeleted = graphQLHelper.deleteObject(admin, "deleteReport", testReportUuid);
+    final Integer nrDeleted = adminMutationExecutor.deleteReport("", testReport.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
     assertThat(nrNotes).isEqualTo(countNotes());
 
     // The note should still be there, try to update it
     createdNote.setText("{\"text\":"
         + "\"a report test task assessment updated by testDeleteDanglingReportTaskAssessment\"}");
-    final Note updatedNote = graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS,
-        "NoteInput", createdNote, new TypeReference<GraphQlResponse<Note>>() {});
+    final Note updatedNote =
+        adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(createdNote));
     assertThat(updatedNote).isNotNull();
     assertThat(updatedNote.getText()).isEqualTo(createdNote.getText());
     assertThat(updatedNote.getNoteRelatedObjects()).hasSize(2);
@@ -254,8 +257,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     updatedNote.setText("{\"text\":"
         + "\"a report test task assessment updated twice by testDeleteDanglingReportTaskAssessment\"}");
     try {
-      graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS, "NoteInput", updatedNote,
-          new TypeReference<GraphQlResponse<Note>>() {});
+      adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(updatedNote));
       fail("Expected exception updating deleted note");
     } catch (Exception expected) {
       // OK
@@ -263,56 +265,57 @@ public class NoteResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testDeleteDanglingReportAttendeeAssessment() {
+  public void testDeleteDanglingReportAttendeeAssessment()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create test report
-    final Report testReport = new Report();
-    testReport.setIntent("a test report created by testDeleteDanglingReportAttendeeAssessment");
-    testReport.setReportPeople(Collections.singletonList(PersonTest.personToReportAuthor(admin)));
-    final String testReportUuid = graphQLHelper.createObject(admin, "createReport", "report",
-        "ReportInput", testReport, new TypeReference<GraphQlResponse<Report>>() {});
-    assertThat(testReportUuid).isNotNull();
+    final ReportInput testReportInput =
+        ReportInput.builder()
+            .withIntent("a test report created by testDeleteDanglingReportAttendeeAssessment")
+            .withReportPeople(
+                getReportPeopleInput(Collections.singletonList(personToReportAuthor(admin))))
+            .build();
+    final Report testReport = adminMutationExecutor.createReport(REPORT_FIELDS, testReportInput);
+    assertThat(testReport).isNotNull();
+    assertThat(testReport.getUuid()).isNotNull();
 
-    final Report createdReport = graphQLHelper.getObjectById(admin, "report", REPORT_FIELDS,
-        testReportUuid, new TypeReference<GraphQlResponse<Report>>() {});
-    assertThat(createdReport.getIntent()).isEqualTo(testReport.getIntent());
+    final Report createdReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
+    assertThat(createdReport.getIntent()).isEqualTo(testReportInput.getIntent());
     assertThat(createdReport.getNotes()).isEmpty();
 
     // Attach attendee assessment to test report
     final Person attendee = getRogerRogwell();
 
-    final Note testNote = new Note();
-    testNote.setType(Note.NoteType.ASSESSMENT);
-    testNote.setText("{\"text\":"
-        + "\"a report test attendee assessment created by testDeleteDanglingReportAttendeeAssessment\"}");
-    final NoteRelatedObject testNroReport = new NoteRelatedObject();
-    testNroReport.setRelatedObjectType(ReportDao.TABLE_NAME);
-    testNroReport.setRelatedObjectUuid(testReportUuid);
-    final NoteRelatedObject testNroTask = new NoteRelatedObject();
-    testNroTask.setRelatedObjectType(PersonDao.TABLE_NAME);
-    testNroTask.setRelatedObjectUuid(attendee.getUuid());
-    testNote.setNoteRelatedObjects(Lists.newArrayList(testNroReport, testNroTask));
-    final String createdNoteUuid = graphQLHelper.createObject(admin, "createNote", "note",
-        "NoteInput", testNote, new TypeReference<GraphQlResponse<Note>>() {});
-    assertThat(createdNoteUuid).isNotNull();
+    final NoteRelatedObjectInput testNroReportInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(ReportDao.TABLE_NAME)
+            .withRelatedObjectUuid(testReport.getUuid()).build();
+    final NoteRelatedObjectInput testNroTaskInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
+            .withRelatedObjectUuid(attendee.getUuid()).build();
+    final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.ASSESSMENT)
+        .withText("{\"text\":"
+            + "\"a report test attendee assessment created by testDeleteDanglingReportAttendeeAssessment\"}")
+        .withNoteRelatedObjects(Lists.newArrayList(testNroReportInput, testNroTaskInput)).build();
+    final Note createdNote = adminMutationExecutor.createNote(NOTE_FIELDS, testNoteInput);
+    assertThat(createdNote).isNotNull();
+    assertThat(createdNote.getUuid()).isNotNull();
 
-    final Report updatedReport = graphQLHelper.getObjectById(admin, "report", REPORT_FIELDS,
-        testReportUuid, new TypeReference<GraphQlResponse<Report>>() {});
+    final Report updatedReport = adminQueryExecutor.report(REPORT_FIELDS, testReport.getUuid());
     assertThat(updatedReport.getNotes()).hasSize(1);
-    final Note createdNote = updatedReport.getNotes().get(0);
-    assertThat(createdNote.getText()).isEqualTo(testNote.getText());
-    assertThat(createdNote.getNoteRelatedObjects()).hasSize(2);
+    final Note reportNote = updatedReport.getNotes().get(0);
+    assertThat(reportNote.getText()).isEqualTo(testNoteInput.getText());
+    assertThat(reportNote.getNoteRelatedObjects()).hasSize(2);
 
     // Delete test report
     final int nrNotes = countNotes();
-    final Integer nrDeleted = graphQLHelper.deleteObject(admin, "deleteReport", testReportUuid);
+    final Integer nrDeleted = adminMutationExecutor.deleteReport("", testReport.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
     assertThat(nrNotes).isEqualTo(countNotes());
 
     // The note should still be there, try to update it
     createdNote.setText("{\"text\":"
         + "\"a report test attendee assessment updated by testDeleteDanglingReportAttendeeAssessment\"}");
-    final Note updatedNote = graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS,
-        "NoteInput", createdNote, new TypeReference<GraphQlResponse<Note>>() {});
+    final Note updatedNote =
+        adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(createdNote));
     assertThat(updatedNote).isNotNull();
     assertThat(updatedNote.getText()).isEqualTo(createdNote.getText());
     assertThat(updatedNote.getNoteRelatedObjects()).hasSize(2);
@@ -326,8 +329,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     updatedNote.setText("{\"text\":"
         + "\"a report test attendee assessment updated twice by testDeleteDanglingReportAttendeeAssessment\"}");
     try {
-      graphQLHelper.updateObject(admin, "updateNote", "note", NOTE_FIELDS, "NoteInput", updatedNote,
-          new TypeReference<GraphQlResponse<Note>>() {});
+      adminMutationExecutor.updateNote(NOTE_FIELDS, getNoteInput(updatedNote));
       fail("Expected exception updating deleted note");
     } catch (Exception expected) {
       // OK

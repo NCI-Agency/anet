@@ -28,6 +28,7 @@ import {
 } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 import { RECURSE_STRATEGY } from "searchUtils"
+import Settings from "settings"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
@@ -35,6 +36,7 @@ const GQL_DELETE_PERSON_FROM_POSITION = gql`
     deletePersonFromPosition(uuid: $uuid)
   }
 `
+
 const GQL_PUT_PERSON_IN_POSITION = gql`
   mutation($uuid: String!, $person: PersonInput!) {
     putPersonInPosition(uuid: $uuid, person: $person)
@@ -53,6 +55,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
   const [error, setError] = useState(null)
   const [position, setPosition] = useState(person && person.position)
   const [doSave, setDoSave] = useState(false)
+  const [removeUser, setRemoveUser] = useState(false)
 
   const save = useCallback(() => {
     let graphql, variables
@@ -101,12 +104,80 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
           This position is currently held by{" "}
           <LinkTo modelType="Person" model={position.person} />. By selecting
           this position, they will be removed.
+          {person.position.type !== position.type ? (
+            <>
+              {" "}
+              Permissions of the <b>{position.name}</b> position will be
+              converted from <b>{Position.convertType(position.type)}</b> to{" "}
+              <b>{Position.convertType(person.position.type)}</b>.
+              {person.position.type !== Position.TYPE.ADVISOR && (
+                <>
+                  {" "}
+                  Furthermore, permissions of the
+                  <b>{person.position.name}</b> position will be converted from{" "}
+                  <b>{Position.convertType(person.position.type)}</b> to{" "}
+                  <b>{Settings.fields.advisor.position.type}</b>.
+                </>
+              )}
+            </>
+          ) : (
+            person.position.type !== Position.TYPE.ADVISOR &&
+            person.position.type !== Position.TYPE.PRINCIPAL && (
+              <>
+                {" "}
+                Permissions of the <b>{person.position.name}</b> position will
+                be converted from{" "}
+                <b>{Position.convertType(person.position.type)}</b> to{" "}
+                <b>{Settings.fields.advisor.position.type}</b>.
+              </>
+            )
+          )}
+        </>
+      )
+      newError = { message: errorMessage }
+    } else if (
+      position !== null &&
+      position.name !== person.position.name &&
+      _isEmpty(position.person) &&
+      !_isEmpty(person.position) &&
+      person.position.type !== Position.TYPE.ADVISOR &&
+      person.position.type !== Position.TYPE.PRINCIPAL
+    ) {
+      const errorMessage = (
+        <>
+          Permissions of the <b>{person.position.name}</b> position will be
+          converted from <b>{Position.convertType(person.position.type)}</b> to{" "}
+          <b>{Settings.fields.advisor.position.type}</b>
+          {person.position.type !== Position.TYPE.ADVISOR ? (
+            <>
+              {" "}
+              and permissions of the <b>{position.name}</b> position will be
+              converted to <b>{Position.convertType(person.position.type)}</b>.
+            </>
+          ) : (
+            <>.</>
+          )}
+        </>
+      )
+      newError = { message: errorMessage }
+    } else if (
+      !Position.isAdvisor(latestPersonProp.current.position) &&
+      !Position.isPrincipal(latestPersonProp.current.position) &&
+      !_isEmpty(person.position) &&
+      (removeUser || !position)
+    ) {
+      const errorMessage = (
+        <>
+          If you save, permissions of the <b>{person.position.name}</b> position
+          will be converted from{" "}
+          <b>{Position.convertType(person.position.type)}</b> to{" "}
+          <b>{Settings.fields.advisor.position.type}</b>.
         </>
       )
       newError = { message: errorMessage }
     }
     setError(newError)
-  }, [position, person.uuid])
+  }, [position, person, removeUser])
 
   const newPosition = position ? new Position(position) : new Position()
 
@@ -146,85 +217,123 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       <Modal.Body>
         {person.position.uuid && (
           <div style={{ textAlign: "center" }}>
-            <Button
-              bsStyle="danger"
-              onClick={() => {
-                setPosition(null)
-                setDoSave(true)
-              }}
-              className="remove-person-from-position"
-            >
-              Remove <LinkTo modelType="Person" model={person} isLink={false} />{" "}
-              from{" "}
-              <LinkTo
-                modelType="Position"
-                model={person.position}
-                isLink={false}
-              />
-            </Button>
-            <hr className="assignModalSplit" />
+            {!removeUser && (
+              <>
+                <Button
+                  bsStyle="danger"
+                  onClick={() => {
+                    if (
+                      Position.isAdvisor(latestPersonProp.current.position) ||
+                      Position.isPrincipal(latestPersonProp.current.position)
+                    ) {
+                      setPosition(null)
+                      setDoSave(true)
+                    } else {
+                      setRemoveUser(true)
+                      setPosition(person.position)
+                    }
+                  }}
+                  className="remove-person-from-position"
+                >
+                  Remove{" "}
+                  <LinkTo modelType="Person" model={person} isLink={false} />{" "}
+                  from{" "}
+                  <LinkTo
+                    modelType="Position"
+                    model={person.position}
+                    isLink={false}
+                  />
+                </Button>
+                <hr className="assignModalSplit" />
+              </>
+            )}
+            {removeUser && <Messages error={error} />}
           </div>
         )}
-        <Grid fluid>
-          <Row>
-            <Col md={12}>
-              <FormGroup controlId="position">
-                <AdvancedSingleSelect
-                  fieldName="position"
-                  fieldLabel="Select a position"
-                  placeholder="Select a position for this person"
-                  value={position}
-                  overlayColumns={[
-                    "Position",
-                    "Organization",
-                    "Current Occupant"
-                  ]}
-                  overlayRenderRow={PositionOverlayRow}
-                  filterDefs={positionsFilters}
-                  onChange={value => setPosition(value)}
-                  objectType={Position}
-                  valueKey="name"
-                  fields="uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role, avatar(size: 32) }"
-                  addon={POSITIONS_ICON}
-                  vertical
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          {newPosition.uuid && (
-            <Table striped condensed hover responsive>
-              <thead>
-                <tr>
-                  <th>Organization</th>
-                  <th>Type</th>
-                  <th>Current Person</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{newPosition.organization.shortName}</td>
-                  <td>{newPosition.humanNameOfType()}</td>
-                  <td>
-                    {newPosition.person ? (
-                      newPosition.person.name
-                    ) : newPosition.uuid === person.position.uuid ? (
-                      person.name
-                    ) : (
-                      <i>Unfilled</i>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          )}
-          <Messages error={error} />
-        </Grid>
+        {!removeUser && (
+          <Grid fluid>
+            <Row>
+              <Col md={12}>
+                <FormGroup controlId="position">
+                  <AdvancedSingleSelect
+                    fieldName="position"
+                    fieldLabel="Select a position"
+                    placeholder="Select a position for this person"
+                    value={position}
+                    overlayColumns={[
+                      "Position",
+                      "Organization",
+                      "Current Occupant"
+                    ]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
+                    onChange={value => setPosition(value)}
+                    objectType={Position}
+                    valueKey="name"
+                    fields="uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatar(size: 32) }"
+                    addon={POSITIONS_ICON}
+                    vertical
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            {newPosition.uuid && (
+              <Table striped condensed hover responsive>
+                <thead>
+                  <tr>
+                    <th>Organization</th>
+                    <th>Type</th>
+                    <th>Current Person</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{newPosition.organization.shortName}</td>
+                    <td>{newPosition.humanNameOfType()}</td>
+                    <td>
+                      {newPosition.person ? (
+                        newPosition.person.name
+                      ) : newPosition.uuid === person.position.uuid ? (
+                        person.name
+                      ) : (
+                        <i>Unfilled</i>
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            )}
+            {<Messages error={error} />}
+          </Grid>
+        )}
       </Modal.Body>
       <Modal.Footer>
-        <Button className="pull-left" onClick={closeModal}>
+        <Button
+          className="pull-left"
+          onClick={() => {
+            removeUser ? setRemoveUser(false) : closeModal()
+          }}
+        >
           Cancel
         </Button>
-        <Button onClick={save} bsStyle="primary">
+        <Button
+          onClick={() => {
+            if (removeUser || !position) {
+              setPosition(null)
+              setDoSave(true)
+            } else if (
+              position.person !== undefined &&
+              position.person !== null &&
+              position.person !== latestPersonProp.current.name
+            ) {
+              setDoSave(true)
+            } else {
+              closeModal()
+            }
+            setRemoveUser(false)
+          }}
+          bsStyle="primary"
+        >
           Save
         </Button>
       </Modal.Footer>
@@ -234,6 +343,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
   function closeModal() {
     // Reset state before closing (cancel)
     setPosition(person.position)
+    setRemoveUser(false)
     onCancel()
   }
 }

@@ -19,6 +19,30 @@ class CreateNewLocation extends Page {
     return this.form.$("input#name")
   }
 
+  get typeRequiredError() {
+    return browser.$('//span[contains(text(),"type is a required field")]')
+  }
+
+  get typeField() {
+    return this.form.$("select.location-type-form-group")
+  }
+
+  get duplicatesButton() {
+    return browser.$('//button[text()="Possible Duplicates"]')
+  }
+
+  get modalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  get modalCloseButton() {
+    return this.modalContent.$("button.close")
+  }
+
+  get similarLocation() {
+    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  }
+
   get latField() {
     return this.form.$("input#lat")
   }

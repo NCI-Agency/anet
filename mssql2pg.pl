@@ -20,7 +20,7 @@ s/^(?=(SET|DECLARE))/-- /;
 # Eliminate the weird "[key]" column naming
 s/\[key\]/key/g;
 # Quote mixed-case column and table names
-s/(?<![":-])\b([a-z]\w+[A-Z]\w+)/"$1"/g;
+s/(?<!['":-])\b([a-z]\w+[A-Z]\w+)/"$1"/g;
 # Turn a couple very specific 1/0 booleans into true/false booleans
 # This one is for "isAuthor" in "reportPeople"
 s/(?<=\Q:reportuuid, \E[10]\Q, \E)([10])/$1 ? 'TRUE' : 'FALSE'/ie;

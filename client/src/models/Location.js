@@ -25,6 +25,28 @@ export default class Location extends Model {
     Settings.fields.location.customFields
   )
 
+  static LOCATION_FORMATS = {
+    LAT_LON: "LAT_LON",
+    MGRS: "MGRS"
+  }
+
+  static LOCATION_FORMAT_LABELS = {
+    [Location.LOCATION_FORMATS.LAT_LON]: "Latitude, Longitude",
+    [Location.LOCATION_FORMATS.MGRS]: "Military Grid Reference System (MGRS)"
+  }
+
+  static locationFormat =
+    Settings.fields.location.format || Location.LOCATION_FORMATS.LAT_LON
+
+  static LOCATION_TYPES = {
+    PHYSICAL_LOCATION: "PHYSICAL_LOCATION",
+    GEOGRAPHICAL_AREA: "GEOGRAPHICAL_AREA",
+    PINPOINT_LOCATION: "PINPOINT_LOCATION",
+    ADVISOR_LOCATION: "ADVISOR_LOCATION",
+    PRINCIPAL_LOCATION: "PRINCIPAL_LOCATION",
+    VIRTUAL_LOCATION: "VIRTUAL_LOCATION"
+  }
+
   static yupSchema = yup
     .object()
     .shape({
@@ -33,6 +55,7 @@ export default class Location extends Model {
         .string()
         .required()
         .default(() => Model.STATUS.ACTIVE),
+      type: yup.string().required().default(""),
       lat: yup
         .number()
         .nullable()
@@ -69,7 +92,7 @@ export default class Location extends Model {
             if (_isEmpty(displayedCoordinate)) {
               return true
             }
-            if (Settings?.fields?.location?.format === "MGRS") {
+            if (Location.locationFormat === Location.LOCATION_FORMATS.MGRS) {
               const latLngValue = convertMGRSToLatLng(displayedCoordinate)
               return !latLngValue[0] || !latLngValue[1]
                 ? this.createError({
@@ -130,9 +153,50 @@ export default class Location extends Model {
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid, name"
+  static autocompleteQuery = "uuid, name, type"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
+
+  static allFieldsQuery = `
+    uuid
+    name
+    type
+    lat
+    lng
+    status
+    planningApprovalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+    }
+    approvalSteps {
+      uuid
+      name
+      approvers {
+        uuid
+        name
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
+    }
+    customFields
+    ${GRAPHQL_NOTES_FIELDS}
+  `
 
   static hasCoordinates(location) {
     return (
@@ -142,8 +206,16 @@ export default class Location extends Model {
     )
   }
 
+  static isActive(loc) {
+    return loc.status === Location.STATUS.ACTIVE
+  }
+
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
+  }
+
+  static humanNameOfType(type) {
+    return utils.sentenceCase(type)
   }
 
   constructor(props) {
@@ -163,5 +235,19 @@ export default class Location extends Model {
       return `${this.name} ${coordinate}`
     }
     return this.name
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = ["displayedCoordinate"]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Location.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Location.filterClientSideFields(this, ...additionalFields)
   }
 }

@@ -8,26 +8,21 @@
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["*"],
+      "matchPackagePatterns": ["*"],
       "minor": {
         "groupName": "most non-major dependencies",
         "groupSlug": "most-minor-patch"
       }
     },
     {
-      "packageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
+      "matchPackageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
       "allowedVersions": "/^.*\\.jre8$/"
     },
     {
-      "packageNames": [
-        "autoprefixer",
+      "matchPackageNames": [
         "com.networknt:json-schema-validator",
-        "draft-js",
-        "io.leangen.graphql:spqr",
-        "leaflet",
-        "yup"
+        "draft-js"
       ],
-      "packagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],

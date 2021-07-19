@@ -3,409 +3,369 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
-import java.io.UnsupportedEncodingException;
+import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
+import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.time.Instant;
 import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
-import mil.dds.anet.beans.ApprovalStep;
-import mil.dds.anet.beans.ApprovalStep.ApprovalStepType;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.beans.search.OrganizationSearchQuery;
-import mil.dds.anet.test.beans.OrganizationTest;
-import mil.dds.anet.test.beans.PositionTest;
-import mil.dds.anet.test.resources.utils.GraphQlResponse;
+import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.client.AnetBeanList_Organization;
+import mil.dds.anet.test.client.ApprovalStep;
+import mil.dds.anet.test.client.ApprovalStepInput;
+import mil.dds.anet.test.client.ApprovalStepType;
+import mil.dds.anet.test.client.Organization;
+import mil.dds.anet.test.client.OrganizationInput;
+import mil.dds.anet.test.client.OrganizationSearchQueryInput;
+import mil.dds.anet.test.client.OrganizationType;
+import mil.dds.anet.test.client.Person;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.Task;
+import mil.dds.anet.test.client.TaskInput;
+import mil.dds.anet.test.client.util.MutationExecutor;
 import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
-  private static final String FIELDS = "uuid shortName longName status identificationCode type";
+  private static final String FIELDS = "{ uuid shortName longName status identificationCode type "
+      + "tasks { uuid } approvalSteps { uuid name approvers { uuid } } }";
   private static final String POSITION_FIELDS =
-      "uuid name code type status organization { uuid } location { uuid }";
+      "{ uuid name code type status organization { uuid } location { uuid } }";
 
   @Test
-  public void createAO() {
-    final Organization ao = OrganizationTest.getTestAO(true);
-    final Person jack = getJackJackson();
-
+  public void createAO()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a new AO
-    final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(aoUuid).isNotNull();
-    final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoUuid,
-        new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao.getShortName()).isEqualTo(created.getShortName());
-    assertThat(ao.getLongName()).isEqualTo(created.getLongName());
-    assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
+    final OrganizationInput aoInput = TestData.createAdvisorOrganizationInput(true);
+    final Organization created = adminMutationExecutor.createOrganization(FIELDS, aoInput);
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(aoInput.getShortName()).isEqualTo(created.getShortName());
+    assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
+    assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
 
     // update name of the AO
     created.setLongName("Ao McAoFace");
-    Integer nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
-        "OrganizationInput", created);
+    Integer nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(created));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify the AO name is updated.
-    Organization updated = graphQLHelper.getObjectById(jack, "organization", FIELDS,
-        created.getUuid(), new TypeReference<GraphQlResponse<Organization>>() {});
+    Organization updated = adminQueryExecutor.organization(FIELDS, created.getUuid());
     assertThat(updated.getLongName()).isEqualTo(created.getLongName());
 
     // Create a position and put it in this AO
-    Position b1 = PositionTest.getTestAdvisor();
-    b1.setOrganization(updated);
-    b1.setCode(b1.getCode() + "_" + Instant.now().toEpochMilli());
-    final String b1Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", b1, new TypeReference<GraphQlResponse<Position>>() {});
-    assertThat(b1Uuid).isNotNull();
-    b1 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1Uuid,
-        new TypeReference<GraphQlResponse<Position>>() {});
+    final PositionInput b1Input = getPositionInput(TestData.getTestAdvisor());
+    b1Input.setOrganization(getOrganizationInput(updated));
+    b1Input.setLocation(getLocationInput(getGeneralHospital()));
+    b1Input.setCode(b1Input.getCode() + "_" + Instant.now().toEpochMilli());
+    final Position createdPos = adminMutationExecutor.createPosition(POSITION_FIELDS, b1Input);
+    assertThat(createdPos).isNotNull();
+    assertThat(createdPos.getUuid()).isNotNull();
+    final Position b1 = adminQueryExecutor.position(POSITION_FIELDS, createdPos.getUuid());
     assertThat(b1.getUuid()).isNotNull();
-    assertThat(b1.getOrganizationUuid()).isEqualTo(updated.getUuid());
+    assertThat(b1.getOrganization().getUuid()).isEqualTo(updated.getUuid());
 
     b1.setOrganization(updated);
-    nrUpdated =
-        graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", b1);
+    nrUpdated = adminMutationExecutor.updatePosition("", getPositionInput(b1));
     assertThat(nrUpdated).isEqualTo(1);
 
-    Position ret = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1.getUuid(),
-        new TypeReference<GraphQlResponse<Position>>() {});
+    final Position ret = adminQueryExecutor.position(POSITION_FIELDS, createdPos.getUuid());
     assertThat(ret.getOrganization()).isNotNull();
-    assertThat(ret.getOrganizationUuid()).isEqualTo(updated.getUuid());
+    assertThat(ret.getOrganization().getUuid()).isEqualTo(updated.getUuid());
 
     // Create a child organizations
-    Organization child = new Organization();
-    child.setParentOrg(createOrganizationWithUuid(created.getUuid()));
-    child.setShortName("AO McChild");
-    child.setLongName("Child McAo");
-    child.setStatus(Organization.Status.ACTIVE);
-    child.setType(OrganizationType.ADVISOR_ORG);
-    final String childUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", child, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(childUuid).isNotNull();
-    child = graphQLHelper.getObjectById(admin, "organization", FIELDS, childUuid,
-        new TypeReference<GraphQlResponse<Organization>>() {});
+    final OrganizationInput childInput =
+        OrganizationInput.builder().withParentOrg(getOrganizationInput(created))
+            .withShortName("AO McChild").withLongName("Child McAo").withStatus(Status.ACTIVE)
+            .withType(OrganizationType.ADVISOR_ORG).build();
+    final Organization child = adminMutationExecutor.createOrganization(FIELDS, childInput);
+    assertThat(child).isNotNull();
     assertThat(child.getUuid()).isNotNull();
 
-    OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setParentOrgUuid(ImmutableList.of(created.getUuid()));
-    final AnetBeanList<Organization> children = graphQLHelper.searchObjects(admin,
-        "organizationList", "query", "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
-    assertThat(children.getList()).hasSize(1).contains(child);
+    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
+        .withParentOrgUuid(ImmutableList.of(created.getUuid())).build();
+    final AnetBeanList_Organization children =
+        adminQueryExecutor.organizationList(getListFields(FIELDS), query);
+    assertThat(children.getList()).hasSize(1);
+    assertThat(children.getList().get(0).getUuid()).isEqualTo(child.getUuid());
 
     // Give this Org some Approval Steps
-    ApprovalStep step1 = new ApprovalStep();
-    step1.setName("First Approvers");
-    step1.setType(ApprovalStepType.REPORT_APPROVAL);
-    step1.setApprovers(ImmutableList.of(b1));
-    child.setApprovalSteps(ImmutableList.of(step1));
-    nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
-        "OrganizationInput", child);
+    final ApprovalStepInput step1Input = ApprovalStepInput.builder().withName("First Approvers")
+        .withType(ApprovalStepType.REPORT_APPROVAL)
+        .withApprovers(getPositionsInput(ImmutableList.of(b1))).build();
+    final OrganizationInput childInput1 = getOrganizationInput(child);
+    childInput1.setApprovalSteps(ImmutableList.of(step1Input));
+    nrUpdated = adminMutationExecutor.updateOrganization("", childInput1);
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify approval step was saved.
-    updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
-        new TypeReference<GraphQlResponse<Organization>>() {});
-    List<ApprovalStep> returnedSteps = updated.loadApprovalSteps(context).join();
+    updated = adminQueryExecutor.organization(FIELDS, childInput1.getUuid());
+    List<ApprovalStep> returnedSteps = updated.getApprovalSteps();
     assertThat(returnedSteps.size()).isEqualTo(1);
-    assertThat(returnedSteps.get(0).loadApprovers(context).join()).contains(b1);
+    assertThat(returnedSteps.get(0).getApprovers()).anyMatch(a -> a.getUuid().equals(b1.getUuid()));
 
     // Give this org a Task
-    Task task = new Task();
-    task.setShortName("TST POM1");
-    task.setLongName("Verify that you can update Tasks on a Organization");
-    task.setStatus(Task.Status.ACTIVE);
-    final String taskUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-        task, new TypeReference<GraphQlResponse<Task>>() {});
-    assertThat(taskUuid).isNotNull();
-    task = graphQLHelper.getObjectById(admin, "task", "uuid shortName longName status", taskUuid,
-        new TypeReference<GraphQlResponse<Task>>() {});
+    final TaskInput taskInput = TaskInput.builder().withShortName("TST POM1")
+        .withLongName("Verify that you can update Tasks on a Organization")
+        .withStatus(Status.ACTIVE).build();
+    final Task createdTask = adminMutationExecutor.createTask("{ uuid }", taskInput);
+    assertThat(createdTask).isNotNull();
+    assertThat(createdTask.getUuid()).isNotNull();
+    final Task task =
+        adminQueryExecutor.task("{ uuid shortName longName status }", createdTask.getUuid());
+    assertThat(task).isNotNull();
     assertThat(task.getUuid()).isNotNull();
 
-    child.setTasks(ImmutableList.of(task));
-    child.setApprovalSteps(null);
-    nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
-        "OrganizationInput", child);
+    final OrganizationInput childInput2 = getOrganizationInput(updated);
+    childInput2.setTasks(ImmutableList.of(getTaskInput(task)));
+    childInput2.setApprovalSteps(null);
+    nrUpdated = adminMutationExecutor.updateOrganization("", childInput2);
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify task was saved.
-    updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
-        new TypeReference<GraphQlResponse<Organization>>() {});
-    final List<Task> tasks = updated.loadTasks(context).join();
+    updated = jackQueryExecutor.organization(FIELDS, childInput2.getUuid());
+    final List<Task> tasks = updated.getTasks();
     assertThat(tasks).isNotNull();
     assertThat(tasks.size()).isEqualTo(1);
     assertThat(tasks.get(0).getUuid()).isEqualTo(task.getUuid());
 
     // Change the approval steps.
-    step1.setApprovers(ImmutableList.of(admin.loadPosition()));
-    ApprovalStep step2 = new ApprovalStep();
-    step2.setName("Final Reviewers");
-    step2.setType(ApprovalStepType.REPORT_APPROVAL);
-    step2.setApprovers(ImmutableList.of(b1));
-    child.setApprovalSteps(ImmutableList.of(step1, step2));
-    child.setTasks(null);
-    nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
-        "OrganizationInput", child);
+    step1Input.setApprovers(ImmutableList.of(getPositionInput(admin.getPosition())));
+    final ApprovalStepInput step2Input = ApprovalStepInput.builder().withName("Final Reviewers")
+        .withType(ApprovalStepType.REPORT_APPROVAL)
+        .withApprovers(ImmutableList.of(getPositionInput(b1))).build();
+    childInput2.setApprovalSteps(ImmutableList.of(step1Input, step2Input));
+    childInput2.setTasks(null);
+    nrUpdated = adminMutationExecutor.updateOrganization("", childInput2);
     assertThat(nrUpdated).isEqualTo(1);
 
     // Verify approval steps updated correct.
-    updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(),
-        new TypeReference<GraphQlResponse<Organization>>() {});
-    returnedSteps = updated.loadApprovalSteps(context).join();
+    updated = jackQueryExecutor.organization(FIELDS, childInput2.getUuid());
+    returnedSteps = updated.getApprovalSteps();
     assertThat(returnedSteps.size()).isEqualTo(2);
-    assertThat(returnedSteps.get(0).getName()).isEqualTo(step1.getName());
-    assertThat(returnedSteps.get(0).loadApprovers(context).join())
-        .containsExactly(admin.loadPosition());
-    assertThat(returnedSteps.get(1).loadApprovers(context).join()).containsExactly(b1);
-
+    assertThat(returnedSteps.get(0).getName()).isEqualTo(step1Input.getName());
+    assertThat(returnedSteps.get(0).getApprovers())
+        .allMatch(a -> a.getUuid().equals(admin.getPosition().getUuid()));
+    assertThat(returnedSteps.get(1).getApprovers()).allMatch(a -> a.getUuid().equals(b1.getUuid()));
   }
 
   @Test
-  public void createDuplicateAO() {
+  public void createDuplicateAO()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a new AO
-    final Organization ao = OrganizationTest.getTestAO(true);
-    final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(aoUuid).isNotNull();
-    final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoUuid,
-        new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao.getShortName()).isEqualTo(created.getShortName());
-    assertThat(ao.getLongName()).isEqualTo(created.getLongName());
-    assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
+    final OrganizationInput aoInput = TestData.createAdvisorOrganizationInput(true);
+    final Organization created = adminMutationExecutor.createOrganization(FIELDS, aoInput);
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(aoInput.getShortName()).isEqualTo(created.getShortName());
+    assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
+    assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
 
     // Trying to create another AO with the same identificationCode should fail
     try {
-      graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
-          ao, new TypeReference<GraphQlResponse<Organization>>() {});
+      adminMutationExecutor.createOrganization(FIELDS, aoInput);
       fail("Expected ClientErrorException");
     } catch (ClientErrorException expectedException) {
     }
   }
 
   @Test
-  public void updateDuplicateAO() {
+  public void updateDuplicateAO()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a new AO
-    final Organization ao1 = OrganizationTest.getTestAO(true);
-    final String ao1Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1Uuid).isNotNull();
-    final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao1Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
-    assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
-    assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
+    final OrganizationInput ao1Input = TestData.createAdvisorOrganizationInput(true);
+    final Organization created1 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
+    assertThat(created1).isNotNull();
+    assertThat(created1.getUuid()).isNotNull();
+    assertThat(ao1Input.getShortName()).isEqualTo(created1.getShortName());
+    assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
+    assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
 
     // Create another new AO
-    final Organization ao2 = OrganizationTest.getTestAO(true);
-    final String ao2Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao2, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao2Uuid).isNotNull();
-    final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao2Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao2.getShortName()).isEqualTo(created2.getShortName());
-    assertThat(ao2.getLongName()).isEqualTo(created2.getLongName());
-    assertThat(ao2.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
+    final OrganizationInput ao2Input = TestData.createAdvisorOrganizationInput(true);
+    final Organization created2 = adminMutationExecutor.createOrganization(FIELDS, ao2Input);
+    assertThat(created2).isNotNull();
+    assertThat(created2.getUuid()).isNotNull();
+    assertThat(ao2Input.getShortName()).isEqualTo(created2.getShortName());
+    assertThat(ao2Input.getLongName()).isEqualTo(created2.getLongName());
+    assertThat(ao2Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
 
     // Trying to update AO2 with the same identificationCode as AO1 should fail
-    created2.setIdentificationCode(ao1.getIdentificationCode());
+    created2.setIdentificationCode(created1.getIdentificationCode());
     try {
-      graphQLHelper.updateObject(admin, "updateOrganization", "organization", "OrganizationInput",
-          created2);
+      adminMutationExecutor.updateOrganization("", getOrganizationInput(created2));
       fail("Expected ClientErrorException");
     } catch (ClientErrorException expectedException) {
     }
   }
 
   @Test
-  public void createEmptyDuplicateAO() {
+  public void createEmptyDuplicateAO()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a new AO with NULL identificationCode
-    final Organization ao1 = OrganizationTest.getTestAO(false);
-    final String ao1Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1Uuid).isNotNull();
-    final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao1Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
-    assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
-    assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
+    final OrganizationInput ao1Input = TestData.createAdvisorOrganizationInput(false);
+    final Organization created1 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
+    assertThat(created1).isNotNull();
+    assertThat(created1.getUuid()).isNotNull();
+    assertThat(ao1Input.getShortName()).isEqualTo(created1.getShortName());
+    assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
+    assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
 
     // Creating another AO with NULL identificationCode should succeed
-    final String ao2Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao2Uuid).isNotNull();
-    final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao2Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1.getShortName()).isEqualTo(created2.getShortName());
-    assertThat(ao1.getLongName()).isEqualTo(created2.getLongName());
-    assertThat(ao1.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
+    final Organization created2 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
+    assertThat(created2).isNotNull();
+    assertThat(created2.getUuid()).isNotNull();
+    assertThat(ao1Input.getShortName()).isEqualTo(created2.getShortName());
+    assertThat(ao1Input.getLongName()).isEqualTo(created2.getLongName());
+    assertThat(ao1Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
 
     // Creating an AO with empty identificationCode should succeed
-    ao1.setIdentificationCode("");
-    final String ao3Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao3Uuid).isNotNull();
-    final Organization created3 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao3Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1.getShortName()).isEqualTo(created3.getShortName());
-    assertThat(ao1.getLongName()).isEqualTo(created3.getLongName());
-    assertThat(ao1.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
+    ao1Input.setIdentificationCode("");
+    final Organization created3 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
+    assertThat(created3).isNotNull();
+    assertThat(created3.getUuid()).isNotNull();
+    assertThat(ao1Input.getShortName()).isEqualTo(created3.getShortName());
+    assertThat(ao1Input.getLongName()).isEqualTo(created3.getLongName());
+    assertThat(ao1Input.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
 
     // Creating another AO with empty identificationCode should succeed
-    final String ao4Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao1, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao4Uuid).isNotNull();
-    final Organization created4 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao4Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao1.getShortName()).isEqualTo(created4.getShortName());
-    assertThat(ao1.getLongName()).isEqualTo(created4.getLongName());
-    assertThat(ao1.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
+    final Organization created4 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
+    assertThat(created4).isNotNull();
+    assertThat(created4.getUuid()).isNotNull();
+    assertThat(ao1Input.getShortName()).isEqualTo(created4.getShortName());
+    assertThat(ao1Input.getLongName()).isEqualTo(created4.getLongName());
+    assertThat(ao1Input.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
 
     // Create a new AO with non-NULL identificationCode
-    final Organization ao2 = OrganizationTest.getTestAO(true);
-    final String ao5Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
-        "OrganizationInput", ao2, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao5Uuid).isNotNull();
-    final Organization created5 = graphQLHelper.getObjectById(admin, "organization", FIELDS,
-        ao5Uuid, new TypeReference<GraphQlResponse<Organization>>() {});
-    assertThat(ao2.getShortName()).isEqualTo(created5.getShortName());
-    assertThat(ao2.getLongName()).isEqualTo(created5.getLongName());
-    assertThat(ao2.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
+    final OrganizationInput ao5Input = TestData.createAdvisorOrganizationInput(true);
+    final Organization created5 = adminMutationExecutor.createOrganization(FIELDS, ao5Input);
+    assertThat(created5).isNotNull();
+    assertThat(created5.getUuid()).isNotNull();
+    assertThat(ao5Input.getShortName()).isEqualTo(created5.getShortName());
+    assertThat(ao5Input.getLongName()).isEqualTo(created5.getLongName());
+    assertThat(ao5Input.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
 
     // Updating this AO with empty identificationCode should succeed
     created5.setIdentificationCode("");
-    Integer nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
-        "OrganizationInput", created5);
+    Integer nrUpdated =
+        adminMutationExecutor.updateOrganization("", getOrganizationInput(created5));
     assertThat(nrUpdated).isEqualTo(1);
 
     // Updating this AO with NULL identificationCode should succeed
     created5.setIdentificationCode(null);
-    nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization",
-        "OrganizationInput", created5);
+    nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(created5));
     assertThat(nrUpdated).isEqualTo(1);
   }
 
   @Test
-  public void searchTest() {
-    Person jack = getJackJackson();
-
+  public void searchTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Search by name
-    OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setText("Ministry");
-    AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    final OrganizationSearchQueryInput query =
+        OrganizationSearchQueryInput.builder().withText("Ministry").build();
+    AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList()).isNotEmpty();
 
     // Search by name and type
     query.setType(OrganizationType.ADVISOR_ORG);
-    orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList()).isEmpty(); // Should be empty!
 
     query.setType(OrganizationType.PRINCIPAL_ORG);
-    orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList()).isNotEmpty();
 
     // Autocomplete puts the star in, verify that works.
     query.setText("EF 2*");
     query.setType(null);
-    orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2")).count())
         .isEqualTo(1);
 
     query.setText("EF 2.2*");
-    orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2.2")).count())
         .isEqualTo(1);
 
     query.setText("MOD-F");
-    orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("MOD-F")).count())
         .isEqualTo(1);
 
     query.setText("MOD-F*");
-    orgs = graphQLHelper.searchObjects(jack, "organizationList", "query",
-        "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("MOD-F")).count())
         .isEqualTo(1);
   }
 
   @Test
-  public void searchNoPaginationTest() {
-    final OrganizationSearchQuery query = new OrganizationSearchQuery();
-    query.setText("EF");
-    query.setPageSize(1);
-    final AnetBeanList<Organization> list1 = graphQLHelper.searchObjects(admin, "organizationList",
-        "query", "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+  public void searchNoPaginationTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final OrganizationSearchQueryInput query =
+        OrganizationSearchQueryInput.builder().withText("EF").withPageSize(1).build();
+    final AnetBeanList_Organization list1 =
+        adminQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(list1).isNotNull();
     assertThat(list1.getTotalCount()).isGreaterThan(1);
 
     query.setPageSize(0);
-    final AnetBeanList<Organization> listAll = graphQLHelper.searchObjects(admin,
-        "organizationList", "query", "OrganizationSearchQueryInput", FIELDS, query,
-        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
+    final AnetBeanList_Organization listAll =
+        adminQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(listAll).isNotNull();
     assertThat(listAll.getTotalCount()).isEqualTo(list1.getTotalCount());
     assertThat(listAll.getTotalCount()).isEqualTo(listAll.getList().size());
   }
 
   @Test
-  public void organizationCreateSuperUserPermissionTest() throws UnsupportedEncodingException {
+  public void organizationCreateSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createOrganization(getSuperUser());
   }
 
   @Test
-  public void organizationCreateRegularUserPermissionTest() throws UnsupportedEncodingException {
+  public void organizationCreateRegularUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     createOrganization(getRegularUser());
   }
 
-  private void createOrganization(Person user) {
-    final Organization o = OrganizationTest.getTestAO(true);
+  private void createOrganization(Person user)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
+    final OrganizationInput oInput = TestData.createAdvisorOrganizationInput(true);
     try {
-      graphQLHelper.createObject(user, "createOrganization", "organization", "OrganizationInput", o,
-          new TypeReference<GraphQlResponse<Organization>>() {});
+      userMutationExecutor.createOrganization(FIELDS, oInput);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
   }
 
   @Test
-  public void organizationUpdateSuperUserPermissionTest() throws UnsupportedEncodingException {
+  public void organizationUpdateSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     updateOrganization(getRegularUser());
   }
 
   @Test
-  public void organizationUpdateRegularUserPermissionTest() throws UnsupportedEncodingException {
+  public void organizationUpdateRegularUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     updateOrganization(getRegularUser());
   }
 
-  private void updateOrganization(Person user) {
+  private void updateOrganization(Person user)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
     final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
-    final Organization organization = position.getOrganization();
+    final OrganizationInput organizationInput = getOrganizationInput(position.getOrganization());
 
     // own organization
     try {
-      final Integer nrUpdated = graphQLHelper.updateObject(user, "updateOrganization",
-          "organization", "OrganizationInput", organization);
+      final Integer nrUpdated = userMutationExecutor.updateOrganization("", organizationInput);
       if (isSuperUser) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
@@ -418,10 +378,9 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     }
 
     // other organization
-    final Organization o = OrganizationTest.getTestAO(true);
+    final OrganizationInput oInput = TestData.createAdvisorOrganizationInput(true);
     try {
-      graphQLHelper.updateObject(user, "updateOrganization", "organization", "OrganizationInput",
-          o);
+      userMutationExecutor.createOrganization(FIELDS, oInput);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }

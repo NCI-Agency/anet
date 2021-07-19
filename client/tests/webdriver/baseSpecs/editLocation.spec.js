@@ -1,12 +1,19 @@
+import { expect } from "chai"
 import CreateNewLocation from "../pages/location/createNewLocation.page"
 import EditLocation from "../pages/location/editLocation.page"
 import ShowLocation from "../pages/location/showLocation.page"
-import { LOCATION_COORDS, LOCATION_NAME, NEW_COORDS } from "./locationUtils"
+import {
+  LOCATION_COORDS,
+  LOCATION_NAME,
+  LOCATION_TYPE,
+  NEW_COORDS
+} from "./locationUtils"
 
 describe("When editing a location", () => {
   beforeEach("Should create a new location first", () => {
     CreateNewLocation.open(LOCATION_NAME)
     CreateNewLocation.nameField.setValue(LOCATION_NAME)
+    CreateNewLocation.typeField.selectByIndex(LOCATION_TYPE.index)
     CreateNewLocation.latField.setValue(LOCATION_COORDS.lat)
     CreateNewLocation.lngField.setValue(LOCATION_COORDS.lng)
     CreateNewLocation.createButton.click()
@@ -19,12 +26,21 @@ describe("When editing a location", () => {
     // Now we are in the edit page
   })
 
+  it("Should see the correct location type value of the created location", () => {
+    EditLocation.locationTypeLabel.waitForExist()
+    EditLocation.locationTypeLabel.waitForDisplayed()
+
+    expect(EditLocation.locationTypeField.getValue()).to.equal(
+      LOCATION_TYPE.type
+    )
+  })
+
   it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", () => {
     EditLocation.latLngLabel.waitForExist()
     EditLocation.latLngLabel.waitForDisplayed()
 
-    expect(EditLocation.latInputField.getValue()).toEqual(LOCATION_COORDS.lat)
-    expect(EditLocation.lngInputField.getValue()).toEqual(LOCATION_COORDS.lng)
+    expect(EditLocation.latInputField.getValue()).to.equal(LOCATION_COORDS.lat)
+    expect(EditLocation.lngInputField.getValue()).to.equal(LOCATION_COORDS.lng)
   })
 
   it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", () => {
@@ -33,9 +49,9 @@ describe("When editing a location", () => {
     EditLocation.allFormatsPopoverLat.waitForExist()
     EditLocation.allFormatsPopoverMGRS.waitForExist()
 
-    expect(EditLocation.allFormatsPopoverLat.getText()).toEqual(NEW_COORDS.lat)
-    expect(EditLocation.allFormatsPopoverLng.getText()).toEqual(NEW_COORDS.lng)
-    expect(EditLocation.allFormatsPopoverMGRS.getText()).toEqual(
+    expect(EditLocation.allFormatsPopoverLat.getText()).to.equal(NEW_COORDS.lat)
+    expect(EditLocation.allFormatsPopoverLng.getText()).to.equal(NEW_COORDS.lng)
+    expect(EditLocation.allFormatsPopoverMGRS.getText()).to.equal(
       NEW_COORDS.mgrs
     )
 
@@ -43,8 +59,8 @@ describe("When editing a location", () => {
     ShowLocation.successMsg.waitForExist()
     ShowLocation.successMsg.waitForDisplayed()
 
-    expect(ShowLocation.latField.getText()).toEqual(NEW_COORDS.lat)
-    expect(ShowLocation.lngField.getText()).toEqual(NEW_COORDS.lng)
+    expect(ShowLocation.latField.getText()).to.equal(NEW_COORDS.lat)
+    expect(ShowLocation.lngField.getText()).to.equal(NEW_COORDS.lng)
   })
 })
 

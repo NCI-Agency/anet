@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core"
+import { Icon, IconSize } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
@@ -403,7 +403,7 @@ const ReportAuthorCheckbox = ({
     readOnly={isCurrentEditor}
     onChange={() => !disabled && handleOnChange(person)}
   >
-    <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EDIT} />
+    <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
   </Checkbox>
 )
 ReportAuthorCheckbox.propTypes = {
@@ -420,7 +420,7 @@ const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
     disabled={disabled}
     onChange={() => !disabled && handleOnChange(person)}
   >
-    <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.PEOPLE} />
+    <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
   </Checkbox>
 )
 ReportAttendeeCheckbox.propTypes = {

@@ -1,76 +1,83 @@
 package mil.dds.anet.test;
 
 import java.util.List;
-import mil.dds.anet.beans.Comment;
-import mil.dds.anet.beans.Location;
+import java.util.UUID;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.Task;
+import mil.dds.anet.test.client.CommentInput;
+import mil.dds.anet.test.client.LocationInput;
+import mil.dds.anet.test.client.LocationType;
+import mil.dds.anet.test.client.OrganizationInput;
+import mil.dds.anet.test.client.OrganizationType;
+import mil.dds.anet.test.client.Position;
+import mil.dds.anet.test.client.PositionInput;
+import mil.dds.anet.test.client.PositionType;
+import mil.dds.anet.test.client.Status;
+import mil.dds.anet.test.client.TaskInput;
 
 public class TestData {
 
   public static RollupGraph createRollupGraph() {
-
-    RollupGraph rollupGraph = new RollupGraph();
+    final RollupGraph rollupGraph = new RollupGraph();
     rollupGraph.setCancelled(0);
     rollupGraph.setOrg(createOrganization());
     rollupGraph.setPublished(1);
-
     return rollupGraph;
   }
 
   public static Organization createOrganization() {
-    Organization org = new Organization();
-
+    final Organization org = new Organization();
     org.setLongName("longName");
-
     return org;
   }
 
-  public static Organization createOrganization(String shortName,
-      Organization.OrganizationType type) {
-    Organization org = new Organization();
-    org.setShortName(shortName);
-    org.setType(type);
-    return org;
+  public static Position getTestAdvisor() {
+    final Position b = new Position();
+    b.setName("Test Advisor Position");
+    b.setCode("TST-0101");
+    b.setType(PositionType.ADVISOR);
+    b.setStatus(Status.ACTIVE);
+    return b;
   }
 
-  public static Task createTask(String shortName, String longName, String category) {
-    return TestData.createTask(shortName, longName, category, null, null, Task.Status.ACTIVE);
+  public static OrganizationInput createAdvisorOrganizationInput(
+      boolean generateIdentificationCode) {
+    return OrganizationInput.builder().withShortName("TBAE").withLongName("The Best Advisors Ever")
+        .withStatus(Status.ACTIVE)
+        .withIdentificationCode(generateIdentificationCode ? UUID.randomUUID().toString() : null)
+        .withType(OrganizationType.ADVISOR_ORG).build();
   }
 
-  public static Task createTask(String shortName, String longName, String category,
+  public static CommentInput createCommentInput(String text) {
+    return CommentInput.builder().withText(text).build();
+  }
+
+  public static LocationInput createLocationInput(String name, Double lat, Double lng) {
+    return LocationInput.builder().withName(name).withStatus(Status.ACTIVE).withLat(lat)
+        .withType(LocationType.PINPOINT_LOCATION).withLng(lng).build();
+  }
+
+  public static PositionInput createPositionInput() {
+    return PositionInput.builder().withName("Head of donut operations").withCode("DNT-001")
+        .withType(PositionType.PRINCIPAL).withStatus(Status.ACTIVE).build();
+  }
+
+  public static TaskInput createTaskInput(String shortName, String longName, String category) {
+    return TestData.createTaskInput(shortName, longName, category, null, null, Status.ACTIVE);
+  }
+
+  public static TaskInput createTaskInput(String shortName, String longName, String category,
       String customFields) {
-    final Task p = TestData.createTask(shortName, longName, category);
+    final TaskInput p = TestData.createTaskInput(shortName, longName, category);
     p.setCustomFields(customFields);
     return p;
   }
 
-  public static Task createTask(String shortName, String longName, String category,
-      Task customFieldRef1, List<Organization> taskedOrganizations, Task.Status status) {
-    Task p = new Task();
-    p.setShortName(shortName);
-    p.setLongName(longName);
-    p.setCategory(category);
-    p.setCustomFieldRef1(customFieldRef1);
-    p.setTaskedOrganizations(taskedOrganizations);
-    p.setStatus(status);
-    return p;
-  }
-
-  public static Comment createComment(String text) {
-    Comment c = new Comment();
-    c.setText(text);
-    return c;
-  }
-
-  public static Location createLocation(String name, Double lat, Double lng) {
-    Location l = new Location();
-    l.setName(name);
-    l.setStatus(Location.Status.ACTIVE);
-    l.setLat(lat);
-    l.setLng(lng);
-    return l;
+  public static TaskInput createTaskInput(String shortName, String longName, String category,
+      TaskInput customFieldRef1, List<OrganizationInput> taskedOrganizations, Status status) {
+    return TaskInput.builder().withShortName(shortName).withLongName(longName)
+        .withCategory(category).withCustomFieldRef1(customFieldRef1)
+        .withTaskedOrganizations(taskedOrganizations).withStatus(status).build();
   }
 
 }

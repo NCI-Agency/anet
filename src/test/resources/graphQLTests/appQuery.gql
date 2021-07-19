@@ -29,6 +29,17 @@ me {
     associatedPositions {
       uuid
       name
+      code
+      type
+      status
+      organization {
+        uuid
+        shortName
+      }
+      location {
+        uuid
+        name
+      }
       person {
         uuid
         name
@@ -37,22 +48,56 @@ me {
         position {
           uuid
           name
-          code
           type
+          code
+          status
           organization {
             uuid
             shortName
+            identificationCode
           }
           location {
             uuid
             name
           }
         }
+        customFields
+        notes {
+          noteRelatedObjects {
+            noteUuid
+          }
+          createdAt
+          type
+          text
+        }
       }
-      organization {
+    }
+    responsibleTasks(
+      query: {
+        status: ACTIVE
+      }
+    ) {
+      uuid
+      shortName
+      longName
+      customFieldRef1 {
         uuid
-        shortName
       }
+      customFields
+      notes {
+        noteRelatedObjects {
+          noteUuid
+        }
+        createdAt
+        type
+        text
+      }
+    }
+    authorizationGroups {
+      uuid
+      name
+      description
+      status
     }
   }
 }
@@ -62,12 +107,26 @@ adminSettings {
   value
 }
 
-organizationTopLevelOrgs: organizationList(
+topLevelAdvisorOrgs: organizationList(
   query: {
     pageSize: 0
     hasParentOrg: false
     status: ACTIVE
     type: ADVISOR_ORG
+  }
+) {
+  list {
+    uuid
+    shortName
+  }
+}
+
+topLevelPrincipalOrgs: organizationList(
+  query: {
+    pageSize: 0
+    hasParentOrg: false
+    status: ACTIVE
+    type: PRINCIPAL_ORG
   }
 ) {
   list {

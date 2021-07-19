@@ -1,11 +1,11 @@
 import "@testing-library/jest-dom/extend-expect"
-import { render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import { Form, Formik } from "formik"
 import React from "react"
+import GeoLocation from "../../src/components/GeoLocation"
 import { convertLatLngToMGRS } from "../../src/geoUtils"
-import GeoLocation from "../../src/pages/locations/GeoLocation"
 
-const GeoLocationTest = format => {
+const GeoLocationTest = () => {
   return (
     <Formik>
       {() => {
@@ -17,7 +17,6 @@ const GeoLocationTest = format => {
         return (
           <Form>
             <GeoLocation
-              locationFormat={format}
               coordinates={coordinates}
               editable
               setFieldTouched={() => {}}
@@ -32,17 +31,34 @@ const GeoLocationTest = format => {
 
 describe("In the location form", () => {
   it("We should be able to see Latitude, Longitude label and input field", () => {
-    render(GeoLocationTest("LAT_LON"))
+    render(GeoLocationTest())
+    // LAT_LON is default
     const latLngLabel = screen.getByText(/Latitude, Longitude/)
     expect(latLngLabel).toBeInTheDocument()
     const latLngInput = screen.getByLabelText(/Latitude, Longitude/)
     expect(latLngInput).toBeInTheDocument()
   })
   it("We should be able to see MGRS label and input field", () => {
-    render(GeoLocationTest("MGRS"))
-    const mgrsLabel = screen.getByText(/MGRS/)
+    render(GeoLocationTest())
+    const infoButton = screen.getByRole("button", { name: "info-sign" })
+    expect(infoButton).toBeInTheDocument()
+    act(() => {
+      fireEvent.click(infoButton)
+    })
+    const mgrsButton = screen.getByRole("button", {
+      name: "Military Grid Reference System (MGRS)"
+    })
+    expect(mgrsButton).toBeInTheDocument()
+    act(() => {
+      fireEvent.click(mgrsButton)
+    })
+    const mgrsLabel = screen.getByText(
+      /Military Grid Reference System \(MGRS\)/
+    )
     expect(mgrsLabel).toBeInTheDocument()
-    const mgrsInput = screen.getByLabelText(/MGRS/)
-    expect(mgrsInput).toBeInTheDocument()
+    const mrgsInput = screen.getByLabelText(
+      /Military Grid Reference System \(MGRS\)/
+    )
+    expect(mrgsInput).toBeInTheDocument()
   })
 })

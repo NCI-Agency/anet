@@ -7,12 +7,12 @@ class MyReports extends Page {
     super.openAsAdminUser(PAGE_URL)
   }
 
-  get reportWithAssessmentsUrl() {
+  getReportUrl(urlText) {
     const tableTab = browser.$(
       "#published-reports .report-collection div header div button[value='table']"
     )
     tableTab.click()
-    return $("*=A test report from Arthur").getAttribute("href")
+    return $(`*=${urlText}`).getAttribute("href")
   }
 }
 

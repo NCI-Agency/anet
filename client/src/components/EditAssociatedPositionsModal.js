@@ -185,14 +185,11 @@ const EditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = Object.without(
-      new Position(values),
-      "notes",
-      "responsibleTasks" // Only for querying
+    const newPosition = new Position(values).filterClientSideFields(
+      "previousPeople",
+      "person",
+      "responsibleTasks"
     )
-    newPosition.associatedPositions = values.associatedPositions
-    delete newPosition.previousPeople
-    delete newPosition.person // prevent any changes to person.
     return API.mutation(GQL_UPDATE_ASSOCIATED_POSITION, {
       position: newPosition
     })

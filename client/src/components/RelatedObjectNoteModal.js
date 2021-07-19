@@ -1,5 +1,5 @@
 import API from "api"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
 import Model, {
@@ -106,8 +106,8 @@ const RelatedObjectNoteModal = ({
                   Cancel
                 </Button>
                 {_isEmpty(relatedObjects) && onDelete && (
-                  <ConfirmDelete
-                    onConfirmDelete={() => onDelete(note.uuid)}
+                  <ConfirmDestructive
+                    onConfirm={() => onDelete(note.uuid)}
                     objectType="note"
                     objectDisplay={"#" + note.uuid}
                     bsStyle="warning"

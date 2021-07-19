@@ -1,6 +1,5 @@
 import Model, {
   createCustomFieldsSchema,
-  DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE,
   REPORT_RELATED_OBJECT_TYPE,
   REPORT_STATE_PUBLISHED,
@@ -276,12 +275,12 @@ export default class Report extends Model {
         .when(["engagementDate"], (engagementDate, schema) =>
           !Report.isFuture(engagementDate)
             ? schema.required(
-              `You must provide a brief summary of the ${Settings.fields.report.nextSteps}`
+              `You must provide a brief summary of the ${Settings.fields.report.nextSteps.label}`
             )
             : schema.nullable()
         )
         .default("")
-        .label(Settings.fields.report.nextSteps),
+        .label(Settings.fields.report.nextSteps.label),
       keyOutcomes: yup
         .string()
         .nullable()
@@ -590,18 +589,25 @@ export default class Report extends Model {
     )
   }
 
-  static getCleanReport(values) {
-    // Strip notes and any synthetic fields from a report
-    return Object.without(
-      new Report(values),
-      "notes",
-      "showSensitiveInfo",
-      "authors",
-      DEFAULT_CUSTOM_FIELDS_PARENT,
-      Report.TASKS_ASSESSMENTS_PARENT_FIELD,
-      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
-      Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
-      Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    "authors",
+    "cancelled",
+    "showSensitiveInfo",
+    Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+    Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+    Report.TASKS_ASSESSMENTS_UUIDS_FIELD,
+    Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
+  ]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Report.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
     )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Report.filterClientSideFields(this, ...additionalFields)
   }
 }

@@ -22,6 +22,7 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE authorizationGroupPositions;
 --DROP TABLE authorizationGroups;
 --DROP TABLE reportAuthorizationGroups;
+--DROP TABLE customSensitiveInformation;
 --DROP TABLE notes;
 --DROP TABLE noteRelatedObjects;
 --DROP TABLE DATABASECHANGELOG;
@@ -52,6 +53,7 @@ DELETE FROM locations;
 DELETE FROM organizations;
 DELETE FROM adminSettings;
 DELETE FROM authorizationGroups;
+DELETE FROM customSensitiveInformation;
 
 --Advisors
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
@@ -66,16 +68,28 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES (lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'DVISOR, A', 0, 0, 'hunter+aDvisor@example.com', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'BRATTON, Creed', 0, 0, 'creed+bratton@example.com', '+444-44-4444', 'CIV', 'Let me first settle in.', 'creed', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'MALONE, Kevin', 0, 0, 'kevin+malone@example.com', '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', 'kevin', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Advisor with no position for testing
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'REPORTGUY, Ima', 0, 0, 'ima+reportguy@example.com', '+444-44-4545', 'CIV', 'I need a career change', 'reportguy', 'France', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'REPORTGIRL, Ima', 0, 0, 'ima+reportgirl@example.com', '+444-44-4545', 'CIV', 'I need a career change', 'reportgirl', 'Mexico', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Principals
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'STEVESON, Steve', 0, 1, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('90fa5784-9e63-4353-8119-357bcd88e287', 'STEVESON, Steve', 0, 1, 'hunter+steve@example.com', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ROGWELL, Roger', 0, 1, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', 'ROGWELL, Roger', 0, 1, 'hunter+roger@example.com', '+1-412-7324', 'Maj', 'Roger is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('237e8bf7-2ae4-4d49-b7c8-eca6a92d4767', 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@example.com', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
+	VALUES (lower(newid()), 'CHRISVILLE, Chris', 0, 1, 'chrisville+chris@example.com', '+1-412-7324', 'Maj', 'Chris is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
+	VALUES (lower(newid()), 'KYLESON, Kyle', 0, 1, 'kyleson+kyle@example.com', '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Super Users
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -87,10 +101,15 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES (lower(newid()), 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', 'Germany', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'SCHRUTE, Dwight', 0, 0, 'dwight+schrute@example.com', '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', 'dwight', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'HALPERT, Jim', 0, 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', 'jim', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Administrator
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@example.com', NULL, 'CIV', 'An administrator', 'arthur', 'Albania', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'SCOTT, Michael', '0', '0', 'michael+scott@example.com', NULL, 'CIV', 'Worlds best boss.', 'michael', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 --People
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, 'United States of America', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -99,71 +118,81 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, 'Italy', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ANET Administrator', 3, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1 Manager', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor A', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor B', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor C', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor D', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor E', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor F', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor for Agriculture', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Old Inactive Advisor', 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor for Mining', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor for Space Issues', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 Advisor for Interagency Advising', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 SuperUser', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.2 Advisor', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.1 Advisor B', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.1 Advisor for Accounting', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.1 Advisor for Kites', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.1 SuperUser', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Advisor C', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Advisor D', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Old and Inactive', 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Advisor Sewing Facilities', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Advisor Local Kebabs', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Super User', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 Final Reviewer', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 4.1 Advisor A', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 4.1 Advisor for Coffee', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 4.1 Advisor on Software Engineering', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 4.1 Advisor E', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 4.1 Advisor old - dont use', 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 9 Advisor <empty>', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- Create locations
+INSERT INTO locations (uuid, type, name, lat, lng, createdAt, updatedAt)
+	VALUES
+		(N'e5b3a4b9-acf7-4c79-8224-f248b9a7215d', 'PA', 'Antarctica', -90, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'PPA', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'PPA', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'PPA', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'0855fb0a-995e-4a79-a132-4024ee2983ff', 'PPA', 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'95446f93-249b-4aa9-b98a-7bd2c4680718', 'PPA', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'PPA', 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c7a9f420-457a-490c-a810-b504c022cf1e', 'PPA', 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'PPP', 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'PPP', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO locations (uuid, type, name, createdAt, updatedAt)
+	VALUES
+		(N'283797ec-7077-49b2-87b8-9afd5499b6f3', 'V', 'VTC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'PPP', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'PPP', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'PPP', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'0585f158-5121-46a2-b099-799fe980aa9c', 'PPP', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'053ab2ad-132a-4a62-8cbb-20827f50ec34', 'PPP', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'PPP', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'6465dd40-9fec-41db-a3b9-652fa52c7d21', 'PPP', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'PPP', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'PPP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'8a34768c-aa15-41e4-ab79-6cf2740d555e', 'PPP', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'9f364c59-953e-4c17-919c-648ea3a74e36', 'PPP', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'dfc3918d-c2e3-4308-b161-2445cde77b3f', 'PPP', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'3652e114-ad16-43f0-b179-cc1bce6958d5', 'PPP', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'5ac4078d-d445-416a-a93e-5941562359bb', 'PPP', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'22b0137c-4d89-43eb-ac95-a9f68aba884f', 'PPP', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'60f4084f-3304-4cd5-89df-353edef07d18', 'PPP', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'PPP', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'PPP', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- Create advisor positions
+INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid, createdAt, updatedAt)
+	VALUES
+		(lower(newid()), 'ANET Administrator', 3, 0, NULL, 'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1 Manager', 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor A', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor B', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor C', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor D', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor E', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor F', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor for Agriculture', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Old Inactive Advisor', 0, 1, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor for Mining', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor for Space Issues', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 Advisor for Interagency Advising', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.1 SuperUser', 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 1.2 Advisor', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.1 Advisor B', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.1 Advisor for Accounting', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.1 Advisor for Kites', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.1 SuperUser', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Advisor C', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Advisor D', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Old and Inactive', 0, 1, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Advisor Sewing Facilities', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Advisor Local Kebabs', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Super User', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 2.2 Final Reviewer', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 4.1 Advisor A', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 4.1 Advisor for Coffee', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 4.1 Advisor on Software Engineering', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 4.1 Advisor E', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 4.1 Advisor old - dont use', 0, 1, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5 Admin', 3, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Advisor Quality Assurance', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Advisor Accounting', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Super User Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 5.1 Super User Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'EF 9 Advisor <empty>', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Andrew in the EF 1 Manager Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
@@ -226,6 +255,30 @@ INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'ANET Administrator'), (SELECT uuid from people where emailAddress = 'hunter+arthur@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+arthur@example.com') WHERE name = 'ANET Administrator';
 
+-- Put Creed into the EF 5.1 Quality Ensurance
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Advisor Quality Assurance'), (SELECT uuid from people where emailAddress = 'creed+bratton@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'creed+bratton@example.com') WHERE name = 'EF 5.1 Advisor Quality Assurance';
+
+-- Put Kevin into the EF 5.1 Accounting
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Advisor Accounting'), (SELECT uuid from people where emailAddress = 'kevin+malone@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'kevin+malone@example.com') WHERE name = 'EF 5.1 Advisor Accounting';
+
+-- Put Jim into the EF 5.1 Sales 1
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Super User Sales 1'), (SELECT uuid from people where emailAddress = 'jim+halpert@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'jim+halpert@example.com') WHERE name = 'EF 5.1 Super User Sales 1';
+
+-- Put Dwight into the EF 5.1 Sales 2
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Super User Sales 2'), (SELECT uuid from people where emailAddress = 'dwight+schrute@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'dwight+schrute@example.com') WHERE name = 'EF 5.1 Super User Sales 2';
+
+-- Put Michael into the EF 5 Admin
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where emailAddress = 'michael+scott@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'michael+scott@example.com') WHERE name = 'EF 5 Admin';
 
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANET Administrators','', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -256,7 +309,7 @@ INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 5', '', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
-		VALUES (lower(newid()), 'EF 5.1', '', 0 , (SELECT uuid FROM organizations WHERE shortName = 'EF 4'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		VALUES (lower(newid()), 'EF 5.1', '', 0 , (SELECT uuid FROM organizations WHERE shortName = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
 		VALUES (lower(newid()), 'EF 5.2', '', 0 , (SELECT uuid FROM organizations WHERE shortName = 'EF 5'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
@@ -295,6 +348,8 @@ UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE sh
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 2.2') WHERE name LIKE 'EF 2.2%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 3') WHERE name LIKE 'EF 3%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 4') WHERE name LIKE 'EF 4%';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 5') WHERE name LIKE 'EF 5%';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 5.1') WHERE name LIKE 'EF 5.1%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName='ANET Administrators') where name = 'ANET Administrator';
 
 -- Create the EF 1.1 approval process
@@ -432,62 +487,6 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 	WHERE approvalSteps.name = 'Task Owner approval'
 	AND approvalSteps.type = 1;
 
--- Create locations
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', 'St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'8c138750-91ce-41bf-9b4c-9f0ddc73608b', 'Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'9c982685-5946-4dad-a7ee-0f5a12f5e170', 'Wishingwells Park', 47.560040, -52.736962, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'0855fb0a-995e-4a79-a132-4024ee2983ff', 'General Hospital', 47.571772, -52.741935, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'95446f93-249b-4aa9-b98a-7bd2c4680718', 'Portugal Cove Ferry Terminal', 47.626718, -52.857241, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'c8fdb53f-6f93-46fc-b0fa-f005c7b49667', 'Cabot Tower', 47.570010, -52.681770, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'c7a9f420-457a-490c-a810-b504c022cf1e', 'Fort Amherst', 47.563763, -52.680590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'7339f9e3-99d1-497a-9e3b-1269c4c287fe', 'Harbour Grace Police Station', 47.705133, -53.214422, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, lat, lng, createdAt, updatedAt)
-	VALUES (N'f2207d9b-204b-4cb5-874d-3fe6bc6f8acd', 'Conception Bay South Police Station', 47.526784, -52.954739, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'e0ff0d6c-e663-4639-a44d-b075bf1e690d', 'MoD Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'5046a870-6c2a-40a7-9681-61a1d6eeaa07', 'MoI Headquarters Kabul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'c15eb29e-2965-401e-9f36-6ac8b9cc3842', 'President''s Palace', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'0585f158-5121-46a2-b099-799fe980aa9c', 'Kabul Police Academy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'053ab2ad-132a-4a62-8cbb-20827f50ec34', 'Police HQ Training Facility', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'e87f145b-32e9-47ec-a0f4-e0dcf18e8a8c', 'Kabul Hospital', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'6465dd40-9fec-41db-a3b9-652fa52c7d21', 'MoD Army Training Base 123', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'2a59dd78-0c29-4b3f-bc94-7c98ff80b197', 'MoD Location the Second', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'18c9be38-bf68-40e2-80d8-aac47f5ff7cf', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'8a34768c-aa15-41e4-ab79-6cf2740d555e', 'MoI Training Center', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'9f364c59-953e-4c17-919c-648ea3a74e36', 'MoI Adminstrative Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'dfc3918d-c2e3-4308-b161-2445cde77b3f', 'MoI Senior Executive Suite', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'3652e114-ad16-43f0-b179-cc1bce6958d5', 'MoI Coffee Shop', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'5ac4078d-d445-416a-a93e-5941562359bb', 'MoI Herat Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'22b0137c-4d89-43eb-ac95-a9f68aba884f', 'MoI Jalalabad Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'60f4084f-3304-4cd5-89df-353edef07d18', 'MoI Kandahar Office', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'c136bf89-cc24-43a5-8f51-0f41dfc9ab77', 'MoI Mazar-i-Sharif', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO locations (uuid, name, createdAt, updatedAt)
-	VALUES (N'b0979678-0ed0-4b42-9b26-9976fcfa1b81', 'MoI Office Building ABC', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 -- Create a location approval process for a location
 INSERT INTO approvalSteps (uuid, relatedObjectUuid, name, type)
     SELECT lower(newid()), (SELECT uuid FROM locations WHERE name = 'Portugal Cove Ferry Terminal'), 'Location approval', 1;
@@ -503,6 +502,7 @@ INSERT INTO organizations (uuid, shortName, longName, type, parentOrgUuid, creat
 	VALUES (lower(newid()), 'MOD-F', 'Ministry of Defense Finances', 1,
 	(SELECT uuid from organizations where shortName = 'MoD'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- Create principal positions
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
 	VALUES (N'879121d2-d265-4d26-8a2b-bd073caa474e', 'Minister of Defense', 'MOD-FO-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
@@ -519,6 +519,10 @@ INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organi
 	VALUES (N'c065c2b6-a04a-4ead-a3a2-5aabf921446d', 'Cost Adder - MoD', 'MOD-Bud-00003', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
 	VALUES (N'731ee4f9-f21b-4166-b03d-d7ba5e7f735c', 'Chief of Police', 'MOI-Pol-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
+	VALUES (N'18f42d92-ada7-11eb-8529-0242ac130003', 'Chief of Tests', 'MOI-TST-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
+	VALUES (N'338e4d54-ada7-11eb-8529-0242ac130003', 'Director of Tests', 'MOD-TST-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
@@ -529,7 +533,7 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	(SELECT uuid FROM positions WHERE name='Cost Adder - MoD'),
 	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
--- But Roger in a Tashkil and associate with the EF 2.1 Advisor B Billet
+-- Put Roger in a Tashkil and associate with the EF 2.1 Advisor B Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'Chief of Police'), (SELECT uuid from people where emailAddress = 'hunter+roger@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+roger@example.com') WHERE name = 'Chief of Police';
@@ -538,7 +542,7 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	(SELECT uuid from positions WHERE name ='Chief of Police'),
 	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
--- But Christopf in a Tashkil and associate with the EF 2.2 Advisor D Billet
+-- Put Christopf in a Tashkil and associate with the EF 2.2 Advisor D Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'Planning Captain'), (SELECT uuid from people where emailAddress = 'hunter+christopf@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+christopf@example.com') WHERE name = 'Planning Captain';
@@ -547,6 +551,23 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	(SELECT uuid from positions WHERE name ='Planning Captain'),
 	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
+-- Put Chris in a Tashkil and associate with the EF 5.1 Advisor Accounting
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'Chief of Tests'), (SELECT uuid from people where emailAddress = 'chrisville+chris@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'chrisville+chris@example.com') WHERE name = 'Chief of Tests';
+INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, updatedAt, deleted)
+	VALUES ((SELECT uuid FROM positions WHERE name='EF 5.1 Advisor Accounting'),
+	(SELECT uuid from positions WHERE name ='Chief of Tests'),
+	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+
+-- Put Kyle in a Tashkil and associate with the EF 5.1 Advisor Quality Assurance
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'Director of Tests'), (SELECT uuid from people where emailAddress = 'kyleson+kyle@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'kyleson+kyle@example.com') WHERE name = 'Director of Tests';
+INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, updatedAt, deleted)
+	VALUES ((SELECT uuid FROM positions WHERE name='EF 5.1 Advisor Quality Assurance'),
+	(SELECT uuid from positions WHERE name ='Director of Tests'),
+	CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
 
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'MoD Headquarters Kabul') WHERE name = 'Cost Adder - MoD';
@@ -760,6 +781,22 @@ INSERT INTO reportTasks (taskUuid, reportUuid)
 INSERT INTO reportTasks (taskUuid, reportUuid)
   VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
+SET @reportUuid = lower(newid());
+INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
+	VALUES (@reportUuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'A test report to be unpublished from Arthur', '',
+	'I need to edit this report so unpublish it please','have reports in organizations', 2, DATEADD (minute, 1, CURRENT_TIMESTAMP), 0,
+	(SELECT uuid FROM organizations where shortName = 'ANET Administrators'), (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'));
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+arthur@example.com'), @reportUuid, 1, 1);
+INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
+	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
+INSERT INTO reportTasks (taskUuid, reportUuid)
+  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
 
@@ -868,30 +905,27 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 
 -- Authorization groups
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('1050c9e3-e679-4c60-8bdc-5139fbc1c10b', 'EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('39a78d51-c351-452c-9206-4305ec8dd76d', 'EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('c21e7321-7ec5-4837-8805-a302f9575754', 'EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO authorizationGroups (uuid, name, description, status, createdAt, updatedAt)
-	VALUES (lower(newid()), 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('90a5196d-acf3-4a81-8ff9-3a8c7acabdf3', 'Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Authorization group positions
 INSERT INTO authorizationGroupPositions (authorizationGroupUuid, positionUuid)
-  SELECT a.uuid, p.uuid
-  FROM authorizationGroups a, positions p
-  WHERE a.name LIKE 'EF 1.1%'
-  AND p.name LIKE 'EF 1.1%';
+  SELECT '1050c9e3-e679-4c60-8bdc-5139fbc1c10b', p.uuid
+  FROM positions p
+  WHERE p.name LIKE 'EF 1.1%';
 INSERT INTO authorizationGroupPositions (authorizationGroupUuid, positionUuid)
-  SELECT a.uuid, p.uuid
-  FROM authorizationGroups a, positions p
-  WHERE a.name LIKE 'EF 2.1%'
-  AND p.name LIKE 'EF 2.1%';
+  SELECT '39a78d51-c351-452c-9206-4305ec8dd76d', p.uuid
+  FROM positions p
+  WHERE p.name LIKE 'EF 2.1%';
 INSERT INTO authorizationGroupPositions (authorizationGroupUuid, positionUuid)
-  SELECT a.uuid, p.uuid
-  FROM authorizationGroups a, positions p
-  WHERE a.name LIKE 'EF 2.2%'
-  AND p.name LIKE 'EF 2.2%';
+  SELECT 'c21e7321-7ec5-4837-8805-a302f9575754', p.uuid
+  FROM positions p
+  WHERE p.name LIKE 'EF 2.2%';
 
 -- Report authorization groups
 INSERT INTO reportAuthorizationGroups (reportUuid, authorizationGroupUuid)
@@ -907,6 +941,16 @@ INSERT INTO reportAuthorizationGroups (reportUuid, authorizationGroupUuid)
     WHERE rap.reportUuid = rp.reportUuid
     AND rap.authorizationGroupUuid = agp.authorizationGroupUuid
   );
+
+-- Create customSensitiveInformation for some principals
+INSERT INTO customSensitiveInformation (uuid, customFieldName, customFieldValue, relatedObjectType, relatedObjectUuid, createdAt, updatedAt)
+	VALUES
+		-- Steve
+		(N'4263793a-18bc-4cef-a535-0116615301e1', 'birthday', '{"birthday":"1999-09-09T00:00:00.000Z"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'c9ca5fd9-699e-4643-8025-91a2f2e0cd77', 'politicalPosition', '{"politicalPosition":"LEFT"}', 'people', '90fa5784-9e63-4353-8119-357bcd88e287', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		-- Roger
+		(N'84b46418-4350-4b52-8789-2b292fc0ab60', 'birthday', '{"birthday":"2001-01-01T00:00:00.000Z"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(N'810cf44b-91f6-474a-b522-5ba822ccfc1c', 'politicalPosition', '{"politicalPosition":"RIGHT"}', 'people', '6866ce4d-1f8c-4f78-bdc2-4767e9a859b0', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Add some notes and link them to the objects they relate to
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');

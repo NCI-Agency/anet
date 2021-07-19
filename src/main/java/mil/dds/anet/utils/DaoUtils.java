@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.slf4j.Logger;
@@ -52,6 +53,13 @@ public class DaoUtils {
       return null;
     }
     return o.ordinal();
+  }
+
+  public static String getEnumString(Enum<?> o) {
+    if (o == null) {
+      return null;
+    }
+    return o.toString();
   }
 
   /* This never changes during execution, so statically cache it. */
@@ -112,6 +120,13 @@ public class DaoUtils {
 
   public static Person getUserFromContext(Map<String, Object> context) {
     return (Person) context.get("user");
+  }
+
+  public static void saveCustomSensitiveInformation(final Person user, final String tableName,
+      final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
+    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao()
+        .insertOrUpdateCustomSensitiveInformation(user, tableName, uuid,
+            customSensitiveInformation);
   }
 
   public static ZoneId getServerNativeZoneId() {

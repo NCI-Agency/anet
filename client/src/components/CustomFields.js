@@ -1,3 +1,6 @@
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -9,7 +12,8 @@ import Model, {
   createYupObjectShape,
   CUSTOM_FIELD_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
-  INVISIBLE_CUSTOM_FIELDS_FIELD
+  INVISIBLE_CUSTOM_FIELDS_FIELD,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
@@ -136,14 +140,25 @@ const NumberField = fieldProps => {
 }
 
 const ReadonlyTextField = fieldProps => {
-  const { name, label, vertical, isCompact } = fieldProps
+  const {
+    name,
+    label,
+    vertical,
+    isCompact,
+    extraColElem,
+    labelColumnWidth,
+    className
+  } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
       vertical={vertical}
       isCompact={isCompact}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       component={FieldHelper.ReadonlyField}
+      className={className}
     />
   )
 }
@@ -161,13 +176,24 @@ const DateField = fieldProps => {
 }
 
 const ReadonlyDateField = fieldProps => {
-  const { name, label, vertical, isCompact, withTime } = fieldProps
+  const {
+    name,
+    label,
+    vertical,
+    isCompact,
+    withTime,
+    extraColElem,
+    labelColumnWidth,
+    className
+  } = fieldProps
   return (
     <FastField
       name={name}
       label={label}
       vertical={vertical}
       isCompact={isCompact}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal =>
         fieldVal &&
@@ -177,6 +203,7 @@ const ReadonlyDateField = fieldProps => {
             : Settings.dateFormats.forms.displayShort.date
         )
       }
+      className={className}
     />
   )
 }
@@ -215,7 +242,14 @@ const JsonField = fieldProps => {
   )
 }
 
-const ReadonlyJsonField = ({ name, label, values }) => {
+const ReadonlyJsonField = ({
+  name,
+  label,
+  values,
+  extraColElem,
+  labelColumnWidth,
+  className
+}) => {
   const value = Object.get(values, name) || {}
   return (
     <FastField
@@ -223,13 +257,19 @@ const ReadonlyJsonField = ({ name, label, values }) => {
       label={label}
       component={FieldHelper.ReadonlyField}
       humanValue={JSON.stringify(value)}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
 ReadonlyJsonField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  values: PropTypes.object.isRequired
+  values: PropTypes.object.isRequired,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const EnumField = fieldProps => {
@@ -252,7 +292,17 @@ const enumHumanValue = (choices, fieldVal) => {
 }
 
 const ReadonlyEnumField = fieldProps => {
-  const { name, label, vertical, values, isCompact, choices } = fieldProps
+  const {
+    name,
+    label,
+    vertical,
+    values,
+    isCompact,
+    choices,
+    extraColElem,
+    labelColumnWidth,
+    className
+  } = fieldProps
   return (
     <FastField
       name={name}
@@ -262,6 +312,9 @@ const ReadonlyEnumField = fieldProps => {
       isCompact={isCompact}
       component={FieldHelper.ReadonlyField}
       humanValue={fieldVal => enumHumanValue(choices, fieldVal)}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -383,7 +436,15 @@ const addObject = (objDefault, arrayHelpers) => {
 }
 
 const ReadonlyArrayOfObjectsField = fieldProps => {
-  const { name, fieldConfig, values, isCompact, vertical } = fieldProps
+  const {
+    name,
+    fieldConfig,
+    values,
+    isCompact,
+    vertical,
+    extraColElem,
+    labelColumnWidth
+  } = fieldProps
   const value = useMemo(() => getArrayObjectValue(values, name), [values, name])
   const fieldsetTitle = fieldConfig.label || ""
 
@@ -396,6 +457,8 @@ const ReadonlyArrayOfObjectsField = fieldProps => {
       isCompact={isCompact}
       index={index}
       vertical={vertical}
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
     />
   ))
 
@@ -418,7 +481,9 @@ const ReadonlyArrayObject = ({
   values,
   vertical,
   index,
-  isCompact
+  isCompact,
+  extraColElem,
+  labelColumnWidth
 }) => {
   const objLabel = _upperFirst(fieldConfig.objectLabel || "item")
   return (
@@ -429,6 +494,8 @@ const ReadonlyArrayObject = ({
         values={values}
         isCompact={isCompact}
         vertical={vertical}
+        extraColElem={extraColElem}
+        labelColumnWidth={labelColumnWidth}
       />
     </Fieldset>
   )
@@ -439,7 +506,9 @@ ReadonlyArrayObject.propTypes = {
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
   index: PropTypes.number.isRequired,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 
 const AnetObjectField = ({
@@ -463,7 +532,7 @@ const AnetObjectField = ({
           onConfirm={(value, entityType) =>
             setFieldValue(name, {
               type: entityType,
-              uuid: value.uuid
+              uuid: value?.uuid
             })
           }
         />
@@ -499,7 +568,15 @@ AnetObjectField.propTypes = {
   children: PropTypes.node
 }
 
-const ReadonlyAnetObjectField = ({ name, label, values, isCompact }) => {
+const ReadonlyAnetObjectField = ({
+  name,
+  label,
+  values,
+  isCompact,
+  extraColElem,
+  labelColumnWidth,
+  className
+}) => {
   const { type, uuid } = Object.get(values, name) || {}
   return (
     <FastField
@@ -521,6 +598,9 @@ const ReadonlyAnetObjectField = ({ name, label, values, isCompact }) => {
           </Table>
         )
       }
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -528,7 +608,10 @@ ReadonlyAnetObjectField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const ArrayOfAnetObjectsField = ({
@@ -612,7 +695,10 @@ const ReadonlyArrayOfAnetObjectsField = ({
   name,
   label,
   values,
-  isCompact
+  isCompact,
+  extraColElem,
+  labelColumnWidth,
+  className
 }) => {
   const fieldValue = Object.get(values, name) || []
   return (
@@ -636,6 +722,9 @@ const ReadonlyArrayOfAnetObjectsField = ({
           </Table>
         )
       }
+      extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
+      className={className}
     />
   )
 }
@@ -643,7 +732,10 @@ ReadonlyArrayOfAnetObjectsField.propTypes = {
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 
 const FIELD_COMPONENTS = {
@@ -766,6 +858,8 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     typeError,
     placeholder,
     helpText,
+    authorizationGroupUuids,
+    tooltipText,
     validations,
     visibleWhen,
     test,
@@ -782,13 +876,22 @@ const CustomField = ({
   invisibleFields,
   vertical
 }) => {
-  const { type, helpText } = fieldConfig
+  const { type, helpText, authorizationGroupUuids } = fieldConfig
+  let extraColElem
+  if (authorizationGroupUuids) {
+    if (fieldConfig.authorizationGroupUuids) {
+      extraColElem = (
+        <div>
+          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+            <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+          </Tooltip2>
+        </div>
+      )
+    }
+  }
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
-  const { callback: validateFormDebounced } = useDebouncedCallback(
-    validateForm,
-    400
-  ) // with validateField it somehow doesn't work
+  const validateFormDebounced = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
     () => (value, shouldValidate = true) => {
       let val = value?.target?.value !== undefined ? value.target.value : value
@@ -837,6 +940,7 @@ const CustomField = ({
       name={fieldName}
       onChange={handleChange}
       vertical={vertical}
+      extraColElem={extraColElem}
       {...fieldProps}
       {...extraProps}
     >
@@ -845,10 +949,9 @@ const CustomField = ({
   ) : (
     <FastField
       name={fieldName}
-      label={fieldProps.label}
-      vertical={fieldProps.vertical}
       component={FieldHelper.ReadonlyField}
       humanValue={<i>Missing FieldComponent for {type}</i>}
+      {...fieldProps}
     />
   )
 }
@@ -916,7 +1019,9 @@ export const ReadonlyCustomFields = ({
   parentFieldName, // key path in the values object to get to the level of fields given by the fieldsConfig
   values,
   vertical,
-  isCompact
+  isCompact,
+  extraColElem,
+  labelColumnWidth
 }) => {
   return (
     <>
@@ -938,6 +1043,8 @@ export const ReadonlyCustomFields = ({
             values={values}
             vertical={vertical}
             isCompact={isCompact}
+            extraColElem={extraColElem}
+            labelColumnWidth={labelColumnWidth}
             {...fieldProps}
             {...extraProps}
           />
@@ -945,11 +1052,12 @@ export const ReadonlyCustomFields = ({
           <FastField
             key={key}
             name={fieldName}
-            label={fieldProps.label}
-            vertical={fieldProps.vertical}
             isCompact={isCompact}
             component={FieldHelper.ReadonlyField}
             humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
+            extraColElem={extraColElem}
+            labelColumnWidth={labelColumnWidth}
+            {...fieldProps}
           />
         )
       })}
@@ -961,11 +1069,79 @@ ReadonlyCustomFields.propTypes = {
   parentFieldName: PropTypes.string.isRequired,
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  extraColElem: PropTypes.object,
+  labelColumnWidth: PropTypes.number
 }
 ReadonlyCustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,
   vertical: false
+}
+
+// To access ordered custom fields when showing in a page
+export const mapReadonlyCustomFieldsToComps = ({
+  fieldsConfig,
+  parentFieldName = DEFAULT_CUSTOM_FIELDS_PARENT, // key path in the values object to get to the level of fields given by the fieldsConfig
+  values,
+  vertical,
+  labelColumnWidth,
+  isCompact
+}) => {
+  return Object.entries(fieldsConfig).reduce((accum, [key, fieldConfig]) => {
+    let extraColElem = null
+    if (fieldConfig.authorizationGroupUuids) {
+      extraColElem = (
+        <div>
+          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+            <Icon
+              icon={IconNames.INFO_SIGN}
+              intent={Intent.PRIMARY}
+              className="sensitive-information-icon"
+            />
+          </Tooltip2>
+        </div>
+      )
+    }
+    const fieldName = `${parentFieldName}.${key}`
+    const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
+    if (fieldConfig.authorizationGroupUuids) {
+      fieldProps.className = "sensitive-information"
+    }
+    const { type } = fieldConfig
+    let extraProps = {}
+    if (type === CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS) {
+      extraProps = {
+        fieldConfig
+      }
+    }
+    const ReadonlyFieldComponent = READONLY_FIELD_COMPONENTS[type]
+    accum[key] = ReadonlyFieldComponent ? (
+      <ReadonlyFieldComponent
+        key={key}
+        name={fieldName}
+        values={values}
+        vertical={vertical}
+        extraColElem={extraColElem}
+        labelColumnWidth={labelColumnWidth}
+        isCompact={isCompact}
+        {...fieldProps}
+        {...extraProps}
+      />
+    ) : (
+      <FastField
+        key={key}
+        name={fieldName}
+        component={FieldHelper.ReadonlyField}
+        humanValue={<i>Missing ReadonlyFieldComponent for {type}</i>}
+        extraColElem={extraColElem}
+        labelColumnWidth={labelColumnWidth}
+        isCompact={isCompact}
+        {...fieldProps}
+      />
+    )
+
+    return accum
+  }, {})
 }
 
 // customFields should contain the JSON of all the visible custom fields.
@@ -989,4 +1165,27 @@ export const customFieldsJSONString = (
     }
     return JSON.stringify(filteredCustomFieldsValues)
   }
+}
+
+// customSensitiveInformation should be changed according to formSensitiveField values
+// When field is not initialized new field object should be pushed to customSensitiveInformation
+export const updateCustomSensitiveInformation = (
+  values,
+  parentFieldName = SENSITIVE_CUSTOM_FIELDS_PARENT
+) => {
+  const customSensitiveInformation = []
+  const sensitiveFieldValues = Object.get(values, parentFieldName) || []
+  Object.keys(sensitiveFieldValues).forEach(sensitiveFieldName => {
+    const existingField = values.customSensitiveInformation?.find(
+      sf => sf.customFieldName === sensitiveFieldName
+    )
+    customSensitiveInformation.push({
+      customFieldName: sensitiveFieldName,
+      customFieldValue: JSON.stringify({
+        [sensitiveFieldName]: sensitiveFieldValues[sensitiveFieldName]
+      }),
+      uuid: existingField?.uuid
+    })
+  })
+  return customSensitiveInformation
 }

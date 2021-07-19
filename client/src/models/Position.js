@@ -63,8 +63,24 @@ export default class Position extends Model {
           org => org && org.uuid
         ),
       person: yup.object().nullable().default({}),
-      location: yup.object().nullable().default({})
+      location: yup
+        .object()
+        .nullable()
+        .default(null)
+        .label("Location")
+        .when("type", (type, schema) =>
+          [
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ].includes(type)
+            ? schema.required(
+              `Location is required for ${advisorPosition.name}`
+            )
+            : schema.nullable()
+        )
     })
+
     // not actually in the database, the database contains the JSON customFields
     .concat(Position.customFieldsSchema)
     .concat(Model.yupSchema)
@@ -73,6 +89,65 @@ export default class Position extends Model {
     "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role, avatar(size: 32) }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
+
+  static allFieldsQuery = `
+    uuid
+    name
+    type
+    status
+    isSubscribed
+    updatedAt
+    code
+    organization {
+      uuid
+      shortName
+      longName
+      identificationCode
+    }
+    person {
+      uuid
+      name
+      rank
+      role
+      avatar(size: 32)
+    }
+    associatedPositions {
+      uuid
+      name
+      type
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+      organization {
+        uuid
+        shortName
+      }
+    }
+    previousPeople {
+      startTime
+      endTime
+      person {
+        uuid
+        name
+        rank
+        role
+        avatar(size: 32)
+      }
+    }
+    location {
+      uuid
+      name
+      lat
+      lng
+      type
+    }
+    customFields
+    ${GRAPHQL_NOTES_FIELDS}
+  `
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
@@ -106,8 +181,39 @@ export default class Position extends Model {
     return this.type === Position.TYPE.PRINCIPAL
   }
 
+  isActive() {
+    return Position.isActive(this)
+  }
+
+  static isActive(pos) {
+    return pos.status === Position.STATUS.ACTIVE
+  }
+
   toString() {
     return this.name
+  }
+
+  static convertType(type) {
+    switch (type) {
+      case "ADVISOR":
+        return Settings.fields.advisor.position.type
+      case "PRINCIPAL":
+        return Settings.fields.principal.position.type
+      case "SUPER_USER":
+        return Settings.fields.superUser.position.type
+      case "ADMINISTRATOR":
+        return Settings.fields.administrator.position.type
+      default:
+        return "Default Case"
+    }
+  }
+
+  static isAdvisor(position) {
+    return position.type === Position.TYPE.ADVISOR
+  }
+
+  static isPrincipal(position) {
+    return position.type === Position.TYPE.PRINCIPAL
   }
 
   iconUrl() {
@@ -118,5 +224,27 @@ export default class Position extends Model {
     } else {
       return POSITIONS_ICON
     }
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    // Fill if necessary
+  ]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    // Filter formCustomFields in associatedPositions
+    if (obj.associatedPositions) {
+      obj.associatedPositions = obj.associatedPositions.map(ap =>
+        Position.filterClientSideFields(ap)
+      )
+    }
+    return Model.filterClientSideFields(
+      obj,
+      ...Position.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Position.filterClientSideFields(this, ...additionalFields)
   }
 }

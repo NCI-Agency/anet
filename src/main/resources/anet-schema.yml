@@ -45,6 +45,10 @@ $defs:
           type: string
           title: The bootstrap component class
           description: Used to determine how the user interface of this particular field looks.
+        maxTextFieldLength:
+          type: integer
+          minimum: 1
+          description: Used in the UI for a text input field's maximum input length.
         style:
           type: object
           title: Optional styling for the bootstrap component class
@@ -90,6 +94,17 @@ $defs:
         type: string
       componentClass:
         type: string
+      filters:
+        type: array
+        uniqueItems: true
+        items:
+          type: object
+          title: filterType
+          properties:
+            filterField:
+              type: string
+            filterValue:
+              type: [array, string, number, boolean]
       validations:
         type: array
         items:
@@ -122,8 +137,8 @@ $defs:
                   type: string
                   enum: [sum, avg, min, max]
               required: [aggregationType]
-# TODO: The following properties should not be here as these are only dependency fields.
-# When we have proper handling of `unevaluatedProperties` this section can be removed.
+      # TODO: The following properties should not be here as these are only dependency fields.
+      # When we have proper handling of `unevaluatedProperties` this section can be removed.
       choices:
         type: object
       addButtonLabel:
@@ -152,6 +167,10 @@ $defs:
               type: number
             label:
               type: string
+      authorizationGroupUuids:
+        type: array
+      tooltipText:
+        type: string
 
     dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
       type:
@@ -242,6 +261,21 @@ $defs:
         type: object
         additionalProperties:
           "$ref": "#/$defs/customField"
+
+# definition for custom sensitive information
+  customSensitiveInformation:
+    allOf:
+    - "$ref": "#/$defs/customField"
+    - properties:
+        tooltipText:
+          type: string
+        authorizationGroupUuids:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            type: string
+            description: The list of authorizationGroup uuid's that have access to this custom sensitive information
 
 #########################################################
 ### schema root
@@ -340,6 +374,20 @@ properties:
                 title: The long date/time format if `engagementsIncludeTimeAndDuration` is `true`
                 description: Used to show the report engagement date/time in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998 @ 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
 
+  printOptions:
+    type: object
+    additionalProperties: false
+    required: [sensitiveInformationText]
+    properties:
+      sensitiveInformationText:
+        type: string
+        title: Classification text for printed documents
+        description: Used to indicate the printed document contains sensitive information
+      sensitiveInformationTooltipText:
+        type: string
+        title: Tooltip text for extra information about releasability
+        description: Used to inform the user about the releasability of the document
+
   reportWorkflow:
     type: object
     additionalProperties: false
@@ -430,6 +478,11 @@ properties:
         additionalProperties: false
         required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
         properties:
+          canUnpublishReports:
+            type: boolean
+            default: false
+            title: Whether reports can be unpublished
+            description: Used for reports; if set to `true`, admins can change report state from published to draft
           intent:
             type: string
             title: The label for a report's intent
@@ -447,9 +500,7 @@ properties:
             title: The label for a report's cancelled
             description: Used in the UI where a report's cancelled is shown.
           nextSteps:
-            type: string
-            title: The label for report's next steps
-            description: Used in the UI where report's next steps are shown.
+            "$ref": "#/$defs/inputField"
           keyOutcomes:
             type: string
             title: The label for report's key outcomes
@@ -466,7 +517,7 @@ properties:
       person:
         type: object
         additionalProperties: false
-        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate]
+        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, position, prevPositions]
         properties:
           firstName:
             type: string
@@ -476,6 +527,14 @@ properties:
             type: string
             title: The label for a person's last name
             description: Used in the UI where a person's last name is shown.
+          position:
+            type: string
+            title: The label for person's current position
+            description: Used in Person page UI where a person's position is shown.
+          prevPositions:
+            type: string
+            title: The label for person's previous positions
+            description: Used in Person page UI where a person's previous positions are shown.
           domainUsername:
             type: string
             title: The label for a person's domain username
@@ -512,10 +571,18 @@ properties:
             type: string
             title: The label for a person's end of tour date
             description: Used in the UI where a person's end of tour date is shown.
+          biography:
+            type: string
+            title: The label for a person's biography
+            description: Used in the UI where a person's biography is shown.
           customFields:
             type: object
             additionalProperties:
               "$ref": "#/$defs/customField"
+          customSensitiveInformation:
+            type: object
+            additionalProperties:
+              "$ref": "#/$defs/customSensitiveInformation"
 
       location:
         type: object
@@ -524,8 +591,8 @@ properties:
         properties:
           format:
             type: string
+            title: Default format for location
             enum: [LAT_LON, MGRS]
-            title: Coordinate format for location
             description: Used in the UI where a location's coordinate is shown. Defaults to LAT_LON.
           customFields:
             type: object
@@ -573,7 +640,7 @@ properties:
           person:
             type: object
             additionalProperties: false
-            required: [name, countries]
+            required: [name, countries, numberOfFieldsInLeftColumn, showPageOrderedFields]
             properties:
               name:
                 type: string
@@ -588,7 +655,16 @@ properties:
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for
                     a person inside an advisor organization.
-
+              showPageOrderedFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  description: Ordered fields to show in Person Page in the Person info section
+              numberOfFieldsInLeftColumn:
+                type: number
+                description: Used for dividing fields into 2 columns, make sure the columns are balanced
           position:
             type: object
             additionalProperties: false
@@ -632,7 +708,7 @@ properties:
           person:
             type: object
             additionalProperties: false
-            required: [name, countries]
+            required: [name, countries, numberOfFieldsInLeftColumn, showPageOrderedFields]
             properties:
               name:
                 type: string
@@ -646,6 +722,16 @@ properties:
                   type: string
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
+              showPageOrderedFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  description: Ordered fields to show in Person Page in the Person info section
+              numberOfFieldsInLeftColumn:
+                type: number
+                description: Used for dividing fields into 2 columns, make sure the columns are balanced
               assessments:
                 type: array
                 items:

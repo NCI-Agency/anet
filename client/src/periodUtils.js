@@ -1,7 +1,8 @@
 import moment from "moment"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useLayoutEffect } from "react"
 import { momentObj } from "react-moment-proptypes"
+import useDimensions from "react-use-dimensions"
 
 const ASSESSMENT_PERIOD_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -153,13 +154,13 @@ export const PERIOD_FACTORIES = {
 
 export const getPeriodsConfig = (
   recurrence,
-  numberOfperiods,
+  numberOfPeriods,
   offset,
   forAssessments = false
 ) => {
   const now = moment()
   const periods = []
-  for (let i = numberOfperiods - 1; i >= 0; i--) {
+  for (let i = numberOfPeriods - 1; i >= 0; i--) {
     const periodDetails = PERIOD_FACTORIES[recurrence](now, offset + i)
     if (forAssessments) {
       // only allow assessments for past periods
@@ -233,4 +234,68 @@ PeriodsTableHeader.propTypes = {
     AssessmentPeriodsConfigPropType,
     PeriodsConfigPropType
   ])
+}
+
+export function getOverlappingPeriodIndexes(inputPeriods) {
+  const overlappingDateIndexes = []
+  const periods = inputPeriods || []
+
+  for (let i = 0; i < periods.length; i++) {
+    // end time being null means it is still continuing, might as well pick a large number for it
+    const endTime1 = periods[i].endTime || Infinity
+    // Search against other periods
+    for (let j = i + 1; j < periods.length; j++) {
+      const endTime2 = periods[j].endTime || Infinity
+      if (periods[i].startTime < endTime2 && endTime1 > periods[j].startTime) {
+        overlappingDateIndexes.push([i, j])
+      }
+    }
+  }
+
+  return overlappingDateIndexes
+}
+
+const SCREEN_SIZES = {
+  largeLowLimit: 1000,
+  midLowLimit: 600
+  // further lower is small, no need for a limit
+}
+
+const SCREEN_SIZE_TO_PERIOD_NUMBER = {
+  large: {
+    isMatch: width => width >= SCREEN_SIZES.largeLowLimit,
+    num: 3
+  },
+  mid: {
+    isMatch: width =>
+      width > SCREEN_SIZES.midLowLimit && width < SCREEN_SIZES.largeLowLimit,
+    num: 2
+  },
+  small: {
+    isMatch: width => width <= SCREEN_SIZES.midLowLimit,
+    num: 1
+  }
+}
+
+function getPeriodNumberForScreen(width) {
+  for (const { isMatch, num } of Object.values(SCREEN_SIZE_TO_PERIOD_NUMBER)) {
+    if (isMatch(width)) {
+      return num
+    }
+  }
+  throw new Error(
+    "Invalid width or screen sizes are not continuous. width= ",
+    width
+  )
+}
+
+export const useResponsiveNumberOfPeriods = setNumberOfPeriods => {
+  const [contRef, dimensions] = useDimensions()
+  useLayoutEffect(() => {
+    if (dimensions?.width) {
+      const containerWidth = dimensions.width
+      setNumberOfPeriods(getPeriodNumberForScreen(containerWidth))
+    }
+  }, [setNumberOfPeriods, dimensions])
+  return contRef
 }

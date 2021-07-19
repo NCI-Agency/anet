@@ -1,6 +1,8 @@
+import API from "api"
 import Model, {
   createCustomFieldsSchema,
   GRAPHQL_NOTES_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT,
   yupDate
 } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -34,10 +36,20 @@ export default class Person extends Model {
   static principalAssessmentConfig =
     Settings.fields.principal.person.assessments
 
+  static customFields = Settings.fields.person.customFields
+
+  static customSensitiveInformation =
+    Settings.fields.person.customSensitiveInformation
+
   // create yup schema for the customFields, based on the customFields config
-  static customFieldsSchema = createCustomFieldsSchema(
-    Settings.fields.person.customFields
+  static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
+  static sensitiveFieldsSchema = createCustomFieldsSchema(
+    Person.customSensitiveInformation,
+    SENSITIVE_CUSTOM_FIELDS_PARENT
   )
+
+  static principalShowPageOrderedFields = Person.initShowPageFieldsOrdered(true)
+  static advisorShowPageOrderedFields = Person.initShowPageFieldsOrdered(false)
 
   static yupSchema = yup
     .object()
@@ -154,12 +166,17 @@ export default class Person extends Model {
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Person.customFieldsSchema)
+    .concat(Person.sensitiveFieldsSchema)
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
     "uuid name rank role status endOfTourDate avatar(size: 32) position { uuid name type code status organization { uuid shortName identificationCode } location { uuid name } }"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
+
+  constructor(props) {
+    super(Model.fillObject(props, Person.yupSchema))
+  }
 
   static humanNameOfRole(role) {
     if (role === Person.ROLE.ADVISOR) {
@@ -173,10 +190,6 @@ export default class Person extends Model {
 
   static humanNameOfStatus(status) {
     return utils.sentenceCase(status)
-  }
-
-  constructor(props) {
-    super(Model.fillObject(props, Person.yupSchema))
   }
 
   humanNameOfRole() {
@@ -326,6 +339,88 @@ export default class Person extends Model {
     }
   }
 
+  getNumberOfFieldsInLeftColumn() {
+    return this.isPrincipal()
+      ? Settings.fields.principal.person.numberOfFieldsInLeftColumn
+      : Settings.fields.advisor.person.numberOfFieldsInLeftColumn
+  }
+
+  getShowPageFieldsOrdered() {
+    return this.isPrincipal()
+      ? Person.principalShowPageOrderedFields
+      : Person.advisorShowPageOrderedFields
+  }
+
+  static initShowPageFieldsOrdered(isPrincipal) {
+    const fieldsArrayFromConfig = isPrincipal
+      ? Settings.fields.principal.person.showPageOrderedFields
+      : Settings.fields.advisor.person.showPageOrderedFields
+
+    return Person.filterInvalidShowPageFields(
+      fieldsArrayFromConfig || [],
+      isPrincipal
+    )
+  }
+
+  static filterInvalidShowPageFields(fieldsArrayFromConfig, isPrincipal) {
+    return fieldsArrayFromConfig.filter(field => {
+      if (
+        Settings.fields.person[field] ||
+        Settings.fields.person?.customFields?.[field] ||
+        Settings.fields.person?.customSensitiveInformation?.[field]
+      ) {
+        return true
+      }
+      API.logOnServer(
+        "WARN",
+        "Person.js",
+        366,
+        `Wrong field name in dictionary.fields.${
+          isPrincipal ? "principal" : "advisor"
+        }.showPageOrderedFields, field name: ${field}`
+      )
+      return false
+    })
+  }
+
+  getNormalFieldsOrdered() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out custom fields
+        .filter(
+          key =>
+            !Person?.customFields?.[key] &&
+            !Person?.customSensitiveInformation?.[key]
+        )
+    )
+  }
+
+  // we want custom fields as an object not array so we can parse it using existing code
+  getCustomFieldsOrderedAsObject() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out non-custom fields
+        .filter(key => Person?.customFields?.[key])
+        .reduce((accum, key) => {
+          accum[key] = Person.customFields[key]
+          return accum
+        }, {})
+    )
+  }
+
+  // we want custom fields as an object not array so we can parse it using existing code
+  getSensitiveFieldsOrderedAsObject() {
+    return (
+      this.getShowPageFieldsOrdered()
+        // filter out non-custom fields
+        .filter(key => Person?.customSensitiveInformation?.[key])
+        .reduce((accum, key) => {
+          accum[key] = Person.customSensitiveInformation[key]
+          return accum
+        }, {})
+    )
+  }
+
   generalAssessmentsConfig() {
     let config
     if (this.isAdvisor()) {
@@ -334,5 +429,42 @@ export default class Person extends Model {
       config = Person.principalAssessmentConfig
     }
     return config || []
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = ["firstName", "lastName"]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Model.filterClientSideFields(
+      obj,
+      ...Person.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Person.filterClientSideFields(this, ...additionalFields)
+  }
+
+  static isAuthorized(user, customSensitiveInformationField, position) {
+    if (Model.isAuthorized(user, customSensitiveInformationField)) {
+      return true
+    }
+    // Else user has to be counterpart
+    return user?.position?.associatedPositions?.find(
+      pos => pos.uuid === position.uuid
+    )
+  }
+
+  static getAuthorizedSensitiveFields(
+    user,
+    customSensitiveInformation,
+    position
+  ) {
+    return Model.getAuthorizedSensitiveFields(
+      Person.isAuthorized,
+      user,
+      customSensitiveInformation,
+      position
+    )
   }
 }

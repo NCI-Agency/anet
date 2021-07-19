@@ -192,7 +192,7 @@ const reportTour = (currentUser, history) => {
         ]
         : []),
       {
-        title: Settings.fields.report.nextSteps,
+        title: Settings.fields.report.nextSteps.label,
         content:
           "Here, tell readers about the next concrete steps that you'll be taking to build on the progress made in your engagement. This will be displayed in your report's summary, so include information that will explain to leadership what you are doing next, as a result of your meeting's outcomes.",
         target: "#nextSteps",
@@ -370,7 +370,7 @@ const personTour = (currentUser, history) => {
         title: "Current assigned position",
         content:
           "This section tells you which position this person is currently in. If you need to remove them from this position, or assign them to a different position, you can do so from here.",
-        target: "#current-position h2",
+        target: "#current-position",
         placement: "top"
       },
       {
