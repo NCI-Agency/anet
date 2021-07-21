@@ -69,7 +69,7 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
     // update m2m objects where we don't already have the same object for the winnerUuid
     final String sqlUpdateFormat = "UPDATE \"%1$s\" SET \"%3$s\" = :winnerUuid"
         + " WHERE \"%3$s\" = :loserUuid AND \"%2$s\" NOT IN ("
-        + "SELECT \"%2$s\" FROM \"%1$s\" WHERE \"%3$s\" = :winnerUuid" + ")";
+        + "SELECT \"%2$s\" FROM \"%1$s\" WHERE \"%3$s\" = :winnerUuid)";
     getDbHandle()
         .createUpdate(
             String.format(sqlUpdateFormat, tableName, mainObjectFieldName, relatedObjectFieldName))

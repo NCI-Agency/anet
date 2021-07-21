@@ -107,11 +107,11 @@ public abstract class AbstractPositionSearcher
     }
 
     if (query.getHasCounterparts()) {
-      qb.addWhereClause("("
-          + "positions.uuid IN (SELECT \"positionUuid_a\" FROM \"positionRelationships\""
-          + " WHERE \"positionUuid_b\" IS NOT NULL AND deleted = :deleted)"
-          + " OR positions.uuid IN (" + "SELECT \"positionUuid_b\" FROM \"positionRelationships\""
-          + " WHERE \"positionUuid_a\" IS NOT NULL AND deleted = :deleted))");
+      qb.addWhereClause(
+          "(positions.uuid IN (SELECT \"positionUuid_a\" FROM \"positionRelationships\""
+              + " WHERE \"positionUuid_b\" IS NOT NULL AND deleted = :deleted)"
+              + " OR positions.uuid IN (SELECT \"positionUuid_b\" FROM \"positionRelationships\""
+              + " WHERE \"positionUuid_a\" IS NOT NULL AND deleted = :deleted))");
       qb.addSqlArg("deleted", false);
     }
 
