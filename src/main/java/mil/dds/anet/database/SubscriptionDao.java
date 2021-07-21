@@ -104,7 +104,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
         + " SET \"updatedAt\" = :updatedAt WHERE ");
     final String paramObjectTypeTpl = "objectType%1$d";
     final String stmtTpl =
-        "( \"subscribedObjectType\" = :%1$s" + " AND \"subscribedObjectUuid\" IN ( %2$s ) )";
+        "( \"subscribedObjectType\" = :%1$s AND \"subscribedObjectUuid\" IN ( %2$s ) )";
     final List<String> stmts = new ArrayList<>();
     final Map<String, Object> params = new HashMap<>();
     final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
@@ -135,7 +135,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
             + " FROM subscriptions s WHERE ");
     final String paramObjectTypeTpl = "objectType%1$d";
     final String stmtTpl =
-        "( \"subscribedObjectType\" = :%1$s" + " AND \"subscribedObjectUuid\" IN ( %2$s ) )";
+        "( \"subscribedObjectType\" = :%1$s AND \"subscribedObjectUuid\" IN ( %2$s ) )";
     final List<String> stmts = new ArrayList<>();
     final Map<String, Object> params = new HashMap<>();
     final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
@@ -164,7 +164,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
   public boolean isSubscribedObject(Map<String, Object> context, String subscribedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position position = user.loadPosition();
-    final String sql = "/* isSubscribedObject */ SELECT COUNT(*) AS count" + " FROM subscriptions"
+    final String sql = "/* isSubscribedObject */ SELECT COUNT(*) AS count FROM subscriptions"
         + " WHERE \"subscriberUuid\" = :subscriberUuid"
         + " AND \"subscribedObjectUuid\" = :subscribedObjectUuid";
     final List<Map<String, Object>> rs =

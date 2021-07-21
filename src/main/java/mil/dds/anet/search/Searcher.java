@@ -37,7 +37,7 @@ public abstract class Searcher implements ISearcher {
       SubscriptionUpdateGroup subscriptionUpdate) {
     final String paramObjectTypeTpl = "objectType%1$d";
     final String stmtTpl =
-        "( \"subscribedObjectType\" = :%1$s" + " AND \"subscribedObjectUuid\" IN ( %2$s ) )";
+        "( \"subscribedObjectType\" = :%1$s AND \"subscribedObjectUuid\" IN ( %2$s ) )";
     final List<String> stmts = new ArrayList<>();
     final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
     while (iter.hasNext()) {
@@ -49,7 +49,7 @@ public abstract class Searcher implements ISearcher {
       }
     }
     final String sql =
-        "EXISTS ( SELECT uuid FROM subscriptions WHERE " + "\"subscriberUuid\" = :subscriberUuid "
+        "EXISTS ( SELECT uuid FROM subscriptions WHERE \"subscriberUuid\" = :subscriberUuid "
             + "AND ( " + Joiner.on(" OR ").join(stmts) + " ) )";
     final Position position = user.loadPosition();
     args.put("subscriberUuid", DaoUtils.getUuid(position));

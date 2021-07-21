@@ -979,14 +979,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid");
     // update reportPeople
     update.stmts.add(new SubscriptionUpdateStatement("people",
-        "SELECT \"personUuid\"" + " FROM \"reportPeople\"" + " WHERE \"reportUuid\" = "
+        "SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
             + paramOrJoin("reports.uuid", isParam),
         // param is already added above
         Collections.emptyMap()));
     // update reportPeople positions
     update.stmts.add(new SubscriptionUpdateStatement("positions",
-        "SELECT uuid" + " FROM positions" + " WHERE \"currentPersonUuid\" in ("
-            + "   SELECT \"personUuid\"" + "   FROM \"reportPeople\"" + "   WHERE \"reportUuid\" = "
+        "SELECT uuid FROM positions WHERE \"currentPersonUuid\" in ("
+            + " SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
             + paramOrJoin("reports.uuid", isParam) + " )",
         // param is already added above
         Collections.emptyMap()));
@@ -1000,7 +1000,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
             "organizations", "reports.principalOrganizationUuid"));
     // update tasks
     update.stmts.add(new SubscriptionUpdateStatement("tasks",
-        "SELECT \"taskUuid\"" + " FROM \"reportTasks\"" + " WHERE \"reportUuid\" = "
+        "SELECT \"taskUuid\" FROM \"reportTasks\" WHERE \"reportUuid\" = "
             + paramOrJoin("reports.uuid", isParam),
         // param is already added above
         Collections.emptyMap()));
