@@ -95,14 +95,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
   private static final String POSITION_FIELDS = "{ uuid isApprover person { uuid } }";
   private static final String REPORT_FIELDS =
       "uuid intent exsum state cancelledReason atmosphere atmosphereDetails"
-          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText createdAt updatedAt"
-          + " customFields";
+          + " engagementDate duration engagementDayOfWeek keyOutcomes nextSteps reportText"
+          + " createdAt updatedAt customFields";
   private static final String ROLLUP_FIELDS =
       String.format("{ org { %1$s } published cancelled }", _ORGANIZATION_FIELDS);
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("{ %1$s customFieldRef1 { %1$s } }", _TASK_FIELDS);
-  private static final String FIELDS = String.format(
+  protected static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s principalOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
           + " comments %6$s authorizationGroups { uuid name }"
