@@ -110,7 +110,7 @@ public class GraphQlResource {
       @Override
       public ResponseBuilder apply(final Map<String, Object> json) {
         return Response.ok(xlsxTransformer.apply(json), this.mediaType)
-            .header("Content-Disposition", "attachment; filename=" + "anet_export.xslx");
+            .header("Content-Disposition", "attachment; filename=anet_export.xslx");
       }
     });
 
