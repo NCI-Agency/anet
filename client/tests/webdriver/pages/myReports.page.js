@@ -7,12 +7,18 @@ class MyReports extends Page {
     super.openAsAdminUser(PAGE_URL)
   }
 
-  getReportUrl(urlText) {
+  selectReport(linkText) {
     const tableTab = browser.$(
       "#published-reports .report-collection div header div button[value='table']"
     )
+    tableTab.waitForExist()
+    tableTab.waitForDisplayed()
     tableTab.click()
-    return $(`*=${urlText}`).getAttribute("href")
+    const reportLink = browser.$(`*=${linkText}`)
+    reportLink.waitForExist()
+    reportLink.waitForDisplayed()
+    reportLink.click()
+    super.waitUntilLoaded()
   }
 }
 
