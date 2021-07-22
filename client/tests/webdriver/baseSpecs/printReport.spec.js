@@ -6,9 +6,7 @@ import ShowReport from "../pages/showReport.page"
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open()
-    ShowReport.openAsAdminUser(
-      MyReports.getReportUrl("A test report from Arthur")
-    )
+    MyReports.selectReport("A test report from Arthur")
     ShowReport.compactViewButton.click()
     ShowReport.compactView.waitForExist()
     ShowReport.compactView.waitForDisplayed()
