@@ -50,16 +50,20 @@ class Page {
     this.waitForLoginForm()
   }
 
-  _open(pathName, credentials) {
-    browser.url(pathName)
-    if (this.loginForm.isExisting()) {
-      this.login(credentials)
-    }
+  waitUntilLoaded() {
     browser.$("div.loader").waitForExist({
       timeout: 30000,
       reverse: true,
       timeoutMsg: "Expected everything to be loaded by now"
     })
+  }
+
+  _open(pathName, credentials) {
+    browser.url(this._buildUrl(pathName, credentials))
+    if (this.loginForm.isExisting()) {
+      this.login(credentials)
+    }
+    this.waitUntilLoaded()
   }
 
   open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
