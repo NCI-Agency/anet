@@ -87,7 +87,7 @@
     "json-loader": "0.5.7",
     "mini-css-extract-plugin": "2.1.0",
     "moment-timezone": "0.5.33",
-    "postcss": "8.3.5",
+    "postcss": "8.3.6",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "6.1.1",
     "prettier-eslint-cli": "5.0.1",
