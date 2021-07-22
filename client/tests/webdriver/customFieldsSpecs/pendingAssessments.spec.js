@@ -28,6 +28,7 @@ describe("In my counterparts page", () => {
       )
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
+      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
       const modalContent = AssessmentsSection.modalContent
       modalContent.waitForDisplayed()
       AssessmentsSection.modalTitle.waitForDisplayed()
@@ -67,6 +68,7 @@ describe("In my counterparts page", () => {
       )
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
+      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
       const modalContent = AssessmentsSection.modalContent
       modalContent.waitForDisplayed()
       AssessmentsSection.modalTitle.waitForDisplayed()
@@ -116,6 +118,7 @@ describe("In my tasks page", () => {
       )
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
+      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
       const modalContent = AssessmentsSection.modalContent
       modalContent.waitForDisplayed()
       AssessmentsSection.modalTitle.waitForDisplayed()
@@ -139,6 +142,7 @@ describe("In my tasks page", () => {
       )
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
+      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
       const modalContent = AssessmentsSection.modalContent
       modalContent.waitForDisplayed()
       AssessmentsSection.modalTitle.waitForDisplayed()
