@@ -143,7 +143,7 @@ const MySubscriptionUpdates = ({ pageDispatchers }) => {
                 <th />
                 <th>Subscription</th>
                 <th>Updated</th>
-                <th>By</th>
+                <th>Through</th>
               </tr>
             </thead>
             <tbody>
