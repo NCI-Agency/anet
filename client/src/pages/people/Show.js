@@ -288,9 +288,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 />
               )}
 
-              {person.uuid === currentUser.uuid && (
-                <MySubscriptions uuid={person.position.uuid} />
-              )}
+              {person.uuid === currentUser.uuid && <MySubscriptions />}
 
               {hasPosition && (
                 <Fieldset
