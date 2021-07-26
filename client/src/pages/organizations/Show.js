@@ -15,7 +15,6 @@ import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -287,14 +286,12 @@ const OrganizationShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(organization.isSubscribed, () =>
-                      toggleSubscription(
-                        "organizations",
-                        organization.uuid,
-                        organization.isSubscribed,
-                        organization.updatedAt,
-                        refetch
-                      )
+                    {getSubscriptionIcon(
+                      "organizations",
+                      organization.uuid,
+                      organization.isSubscribed,
+                      organization.updatedAt,
+                      refetch
                     )}{" "}
                     Organization {organization.shortName}
                   </>

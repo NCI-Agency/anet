@@ -130,7 +130,13 @@ const applySearchProps = (setSearchProps, searchProps) => {
   }
 }
 
-export const getSubscriptionIcon = (isSubscribed, onClick) => {
+export const getSubscriptionIcon = (
+  subscribedObjectType,
+  subscribedObjectUuid,
+  isSubscribed,
+  updatedAt,
+  refetch
+) => {
   const tooltip = isSubscribed ? "Click to unsubscribe" : "Click to subscribe"
   const icon = isSubscribed ? IconNames.FEED_SUBSCRIBED : IconNames.FEED
   // or perhaps: const icon = isSubscribed ? IconNames.EYE_ON : IconNames.EYE_OFF
@@ -144,13 +150,21 @@ export const getSubscriptionIcon = (isSubscribed, onClick) => {
         icon={icon}
         color={color}
         style={{ verticalAlign: "middle", cursor: "pointer" }}
-        onClick={onClick}
+        onClick={() =>
+          toggleSubscription(
+            subscribedObjectType,
+            subscribedObjectUuid,
+            isSubscribed,
+            updatedAt,
+            refetch
+          )
+        }
       />
     </OverlayTrigger>
   )
 }
 
-export const toggleSubscription = (
+const toggleSubscription = (
   subscribedObjectType,
   subscribedObjectUuid,
   isSubscribed,

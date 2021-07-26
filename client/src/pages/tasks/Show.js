@@ -13,7 +13,6 @@ import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -211,14 +210,12 @@ const TaskShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(task.isSubscribed, () =>
-                      toggleSubscription(
-                        "tasks",
-                        task.uuid,
-                        task.isSubscribed,
-                        task.updatedAt,
-                        refetch
-                      )
+                    {getSubscriptionIcon(
+                      "tasks",
+                      task.uuid,
+                      task.isSubscribed,
+                      task.updatedAt,
+                      refetch
                     )}{" "}
                     {fieldSettings.shortLabel} {task.shortName}
                   </>

@@ -15,7 +15,6 @@ import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
@@ -108,14 +107,12 @@ const LocationShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(location.isSubscribed, () =>
-                      toggleSubscription(
-                        "locations",
-                        location.uuid,
-                        location.isSubscribed,
-                        location.updatedAt,
-                        refetch
-                      )
+                    {getSubscriptionIcon(
+                      "locations",
+                      location.uuid,
+                      location.isSubscribed,
+                      location.updatedAt,
+                      refetch
                     )}{" "}
                     Location {location.name}
                   </>

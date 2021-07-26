@@ -23,7 +23,6 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
@@ -502,14 +501,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 title={
                   <>
                     {(report.isPublished() || report.isCancelled()) &&
-                      getSubscriptionIcon(report.isSubscribed, () =>
-                        toggleSubscription(
-                          "reports",
-                          report.uuid,
-                          report.isSubscribed,
-                          report.updatedAt,
-                          refetch
-                        )
+                      getSubscriptionIcon(
+                        "reports",
+                        report.uuid,
+                        report.isSubscribed,
+                        report.updatedAt,
+                        refetch
                       )}{" "}
                     Report #{report.uuid}
                   </>

@@ -25,7 +25,6 @@ import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -244,14 +243,12 @@ const PersonShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(person.isSubscribed, () =>
-                      toggleSubscription(
-                        "people",
-                        person.uuid,
-                        person.isSubscribed,
-                        person.updatedAt,
-                        refetch
-                      )
+                    {getSubscriptionIcon(
+                      "people",
+                      person.uuid,
+                      person.isSubscribed,
+                      person.updatedAt,
+                      refetch
                     )}{" "}
                     {person.rank} {person.name}
                   </>

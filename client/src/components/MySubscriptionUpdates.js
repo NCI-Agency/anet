@@ -6,7 +6,6 @@ import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  toggleSubscription,
   useBoilerplate
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
@@ -212,14 +211,12 @@ const MySubscriptionUpdates = ({ pageDispatchers }) => {
                 return (
                   <tr key={key}>
                     <td>
-                      {getSubscriptionIcon(true, () =>
-                        toggleSubscription(
-                          subscription.subscribedObjectType,
-                          subscription.subscribedObjectUuid,
-                          true,
-                          null,
-                          refetch
-                        )
+                      {getSubscriptionIcon(
+                        subscription.subscribedObjectType,
+                        subscription.subscribedObjectUuid,
+                        true,
+                        null,
+                        refetch
                       )}
                     </td>
                     <td>{linkToSubscription}</td>
