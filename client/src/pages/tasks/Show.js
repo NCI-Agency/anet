@@ -11,6 +11,7 @@ import Messages from "components/Messages"
 import Model from "components/Model"
 import {
   getSubscriptionIcon,
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
@@ -24,7 +25,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -136,6 +137,10 @@ const TaskShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
@@ -172,9 +177,6 @@ const TaskShow = ({ pageDispatchers }) => {
   const ProjectedCompletionField = DictionaryField(Field)
   const TaskCustomFieldEnum1 = DictionaryField(Field)
   const TaskCustomFieldEnum2 = DictionaryField(Field)
-
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
 
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
@@ -215,7 +217,11 @@ const TaskShow = ({ pageDispatchers }) => {
                       task.uuid,
                       task.isSubscribed,
                       task.updatedAt,
-                      refetch
+                      refetch,
+                      error => {
+                        setStateError(error)
+                        jumpToTop()
+                      }
                     )}{" "}
                     {fieldSettings.shortLabel} {task.shortName}
                   </>

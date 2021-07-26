@@ -13,6 +13,7 @@ import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   getSubscriptionIcon,
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
@@ -137,6 +138,10 @@ const GQL_GET_ORGANIZATION = gql`
 const OrganizationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
@@ -164,8 +169,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
@@ -291,7 +294,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
                       organization.uuid,
                       organization.isSubscribed,
                       organization.updatedAt,
-                      refetch
+                      refetch,
+                      error => {
+                        setStateError(error)
+                        jumpToTop()
+                      }
                     )}{" "}
                     Organization {organization.shortName}
                   </>

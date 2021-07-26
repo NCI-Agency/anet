@@ -2,6 +2,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
 import {
   getSubscriptionIcon,
   mapPageDispatchersToProps,
@@ -89,6 +90,7 @@ const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
 `
 
 const MySubscriptionUpdates = ({ pageDispatchers }) => {
+  const [saveError, setSaveError] = useState(null)
   const [pageNum, setPageNum] = useState(0)
   const subscriptionUpdatesQuery = {
     pageNum: pageNum,
@@ -118,6 +120,7 @@ const MySubscriptionUpdates = ({ pageDispatchers }) => {
 
   return (
     <Fieldset title="My Subscription Updates">
+      <Messages error={saveError} />
       {subscriptionUpdatesExist ? (
         <div>
           <UltimatePagination
@@ -216,7 +219,8 @@ const MySubscriptionUpdates = ({ pageDispatchers }) => {
                         subscription.subscribedObjectUuid,
                         true,
                         null,
-                        refetch
+                        refetch,
+                        error => setSaveError(error)
                       )}
                     </td>
                     <td>{linkToSubscription}</td>

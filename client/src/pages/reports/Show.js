@@ -506,7 +506,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         report.uuid,
                         report.isSubscribed,
                         report.updatedAt,
-                        refetch
+                        refetch,
+                        error => {
+                          setSaveError(error)
+                          jumpToTop()
+                        }
                       )}{" "}
                     Report #{report.uuid}
                   </>

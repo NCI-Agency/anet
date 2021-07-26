@@ -13,6 +13,7 @@ import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   getSubscriptionIcon,
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
@@ -23,7 +24,7 @@ import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -41,6 +42,10 @@ const LocationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
@@ -62,8 +67,6 @@ const LocationShow = ({ pageDispatchers }) => {
     )
   }
   const location = new Location(data ? data.location : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
 
   return (
@@ -112,7 +115,11 @@ const LocationShow = ({ pageDispatchers }) => {
                       location.uuid,
                       location.isSubscribed,
                       location.updatedAt,
-                      refetch
+                      refetch,
+                      error => {
+                        setStateError(error)
+                        jumpToTop()
+                      }
                     )}{" "}
                     Location {location.name}
                   </>

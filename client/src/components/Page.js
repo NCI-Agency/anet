@@ -135,7 +135,8 @@ export const getSubscriptionIcon = (
   subscribedObjectUuid,
   isSubscribed,
   updatedAt,
-  refetch
+  refetch,
+  setError
 ) => {
   const tooltip = isSubscribed ? "Click to unsubscribe" : "Click to subscribe"
   const icon = isSubscribed ? IconNames.FEED_SUBSCRIBED : IconNames.FEED
@@ -156,7 +157,8 @@ export const getSubscriptionIcon = (
             subscribedObjectUuid,
             isSubscribed,
             updatedAt,
-            refetch
+            refetch,
+            setError
           )
         }
       />
@@ -169,7 +171,8 @@ const toggleSubscription = (
   subscribedObjectUuid,
   isSubscribed,
   updatedAt,
-  refetch
+  refetch,
+  setError
 ) => {
   const variables = isSubscribed
     ? { subscribedObjectUuid }
@@ -183,5 +186,7 @@ const toggleSubscription = (
   return API.mutation(
     isSubscribed ? GQL_DELETE_OBJECT_SUBSCRIPTION : GQL_CREATE_SUBSCRIPTION,
     variables
-  ).then(data => refetch())
+  )
+    .then(data => refetch())
+    .catch(error => typeof setError === "function" && setError(error))
 }

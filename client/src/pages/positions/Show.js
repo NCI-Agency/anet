@@ -156,7 +156,11 @@ const PositionShow = ({ pageDispatchers }) => {
                       position.uuid,
                       position.isSubscribed,
                       position.updatedAt,
-                      refetch
+                      refetch,
+                      error => {
+                        setStateError(error)
+                        jumpToTop()
+                      }
                     )}{" "}
                     Position {position.name}
                   </>

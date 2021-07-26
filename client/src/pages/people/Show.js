@@ -23,6 +23,7 @@ import {
 import MySubscriptions from "components/MySubscriptions"
 import {
   getSubscriptionIcon,
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
@@ -116,6 +117,10 @@ const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const history = useHistory()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
     showAssociatedPositionsModal,
@@ -149,8 +154,6 @@ const PersonShow = ({ pageDispatchers }) => {
     }
   }
   const person = new Person(data ? data.person : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
@@ -248,7 +251,11 @@ const PersonShow = ({ pageDispatchers }) => {
                       person.uuid,
                       person.isSubscribed,
                       person.updatedAt,
-                      refetch
+                      refetch,
+                      error => {
+                        setStateError(error)
+                        jumpToTop()
+                      }
                     )}{" "}
                     {person.rank} {person.name}
                   </>
