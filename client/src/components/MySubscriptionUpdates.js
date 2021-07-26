@@ -207,7 +207,7 @@ const MySubscriptionUpdates = ({ pageDispatchers }) => {
                     <span>Note on {linkToUpdatedObject}</span>
                   )
                 }
-                const key = `${subscriptionUpdate.createdAt}:${subscriptionUpdate.updatedObjectType}:${subscriptionUpdate.updatedObjectUuid}`
+                const key = `${subscriptionUpdate.createdAt}:${subscription.uuid}`
                 return (
                   <tr key={key}>
                     <td>
