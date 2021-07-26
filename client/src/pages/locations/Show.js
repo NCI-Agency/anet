@@ -18,9 +18,7 @@ import {
   toggleSubscription,
   useBoilerplate
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
@@ -35,46 +33,7 @@ import utils from "utils"
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
     location(uuid: $uuid) {
-      uuid
-      name
-      type
-      lat
-      lng
-      status
-      isSubscribed
-      updatedAt
-      planningApprovalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            role
-            avatar(size: 32)
-          }
-        }
-      }
-      approvalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            role
-            avatar(size: 32)
-          }
-        }
-      }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
+      ${Location.allFieldsQuery}
     }
   }
 `
