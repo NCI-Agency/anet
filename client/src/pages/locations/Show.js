@@ -12,10 +12,10 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
-  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
@@ -110,17 +110,20 @@ const LocationShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      "locations",
-                      location.uuid,
-                      location.isSubscribed,
-                      location.updatedAt,
-                      refetch,
-                      error => {
-                        setStateError(error)
-                        jumpToTop()
-                      }
-                    )}{" "}
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="locations"
+                        subscribedObjectUuid={location.uuid}
+                        isSubscribed={location.isSubscribed}
+                        updatedAt={location.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
                     Location {location.name}
                   </>
                 }

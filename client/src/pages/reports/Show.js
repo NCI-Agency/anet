@@ -19,10 +19,10 @@ import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import {
   AnchorLink,
-  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
@@ -500,18 +500,20 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {(report.isPublished() || report.isCancelled()) &&
-                      getSubscriptionIcon(
-                        "reports",
-                        report.uuid,
-                        report.isSubscribed,
-                        report.updatedAt,
-                        refetch,
-                        error => {
+                    {(report.isPublished() || report.isCancelled()) && (
+                      <SubscriptionIcon
+                        subscribedObjectType="reports"
+                        subscribedObjectUuid={report.uuid}
+                        isSubscribed={report.isSubscribed}
+                        updatedAt={report.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
                           setSaveError(error)
                           jumpToTop()
-                        }
-                      )}{" "}
+                        }}
+                        persistent
+                      />
+                    )}{" "}
                     Report #{report.uuid}
                   </>
                 }

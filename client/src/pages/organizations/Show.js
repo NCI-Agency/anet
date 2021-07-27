@@ -12,10 +12,10 @@ import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
-  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -289,17 +289,20 @@ const OrganizationShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      "organizations",
-                      organization.uuid,
-                      organization.isSubscribed,
-                      organization.updatedAt,
-                      refetch,
-                      error => {
-                        setStateError(error)
-                        jumpToTop()
-                      }
-                    )}{" "}
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="organizations"
+                        subscribedObjectUuid={organization.uuid}
+                        isSubscribed={organization.isSubscribed}
+                        updatedAt={organization.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
                     Organization {organization.shortName}
                   </>
                 }

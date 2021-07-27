@@ -22,10 +22,10 @@ import {
 } from "components/Model"
 import MySubscriptions from "components/MySubscriptions"
 import {
-  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -246,17 +246,21 @@ const PersonShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      "people",
-                      person.uuid,
-                      person.isSubscribed,
-                      person.updatedAt,
-                      refetch,
-                      error => {
-                        setStateError(error)
-                        jumpToTop()
-                      }
-                    )}{" "}
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="people"
+                        subscribedObjectUuid={person.uuid}
+                        isSubscribed={person.isSubscribed}
+                        updatedAt={person.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          console.log("is it called")
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
                     {person.rank} {person.name}
                   </>
                 }

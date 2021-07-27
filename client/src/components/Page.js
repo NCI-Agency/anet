@@ -5,7 +5,7 @@ import API from "api"
 import { gql } from "apollo-boost"
 import NotFound from "components/NotFound"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { OverlayTrigger, Tooltip } from "react-bootstrap"
 import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
@@ -130,14 +130,16 @@ const applySearchProps = (setSearchProps, searchProps) => {
   }
 }
 
-export const getSubscriptionIcon = (
+export const SubscriptionIcon = ({
   subscribedObjectType,
   subscribedObjectUuid,
   isSubscribed,
   updatedAt,
   refetch,
-  setError
-) => {
+  setError,
+  persistent
+}) => {
+  const [disabled, setDisabled] = useState(false)
   const tooltip = isSubscribed ? "Click to unsubscribe" : "Click to subscribe"
   const icon = isSubscribed ? IconNames.FEED_SUBSCRIBED : IconNames.FEED
   // or perhaps: const icon = isSubscribed ? IconNames.EYE_ON : IconNames.EYE_OFF
@@ -150,9 +152,13 @@ export const getSubscriptionIcon = (
       <Icon
         icon={icon}
         color={color}
-        style={{ verticalAlign: "middle", cursor: "pointer" }}
-        onClick={() =>
-          toggleSubscription(
+        style={{ background: "none", border: "none", verticalAlign: "middle" }}
+        type="button"
+        tagName="button"
+        disabled={disabled}
+        onClick={async() => {
+          persistent && setDisabled(true)
+          await toggleSubscription(
             subscribedObjectType,
             subscribedObjectUuid,
             isSubscribed,
@@ -160,10 +166,22 @@ export const getSubscriptionIcon = (
             refetch,
             setError
           )
-        }
+          // TODO: Changing the state of an unmounted component cause warnings. persistent prop can be removed if this changes with react 17
+          persistent && setDisabled(false)
+        }}
       />
     </OverlayTrigger>
   )
+}
+
+SubscriptionIcon.propTypes = {
+  subscribedObjectType: PropTypes.string.isRequired,
+  subscribedObjectUuid: PropTypes.string.isRequired,
+  isSubscribed: PropTypes.bool.isRequired,
+  updatedAt: PropTypes.number,
+  refetch: PropTypes.func.isRequired,
+  setError: PropTypes.func.isRequired,
+  persistent: PropTypes.bool
 }
 
 const toggleSubscription = (
@@ -188,5 +206,5 @@ const toggleSubscription = (
     variables
   )
     .then(data => refetch())
-    .catch(error => typeof setError === "function" && setError(error))
+    .catch(setError)
 }

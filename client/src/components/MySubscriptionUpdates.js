@@ -4,9 +4,9 @@ import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  getSubscriptionIcon,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
@@ -214,14 +214,20 @@ const MySubscriptionUpdates = ({ pageDispatchers }) => {
                 return (
                   <tr key={key}>
                     <td>
-                      {getSubscriptionIcon(
-                        subscription.subscribedObjectType,
-                        subscription.subscribedObjectUuid,
-                        true,
-                        null,
-                        refetch,
-                        error => setSaveError(error)
-                      )}
+                      {
+                        <SubscriptionIcon
+                          subscribedObjectType={
+                            subscription.subscribedObjectType
+                          }
+                          subscribedObjectUuid={
+                            subscription.subscribedObjectUuid
+                          }
+                          isSubscribed={true}
+                          updatedAt={null}
+                          refetch={refetch}
+                          setError={error => setSaveError(error)}
+                        />
+                      }
                     </td>
                     <td>{linkToSubscription}</td>
                     <td>{moment(subscriptionUpdate.createdAt).fromNow()}</td>

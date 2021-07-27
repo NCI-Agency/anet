@@ -10,10 +10,10 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
-  getSubscriptionIcon,
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -212,17 +212,20 @@ const TaskShow = ({ pageDispatchers }) => {
               <Fieldset
                 title={
                   <>
-                    {getSubscriptionIcon(
-                      "tasks",
-                      task.uuid,
-                      task.isSubscribed,
-                      task.updatedAt,
-                      refetch,
-                      error => {
-                        setStateError(error)
-                        jumpToTop()
-                      }
-                    )}{" "}
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="tasks"
+                        subscribedObjectUuid={task.uuid}
+                        isSubscribed={task.isSubscribed}
+                        updatedAt={task.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
                     {fieldSettings.shortLabel} {task.shortName}
                   </>
                 }
