@@ -6,6 +6,7 @@ describe("Home page", () => {
   describe("When checking the notification numbers", () => {
     it("Should see that Erin has 1 counterpart and no tasks with pending assessments", () => {
       Home.open()
+      Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
       expect(Home.myCounterpartsNotifications.getText()).to.equal("1")
@@ -14,6 +15,7 @@ describe("Home page", () => {
     })
     it("Should see that Bob has no counterparts and 1 task with pending assessments", () => {
       Home.open("/", "bob")
+      Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
@@ -22,6 +24,7 @@ describe("Home page", () => {
     })
     it("Should see that Jack has no counterpart and 1 task with pending assessments", () => {
       Home.open("/", "jack")
+      Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
@@ -30,6 +33,7 @@ describe("Home page", () => {
     })
     it("Should see that Nick has no counterparts and no tasks with pending assessments", () => {
       Home.open("/", "nick")
+      Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
       /* eslint-disable no-unused-expressions */

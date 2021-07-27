@@ -15,6 +15,7 @@ test("Move someone in and out of a position", async t => {
 
   await t.context.get("/", "rebecca")
 
+  await t.context.pageHelpers.clickMenuLinksButton()
   await t.context.pageHelpers.clickMyOrgLink()
 
   const positionName = "EF 2.2 Advisor C"
