@@ -6,7 +6,9 @@ import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import CompactTable, {
   CompactFooterContent,
-  CompactHeaderContent
+  CompactHeaderContent,
+  FullColumn,
+  HalfColumn
 } from "components/Compact"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -315,25 +317,19 @@ const CompactPersonView = ({ pageDispatchers }) => {
             <CompactTable
               children={
                 <>
-                  <PersonContainer>
-                    {(_isEmpty(rightColumn) && (
-                      <FullColumn className="full-table">
+                  {(_isEmpty(rightColumn) && (
+                    <FullColumn className="full-table">{leftColumn}</FullColumn>
+                  )) || (
+                    <>
+                      <HalfColumn className="left-table">
                         {leftColumn}
-                      </FullColumn>
-                    )) || (
-                      <>
-                        <HalfColumn className="left-table">
-                          {leftColumn}
-                        </HalfColumn>
-                        <HalfColumn className="right-table">
-                          {rightColumn}
-                        </HalfColumn>
-                      </>
-                    )}
-                  </PersonContainer>
-                  <table>
-                    <tbody>{twoColumnFields}</tbody>
-                  </table>
+                      </HalfColumn>
+                      <HalfColumn className="right-table">
+                        {rightColumn}
+                      </HalfColumn>
+                    </>
+                  )}
+                  <FullColumn>{twoColumnFields}</FullColumn>
                 </>
               }
             >
@@ -545,14 +541,6 @@ const CompactPersonViewS = styled.div`
   }
 `
 
-const HalfColumn = styled.tbody`
-  flex: 1 1 50%;
-`
-
-const FullColumn = styled.tbody`
-  flex: 1 1 100%;
-`
-
 const CompactPersonViewHeader = ({
   onPrintClick,
   returnToDefaultPage,
@@ -677,13 +665,6 @@ function onPresetSelect(fields, optionalFields, setOptionalFields) {
   )
   setOptionalFields({ ...activeFields })
 }
-
-const PersonContainer = styled.table`
-  display: flex;
-  flex-flow: row wrap;
-  width: 100%;
-  margin-bottom: 10px;
-`
 
 const HeaderTitle = styled.h3`
   margin: 0;

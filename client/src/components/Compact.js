@@ -184,7 +184,9 @@ const CompactTable = ({ className, children }) => {
       {
         <tbody>
           <tr>
-            <td>{children}</td>
+            <td>
+              <InnerTable>{children}</InnerTable>
+            </td>
           </tr>
         </tbody>
       }
@@ -203,6 +205,21 @@ CompactTable.propTypes = {
 }
 
 export default CompactTable
+
+const InnerTable = styled.table`
+  display: flex;
+  flex-flow: row wrap;
+  width: 100%;
+  margin-bottom: 10px;
+`
+
+export const HalfColumn = styled.tbody`
+  flex: 1 1 50%;
+`
+
+export const FullColumn = styled.tbody`
+  flex: 1 1 100%;
+`
 
 const CompactTableS = styled.table`
   width: 100% !important;
