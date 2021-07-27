@@ -124,6 +124,35 @@ When you read a report that you think someone else may want to read, you can qui
 3. You’ll be prompted to search for the name of the person you’d like to send the report to.
 4. You also have the option to include a comment in the email. Once you’ve added the comment, click the “Send Email” button and you’re all set.
 
+### Subscriptions ###
+
+Subscriptions are a way to keep an eye on updates to specific objects. The "My Subscription Updates" table shows three columns: the subscription, when it was last updated, and through which object. You can look at subscriptions as a kind of feed: when I subscribe to something, I get a feed of all updates relevant to that object. By subscribing to a location, an organization, a person, a position, a report or a task, you will receive an update for each change to that object, or for each note that is written on that object.
+
+Additionally, when an engagement report is *Published* or *Cancelled*, subscriptions to the following objects will also receive an update:
+
+* to the report itself
+* to the report's attendees
+* to the report's attendees' positions
+* to the report's advisor organization and principal organization
+* to the report's tasks
+* to the report's location
+
+So for example, if someone edits a location, subscriptions to that location will get an update. And additionally, if that location is used in a report, and you subscribe to that location, publishing that report will show a subscription update for that location.
+
+The idea behind it is: say you're managing a location, then you want to know what goes on at that location, so you subscribe to that location, and see all engagement reports for that location (as well as any updates to, or notes posted on, that location itself). Or: you're responsible for a task, then you want to see what happens around that task, so you subscribe to that task, and see all engagement reports that relate to that task (as well as any updates, or notes posted on, to that task itself).
+
+You can subscribe to an object by e.g. searching for it, then going to that object's details page, and clicking on the grey icon:
+
+![Subscribe](images/subscribe.png)
+
+If you've already subscribed to the object, the icon will change to the green icon:
+
+![Unsubscribe](images/unsubscribe.png)
+
+and clicking on it will unsubscribe you from that object. You can also go to your own details page and view all your subscriptions from there, where your can also unsubscribe from each object. On the home page, your update feed is shown. There you can also unsubscribe from objects you are no longer interested in.
+
+Note that subscriptions are linked to your *position*, so if somebody else takes over your position, they will 'inherit' your subscriptions. Think of it as a good way to transfer knowledge of which objects are of specific interest for a person in that position.
+
 ## Workflows for Super Users
 *These workflows are the ones that will be most helpful for Super Users. Admins are also able to complete these workflows. Super Users and Admins have advanced capabilities within ANET. Super Users are able to manage information for their organization, and admins are able to manage information across the system.*
 
@@ -157,7 +186,7 @@ To create a new person in ANET:
     7. Nationality: You can add which country the person is from (their nationality, not the country they are currently working in).
     8. End of tour: You can add their end of tour date.
     9. Biography: This is an open text field where you can record helpful information about this person.
-    10. Position: You can identify which position this person is filling by searching for the position (by name or billet/tashkill number). If their position does not already exist in the system, you can leave this blank and create the position for them.
+    10. Position: You can identify which position this person is filling by searching for the position (by name or billet/tashkil number). If their position does not already exist in the system, you can leave this blank and create the position for them.
 4. Once those fields have been completed, click the “Save person” button at the bottom of the page.
 
 **Creating a new position**
@@ -167,9 +196,9 @@ To create a new person in ANET:
 1. Click on the “Create” button on the top right-hand side of the page.
 2. Then select “New Position” from the dropdown menu of options.
 3. Begin filling in the information requested on the page:
-    1. Type: choose whether the position is for an advisor / billet, or a principal / tashkill.
+    1. Type: choose whether the position is for an advisor / billet, or a principal / tashkil.
     2. Organization: Search for the organization that the position is for by searching in this field.
-    3. Code: You can add the billet / tashkill code here.
+    3. Code: You can add the billet / tashkil code here.
     4. Position Name: Enter the name of the position here.
     5. Person: You can search for the person who fills this position in this field.
     6. Permissions: This drop down menu lets you choose what permission someone with this role should have in ANET. Super Users can assign positions the permissions of an advisor or Super User. Admins have the added ability to assign positions administrative permissions.
@@ -257,7 +286,7 @@ Admins have the ability to modify the color and text of the security banner. To 
 
 **Updating the General Banner Text and Announcement Level and banner visibility**
 
-Admins have the ability to modify the color and text of the general anouncement banner. To modify these settings, start by clicking on “Admins” on the left-hand menu on the home screen.
+Admins have the ability to modify the color and text of the general announcement banner. To modify these settings, start by clicking on “Admins” on the left-hand menu on the home screen.
 
 From there, you can change the text of the general banner by entering your desired text in the "General banner text” field.
 
