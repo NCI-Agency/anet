@@ -10,7 +10,8 @@ import CompactTable, {
   CompactRowS,
   CompactSubTitle,
   CompactTitle,
-  HalfColumn
+  FullColumn,
+  InnerTable
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -277,7 +278,7 @@ const CompactReportView = ({ pageDispatchers }) => {
             <CompactTable
               children={
                 <>
-                  <HalfColumn>
+                  <FullColumn>
                     <CompactTitle
                       label={getReportTitle()}
                       className="reportField"
@@ -362,7 +363,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                         isCompact
                       />
                     ) : null}
-                  </HalfColumn>
+                  </FullColumn>
                 </>
               }
             >
@@ -433,8 +434,8 @@ const CompactReportView = ({ pageDispatchers }) => {
 
   function getTasksAndAssessments() {
     return (
-      <table>
-        <tbody>
+      <InnerTable>
+        <FullColumn>
           {report.tasks.map(task => {
             const taskInstantAssessmentConfig = Model.filterAssessmentConfig(
               task.getInstantAssessmentConfig(),
@@ -447,8 +448,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                 key={task.uuid}
                 label={<LinkTo modelType={Task.resourceName} model={task} />}
                 content={
-                  <table>
-                    <tbody>
+                  <InnerTable>
+                    <FullColumn>
                       <CompactRow
                         label={Settings.fields.task.topLevel.shortLabel}
                         content={
@@ -472,14 +473,14 @@ const CompactReportView = ({ pageDispatchers }) => {
                             isCompact
                           />
                       )}
-                    </tbody>
-                  </table>
+                    </FullColumn>
+                  </InnerTable>
                 }
               />
             )
           })}
-        </tbody>
-      </table>
+        </FullColumn>
+      </InnerTable>
     )
   }
 
@@ -489,8 +490,8 @@ const CompactReportView = ({ pageDispatchers }) => {
     // to keep track of different organization, if it is same consecutively, don't show for compactness
     let prevDiffOrgName = ""
     return (
-      <table>
-        <tbody>
+      <InnerTable>
+        <FullColumn>
           {attendees.map(attendee => {
             const attendeeInstantAssessmentConfig = Model.filterAssessmentConfig(
               attendee.getInstantAssessmentConfig(),
@@ -522,8 +523,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                 content={
                   optionalFields.assessments.active &&
                   attendeeInstantAssessmentConfig && (
-                    <table>
-                      <tbody>
+                    <InnerTable>
+                      <FullColumn>
                         <ReadonlyCustomFields
                           parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
                           fieldsConfig={attendeeInstantAssessmentConfig}
@@ -531,8 +532,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                           vertical
                           isCompact
                         />
-                      </tbody>
-                    </table>
+                      </FullColumn>
+                    </InnerTable>
                   )
                 }
                 style={`
@@ -547,8 +548,8 @@ const CompactReportView = ({ pageDispatchers }) => {
               />
             )
           })}
-        </tbody>
-      </table>
+        </FullColumn>
+      </InnerTable>
     )
   }
 

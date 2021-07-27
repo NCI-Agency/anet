@@ -206,7 +206,7 @@ CompactTable.propTypes = {
 
 export default CompactTable
 
-const InnerTable = styled.table`
+export const InnerTable = styled.table`
   display: flex;
   flex-flow: row wrap;
   width: 100%;
@@ -247,12 +247,12 @@ export const CompactRow = ({ label, content, ...otherProps }) => {
   `
 
   // top level th have different width
-  const isTopLevelTh = className === "reportField"
+  const isHeaderRow = className === "reportField"
 
   return (
     <CustomStyled className={className || null}>
-      <RowLabelS isTopLevelTh={isTopLevelTh}>{label}</RowLabelS>
-      <CompactRowContentS>{content}</CompactRowContentS>
+      {label && <RowLabelS isHeaderRow={isHeaderRow}>{label}</RowLabelS>}
+      <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
     </CustomStyled>
   )
 }
@@ -274,12 +274,10 @@ const RowLabelS = styled.th`
   color: grey;
   max-width: 50%;
   font-weight: 300;
-  width: ${props => (props.isTopLevelTh ? "15%" : "auto")};
+  width: ${props => (props.isHeaderRow ? "15%" : "auto")};
 `
 
 export const CompactRowContentS = styled.td`
-  display: flex;
-  justify-content: space-between;
   padding: 4px 1rem;
   & .form-control-static {
     margin-bottom: 0;

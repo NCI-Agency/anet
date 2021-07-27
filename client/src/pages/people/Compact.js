@@ -7,6 +7,7 @@ import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
+  CompactRow,
   FullColumn,
   HalfColumn
 } from "components/Compact"
@@ -265,15 +266,15 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
   const leftColumn = [
     optionalFields.name.active && (
-      <tr key="fullName">
-        <td colSpan="4">
-          <Name>{`${person.rank} ${person.name}`}</Name>
-        </td>
-      </tr>
+      <CompactRow
+        key="fullName"
+        content={<Name>{`${person.rank} ${person.name}`}</Name>}
+      />
     ),
     optionalFields.avatar.active && (
-      <tr key="avatar">
-        <td colSpan="4">
+      <CompactRow
+        key="avatar"
+        content={
           <AvatarDisplayComponent
             avatar={person.avatar}
             height={pageSize.avatarSize}
@@ -285,8 +286,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
               marginBottom: "10px"
             }}
           />
-        </td>
-      </tr>
+        }
+      />
     ),
     ...leftColumUnderAvatar
   ]
