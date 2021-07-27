@@ -324,15 +324,28 @@ button.home-tile.btn {
   text-align: center;
 }
 
+.caret {
+  transition: 0.3s ease;
+}
+
+.caret-rotate {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
 .nav img {
   width: 16px;
   margin-right: 6px;
 }
 
-.nav .nav > li > a {
+.nav-pills li.active > #nav-links-button {
+  background-color: #e0e0e0;
+  color: #337ab7;
+}
+
+.nav > .nav > li > a {
   border-left: 4px solid rgba(0, 0, 0, 0);
-  padding: 4px 0 4px 38px;
-  padding-right: 4px;
+  padding: 4px 4px 4px 38px;
 }
 
 .nav .nav > li.active > a {

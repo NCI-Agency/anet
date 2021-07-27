@@ -1,3 +1,4 @@
+import { Collapse } from "@blueprintjs/core"
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
@@ -5,7 +6,7 @@ import { Organization } from "models"
 import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useContext, useEffect } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import {
   Badge,
   MenuItem,
@@ -56,8 +57,20 @@ AnchorNavItem.propTypes = {
   children: PropTypes.node
 }
 
-const SidebarLink = ({ linkTo, children, handleOnClick, id }) => (
-  <Link to={linkTo} onClick={handleOnClick}>
+const SidebarLink = ({
+  linkTo,
+  children,
+  handleOnClick,
+  id,
+  setIsMenuLinksOpened
+}) => (
+  <Link
+    to={linkTo}
+    onClick={() => {
+      handleOnClick()
+      setIsMenuLinksOpened && setIsMenuLinksOpened()
+    }}
+  >
     <NavItem id={id}>{children}</NavItem>
   </Link>
 )
@@ -65,6 +78,7 @@ SidebarLink.propTypes = {
   linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   children: PropTypes.node,
   handleOnClick: PropTypes.func,
+  setIsMenuLinksOpened: PropTypes.func,
   id: PropTypes.string
 }
 
@@ -75,6 +89,7 @@ const Nav = ({
   clearSearchQuery
 }) => {
   const { appSettings, currentUser, notifications } = useContext(AppContext)
+  const [isMenuLinksOpened, setIsMenuLinksOpened] = useState(false)
   useEffect(() => scrollSpy.update(), [])
 
   const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -84,18 +99,22 @@ const Nav = ({
   const routerLocation = useLocation()
   const path = routerLocation.pathname
   const inAdmin = path.indexOf("/admin") === 0
-  const inOrg = path.indexOf("/organizations") === 0
+
+  const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
+    const inOrg = path.indexOf("/organizations") === 0
+    const orgUuid = inOrg ? path.split("/")[2] : null
+    const myOrg = currentUser.position?.uuid
+      ? currentUser.position?.organization
+      : null
+    const inMyOrg = orgUuid === myOrg?.uuid
+    return [orgUuid, inOrg, myOrg, inMyOrg]
+  }, [path, currentUser.position?.uuid, currentUser.position?.organization])
+
+  const inMyCounterParts = path.indexOf("/positions/counterparts") === 0
+  const inMyTasks = path.indexOf("/tasks/mine") === 0
+  const inMyReports = path.indexOf("/reports/mine") === 0
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
-
-  const myOrg = currentUser.position?.uuid
-    ? currentUser.position?.organization
-    : null
-  let orgUuid, myOrgUuid
-  if (inOrg) {
-    orgUuid = path.split("/")[2]
-    myOrgUuid = myOrg && myOrg.uuid
-  }
 
   const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
@@ -103,80 +122,111 @@ const Nav = ({
   const isAdvisor = currentUser.isAdvisor()
   const taskShortLabel = Settings.fields.task.shortLabel
 
+  useEffect(() => {
+    if (inMyOrg || inMyCounterParts || inMyReports || inMyTasks) {
+      setIsMenuLinksOpened(true)
+    }
+  }, [inMyOrg, inMyCounterParts, inMyReports, inMyTasks])
+
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
-      <SidebarLink linkTo="/" handleOnClick={resetPages}>
+      <SidebarLink
+        linkTo="/"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
         Home
       </SidebarLink>
 
       <BSNav id="search-nav" />
 
-      {currentUser.uuid && (
-        <SidebarLink
-          linkTo={{ pathname: "/reports/mine" }}
-          handleOnClick={resetPages}
+      <NavItem
+        active={isMenuLinksOpened}
+        id="nav-links-button"
+        style={{ paddingTop: "2px" }}
+        onClick={() => setIsMenuLinksOpened(!isMenuLinksOpened)}
+      >
+        My Links
+        <span
+          className={isMenuLinksOpened ? "caret caret-rotate" : "caret"}
+          style={{ marginLeft: "0.5rem" }}
         >
-          My Reports
-        </SidebarLink>
-      )}
+        </span>
+      </NavItem>
 
-      <BSNav id="reports-nav" />
-
-      {isAdvisor && currentUser.position?.uuid && (
-        <>
-          <SidebarLink
-            linkTo={{ pathname: "/tasks/mine" }}
-            handleOnClick={resetPages}
-            id="my-tasks-nav"
-          >
-            {`My ${pluralize(taskShortLabel)}`}
-            {notifications?.tasksWithPendingAssessments?.length ? (
-              <NotificationBadge>
-                {notifications.tasksWithPendingAssessments.length}
-              </NotificationBadge>
-            ) : null}
-          </SidebarLink>
-          <SidebarLink
-            linkTo={{ pathname: "/positions/counterparts" }}
-            handleOnClick={resetPages}
-            id="my-counterparts-nav"
-          >
-            My Counterparts
-            {notifications?.counterpartsWithPendingAssessments?.length ? (
-              <NotificationBadge>
-                {notifications.counterpartsWithPendingAssessments.length}
-              </NotificationBadge>
-            ) : null}
-          </SidebarLink>
-        </>
-      )}
-
-      {myOrg && (
-        <SidebarLink
-          linkTo={Organization.pathFor(myOrg)}
-          handleOnClick={resetPages}
-          id="my-organization"
+      <Collapse isOpen={isMenuLinksOpened}>
+        <BSNav
+          bsStyle="pills"
+          stacked
+          style={{ paddingLeft: "1rem", paddingTop: "2px" }}
         >
-          My Organization <br />
-          <small>{myOrg.shortName}</small>
-        </SidebarLink>
-      )}
-      <BSNav id="myorg-nav" />
+          {currentUser.uuid && (
+            <SidebarLink
+              linkTo={{ pathname: "/reports/mine" }}
+              handleOnClick={resetPages}
+            >
+              My Reports
+            </SidebarLink>
+          )}
+
+          <BSNav id="reports-nav" />
+
+          {isAdvisor && currentUser.position?.uuid && (
+            <>
+              <SidebarLink
+                linkTo={{ pathname: "/tasks/mine" }}
+                handleOnClick={resetPages}
+                id="my-tasks-nav"
+              >
+                {`My ${pluralize(taskShortLabel)}`}
+                {notifications?.tasksWithPendingAssessments?.length ? (
+                  <NotificationBadge>
+                    {notifications.tasksWithPendingAssessments.length}
+                  </NotificationBadge>
+                ) : null}
+              </SidebarLink>
+              <SidebarLink
+                linkTo={{ pathname: "/positions/counterparts" }}
+                handleOnClick={resetPages}
+                id="my-counterparts-nav"
+              >
+                My Counterparts
+                {notifications?.counterpartsWithPendingAssessments?.length ? (
+                  <NotificationBadge>
+                    {notifications.counterpartsWithPendingAssessments.length}
+                  </NotificationBadge>
+                ) : null}
+              </SidebarLink>
+            </>
+          )}
+
+          {myOrg && (
+            <SidebarLink
+              linkTo={Organization.pathFor(myOrg)}
+              handleOnClick={resetPages}
+              id="my-organization"
+            >
+              My Organization <br />
+              <small>{myOrg.shortName}</small>
+            </SidebarLink>
+          )}
+          <BSNav id="myorg-nav" />
+        </BSNav>
+      </Collapse>
 
       <NavDropdown
         title={Settings.fields.advisor.org.allOrgName}
         id="advisor-organizations"
-        active={
-          inOrg &&
-          advisorOrganizationUuids.includes(orgUuid) &&
-          orgUuid !== myOrgUuid
-        }
+        active={inOrg && advisorOrganizationUuids.includes(orgUuid) && !inMyOrg}
       >
         {Organization.map(advisorOrganizations, org => (
           <Link
             to={Organization.pathFor(org)}
             key={org.uuid}
-            onClick={clearSearchQuery}
+            onClick={() => {
+              clearSearchQuery()
+              setIsMenuLinksOpened(false)
+            }}
           >
             <MenuItem>{org.shortName}</MenuItem>
           </Link>
@@ -189,16 +239,17 @@ const Nav = ({
         title={Settings.fields.principal.org.allOrgName}
         id="principal-organizations"
         active={
-          inOrg &&
-          principalOrganizationUuids.includes(orgUuid) &&
-          orgUuid !== myOrgUuid
+          inOrg && principalOrganizationUuids.includes(orgUuid) && !inMyOrg
         }
       >
         {Organization.map(principalOrganizations, org => (
           <Link
             to={Organization.pathFor(org)}
             key={org.uuid}
-            onClick={clearSearchQuery}
+            onClick={() => {
+              clearSearchQuery()
+              setIsMenuLinksOpened(false)
+            }}
           >
             <MenuItem>{org.shortName}</MenuItem>
           </Link>
@@ -207,12 +258,22 @@ const Nav = ({
 
       <BSNav id="principal-org-nav" />
 
-      <SidebarLink linkTo="/rollup" handleOnClick={resetPages}>
+      <SidebarLink
+        linkTo="/rollup"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
         Daily Rollup
       </SidebarLink>
 
       {currentUser.isAdmin() && (
-        <LinkContainer to="/admin" onClick={clearSearchQuery}>
+        <LinkContainer
+          to="/admin"
+          onClick={() => {
+            clearSearchQuery()
+            setIsMenuLinksOpened(false)
+          }}
+        >
           <NavItem>Admin</NavItem>
         </LinkContainer>
       )}
@@ -243,7 +304,11 @@ const Nav = ({
         </NavItem>
       )}
 
-      <SidebarLink linkTo="/help" handleOnClick={resetPages}>
+      <SidebarLink
+        linkTo="/help"
+        handleOnClick={resetPages}
+        setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
+      >
         Help
       </SidebarLink>
 
@@ -253,7 +318,10 @@ const Nav = ({
             <Link
               to={"/insights/" + insight}
               key={insight}
-              onClick={clearSearchQuery}
+              onClick={() => {
+                clearSearchQuery()
+                setIsMenuLinksOpened(false)
+              }}
             >
               <MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
             </Link>
@@ -267,7 +335,10 @@ const Nav = ({
             <Link
               to={`/dashboards/${dashboard.type}/${dashboard.label}`}
               key={dashboard.label}
-              onClick={clearSearchQuery}
+              onClick={() => {
+                clearSearchQuery()
+                setIsMenuLinksOpened(false)
+              }}
             >
               <MenuItem>{dashboard.label}</MenuItem>
             </Link>
