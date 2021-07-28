@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AggregationWidgetContainer, {
   AGGERGATION_WIDGET_TYPE,
   AGGREGATION_TYPE,

@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { SEARCH_OBJECT_TYPES } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import FileSaver from "file-saver"
 
 const GQL_GET_ORGANIZATION_LIST = gql`

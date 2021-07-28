@@ -1,7 +1,7 @@
+import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
