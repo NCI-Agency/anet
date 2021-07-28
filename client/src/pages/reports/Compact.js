@@ -11,7 +11,8 @@ import CompactTable, {
   CompactSubTitle,
   CompactTitle,
   FullColumn,
-  InnerTable
+  InnerTable,
+  PAGE_SIZES
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -33,7 +34,7 @@ import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, DropdownButton, MenuItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -217,6 +218,7 @@ const GQL_GET_REPORT = gql`
 const CompactReportView = ({ pageDispatchers }) => {
   const history = useHistory()
   const { uuid } = useParams()
+  const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -272,8 +274,13 @@ const CompactReportView = ({ pageDispatchers }) => {
             returnToDefaultPage={returnToDefaultPage}
             optionalFields={optionalFields}
             setOptionalFields={setOptionalFields}
+            setPageSize={setPageSize}
           />
-          <CompactReportViewS className="compact-view" data-draft={draftAttr}>
+          <CompactReportViewS
+            className="compact-view"
+            data-draft={draftAttr}
+            pageSize={pageSize}
+          >
             <CompactHeaderContent />
             <CompactTable
               children={
@@ -618,7 +625,7 @@ const CompactReportViewS = styled.div`
   position: relative;
   outline: 2px solid grey;
   padding: 0 1rem;
-  width: 21cm;
+  width: ${props => props.pageSize.width};
 
   &[data-draft="draft"]:before {
     content: "DRAFT";
@@ -653,6 +660,9 @@ const CompactReportViewS = styled.div`
     tr {
       page-break-inside: auto;
     }
+    @page {
+      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
+    }
   }
 `
 
@@ -661,11 +671,28 @@ const CompactReportViewHeader = ({
   returnToDefaultPage,
   noReport,
   optionalFields,
-  setOptionalFields
+  setOptionalFields,
+  setPageSize
 }) => {
   return (
     <Header>
       <HeaderTitle value="title">Summary / Print</HeaderTitle>
+      <DropdownButton
+        title="Page Size"
+        bsStyle="primary"
+        id="pageSizeButton"
+        onSelect={setPageSize}
+      >
+        {Object.keys(PAGE_SIZES).map(pageSize => (
+          <MenuItem
+            key={PAGE_SIZES[pageSize].name}
+            eventKey={PAGE_SIZES[pageSize]}
+            style={{ minWidth: "205px" }}
+          >
+            {PAGE_SIZES[pageSize].name}
+          </MenuItem>
+        ))}
+      </DropdownButton>
       <SimpleMultiCheckboxDropdown
         label="Optional Fields ⇓"
         options={optionalFields}
@@ -705,7 +732,8 @@ CompactReportViewHeader.propTypes = {
       active: PropTypes.bool.isRequired
     })
   ).isRequired,
-  setOptionalFields: PropTypes.func
+  setOptionalFields: PropTypes.func,
+  setPageSize: PropTypes.func
 }
 
 CompactReportViewHeader.defaultProps = {
