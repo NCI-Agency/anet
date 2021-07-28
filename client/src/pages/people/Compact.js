@@ -8,6 +8,7 @@ import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
   CompactRow,
+  CompactView,
   FullColumn,
   HalfColumn,
   PAGE_SIZES
@@ -279,7 +280,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
             leftColumnFields={leftColumnFields}
             setLeftColumnFields={setLeftColumnFields}
           />
-          <CompactPersonViewS className="compact-view" pageSize={pageSize}>
+          <CompactView className="compact-view" pageSize={pageSize}>
             <CompactHeaderContent
               sensitiveInformation={containsSensitiveInformation}
             />
@@ -304,7 +305,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
               }
             >
             </CompactTable>
-          </CompactPersonViewS>
+          </CompactView>
         </>
       )}
     </Formik>
@@ -486,30 +487,6 @@ CompactPersonView.propTypes = {
 }
 
 export default connect(null, mapPageDispatchersToProps)(CompactPersonView)
-
-const CompactPersonViewS = styled.div`
-  position: relative;
-  outline: 2px solid grey;
-  padding: 0 1rem;
-  width: ${props => props.pageSize.width};
-  @media print {
-    outline: none;
-    .banner {
-      display: inline-block !important;
-      -webkit-print-color-adjust: exact;
-      color-adjust: exact !important;
-    }
-    table {
-      page-break-inside: auto;
-    }
-    tr {
-      page-break-inside: auto;
-    }
-    @page {
-      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
-    }
-  }
-`
 
 const CompactPersonViewHeader = ({
   onPrintClick,

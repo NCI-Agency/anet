@@ -49,6 +49,76 @@ export const PAGE_SIZES = {
   }
 }
 
+export const CompactView = ({
+  className,
+  pageSize,
+  backgroundText,
+  children
+}) => {
+  return (
+    <CompactViewS
+      className={className}
+      pageSize={pageSize}
+      backgroundText={backgroundText}
+    >
+      {children}
+    </CompactViewS>
+  )
+}
+
+CompactView.propTypes = {
+  className: PropTypes.string,
+  pageSize: PropTypes.object,
+  backgroundText: PropTypes.string,
+  children: PropTypes.node
+}
+
+// color-adjust forces browsers to keep color values of the node
+// supported in most major browsers' new versions, but not in IE or some older versions
+// TODO: Find a way to calculate background text width after 45deg rotation currently it is hardcoded as 130
+const CompactViewS = styled.div`
+  position: relative;
+  outline: 2px solid grey;
+  padding: 0 1rem;
+  width: ${props => props.pageSize.width};
+  &:before {
+    content: "${props => props.backgroundText}";
+    z-index: -1000;
+    position: absolute;
+    font-weight: 100;
+    top: 40%;
+    left: ${props => getBackgroundIndent(props.pageSize.width, 130)};
+    font-size: 150px;
+    color: rgba(161, 158, 158, 0.3) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact !important;
+    transform: rotateZ(-45deg);
+  }
+  @media print {
+    outline: none;
+    .banner {
+      display: inline-block !important;
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact !important;
+    }
+    table {
+      page-break-inside: auto;
+    }
+    tr {
+      page-break-inside: auto;
+    }
+    @page {
+      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
+    }
+    &:before {
+      position: fixed;
+    }
+    .workflow-action .btn {
+      display: inline-block !important;
+    }
+  }
+`
+
 export const CompactHeaderContent = ({ sensitiveInformation }) => {
   const { appSettings } = useContext(AppContext)
   return (
@@ -369,3 +439,8 @@ const CompactSubTitleS = styled(CompactRowS)`
     font-weight: normal;
   }
 `
+
+const getBackgroundIndent = (pageWidth, textWidth) => {
+  // Takes page width in "NNNmm", text width in number format and returns left indentation to center the text
+  return `${(parseInt(pageWidth) - textWidth) / 2}mm`
+}

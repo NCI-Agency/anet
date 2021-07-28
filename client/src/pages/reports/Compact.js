@@ -10,6 +10,7 @@ import CompactTable, {
   CompactRowS,
   CompactSubTitle,
   CompactTitle,
+  CompactView,
   FullColumn,
   InnerTable,
   PAGE_SIZES
@@ -260,7 +261,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   // Get initial tasks/attendees instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
-  const draftAttr = report.isDraft() ? "draft" : "not-draft"
+  const backgroundText = report.isDraft() ? "DRAFT" : ""
   return (
     <Formik
       validationSchema={Report.yupSchema}
@@ -276,10 +277,10 @@ const CompactReportView = ({ pageDispatchers }) => {
             setOptionalFields={setOptionalFields}
             setPageSize={setPageSize}
           />
-          <CompactReportViewS
+          <CompactView
             className="compact-view"
-            data-draft={draftAttr}
             pageSize={pageSize}
+            backgroundText={backgroundText}
           >
             <CompactHeaderContent />
             <CompactTable
@@ -376,7 +377,7 @@ const CompactReportView = ({ pageDispatchers }) => {
             >
             </CompactTable>
             <CompactFooterContent object={report} />
-          </CompactReportViewS>
+          </CompactView>
         </>
       )}
     </Formik>
@@ -618,53 +619,6 @@ const OPTIONAL_FIELDS_INIT = {
     active: false
   }
 }
-
-// color-adjust forces browsers to keep color values of the node
-// supported in most major browsers' new versions, but not in IE or some older versions
-const CompactReportViewS = styled.div`
-  position: relative;
-  outline: 2px solid grey;
-  padding: 0 1rem;
-  width: ${props => props.pageSize.width};
-
-  &[data-draft="draft"]:before {
-    content: "DRAFT";
-    z-index: -1000;
-    position: absolute;
-    font-weight: 100;
-    top: 300px;
-    left: 20%;
-    font-size: 150px;
-    color: rgba(161, 158, 158, 0.3) !important;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact !important;
-    transform: rotateZ(-45deg);
-  }
-  @media print {
-    outline: none;
-    &[data-draft="draft"]:before {
-      top: 40%;
-      position: fixed;
-    }
-    .banner {
-      display: inline-block !important;
-      -webkit-print-color-adjust: exact;
-      color-adjust: exact !important;
-    }
-    .workflow-action .btn {
-      display: inline-block !important;
-    }
-    table {
-      page-break-inside: auto;
-    }
-    tr {
-      page-break-inside: auto;
-    }
-    @page {
-      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
-    }
-  }
-`
 
 const CompactReportViewHeader = ({
   onPrintClick,
