@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import { Button, Callout, Icon, Intent, Spinner } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
@@ -7,7 +8,6 @@ import {
 } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
-import { gql } from "apollo-boost"
 import LinkTo from "components/LinkTo"
 import Person from "models/Person"
 import Report from "models/Report"

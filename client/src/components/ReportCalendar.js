@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import { reportsToEvents } from "components/aggregations/utils"
 import Calendar from "components/Calendar"
 import { PageDispatchersPropType } from "components/Page"

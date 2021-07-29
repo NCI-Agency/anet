@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import OrganizationAdvisorsTable from "components/AdvisorReports/OrganizationAdvisorsTable"
 import Toolbar from "components/AdvisorReports/Toolbar"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"

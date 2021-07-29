@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import ReportsMapWidget from "components/aggregations/ReportsMapWidget"
 import {
   mapPageDispatchersToProps,

@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
