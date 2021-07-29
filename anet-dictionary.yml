@@ -23,6 +23,9 @@ dateFormats:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
 
+menuOptions:
+  menuLinksDropdownTitle: My Work
+
 printOptions:
   sensitiveInformationText: Sensitive Information
   sensitiveInformationTooltipText: Releasability Information

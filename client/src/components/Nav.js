@@ -146,7 +146,7 @@ const Nav = ({
         style={{ paddingTop: "2px" }}
         onClick={() => setIsMenuLinksOpened(!isMenuLinksOpened)}
       >
-        My Links
+        {Settings?.menuOptions?.menuLinksDropdownTitle ?? "My Work"}
         <span
           className={isMenuLinksOpened ? "caret caret-rotate" : "caret"}
           style={{ marginLeft: "0.5rem" }}
