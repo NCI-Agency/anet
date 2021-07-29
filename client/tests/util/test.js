@@ -316,6 +316,10 @@ test.beforeEach(t => {
         text
       )
     },
+    async clickMenuLinksButton() {
+      const $menuLinksButton = await t.context.$("#nav-links-button")
+      await $menuLinksButton.click()
+    },
     async clickMyOrgLink() {
       const $myOrgLink = await t.context.$("#my-organization")
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
