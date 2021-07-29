@@ -275,11 +275,18 @@ if (testEnv === "local") {
   config.path = "/"
 } else {
   const capabilities = require("./browserstack.config.js")
-  config.services = ["browserstack"]
+  config.services = [
+    [
+      "browserstack",
+      {
+        browserstackLocal: true
+      }
+    ]
+  ]
   config.capabilities = [capabilities]
   config.maxInstances = 1
-  config.user = capabilities["browserstack.user"]
-  config.key = capabilities["browserstack.key"]
+  config.user = capabilities["bstack:options"].userName
+  config.key = capabilities["bstack:options"].accessKey
   // config.browserstackLocal = true -- already started by the GitHub Actions workflow
 }
 exports.config = config

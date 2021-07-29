@@ -63,7 +63,7 @@ test.beforeEach(t => {
   } else {
     capabilities.name = t.title.replace(/^beforeEach hook for /, "")
     builder = builder
-      .usingServer("http://hub-cloud.browserstack.com/wd/hub")
+      .usingServer("http://hub.browserstack.com/wd/hub")
       .withCapabilities(capabilities)
   }
   t.context.driver = builder.build()
@@ -384,7 +384,7 @@ test.afterEach.always(async t => {
           Authorization:
             "Basic " +
             Buffer.from(
-              `${capabilities["browserstack.user"]}:${capabilities["browserstack.key"]}`
+              `${capabilities["bstack:options"].userName}:${capabilities["bstack:options"].accessKey}`
             ).toString("base64")
         },
         body: JSON.stringify({
