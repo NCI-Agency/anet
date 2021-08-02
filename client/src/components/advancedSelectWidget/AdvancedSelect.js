@@ -1,7 +1,7 @@
+import { gql } from "@apollo/client"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
-import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
 import _isEmpty from "lodash/isEmpty"

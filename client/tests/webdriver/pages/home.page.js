@@ -37,6 +37,10 @@ class Home extends Page {
     return browser.$("#topbar #searchBarSubmit")
   }
 
+  get linksMenuButton() {
+    return browser.$("#nav-links-button")
+  }
+
   get myOrgLink() {
     return browser.$("#my-organization")
   }

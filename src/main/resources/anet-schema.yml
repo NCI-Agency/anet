@@ -346,6 +346,14 @@ properties:
                 title: The long date/time format if `engagementsIncludeTimeAndDuration` is `true`
                 description: Used to show the report engagement date/time in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998 @ 15:30"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
 
+  menuOptions:
+    type: object
+    additionalProperties: false
+    required: [menuLinksDropdownTitle]
+    properties:
+      menuLinksDropdownTitle:
+        type: string
+
   printOptions:
     type: object
     additionalProperties: false

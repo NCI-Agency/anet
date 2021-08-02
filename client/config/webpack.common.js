@@ -110,7 +110,10 @@ module.exports = {
     },
     plugins: [
       new webpack.DefinePlugin({
-        "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+        "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+        // Work-around for https://github.com/palantir/blueprint/issues/3739
+        // and https://github.com/palantir/blueprint/issues/4393
+        "process.env.BLUEPRINT_NAMESPACE": JSON.stringify("bp3")
       }),
       new CircularDependencyPlugin({
         // exclude detection of files based on a RegExp

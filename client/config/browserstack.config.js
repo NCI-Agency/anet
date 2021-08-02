@@ -19,10 +19,23 @@ const localTz = moment.tz.guess()
 const tzParts = localTz.split("/")
 const bsTz = tzParts[tzParts.length - 1]
 
+const bstackOptions = {
+  os: "Windows",
+  osVersion: "10",
+  resolution: "2048x1536",
+  projectName: "ANET",
+  // Use the local timezone on BrowserStack
+  timezone: bsTz,
+  // Credentials for BrowserStack:
+  userName: user,
+  accessKey: key,
+  // This requires that BrowserStackLocal is running!
+  local: "true"
+}
 const capabilities = {
   maxInstances: 1,
   browserName: "Chrome",
-  browser_version: "latest",
+  browserVersion: "latest",
   "goog:chromeOptions": {
     // Maximize the window so we can see what's going on
     args: [
@@ -32,33 +45,23 @@ const capabilities = {
       // (note: on Windows we use NUL, on *NIX it would be /dev/null)
     ]
   },
-  os: "Windows",
-  os_version: "10",
-  resolution: "2048x1536",
-  project: "ANET",
-  build: require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
-    .semverString,
-  // Use the local timezone on BrowserStack
-  "browserstack.timezone": bsTz,
-  // Credentials for BrowserStack:
-  "browserstack.user": user,
-  "browserstack.key": key,
-  // This requires that BrowserStackLocal is running!
-  "browserstack.local": "true"
+  "bstack:options": bstackOptions
 }
 if (debug) {
-  capabilities["browserstack.debug"] = debug
+  bstackOptions.debug = debug
 }
 if (localIdentifier) {
   // For GitHub Actions
-  capabilities["browserstack.localIdentifier"] = localIdentifier
+  bstackOptions.localIdentifier = localIdentifier
 }
-capabilities.build = util.format(
-  capabilities.build,
-  capabilities.os,
-  capabilities.os_version,
+
+bstackOptions.buildName = util.format(
+  require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
+    .semverString,
+  bstackOptions.os,
+  bstackOptions.osVersion,
   capabilities.browserName,
-  capabilities.browser_version
+  capabilities.browserVersion
 )
 
 module.exports = capabilities

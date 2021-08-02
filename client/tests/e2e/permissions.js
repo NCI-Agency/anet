@@ -7,6 +7,7 @@ test.serial("checking super user permissions", async t => {
   const { pageHelpers, assertElementNotPresent, shortWaitMs } = t.context
 
   await t.context.get("/", "rebecca")
+  await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
 
   const $rebeccaLink = await findSuperUserLink(t, "CTR BECCABON, Rebecca")
@@ -23,6 +24,7 @@ test.serial("checking super user permissions", async t => {
   await t.context.logout()
 
   await t.context.get("/", "rebecca")
+  await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
   const $jacobLink = await findSuperUserLink(t, "CIV JACOBSON, Jacob")
   await $jacobLink.click()
@@ -88,6 +90,7 @@ test("checking regular user permissions", async t => {
   const { pageHelpers, $, assertElementNotPresent, shortWaitMs } = t.context
 
   await t.context.get("/", "jack")
+  await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
   await pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
     "OF-9 JACKSON, Jack"
@@ -128,6 +131,7 @@ test("checking admin permissions", async t => {
   t.plan(11)
 
   await t.context.get("/", "arthur")
+  await t.context.pageHelpers.clickMenuLinksButton()
   await t.context.pageHelpers.clickMyOrgLink()
   const $arthurLink = await findSuperUserLink(t, "CIV DMIN, Arthur")
   await $arthurLink.click()

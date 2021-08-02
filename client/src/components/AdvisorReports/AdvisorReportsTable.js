@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
 import {
