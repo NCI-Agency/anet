@@ -63,7 +63,12 @@ const UltimatePagination = ({
   totalCount,
   goToPage
 }) => {
-  const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
+  // We may have a pagination overshoot, so set the number of pages
+  // to the maximum of the requested page and the total number of pages
+  const numPages = Math.max(
+    pageNum + 1,
+    pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
+  )
   if (numPages < 2) {
     return null
   }
