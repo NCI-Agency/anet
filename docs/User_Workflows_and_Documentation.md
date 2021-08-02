@@ -149,7 +149,7 @@ If you've already subscribed to the object, the icon will change to the green ic
 
 ![Unsubscribe](images/unsubscribe.png)
 
-and clicking on it will unsubscribe you from that object. You can also go to your own details page and view all your subscriptions from there, where your can also unsubscribe from each object. On the home page, your update feed is shown. There you can also unsubscribe from objects you are no longer interested in.
+and clicking on it will unsubscribe you from that object. Under **My Work** in the navigation menu you find an entry **My Subscriptions**. Clicking on it shows you a page with two tables: your update feed (*My Subscription Updates*) and your subscriptions (*My Subscriptions*). You can browse through both tables; they also have a clickable icon to unsubscribe from objects you are no longer interested in.
 
 Note that subscriptions are linked to your *position*, so if somebody else takes over your position, they will 'inherit' your subscriptions. Think of it as a good way to transfer knowledge of which objects are of specific interest for a person in that position.
 

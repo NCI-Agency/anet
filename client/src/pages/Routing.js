@@ -38,6 +38,7 @@ import ReportNew from "pages/reports/New"
 import ReportShow from "pages/reports/Show"
 import RollupShow from "pages/rollup/Show"
 import Search from "pages/Search"
+import MySubscriptions from "pages/subscriptions/Mine"
 import TaskEdit from "pages/tasks/Edit"
 import MyTasks from "pages/tasks/MyTasks"
 import TaskNew from "pages/tasks/New"
@@ -209,6 +210,14 @@ const Routing = () => {
             <Redirect to="/" />
           )
         }
+      />
+      <Route
+        path={PAGE_URLS.SUBSCRIPTIONS}
+        render={({ match: { url } }) => (
+          <Switch>
+            <Route path={`${url}/mine`} component={MySubscriptions} />
+          </Switch>
+        )}
       />
       <Route path={PAGE_URLS.MISSING} component={PageMissing} />
     </Switch>

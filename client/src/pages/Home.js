@@ -11,11 +11,10 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
-import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
@@ -464,8 +463,6 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
           pageDispatchers={pageDispatchers}
         />
       </Fieldset>
-
-      <MySubscriptionUpdates />
 
       <Fieldset title="Saved searches">
         <SavedSearches

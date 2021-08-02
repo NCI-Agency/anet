@@ -20,7 +20,6 @@ import {
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
-import MySubscriptions from "components/MySubscriptions"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -295,8 +294,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   onSuccess={() => hideAssignPositionModal(true)}
                 />
               )}
-
-              {person.uuid === currentUser.uuid && <MySubscriptions />}
 
               {hasPosition && (
                 <Fieldset

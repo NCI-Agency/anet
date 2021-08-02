@@ -14,7 +14,8 @@ import _get from "lodash/get"
 import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import pluralize from "pluralize"
-import React, { useState } from "react"
+import PropTypes from "prop-types"
+import React, { useEffect, useState } from "react"
 import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
@@ -59,7 +60,12 @@ const GQL_GET_MY_SUBSCRIPTIONS = gql`
   }
 `
 
-const MySubscriptions = ({ pageDispatchers }) => {
+const MySubscriptions = ({
+  forceRefetch,
+  setForceRefetch,
+  refetchCallback,
+  pageDispatchers
+}) => {
   const [saveError, setSaveError] = useState(null)
   const [pageNum, setPageNum] = useState(0)
   const subscriptionsQuery = {
@@ -72,6 +78,12 @@ const MySubscriptions = ({ pageDispatchers }) => {
       subscriptionsQuery
     }
   )
+  useEffect(() => {
+    if (forceRefetch) {
+      setForceRefetch(false)
+      refetch()
+    }
+  }, [forceRefetch, setForceRefetch, refetch])
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -86,7 +98,7 @@ const MySubscriptions = ({ pageDispatchers }) => {
     ? paginatedSubscriptions.list
     : []
   const { pageSize, totalCount } = paginatedSubscriptions
-  const subscriptionsExist = _get(subscriptions, "length", 0) > 0
+  const subscriptionsExist = totalCount > 0
 
   return (
     <Fieldset title="My Subscriptions">
@@ -118,39 +130,43 @@ const MySubscriptions = ({ pageDispatchers }) => {
               </tr>
             </thead>
             <tbody>
-              {subscriptions.map(subscription => {
-                const createdAt = moment(subscription.createdAt).fromNow()
-                const objectType = _upperFirst(
-                  pluralize.singular(subscription.subscribedObjectType)
-                )
-                let linkTo
-                if (subscription.subscribedObject) {
-                  linkTo = (
-                    <LinkTo
-                      modelType={objectType}
-                      model={{
-                        uuid: subscription.subscribedObjectUuid,
-                        ...subscription.subscribedObject
-                      }}
-                    />
+              {(_get(subscriptions, "length", 0) === 0 && (
+                <tr>
+                  <td colSpan="3">nothing to show…</td>
+                </tr>
+              )) ||
+                subscriptions.map(subscription => {
+                  const createdAt = moment(subscription.createdAt).fromNow()
+                  const objectType = _upperFirst(
+                    pluralize.singular(subscription.subscribedObjectType)
                   )
-                } else {
-                  linkTo = (
-                    <LinkTo
-                      componentClass="span"
-                      modelType={objectType}
-                      model={{
-                        uuid: subscription.subscribedObjectUuid
-                      }}
-                    >
-                      [object was deleted]
-                    </LinkTo>
-                  )
-                }
-                return (
-                  <tr key={subscription.uuid}>
-                    <td>
-                      {
+                  let linkTo
+                  if (subscription.subscribedObject) {
+                    linkTo = (
+                      <LinkTo
+                        modelType={objectType}
+                        model={{
+                          uuid: subscription.subscribedObjectUuid,
+                          ...subscription.subscribedObject
+                        }}
+                      />
+                    )
+                  } else {
+                    linkTo = (
+                      <LinkTo
+                        componentClass="span"
+                        modelType={objectType}
+                        model={{
+                          uuid: subscription.subscribedObjectUuid
+                        }}
+                      >
+                        [object was deleted]
+                      </LinkTo>
+                    )
+                  }
+                  return (
+                    <tr key={subscription.uuid}>
+                      <td>
                         <SubscriptionIcon
                           subscribedObjectType={
                             subscription.subscribedObjectType
@@ -160,16 +176,18 @@ const MySubscriptions = ({ pageDispatchers }) => {
                           }
                           isSubscribed={true}
                           updatedAt={null}
-                          refetch={refetch}
+                          refetch={() => {
+                            refetch()
+                            refetchCallback()
+                          }}
                           setError={error => setSaveError(error)}
                         />
-                      }
-                    </td>
-                    <td>{createdAt}</td>
-                    <td>{linkTo}</td>
-                  </tr>
-                )
-              })}
+                      </td>
+                      <td>{createdAt}</td>
+                      <td>{linkTo}</td>
+                    </tr>
+                  )
+                })}
             </tbody>
           </Table>
         </div>
@@ -181,6 +199,9 @@ const MySubscriptions = ({ pageDispatchers }) => {
 }
 
 MySubscriptions.propTypes = {
+  forceRefetch: PropTypes.bool.isRequired,
+  setForceRefetch: PropTypes.func.isRequired,
+  refetchCallback: PropTypes.func.isRequired,
   pageDispatchers: PageDispatchersPropType
 }
 
