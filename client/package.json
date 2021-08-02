@@ -5,7 +5,7 @@
   "homepage": "/assets/client",
   "devDependencies": {
     "@babel/core": "7.14.8",
-    "@babel/eslint-parser": "7.14.7",
+    "@babel/eslint-parser": "7.14.9",
     "@babel/plugin-proposal-class-properties": "7.14.5",
     "@babel/plugin-proposal-decorators": "7.14.5",
     "@babel/plugin-proposal-do-expressions": "7.14.5",
