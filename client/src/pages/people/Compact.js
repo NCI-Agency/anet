@@ -1,12 +1,17 @@
+import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import CompactTable, {
   CompactFooterContent,
-  CompactHeaderContent
+  CompactHeaderContent,
+  CompactRow,
+  CompactView,
+  FullColumn,
+  HalfColumn,
+  PAGE_SIZES
 } from "components/Compact"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -94,38 +99,6 @@ const GQL_GET_PERSON = gql`
     }
   }
 `
-const PAGE_SIZES = {
-  A4: {
-    name: "A4 (210 x 297 mm)",
-    width: "210mm",
-    height: "297mm",
-    avatarSize: 256
-  },
-  A5: {
-    name: "A5 (148 x 210 mm)",
-    width: "148mm",
-    height: "210mm",
-    avatarSize: 128
-  },
-  letter: {
-    name: "Letter (8.5 x 11 inches)",
-    width: "216mm",
-    height: "279mm",
-    avatarSize: 256
-  },
-  juniorLegal: {
-    name: "Junior Legal (5 x 8 inches)",
-    width: "127mm",
-    height: "203mm",
-    avatarSize: 128
-  },
-  legal: {
-    name: "Legal (8.5 x 14 inches)",
-    width: "216mm",
-    height: "356mm",
-    avatarSize: 256
-  }
-}
 
 // Redundant fields to print
 const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
@@ -263,15 +236,15 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
   const leftColumn = [
     optionalFields.name.active && (
-      <tr key="fullName">
-        <td colSpan="4">
-          <Name>{`${person.rank} ${person.name}`}</Name>
-        </td>
-      </tr>
+      <CompactRow
+        key="fullName"
+        content={<Name>{`${person.rank} ${person.name}`}</Name>}
+      />
     ),
     optionalFields.avatar.active && (
-      <tr key="avatar">
-        <td colSpan="4">
+      <CompactRow
+        key="avatar"
+        content={
           <AvatarDisplayComponent
             avatar={person.avatar}
             height={pageSize.avatarSize}
@@ -283,8 +256,8 @@ const CompactPersonView = ({ pageDispatchers }) => {
               marginBottom: "10px"
             }}
           />
-        </td>
-      </tr>
+        }
+      />
     ),
     ...leftColumUnderAvatar
   ]
@@ -307,7 +280,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
             leftColumnFields={leftColumnFields}
             setLeftColumnFields={setLeftColumnFields}
           />
-          <CompactPersonViewS className="compact-view" pageSize={pageSize}>
+          <CompactView className="compact-view" pageSize={pageSize}>
             <CompactHeaderContent
               sensitiveInformation={containsSensitiveInformation}
             />
@@ -315,30 +288,24 @@ const CompactPersonView = ({ pageDispatchers }) => {
             <CompactTable
               children={
                 <>
-                  <PersonContainer>
-                    {(_isEmpty(rightColumn) && (
-                      <FullColumn className="full-table">
+                  {(_isEmpty(rightColumn) && (
+                    <FullColumn className="full-table">{leftColumn}</FullColumn>
+                  )) || (
+                    <>
+                      <HalfColumn className="left-table">
                         {leftColumn}
-                      </FullColumn>
-                    )) || (
-                      <>
-                        <HalfColumn className="left-table">
-                          {leftColumn}
-                        </HalfColumn>
-                        <HalfColumn className="right-table">
-                          {rightColumn}
-                        </HalfColumn>
-                      </>
-                    )}
-                  </PersonContainer>
-                  <table>
-                    <tbody>{twoColumnFields}</tbody>
-                  </table>
+                      </HalfColumn>
+                      <HalfColumn className="right-table">
+                        {rightColumn}
+                      </HalfColumn>
+                    </>
+                  )}
+                  <FullColumn>{twoColumnFields}</FullColumn>
                 </>
               }
             >
             </CompactTable>
-          </CompactPersonViewS>
+          </CompactView>
         </>
       )}
     </Formik>
@@ -521,38 +488,6 @@ CompactPersonView.propTypes = {
 
 export default connect(null, mapPageDispatchersToProps)(CompactPersonView)
 
-const CompactPersonViewS = styled.div`
-  position: relative;
-  outline: 2px solid grey;
-  padding: 0 1rem;
-  width: ${props => props.pageSize.width};
-  @media print {
-    outline: none;
-    .banner {
-      display: inline-block !important;
-      -webkit-print-color-adjust: exact;
-      color-adjust: exact !important;
-    }
-    table {
-      page-break-inside: auto;
-    }
-    tr {
-      page-break-inside: auto;
-    }
-    @page {
-      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
-    }
-  }
-`
-
-const HalfColumn = styled.tbody`
-  flex: 1 1 50%;
-`
-
-const FullColumn = styled.tbody`
-  flex: 1 1 100%;
-`
-
 const CompactPersonViewHeader = ({
   onPrintClick,
   returnToDefaultPage,
@@ -677,13 +612,6 @@ function onPresetSelect(fields, optionalFields, setOptionalFields) {
   )
   setOptionalFields({ ...activeFields })
 }
-
-const PersonContainer = styled.table`
-  display: flex;
-  flex-flow: row wrap;
-  width: 100%;
-  margin-bottom: 10px;
-`
 
 const HeaderTitle = styled.h3`
   margin: 0;

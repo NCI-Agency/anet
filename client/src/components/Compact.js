@@ -16,6 +16,109 @@ import { Link, useLocation } from "react-router-dom"
 import anetLogo from "resources/logo.svg"
 import Settings from "settings"
 
+export const PAGE_SIZES = {
+  A4: {
+    name: "A4 (210 x 297 mm)",
+    width: "210mm",
+    height: "297mm",
+    avatarSize: 256
+  },
+  A5: {
+    name: "A5 (148 x 210 mm)",
+    width: "148mm",
+    height: "210mm",
+    avatarSize: 128
+  },
+  letter: {
+    name: "Letter (8.5 x 11 inches)",
+    width: "216mm",
+    height: "279mm",
+    avatarSize: 256
+  },
+  juniorLegal: {
+    name: "Junior Legal (5 x 8 inches)",
+    width: "127mm",
+    height: "203mm",
+    avatarSize: 128
+  },
+  legal: {
+    name: "Legal (8.5 x 14 inches)",
+    width: "216mm",
+    height: "356mm",
+    avatarSize: 256
+  }
+}
+
+export const CompactView = ({
+  className,
+  pageSize,
+  backgroundText,
+  children
+}) => {
+  return (
+    <CompactViewS
+      className={className}
+      pageSize={pageSize}
+      backgroundText={backgroundText}
+    >
+      {children}
+    </CompactViewS>
+  )
+}
+
+CompactView.propTypes = {
+  className: PropTypes.string,
+  pageSize: PropTypes.object,
+  backgroundText: PropTypes.string,
+  children: PropTypes.node
+}
+
+// color-adjust forces browsers to keep color values of the node
+// supported in most major browsers' new versions, but not in IE or some older versions
+// TODO: Find a way to calculate background text width after 45deg rotation currently it is hardcoded as 130
+const CompactViewS = styled.div`
+  position: relative;
+  outline: 2px solid grey;
+  padding: 0 1rem;
+  width: ${props => props.pageSize.width};
+  &:before {
+    content: "${props => props.backgroundText}";
+    z-index: -1000;
+    position: absolute;
+    font-weight: 100;
+    top: 40%;
+    left: ${props => getBackgroundIndent(props.pageSize.width, 130)};
+    font-size: 150px;
+    color: rgba(161, 158, 158, 0.3) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact !important;
+    transform: rotateZ(-45deg);
+  }
+  @media print {
+    outline: none;
+    .banner {
+      display: inline-block !important;
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact !important;
+    }
+    table {
+      page-break-inside: auto;
+    }
+    tr {
+      page-break-inside: auto;
+    }
+    @page {
+      size: ${props => props.pageSize.width} ${props => props.pageSize.height};
+    }
+    &:before {
+      position: fixed;
+    }
+    .workflow-action .btn {
+      display: inline-block !important;
+    }
+  }
+`
+
 export const CompactHeaderContent = ({ sensitiveInformation }) => {
   const { appSettings } = useContext(AppContext)
   return (
@@ -184,7 +287,9 @@ const CompactTable = ({ className, children }) => {
       {
         <tbody>
           <tr>
-            <td>{children}</td>
+            <td>
+              <InnerTable>{children}</InnerTable>
+            </td>
           </tr>
         </tbody>
       }
@@ -203,6 +308,21 @@ CompactTable.propTypes = {
 }
 
 export default CompactTable
+
+export const InnerTable = styled.table`
+  display: flex;
+  flex-flow: row wrap;
+  width: 100%;
+  margin-bottom: 10px;
+`
+
+export const HalfColumn = styled.tbody`
+  flex: 1 1 50%;
+`
+
+export const FullColumn = styled.tbody`
+  flex: 1 1 100%;
+`
 
 const CompactTableS = styled.table`
   width: 100% !important;
@@ -230,12 +350,12 @@ export const CompactRow = ({ label, content, ...otherProps }) => {
   `
 
   // top level th have different width
-  const isTopLevelTh = className === "reportField"
+  const isHeaderRow = className === "reportField"
 
   return (
     <CustomStyled className={className || null}>
-      <RowLabelS isTopLevelTh={isTopLevelTh}>{label}</RowLabelS>
-      <CompactRowContentS>{content}</CompactRowContentS>
+      {label && <RowLabelS isHeaderRow={isHeaderRow}>{label}</RowLabelS>}
+      <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
     </CustomStyled>
   )
 }
@@ -257,12 +377,10 @@ const RowLabelS = styled.th`
   color: grey;
   max-width: 50%;
   font-weight: 300;
-  width: ${props => (props.isTopLevelTh ? "15%" : "auto")};
+  width: ${props => (props.isHeaderRow ? "15%" : "auto")};
 `
 
 export const CompactRowContentS = styled.td`
-  display: flex;
-  justify-content: space-between;
   padding: 4px 1rem;
   & .form-control-static {
     margin-bottom: 0;
@@ -321,3 +439,8 @@ const CompactSubTitleS = styled(CompactRowS)`
     font-weight: normal;
   }
 `
+
+const getBackgroundIndent = (pageWidth, textWidth) => {
+  // Takes page width in "NNNmm", text width in number format and returns left indentation to center the text
+  return `${(parseInt(pageWidth) - textWidth) / 2}mm`
+}
