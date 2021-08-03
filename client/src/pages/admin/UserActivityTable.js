@@ -9,7 +9,7 @@ import "./UserActivityTable.css"
 const UserActivityTable = ({ text, values }) => {
   if (!values) {
     return (
-      <Alert bsStyle="info" style={{ textAlign: "center" }}>
+      <Alert variant="info" style={{ textAlign: "center" }}>
         Click <b>Load Recent Activities & Recent Users</b> button to load {text}
         .
       </Alert>
@@ -18,7 +18,7 @@ const UserActivityTable = ({ text, values }) => {
 
   if (!values.length) {
     return (
-      <Alert bsStyle="warning" style={{ textAlign: "center" }}>
+      <Alert variant="warning" style={{ textAlign: "center" }}>
         No {text} detected!
       </Alert>
     )

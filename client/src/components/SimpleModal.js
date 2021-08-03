@@ -12,7 +12,8 @@ const SimpleModal = props => {
       </span>
 
       <Modal
-        bsSize={props.size}
+        centered
+        size={props.size}
         show={showModal}
         onHide={() => setShowModal(false)}
       >

@@ -154,7 +154,7 @@ const AdvisorList = ({
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table striped condensed hover responsive className="positions_table">
+        <Table striped hover responsive className="positions_table">
           <thead>
             <tr>
               <th colSpan="3" style={borderStyle}>
@@ -236,7 +236,7 @@ const PrincipalList = ({ positions }) => {
     return <em>No {Settings.fields.principal.person.name} to assess</em>
   }
   return (
-    <Table condensed responsive style={{ background: "transparent" }}>
+    <Table responsive style={{ background: "transparent" }}>
       <tbody>
         {Position.map(positions, pos => {
           const nameComponents = []
@@ -274,7 +274,7 @@ const TaskList = ({ tasks }) => {
     return <em>No {Settings.fields.task.shortLabel} to assess</em>
   }
   return (
-    <Table condensed responsive style={{ background: "transparent" }}>
+    <Table responsive style={{ background: "transparent" }}>
       <tbody>
         {Task.map(tasks, task => {
           return (

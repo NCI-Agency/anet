@@ -243,7 +243,6 @@ const ReportStatistics = ({
     <>
       <PeriodsNavigation offset={offset} onChange={setOffset} />
       <Table
-        condensed
         responsive
         className="assessments-table"
         style={{ tableLayout: "fixed" }}

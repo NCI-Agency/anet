@@ -10,7 +10,7 @@ const TriggerableConfirm = ({
   body,
   confirmText,
   cancelText,
-  bsStyle,
+  variant,
   buttonLabel,
   buttonRef,
   ...otherProps
@@ -24,7 +24,7 @@ const TriggerableConfirm = ({
     dialogClassName="react-confirm-bootstrap-modal"
     confirmBSStyle="primary"
   >
-    <Button bsStyle={bsStyle} {...otherProps} ref={buttonRef}>
+    <Button variant={variant} {...otherProps} ref={buttonRef}>
       {buttonLabel}
     </Button>
   </Confirm>
@@ -35,7 +35,7 @@ TriggerableConfirm.propTypes = {
   body: PropTypes.string,
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
-  bsStyle: PropTypes.string,
+  variant: PropTypes.string,
   buttonLabel: PropTypes.string,
   buttonRef: PropTypes.object
 }

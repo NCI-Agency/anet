@@ -33,10 +33,9 @@ import {
   Alert,
   Button,
   Col,
-  ControlLabel,
   FormGroup,
-  HelpBlock,
-  Radio
+  FormText,
+  ToggleButton
 } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
@@ -175,7 +174,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
           <>
             <Button
               key="submit"
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={submitForm}
               disabled={isSubmitting}
@@ -202,7 +201,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   onAvatarUpdate={onAvatarUpdate}
                 />
                 <FormGroup>
-                  <Col sm={2} componentClass={ControlLabel} htmlFor="lastName">
+                  <Col sm={2} as={Form.Label} htmlFor="lastName">
                     Name
                   </Col>
                   <Col sm={7}>
@@ -260,7 +259,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                         body="Are you sure you want to reset this account?"
                         confirmText={confirmLabel}
                         cancelText="No, I am not entirely sure at this point"
-                        bsStyle="warning"
+                        variant="warning"
                         buttonLabel="Reset account"
                         className="hidden"
                         buttonRef={confirmHasReplacementButton}
@@ -283,42 +282,78 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       >
                         {(isSelf && (
                           <div>
-                            <Radio name="wrongPerson" value="needNewAccount">
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="needNewAccount"
+                            >
                               <em>{fullName}</em> has left and is replaced by
                               me. I need to set up a new account.
-                            </Radio>
-                            <Radio name="wrongPerson" value="haveAccount">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="haveAccount"
+                            >
                               <em>{fullName}</em> has left and is replaced by
                               me. I already have an account.
-                            </Radio>
-                            <Radio name="wrongPerson" value="transferAccount">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="transferAccount"
+                            >
                               <em>{fullName}</em> is still active, but this
                               should be my account.
-                            </Radio>
-                            <Radio name="wrongPerson" value="misspelledName">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="misspelledName"
+                            >
                               I am <em>{fullName}</em>, but my name is
                               misspelled.
-                            </Radio>
-                            <Radio name="wrongPerson" value="otherError">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="otherError"
+                            >
                               Something else is wrong.
-                            </Radio>
+                            </ToggleButton>
                           </div>
                         )) || (
                           <div>
-                            <Radio name="wrongPerson" value="leftVacant">
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="leftVacant"
+                            >
                               <em>{fullName}</em> has left and the position is
                               vacant.
-                            </Radio>
-                            <Radio name="wrongPerson" value="hasReplacement">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="hasReplacement"
+                            >
                               <em>{fullName}</em> has left and has a
                               replacement.
-                            </Radio>
-                            <Radio name="wrongPerson" value="misspelledName">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="misspelledName"
+                            >
                               The name of <em>{fullName}</em> is misspelled.
-                            </Radio>
-                            <Radio name="wrongPerson" value="otherError">
+                            </ToggleButton>
+                            <ToggleButton
+                              type="radio"
+                              name="wrongPerson"
+                              value="otherError"
+                            >
                               Something else is wrong.
-                            </Radio>
+                            </ToggleButton>
                           </div>
                         )}
                       </OptionListModal>
@@ -363,7 +398,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     }}
                   >
                     {isAdvisor && (
-                      <Alert bsStyle="warning">
+                      <Alert variant="warning">
                         Creating a {Settings.fields.advisor.person.name} in ANET
                         could result in duplicate accounts if this person logs
                         in later. If you notice duplicate accounts, please
@@ -393,16 +428,16 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                     onChange={value => setFieldValue("status", value)}
                   >
                     {willAutoKickPosition && (
-                      <HelpBlock>
+                      <FormText>
                         <span className="text-danger">
                           Setting this person to inactive will automatically
                           remove them from the{" "}
                           <strong>{values.position.name}</strong> position.
                         </span>
-                      </HelpBlock>
+                      </FormText>
                     )}
                     {warnDomainUsername && (
-                      <HelpBlock>
+                      <FormText>
                         <span className="text-danger">
                           Setting this person to inactive means the next person
                           to logon with the user name{" "}
@@ -410,7 +445,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                           create a new profile. Do you want the next person to
                           login with this user name to create a new profile?
                         </span>
-                      </HelpBlock>
+                      </FormText>
                     )}
                   </Field>
                 )}
@@ -492,7 +527,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                   widget={<CustomDateInput id="endOfTourDate" />}
                 >
                   {isAdvisor && endOfTourDateInPast && (
-                    <Alert bsStyle="warning">
+                    <Alert variant="warning">
                       Be aware that the end of tour date is in the past.
                     </Alert>
                   )}
@@ -564,7 +599,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={submitForm}
                     disabled={isSubmitting}

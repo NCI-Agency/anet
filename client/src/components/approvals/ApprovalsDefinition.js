@@ -11,7 +11,7 @@ import { FastField, FieldArray } from "formik"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Checkbox, Modal, Table } from "react-bootstrap"
+import { Button, Modal, Table, ToggleButton } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_GET_APPROVAL_STEP_IN_USE = gql`
@@ -21,7 +21,7 @@ const GQL_GET_APPROVAL_STEP_IN_USE = gql`
 `
 
 const ApproverTable = ({ approvers, onDelete }) => (
-  <Table striped condensed hover responsive>
+  <Table striped hover responsive>
     <thead>
       <tr>
         <th>Name</th>
@@ -87,12 +87,13 @@ const ApprovalsDefinition = ({
               <Button
                 className="pull-right"
                 onClick={() => addApprovalStep(arrayHelpers, values[fieldName])}
-                bsStyle="primary"
+                variant="primary"
                 id={`add${fieldName}Button`}
               >
                 {addButtonLabel}
               </Button>
               <Modal
+                centered
                 show={showAddApprovalStepAlert}
                 onHide={hideAddApprovalStepAlert}
               >
@@ -107,7 +108,7 @@ const ApprovalsDefinition = ({
                   <Button
                     className="pull-right"
                     onClick={hideAddApprovalStepAlert}
-                    bsStyle="primary"
+                    variant="primary"
                   >
                     OK
                   </Button>
@@ -127,7 +128,7 @@ const ApprovalsDefinition = ({
                   <Button
                     className="pull-right"
                     onClick={hideRemoveApprovalStepAlert}
-                    bsStyle="primary"
+                    variant="primary"
                   >
                     OK
                   </Button>
@@ -184,12 +185,12 @@ const ApprovalsDefinition = ({
             component={FieldHelper.SpecialField}
             label=""
             widget={
-              <Checkbox
-                inline
+              <ToggleButton
+                type="checkbox"
                 checked={values?.[fieldName]?.[index].restrictedApproval}
               >
                 {restrictedApprovalLabel}
-              </Checkbox>
+              </ToggleButton>
             }
           />
         )}

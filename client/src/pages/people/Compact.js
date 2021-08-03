@@ -35,7 +35,7 @@ import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, DropdownButton, MenuItem, Table } from "react-bootstrap"
+import { Button, DropdownButton, DropdownItem, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -521,36 +521,36 @@ const CompactPersonViewHeader = ({
       </label>
       <DropdownButton
         title="Page Size"
-        bsStyle="primary"
+        variant="primary"
         id="pageSizeButton"
         onSelect={setPageSize}
       >
         {Object.keys(PAGE_SIZES).map(pageSize => (
-          <MenuItem
+          <DropdownItem
             key={PAGE_SIZES[pageSize].name}
             eventKey={PAGE_SIZES[pageSize]}
             style={{ minWidth: "205px" }}
           >
             {PAGE_SIZES[pageSize].name}
-          </MenuItem>
+          </DropdownItem>
         ))}
       </DropdownButton>
       <DropdownButton
         title="Presets"
-        bsStyle="primary"
+        variant="primary"
         id="presetsButton"
         onSelect={fields =>
           onPresetSelect(fields, optionalFields, setOptionalFields)
         }
       >
         {PRESETS.map(preset => (
-          <MenuItem
+          <DropdownItem
             key={preset.name}
             eventKey={preset.fields}
             style={{ minWidth: "185px" }}
           >
             {preset.label}
-          </MenuItem>
+          </DropdownItem>
         ))}
       </DropdownButton>
       <SimpleMultiCheckboxDropdown
@@ -563,7 +563,7 @@ const CompactPersonViewHeader = ({
           <Button
             value="print"
             type="button"
-            bsStyle="primary"
+            variant="primary"
             onClick={onPrintClick}
           >
             Print
@@ -572,7 +572,7 @@ const CompactPersonViewHeader = ({
         <Button
           value="detailedView"
           type="button"
-          bsStyle="primary"
+          variant="primary"
           onClick={returnToDefaultPage}
         >
           Detailed View

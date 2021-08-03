@@ -14,12 +14,12 @@ import {
 } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
 import {
-  PathFindingLinkFactory,
-  DagreEngine
+  DagreEngine,
+  PathFindingLinkFactory
 } from "@projectstorm/react-diagrams-routing"
 import { DEFAULT_PAGE_PROPS } from "actions"
-import LinkTo from "components/LinkTo"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -29,7 +29,7 @@ import FileSaver from "file-saver"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Badge, Button, Modal, Panel } from "react-bootstrap"
+import { Badge, Button, Card, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
@@ -230,9 +230,9 @@ const BoardDashboard = ({ pageDispatchers }) => {
         )}
       </div>
       <div>
-        <Panel>
+        <Card>
           <Button
-            bsStyle="primary"
+            variant="primary"
             type="button"
             onClick={() => setEdit(!edit)}
           >
@@ -264,13 +264,13 @@ const BoardDashboard = ({ pageDispatchers }) => {
               </Button>
             </>
           )}
-        </Panel>
+        </Card>
 
         {edit && (
           <>
-            <Panel bsStyle="primary">
-              <Panel.Heading>Node palette</Panel.Heading>
-              <Panel.Body style={{ display: "flex", flexDirection: "column" }}>
+            <Card variant="primary">
+              <Card.Heading>Node palette</Card.Heading>
+              <Card.Body style={{ display: "flex", flexDirection: "column" }}>
                 {Object.values(Models).map(Model => {
                   const instance = new Model()
                   const modelName = instance.constructor.resourceName
@@ -292,11 +292,11 @@ const BoardDashboard = ({ pageDispatchers }) => {
                 <span>
                   <i>Click or drag into diagram</i>
                 </span>
-              </Panel.Body>
-            </Panel>
-            <Panel bsStyle="primary">
-              <Panel.Heading>Node editor</Panel.Heading>
-              <Panel.Body>
+              </Card.Body>
+            </Card>
+            <Card variant="primary">
+              <Card.Heading>Node editor</Card.Heading>
+              <Card.Body>
                 {editedNode ? (
                   <>
                     <span>ANET entity:</span>
@@ -314,8 +314,9 @@ const BoardDashboard = ({ pageDispatchers }) => {
                     <i>Select an item on diagram</i>
                   </span>
                 )}
-              </Panel.Body>
+              </Card.Body>
               <Modal
+                centered
                 show={selectingEntity}
                 onHide={() => setSelectingEntity(false)}
               >
@@ -333,7 +334,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   />
                 </Modal.Body>
               </Modal>
-            </Panel>
+            </Card>
           </>
         )}
       </div>
