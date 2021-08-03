@@ -101,11 +101,9 @@ const SearchBar = ({
             id="searchBarInput"
           />
           {!showAdvancedSearch && (
-            <InputGroup.Button>
-              <Button onClick={onSubmit} id="searchBarSubmit">
-                <img src={SEARCH_ICON} height={16} alt="Search" />
-              </Button>
-            </InputGroup.Button>
+            <Button onClick={onSubmit} id="searchBarSubmit">
+              <img src={SEARCH_ICON} height={16} alt="Search" />
+            </Button>
           )}
         </InputGroup>
       </Form>

@@ -19,7 +19,7 @@ import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Panel } from "react-bootstrap"
+import { Button, Card } from "react-bootstrap"
 import ReactDOM from "react-dom"
 import NotificationBadge from "react-notification-badge"
 import REMOVE_ICON from "resources/delete.png"
@@ -87,7 +87,7 @@ const RelatedObjectNotes = ({
           style={{ fontSize: "8px", padding: 4 }}
           effect={["none", "none"]}
         />
-        <Button bsSize="small" onClick={toggleHidden} title="Show notes">
+        <Button size="small" onClick={toggleHidden} title="Show notes">
           <Icon icon={IconNames.COMMENT} />
         </Button>
       </div>
@@ -110,7 +110,7 @@ const RelatedObjectNotes = ({
           }}
         >
           <h4 style={{ paddingRight: 5 }}>Notes</h4>
-          <Button bsSize="small" onClick={toggleHidden} title="hidden notes">
+          <Button size="small" onClick={toggleHidden} title="hidden notes">
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
         </div>
@@ -126,7 +126,7 @@ const RelatedObjectNotes = ({
           }}
         >
           <Button
-            bsStyle="primary"
+            variant="primary"
             style={{ margin: "5px" }}
             onClick={() =>
               showRelatedObjectNoteModal("new", NOTE_TYPE.FREE_TEXT)
@@ -174,12 +174,12 @@ const RelatedObjectNotes = ({
               ? jsonFields.text
               : parseHtmlWithLinkTo(note.text)
             return (
-              <Panel
+              <Card
                 key={note.uuid}
-                bsStyle="primary"
+                variant="primary"
                 style={{ borderRadius: "15px" }}
               >
-                <Panel.Heading
+                <Card.Header
                   style={{
                     padding: "1px 1px",
                     borderTopLeftRadius: "15px",
@@ -203,8 +203,8 @@ const RelatedObjectNotes = ({
                       <Button
                         title="Edit note"
                         onClick={() => showRelatedObjectNoteModal(note.uuid)}
-                        bsSize="xsmall"
-                        bsStyle="primary"
+                        size="xsmall"
+                        variant="primary"
                       >
                         <Icon icon={IconNames.EDIT} />
                       </Button>
@@ -221,15 +221,15 @@ const RelatedObjectNotes = ({
                         objectType="note"
                         objectDisplay={"#" + note.uuid}
                         title="Delete note"
-                        bsSize="xsmall"
-                        bsStyle="primary"
+                        size="xsmall"
+                        variant="primary"
                       >
                         <img src={REMOVE_ICON} height={14} alt="Delete" />
                       </ConfirmDestructive>
                     </>
                   )}
-                </Panel.Heading>
-                <Panel.Body>
+                </Card.Header>
+                <Card.Body>
                   <div
                     style={{
                       overflowWrap: "break-word",
@@ -292,8 +292,8 @@ const RelatedObjectNotes = ({
                   >
                     {noteText}
                   </div>
-                </Panel.Body>
-              </Panel>
+                </Card.Body>
+              </Card>
             )
           })}
         </div>

@@ -7,13 +7,7 @@ import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useState } from "react"
-import {
-  Badge,
-  MenuItem,
-  Nav as BSNav,
-  NavDropdown,
-  NavItem
-} from "react-bootstrap"
+import { Badge, Nav, NavDropdown } from "react-bootstrap"
 import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
@@ -26,7 +20,7 @@ import Settings from "settings"
 import utils from "utils"
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
-  const ScrollLinkNavItem = ScrollLink(NavItem)
+  const ScrollLinkNavItem = ScrollLink(Nav.Item)
   return (
     <ResponsiveLayoutContext.Consumer>
       {context => (
@@ -71,7 +65,7 @@ const SidebarLink = ({
       setIsMenuLinksOpened && setIsMenuLinksOpened()
     }}
   >
-    <NavItem id={id}>{children}</NavItem>
+    <Nav.Item id={id}>{children}</Nav.Item>
   </Link>
 )
 SidebarLink.propTypes = {
@@ -82,7 +76,7 @@ SidebarLink.propTypes = {
   id: PropTypes.string
 }
 
-const Nav = ({
+const Navigation = ({
   advisorOrganizations,
   principalOrganizations,
   resetPages,
@@ -136,7 +130,7 @@ const Nav = ({
   }, [inMyOrg, inMyCounterParts, inMyReports, inMyTasks, inMySubscriptions])
 
   return (
-    <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
+    <Nav variant="pills" id="leftNav" className="flex-column hide-for-print">
       <SidebarLink
         linkTo="/"
         handleOnClick={resetPages}
@@ -145,10 +139,10 @@ const Nav = ({
         Home
       </SidebarLink>
 
-      <BSNav id="search-nav" />
+      <Nav id="search-nav" />
 
-      <NavItem
-        active={isMenuLinksOpened}
+      <Nav.Item
+        active={isMenuLinksOpened ? 1 : 0}
         id="nav-links-button"
         style={{ paddingTop: "2px" }}
         onClick={() => setIsMenuLinksOpened(!isMenuLinksOpened)}
@@ -159,12 +153,12 @@ const Nav = ({
           style={{ marginLeft: "0.5rem" }}
         >
         </span>
-      </NavItem>
+      </Nav.Item>
 
       <Collapse isOpen={isMenuLinksOpened}>
-        <BSNav
-          bsStyle="pills"
-          stacked
+        <Nav
+          variant="pills"
+          className="flex-column"
           style={{ paddingLeft: "1rem", paddingTop: "2px" }}
         >
           {currentUser.uuid && (
@@ -176,7 +170,7 @@ const Nav = ({
             </SidebarLink>
           )}
 
-          <BSNav id="reports-nav" />
+          <Nav id="reports-nav" />
 
           {isAdvisor && currentUser.position?.uuid && (
             <>
@@ -224,7 +218,7 @@ const Nav = ({
           >
             My Subscriptions
           </SidebarLink>
-        </BSNav>
+        </Nav>
       </Collapse>
 
       <NavDropdown
@@ -241,12 +235,12 @@ const Nav = ({
               setIsMenuLinksOpened(false)
             }}
           >
-            <MenuItem>{org.shortName}</MenuItem>
+            <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
           </Link>
         ))}
       </NavDropdown>
 
-      <BSNav id="advisor-org-nav" />
+      <Nav id="advisor-org-nav" />
 
       <NavDropdown
         title={Settings.fields.principal.org.allOrgName}
@@ -264,12 +258,12 @@ const Nav = ({
               setIsMenuLinksOpened(false)
             }}
           >
-            <MenuItem>{org.shortName}</MenuItem>
+            <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
           </Link>
         ))}
       </NavDropdown>
 
-      <BSNav id="principal-org-nav" />
+      <Nav id="principal-org-nav" />
 
       <SidebarLink
         linkTo="/rollup"
@@ -287,34 +281,34 @@ const Nav = ({
             setIsMenuLinksOpened(false)
           }}
         >
-          <NavItem>Admin</NavItem>
+          <Nav.Item>Admin</Nav.Item>
         </LinkContainer>
       )}
 
       {inAdmin && (
-        <BSNav>
+        <Nav>
           <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
-            <NavItem>Merge people</NavItem>
+            <Nav.Item>Merge people</Nav.Item>
           </LinkContainer>
           <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
-            <NavItem>Merge positions</NavItem>
+            <Nav.Item>Merge positions</Nav.Item>
           </LinkContainer>
           <LinkContainer to="/admin/mergeLocations" onClick={resetPages}>
-            <NavItem>Merge locations</NavItem>
+            <Nav.Item>Merge locations</Nav.Item>
           </LinkContainer>
           <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
-            <NavItem>Authorization groups</NavItem>
+            <Nav.Item>Authorization groups</Nav.Item>
           </LinkContainer>
           <SidebarLink linkTo="/admin/graphiql" handleOnClick={resetPages}>
             GraphQL
           </SidebarLink>
-        </BSNav>
+        </Nav>
       )}
 
       {externalDocumentationUrl && externalDocumentationUrlText && (
-        <NavItem href={externalDocumentationUrl} target="_extdocs">
+        <Nav.Item href={externalDocumentationUrl} target="_extdocs">
           {externalDocumentationUrlText}
-        </NavItem>
+        </Nav.Item>
       )}
 
       <SidebarLink
@@ -336,7 +330,9 @@ const Nav = ({
                 setIsMenuLinksOpened(false)
               }}
             >
-              <MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
+              <NavDropdown.Item>
+                {INSIGHT_DETAILS[insight].navTitle}
+              </NavDropdown.Item>
             </Link>
           ))}
         </NavDropdown>
@@ -353,23 +349,23 @@ const Nav = ({
                 setIsMenuLinksOpened(false)
               }}
             >
-              <MenuItem>{dashboard.label}</MenuItem>
+              <NavDropdown.Item>{dashboard.label}</NavDropdown.Item>
             </Link>
           ))}
         </NavDropdown>
       )}
-    </BSNav>
+    </Nav>
   )
 }
 
-Nav.propTypes = {
+Navigation.propTypes = {
   advisorOrganizations: PropTypes.array,
   principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
-Nav.defaultProps = {
+Navigation.defaultProps = {
   advisorOrganizations: [],
   principalOrganizations: []
 }
@@ -402,4 +398,4 @@ NotificationBadge.propTypes = {
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false
-})(Nav)
+})(Navigation)

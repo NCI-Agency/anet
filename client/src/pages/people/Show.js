@@ -37,15 +37,7 @@ import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import {
-  Button,
-  Col,
-  ControlLabel,
-  FormGroup,
-  Grid,
-  Row,
-  Table
-} from "react-bootstrap"
+import { Button, Col, Container, FormGroup, Row, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -188,7 +180,7 @@ const PersonShow = ({ pageDispatchers }) => {
       <Button
         value="compactView"
         type="button"
-        bsStyle="primary"
+        variant="primary"
         onClick={onCompactClick}
       >
         Summary / Print
@@ -266,7 +258,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <Grid fluid>
+                <Container fluid>
                   <Row>
                     <Col md={6}>
                       <AvatarDisplayComponent
@@ -284,7 +276,7 @@ const PersonShow = ({ pageDispatchers }) => {
                     </Col>
                     <Col md={6}>{rightColum}</Col>
                   </Row>
-                </Grid>
+                </Container>
               </Fieldset>
               {canChangePosition && (
                 <AssignPositionModal
@@ -501,7 +493,7 @@ const PersonShow = ({ pageDispatchers }) => {
         <Tooltip content="Change position" position="top">
           <Button
             onClick={() => setShowAssignPositionModal(true)}
-            bsStyle="primary"
+            variant="primary"
             className="change-assigned-position"
           >
             <Icon iconSize={IconSize.LARGE} icon={IconNames.EXCHANGE} />
@@ -517,7 +509,7 @@ const PersonShow = ({ pageDispatchers }) => {
         <Tooltip content="Assign a position" position="top">
           <Button
             onClick={() => setShowAssignPositionModal(true)}
-            bsStyle="primary"
+            variant="primary"
           >
             <Icon iconSize={IconSize.LARGE} icon={IconNames.INSERT} />
           </Button>
@@ -577,7 +569,7 @@ const PersonShow = ({ pageDispatchers }) => {
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
-        <Col sm={2} componentClass={ControlLabel}>
+        <Col sm={2} as={Form.Label}>
           {assocTitle}
         </Col>
         <Col sm={10}>

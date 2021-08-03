@@ -46,18 +46,18 @@ describe("In the location form", () => {
       fireEvent.click(infoButton)
     })
     const mgrsButton = screen.getByRole("button", {
-      name: "Military Grid Reference System (MGRS)"
+      name: "Military Container Reference System (MGRS)"
     })
     expect(mgrsButton).toBeInTheDocument()
     act(() => {
       fireEvent.click(mgrsButton)
     })
     const mgrsLabel = screen.getByText(
-      /Military Grid Reference System \(MGRS\)/
+      /Military Container Reference System \(MGRS\)/
     )
     expect(mgrsLabel).toBeInTheDocument()
     const mrgsInput = screen.getByLabelText(
-      /Military Grid Reference System \(MGRS\)/
+      /Military Container Reference System \(MGRS\)/
     )
     expect(mrgsInput).toBeInTheDocument()
   })

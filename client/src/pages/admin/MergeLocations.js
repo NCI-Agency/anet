@@ -36,7 +36,7 @@ import useMergeObjects, {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
-import { Col, FormGroup, Grid, Row } from "react-bootstrap"
+import { Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -83,7 +83,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   }, [location1, location2])
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         <Messages error={saveError} warning={saveWarning} />
         <h2>Merge Locations Tool</h2>
@@ -284,7 +284,7 @@ const MergeLocations = ({ pageDispatchers }) => {
           }
         />
       </Row>
-    </Grid>
+    </Container>
   )
 
   function mergeLocations() {

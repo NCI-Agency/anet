@@ -1,4 +1,4 @@
-import Nav from "components/Nav"
+import Navigation from "components/Nav"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import TopBar from "components/TopBar"
 import PropTypes from "prop-types"
@@ -95,7 +95,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
               className={`main-sidebar ${sidebarClass}`}
             >
               <div style={sidebar}>
-                <Nav {...sidebarData} />
+                <Navigation {...sidebarData} />
               </div>
             </div>
           )}

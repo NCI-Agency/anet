@@ -63,7 +63,7 @@ const OrganizationAdvisorsTable = ({
 
   return (
     <div className="organization-advisors-table">
-      <Table striped bordered condensed hover responsive>
+      <Table striped bordered hover responsive>
         <caption>
           Shows reports submitted and engagements attended per week by an
           organization's {pluralize(Settings.fields.advisor.person.name)}

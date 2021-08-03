@@ -7,7 +7,7 @@ import React from "react"
 import { Link } from "react-router-dom"
 
 const LinkTo = ({
-  componentClass,
+  as,
   children,
   edit,
   button,
@@ -82,7 +82,7 @@ const LinkTo = ({
     to = model
   }
 
-  const LinkToComponent = componentClass
+  const LinkToComponent = as
   return (
     <LinkToComponent to={to} style={style} {...componentProps}>
       <>
@@ -95,11 +95,7 @@ const LinkTo = ({
 }
 
 LinkTo.propTypes = {
-  componentClass: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.func,
-    PropTypes.object
-  ]),
+  as: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
   children: PropTypes.node,
   className: PropTypes.string,
 
@@ -120,7 +116,7 @@ LinkTo.propTypes = {
 }
 
 LinkTo.defaultProps = {
-  componentClass: Link,
+  as: Link,
   showIcon: true,
   showAvatar: true,
   isLink: true,

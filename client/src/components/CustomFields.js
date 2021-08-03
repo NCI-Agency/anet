@@ -28,7 +28,7 @@ import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo } from "react"
-import { Button, HelpBlock, Table } from "react-bootstrap"
+import { Button, Form, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
@@ -370,7 +370,7 @@ const ArrayOfObjectsField = fieldProps => {
             <Button
               className="pull-right"
               onClick={() => addObject(objDefault, arrayHelpers)}
-              bsStyle="primary"
+              variant="primary"
               id={`add-${name}`}
             >
               {addButtonLabel}
@@ -541,7 +541,7 @@ const AnetObjectField = ({
     >
       {children}
       {fieldValue.type && fieldValue.uuid && (
-        <Table id={`${name}-value`} striped condensed hover responsive>
+        <Table id={`${name}-value`} striped hover responsive>
           <tbody>
             <tr>
               <td>
@@ -587,7 +587,7 @@ const ReadonlyAnetObjectField = ({
       humanValue={
         type &&
         uuid && (
-          <Table id={`${name}-value`} striped condensed hover responsive>
+          <Table id={`${name}-value`} striped hover responsive>
             <tbody>
               <tr>
                 <td>
@@ -650,7 +650,7 @@ const ArrayOfAnetObjectsField = ({
     >
       {children}
       {!_isEmpty(fieldValue) && (
-        <Table id={`${name}-value`} striped condensed hover responsive>
+        <Table id={`${name}-value`} striped hover responsive>
           <tbody>
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
@@ -709,7 +709,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
       isCompact={isCompact}
       humanValue={
         !_isEmpty(fieldValue) && (
-          <Table id={`${name}-value`} striped condensed hover responsive>
+          <Table id={`${name}-value`} striped hover responsive>
             <tbody>
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
@@ -944,7 +944,7 @@ const CustomField = ({
       {...fieldProps}
       {...extraProps}
     >
-      {helpText && <HelpBlock>{helpText}</HelpBlock>}
+      {helpText && <Form.Text>{helpText}</Form.Text>}
     </FieldComponent>
   ) : (
     <FastField

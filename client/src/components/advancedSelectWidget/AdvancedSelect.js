@@ -8,7 +8,7 @@ import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
+import { Button, Col, Form, InputGroup, Row } from "react-bootstrap"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 import "./AdvancedSelect.css"
@@ -39,7 +39,7 @@ const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
             key={filterType}
             className={currentFilter === filterType ? "active" : null}
           >
-            <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
+            <Button variant="link" onClick={() => handleOnClick(filterType)}>
               {filter.label}
             </Button>
           </li>
@@ -367,19 +367,19 @@ const AdvancedSelect = ({
                   }
                 }}
               >
-                <FormControl
+                <Form.Control
                   name={fieldName}
                   value={searchTerms || ""}
                   placeholder={placeholder}
                   onChange={changeSearchTerms}
                   onFocus={event => handleInteraction(true, event)}
-                  inputRef={ref => {
+                  ref={ref => {
                     searchInput.current = ref
                   }}
                   disabled={disabled}
                 />
               </Popover2>
-              {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
+              {extraAddon && <InputGroup>{extraAddon}</InputGroup>}
               {addon && (
                 <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
               )}

@@ -25,14 +25,7 @@ import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import {
-  Button,
-  ControlLabel,
-  FormControl,
-  FormGroup,
-  Grid,
-  Row
-} from "react-bootstrap"
+import { Button, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -82,7 +75,7 @@ const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
   const totalCount = data && data.reportList && data.reportList.totalCount
   return (
     <Button
-      bsStyle="link"
+      variant="link"
       onClick={event => onClickDashboard(query, event)}
       className="home-tile"
     >
@@ -124,7 +117,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const queries = getQueriesForUser(currentUser)
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         {queries
           .filter(q => q.query !== null)
@@ -137,7 +130,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
             />
           ))}
       </Row>
-    </Grid>
+    </Container>
   )
 
   function getQueriesForUser(currentUser) {
@@ -329,17 +322,17 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   return (
     <>
       <Messages error={stateError} />
-      <FormGroup controlId="savedSearchSelect">
-        <ControlLabel>Select a saved search</ControlLabel>
-        <FormControl componentClass="select" onChange={onSaveSearchSelect}>
+      <Form.Group controlId="savedSearchSelect">
+        <Form.Label>Select a saved search</Form.Label>
+        <Form.Control as="select" onChange={onSaveSearchSelect}>
           {savedSearches &&
             savedSearches.map(savedSearch => (
               <option value={savedSearch.uuid} key={savedSearch.uuid}>
                 {savedSearch.name}
               </option>
             ))}
-        </FormControl>
-      </FormGroup>
+        </Form.Control>
+      </Form.Group>
 
       {selectedSearch && (
         <div>
@@ -351,7 +344,7 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
               onConfirm={onConfirmDelete}
               objectType="search"
               objectDisplay={selectedSearch.name}
-              bsStyle="danger"
+              variant="danger"
               buttonLabel="Delete Search"
             />
           </div>

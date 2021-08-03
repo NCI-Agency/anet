@@ -17,7 +17,7 @@ import {
 } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Panel } from "react-bootstrap"
+import { Button, Card } from "react-bootstrap"
 import { toast } from "react-toastify"
 import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
@@ -44,8 +44,8 @@ const PeriodicAssessment = ({
   const periodDisplay = periodToString(period)
 
   return (
-    <Panel bsStyle="primary" style={{ borderRadius: "15px" }}>
-      <Panel.Heading
+    <Card variant="primary" style={{ borderRadius: "15px" }}>
+      <Card.Header
         style={{
           padding: "1px 1px",
           borderTopLeftRadius: "15px",
@@ -74,8 +74,8 @@ const PeriodicAssessment = ({
               <Button
                 title="Edit assessment"
                 onClick={() => setShowAssessmentModalKey(note.uuid)}
-                bsSize="xsmall"
-                bsStyle="primary"
+                size="xsmall"
+                variant="primary"
               >
                 <Icon icon={IconNames.EDIT} />
               </Button>
@@ -84,8 +84,8 @@ const PeriodicAssessment = ({
                 objectType="note"
                 objectDisplay={"#" + note.uuid}
                 title="Delete assessment"
-                bsSize="xsmall"
-                bsStyle="primary"
+                size="xsmall"
+                variant="primary"
               >
                 <img src={REMOVE_ICON} height={14} alt="Delete" />
               </ConfirmDestructive>
@@ -107,8 +107,8 @@ const PeriodicAssessment = ({
             </>
           )}
         </>
-      </Panel.Heading>
-      <Panel.Body>
+      </Card.Header>
+      <Card.Body>
         <div
           style={{
             overflowWrap: "break-word",
@@ -133,8 +133,8 @@ const PeriodicAssessment = ({
             }}
           </Formik>
         </div>
-      </Panel.Body>
-    </Panel>
+      </Card.Body>
+    </Card>
   )
 
   function deleteNote(uuid) {
@@ -243,7 +243,7 @@ export const PeriodicAssessmentsRows = ({
                 {periodsAllowNewAssessment[index] && (
                   <>
                     <Button
-                      bsStyle="primary"
+                      variant="primary"
                       onClick={() => setShowAssessmentModalKey(modalKey)}
                     >
                       {addAssessmentLabel}

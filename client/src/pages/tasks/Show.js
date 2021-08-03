@@ -245,10 +245,10 @@ const TaskShow = ({ pageDispatchers }) => {
                     name="shortName"
                     component={FieldHelper.ReadonlyField}
                   />
-                  {/* Override componentClass and style from dictProps */}
+                  {/* Override as and style from dictProps */}
                   <LongNameField
                     dictProps={fieldSettings.longName}
-                    componentClass="div"
+                    as="div"
                     style={{}}
                     name="longName"
                     component={FieldHelper.ReadonlyField}

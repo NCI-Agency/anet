@@ -32,7 +32,8 @@ export default class Location extends Model {
 
   static LOCATION_FORMAT_LABELS = {
     [Location.LOCATION_FORMATS.LAT_LON]: "Latitude, Longitude",
-    [Location.LOCATION_FORMATS.MGRS]: "Military Grid Reference System (MGRS)"
+    [Location.LOCATION_FORMATS.MGRS]:
+      "Military Container Reference System (MGRS)"
   }
 
   static locationFormat =
