@@ -25,7 +25,7 @@ import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, HelpBlock } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -169,7 +169,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={submitForm}
               disabled={isSubmitting}
@@ -219,14 +219,14 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   onChange={value => setFieldValue("status", value)}
                 >
                   {willAutoKickPerson && (
-                    <HelpBlock>
+                    <Form.Text>
                       <span className="text-danger">
                         Setting this position to inactive will automatically
                         remove{" "}
                         <LinkTo modelType="Person" model={values.person} /> from
                         this position.
                       </span>
-                    </HelpBlock>
+                    </Form.Text>
                   )}
                 </FastField>
 
@@ -357,7 +357,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={submitForm}
                     disabled={isSubmitting}

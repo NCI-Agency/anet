@@ -7,9 +7,9 @@ import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
@@ -17,7 +17,14 @@ import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
 import React, { useState } from "react"
-import { Alert, Button, Checkbox, Col, Grid, Row } from "react-bootstrap"
+import {
+  Alert,
+  Button,
+  Col,
+  Container,
+  Row,
+  ToggleButton
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
@@ -95,7 +102,7 @@ const MergePeople = ({ pageDispatchers }) => {
       <Messages error={saveError} />
 
       <h2 className="form-header">Merge People Tool</h2>
-      <Alert bsStyle="warning">
+      <Alert variant="warning">
         <p>
           <b>Important</b>: Select the two duplicative people below. The loser
           account will be deleted and all reports will be transferred over to
@@ -124,7 +131,7 @@ const MergePeople = ({ pageDispatchers }) => {
           }
           return (
             <Form>
-              <Grid fluid>
+              <Container fluid>
                 <Row>
                   <Col md={6}>
                     <Row>
@@ -207,9 +214,12 @@ const MergePeople = ({ pageDispatchers }) => {
                         component={FieldHelper.SpecialField}
                         label={null}
                         widget={
-                          <Checkbox inline checked={values.copyPosition}>
+                          <ToggleButton
+                            type="checkbox"
+                            checked={values.copyPosition}
+                          >
                             Set position on winner to {loser.position.name}
-                          </Checkbox>
+                          </ToggleButton>
                         }
                       />
                     )}
@@ -217,7 +227,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       !_isEmpty(loser.position) &&
                       winner &&
                       !_isEmpty(winner.position) && (
-                        <Alert bsStyle="danger">
+                        <Alert variant="danger">
                           <b>Danger:</b> Position on Loser (
                           {loser.position.name}) will be left unfilled
                         </Alert>
@@ -227,8 +237,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 <Row>
                   <Col md={12}>
                     <Button
-                      bsStyle="primary"
-                      bsSize="large"
+                      variant="primary"
+                      size="large"
                       block
                       onClick={submitForm}
                       disabled={isSubmitting}
@@ -237,7 +247,7 @@ const MergePeople = ({ pageDispatchers }) => {
                     </Button>
                   </Col>
                 </Row>
-              </Grid>
+              </Container>
             </Form>
           )
         }}

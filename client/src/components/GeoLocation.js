@@ -16,7 +16,7 @@ import {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
+import { Col, Form, FormGroup, Table } from "react-bootstrap"
 import utils from "utils"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
@@ -162,7 +162,7 @@ const MGRSFormField = ({
 
   return (
     <FormGroup style={{ marginBottom: 0 }}>
-      <Col sm={2} componentClass={ControlLabel} htmlFor="displayedCoordinate">
+      <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
@@ -247,7 +247,7 @@ const LatLonFormField = ({
   }
   return (
     <FormGroup style={{ marginBottom: 0 }}>
-      <Col sm={2} componentClass={ControlLabel} htmlFor="lat">
+      <Col sm={2} as={Form.Label} htmlFor="lat">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 

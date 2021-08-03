@@ -9,7 +9,7 @@ const ConfirmDestructive = ({
   operation,
   objectType,
   objectDisplay,
-  bsStyle,
+  variant,
   buttonLabel,
   children,
   ...otherProps
@@ -28,7 +28,7 @@ const ConfirmDestructive = ({
       dialogClassName="react-confirm-bootstrap-modal"
       confirmBSStyle="primary"
     >
-      <Button bsStyle={bsStyle} {...otherProps}>
+      <Button variant={variant} {...otherProps}>
         {buttonLabel}
         {children}
       </Button>
@@ -40,7 +40,7 @@ ConfirmDestructive.propTypes = {
   objectType: PropTypes.string.isRequired,
   operation: PropTypes.string.isRequired,
   objectDisplay: PropTypes.string.isRequired,
-  bsStyle: PropTypes.string,
+  variant: PropTypes.string,
   buttonLabel: PropTypes.string,
   children: PropTypes.node
 }

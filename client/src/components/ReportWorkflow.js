@@ -63,7 +63,7 @@ const ApprovalStepModal = ({ action }) => {
       >
         <span>{step.name}</span>
       </Button>
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal centered show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Approvers for {step.name}</Modal.Title>
         </Modal.Header>

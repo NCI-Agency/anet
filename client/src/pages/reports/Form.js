@@ -47,7 +47,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
+import { Button, Collapse, ToggleButton } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -439,7 +439,7 @@ const ReportForm = ({
         const action = (
           <div>
             <Button
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
               disabled={isSubmitting}
@@ -493,7 +493,7 @@ const ReportForm = ({
                   name="intent"
                   label={Settings.fields.report.intent}
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  as="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
                   onChange={event => {
@@ -536,11 +536,11 @@ const ReportForm = ({
                   }
                 >
                   {isFutureEngagement && (
-                    <HelpBlock>
+                    <Form.Text>
                       <span className="text-success">
                         This will create a planned engagement
                       </span>
-                    </HelpBlock>
+                    </Form.Text>
                   )}
                 </FastField>
 
@@ -611,8 +611,8 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
-                      <Checkbox
-                        inline
+                      <ToggleButton
+                        type="checkbox"
                         className="cancelled-checkbox"
                         checked={values.cancelled}
                         onClick={event =>
@@ -627,7 +627,7 @@ const ReportForm = ({
                         }
                       >
                         This engagement was cancelled
-                      </Checkbox>
+                      </ToggleButton>
                     }
                   />
                 )}
@@ -868,7 +868,7 @@ const ReportForm = ({
                         setFieldValue("keyOutcomes", event.target.value, false)
                         validateFieldDebounced("keyOutcomes")
                       }}
-                      componentClass="textarea"
+                      as="textarea"
                       maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
                         countCharsLeft(
@@ -894,7 +894,7 @@ const ReportForm = ({
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
-                    componentClass="textarea"
+                    as="textarea"
                     onChange={event => {
                       setFieldTouched("nextSteps", true, false)
                       setFieldValue("nextSteps", event.target.value, false)
@@ -1116,7 +1116,7 @@ const ReportForm = ({
                       onConfirm={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
-                      bsStyle="warning"
+                      variant="warning"
                       buttonLabel={`Delete this ${getReportType(values)}`}
                       disabled={isSubmitting}
                     />
@@ -1124,7 +1124,7 @@ const ReportForm = ({
                   {/* Skip validation on save! */}
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={() =>
                       onSubmit(values, { resetForm, setSubmitting })

@@ -7,14 +7,14 @@ import { Button } from "react-bootstrap"
 const PeriodsNavigation = ({ offset, onChange }) => (
   <div style={{ display: "flex", justifyContent: "space-between" }}>
     <Button
-      bsStyle="default"
+      variant="default"
       type="button"
       onClick={() => onChange(offset + 1)}
     >
       <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} /> previous period
     </Button>
     <Button
-      bsStyle="default"
+      variant="default"
       type="button"
       onClick={() => onChange(offset - 1)}
     >

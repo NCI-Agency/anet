@@ -336,7 +336,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     onConfirm={onConfirmDelete}
                     objectType="position"
                     objectDisplay={"#" + position.uuid}
-                    bsStyle="warning"
+                    variant="warning"
                     buttonLabel="Delete position"
                     className="pull-right"
                   />

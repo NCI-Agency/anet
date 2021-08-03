@@ -1,7 +1,7 @@
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import React from "react"
@@ -29,7 +29,7 @@ const OnboardingShow = ({ pageDispatchers }) => {
         and help your super user get you set up.
       </p>
       <div className="create-account-button-wrapper">
-        <Button bsStyle="primary" onClick={onCreateAccountClick}>
+        <Button variant="primary" onClick={onCreateAccountClick}>
           Create your account
         </Button>
       </div>

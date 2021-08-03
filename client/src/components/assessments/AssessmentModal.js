@@ -40,7 +40,7 @@ const AssessmentModal = ({
   )
   return (
     <>
-      <Modal show={showModal} onHide={closeModal}>
+      <Modal centered show={showModal} onHide={closeModal}>
         <Formik
           enableReinitialize
           onSubmit={onAssessmentSubmit}
@@ -90,7 +90,7 @@ const AssessmentModal = ({
                   </Button>
                   <Button
                     onClick={submitForm}
-                    bsStyle="primary"
+                    variant="primary"
                     disabled={isSubmitting}
                   >
                     Save
