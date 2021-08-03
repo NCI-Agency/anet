@@ -59,7 +59,7 @@ class Page {
   }
 
   _open(pathName, credentials) {
-    browser.url(this._buildUrl(pathName, credentials))
+    browser.url(pathName)
     if (this.loginForm.isExisting()) {
       this.login(credentials)
     }
