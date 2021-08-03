@@ -127,14 +127,7 @@ const BasePositionTable = ({
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table
-          striped
-          condensed
-          hover
-          responsive
-          className="positions_table"
-          id={id}
-        >
+        <Table striped hover responsive className="positions_table" id={id}>
           <thead>
             <tr>
               <th>Name</th>

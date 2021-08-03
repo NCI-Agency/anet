@@ -37,7 +37,7 @@ import useMergeObjects, {
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, FormGroup, Grid, Row } from "react-bootstrap"
+import { Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
@@ -72,7 +72,7 @@ const MergePositions = ({ pageDispatchers }) => {
   const mergedPosition = mergeState.merged
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         <Messages error={saveError} />
         <h2>Merge Positions Tool</h2>
@@ -320,7 +320,7 @@ const MergePositions = ({ pageDispatchers }) => {
           disabled={!areAllSet(position1, position2, mergedPosition?.name)}
         />
       </Row>
-    </Grid>
+    </Container>
   )
 
   function mergePositions() {

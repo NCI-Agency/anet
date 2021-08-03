@@ -82,7 +82,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={submitForm}
               disabled={isSubmitting}
@@ -103,7 +103,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                 <Field
                   name="description"
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  as="textarea"
                   maxLength={Settings.maxTextFieldLength}
                   onKeyUp={event =>
                     countCharsLeft(
@@ -172,7 +172,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={submitForm}
                     disabled={isSubmitting}

@@ -1,4 +1,4 @@
-import { Classes, Menu, MenuItem } from "@blueprintjs/core"
+import { Classes } from "@blueprintjs/core"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
@@ -18,9 +18,10 @@ import React, { useState } from "react"
 import {
   Button,
   Col,
-  ControlLabel,
+  Dropdown,
   FormControl,
-  FormGroup
+  FormGroup,
+  Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -74,20 +75,21 @@ const AdvancedSearch = ({
     existingKeys.length < Object.keys(filterDefs).length
 
   const advancedSearchMenuContent = (
-    <Menu
+    <Dropdown
       className={Classes.POPOVER_DISMISS}
       style={{ maxHeight: "400px", overflowY: "auto" }}
     >
       {Object.keys(filterDefs).map(filterKey => (
-        <MenuItem
+        <Dropdown.Item
           disabled={existingKeys.includes(filterKey)}
           key={filterKey}
           onClick={() => addFilter(filterKey)}
-          text={filterKey}
-          shouldDismissPopover={false}
-        />
+          // shouldDismissPopover={false}
+        >
+          {filterKey}
+        </Dropdown.Item>
       ))}
-    </Menu>
+    </Dropdown>
   )
 
   const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
@@ -196,7 +198,7 @@ const AdvancedSearch = ({
                       }
                     }}
                   >
-                    <Button bsStyle="link" id="addFilterDropdown">
+                    <Button variant="link" id="addFilterDropdown">
                       + Add {filters.length > 0 && "another"} filter
                     </Button>
                   </Popover2>
@@ -218,7 +220,7 @@ const AdvancedSearch = ({
                   Cancel
                 </Button>
                 <Button
-                  bsStyle="primary"
+                  variant="primary"
                   className={Classes.POPOVER_DISMISS}
                   type="submit"
                   intent="success"
@@ -335,27 +337,29 @@ const SearchFilter = ({
 
   return (
     <FormGroup controlId={queryKey}>
-      <Col xs={12} sm={3} lg={2} componentClass={ControlLabel}>
-        {label}
-      </Col>
-      <Col xs={10} sm={8} lg={9}>
-        <div>
-          <ChildComponent
-            value={filter.value || ""}
-            onChange={onChange}
-            orgFilterQueryParams={orgFilterQueryParams}
-            {...element.props}
+      <Row>
+        <Col xs={12} sm={3} lg={2}>
+          {label}
+        </Col>
+        <Col xs={10} sm={8} lg={9}>
+          <div>
+            <ChildComponent
+              value={filter.value || ""}
+              onChange={onChange}
+              orgFilterQueryParams={orgFilterQueryParams}
+              {...element.props}
+            />
+          </div>
+        </Col>
+        <Col xs={1} sm={1} lg={1}>
+          <RemoveButton
+            title="Remove this filter"
+            altText="Remove this filter"
+            onClick={() => onRemove(filter)}
+            buttonStyle="link"
           />
-        </div>
-      </Col>
-      <Col xs={1} sm={1} lg={1}>
-        <RemoveButton
-          title="Remove this filter"
-          altText="Remove this filter"
-          onClick={() => onRemove(filter)}
-          buttonStyle="link"
-        />
-      </Col>
+        </Col>
+      </Row>
     </FormGroup>
   )
 

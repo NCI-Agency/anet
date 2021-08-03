@@ -32,7 +32,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useMemo, useState } from "react"
-import { Button, HelpBlock, Modal } from "react-bootstrap"
+import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
@@ -387,7 +387,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
             <Button
               id="email-rollup"
               onClick={toggleEmailModal}
-              bsStyle="primary"
+              variant="primary"
             >
               Email rollup
             </Button>
@@ -511,7 +511,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   function renderEmailModal(formikProps) {
     const { isSubmitting, submitForm } = formikProps
     return (
-      <Modal show={showEmailModal} onHide={toggleEmailModal}>
+      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Form>
           <Modal.Header closeButton>
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
@@ -528,19 +528,19 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               validate={email => handleEmailValidation(email)}
               vertical
             >
-              <HelpBlock>
+              <FormText>
                 One or more email addresses, comma separated, e.g.:
                 <br />
                 <em>
                   jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr.
                   X" &lt;x@example.org&gt;
                 </em>
-              </HelpBlock>
+              </FormText>
             </Field>
             <Field
               name="comment"
               component={FieldHelper.InputField}
-              componentClass="textarea"
+              as="textarea"
               vertical
             />
           </Modal.Body>
@@ -555,7 +555,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
             </Button>
             <Button
               id="send-rollup-email"
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={submitForm}
               disabled={isSubmitting}

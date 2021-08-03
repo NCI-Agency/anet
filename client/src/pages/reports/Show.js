@@ -40,7 +40,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
+import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
@@ -384,7 +384,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             <Button
               value="compactView"
               type="button"
-              bsStyle="primary"
+              variant="primary"
               onClick={onCompactClick}
             >
               Summary / Print
@@ -779,13 +779,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   name="newComment"
                   label="Add a comment"
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  as="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
                 />
                 <div className="right-button">
                   <Button
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={() =>
                       submitComment(values.newComment, setFieldValue)
@@ -820,7 +820,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         objectType="report"
                         operation="unpublish"
                         objectDisplay={"#" + uuid}
-                        bsStyle="warning"
+                        variant="warning"
                         buttonLabel={`Unpublish ${reportType}`}
                         className="pull-left"
                       />
@@ -831,7 +831,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     onConfirm={onConfirmDelete}
                     objectType="report"
                     objectDisplay={"#" + uuid}
-                    bsStyle="warning"
+                    variant="warning"
                     buttonLabel={`Delete ${reportType}`}
                     className="pull-right"
                   />
@@ -918,7 +918,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="approvalComment"
           label="Approval comment"
           component={FieldHelper.InputField}
-          componentClass="textarea"
+          as="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -945,7 +945,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="requestChangesComment"
           label="Request changes comment"
           component={FieldHelper.InputField}
-          componentClass="textarea"
+          as="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -958,7 +958,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function renderEmailModal(values, setFieldValue) {
     return (
-      <Modal show={showEmailModal} onHide={toggleEmailModal}>
+      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Modal.Header closeButton>
           <Modal.Title>Email {reportTypeUpperFirst}</Modal.Title>
         </Modal.Header>
@@ -970,27 +970,27 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             validate={email => handleEmailValidation(email)}
             vertical
           >
-            <HelpBlock>
+            <FormText>
               One or more email addresses, comma separated, e.g.:
               <br />
               <em>
                 jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X"
                 &lt;x@example.org&gt;
               </em>
-            </HelpBlock>
+            </FormText>
           </Field>
 
           <Field
             name="comment"
             component={FieldHelper.InputField}
-            componentClass="textarea"
+            as="textarea"
             vertical
           />
         </Modal.Body>
 
         <Modal.Footer>
           <Button
-            bsStyle="primary"
+            variant="primary"
             onClick={() => emailReport(values, setFieldValue)}
           >
             Send Email
@@ -1171,7 +1171,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         : []
     )
     return _isEmpty(warnings) ? (
-      <Button bsStyle="warning" onClick={confirmHandler}>
+      <Button variant="warning" onClick={confirmHandler}>
         {label}
       </Button>
     ) : (
@@ -1184,7 +1184,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         dialogClassName="react-confirm-bootstrap-modal"
         confirmBSStyle="primary"
       >
-        <Button bsStyle="warning" onClick={confirmHandler}>
+        <Button variant="warning" onClick={confirmHandler}>
           {label}
         </Button>
       </Confirm>
@@ -1264,8 +1264,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     return _isEmpty(warnings) ? (
       <Button
         type="button"
-        bsStyle="primary"
-        bsSize={size}
+        variant="primary"
+        size={size}
         className={className}
         onClick={confirmHandler}
         disabled={disabled}
@@ -1285,8 +1285,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       >
         <Button
           type="button"
-          bsStyle="primary"
-          bsSize={size}
+          variant="primary"
+          size={size}
           className={className}
           disabled={disabled}
           id={id}
@@ -1316,7 +1316,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       : `The following errors must be fixed before ${submitType} this ${reportType}:`
     const style = report.isFuture() ? "info" : "danger"
     return (
-      <Alert bsStyle={style}>
+      <Alert variant={style}>
         {warning}
         <ul>
           {validationErrors.map((error, idx) => (
@@ -1332,7 +1332,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       return null
     }
     return (
-      <Alert bsStyle="warning">
+      <Alert variant="warning">
         The following warnings should be addressed before {submitType} this{" "}
         {reportType}:
         <ul>

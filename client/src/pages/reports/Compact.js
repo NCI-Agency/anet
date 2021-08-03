@@ -35,7 +35,7 @@ import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, DropdownButton, MenuItem } from "react-bootstrap"
+import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -633,18 +633,18 @@ const CompactReportViewHeader = ({
       <HeaderTitle value="title">Summary / Print</HeaderTitle>
       <DropdownButton
         title="Page Size"
-        bsStyle="primary"
+        variant="primary"
         id="pageSizeButton"
         onSelect={setPageSize}
       >
         {Object.keys(PAGE_SIZES).map(pageSize => (
-          <MenuItem
+          <Dropdown.Item
             key={PAGE_SIZES[pageSize].name}
             eventKey={PAGE_SIZES[pageSize]}
             style={{ minWidth: "205px" }}
           >
             {PAGE_SIZES[pageSize].name}
-          </MenuItem>
+          </Dropdown.Item>
         ))}
       </DropdownButton>
       <SimpleMultiCheckboxDropdown
@@ -657,7 +657,7 @@ const CompactReportViewHeader = ({
           <Button
             value="print"
             type="button"
-            bsStyle="primary"
+            variant="primary"
             onClick={onPrintClick}
           >
             Print
@@ -666,7 +666,7 @@ const CompactReportViewHeader = ({
         <Button
           value="detailedView"
           type="button"
-          bsStyle="primary"
+          variant="primary"
           onClick={returnToDefaultPage}
         >
           Detailed View
