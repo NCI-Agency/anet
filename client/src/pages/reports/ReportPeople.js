@@ -10,7 +10,7 @@ import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Checkbox, Label, Radio, Table } from "react-bootstrap"
+import { Badge, Table, ToggleButton } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
@@ -19,7 +19,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const showNonAttending = report.reportPeople.some(rp => !rp.attendee)
   return (
     <div id="reportPeopleContainer">
-      <Table condensed responsive>
+      <Table responsive>
         <tbody>
           <tr>
             <th style={{ border: "none" }}>Advisors</th>
@@ -268,14 +268,7 @@ ReportPeople.propTypes = {
 }
 
 const TableContainer = ({ className, children }) => (
-  <Table
-    striped
-    condensed
-    hover
-    responsive
-    className={className}
-    style={{ margin: 0 }}
-  >
+  <Table striped hover responsive className={className} style={{ margin: 0 }}>
     {children}
   </Table>
 )
@@ -371,15 +364,16 @@ function sortReportPeople(reportPeople) {
 }
 
 const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
-  <Radio
+  <ToggleButton
+    type="radio"
     name={`primaryAttendee${person.role}`}
     className={`primary${!person.primary ? " inActive" : ""}`}
     checked={person.primary}
     disabled={disabled || !person.attendee}
     onChange={() => !disabled && handleOnChange(person)}
   >
-    <Label bsStyle="primary">Primary</Label>
-  </Radio>
+    <Badge variant="primary">Primary</Badge>
+  </ToggleButton>
 )
 
 PrimaryAttendeeRadioButton.propTypes = {
@@ -393,7 +387,8 @@ const ReportAuthorCheckbox = ({
   isCurrentEditor,
   handleOnChange
 }) => (
-  <Checkbox
+  <ToggleButton
+    type="checkbox"
     name={`authorAttendee${person.role}`}
     className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
       !person.author ? " inActive" : ""
@@ -404,7 +399,7 @@ const ReportAuthorCheckbox = ({
     onChange={() => !disabled && handleOnChange(person)}
   >
     <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
-  </Checkbox>
+  </ToggleButton>
 )
 ReportAuthorCheckbox.propTypes = {
   person: PropTypes.object,
@@ -413,7 +408,8 @@ ReportAuthorCheckbox.propTypes = {
   handleOnChange: PropTypes.func
 }
 const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
-  <Checkbox
+  <ToggleButton
+    type="checkbox"
     name={`authorAttendee${person.role}`}
     className={`primary${!person.attendee ? " inActive" : ""}`}
     checked={!!person.attendee}
@@ -421,7 +417,7 @@ const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
     onChange={() => !disabled && handleOnChange(person)}
   >
     <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
-  </Checkbox>
+  </ToggleButton>
 )
 ReportAttendeeCheckbox.propTypes = {
   person: PropTypes.object,

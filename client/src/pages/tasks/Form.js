@@ -161,7 +161,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={submitForm}
               disabled={isSubmitting}
@@ -449,7 +449,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={submitForm}
                     disabled={isSubmitting}

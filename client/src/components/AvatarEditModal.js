@@ -11,7 +11,7 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
     <div>
       <button onClick={open}>{title}</button>
 
-      <Modal show={showModal} onHide={close}>
+      <Modal centered show={showModal} onHide={close}>
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>

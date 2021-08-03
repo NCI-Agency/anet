@@ -7,10 +7,9 @@ import React, { useCallback, useMemo } from "react"
 import {
   Button,
   Col,
-  ControlLabel,
+  Form,
   FormControl,
   FormGroup,
-  HelpBlock,
   InputGroup,
   ToggleButton,
   ToggleButtonGroup
@@ -32,24 +31,28 @@ const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
   const fieldTouched = _get(touched, field.name)
   const fieldError = _get(errors, field.name)
-  return (fieldTouched && (fieldError ? "error" : null)) || null
+  return (fieldTouched && (fieldError ? true : null)) || null
 }
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
   const fieldTouched = _get(touched, field.name)
   const fieldError = _get(errors, field.name)
-  return fieldTouched && fieldError && <HelpBlock>{fieldError}</HelpBlock>
+  return fieldTouched && fieldError && <Form.Text>{fieldError}</Form.Text>
 }
 
 const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
   const validationState = getFormGroupValidationState(field, form)
   return (
-    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
+    <FormGroup id={`fg-${id}`} controlId={id}>
       {widgetElem}
       {getHelpBlock(field, form)}
       {children}
+      <FormControl.Feedback
+        type={validationState ?? "invalid"}
+      >
+      </FormControl.Feedback>
     </FormGroup>
   )
 }
@@ -117,15 +120,10 @@ const Field = ({
   }
 
   return (
-    <FormGroup
-      id={`fg-${id}`}
-      controlId={id}
-      validationState={validationState}
-      className={className}
-    >
+    <FormGroup id={`fg-${id}`} controlId={id} className={className}>
       {vertical ? (
         <>
-          <div>{label !== null && <ControlLabel>{label}</ControlLabel>}</div>
+          <div>{label !== null && <Form.Label>{label}</Form.Label>}</div>
           {widget}
           {getHelpBlock(field, form)}
           {children}
@@ -133,7 +131,7 @@ const Field = ({
       ) : (
         <>
           {label !== null && (
-            <Col sm={labelColumnWidth} componentClass={ControlLabel}>
+            <Col sm={labelColumnWidth} as={Form.Label}>
               {label}
             </Col>
           )}
@@ -147,6 +145,10 @@ const Field = ({
         </>
       )}
       {extraColElem && <Col sm={3} {...extraColElem.props} />}
+      <FormControl.Feedback
+        type={validationState && "invalid"}
+      >
+      </FormControl.Feedback>
     </FormGroup>
   )
 }
@@ -265,9 +267,9 @@ export const ReadonlyField = ({
   const { className } = otherProps
   const widgetElem = useMemo(
     () => (
-      <FormControl.Static componentClass="div" {...field} {...otherProps}>
+      <FormControl as="div" plaintext {...field} {...otherProps}>
         {getHumanValue(field, humanValue)}
-      </FormControl.Static>
+      </FormControl>
     ),
     [field, humanValue, otherProps]
   )
@@ -474,9 +476,7 @@ export const FieldAddon = ({ fieldId, addon }) => {
       element.focus()
     }
   }, [fieldId])
-  return (
-    <InputGroup.Addon onClick={focusElement}>{addonComponent}</InputGroup.Addon>
-  )
+  return <InputGroup onClick={focusElement}>{addonComponent}</InputGroup>
 }
 FieldAddon.propTypes = {
   fieldId: PropTypes.string,
@@ -534,7 +534,7 @@ export const FieldShortcuts = ({
       {objectType.map(shortcuts, (shortcut, idx) => (
         <Button
           key={shortcut.uuid}
-          bsStyle="link"
+          variant="link"
           onClick={() => handleAddItem(shortcut, onChange, curValue)}
         >
           Add{" "}

@@ -1,7 +1,7 @@
 import AppContext from "components/AppContext"
 import * as Models from "models"
 import React, { useContext } from "react"
-import { Button, DropdownButton, MenuItem } from "react-bootstrap"
+import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 
 const DEFAULT_ACTIONS = [Models.Report]
@@ -25,23 +25,18 @@ const CreateButton = () => {
 
   if (modelClasses.length > 1) {
     return (
-      <DropdownButton
-        title="Create"
-        pullRight
-        bsStyle="primary"
-        id="createButton"
-        onSelect={onSelect}
-      >
+      <DropdownButton id="createButton" title="Create" align="end">
         {modelClasses.map((modelClass, i) => {
           const name = modelClass.displayName() || modelClass.resourceName
           return (
-            <MenuItem
+            <Dropdown.Item
               key={modelClass.resourceName}
               eventKey={modelClass}
               id={`new-${name.toLowerCase()}`}
+              onSelect={() => onSelect(modelClass)}
             >
               New {name}
-            </MenuItem>
+            </Dropdown.Item>
           )
         })}
       </DropdownButton>
@@ -50,7 +45,7 @@ const CreateButton = () => {
     const modelClass = modelClasses[0]
     return (
       <Button
-        bsStyle="primary"
+        variant="primary"
         onClick={() => onSelect(modelClass)}
         id="createButton"
       >

@@ -19,7 +19,7 @@ const InstantAssessmentsContainerField = ({
 }) => {
   const { values } = formikProps
   return (
-    <Table condensed responsive>
+    <Table responsive>
       <tbody>
         {entities.map(entity => {
           const entityInstantAssessmentConfig = Model.filterAssessmentConfig(

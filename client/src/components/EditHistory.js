@@ -6,7 +6,7 @@ import { Field, Form, Formik } from "formik"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Grid, Modal, Row } from "react-bootstrap"
+import { Col, Container, Modal, Row } from "react-bootstrap"
 import Settings from "settings"
 import uuidv4 from "uuid/v4"
 import "./EditHistory.css"
@@ -41,9 +41,10 @@ function EditHistory({
         Edit History Manually
       </Button>
       <Modal
+        centered
         show={showModal}
         onHide={onHide}
-        bsSize="lg"
+        size="lg"
         dialogClassName="edit-history-dialog"
       >
         <Modal.Header closeButton>
@@ -83,7 +84,7 @@ function EditHistory({
               const validLastItem = validWhenNoOccupant || validWhenOccupant
 
               return (
-                <Grid fluid>
+                <Container fluid>
                   <Row>
                     <Col sm={4}>
                       <HistoryComp
@@ -217,7 +218,7 @@ function EditHistory({
                       </Col>
                     )}
                   </Row>
-                </Grid>
+                </Container>
               )
 
               function removeItemFromHistory(idx) {

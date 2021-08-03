@@ -2,8 +2,8 @@ import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RemoveButton from "components/RemoveButton"
@@ -109,14 +109,7 @@ const BaseOrganizationTable = ({
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table
-          striped
-          condensed
-          hover
-          responsive
-          className="organizations_table"
-          id={id}
-        >
+        <Table striped hover responsive className="organizations_table" id={id}>
           <thead>
             <tr>
               <th>Name</th>

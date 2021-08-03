@@ -140,7 +140,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
+              variant="primary"
               type="button"
               onClick={submitForm}
               disabled={isSubmitting}
@@ -282,7 +282,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
+                    variant="primary"
                     type="button"
                     onClick={submitForm}
                     disabled={isSubmitting}
