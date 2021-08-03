@@ -12,7 +12,7 @@ const RemoveButton = ({
 }) => (
   <Button
     className="pull-right"
-    bsStyle={buttonStyle}
+    variant={buttonStyle}
     title={title}
     onClick={onClick}
     disabled={disabled}

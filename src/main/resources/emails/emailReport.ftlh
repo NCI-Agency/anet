@@ -357,7 +357,7 @@ ${sender.name} sent you a report from ANET:
       <span class="title-text">People involved in this engagement</span>
     </h2>
     <fieldset>
-      <table class="borderless table table-condensed">
+      <table class="borderless table table-">
         <thead>
           <tr>
             <th style="text-align: center;">

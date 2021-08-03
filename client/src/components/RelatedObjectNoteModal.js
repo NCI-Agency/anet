@@ -36,7 +36,7 @@ const RelatedObjectNoteModal = ({
   const edit = !!note.uuid
 
   return (
-    <Modal show={showModal} onHide={close}>
+    <Modal centered show={showModal} onHide={close}>
       <Formik
         enableReinitialize
         onSubmit={onSubmit}
@@ -110,14 +110,14 @@ const RelatedObjectNoteModal = ({
                     onConfirm={() => onDelete(note.uuid)}
                     objectType="note"
                     objectDisplay={"#" + note.uuid}
-                    bsStyle="warning"
+                    variant="warning"
                     buttonLabel="Delete note"
                   />
                 )}
                 {!_isEmpty(relatedObjects) && (
                   <Button
                     onClick={submitForm}
-                    bsStyle="primary"
+                    variant="primary"
                     disabled={isSubmitting || !isValid}
                   >
                     Save

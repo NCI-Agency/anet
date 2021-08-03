@@ -1,7 +1,7 @@
 import useSearchFilter from "components/advancedSearch/hooks"
 import PropTypes from "prop-types"
 import React from "react"
-import { Checkbox, FormGroup } from "react-bootstrap"
+import { FormGroup, ToggleButton } from "react-bootstrap"
 import { deserializeSearchFilter } from "searchUtils"
 
 const CheckboxFilter = ({ msg, asFormField, queryKey, onChange }) => {
@@ -21,9 +21,14 @@ const CheckboxFilter = ({ msg, asFormField, queryKey, onChange }) => {
     <>{msg}</>
   ) : (
     <FormGroup>
-      <Checkbox id={queryKey} readOnly checked={value.value}>
+      <ToggleButton
+        type="checkbox"
+        id={queryKey}
+        readOnly
+        checked={value.value}
+      >
         {msg}
-      </Checkbox>
+      </ToggleButton>
     </FormGroup>
   )
 }
