@@ -1,19 +1,59 @@
-import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import {
+  PersonSimpleOverlayRow,
+  PositionOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import { Field, Form, Formik } from "formik"
-import { Person } from "models"
+import { Person, Position } from "models"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Grid, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
+import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import uuidv4 from "uuid/v4"
 import "./EditHistory.css"
+
+const PERSON_SINGLE_SELECT_PARAMETERS = {
+  fieldName: "person",
+  overlayColumns: ["Name"],
+  overlayRenderRow: PersonSimpleOverlayRow,
+  onChange: (value, cb) => {
+    const newEntry = {
+      endTime: null,
+      person: new Person(value).filterClientSideFields(),
+      startTime: null
+    }
+    cb(newEntry)
+  },
+  objectType: Person,
+  fields:
+    "uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} }",
+  addon: PEOPLE_ICON
+}
+
+const POSITION_SINGLE_SELECT_PARAMETERS = {
+  fieldName: "position",
+  overlayColumns: ["Position", "Organization", "Current Occupant"],
+  overlayRenderRow: PositionOverlayRow,
+  onChange: (value, cb) => {
+    const newEntry = {
+      startTime: null,
+      endTime: null,
+      position: new Position(value).filterClientSideFields()
+    }
+    cb(newEntry)
+  },
+  objectType: Position,
+  fields:
+    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatar(size: 32) }",
+  addon: POSITIONS_ICON
+}
 
 function EditHistory({
   history1,
@@ -21,41 +61,39 @@ function EditHistory({
   initialHistory,
   setHistory,
   historyEntityType,
+  parentEntityType,
   historyComp: HistoryComp,
+  externalButton,
+  showModal,
+  setShowModal,
   // currentlyOccupyingEntity used to assert the last item in the history and end time
   currentlyOccupyingEntity,
   midColTitle,
   mainTitle
 }) {
-  const [showModal, setShowModal] = useState(false)
   const [finalHistory, setFinalHistory] = useState(getInitialState)
 
-  const personSearchQuery = {
-    status: Model.STATUS.ACTIVE,
-    role: Person.ROLE.ADVISOR
-  }
-
-  const personFilters = {
-    allPersons: {
-      label: "All",
-      queryVars: personSearchQuery
-    }
-  }
+  const singleSelectParameters = getSingleSelectParameters(
+    historyEntityType,
+    parentEntityType
+  )
 
   return (
     <div
       className="edit-history"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <Button
-        onClick={() => {
-          // Set the state to initial value first if there were any changes
-          setFinalHistory(getInitialState())
-          setShowModal(true)
-        }}
-      >
-        Edit History Manually
-      </Button>
+      {!externalButton && (
+        <Button
+          onClick={() => {
+            // Set the state to initial value first if there were any changes
+            setFinalHistory(getInitialState())
+            setShowModal(true)
+          }}
+        >
+          Edit History Manually
+        </Button>
+      )}
       <Modal
         show={showModal}
         onHide={onHide}
@@ -129,25 +167,23 @@ function EditHistory({
                         <h2 style={{ textAlign: "center" }}>{midColTitle}</h2>
                         {!history2 && (
                           <AdvancedSingleSelect
-                            fieldName="person"
+                            fieldName={singleSelectParameters.fieldName}
                             fieldLabel="Select a person"
                             placeholder="Insert antoher person to history"
-                            overlayColumns={["Name"]}
-                            overlayRenderRow={PersonSimpleOverlayRow}
-                            filterDefs={personFilters}
-                            onChange={value =>
-                              addItem({
-                                startTime: null,
-                                endTime: null,
-                                person: new Person(
-                                  value
-                                ).filterClientSideFields()
-                              })
+                            overlayColumns={
+                              singleSelectParameters.overlayColumns
                             }
-                            objectType={Person}
+                            overlayRenderRow={
+                              singleSelectParameters.overlayRenderRow
+                            }
+                            filterDefs={singleSelectParameters.filterDefs}
+                            onChange={value =>
+                              singleSelectParameters.onChange(value, addItem)
+                            }
+                            objectType={singleSelectParameters.objectType}
                             valueKey="name"
-                            fields="uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} }"
-                            addon={PEOPLE_ICON}
+                            fields={singleSelectParameters.fields}
+                            addon={singleSelectParameters.addon}
                             vertical
                           />
                         )}
@@ -308,7 +344,11 @@ EditHistory.propTypes = {
   initialHistory: PropTypes.array,
   setHistory: PropTypes.func.isRequired,
   historyEntityType: PropTypes.string,
+  parentEntityType: PropTypes.string.isRequired,
   historyComp: PropTypes.func.isRequired,
+  externalButton: PropTypes.bool,
+  showModal: PropTypes.bool.isRequired,
+  setShowModal: PropTypes.func.isRequired,
   currentlyOccupyingEntity: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object
@@ -446,4 +486,35 @@ function giveEachItemUuid(history) {
     const newItem = { ...item, uuid: uuidv4() }
     return newItem
   })
+}
+
+function getSingleSelectParameters(historyEntityType, parentEntityType) {
+  if (historyEntityType === "person") {
+    const personSearchQuery = {
+      status: Model.STATUS.ACTIVE,
+      role: parentEntityType
+    }
+
+    const personFilters = {
+      allPersons: {
+        label: "All",
+        queryVars: personSearchQuery
+      }
+    }
+    return { ...PERSON_SINGLE_SELECT_PARAMETERS, filterDefs: personFilters }
+  } else if (historyEntityType === "position") {
+    const positionsFilters = {
+      allAdvisorPositions: {
+        label: "All",
+        queryVars: {
+          status: Position.STATUS.ACTIVE,
+          type: parentEntityType
+        }
+      }
+    }
+    return {
+      ...POSITION_SINGLE_SELECT_PARAMETERS,
+      filterDefs: positionsFilters
+    }
+  }
 }

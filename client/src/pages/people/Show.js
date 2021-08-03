@@ -9,6 +9,7 @@ import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import EditHistory from "components/EditHistory"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -50,6 +51,7 @@ import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
+import PreviousPositions from "./PreviousPositions"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -112,6 +114,12 @@ const GQL_GET_PERSON = gql`
   }
 `
 
+const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
+  mutation($person: PersonInput!) {
+    updatePreviousPositions(person: $person)
+  }
+`
+
 const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const history = useHistory()
@@ -125,6 +133,7 @@ const PersonShow = ({ pageDispatchers }) => {
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
@@ -318,6 +327,21 @@ const PersonShow = ({ pageDispatchers }) => {
                   )}
                 </Fieldset>
               )}
+              {isAdmin && (
+                <EditHistory
+                  history1={person.previousPositions}
+                  initialHistory={person.previousPositions}
+                  historyComp={PreviousPositions}
+                  currentlyOccupyingEntity={person.position}
+                  midColTitle="New History"
+                  externalButton
+                  historyEntityType="position"
+                  parentEntityType={person.role}
+                  showModal={showHistoryModal}
+                  setShowModal={setShowHistoryModal}
+                  setHistory={history => onSavePreviousPositions(history)}
+                />
+              )}
               {person.isAdvisor() && (
                 <Fieldset title="Reports authored" id="reports-authored">
                   <ReportCollection
@@ -376,7 +400,8 @@ const PersonShow = ({ pageDispatchers }) => {
     }
 
     const extraColElems = {
-      position: getPositionActions()
+      position: getPositionActions(),
+      prevPositions: getPreviousPositionsActions()
     }
 
     return (
@@ -537,6 +562,22 @@ const PersonShow = ({ pageDispatchers }) => {
     )
   }
 
+  function getPreviousPositionsActions() {
+    const editHistoryButton = isAdmin ? (
+      <Tooltip content="Edit history" position="top">
+        <Button
+          onClick={() => setShowHistoryModal(true)}
+          bsStyle="primary"
+          className="edit-history"
+        >
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+        </Button>
+      </Tooltip>
+    ) : null
+
+    return <>{editHistoryButton}</>
+  }
+
   function getPrevPositionsHumanValue() {
     return _isEmpty(person.previousPositions) ? (
       <em>No positions found</em>
@@ -635,6 +676,19 @@ const PersonShow = ({ pageDispatchers }) => {
     if (!_isEmpty(person)) {
       history.push(`${person.uuid}/compact`)
     }
+  }
+
+  function onSavePreviousPositions(history) {
+    const newPerson = person.filterClientSideFields()
+    newPerson.previousPositions = history
+    API.mutation(GQL_UPDATE_PREVIOUS_POSITIONS, { person: newPerson })
+      .then(data =>
+        history.push(Person.pathFor(person), { success: "History edited" })
+      )
+      .catch(error => {
+        setStateError(error)
+        jumpToTop()
+      })
   }
 }
 

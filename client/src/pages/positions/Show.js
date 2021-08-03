@@ -61,6 +61,7 @@ const PositionShow = ({ pageDispatchers }) => {
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
+  const [showEditHistoryModal, setShowEditHistoryModal] = useState(false)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
@@ -334,6 +335,9 @@ const PositionShow = ({ pageDispatchers }) => {
                       historyComp={PreviousPeople}
                       currentlyOccupyingEntity={position.person}
                       midColTitle="New History"
+                      parentEntityType={position.type}
+                      showModal={showEditHistoryModal}
+                      setShowModal={setShowEditHistoryModal}
                       setHistory={history => {
                         onSavePreviousPeople(history)
                       }}
