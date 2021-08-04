@@ -49,9 +49,11 @@ import {
   Alert,
   Badge,
   Button,
+  Container,
   Dropdown,
   Modal,
   Nav,
+  Row,
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -656,47 +658,76 @@ const Search = ({
   return (
     <div>
       <SubNav subnavElemId="search-nav">
-        <div>
-          <Button onClick={history.goBack} variant="link">
-            &lt; Return to previous page
-          </Button>
-        </div>
-        <Nav variant="pills" className="flex-column">
-          <AnchorNavItem to="organizations" disabled={!hasOrganizationsResults}>
-            <img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-            {hasOrganizationsResults && <Badge>{numOrganizations}</Badge>}
-          </AnchorNavItem>
+        <Container>
+          <Row style={{ paddingLeft: 0 }}>
+            <div>
+              <Button onClick={history.goBack} variant="link" size="sm">
+                &lt; Return to previous page
+              </Button>
+            </div>
+          </Row>
+          <Row style={{ paddingLeft: "2rem", marginBottom: "5px" }}>
+            <Nav variant="pills" className="flex-column">
+              <AnchorNavItem
+                to="organizations"
+                disabled={!hasOrganizationsResults}
+              >
+                <img src={ORGANIZATIONS_ICON} alt="" /> Organizations{" "}
+                {hasOrganizationsResults && (
+                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+                  <Badge className="bg-secondary">{numOrganizations}</Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="people" disabled={!hasPeopleResults}>
-            <img src={PEOPLE_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}
-            {hasPeopleResults && <Badge>{numPeople}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="people" disabled={!hasPeopleResults}>
+                <img src={PEOPLE_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}{" "}
+                {hasPeopleResults && (
+                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+                  <Badge className="bg-secondary">{numPeople}</Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="positions" disabled={!hasPositionsResults}>
-            <img src={POSITIONS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}
-            {hasPositionsResults && <Badge>{numPositions}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="positions" disabled={!hasPositionsResults}>
+                <img src={POSITIONS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}{" "}
+                {hasPositionsResults && (
+                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+                  <Badge className="bg-secondary">{numPositions}</Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="tasks" disabled={!hasTasksResults}>
-            <img src={TASKS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}
-            {hasTasksResults && <Badge>{numTasks}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="tasks" disabled={!hasTasksResults}>
+                <img src={TASKS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}{" "}
+                {hasTasksResults && (
+                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+                  <Badge className="bg-secondary">{numTasks}</Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="locations" disabled={!hasLocationsResults}>
-            <img src={LOCATIONS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}
-            {hasLocationsResults && <Badge>{numLocations}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="locations" disabled={!hasLocationsResults}>
+                <img src={LOCATIONS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}{" "}
+                {hasLocationsResults && (
+                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+                  <Badge className="bg-secondary">{numLocations}</Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="reports" disabled={!hasReportsResults}>
-            <img src={REPORTS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}
-            {hasReportsResults && <Badge>{numReports}</Badge>}
-          </AnchorNavItem>
-        </Nav>
+              <AnchorNavItem to="reports" disabled={!hasReportsResults}>
+                <img src={REPORTS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}{" "}
+                {hasReportsResults && (
+                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+                  <Badge pill className="bg-secondary">
+                    {numReports}
+                  </Badge>
+                )}
+              </AnchorNavItem>
+            </Nav>
+          </Row>
+        </Container>
       </SubNav>
       <div className="pull-right">
         {numResults > 0 && (

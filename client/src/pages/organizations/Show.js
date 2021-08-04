@@ -193,19 +193,35 @@ const OrganizationShow = ({ pageDispatchers }) => {
       : null
   const isMyOrg = myOrg && organization.uuid === myOrg.uuid
   const orgSubNav = (
-    <Nav>
-      <AnchorNavItem to="info">Info</AnchorNavItem>
-      <AnchorNavItem to="supportedPositions">Supported positions</AnchorNavItem>
-      <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
-      {!isPrincipalOrg && (
-        <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
-      )}
-      {organization.isTaskEnabled() && (
-        <AnchorNavItem to="tasks">
-          {pluralize(Settings.fields.task.shortLabel)}
-        </AnchorNavItem>
-      )}
-      <AnchorNavItem to="reports">Reports</AnchorNavItem>
+    <Nav className="flex-column">
+      <span id="style-nav">
+        <Nav.Item>
+          <AnchorNavItem to="info">Info</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="supportedPositions">
+            Supported positions
+          </AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
+        </Nav.Item>
+        {!isPrincipalOrg && (
+          <Nav.Item>
+            <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
+          </Nav.Item>
+        )}
+        {organization.isTaskEnabled() && (
+          <Nav.Item>
+            <AnchorNavItem to="tasks">
+              {pluralize(Settings.fields.task.shortLabel)}
+            </AnchorNavItem>
+          </Nav.Item>
+        )}
+        <Nav.Item>
+          <AnchorNavItem to="reports">Reports</AnchorNavItem>
+        </Nav.Item>
+      </span>
     </Nav>
   )
   const reportQueryParams = {
