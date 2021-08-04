@@ -8,14 +8,14 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import { Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Button, Col, Grid, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
-import Settings from "settings"
 import uuidv4 from "uuid/v4"
 import "./EditHistory.css"
 
@@ -71,12 +71,21 @@ function EditHistory({
   midColTitle,
   mainTitle
 }) {
+  const getInitialState = useCallback(() => {
+    return giveEachItemUuid(initialHistory || history1 || [])
+  }, [initialHistory, history1])
   const [finalHistory, setFinalHistory] = useState(getInitialState)
 
   const singleSelectParameters = getSingleSelectParameters(
     historyEntityType,
     parentEntityType
   )
+  // Set the state to initial value first if there were any changes
+  useEffect(() => {
+    if (showModal) {
+      setFinalHistory(getInitialState())
+    }
+  }, [showModal, setFinalHistory, getInitialState])
 
   return (
     <div
@@ -86,8 +95,6 @@ function EditHistory({
       {!externalButton && (
         <Button
           onClick={() => {
-            // Set the state to initial value first if there were any changes
-            setFinalHistory(getInitialState())
             setShowModal(true)
           }}
         >
@@ -97,8 +104,7 @@ function EditHistory({
       <Modal
         show={showModal}
         onHide={onHide}
-        bsSize="lg"
-        dialogClassName="edit-history-dialog"
+        dialogClassName={`${history2 && "edit-history-dialog-lg"}`}
       >
         <Modal.Header closeButton>
           <Modal.Title>{mainTitle}</Modal.Title>
@@ -119,6 +125,7 @@ function EditHistory({
                 getInvalidDateIndexes(values.history)
               )
 
+              const hasCurrent = !_isEmpty(currentlyOccupyingEntity)
               const lastItem = values.history[values.history.length - 1]
               // For last item to be valid:
               // 1- If there is no currently occupying entity
@@ -126,10 +133,9 @@ function EditHistory({
               // 2- If there is a currently occupying entity
               //    a- The last entity should be same with currently occupying
               //    b- The end time of last entity should be null or undefined ( meaning continuing range)
-              const validWhenNoOccupant =
-                !currentlyOccupyingEntity && lastItem?.endTime
+              const validWhenNoOccupant = !hasCurrent && lastItem?.endTime
               const validWhenOccupant =
-                currentlyOccupyingEntity &&
+                hasCurrent &&
                 currentlyOccupyingEntity?.uuid ===
                   lastItem?.[historyEntityType]?.uuid &&
                 // eslint-disable-next-line eqeqeq
@@ -191,20 +197,35 @@ function EditHistory({
                           // To be able to set fields inside the array state
                           const startTimeFieldName = `history[${idx}].startTime`
                           const endTimeFieldName = `history[${idx}].endTime`
+                          const isCurrent =
+                            hasCurrent &&
+                            idx === values.history.length - 1 &&
+                            item[historyEntityType]?.uuid ===
+                              currentlyOccupyingEntity.uuid
+
+                          if (isCurrent) {
+                            item.endTime = null
+                          }
 
                           return (
                             <div key={item.uuid}>
                               <Fieldset
                                 title={`${idx + 1}-) ${
                                   item[historyEntityType].name
+                                } ${
+                                  isCurrent
+                                    ? `(Current ${historyEntityType})`
+                                    : ""
                                 }`}
                                 action={
-                                  <Button
-                                    bsStyle="danger"
-                                    onClick={() => removeItemFromHistory(idx)}
-                                  >
-                                    Remove
-                                  </Button>
+                                  !isCurrent && (
+                                    <Button
+                                      bsStyle="danger"
+                                      onClick={() => removeItemFromHistory(idx)}
+                                    >
+                                      Remove
+                                    </Button>
+                                  )
                                 }
                               />
                               <div
@@ -230,32 +251,30 @@ function EditHistory({
                                   widget={
                                     <CustomDateInput
                                       id={startTimeFieldName}
-                                      withTime={
-                                        Settings.engagementsIncludeTimeAndDuration
-                                      }
+                                      withTime
                                     />
                                   }
                                 />
-                                <Field
-                                  name={endTimeFieldName}
-                                  label="End Time"
-                                  value={values.history[idx].endTime}
-                                  onChange={value =>
-                                    setFieldValue(
-                                      endTimeFieldName,
-                                      value?.valueOf()
-                                    )
-                                  }
-                                  component={FieldHelper.SpecialField}
-                                  widget={
-                                    <CustomDateInput
-                                      id={endTimeFieldName}
-                                      withTime={
-                                        Settings.engagementsIncludeTimeAndDuration
-                                      }
-                                    />
-                                  }
-                                />
+                                {!isCurrent && (
+                                  <Field
+                                    name={endTimeFieldName}
+                                    label="End Time"
+                                    value={values.history[idx].endTime}
+                                    onChange={value =>
+                                      setFieldValue(
+                                        endTimeFieldName,
+                                        value?.valueOf()
+                                      )
+                                    }
+                                    component={FieldHelper.SpecialField}
+                                    widget={
+                                      <CustomDateInput
+                                        id={endTimeFieldName}
+                                        withTime
+                                      />
+                                    }
+                                  />
+                                )}
                               </div>
                             </div>
                           )
@@ -307,7 +326,7 @@ function EditHistory({
 
               function addItem(item) {
                 setValues({
-                  history: [...values.history, { ...item, uuid: uuidv4() }]
+                  history: [{ ...item, uuid: uuidv4() }, ...values.history]
                 })
               }
             }}
@@ -316,10 +335,6 @@ function EditHistory({
       </Modal>
     </div>
   )
-
-  function getInitialState() {
-    return giveEachItemUuid(initialHistory || history1 || [])
-  }
 
   function onHide() {
     setShowModal(false)
@@ -360,6 +375,7 @@ EditHistory.defaultProps = {
   history2: null,
   initialHistory: null,
   historyEntityType: "person",
+  parentEntityType: "position",
   currentlyOccupyingEntity: null,
   midColTitle: "Merged History",
   mainTitle: "Pick and Choose History Items"
@@ -508,7 +524,14 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
         label: "All",
         queryVars: {
           status: Position.STATUS.ACTIVE,
-          type: parentEntityType
+          type:
+            parentEntityType === "ADVISOR"
+              ? [
+                Position.TYPE.ADVISOR,
+                Position.TYPE.SUPER_USER,
+                Position.TYPE.ADMINSTRATOR
+              ]
+              : Position.TYPE.PRINCIPAL
         }
       }
     }
