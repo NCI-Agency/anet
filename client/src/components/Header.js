@@ -26,7 +26,7 @@ const Header = ({ minimalHeader, onHomeClick, toggleMenuAction }) => (
             </span>
           ) : (
             <Link
-              className="logo d-xs-none d-sm-block"
+              className="logo d-none d-sm-block"
               to="/"
               onClick={onHomeClick}
             >
