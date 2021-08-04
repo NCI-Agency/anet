@@ -55,20 +55,36 @@ const MyReports = ({ pageDispatchers, searchQuery }) => {
   return (
     <div>
       <SubNav subnavElemId="reports-nav">
-        <Nav>
-          <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
-          <AnchorNavItem to="planned-engagements">
-            Planned Engagements
-          </AnchorNavItem>
-          <AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
-          <AnchorNavItem to="approved">Approved reports</AnchorNavItem>
-          <AnchorNavItem to="published-reports">
-            Published reports
-          </AnchorNavItem>
-          <AnchorNavItem to="cancelled-reports">
-            Cancelled reports
-          </AnchorNavItem>
-        </Nav>
+        <span id="style-nav">
+          <Nav className="flex-column">
+            <Nav.Item>
+              <AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
+            </Nav.Item>
+            <Nav.Item>
+              <AnchorNavItem to="planned-engagements">
+                Planned Engagements
+              </AnchorNavItem>
+            </Nav.Item>
+            <Nav.Item>
+              <AnchorNavItem to="pending-approval">
+                Pending approval
+              </AnchorNavItem>
+            </Nav.Item>
+            <Nav.Item>
+              <AnchorNavItem to="approved">Approved reports</AnchorNavItem>
+            </Nav.Item>
+            <Nav.Item>
+              <AnchorNavItem to="published-reports">
+                Published reports
+              </AnchorNavItem>
+            </Nav.Item>
+            <Nav.Item>
+              <AnchorNavItem to="cancelled-reports">
+                Cancelled reports
+              </AnchorNavItem>
+            </Nav.Item>
+          </Nav>
+        </span>
       </SubNav>
 
       {renderSection("Draft Reports", "draft-reports", "draft")}

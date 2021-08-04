@@ -204,9 +204,38 @@ fieldset.danger {
   background-color: #e0e0e0;
 }
 
-.nav > li > a:hover,
-.nav .open > a:focus {
+.nav-pills .nav-link:hover {
   background-color: #e0e0e0;
+  text-decoration: none;
+  color: #337ab7;
+}
+
+.nav #style-nav .nav-item .nav-link {
+  margin: 2px 0 2px 1rem;
+}
+
+.nav #style-nav .nav-item .nav-link.active {
+  margin-left: 1rem;
+  background-color: transparent;
+  color: #337ab7;
+  border-left: 5px solid #337ab7;
+  border-radius: 0;
+  padding-left: 10px;
+}
+
+.nav #style-nav .nav-item .nav-link.active:hover {
+  background-color: #e0e0e0;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.dropdown-item {
+  white-space: normal;
+  word-break: normal;
+}
+
+.dropdown-item:hover {
+  text-decoration: none;
 }
 
 .header .logo img,
@@ -324,11 +353,11 @@ button.home-tile.btn {
   text-align: center;
 }
 
-.caret {
+.dropdown-toggle::after {
   transition: 0.3s ease;
 }
 
-.caret-rotate {
+.dropdown-toggle-rotate::after {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
 }
@@ -338,17 +367,18 @@ button.home-tile.btn {
   margin-right: 6px;
 }
 
-.nav-pills li.active > #nav-links-button {
+#nav-links-opened {
   background-color: #e0e0e0;
   color: #337ab7;
+  border-radius: 0.25rem;
 }
 
 .nav > .nav > li > a {
-  border-left: 4px solid rgba(0, 0, 0, 0);
+  border-left: 4px solid rgba(155, 145, 145, 0);
   padding: 4px 4px 4px 38px;
 }
 
-.nav .nav > li.active > a {
+.nav .nav-link > .active > a {
   border-left: 4px solid #1772b8;
 }
 
@@ -888,21 +918,21 @@ header.searchPagination {
 }
 
 .advanced-select-popover .bp3-popover2-content-sizing {
-	width: 100% !important;
+  width: 100% !important;
 }
 
 .advanced-select-popover span.bp3-popover2-target {
-	display: block;
-	width: 100%;
+  display: block;
+  width: 100%;
 }
 
 .advanced-select-popover .bp3-popover2-transition-container {
-	top: 50px !important;
+  top: 50px !important;
 }
 
 .advanced-select-popover .bp3-popover2-content {
-	min-width: 400px;
-	max-width: 90vw !important;
+  min-width: 400px;
+  max-width: 90vw !important;
 }
 
 .advanced-search {
