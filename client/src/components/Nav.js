@@ -1,4 +1,3 @@
-import { Collapse } from "@blueprintjs/core"
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
@@ -7,7 +6,7 @@ import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useState } from "react"
-import { Badge, Nav, NavDropdown } from "react-bootstrap"
+import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
 import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
@@ -20,7 +19,7 @@ import Settings from "settings"
 import utils from "utils"
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
-  const ScrollLinkNavItem = ScrollLink(Nav.Item)
+  const ScrollLinkNavItem = ScrollLink(Nav.Link)
   return (
     <ResponsiveLayoutContext.Consumer>
       {context => (
@@ -58,22 +57,25 @@ const SidebarLink = ({
   id,
   setIsMenuLinksOpened
 }) => (
-  <Link
-    to={linkTo}
+  <Nav.Item
     onClick={() => {
       handleOnClick()
       setIsMenuLinksOpened && setIsMenuLinksOpened()
     }}
   >
-    <Nav.Item id={id}>{children}</Nav.Item>
-  </Link>
+    <Link to={linkTo}>
+      <Nav.Link eventKey={id}>
+        <span>{children}</span>
+      </Nav.Link>
+    </Link>
+  </Nav.Item>
 )
 SidebarLink.propTypes = {
   linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   children: PropTypes.node,
   handleOnClick: PropTypes.func,
   setIsMenuLinksOpened: PropTypes.func,
-  id: PropTypes.string
+  id: PropTypes.string.isRequired
 }
 
 const Navigation = ({
@@ -132,6 +134,7 @@ const Navigation = ({
   return (
     <Nav variant="pills" id="leftNav" className="flex-column hide-for-print">
       <SidebarLink
+        id="nav-home-button"
         linkTo="/"
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
@@ -142,27 +145,30 @@ const Navigation = ({
       <Nav id="search-nav" />
 
       <Nav.Item
+        id={isMenuLinksOpened ? "nav-links-opened" : ""}
         active={isMenuLinksOpened ? 1 : 0}
-        id="nav-links-button"
         style={{ paddingTop: "2px" }}
         onClick={() => setIsMenuLinksOpened(!isMenuLinksOpened)}
       >
-        {Settings?.menuOptions?.menuLinksDropdownTitle ?? "My Work"}
-        <span
-          className={isMenuLinksOpened ? "caret caret-rotate" : "caret"}
-          style={{ marginLeft: "0.5rem" }}
-        >
-        </span>
+        <Nav.Link>
+          {Settings?.menuOptions?.menuLinksDropdownTitle ?? "My Work"}
+          <span
+            className={
+              isMenuLinksOpened
+                ? "dropdown-toggle dropdown-toggle-rotate"
+                : "dropdown-toggle"
+            }
+            style={{ marginLeft: "0.255em" }}
+          >
+          </span>
+        </Nav.Link>
       </Nav.Item>
 
-      <Collapse isOpen={isMenuLinksOpened}>
-        <Nav
-          variant="pills"
-          className="flex-column"
-          style={{ paddingLeft: "1rem", paddingTop: "2px" }}
-        >
+      <Collapse in={isMenuLinksOpened}>
+        <div style={{ marginLeft: "1rem" }}>
           {currentUser.uuid && (
             <SidebarLink
+              id="my-reports-nav"
               linkTo={{ pathname: "/reports/mine" }}
               handleOnClick={resetPages}
             >
@@ -175,9 +181,9 @@ const Navigation = ({
           {isAdvisor && currentUser.position?.uuid && (
             <>
               <SidebarLink
+                id="my-tasks-nav"
                 linkTo={{ pathname: "/tasks/mine" }}
                 handleOnClick={resetPages}
-                id="my-tasks-nav"
               >
                 {`My ${pluralize(taskShortLabel)}`}
                 {notifications?.tasksWithPendingAssessments?.length ? (
@@ -187,9 +193,9 @@ const Navigation = ({
                 ) : null}
               </SidebarLink>
               <SidebarLink
+                id="my-counterparts-nav"
                 linkTo={{ pathname: "/positions/counterparts" }}
                 handleOnClick={resetPages}
-                id="my-counterparts-nav"
               >
                 My Counterparts
                 {notifications?.counterpartsWithPendingAssessments?.length ? (
@@ -203,9 +209,9 @@ const Navigation = ({
 
           {myOrg && (
             <SidebarLink
+              id="my-organization-nav"
               linkTo={Organization.pathFor(myOrg)}
               handleOnClick={resetPages}
-              id="my-organization"
             >
               My Organization <br />
               <small>{myOrg.shortName}</small>
@@ -218,7 +224,7 @@ const Navigation = ({
           >
             My Subscriptions
           </SidebarLink>
-        </Nav>
+        </div>
       </Collapse>
 
       <NavDropdown
@@ -266,6 +272,7 @@ const Navigation = ({
       <Nav id="principal-org-nav" />
 
       <SidebarLink
+        id="daily-rollup-nav"
         linkTo="/rollup"
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
@@ -274,34 +281,53 @@ const Navigation = ({
       </SidebarLink>
 
       {currentUser.isAdmin() && (
-        <LinkContainer
-          to="/admin"
-          onClick={() => {
-            clearSearchQuery()
-            setIsMenuLinksOpened(false)
-          }}
-        >
-          <Nav.Item>Admin</Nav.Item>
-        </LinkContainer>
+        <Nav.Item>
+          <LinkContainer
+            to="/admin"
+            onClick={() => {
+              clearSearchQuery()
+              setIsMenuLinksOpened(false)
+            }}
+          >
+            <Nav.Link>Admin</Nav.Link>
+          </LinkContainer>
+        </Nav.Item>
       )}
 
       {inAdmin && (
-        <Nav>
-          <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
-            <Nav.Item>Merge people</Nav.Item>
-          </LinkContainer>
-          <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
-            <Nav.Item>Merge positions</Nav.Item>
-          </LinkContainer>
-          <LinkContainer to="/admin/mergeLocations" onClick={resetPages}>
-            <Nav.Item>Merge locations</Nav.Item>
-          </LinkContainer>
-          <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
-            <Nav.Item>Authorization groups</Nav.Item>
-          </LinkContainer>
-          <SidebarLink linkTo="/admin/graphiql" handleOnClick={resetPages}>
-            GraphQL
-          </SidebarLink>
+        <Nav className="flex-column">
+          <span id="style-nav">
+            <Nav.Item>
+              <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
+                <Nav.Link>Merge people</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
+                <Nav.Link>Merge positions</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer to="/admin/mergeLocations" onClick={resetPages}>
+                <Nav.Link>Merge locations</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer
+                to="/admin/authorizationGroups"
+                onClick={resetPages}
+              >
+                <Nav.Link>Authorization groups</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <SidebarLink
+              id="grapgQL-nav"
+              linkTo="/admin/graphiql"
+              handleOnClick={resetPages}
+            >
+              GraphQL
+            </SidebarLink>
+          </span>
         </Nav>
       )}
 
@@ -312,6 +338,7 @@ const Navigation = ({
       )}
 
       <SidebarLink
+        id="help-nav"
         linkTo="/help"
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
