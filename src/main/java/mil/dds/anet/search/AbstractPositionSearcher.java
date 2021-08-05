@@ -73,6 +73,11 @@ public abstract class AbstractPositionSearcher
       addBatchClause(query);
     }
 
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getPositionDao().getSubscriptionUpdate(null)));
+    }
+
     qb.addInClause("types", "positions.type", query.getType());
 
     if (query.getOrganizationUuid() != null) {

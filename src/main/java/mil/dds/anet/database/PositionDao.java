@@ -31,7 +31,7 @@ import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
+public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSearchQuery> {
 
   public static final String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid", "customFields"};
@@ -469,6 +469,11 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
   }
 
   @Override
+  protected Position getObjectForSubscriptionDelete(String uuid) {
+    return new Position();
+  }
+
+  @Override
   public int deleteInternal(String positionUuid) {
     // if this position has any history, we'll just delete it
     getDbHandle().execute("DELETE FROM \"peoplePositions\" WHERE \"positionUuid\" = ?",
@@ -504,6 +509,11 @@ public class PositionDao extends AnetBaseDao<Position, PositionSearchQuery> {
             + "   maxPp.\"positionUuid\" = pp.\"positionUuid\" AND maxPp.\"createdAt\" > pp.\"createdAt\" AND maxPp.\"createdAt\" <= %2$s "
             + " WHERE pp.\"positionUuid\" = :%3$s AND maxPp.\"createdAt\" IS NULL ",
         personJoinColumn, dateFilterColumn, placeholderName);
+  }
+
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "positions.uuid");
   }
 
   @InTransaction

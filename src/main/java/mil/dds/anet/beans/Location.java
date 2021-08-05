@@ -12,7 +12,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 
-public class Location extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
+public class Location extends AbstractCustomizableAnetBean
+    implements RelatableObject, SubscribableObject, WithStatus {
 
   /** Pseudo uuid to represent 'no location'. */
   public static final String DUMMY_LOCATION_UUID = "-1";

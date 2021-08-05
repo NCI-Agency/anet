@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
-  private static final String FIELDS = "{ uuid name type status lat lng }";
+  protected static final String FIELDS = "{ uuid name type status lat lng customFields }";
 
   @Test
   public void locationTestGraphQL()

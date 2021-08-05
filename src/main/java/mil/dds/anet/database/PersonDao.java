@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
+public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -438,6 +438,11 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
       }
     }
+  }
+
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid");
   }
 
   public String clearCache() {

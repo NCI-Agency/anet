@@ -22,7 +22,8 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearchQuery> {
+public class OrganizationDao
+    extends AnetSubscribableObjectDao<Organization, OrganizationSearchQuery> {
 
   private static final String[] fields = {"uuid", "shortName", "longName", "status",
       "identificationCode", "type", "createdAt", "updatedAt", "parentOrgUuid", "customFields"};
@@ -149,5 +150,10 @@ public class OrganizationDao extends AnetBaseDao<Organization, OrganizationSearc
   @Override
   public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher().runSearch(query);
+  }
+
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "organizations.uuid");
   }
 }

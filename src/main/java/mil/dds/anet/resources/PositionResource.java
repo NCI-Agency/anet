@@ -203,6 +203,7 @@ public class PositionResource {
   public CompletableFuture<AnetBeanList<Position>> search(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") PositionSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(context, query);
   }
 

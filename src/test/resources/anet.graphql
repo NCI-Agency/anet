@@ -80,6 +80,20 @@ type AnetBeanList_Report {
   totalCount: Int
 }
 
+type AnetBeanList_Subscription {
+  list: [Subscription]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_SubscriptionUpdate {
+  list: [SubscriptionUpdate]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
 type AnetBeanList_Task {
   list: [Task]
   pageNum: Int
@@ -217,6 +231,7 @@ type Location {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  isSubscribed: Boolean
   lat: Float
   lng: Float
   name: String
@@ -250,6 +265,7 @@ input LocationSearchQueryInput {
   sortBy: LocationSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   text: String
   type: LocationType
 }
@@ -282,12 +298,15 @@ type Mutation {
   createPosition(position: PositionInput): Position
   createReport(report: ReportInput): Report
   createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
+  createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
   deleteNote(uuid: String): Int
+  deleteObjectSubscription(uuid: String): Int
   deletePersonFromPosition(uuid: String): Int
   deletePosition(uuid: String): Int
   deleteReport(uuid: String): Int
   deleteSavedSearch(uuid: String): Int
+  deleteSubscription(uuid: String): Int
   emailReport(email: AnetEmailInput, uuid: String): Int
   emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
   mergeLocations(loserUuid: String, winnerLocation: LocationInput): Location
@@ -361,6 +380,7 @@ type Organization {
   customSensitiveInformation: [CustomSensitiveInformation]
   descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   identificationCode: String
+  isSubscribed: Boolean
   longName: String
   notes: [Note]
   parentOrg: Organization
@@ -401,6 +421,7 @@ input OrganizationSearchQueryInput {
   sortBy: OrganizationSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   text: String
   type: OrganizationType
 }
@@ -430,6 +451,7 @@ type Person {
   emailAddress: String
   endOfTourDate: Instant
   gender: String
+  isSubscribed: Boolean
   name: String
   notes: [Note]
   pendingVerification: Boolean
@@ -503,6 +525,7 @@ input PersonSearchQueryInput {
   sortBy: PersonSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   text: String
 }
 
@@ -521,6 +544,7 @@ type Position {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   isApprover: Boolean
+  isSubscribed: Boolean
   location: Location
   name: String
   notes: [Note]
@@ -566,6 +590,7 @@ input PositionSearchQueryInput {
   sortBy: PositionSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   text: String
   type: [PositionType]
 }
@@ -594,6 +619,8 @@ type Query {
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person
   mySearches: [SavedSearch]
+  mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
+  mySubscriptions(query: SubscriptionSearchQueryInput): AnetBeanList_Subscription
   organization(uuid: String): Organization
   organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
   person(uuid: String): Person
@@ -642,6 +669,7 @@ type Report {
   engagementStatus: [EngagementStatus]
   exsum: String
   intent: String
+  isSubscribed: Boolean
   keyOutcomes: String
   location: Location
   nextSteps: String
@@ -728,6 +756,7 @@ type ReportPerson {
   emailAddress: String
   endOfTourDate: Instant
   gender: String
+  isSubscribed: Boolean
   name: String
   notes: [Note]
   pendingVerification: Boolean
@@ -802,6 +831,7 @@ input ReportSearchQueryInput {
   sortOrder: SortOrder
   state: [ReportState]
   status: Status
+  subscribed: Boolean
   taskUuid: String
   text: String
   updatedAtEnd: Instant
@@ -889,6 +919,64 @@ enum Status {
   INACTIVE
 }
 
+union SubscribableObject = Location | Organization | Person | Position | Report | ReportPerson | Task
+
+type Subscription {
+  createdAt: Instant
+  subscribedObject: SubscribableObject
+  subscribedObjectType: String
+  subscribedObjectUuid: String
+  subscriber: Position
+  updatedAt: Instant
+  uuid: String
+}
+
+input SubscriptionInput {
+  createdAt: Instant
+  subscribedObjectType: String
+  subscribedObjectUuid: String
+  subscriber: PositionInput
+  updatedAt: Instant
+  uuid: String
+}
+
+input SubscriptionSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: SubscriptionSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+}
+
+enum SubscriptionSearchSortBy {
+  CREATED_AT
+}
+
+type SubscriptionUpdate {
+  createdAt: Instant
+  isNote: Boolean!
+  subscription: Subscription
+  updatedObject: SubscribableObject
+  updatedObjectType: String
+  updatedObjectUuid: String
+}
+
+input SubscriptionUpdateSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: SubscriptionUpdateSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+}
+
+enum SubscriptionUpdateSearchSortBy {
+  CREATED_AT
+}
+
 type Task {
   approvalSteps: [ApprovalStep]
   category: String
@@ -899,6 +987,7 @@ type Task {
   customFieldRef1: Task
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  isSubscribed: Boolean
   longName: String
   notes: [Note]
   plannedCompletion: Instant
@@ -954,6 +1043,7 @@ input TaskSearchQueryInput {
   sortBy: TaskSearchSortBy
   sortOrder: SortOrder
   status: Status
+  subscribed: Boolean
   taskedOrgUuid: String
   text: String
 }

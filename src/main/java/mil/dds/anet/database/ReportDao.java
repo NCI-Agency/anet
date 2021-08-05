@@ -63,7 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
+public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQuery> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -203,7 +203,17 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
   @InTransaction
   public int update(Report r, Person user) {
     DaoUtils.setUpdateFields(r);
-    return updateInternal(r, user);
+    return updateWithSubscriptions(r, user);
+  }
+
+  private int updateWithSubscriptions(Report r, Person user) {
+    final int numRows = updateInternal(r, user);
+    if (numRows > 0) {
+      final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(r);
+      final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+      subscriptionDao.updateSubscriptions(subscriptionUpdate);
+    }
+    return numRows;
   }
 
   @Override
@@ -353,6 +363,14 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
       Set<String> subFields, ReportSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getReportSearcher().runSearch(context,
         subFields, query);
+  }
+
+  @Override
+  protected Report getObjectForSubscriptionDelete(String uuid) {
+    final Report obj = new Report();
+    final Report tmp = getByUuid(uuid);
+    obj.setState(tmp.getState());
+    return obj;
   }
 
   /*
@@ -946,6 +964,51 @@ public class ReportDao extends AnetBaseDao<Report, ReportSearchQuery> {
     sqlArgs.put("planningApprovalStepType", DaoUtils.getEnumId(ApprovalStepType.PLANNING_APPROVAL));
     return getDbHandle().createQuery(sql.toString()).bindMap(sqlArgs).map(new ReportMapper())
         .list();
+  }
+
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
+    final boolean isParam = (obj != null);
+    if (isParam && obj.getState() != ReportState.PUBLISHED
+        && obj.getState() != ReportState.CANCELLED) {
+      return null;
+    }
+
+    // update report; this also adds the param
+    final SubscriptionUpdateGroup update =
+        getCommonSubscriptionUpdate(obj, TABLE_NAME, "reports.uuid");
+    // update reportPeople
+    update.stmts.add(new SubscriptionUpdateStatement("people",
+        "SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
+            + paramOrJoin("reports.uuid", isParam),
+        // param is already added above
+        Collections.emptyMap()));
+    // update reportPeople positions
+    update.stmts.add(new SubscriptionUpdateStatement("positions",
+        "SELECT uuid FROM positions WHERE \"currentPersonUuid\" in ("
+            + " SELECT \"personUuid\" FROM \"reportPeople\" WHERE \"reportUuid\" = "
+            + paramOrJoin("reports.uuid", isParam) + " )",
+        // param is already added above
+        Collections.emptyMap()));
+    // update organizations
+    // TODO: is this correct?
+    update.stmts
+        .add(getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getAdvisorOrgUuid() : null,
+            "organizations", "reports.advisorOrganizationUuid"));
+    update.stmts.add(
+        getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getPrincipalOrgUuid() : null,
+            "organizations", "reports.principalOrganizationUuid"));
+    // update tasks
+    update.stmts.add(new SubscriptionUpdateStatement("tasks",
+        "SELECT \"taskUuid\" FROM \"reportTasks\" WHERE \"reportUuid\" = "
+            + paramOrJoin("reports.uuid", isParam),
+        // param is already added above
+        Collections.emptyMap()));
+    // update location
+    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
+        isParam ? obj.getLocationUuid() : null, "locations", "reports.locationUuid"));
+
+    return update;
   }
 
 }

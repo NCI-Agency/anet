@@ -10,8 +10,10 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -23,7 +25,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -36,6 +38,8 @@ const GQL_GET_TASK = gql`
       shortName
       longName
       status
+      isSubscribed
+      updatedAt
       customField
       customFieldEnum1
       customFieldEnum2
@@ -133,6 +137,10 @@ const TaskShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
@@ -170,9 +178,6 @@ const TaskShow = ({ pageDispatchers }) => {
   const TaskCustomFieldEnum1 = DictionaryField(Field)
   const TaskCustomFieldEnum2 = DictionaryField(Field)
 
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
-
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
     currentUser.isAdmin() ||
@@ -205,7 +210,25 @@ const TaskShow = ({ pageDispatchers }) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`${fieldSettings.shortLabel} ${task.shortName}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="tasks"
+                        subscribedObjectUuid={task.uuid}
+                        isSubscribed={task.isSubscribed}
+                        updatedAt={task.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    {fieldSettings.shortLabel} {task.shortName}
+                  </>
+                }
                 action={action}
               />
               <div

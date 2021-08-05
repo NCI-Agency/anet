@@ -51,6 +51,8 @@ import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
+import mil.dds.anet.resources.SubscriptionResource;
+import mil.dds.anet.resources.SubscriptionUpdateResource;
 import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
@@ -270,11 +272,15 @@ public class AnetApplication extends Application<AnetConfiguration> {
         new AuthorizationGroupResource(engine);
     final NoteResource noteResource = new NoteResource(engine);
     final ApprovalStepResource approvalStepResource = new ApprovalStepResource(engine);
+    final SubscriptionResource subscriptionResource = new SubscriptionResource(engine);
+    final SubscriptionUpdateResource subscriptionUpdateResource =
+        new SubscriptionUpdateResource(engine);
     final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
     graphQlResource.initialise(engine, configuration,
         ImmutableList.of(reportResource, personResource, positionResource, locationResource,
             orgResource, taskResource, adminResource, savedSearchResource,
-            authorizationGroupResource, noteResource, approvalStepResource),
+            authorizationGroupResource, noteResource, approvalStepResource, subscriptionResource,
+            subscriptionUpdateResource),
         metricRegistry);
 
     // Register all of the HTTP Resources

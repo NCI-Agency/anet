@@ -27,7 +27,7 @@ import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
 public class Person extends AbstractCustomizableAnetBean
-    implements Principal, RelatableObject, WithStatus, Comparable<Person> {
+    implements Principal, RelatableObject, SubscribableObject, WithStatus, Comparable<Person> {
 
   private static final Comparator<Person> COMPARATOR =
       Comparator.comparing(Person::getName).thenComparing(Person::getUuid);

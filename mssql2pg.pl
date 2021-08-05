@@ -5,6 +5,7 @@ s/^SET \@positionTimestamp = CURRENT_TIMESTAMP;/SELECT ('''' || CURRENT_TIMESTAM
 s/\@positionTimestamp/:positionTimestamp/;
 #
 s/^SET \@reportUuid = lower\(newid\(\)\);/SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \\gset/;
+s/^SET \@reportUuid = (N'[^']*');/SELECT ('''' || $1 || '''') AS reportuuid \\gset/;
 s/\@reportUuid/:reportuuid/;
 #
 s/^SET \@approvalStepUuid = lower\(newid\(\)\);/SELECT ('''' || uuid_generate_v4() || '''') AS approvalStepUuid \\gset/;

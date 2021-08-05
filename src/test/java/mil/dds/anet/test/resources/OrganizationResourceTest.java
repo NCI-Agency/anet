@@ -31,8 +31,9 @@ import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
-  private static final String FIELDS = "{ uuid shortName longName status identificationCode type "
-      + "tasks { uuid } approvalSteps { uuid name approvers { uuid } } }";
+  protected static final String FIELDS = "{ uuid shortName longName status identificationCode type"
+      + " customFields tasks { uuid } parentOrg { uuid }"
+      + " approvalSteps { uuid name approvers { uuid } } }";
   private static final String POSITION_FIELDS =
       "{ uuid name code type status organization { uuid } location { uuid } }";
 

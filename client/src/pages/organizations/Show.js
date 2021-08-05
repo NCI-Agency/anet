@@ -12,8 +12,10 @@ import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -49,6 +51,8 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       status
+      isSubscribed
+      updatedAt
       identificationCode
       type
       parentOrg {
@@ -134,12 +138,19 @@ const GQL_GET_ORGANIZATION = gql`
 const OrganizationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
-    uuid
-  })
+  const { loading, error, data, refetch } = API.useApiQuery(
+    GQL_GET_ORGANIZATION,
+    {
+      uuid
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -158,8 +169,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
@@ -278,7 +287,25 @@ const OrganizationShow = ({ pageDispatchers }) => {
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`Organization ${organization.shortName}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="organizations"
+                        subscribedObjectUuid={organization.uuid}
+                        isSubscribed={organization.isSubscribed}
+                        updatedAt={organization.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    Organization {organization.shortName}
+                  </>
+                }
                 action={action}
               />
               <Fieldset id="info">
