@@ -12,7 +12,7 @@ import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
-public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
+public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField
@@ -402,7 +402,6 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
-        && Objects.equals(getUser(), other.getUser())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
 

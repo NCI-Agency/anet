@@ -16,6 +16,7 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
@@ -147,7 +148,28 @@ const PositionShow = ({ pageDispatchers }) => {
             />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Position ${position.name}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="positions"
+                        subscribedObjectUuid={position.uuid}
+                        isSubscribed={position.isSubscribed}
+                        updatedAt={position.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    Position {position.name}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset>
                 <Field
                   name="name"

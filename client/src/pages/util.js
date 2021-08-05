@@ -20,5 +20,6 @@ export const PAGE_URLS = {
   KANBAN: "/dashboards/kanban",
   DECISIVES: "/dashboards/decisives",
   ONBOARDING: "/onboarding",
+  SUBSCRIPTIONS: "/subscriptions",
   MISSING: "*"
 }

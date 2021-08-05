@@ -63,7 +63,7 @@ public class PersonResourceTest extends AbstractResourceTest {
           + " customFields";
   private static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
-  private static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
+  protected static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
       _POSITION_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
 
   // 200 x 200 avatar

@@ -113,6 +113,7 @@ const Nav = ({
   const inMyCounterParts = path.indexOf("/positions/counterparts") === 0
   const inMyTasks = path.indexOf("/tasks/mine") === 0
   const inMyReports = path.indexOf("/reports/mine") === 0
+  const inMySubscriptions = path.indexOf("/subscriptions/mine") === 0
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
 
@@ -123,10 +124,16 @@ const Nav = ({
   const taskShortLabel = Settings.fields.task.shortLabel
 
   useEffect(() => {
-    if (inMyOrg || inMyCounterParts || inMyReports || inMyTasks) {
+    if (
+      inMyOrg ||
+      inMyCounterParts ||
+      inMyReports ||
+      inMyTasks ||
+      inMySubscriptions
+    ) {
       setIsMenuLinksOpened(true)
     }
-  }, [inMyOrg, inMyCounterParts, inMyReports, inMyTasks])
+  }, [inMyOrg, inMyCounterParts, inMyReports, inMyTasks, inMySubscriptions])
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -210,7 +217,13 @@ const Nav = ({
               <small>{myOrg.shortName}</small>
             </SidebarLink>
           )}
-          <BSNav id="myorg-nav" />
+          <SidebarLink
+            linkTo={{ pathname: "/subscriptions/mine" }}
+            handleOnClick={resetPages}
+            id="my-subscriptions"
+          >
+            My Subscriptions
+          </SidebarLink>
         </BSNav>
       </Collapse>
 

@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
-public class OrganizationSearchQuery extends AbstractSearchQuery<OrganizationSearchSortBy> {
+public class OrganizationSearchQuery
+    extends SubscribableObjectSearchQuery<OrganizationSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

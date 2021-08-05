@@ -43,7 +43,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class NoteResourceTest extends AbstractResourceTest {
 
-  private static final String NOTE_FIELDS = "{ uuid type text author { uuid }"
+  protected static final String NOTE_FIELDS = "{ uuid type text author { uuid }"
       + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }";
   private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
   private static final String POSITION_FIELDS = String.format(

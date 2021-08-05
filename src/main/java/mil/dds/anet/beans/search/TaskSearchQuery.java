@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class TaskSearchQuery extends AbstractSearchQuery<TaskSearchSortBy> {
+public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

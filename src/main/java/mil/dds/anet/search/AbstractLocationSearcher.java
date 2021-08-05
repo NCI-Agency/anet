@@ -1,5 +1,6 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -32,6 +33,11 @@ public abstract class AbstractLocationSearcher
 
     if (hasTextQuery(query)) {
       addTextQuery(query);
+    }
+
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getLocationDao().getSubscriptionUpdate(null)));
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {

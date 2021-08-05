@@ -4,7 +4,7 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import mil.dds.anet.beans.Location.LocationType;
 
-public class LocationSearchQuery extends AbstractSearchQuery<LocationSearchSortBy> {
+public class LocationSearchQuery extends SubscribableObjectSearchQuery<LocationSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

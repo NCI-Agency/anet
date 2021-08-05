@@ -20,15 +20,11 @@ const commonConfig = {
         loader: "ignore-loader"
       },
       {
-        // work-around from https://github.com/graphql/graphiql/issues/617#issuecomment-539034320 ;
-        // TODO: may at some point be removed again
-        test: /\.(ts|ts\.map|js\.map)$/,
-        include: /node_modules\/graphql-language-service-interface/,
-        loader: "ignore-loader"
-      },
-      {
-        test: /\.mjs$/,
+        test: /\.m?js$/,
         include: /node_modules/,
+        resolve: {
+          fullySpecified: false
+        },
         type: "javascript/auto"
       },
       {
@@ -48,7 +44,7 @@ const commonConfig = {
       },
       {
         test: /\.m?js$/,
-        // Based on https://github.com/facebook/create-react-app/pull/3776
+        // Based on https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/config/webpack.config.js
         include: /node_modules/,
         use: [
           "thread-loader",
@@ -56,9 +52,17 @@ const commonConfig = {
             loader: "babel-loader",
             options: {
               babelrc: false,
+              configFile: false,
               compact: false,
-              presets: [require.resolve("babel-preset-react-app/dependencies")],
-              cacheDirectory: true
+              presets: [
+                [
+                  require.resolve("babel-preset-react-app/dependencies"),
+                  { helpers: true }
+                ]
+              ],
+              cacheDirectory: true,
+              // see https://github.com/facebook/create-react-app/issues/6846
+              cacheCompression: false
             }
           }
         ]

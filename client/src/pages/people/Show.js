@@ -21,8 +21,10 @@ import {
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -58,6 +60,8 @@ const GQL_GET_PERSON = gql`
       role
       status
       pendingVerification
+      isSubscribed
+      updatedAt
       emailAddress
       phoneNumber
       domainUsername
@@ -113,6 +117,10 @@ const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const history = useHistory()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
     showAssociatedPositionsModal,
@@ -146,8 +154,6 @@ const PersonShow = ({ pageDispatchers }) => {
     }
   }
   const person = new Person(data ? data.person : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
@@ -238,7 +244,26 @@ const PersonShow = ({ pageDispatchers }) => {
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`${person.rank} ${person.name}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="people"
+                        subscribedObjectUuid={person.uuid}
+                        isSubscribed={person.isSubscribed}
+                        updatedAt={person.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          console.log("is it called")
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    {person.rank} {person.name}
+                  </>
+                }
                 action={action}
               />
               <Fieldset>

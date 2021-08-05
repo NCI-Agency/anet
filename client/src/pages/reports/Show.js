@@ -22,6 +22,7 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
@@ -64,6 +65,8 @@ const GQL_GET_REPORT = gql`
       cancelledReason
       releasedAt
       state
+      isSubscribed
+      updatedAt
       location {
         uuid
         name
@@ -494,7 +497,28 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             )}
 
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Report #${uuid}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {(report.isPublished() || report.isCancelled()) && (
+                      <SubscriptionIcon
+                        subscribedObjectType="reports"
+                        subscribedObjectUuid={report.uuid}
+                        isSubscribed={report.isSubscribed}
+                        updatedAt={report.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setSaveError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    )}{" "}
+                    Report #{report.uuid}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset className="show-report-overview">
                 <Field
                   name="intent"

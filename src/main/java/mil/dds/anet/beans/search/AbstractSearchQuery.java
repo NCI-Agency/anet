@@ -16,12 +16,19 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   private static int DEFAULT_PAGESIZE = 10;
   private static SortOrder DEFAULT_SORTORDER = SortOrder.ASC;
 
+  // annotated below
   private Optional<Status> status = Optional.empty();
+  // annotated below
   private Optional<String> text = Optional.empty();
+  // annotated below
   private Optional<Integer> pageNum = Optional.empty();
+  // annotated below
   private Optional<Integer> pageSize = Optional.empty();
+  // annotated below
   private Optional<SortOrder> sortOrder = Optional.empty();
+  // annotated below
   private Optional<T> sortBy = Optional.empty();
+  // internal search parameter:
   private Optional<AbstractBatchParams<?, ?>> batchParams = Optional.empty();
   @GraphQLQuery
   @GraphQLInputField
@@ -53,52 +60,52 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   }
 
   @Override
-  @GraphQLQuery
+  @GraphQLQuery(name = "text")
   public String getText() {
     return text.orElse(null);
   }
 
   @Override
-  @GraphQLInputField
+  @GraphQLInputField(name = "text")
   public void setText(String text) {
     this.text = Optional.ofNullable(text);
   }
 
   @Override
-  @GraphQLQuery
+  @GraphQLQuery(name = "pageNum")
   @Nonnull
   public int getPageNum() {
     return pageNum.orElse(DEFAULT_PAGENUM);
   }
 
   @Override
-  @GraphQLInputField
+  @GraphQLInputField(name = "pageNum")
   public void setPageNum(Integer pageNum) {
     this.pageNum = Optional.ofNullable(pageNum);
   }
 
   @Override
-  @GraphQLQuery
+  @GraphQLQuery(name = "pageSize")
   @Nonnull
   public int getPageSize() {
     return pageSize.orElse(DEFAULT_PAGESIZE);
   }
 
   @Override
-  @GraphQLInputField
+  @GraphQLInputField(name = "pageSize")
   public void setPageSize(Integer pageSize) {
     this.pageSize = Optional.ofNullable(pageSize);
   }
 
   @Override
-  @GraphQLQuery
+  @GraphQLQuery(name = "sortOrder")
   @Nonnull
   public SortOrder getSortOrder() {
     return sortOrder.orElse(DEFAULT_SORTORDER);
   }
 
   @Override
-  @GraphQLInputField
+  @GraphQLInputField(name = "sortOrder")
   public void setSortOrder(SortOrder sortOrder) {
     this.sortOrder = Optional.ofNullable(sortOrder);
   }
@@ -110,14 +117,14 @@ public abstract class AbstractSearchQuery<T extends ISortBy> implements ISearchQ
   }
 
   @Override
-  @GraphQLQuery
+  @GraphQLQuery(name = "sortBy")
   @Nonnull
   public T getSortBy() {
     return sortBy.orElse(defaultSortBy);
   }
 
   @Override
-  @GraphQLInputField
+  @GraphQLInputField(name = "sortBy")
   public void setSortBy(T sortBy) {
     this.sortBy = Optional.ofNullable(sortBy);
   }

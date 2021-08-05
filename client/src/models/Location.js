@@ -164,6 +164,8 @@ export default class Location extends Model {
     lat
     lng
     status
+    isSubscribed
+    updatedAt
     planningApprovalSteps {
       uuid
       name

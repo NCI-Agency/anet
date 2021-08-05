@@ -12,9 +12,9 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
 import {
-  PageDispatchersPropType,
   jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"

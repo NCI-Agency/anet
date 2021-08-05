@@ -3,7 +3,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.0"
 	id "com.diffplug.spotless" version "5.14.2"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.16"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17"
 	id "org.beryx.runtime" version "1.12.4"
 	id "nebula.ospackage" version "8.5.6"
 }
@@ -85,7 +85,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation 'org.ehcache:ehcache:3.9.4'
+	implementation 'org.ehcache:ehcache:3.9.5'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
@@ -112,7 +112,7 @@ dependencies {
 	implementation 'org.apache.poi:poi-ooxml:5.0.0'
 
 	// For Java 9+
-	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.4'
+	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
 	runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
 
 	// For parsing HTML to check for 'empty' input
@@ -123,7 +123,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.16'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.17'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -542,12 +542,43 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	args cmdline
 }
 
-// Add the generated (re)sources as a Java test (re)source folder
-sourceSets.test.java.srcDirs += 'build/generated/sources/graphqlGradlePlugin'
-sourceSets.test.resources.srcDirs += 'build/generated/resources/graphqlGradlePlugin'
+// Execute the GraphQL plugin before Java compile, so that all test (re)sources are generated on time
 
-// Execute the GraphQL plugin before Java compiles, so that all test sources are generated on time
-compileTestJava.dependsOn generateClientCode
+// Add the generated (re)sources as a Java test (re)source folder
+task prepareCompileTestJava(dependsOn: 'generateClientCode') {
+	doFirst {
+		logger.info("Registering generated folders for task prepareCompileTestJava")
+		sourceSets.test.java.srcDirs += 'build/generated/sources/graphqlGradlePlugin'
+	}
+}
+compileTestJava.dependsOn prepareCompileTestJava
+task prepareProcessTestResources(dependsOn: 'generateClientCode') {
+	doFirst {
+		logger.info("Registering generated folders for task prepareProcessTestResources")
+		sourceSets.test.resources.srcDirs += 'build/generated/resources/graphqlGradlePlugin'
+	}
+}
+processTestResources.dependsOn prepareProcessTestResources
+
+// And remove the auto-added generated (re)sources from the main Java (re)source
+task prepareCompileJava(dependsOn: 'generateClientCode') {
+	doFirst {
+		logger.info("De-registering generated folders for task prepareCompileJava")
+		def mainJavaSrcDirs = sourceSets.main.java.srcDirs.toList()
+		mainJavaSrcDirs.removeAll { it.name == 'graphqlGradlePlugin' }
+		sourceSets.main.java.srcDirs = mainJavaSrcDirs
+	}
+}
+compileJava.dependsOn prepareCompileJava
+task prepareProcessResources(dependsOn: 'generateClientCode') {
+	doFirst {
+		logger.info("De-registering generated folders for task prepareProcessResources")
+		def mainResourceSrcDirs = sourceSets.main.resources.srcDirs.toList()
+		mainResourceSrcDirs.removeAll { it.name == 'graphqlGradlePlugin' }
+		sourceSets.main.resources.srcDirs = mainResourceSrcDirs
+	}
+}
+processResources.dependsOn prepareProcessResources
 
 // Configure the GraphQL Gradle Plugin; all available parameters are described here:
 // https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/generateClientCode-mojo.html

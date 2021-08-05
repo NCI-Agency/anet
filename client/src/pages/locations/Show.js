@@ -12,19 +12,19 @@ import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -33,44 +33,7 @@ import utils from "utils"
 const GQL_GET_LOCATION = gql`
   query($uuid: String!) {
     location(uuid: $uuid) {
-      uuid
-      name
-      type
-      lat
-      lng
-      status
-      planningApprovalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            role
-            avatar(size: 32)
-          }
-        }
-      }
-      approvalSteps {
-        uuid
-        name
-        approvers {
-          uuid
-          name
-          person {
-            uuid
-            name
-            rank
-            role
-            avatar(size: 32)
-          }
-        }
-      }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
+      ${Location.allFieldsQuery}
     }
   }
 `
@@ -79,7 +42,11 @@ const LocationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_LOCATION, {
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
+  const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
   const { done, result } = useBoilerplate({
@@ -100,8 +67,6 @@ const LocationShow = ({ pageDispatchers }) => {
     )
   }
   const location = new Location(data ? data.location : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   const canEdit = currentUser.isSuperUser()
 
   return (
@@ -142,7 +107,28 @@ const LocationShow = ({ pageDispatchers }) => {
             />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Location ${location.name}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="locations"
+                        subscribedObjectUuid={location.uuid}
+                        isSubscribed={location.isSubscribed}
+                        updatedAt={location.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    Location {location.name}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset>
                 <Field name="name" component={FieldHelper.ReadonlyField} />
 

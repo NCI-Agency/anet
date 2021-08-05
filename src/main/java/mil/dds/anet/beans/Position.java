@@ -17,7 +17,8 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Position extends AbstractCustomizableAnetBean implements RelatableObject, WithStatus {
+public class Position extends AbstractCustomizableAnetBean
+    implements RelatableObject, SubscribableObject, WithStatus {
 
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR

@@ -42,19 +42,20 @@ import org.junit.jupiter.api.Test;
 public class PositionResourceTest extends AbstractResourceTest {
   private static final String _ORGANIZATION_FIELDS = "uuid shortName";
   private static final String _PERSON_FIELDS = "uuid name role";
-  private static final String _POSITION_FIELDS = "uuid name code type status";
+  private static final String _POSITION_FIELDS = "uuid name code type status customFields";
   private static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
   private static final String PERSON_FIELDS =
       String.format("{ %1$s position { %2$s } }", _PERSON_FIELDS, _POSITION_FIELDS);
-  private static final String FIELDS = String.format(
+  protected static final String FIELDS = String.format(
       "{ %1$s person { %2$s } organization { %3$s } associatedPositions { uuid }"
           + " previousPeople { createdAt startTime endTime position { uuid }"
           + " person { uuid name rank role } } }",
       _POSITION_FIELDS, _PERSON_FIELDS, _ORGANIZATION_FIELDS);
-  private static final String PA_FIELDS = String.format(
-      "{ uuid associatedPositions { uuid } responsibleTasks(query: ?responsibleTasksQuery) { uuid } }");
+  private static final String PA_FIELDS = String
+      .format("{ uuid associatedPositions { uuid } responsibleTasks(query: ?responsibleTasksQuery)"
+          + " { uuid } }");
 
   @Test
   public void positionTest()

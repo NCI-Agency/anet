@@ -1,5 +1,6 @@
 package mil.dds.anet.search;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractBatchParams;
@@ -37,6 +38,11 @@ public abstract class AbstractOrganizationSearcher extends
 
     if (query.isBatchParamsPresent()) {
       addBatchClause(query);
+    }
+
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getOrganizationDao().getSubscriptionUpdate(null)));
     }
 
     qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());

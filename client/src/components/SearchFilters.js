@@ -77,6 +77,15 @@ const StatusFilter = {
   }
 }
 
+const SubscriptionFilter = {
+  component: CheckboxFilter,
+  deserializer: deserializeCheckboxFilter,
+  props: {
+    queryKey: "subscribed",
+    msg: "By me"
+  }
+}
+
 const taskFilters = () => {
   const taskFiltersObj = {
     Organization: {
@@ -172,6 +181,8 @@ const advancedSelectFilterTaskProps = {
 
 export const searchFilters = function() {
   const filters = {}
+
+  const taskShortLabel = Settings.fields.task.shortLabel
   const authorWidgetFilters = {
     all: {
       label: "All",
@@ -346,19 +357,17 @@ export const searchFilters = function() {
         props: {
           queryKey: "sensitiveInfo"
         }
+      },
+      [taskShortLabel]: {
+        component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterTaskProps, {
+          filterDefs: taskWidgetFilters,
+          placeholder: `Filter reports by ${taskShortLabel}...`,
+          queryKey: "taskUuid"
+        })
       }
     }
-  }
-
-  const taskShortLabel = Settings.fields.task.shortLabel
-  filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
-    component: AdvancedSelectFilter,
-    deserializer: deserializeAdvancedSelectFilter,
-    props: Object.assign({}, advancedSelectFilterTaskProps, {
-      filterDefs: taskWidgetFilters,
-      placeholder: `Filter reports by ${taskShortLabel}...`,
-      queryKey: "taskUuid"
-    })
   }
 
   const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
@@ -535,6 +544,7 @@ export const searchFilters = function() {
 
   for (const filtersForType of Object.values(filters)) {
     filtersForType.filters.Status = StatusFilter
+    filtersForType.filters.Subscribed = SubscriptionFilter
   }
 
   return filters

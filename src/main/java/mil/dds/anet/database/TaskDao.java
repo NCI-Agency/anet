@@ -24,7 +24,7 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
+public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   public static final String TABLE_NAME = "tasks";
 
@@ -202,6 +202,11 @@ public class TaskDao extends AnetBaseDao<Task, TaskSearchQuery> {
   @Override
   public AnetBeanList<Task> search(TaskSearchQuery query) {
     return AnetObjectEngine.getInstance().getSearcher().getTaskSearcher().runSearch(query);
+  }
+
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Task obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "tasks.uuid");
   }
 
 }

@@ -95,6 +95,8 @@ export default class Position extends Model {
     name
     type
     status
+    isSubscribed
+    updatedAt
     code
     organization {
       uuid
