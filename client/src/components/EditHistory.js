@@ -241,18 +241,28 @@ function EditHistory({
                                   name={startTimeFieldName}
                                   label="Start Time"
                                   value={values.history[idx].startTime}
-                                  onChange={value =>
+                                  onChange={value => {
                                     setFieldValue(
                                       startTimeFieldName,
                                       value?.valueOf()
                                     )
-                                  }
+                                    setFinalHistory(
+                                      sortHistory(
+                                        values.history.map((item, index) =>
+                                          index === idx
+                                            ? {
+                                              ...item,
+                                              startTime: value?.valueOf()
+                                            }
+                                            : item
+                                        ),
+                                        hasCurrent
+                                      )
+                                    )
+                                  }}
                                   component={FieldHelper.SpecialField}
                                   widget={
-                                    <CustomDateInput
-                                      id={startTimeFieldName}
-                                      withTime
-                                    />
+                                    <CustomDateInput id={startTimeFieldName} />
                                   }
                                 />
                                 {!isCurrent && (
@@ -268,10 +278,7 @@ function EditHistory({
                                     }
                                     component={FieldHelper.SpecialField}
                                     widget={
-                                      <CustomDateInput
-                                        id={endTimeFieldName}
-                                        withTime
-                                      />
+                                      <CustomDateInput id={endTimeFieldName} />
                                     }
                                   />
                                 )}
@@ -540,4 +547,16 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
       filterDefs: positionsFilters
     }
   }
+}
+
+function sortHistory(history, hasCurrent) {
+  console.log("history: ", history)
+  if (!hasCurrent) {
+    return history.sort((a, b) => a.startTime - b.startTime)
+  }
+  const historyWithoutCurrent = history.slice(0, history.length - 1)
+  const sortedWithoutCurrent = historyWithoutCurrent.sort(
+    (a, b) => a.startTime - b.startTime
+  )
+  return [...sortedWithoutCurrent, history[history.length - 1]]
 }
