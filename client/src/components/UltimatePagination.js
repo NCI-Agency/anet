@@ -9,7 +9,7 @@ const paginationLinkPropTypes = {
 }
 
 const PageLink = ({ value, isActive, onClick }) => (
-  <Pagination.Item active={isActive} onClick={onClick}>
+  <Pagination.Item active={isActive} activeLabel="" onClick={onClick}>
     {value}
   </Pagination.Item>
 )
