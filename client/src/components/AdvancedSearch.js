@@ -15,14 +15,7 @@ import _cloneDeep from "lodash/cloneDeep"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import {
-  Button,
-  Col,
-  Dropdown,
-  FormControl,
-  FormGroup,
-  Row
-} from "react-bootstrap"
+import { Button, Col, Dropdown, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
@@ -101,7 +94,7 @@ const AdvancedSearch = ({
       {() => (
         <div className="advanced-search form-horizontal">
           <Form onSubmit={onSubmit}>
-            <FormGroup>
+            <FormGroup style={{ marginBottom: "15px" }}>
               <ButtonGroupContainerS>
                 <ButtonToggleGroup
                   value={objectType}
@@ -109,6 +102,7 @@ const AdvancedSearch = ({
                 >
                   {possibleFilterTypes.map(type => (
                     <Button
+                      variant="outline-secondary"
                       key={type}
                       value={type}
                       disabled={possibleFilterTypes.length < 2}
@@ -138,9 +132,12 @@ const AdvancedSearch = ({
               </ButtonGroupContainerS>
             </FormGroup>
 
-            <FormControl defaultValue={text} className="hidden" />
+            {/* <FormControl defaultValue={text} className="hidden" /> */}
 
-            <div className="advanced-search-content">
+            <div
+              className="advanced-search-content"
+              style={{ paddingLeft: "15px" }}
+            >
               {filters.map(
                 filter =>
                   filterDefs[filter.key] && (
