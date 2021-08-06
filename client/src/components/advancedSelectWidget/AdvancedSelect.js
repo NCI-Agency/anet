@@ -2,7 +2,6 @@ import { gql } from "@apollo/client"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
-import * as FieldHelper from "components/FieldHelper"
 import UltimatePagination from "components/UltimatePagination"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
@@ -367,22 +366,35 @@ const AdvancedSelect = ({
                   }
                 }}
               >
-                <Form.Control
-                  name={fieldName}
-                  value={searchTerms || ""}
-                  placeholder={placeholder}
-                  onChange={changeSearchTerms}
-                  onFocus={event => handleInteraction(true, event)}
-                  ref={ref => {
-                    searchInput.current = ref
-                  }}
-                  disabled={disabled}
-                />
+                <InputGroup>
+                  <Form.Control
+                    name={fieldName}
+                    value={searchTerms || ""}
+                    placeholder={placeholder}
+                    onChange={changeSearchTerms}
+                    onFocus={event => handleInteraction(true, event)}
+                    ref={ref => {
+                      searchInput.current = ref
+                    }}
+                    disabled={disabled}
+                  />
+                  {addon && (
+                    <InputGroup.Text
+                      style={{
+                        maxHeight: "38px",
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        textSizeAdjust: "10px"
+                      }}
+                    >
+                      <img src={addon} style={{ height: "25px" }} />
+                    </InputGroup.Text>
+                  )}
+                  {extraAddon && (
+                    <InputGroup.Text>{extraAddon}</InputGroup.Text>
+                  )}
+                </InputGroup>
               </Popover2>
-              {extraAddon && <InputGroup>{extraAddon}</InputGroup>}
-              {addon && (
-                <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-              )}
             </InputGroup>
           </div>
           <AdvancedSelectTarget overlayRef={overlayContainer} />
