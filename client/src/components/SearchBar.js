@@ -101,8 +101,18 @@ const SearchBar = ({
             id="searchBarInput"
           />
           {!showAdvancedSearch && (
-            <Button onClick={onSubmit} id="searchBarSubmit">
-              <img src={SEARCH_ICON} height={16} alt="Search" />
+            <Button
+              onClick={onSubmit}
+              id="searchBarSubmit"
+              variant="outline-light"
+              style={{ borderColor: "#ced4da" }}
+            >
+              <img
+                src={SEARCH_ICON}
+                height={16}
+                alt="Search"
+                style={{ color: "white" }}
+              />
             </Button>
           )}
         </InputGroup>
