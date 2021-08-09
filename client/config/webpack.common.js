@@ -78,14 +78,7 @@ const commonConfig = {
       },
       {
         test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              name: "static/media/[name].[hash:8].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource"
       }
     ]
   }
