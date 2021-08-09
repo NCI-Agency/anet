@@ -12,7 +12,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Badge, Col, Container, Row } from "react-bootstrap"
+import { Badge, Button, Col, Container, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -239,7 +239,8 @@ const ReportSummaryRow = ({ report }) => {
       <Row>
         <Col md={12}>
           {report.engagementDate && (
-            <Badge variant="default" className="engagement-date">
+            // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
+            <Badge className="bg-secondary engagement-date">
               {moment(report.engagementDate).format(
                 Report.getEngagementDateFormat()
               )}
@@ -269,7 +270,10 @@ const ReportSummaryRow = ({ report }) => {
               <strong>Location: </strong>
               <LinkTo modelType="Location" model={report.location} />
               {"  "}
-              <Badge>{Location.humanNameOfType(report.location.type)}</Badge>
+              {/* TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x" */}
+              <Badge className="bg-secondary">
+                {Location.humanNameOfType(report.location.type)}
+              </Badge>
             </span>
           </Col>
         </Row>
@@ -337,7 +341,7 @@ const ReportSummaryRow = ({ report }) => {
             button
             className="read-report-button"
           >
-            Read report
+            <Button variant="secondary">Read report</Button>
           </LinkTo>
         </Col>
       </Row>
