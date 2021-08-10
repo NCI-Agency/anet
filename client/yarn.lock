@@ -2499,12 +2499,24 @@
   resolved "https://registry.yarnpkg.com/@projectstorm/geometry/-/geometry-6.6.0.tgz#a5b4d48d2b7f1c08135274f4504338dee028304d"
   integrity sha512-MiRuAQy6eiOU3l6TVpXES8YA/jNnHVT3lylAO/JhAEszAfTRUv2FXaI82dfacJj8LhXZZu8fd/xwZ/FdRNMLag==
 
+"@projectstorm/geometry@^6.6.1":
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/@projectstorm/geometry/-/geometry-6.6.1.tgz#4a42f5c8fdfcc3d951e73f5db7fe9546514acc3d"
+  integrity sha512-gWRkv+fm+VIpoffHzDHPmGYlEqx8xWGfE/JR7TXAZweNdjEIxyhT++hVlCJiFJS+/cGqgN3z+eP7PNjwZUPGRg==
+
 "@projectstorm/react-canvas-core@^6.6.0":
   version "6.6.0"
   resolved "https://registry.yarnpkg.com/@projectstorm/react-canvas-core/-/react-canvas-core-6.6.0.tgz#e7b2d679f402a1c3e5f5e44770fb5e2de29f2a6f"
   integrity sha512-pyeSNHU/f/GK5bs1VHBTovjo3TCcpDUYXcxJ22iJ1ZuVNrwYFMZjkLyMCzO9vbaGzHES56mVDLCtgBZPIq0NSw==
   dependencies:
     "@projectstorm/geometry" "^6.6.0"
+
+"@projectstorm/react-canvas-core@^6.6.1":
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/@projectstorm/react-canvas-core/-/react-canvas-core-6.6.1.tgz#93cc6e70e986fe620b6fad6b597d3aa038075244"
+  integrity sha512-wAxEh4Wja2Au0QAuLqxJNaWpVxYIffTFUZhjH8wtW8MKCWS6W9RnP6upeC8QVQi29NS59UIX4wXNzb6e6ht5ww==
+  dependencies:
+    "@projectstorm/geometry" "^6.6.1"
 
 "@projectstorm/react-diagrams-core@6.6.0", "@projectstorm/react-diagrams-core@^6.6.0":
   version "6.6.0"
@@ -2514,21 +2526,36 @@
     "@projectstorm/geometry" "^6.6.0"
     "@projectstorm/react-canvas-core" "^6.6.0"
 
-"@projectstorm/react-diagrams-defaults@6.6.0", "@projectstorm/react-diagrams-defaults@^6.6.0":
+"@projectstorm/react-diagrams-core@^6.6.1":
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-core/-/react-diagrams-core-6.6.1.tgz#f626c6253dd6f4b04c3256976b55377ffac2b1bb"
+  integrity sha512-TiDwpcH+t2b2tG/UHDQvhlyx3gOQRJXxTyNDo7p+430ikTrvz1f8uNe5Rt3SrzyqxeUazLFXYBgbGpEanqOykQ==
+  dependencies:
+    "@projectstorm/geometry" "^6.6.1"
+    "@projectstorm/react-canvas-core" "^6.6.1"
+
+"@projectstorm/react-diagrams-defaults@6.6.0":
   version "6.6.0"
   resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-defaults/-/react-diagrams-defaults-6.6.0.tgz#199b1673a1bac8e39ffa148fac428b03eba82778"
   integrity sha512-X0w03fBvnVslbGRndCP+5OHh9Wu677XRPBeoqJ5PjFjdHqvjxv433fbsf6dv8t7XIih43xxWAdd47UvgdLpylA==
   dependencies:
     "@projectstorm/react-diagrams-core" "^6.6.0"
 
-"@projectstorm/react-diagrams-routing@6.6.0":
-  version "6.6.0"
-  resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-routing/-/react-diagrams-routing-6.6.0.tgz#bc686efb93f7ee85330cf72d0d72326d20dc23b1"
-  integrity sha512-+cuGegIKBj+vPsLs4+72nPymR1KDXIn3FqlIdIu1IJ5ywc+5cTH/5CD/q+sVKLhwfYjzTsUVGB+5dzVsLA+CBw==
+"@projectstorm/react-diagrams-defaults@^6.6.1":
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-defaults/-/react-diagrams-defaults-6.6.1.tgz#a97cdda56d7336b84775f76a925b90286ea2833d"
+  integrity sha512-FJu8BNBjvANVZ8N99WXS/f6Mu5/yMC4Pi55kTG3vq7o14tsVMcghosmxst5eoeL251O4I+ulNvQ/yCc1Mc5org==
   dependencies:
-    "@projectstorm/geometry" "^6.6.0"
-    "@projectstorm/react-diagrams-core" "^6.6.0"
-    "@projectstorm/react-diagrams-defaults" "^6.6.0"
+    "@projectstorm/react-diagrams-core" "^6.6.1"
+
+"@projectstorm/react-diagrams-routing@6.6.1":
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/@projectstorm/react-diagrams-routing/-/react-diagrams-routing-6.6.1.tgz#06b77ab1f94f4567391099ffe5e1d91db34408ff"
+  integrity sha512-m8akJynhanxmpc/A2U7bcgFxIMxsjb3zmYBRGFltVJve87mir8ACaH2gmiHYcAfgEHxdh+x7mCuUlfNP242Ytw==
+  dependencies:
+    "@projectstorm/geometry" "^6.6.1"
+    "@projectstorm/react-diagrams-core" "^6.6.1"
+    "@projectstorm/react-diagrams-defaults" "^6.6.1"
 
 "@reach/router@^1.3.4":
   version "1.3.4"
