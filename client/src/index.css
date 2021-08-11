@@ -327,11 +327,10 @@ button.home-tile.btn {
   font-weight: 900;
 }
 
-.home-tile:hover {
+.home-tile-col:hover {
   background: #dae3ee;
 }
-.home-tile:hover,
-.home-tile:focus {
+.home-tile-col:focus {
   text-decoration: none;
 }
 
@@ -1105,6 +1104,10 @@ header.searchPagination {
 .modal.in .modal-dialog {
   -webkit-transform: translate(0, 0);
   transform: translate(0, 150px);
+}
+
+.fade.in.modal {
+  opacity: 1;
 }
 
 @page {
