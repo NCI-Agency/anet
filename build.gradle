@@ -80,7 +80,7 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.2.1.jre11'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre11'
 	implementation 'org.postgresql:postgresql:42.2.23' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
@@ -543,22 +543,22 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 // Execute the GraphQL plugin before Java compile, so that all test (re)sources are generated on time
+compileTestJava.dependsOn generateClientCode
+processTestResources.dependsOn generateClientCode
 
 // Add the generated (re)sources as a Java test (re)source folder
-task prepareCompileTestJava(dependsOn: 'generateClientCode') {
-	doFirst {
-		logger.info("Registering generated folders for task prepareCompileTestJava")
-		sourceSets.test.java.srcDirs += 'build/generated/sources/graphqlGradlePlugin'
+sourceSets.test.java.srcDirs += 'build/generated/sources/graphqlGradlePlugin'
+sourceSets.test.resources.srcDirs += 'build/generated/resources/graphqlGradlePlugin'
+// and ignore optional problems in Eclipse
+eclipse.classpath.file {
+	whenMerged { classpath ->
+		classpath.entries.each { entry ->
+			if (entry.path.contains('graphqlGradlePlugin')) {
+				entry.entryAttributes['ignore_optional_problems'] = true
+			}
+		}
 	}
 }
-compileTestJava.dependsOn prepareCompileTestJava
-task prepareProcessTestResources(dependsOn: 'generateClientCode') {
-	doFirst {
-		logger.info("Registering generated folders for task prepareProcessTestResources")
-		sourceSets.test.resources.srcDirs += 'build/generated/resources/graphqlGradlePlugin'
-	}
-}
-processTestResources.dependsOn prepareProcessTestResources
 
 // And remove the auto-added generated (re)sources from the main Java (re)source
 task prepareCompileJava(dependsOn: 'generateClientCode') {
