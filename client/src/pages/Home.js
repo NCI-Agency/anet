@@ -25,7 +25,7 @@ import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, Container, Form, Row } from "react-bootstrap"
+import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -122,12 +122,13 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         {queries
           .filter(q => q.query !== null)
           .map((query, index) => (
-            <HomeTile
-              key={index}
-              query={query}
-              setSearchQuery={setSearchQuery}
-              pageDispatchers={pageDispatchers}
-            />
+            <Col key={index} className="home-tile-col">
+              <HomeTile
+                query={query}
+                setSearchQuery={setSearchQuery}
+                pageDispatchers={pageDispatchers}
+              />
+            </Col>
           ))}
       </Row>
     </Container>
@@ -322,33 +323,41 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   return (
     <>
       <Messages error={stateError} />
-      <Form.Group controlId="savedSearchSelect">
-        <Form.Label>Select a saved search</Form.Label>
-        <Form.Control as="select" onChange={onSaveSearchSelect}>
-          {savedSearches &&
-            savedSearches.map(savedSearch => (
-              <option value={savedSearch.uuid} key={savedSearch.uuid}>
-                {savedSearch.name}
-              </option>
-            ))}
-        </Form.Control>
+      <Form.Group as={Row} className="mb-3" controlId="savedSearchSelect">
+        <Form.Label column sm={2}>
+          <b>Select a saved search</b>
+        </Form.Label>
+        <Col sm={10}>
+          <Form.Control as="select" onChange={onSaveSearchSelect}>
+            {savedSearches &&
+              savedSearches.map(savedSearch => (
+                <option value={savedSearch.uuid} key={savedSearch.uuid}>
+                  {savedSearch.name}
+                </option>
+              ))}
+          </Form.Control>
+        </Col>
       </Form.Group>
 
       {selectedSearch && (
         <div>
-          <div className="pull-right">
-            <Button style={{ marginRight: 12 }} onClick={showSearch}>
-              Show Search
-            </Button>
-            <ConfirmDestructive
-              onConfirm={onConfirmDelete}
-              objectType="search"
-              objectDisplay={selectedSearch.name}
-              variant="danger"
-              buttonLabel="Delete Search"
-            />
-          </div>
-          <SavedSearchTable search={selectedSearch} />
+          <Row>
+            <Col sm={8}>
+              <SavedSearchTable search={selectedSearch} />
+            </Col>
+            <Col className="text-end">
+              <Button style={{ marginRight: 12 }} onClick={showSearch}>
+                Show Search
+              </Button>
+              <ConfirmDestructive
+                onConfirm={onConfirmDelete}
+                objectType="search"
+                objectDisplay={selectedSearch.name}
+                variant="danger"
+                buttonLabel="Delete Search"
+              />
+            </Col>
+          </Row>
         </div>
       )}
     </>
@@ -410,7 +419,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
 
   return (
     <div>
-      <div className="pull-right">
+      <div style={{ width: "inherit" }} className="float-end">
         <GuidedTour
           title="Take a guided tour of the home page."
           tour={currentUser.isSuperUser() ? superUserTour : userTour}
