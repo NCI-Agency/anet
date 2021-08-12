@@ -338,7 +338,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     objectDisplay={"#" + position.uuid}
                     variant="warning"
                     buttonLabel="Delete position"
-                    className="pull-right"
+                    buttonClassName="float-end"
                   />
                 </div>
               </div>
