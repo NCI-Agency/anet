@@ -28,12 +28,13 @@ const getHumanValue = (field, humanValue) => {
   }
 }
 
-const getFormGroupValidationState = (field, form) => {
-  const { touched, errors } = form
-  const fieldTouched = _get(touched, field.name)
-  const fieldError = _get(errors, field.name)
-  return (fieldTouched && (fieldError ? true : null)) || null
-}
+// FIXME: FormGroup does not have a validationStateProperty
+// const getFormGroupValidationState = (field, form) => {
+//   const { touched, errors } = form
+//   const fieldTouched = _get(touched, field.name)
+//   const fieldError = _get(errors, field.name)
+//   return (fieldTouched && (fieldError ? true : null)) || null
+// }
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
@@ -44,7 +45,8 @@ const getHelpBlock = (field, form) => {
 
 const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
-  const validationState = getFormGroupValidationState(field, form)
+  // FIXME: FormGroup does not have a validationStateProperty
+  // const validationState = getFormGroupValidationState(field, form)
   return (
     <FormGroup id={`fg-${id}`} controlId={id}>
       {widgetElem}
@@ -89,7 +91,8 @@ const Field = ({
       ),
     [addon, extraAddon, id, widgetElem]
   )
-  const validationState = getFormGroupValidationState(field, form)
+  // FIXME: FormGroup does not have a validationStateProperty
+  // const validationState = getFormGroupValidationState(field, form)
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
