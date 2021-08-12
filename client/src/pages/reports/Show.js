@@ -31,6 +31,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import { deserializeQueryParams } from "components/SearchFilters"
+import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
@@ -41,7 +42,6 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
-import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -822,7 +822,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         objectDisplay={"#" + uuid}
                         variant="warning"
                         buttonLabel={`Unpublish ${reportType}`}
-                        className="pull-left"
+                        buttonClassName="float-start"
                       />
                     </div>
                 )}
@@ -833,7 +833,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     objectDisplay={"#" + uuid}
                     variant="warning"
                     buttonLabel={`Delete ${reportType}`}
-                    className="pull-right"
+                    buttonClassName="float-end"
                   />
                 </div>
               </div>
@@ -1175,19 +1175,15 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         {label}
       </Button>
     ) : (
-      <Confirm
+      <TriggerableConfirm
         onConfirm={confirmHandler}
         title="Request changes?"
         body={renderValidationWarnings(warnings, "rejecting")}
         confirmText="Request changes anyway"
         cancelText="Cancel change request"
-        dialogClassName="react-confirm-bootstrap-modal"
-        confirmBSStyle="primary"
-      >
-        <Button variant="warning" onClick={confirmHandler}>
-          {label}
-        </Button>
-      </Confirm>
+        variant="warning"
+        buttonLabel={label}
+      />
     )
   }
 
@@ -1274,26 +1270,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         {label}
       </Button>
     ) : (
-      <Confirm
+      <TriggerableConfirm
         onConfirm={confirmHandler}
         title={title}
         body={renderValidationWarnings(warnings, submitType)}
         confirmText={confirmText}
         cancelText={cancelText}
-        dialogClassName="react-confirm-bootstrap-modal"
-        confirmBSStyle="primary"
-      >
-        <Button
-          type="button"
-          variant="primary"
-          size={size}
-          className={className}
-          disabled={disabled}
-          id={id}
-        >
-          {label}
-        </Button>
-      </Confirm>
+        variant="primary"
+        buttonLabel={label}
+        buttonSize={size}
+        buttonClassName={className}
+        buttonDisabled={disabled}
+        buttonId={id}
+      />
     )
   }
 
