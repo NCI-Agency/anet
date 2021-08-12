@@ -674,8 +674,9 @@ const Search = ({
               >
                 <img src={ORGANIZATIONS_ICON} alt="" /> Organizations{" "}
                 {hasOrganizationsResults && (
-                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-                  <Badge className="bg-secondary">{numOrganizations}</Badge>
+                  <Badge pill bg="secondary">
+                    {numOrganizations}
+                  </Badge>
                 )}
               </AnchorNavItem>
 
@@ -683,8 +684,9 @@ const Search = ({
                 <img src={PEOPLE_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}{" "}
                 {hasPeopleResults && (
-                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-                  <Badge className="bg-secondary">{numPeople}</Badge>
+                  <Badge pill bg="secondary">
+                    {numPeople}
+                  </Badge>
                 )}
               </AnchorNavItem>
 
@@ -692,8 +694,9 @@ const Search = ({
                 <img src={POSITIONS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}{" "}
                 {hasPositionsResults && (
-                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-                  <Badge className="bg-secondary">{numPositions}</Badge>
+                  <Badge pill bg="secondary">
+                    {numPositions}
+                  </Badge>
                 )}
               </AnchorNavItem>
 
@@ -701,8 +704,9 @@ const Search = ({
                 <img src={TASKS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}{" "}
                 {hasTasksResults && (
-                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-                  <Badge className="bg-secondary">{numTasks}</Badge>
+                  <Badge pill bg="secondary">
+                    {numTasks}
+                  </Badge>
                 )}
               </AnchorNavItem>
 
@@ -710,8 +714,9 @@ const Search = ({
                 <img src={LOCATIONS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}{" "}
                 {hasLocationsResults && (
-                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-                  <Badge className="bg-secondary">{numLocations}</Badge>
+                  <Badge pill bg="secondary">
+                    {numLocations}
+                  </Badge>
                 )}
               </AnchorNavItem>
 
@@ -719,8 +724,7 @@ const Search = ({
                 <img src={REPORTS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}{" "}
                 {hasReportsResults && (
-                  // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-                  <Badge pill className="bg-secondary">
+                  <Badge pill bg="secondary">
                     {numReports}
                   </Badge>
                 )}
@@ -729,7 +733,7 @@ const Search = ({
           </Row>
         </Container>
       </SubNav>
-      <div className="pull-right">
+      <div className="float-start">
         {numResults > 0 && (
           <Dropdown id="dropdown-custom-1">
             <Dropdown.Toggle>
@@ -766,6 +770,8 @@ const Search = ({
             </Dropdown.Menu>
           </Dropdown>
         )}
+      </div>
+      <div className="float-end">
         {!_isEmpty(searchQueryParams) && numResults >= 0 && (
           <Button
             onClick={openSaveModal}
