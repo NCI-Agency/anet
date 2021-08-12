@@ -830,12 +830,13 @@ export const CustomFieldsContainer = props => {
 
   return (
     <>
-      <FastField
+      {/* FIXME: Seems like a redundant field */}
+      {/* <FastField
         type="text"
         value=""
         name={invisibleFieldsFieldName}
         className="hidden"
-      />
+      /> */}
       <CustomFields invisibleFields={invisibleFields} {...props} />
     </>
   )
