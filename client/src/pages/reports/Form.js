@@ -47,7 +47,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Collapse, Form as ReactBootstrapForm } from "react-bootstrap"
+import { Button, Collapse, FormCheck } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -611,7 +611,7 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
-                      <ReactBootstrapForm.Check
+                      <FormCheck
                         type="checkbox"
                         label="This engagement was cancelled"
                         className="cancelled-checkbox"
