@@ -28,13 +28,12 @@ const getHumanValue = (field, humanValue) => {
   }
 }
 
-// FIXME: FormGroup does not have a validationStateProperty
-// const getFormGroupValidationState = (field, form) => {
-//   const { touched, errors } = form
-//   const fieldTouched = _get(touched, field.name)
-//   const fieldError = _get(errors, field.name)
-//   return (fieldTouched && (fieldError ? true : null)) || null
-// }
+const getFormGroupValidationState = (field, form) => {
+  const { touched, errors } = form
+  const fieldTouched = _get(touched, field.name)
+  const fieldError = _get(errors, field.name)
+  return (fieldTouched && (fieldError ? true : null)) || null
+}
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
@@ -45,14 +44,16 @@ const getHelpBlock = (field, form) => {
 
 const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
-  // FIXME: FormGroup does not have a validationStateProperty
-  // const validationState = getFormGroupValidationState(field, form)
+  const validationState = getFormGroupValidationState(field, form)
   return (
     <FormGroup id={`fg-${id}`} controlId={id}>
       {widgetElem}
       {getHelpBlock(field, form)}
       {children}
-      <FormControl.Feedback></FormControl.Feedback>
+      <FormControl.Feedback
+        type={validationState && "invalid"}
+      >
+      </FormControl.Feedback>
     </FormGroup>
   )
 }
@@ -83,16 +84,16 @@ const Field = ({
       !addon ? (
         widgetElem
       ) : (
-        <>
+        <InputGroup>
           {widgetElem}
           {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
           <FieldAddon id={id} addon={addon} />
-        </>
+        </InputGroup>
       ),
     [addon, extraAddon, id, widgetElem]
   )
-  // FIXME: FormGroup does not have a validationStateProperty
-  // const validationState = getFormGroupValidationState(field, form)
+
+  const validationState = getFormGroupValidationState(field, form)
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
@@ -145,7 +146,10 @@ const Field = ({
           </Col>
           {extraColElem && <Col sm={3} {...extraColElem.props} />}
           <Col>
-            <FormControl.Feedback></FormControl.Feedback>
+            <FormControl.Feedback
+              type={validationState && "invalid"}
+            >
+            </FormControl.Feedback>
           </Col>
         </Row>
       )}
