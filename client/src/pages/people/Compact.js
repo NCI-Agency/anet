@@ -35,7 +35,7 @@ import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, DropdownButton, DropdownItem, Table } from "react-bootstrap"
+import { Button, Dropdown, DropdownButton, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -526,13 +526,13 @@ const CompactPersonViewHeader = ({
         onSelect={setPageSize}
       >
         {Object.keys(PAGE_SIZES).map(pageSize => (
-          <DropdownItem
+          <Dropdown.Item
             key={PAGE_SIZES[pageSize].name}
             eventKey={PAGE_SIZES[pageSize]}
             style={{ minWidth: "205px" }}
           >
             {PAGE_SIZES[pageSize].name}
-          </DropdownItem>
+          </Dropdown.Item>
         ))}
       </DropdownButton>
       <DropdownButton
@@ -544,13 +544,13 @@ const CompactPersonViewHeader = ({
         }
       >
         {PRESETS.map(preset => (
-          <DropdownItem
+          <Dropdown.Item
             key={preset.name}
             eventKey={preset.fields}
             style={{ minWidth: "185px" }}
           >
             {preset.label}
-          </DropdownItem>
+          </Dropdown.Item>
         ))}
       </DropdownButton>
       <SimpleMultiCheckboxDropdown
