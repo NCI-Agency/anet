@@ -240,7 +240,7 @@ const ReportSummaryRow = ({ report }) => {
         <Col md={12}>
           {report.engagementDate && (
             // TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x"
-            <Badge className="bg-secondary engagement-date">
+            <Badge bg="secondary" className="engagement-date">
               {moment(report.engagementDate).format(
                 Report.getEngagementDateFormat()
               )}
@@ -271,7 +271,7 @@ const ReportSummaryRow = ({ report }) => {
               <LinkTo modelType="Location" model={report.location} />
               {"  "}
               {/* TODO: convert className="bg-secondary" to bg="secondary when react-bootstrap is updated to v2.x" */}
-              <Badge className="bg-secondary">
+              <Badge bg="secondary">
                 {Location.humanNameOfType(report.location.type)}
               </Badge>
             </span>
