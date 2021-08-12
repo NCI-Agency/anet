@@ -84,8 +84,8 @@ const PeriodicAssessment = ({
                 objectType="note"
                 objectDisplay={"#" + note.uuid}
                 title="Delete assessment"
-                size="xsmall"
                 variant="primary"
+                buttonSize="xsmall"
               >
                 <img src={REMOVE_ICON} height={14} alt="Delete" />
               </ConfirmDestructive>
