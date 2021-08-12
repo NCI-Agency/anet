@@ -221,8 +221,8 @@ const RelatedObjectNotes = ({
                         objectType="note"
                         objectDisplay={"#" + note.uuid}
                         title="Delete note"
-                        size="xsmall"
                         variant="primary"
+                        buttonSize="xsmall"
                       >
                         <img src={REMOVE_ICON} height={14} alt="Delete" />
                       </ConfirmDestructive>

@@ -1225,11 +1225,6 @@ header.searchPagination {
   margin-left: 10px;
 }
 
-.react-confirm-bootstrap-modal .modal-content {
-  width: max-content;
-  white-space: wrap;
-}
-
 @media screen and (max-width: 768px) {
   #main-viewport {
     padding-top: 8px;
@@ -1301,14 +1296,5 @@ header.searchPagination {
 
   fieldset {
     padding: 1em;
-  }
-
-  .react-confirm-bootstrap-modal .modal-footer {
-    flex-direction: column;
-  }
-
-  .react-confirm-bootstrap-modal .modal-footer button {
-    white-space: normal;
-    margin-bottom: 0.5rem;
   }
 }

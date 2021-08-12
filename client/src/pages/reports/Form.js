@@ -1118,7 +1118,7 @@ const ReportForm = ({
                       objectDisplay={values.uuid}
                       variant="warning"
                       buttonLabel={`Delete this ${getReportType(values)}`}
-                      disabled={isSubmitting}
+                      buttonDisabled={isSubmitting}
                     />
                   )}
                   {/* Skip validation on save! */}
