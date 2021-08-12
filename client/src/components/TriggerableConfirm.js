@@ -1,8 +1,7 @@
-import "components/react-confirm-bootstrap.css"
 import PropTypes from "prop-types"
-import React from "react"
-import { Button } from "react-bootstrap"
-import Confirm from "react-confirm-bootstrap"
+import React, { useState } from "react"
+import { Button, Modal } from "react-bootstrap"
+import "./TriggerableConfirm.css"
 
 const TriggerableConfirm = ({
   onConfirm,
@@ -12,23 +11,53 @@ const TriggerableConfirm = ({
   cancelText,
   variant,
   buttonLabel,
+  buttonSize,
+  buttonClassName,
+  buttonDisabled,
+  buttonId,
   buttonRef,
-  ...otherProps
-}) => (
-  <Confirm
-    onConfirm={onConfirm}
-    title={title}
-    body={body}
-    confirmText={confirmText}
-    cancelText={cancelText}
-    dialogClassName="react-confirm-bootstrap-modal"
-    confirmBSStyle="primary"
-  >
-    <Button variant={variant} {...otherProps} ref={buttonRef}>
-      {buttonLabel}
-    </Button>
-  </Confirm>
-)
+  children
+}) => {
+  const [show, setShow] = useState(false)
+  const handleClose = () => setShow(false)
+  const handleShow = () => setShow(true)
+
+  return (
+    <>
+      <Button
+        variant={variant}
+        onClick={handleShow}
+        size={buttonSize}
+        className={buttonClassName}
+        disabled={buttonDisabled}
+        id={buttonId}
+        ref={buttonRef}
+      >
+        {buttonLabel}
+        {children}
+      </Button>
+
+      <Modal
+        show={show}
+        onHide={handleClose}
+        className="triggerable-confirm-bootstrap-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{body}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            {cancelText}
+          </Button>
+          <Button variant="primary" onClick={onConfirm}>
+            {confirmText}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  )
+}
 TriggerableConfirm.propTypes = {
   onConfirm: PropTypes.func,
   title: PropTypes.string,
@@ -37,7 +66,12 @@ TriggerableConfirm.propTypes = {
   cancelText: PropTypes.string,
   variant: PropTypes.string,
   buttonLabel: PropTypes.string,
-  buttonRef: PropTypes.object
+  buttonSize: PropTypes.string,
+  buttonClassName: PropTypes.string,
+  buttonDisabled: PropTypes.bool,
+  buttonId: PropTypes.string,
+  buttonRef: PropTypes.object,
+  children: PropTypes.node
 }
 
 export default TriggerableConfirm
