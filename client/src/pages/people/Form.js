@@ -33,9 +33,9 @@ import {
   Alert,
   Button,
   Col,
+  FormCheck,
   FormGroup,
-  FormText,
-  ToggleButton
+  FormText
 } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
@@ -273,87 +273,113 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       <OptionListModal
                         title={modalTitle}
                         showModal={showWrongPersonModal}
-                        onCancel={optionValue =>
-                          hideWrongPersonModal(optionValue)
-                        }
+                        onCancel={() => hideWrongPersonModal(null)}
                         onSuccess={optionValue =>
                           hideWrongPersonModal(optionValue)
                         }
                       >
                         {(isSelf && (
                           <div>
-                            <ToggleButton
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="needNewAccount"
-                            >
-                              <em>{fullName}</em> has left and is replaced by
-                              me. I need to set up a new account.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  <em>{fullName}</em> has left and is replaced
+                                  by me. I need to set up a new account.
+                                </>
+                              }
+                              id="wrongPerson-needNewAccount"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="haveAccount"
-                            >
-                              <em>{fullName}</em> has left and is replaced by
-                              me. I already have an account.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  <em>{fullName}</em> has left and is replaced
+                                  by me. I already have an account.
+                                </>
+                              }
+                              id="wrongPerson-haveAccount"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="transferAccount"
-                            >
-                              <em>{fullName}</em> is still active, but this
-                              should be my account.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  <em>{fullName}</em> is still active, but this
+                                  should be my account.
+                                </>
+                              }
+                              id="wrongPerson-transferAccount"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="misspelledName"
-                            >
-                              I am <em>{fullName}</em>, but my name is
-                              misspelled.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  I am <em>{fullName}</em>, but my name is
+                                  misspelled.
+                                </>
+                              }
+                              id="wrongPerson-misspelledName"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="otherError"
-                            >
-                              Something else is wrong.
-                            </ToggleButton>
+                              label="Something else is wrong."
+                              id="wrongPerson-otherError"
+                            />
                           </div>
                         )) || (
                           <div>
-                            <ToggleButton
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="leftVacant"
-                            >
-                              <em>{fullName}</em> has left and the position is
-                              vacant.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  <em>{fullName}</em> has left and the position
+                                  is vacant.
+                                </>
+                              }
+                              id="wrongPerson-leftVacant"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="hasReplacement"
-                            >
-                              <em>{fullName}</em> has left and has a
-                              replacement.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  <em>{fullName}</em> has left and has a
+                                  replacement.
+                                </>
+                              }
+                              id="wrongPerson-hasReplacement"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="misspelledName"
-                            >
-                              The name of <em>{fullName}</em> is misspelled.
-                            </ToggleButton>
-                            <ToggleButton
+                              label={
+                                <>
+                                  The name of <em>{fullName}</em> is misspelled.
+                                </>
+                              }
+                              id="wrongPerson-misspelledName"
+                            />
+                            <FormCheck
                               type="radio"
                               name="wrongPerson"
                               value="otherError"
-                            >
-                              Something else is wrong.
-                            </ToggleButton>
+                              label="Something else is wrong."
+                              id="wrongPerson-otherError"
+                            />
                           </div>
                         )}
                       </OptionListModal>
@@ -707,7 +733,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
         case "leftVacant":
         case "hasReplacement":
           // reset account?
-          confirmHasReplacementButton.current.props.onClick()
+          confirmHasReplacementButton.current.click()
           break
         default:
           // TODO: integrate action to email admin
