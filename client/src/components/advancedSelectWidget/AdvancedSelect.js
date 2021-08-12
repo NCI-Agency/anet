@@ -31,7 +31,7 @@ AdvancedSelectTarget.propTypes = {
 
 const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
-    <Col md={3} xsHidden smHidden>
+    <Col md={3} className="d-none d-md-block">
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.entries(items).map(([filterType, filter]) => (
           <li
@@ -305,10 +305,11 @@ const AdvancedSelect = ({
                       handleOnClick={changeFilterType}
                     />
 
-                    <FilterAsDropdown
+                    {/* FIXME: Seems like a redundant field */}
+                    {/* <FilterAsDropdown
                       items={filterDefs}
                       handleOnChange={handleOnChangeSelect}
-                    />
+                    /> */}
 
                     <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
                       <OverlayTable
@@ -442,9 +443,9 @@ const AdvancedSelect = ({
     setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
-  function handleOnChangeSelect(event) {
-    changeFilterType(event.target.value)
-  }
+  // function handleOnChangeSelect(event) {
+  //   changeFilterType(event.target.value)
+  // }
 
   function changeFilterType(newFilterType) {
     // When changing the filter type, only fetch the results if they were not fetched before

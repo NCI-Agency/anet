@@ -11,6 +11,7 @@ import {
   FormControl,
   FormGroup,
   InputGroup,
+  Row,
   ToggleButton,
   ToggleButtonGroup
 } from "react-bootstrap"
@@ -49,10 +50,7 @@ const FieldNoLabel = ({ field, form, widgetElem, children }) => {
       {widgetElem}
       {getHelpBlock(field, form)}
       {children}
-      <FormControl.Feedback
-        type={validationState ?? "invalid"}
-      >
-      </FormControl.Feedback>
+      <FormControl.Feedback></FormControl.Feedback>
     </FormGroup>
   )
 }
@@ -83,11 +81,11 @@ const Field = ({
       !addon ? (
         widgetElem
       ) : (
-        <InputGroup>
+        <>
           {widgetElem}
           {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
           <FieldAddon id={id} addon={addon} />
-        </InputGroup>
+        </>
       ),
     [addon, extraAddon, id, widgetElem]
   )
@@ -129,7 +127,7 @@ const Field = ({
           {children}
         </>
       ) : (
-        <>
+        <Row style={{ marginBottom: "1rem" }}>
           {label !== null && (
             <Col sm={labelColumnWidth} as={Form.Label}>
               {label}
@@ -142,13 +140,12 @@ const Field = ({
               {children}
             </div>
           </Col>
-        </>
+          {extraColElem && <Col sm={3} {...extraColElem.props} />}
+          <Col>
+            <FormControl.Feedback></FormControl.Feedback>
+          </Col>
+        </Row>
       )}
-      {extraColElem && <Col sm={3} {...extraColElem.props} />}
-      <FormControl.Feedback
-        type={validationState && "invalid"}
-      >
-      </FormControl.Feedback>
     </FormGroup>
   )
 }
@@ -175,6 +172,7 @@ export const InputField = ({
   field, // { name, value, onChange, onBlur }
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
+  asA,
   inputType,
   children,
   extraColElem,
@@ -190,9 +188,10 @@ export const InputField = ({
         {...Object.without(field, "value")}
         value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
+        as={asA ?? "input"}
       />
     ),
-    [field, otherProps, inputType]
+    [field, otherProps, inputType, asA]
   )
   return (
     <Field
@@ -212,6 +211,7 @@ InputField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object,
   label: PropTypes.string,
+  asA: PropTypes.string,
   inputType: PropTypes.string,
   children: PropTypes.any,
   extraColElem: PropTypes.object,
@@ -349,7 +349,7 @@ export const customEnumButtons = list => {
   for (const key in list) {
     if (Object.prototype.hasOwnProperty.call(list, key)) {
       buttons.push({
-        id: key,
+        id: list[key].label,
         value: key,
         label: list[key].label,
         color: list[key].color
@@ -394,7 +394,13 @@ const ButtonToggleGroupField = ({
             style = { ...style, borderColor: color, borderWidth: "2px" }
           }
           return (
-            <ToggleButton {...props} key={value} value={value} style={style}>
+            <ToggleButton
+              {...props}
+              key={value}
+              value={value}
+              style={style}
+              variant="outline-secondary"
+            >
               {label}
             </ToggleButton>
           )
