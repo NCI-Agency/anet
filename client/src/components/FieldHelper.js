@@ -1,3 +1,4 @@
+import classNames from "classnames"
 import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
 import _cloneDeep from "lodash/cloneDeep"
@@ -32,28 +33,28 @@ const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
   const fieldTouched = _get(touched, field.name)
   const fieldError = _get(errors, field.name)
-  return (fieldTouched && (fieldError ? true : null)) || null
+  return fieldTouched && fieldError
 }
 
 const getHelpBlock = (field, form) => {
   const { touched, errors } = form
   const fieldTouched = _get(touched, field.name)
   const fieldError = _get(errors, field.name)
-  return fieldTouched && fieldError && <Form.Text>{fieldError}</Form.Text>
+  return (
+    fieldTouched &&
+    fieldError && (
+      <FormControl.Feedback type="invalid">{fieldError}</FormControl.Feedback>
+    )
+  )
 }
 
 const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
-  const validationState = getFormGroupValidationState(field, form)
   return (
     <FormGroup id={`fg-${id}`} controlId={id}>
       {widgetElem}
       {getHelpBlock(field, form)}
       {children}
-      <FormControl.Feedback
-        type={validationState && "invalid"}
-      >
-      </FormControl.Feedback>
     </FormGroup>
   )
 }
@@ -93,7 +94,6 @@ const Field = ({
     [addon, extraAddon, id, widgetElem]
   )
 
-  const validationState = getFormGroupValidationState(field, form)
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
@@ -145,12 +145,6 @@ const Field = ({
             </div>
           </Col>
           {extraColElem && <Col sm={3} {...extraColElem.props} />}
-          <Col>
-            <FormControl.Feedback
-              type={validationState && "invalid"}
-            >
-            </FormControl.Feedback>
-          </Col>
         </Row>
       )}
     </FormGroup>
@@ -188,6 +182,7 @@ export const InputField = ({
   extraAddon,
   ...otherProps
 }) => {
+  const validationState = getFormGroupValidationState(field, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -196,9 +191,10 @@ export const InputField = ({
         value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
         as={asA ?? "input"}
+        isInvalid={validationState}
       />
     ),
-    [field, otherProps, inputType, asA]
+    [field, otherProps, inputType, asA, validationState]
   )
   return (
     <Field
@@ -233,15 +229,17 @@ export const InputFieldNoLabel = ({
   children,
   ...otherProps
 }) => {
+  const validationState = getFormGroupValidationState(field, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
         {...Object.without(field, "value")}
         value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
+        isInvalid={validationState}
       />
     ),
-    [field, otherProps]
+    [field, otherProps, validationState]
   )
   return (
     <FieldNoLabel
@@ -321,9 +319,14 @@ export const SpecialField = ({
   isCompact,
   ...otherProps
 }) => {
+  const validationState = getFormGroupValidationState(field, form)
+  let { className } = widget.props
+  if (validationState) {
+    className = classNames(className, "is-invalid")
+  }
   const widgetElem = useMemo(
-    () => React.cloneElement(widget, { ...field, ...otherProps }),
-    [field, otherProps, widget]
+    () => React.cloneElement(widget, { className, ...field, ...otherProps }),
+    [className, field, otherProps, widget]
   )
   return (
     <Field

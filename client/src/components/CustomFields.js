@@ -945,7 +945,7 @@ const CustomField = ({
       {...fieldProps}
       {...extraProps}
     >
-      {helpText && <Form.Text>{helpText}</Form.Text>}
+      {helpText && <Form.Text as="div">{helpText}</Form.Text>}
     </FieldComponent>
   ) : (
     <FastField
