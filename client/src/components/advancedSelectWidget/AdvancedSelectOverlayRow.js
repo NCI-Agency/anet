@@ -17,7 +17,7 @@ export const LocationOverlayRow = item => (
     <td>
       <LinkTo modelType="Location" model={item} isLink={false} />
       <span style={{ paddingLeft: "1rem" }}>
-        <Badge>{Location.humanNameOfType(item.type)}</Badge>
+        <Badge bg="secondary">{Location.humanNameOfType(item.type)}</Badge>
       </span>
     </td>
   </React.Fragment>
