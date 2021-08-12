@@ -168,7 +168,10 @@ class RichTextEditor extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return !_isEqual(this.state.content, nextState.content)
+    return (
+      !_isEqual(this.state.content, nextState.content) ||
+      !_isEqual(this.props.className, nextProps.className)
+    )
   }
 
   render() {
