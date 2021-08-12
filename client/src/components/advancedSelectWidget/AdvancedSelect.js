@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
+import classNames from "classnames"
 import UltimatePagination from "components/UltimatePagination"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
@@ -80,6 +81,7 @@ const FETCH_TYPE = {
 
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
+  className: PropTypes.string,
   placeholder: PropTypes.string, // input field placeholder
   pageSize: PropTypes.number,
   disabled: PropTypes.bool,
@@ -114,6 +116,7 @@ export const propTypes = {
 
 const AdvancedSelect = ({
   fieldName,
+  className,
   placeholder,
   pageSize,
   disabled,
@@ -293,7 +296,10 @@ const AdvancedSelect = ({
     <>
       {!(disabled && renderSelectedWithDelete) && (
         <>
-          <div id={`${fieldName}-popover`} className="advanced-select-popover">
+          <div
+            id={`${fieldName}-popover`}
+            className={classNames(className, "advanced-select-popover")}
+          >
             <InputGroup>
               <Popover2
                 popoverClassName="bp3-popover2-content-sizing"
