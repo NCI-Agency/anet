@@ -10,7 +10,7 @@ import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Badge, Table, ToggleButton } from "react-bootstrap"
+import { Badge, Form, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
@@ -364,16 +364,15 @@ function sortReportPeople(reportPeople) {
 }
 
 const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
-  <ToggleButton
+  <Form.Check
     type="radio"
+    label={<Badge bg="primary">Primary</Badge>}
     name={`primaryAttendee${person.role}`}
     className={`primary${!person.primary ? " inActive" : ""}`}
     checked={person.primary}
     disabled={disabled || !person.attendee}
     onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Badge variant="primary">Primary</Badge>
-  </ToggleButton>
+  />
 )
 
 PrimaryAttendeeRadioButton.propTypes = {
@@ -387,8 +386,9 @@ const ReportAuthorCheckbox = ({
   isCurrentEditor,
   handleOnChange
 }) => (
-  <ToggleButton
+  <Form.Check
     type="checkbox"
+    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />}
     name={`authorAttendee${person.role}`}
     className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
       !person.author ? " inActive" : ""
@@ -397,9 +397,7 @@ const ReportAuthorCheckbox = ({
     disabled={disabled}
     readOnly={isCurrentEditor}
     onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
-  </ToggleButton>
+  />
 )
 ReportAuthorCheckbox.propTypes = {
   person: PropTypes.object,
@@ -408,16 +406,15 @@ ReportAuthorCheckbox.propTypes = {
   handleOnChange: PropTypes.func
 }
 const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
-  <ToggleButton
+  <Form.Check
     type="checkbox"
+    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />}
     name={`authorAttendee${person.role}`}
     className={`primary${!person.attendee ? " inActive" : ""}`}
     checked={!!person.attendee}
     disabled={disabled}
     onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
-  </ToggleButton>
+  />
 )
 ReportAttendeeCheckbox.propTypes = {
   person: PropTypes.object,
