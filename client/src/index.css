@@ -134,6 +134,10 @@ fieldset.danger {
   width: 100%;
 }
 
+.form-label {
+  font-weight: bold;
+}
+
 .form-control {
   height: 38px;
   font-size: 1.1em;
@@ -186,6 +190,10 @@ fieldset.danger {
 
 .btn-group .radio-inline input,
 .btn-group-vertical .radio-inline input {
+  display: none;
+}
+
+.btn.btn-outline-secondary input {
   display: none;
 }
 
