@@ -13,7 +13,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useState } from "react"
 import { Button, Col, Grid, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -72,21 +72,12 @@ function EditHistory({
   midColTitle,
   mainTitle
 }) {
-  const getInitialState = useCallback(() => {
-    return giveEachItemUuid(initialHistory || history1 || [])
-  }, [initialHistory, history1])
   const [finalHistory, setFinalHistory] = useState(getInitialState)
 
   const singleSelectParameters = getSingleSelectParameters(
     historyEntityType,
     parentEntityType
   )
-  // Set the state to initial value first if there were any changes
-  useEffect(() => {
-    if (showModal) {
-      setFinalHistory(getInitialState())
-    }
-  }, [showModal, setFinalHistory, getInitialState])
 
   return (
     <div
@@ -96,6 +87,7 @@ function EditHistory({
       {!externalButton && (
         <Button
           onClick={() => {
+            setFinalHistory(getInitialState())
             setShowModal(true)
           }}
         >
@@ -155,7 +147,7 @@ function EditHistory({
                               bsStyle="primary"
                               onClick={() => addItem(item)}
                             >
-                              Insert Top
+                              Add
                             </Button>
                           )}
                         />
@@ -322,7 +314,7 @@ function EditHistory({
                               bsStyle="primary"
                               onClick={() => addItem(item)}
                             >
-                              Insert Top
+                              Add
                             </Button>
                           )}
                         />
@@ -340,7 +332,10 @@ function EditHistory({
 
               function addItem(item) {
                 setValues({
-                  history: [{ ...item, uuid: uuidv4() }, ...values.history]
+                  history: sortHistory(
+                    [{ ...item, uuid: uuidv4() }, ...values.history],
+                    hasCurrent
+                  )
                 })
               }
             }}
@@ -350,6 +345,10 @@ function EditHistory({
     </div>
   )
 
+  function getInitialState() {
+    return giveEachItemUuid(initialHistory || history1 || [])
+  }
+
   function onHide() {
     setShowModal(false)
     // Set the state to initial value
@@ -357,13 +356,13 @@ function EditHistory({
   }
 
   function onSave(values) {
+    setShowModal(false)
     setFinalHistory([...values.history])
     // Shouldn't have uuid, that was for item listing
     const savedHistory = values.history.map(item =>
       Object.without(item, "uuid")
     )
     setHistory(savedHistory)
-    setShowModal(false)
   }
 }
 
@@ -374,7 +373,7 @@ EditHistory.propTypes = {
   setHistory: PropTypes.func.isRequired,
   historyEntityType: PropTypes.string,
   parentEntityType: PropTypes.string.isRequired,
-  historyComp: PropTypes.func.isRequired,
+  historyComp: PropTypes.func,
   externalButton: PropTypes.bool,
   showModal: PropTypes.bool.isRequired,
   setShowModal: PropTypes.func.isRequired,

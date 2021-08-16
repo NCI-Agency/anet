@@ -333,7 +333,6 @@ const PositionShow = ({ pageDispatchers }) => {
                       mainTitle="Edit person history"
                       history1={position.previousPeople}
                       initialHistory={position.previousPeople}
-                      historyComp={PreviousPeople}
                       currentlyOccupyingEntity={position.person}
                       midColTitle="New History"
                       parentEntityType={position.type}
@@ -347,12 +346,6 @@ const PositionShow = ({ pageDispatchers }) => {
                 }
               >
                 <PreviousPeople history={position.previousPeople} />
-                {/* <EditHistoryModal
-                  showModal={showEditHistoryModal}
-                  onCancel={() => setShowEditHistoryModal(false)}
-                  position={position}
-                  title="Edit position history"
-                /> */}
               </Fieldset>
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
@@ -414,9 +407,7 @@ const PositionShow = ({ pageDispatchers }) => {
     const newPosition = position.filterClientSideFields()
     newPosition.previousPeople = history
     API.mutation(GQL_UPDATE_PREVIOUS_PEOPLE, { position: newPosition })
-      .then(data =>
-        history.push(Position.pathFor(position), { success: "History edited" })
-      )
+      .then(data => refetch())
       .catch(error => {
         setStateError(error)
         jumpToTop()

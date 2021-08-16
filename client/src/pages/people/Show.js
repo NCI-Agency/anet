@@ -51,7 +51,6 @@ import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
-import PreviousPositions from "./PreviousPositions"
 
 const GQL_GET_PERSON = gql`
   query($uuid: String!) {
@@ -332,7 +331,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   mainTitle="Edit position history"
                   history1={person.previousPositions}
                   initialHistory={person.previousPositions}
-                  historyComp={PreviousPositions}
                   currentlyOccupyingEntity={person.position}
                   externalButton
                   historyEntityType="position"
@@ -682,9 +680,9 @@ const PersonShow = ({ pageDispatchers }) => {
     const newPerson = person.filterClientSideFields()
     newPerson.previousPositions = history
     API.mutation(GQL_UPDATE_PREVIOUS_POSITIONS, { person: newPerson })
-      .then(data =>
-        history.push(Person.pathFor(person), { success: "History edited" })
-      )
+      .then(data => {
+        refetch()
+      })
       .catch(error => {
         setStateError(error)
         jumpToTop()
