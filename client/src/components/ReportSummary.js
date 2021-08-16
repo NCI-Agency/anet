@@ -239,7 +239,7 @@ const ReportSummaryRow = ({ report }) => {
       <Row>
         <Col md={12}>
           {report.engagementDate && (
-            <Badge variant="default" className="engagement-date">
+            <Badge bg="secondary" className="engagement-date">
               {moment(report.engagementDate).format(
                 Report.getEngagementDateFormat()
               )}
@@ -269,7 +269,9 @@ const ReportSummaryRow = ({ report }) => {
               <strong>Location: </strong>
               <LinkTo modelType="Location" model={report.location} />
               {"  "}
-              <Badge>{Location.humanNameOfType(report.location.type)}</Badge>
+              <Badge bg="secondary">
+                {Location.humanNameOfType(report.location.type)}
+              </Badge>
             </span>
           </Col>
         </Row>
@@ -335,9 +337,10 @@ const ReportSummaryRow = ({ report }) => {
             modelType="Report"
             model={report}
             button
+            variant="secondary"
             className="read-report-button"
           >
-            Read report
+            Read Report
           </LinkTo>
         </Col>
       </Row>

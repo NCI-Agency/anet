@@ -25,6 +25,7 @@ const CalendarIcon = inputRef => (
 
 const CustomDateInput = ({
   id,
+  className,
   disabled,
   showIcon,
   placement,
@@ -58,6 +59,7 @@ const CustomDateInput = ({
         onBlur,
         inputRef: ref => (inputRef.current = ref)
       }}
+      className={className}
       rightElement={rightElement}
       value={value && moment(value).toDate()}
       onChange={onChange}
@@ -83,6 +85,7 @@ const CustomDateInput = ({
 }
 CustomDateInput.propTypes = {
   id: PropTypes.string,
+  className: PropTypes.string,
   disabled: PropTypes.bool,
   showIcon: PropTypes.bool,
   placement: PropTypes.string,

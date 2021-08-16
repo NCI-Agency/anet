@@ -47,7 +47,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Collapse, ToggleButton } from "react-bootstrap"
+import { Button, Collapse, FormCheck } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -493,7 +493,7 @@ const ReportForm = ({
                   name="intent"
                   label={Settings.fields.report.intent}
                   component={FieldHelper.InputField}
-                  as="textarea"
+                  asA="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
                   onChange={event => {
@@ -611,8 +611,9 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
-                      <ToggleButton
+                      <FormCheck
                         type="checkbox"
+                        label="This engagement was cancelled"
                         className="cancelled-checkbox"
                         checked={values.cancelled}
                         onClick={event =>
@@ -625,9 +626,7 @@ const ReportForm = ({
                             true
                           )
                         }
-                      >
-                        This engagement was cancelled
-                      </ToggleButton>
+                      />
                     }
                   />
                 )}
@@ -862,6 +861,7 @@ const ReportForm = ({
                     <FastField
                       name="keyOutcomes"
                       label={Settings.fields.report.keyOutcomes}
+                      asA="textarea"
                       component={FieldHelper.InputField}
                       onChange={event => {
                         setFieldTouched("keyOutcomes", true, false)
@@ -893,6 +893,7 @@ const ReportForm = ({
                   <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps.label}
+                    asA="textarea"
                     component={FieldHelper.InputField}
                     as="textarea"
                     onChange={event => {
@@ -946,14 +947,19 @@ const ReportForm = ({
                   }
                 />
 
-                <Button
-                  className="center-block toggle-section-button"
-                  style={{ marginBottom: "1rem" }}
-                  onClick={toggleReportText}
-                  id="toggleSensitiveInfo"
-                >
-                  {showSensitiveInfo ? "Hide" : "Add"} sensitive information
-                </Button>
+                <div style={{ textAlign: "center" }}>
+                  <Button
+                    variant="outline-secondary"
+                    className="center-block toggle-section-button"
+                    style={{
+                      marginBottom: "1rem"
+                    }}
+                    onClick={toggleReportText}
+                    id="toggleSensitiveInfo"
+                  >
+                    {showSensitiveInfo ? "Hide" : "Add"} sensitive information
+                  </Button>
+                </div>
 
                 <Collapse in={showSensitiveInfo}>
                   {(values.reportSensitiveInformation || !edit) && (

@@ -830,12 +830,6 @@ export const CustomFieldsContainer = props => {
 
   return (
     <>
-      <FastField
-        type="text"
-        value=""
-        name={invisibleFieldsFieldName}
-        className="hidden"
-      />
       <CustomFields invisibleFields={invisibleFields} {...props} />
     </>
   )
@@ -944,7 +938,7 @@ const CustomField = ({
       {...fieldProps}
       {...extraProps}
     >
-      {helpText && <Form.Text>{helpText}</Form.Text>}
+      {helpText && <Form.Text as="div">{helpText}</Form.Text>}
     </FieldComponent>
   ) : (
     <FastField
