@@ -229,9 +229,8 @@ const MergePeople = ({ pageDispatchers }) => {
                 <Row>
                   <Col md={12}>
                     <Button
+                      style={{ width: "98%", margin: "16px 1%" }}
                       variant="primary"
-                      size="large"
-                      block
                       onClick={submitForm}
                       disabled={isSubmitting}
                     >
