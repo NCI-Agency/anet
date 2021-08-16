@@ -64,7 +64,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
     return () => unlistenHistory()
   }, [history])
 
-  const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
+  const sidebarClass = floatingMenu ? "nav-overlay" : "d-none d-sm-block"
 
   return (
     <ResponsiveLayoutContext.Provider
