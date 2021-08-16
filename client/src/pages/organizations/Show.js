@@ -30,10 +30,10 @@ import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import {
   Button,
+  FormCheck,
   ListGroup,
   ListGroupItem,
-  Nav,
-  ToggleButton
+  Nav
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
@@ -460,16 +460,15 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           ? "Show all reports"
                           : "Show pending approval"}
                       </Button>
-                      <ToggleButton
+                      <FormCheck
                         type="checkbox"
+                        label="include reports from sub-orgs"
                         variant="secondary"
                         checked={includeChildrenOrgs}
                         onChange={() =>
                           setIncludeChildrenOrgs(!includeChildrenOrgs)
                         }
-                      >
-                        include reports from sub-orgs
-                      </ToggleButton>
+                      />
                     </>
                   }
                 />
