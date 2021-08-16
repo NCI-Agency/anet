@@ -55,7 +55,7 @@ FilterAsNav.propTypes = {
 
 const FilterAsDropdown = ({ items, handleOnChange }) =>
   hasMultipleItems(items) && (
-    <Col style={{ minHeight: "80px" }} className="d-md-none">
+    <Col className="d-xs-block d-md-none">
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
