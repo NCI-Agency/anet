@@ -3,7 +3,7 @@ import LinkTo from "components/LinkTo"
 import { Location, Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { Table, ToggleButton } from "react-bootstrap"
+import { FormCheck, Table } from "react-bootstrap"
 
 const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
   const approvalSteps = relatedObject.approvalSteps
@@ -18,13 +18,12 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
         {planningApprovalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
             {restrictedApprovalLabel && (
-              <ToggleButton
+              <FormCheck
                 type="checkbox"
+                label={restrictedApprovalLabel}
                 checked={step.restrictedApproval}
                 readOnly
-              >
-                {restrictedApprovalLabel}
-              </ToggleButton>
+              />
             )}
             <Table>
               <thead>
@@ -67,13 +66,12 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
         {approvalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
             {restrictedApprovalLabel && (
-              <ToggleButton
+              <FormCheck
                 type="checkbox"
+                label={restrictedApprovalLabel}
                 checked={step.restrictedApproval}
                 readOnly
-              >
-                {restrictedApprovalLabel}
-              </ToggleButton>
+              />
             )}
             <Table>
               <thead>

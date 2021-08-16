@@ -17,14 +17,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
 import React, { useState } from "react"
-import {
-  Alert,
-  Button,
-  Col,
-  Container,
-  Row,
-  ToggleButton
-} from "react-bootstrap"
+import { Alert, Button, Col, Container, FormCheck, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
@@ -214,12 +207,11 @@ const MergePeople = ({ pageDispatchers }) => {
                         component={FieldHelper.SpecialField}
                         label={null}
                         widget={
-                          <ToggleButton
+                          <FormCheck
                             type="checkbox"
+                            label={`Set position on winner to ${loser.position.name}`}
                             checked={values.copyPosition}
-                          >
-                            Set position on winner to {loser.position.name}
-                          </ToggleButton>
+                          />
                         }
                       />
                     )}
