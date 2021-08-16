@@ -11,7 +11,7 @@ import { FastField, FieldArray } from "formik"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Modal, Table, ToggleButton } from "react-bootstrap"
+import { Button, FormCheck, Modal, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_GET_APPROVAL_STEP_IN_USE = gql`
@@ -185,12 +185,11 @@ const ApprovalsDefinition = ({
             component={FieldHelper.SpecialField}
             label=""
             widget={
-              <ToggleButton
+              <FormCheck
                 type="checkbox"
+                label={restrictedApprovalLabel}
                 checked={values?.[fieldName]?.[index].restrictedApproval}
-              >
-                {restrictedApprovalLabel}
-              </ToggleButton>
+              />
             }
           />
         )}
