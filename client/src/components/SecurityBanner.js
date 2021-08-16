@@ -15,7 +15,8 @@ const CONNECTION_INFO_COLORS = {
 
 const css = {
   zIndex: 101,
-  position: "relative"
+  display: "flex",
+  alignItems: "center"
 }
 
 const aCss = {
@@ -29,17 +30,29 @@ const SecurityBanner = () => {
 
   return (
     <>
-      <div className="banner" style={{ ...css, background }}>
+      <div
+        className="banner justify-content-center justify-content-md-between"
+        style={{ ...css, background }}
+      >
         <>
-          {appSettings[SETTING_KEY_TEXT]} || {currentUser.name}{" "}
-          <LinkTo
-            modelType="Person"
-            model={currentUser}
-            style={aCss}
-            showIcon={false}
+          <div
+            className="d-none d-md-block"
+            style={{ flexBasis: "240px" }}
           >
-            (edit)
-          </LinkTo>
+          </div>
+          <div
+            style={{ display: "flex", alignItems: "center", margin: "0 1rem" }}
+          >
+            {appSettings[SETTING_KEY_TEXT]} || {currentUser.name}{" "}
+            <LinkTo
+              modelType="Person"
+              model={currentUser}
+              style={aCss}
+              showIcon={false}
+            >
+              (edit)
+            </LinkTo>
+          </div>
           <VersionBox>Version : {Version}</VersionBox>
         </>
       </div>
@@ -49,10 +62,9 @@ const SecurityBanner = () => {
 }
 
 const VersionBox = styled.h6`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  margin: 0;
+  margin: 0 1rem 0 0;
+  width: 240px;
+  text-align: end;
   @media (max-width: 768px) {
     display: none;
   }
