@@ -11,6 +11,7 @@ const LinkTo = ({
   children,
   edit,
   button,
+  variant,
   showIcon,
   showAvatar,
   isLink,
@@ -25,7 +26,7 @@ const LinkTo = ({
     componentProps.className = [
       className,
       "btn",
-      `btn-${button === true ? "default" : button}`
+      `btn-${button === true ? variant ?? "primary" : button}`
     ].join(" ")
   } else {
     componentProps.className = className
@@ -107,6 +108,7 @@ LinkTo.propTypes = {
   // Configures this link to look like a button. Set it to true to make it a button,
   // or pass a string to set a button type
   button: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+  variant: PropTypes.string,
 
   target: PropTypes.string,
   whenUnspecified: PropTypes.string,

@@ -55,7 +55,7 @@ FilterAsNav.propTypes = {
 
 const FilterAsDropdown = ({ items, handleOnChange }) =>
   hasMultipleItems(items) && (
-    <Col style={{ minHeight: "80px" }} mdHidden lgHidden>
+    <Col style={{ minHeight: "80px" }} className="d-md-none">
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -311,11 +311,10 @@ const AdvancedSelect = ({
                       handleOnClick={changeFilterType}
                     />
 
-                    {/* FIXME: Seems like a redundant field */}
-                    {/* <FilterAsDropdown
+                    <FilterAsDropdown
                       items={filterDefs}
                       handleOnChange={handleOnChangeSelect}
-                    /> */}
+                    />
 
                     <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
                       <OverlayTable
@@ -394,7 +393,7 @@ const AdvancedSelect = ({
                         textSizeAdjust: "10px"
                       }}
                     >
-                      <img src={addon} style={{ height: "25px" }} alt="addon" />
+                      <img src={addon} style={{ height: "25px" }} alt="" />
                     </InputGroup.Text>
                   )}
                   {extraAddon && (
@@ -449,9 +448,9 @@ const AdvancedSelect = ({
     setFetchType(FETCH_TYPE.DEBOUNCED)
   }
 
-  // function handleOnChangeSelect(event) {
-  //   changeFilterType(event.target.value)
-  // }
+  function handleOnChangeSelect(event) {
+    changeFilterType(event.target.value)
+  }
 
   function changeFilterType(newFilterType) {
     // When changing the filter type, only fetch the results if they were not fetched before
