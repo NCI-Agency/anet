@@ -33,16 +33,16 @@ const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
   const fieldTouched = _get(touched, field.name)
   const fieldError = _get(errors, field.name)
-  return fieldTouched && fieldError
+  return { validationState: fieldTouched && fieldError, fieldError }
 }
 
 const getHelpBlock = (field, form) => {
-  const { touched, errors } = form
-  const fieldTouched = _get(touched, field.name)
-  const fieldError = _get(errors, field.name)
+  const { validationState, fieldError } = getFormGroupValidationState(
+    field,
+    form
+  )
   return (
-    fieldTouched &&
-    fieldError && (
+    validationState && (
       <FormControl.Feedback type="invalid">{fieldError}</FormControl.Feedback>
     )
   )
@@ -182,7 +182,7 @@ export const InputField = ({
   extraAddon,
   ...otherProps
 }) => {
-  const validationState = getFormGroupValidationState(field, form)
+  const { validationState } = getFormGroupValidationState(field, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -229,7 +229,7 @@ export const InputFieldNoLabel = ({
   children,
   ...otherProps
 }) => {
-  const validationState = getFormGroupValidationState(field, form)
+  const { validationState } = getFormGroupValidationState(field, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -319,7 +319,7 @@ export const SpecialField = ({
   isCompact,
   ...otherProps
 }) => {
-  const validationState = getFormGroupValidationState(field, form)
+  const { validationState } = getFormGroupValidationState(field, form)
   let { className } = widget.props
   if (validationState) {
     className = classNames(className, "is-invalid")
