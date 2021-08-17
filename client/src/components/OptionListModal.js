@@ -34,7 +34,11 @@ const OptionListModal = ({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button className="pull-left" onClick={onCancel}>
+        <Button
+          className="float-start"
+          variant="outline-secondary"
+          onClick={onCancel}
+        >
           Cancel
         </Button>
         <Button className="save-button" onClick={save} variant="primary">
