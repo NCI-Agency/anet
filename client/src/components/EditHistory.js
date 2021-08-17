@@ -23,6 +23,7 @@ import "./EditHistory.css"
 
 const PERSON_SINGLE_SELECT_PARAMETERS = {
   fieldName: "person",
+  placeholder: "Insert another person in this position's history",
   overlayColumns: ["Name"],
   overlayRenderRow: PersonSimpleOverlayRow,
   onChange: (value, cb) => {
@@ -41,6 +42,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
 
 const POSITION_SINGLE_SELECT_PARAMETERS = {
   fieldName: "position",
+  placeholder: "Insert another position in this person's history",
   overlayColumns: ["Position", "Organization", "Current Occupant"],
   overlayRenderRow: PositionOverlayRow,
   onChange: (value, cb) => {
@@ -171,7 +173,7 @@ function EditHistory({
                           <AdvancedSingleSelect
                             fieldName={singleSelectParameters.fieldName}
                             fieldLabel="Select a person"
-                            placeholder="Insert another person to history"
+                            placeholder={singleSelectParameters.placeholder}
                             overlayColumns={
                               singleSelectParameters.overlayColumns
                             }
