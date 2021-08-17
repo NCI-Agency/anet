@@ -15,7 +15,14 @@ import _cloneDeep from "lodash/cloneDeep"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Col, Dropdown, FormGroup, Row } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  Dropdown,
+  FormGroup,
+  FormLabel,
+  Row
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
@@ -333,10 +340,10 @@ const SearchFilter = ({
   const { queryKey } = element.props || undefined
 
   return (
-    <FormGroup controlId={queryKey}>
+    <FormGroup controlId={queryKey} className="form-group">
       <Row>
         <Col xs={12} sm={3} lg={2}>
-          {label}
+          <FormLabel>{label}</FormLabel>
         </Col>
         <Col xs={10} sm={8} lg={9}>
           <div>
