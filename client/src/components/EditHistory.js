@@ -86,6 +86,7 @@ function EditHistory({
     >
       {!externalButton && (
         <Button
+          disabled={_isEmpty(history1) && _isEmpty(history2) && !!history2}
           onClick={() => {
             setFinalHistory(getInitialState())
             setShowModal(true)
