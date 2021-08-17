@@ -237,6 +237,7 @@ function EditHistory({
                                 }
                               />
                               <div className="date-container">
+                                <span>From</span>
                                 <Field
                                   name={startTimeFieldName}
                                   label={null}
@@ -268,8 +269,8 @@ function EditHistory({
                                     />
                                   }
                                 />
-                                {!isCurrent && <div>-</div>}
-                                {!isCurrent && (
+                                <span>to</span>
+                                {!isCurrent ? (
                                   <Field
                                     name={endTimeFieldName}
                                     label={null}
@@ -285,10 +286,21 @@ function EditHistory({
                                       <CustomDateInput
                                         id={endTimeFieldName}
                                         maxDate={moment().toDate()}
-                                        style={{ width: "200px" }}
+                                        style={{
+                                          width: "200px"
+                                        }}
                                       />
                                     }
                                   />
+                                ) : (
+                                  <div
+                                    style={{
+                                      width: "200px",
+                                      margin: "0 -15px"
+                                    }}
+                                  >
+                                    present
+                                  </div>
                                 )}
                               </div>
                             </div>
