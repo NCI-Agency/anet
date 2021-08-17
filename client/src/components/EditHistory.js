@@ -127,7 +127,8 @@ function EditHistory({
               // 2- If there is a currently occupying entity
               //    a- The last entity should be same with currently occupying
               //    b- The end time of last entity should be null or undefined ( meaning continuing range)
-              const validWhenNoOccupant = !hasCurrent && lastItem?.endTime
+              const validWhenNoOccupant =
+                !hasCurrent && (!lastItem || lastItem?.endTime)
               const validWhenOccupant =
                 hasCurrent &&
                 currentlyOccupyingEntity?.uuid ===
