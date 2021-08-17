@@ -384,6 +384,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
         .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
 
+    // update winner's fields
+    update(winner);
+
     // update report people, should now be unique
     updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
 
@@ -394,7 +397,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
 
     // update position history
-    updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
+    deleteForMerge("peoplePositions", "personUuid", loserUuid);
+    updatePersonHistory(winner);
+
 
     // update note authors
     updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);

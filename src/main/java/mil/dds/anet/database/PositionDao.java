@@ -641,4 +641,14 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
     return numRows;
   }
+
+  public void setPersonInPositionWithNoRelationOperation(String personUuid, String positionUuid) {
+    getDbHandle()
+        .createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
+            + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
+            + "WHERE uuid = :positionUuid")
+        .bind("personUuid", personUuid).bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now()))
+        .bind("positionUuid", positionUuid).execute();
+
+  }
 }
