@@ -47,7 +47,11 @@ const TriggerableConfirm = ({
         </Modal.Header>
         <Modal.Body>{body}</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button
+            className="float-start"
+            variant="outline-secondary"
+            onClick={handleClose}
+          >
             {cancelText}
           </Button>
           <Button variant="primary" onClick={onConfirm}>

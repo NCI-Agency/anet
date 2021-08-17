@@ -8,8 +8,10 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
   const [currentPreview, setCurrentPreview] = useState(null)
 
   return (
-    <div>
-      <button onClick={open}>{title}</button>
+    <div style={{ marginTop: "10px" }}>
+      <Button variant="outline-secondary" onClick={open}>
+        {title}
+      </Button>
 
       <Modal centered show={showModal} onHide={close}>
         <Modal.Header closeButton>
