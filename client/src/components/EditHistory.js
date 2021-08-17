@@ -11,6 +11,7 @@ import RemoveButton from "components/RemoveButton"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
+import moment from "moment"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -259,7 +260,10 @@ function EditHistory({
                                   }}
                                   component={FieldHelper.SpecialField}
                                   widget={
-                                    <CustomDateInput id={startTimeFieldName} />
+                                    <CustomDateInput
+                                      id={startTimeFieldName}
+                                      maxDate={moment().toDate()}
+                                    />
                                   }
                                 />
                                 {!isCurrent && <div>-</div>}
@@ -278,6 +282,7 @@ function EditHistory({
                                     widget={
                                       <CustomDateInput
                                         id={endTimeFieldName}
+                                        maxDate={moment().toDate()}
                                         style={{ width: "200px" }}
                                       />
                                     }
@@ -288,6 +293,9 @@ function EditHistory({
                           )
                         })}
                         <div className="submit-buttons">
+                          <div>
+                            <Button onClick={onHide}>Cancel</Button>
+                          </div>
                           <div>
                             <Button
                               id="saveSearchModalSubmitButton"
