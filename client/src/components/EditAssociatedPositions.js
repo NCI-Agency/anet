@@ -45,21 +45,28 @@ const EditAssociatedPositions = ({
                   associatedPositions={associatedPositions1}
                   action={item => (
                     <Button
-                      onClick={() => editItem(item)}
-                      intent={isInMerged(item) ? "danger" : "primary"}
-                    >
-                      {isInMerged(item) ? "Remove" : "Add"}
-                    </Button>
+                      icon=""
+                      rightIcon="double-chevron-right"
+                      intent={isInMerged(item) ? "success" : "primary"}
+                      onClick={() => addItem(item)}
+                      style={{ textAlign: "center" }}
+                    />
                   )}
                 />
               </Col>
               <Col md={4}>
+                <h2 style={{ textAlign: "center" }}>
+                  Merged Associated Positions
+                </h2>
                 <AssociatedPositions
                   associatedPositions={finalAssociatedPositions}
                   action={item => (
-                    <Button onClick={() => editItem(item)} intent="danger">
-                      Remove
-                    </Button>
+                    <Button
+                      icon="delete"
+                      outlined
+                      intent="danger"
+                      onClick={() => removeItem(item)}
+                    />
                   )}
                 />
               </Col>
@@ -68,37 +75,34 @@ const EditAssociatedPositions = ({
                   associatedPositions={associatedPositions2}
                   action={item => (
                     <Button
-                      onClick={() => editItem(item)}
-                      intent={isInMerged(item) ? "danger" : "primary"}
-                    >
-                      {isInMerged(item) ? "Remove" : "Add"}
-                    </Button>
+                      icon="double-chevron-left"
+                      rightIcon=""
+                      intent={isInMerged(item) ? "success" : "primary"}
+                      onClick={() => addItem(item)}
+                      style={{ textAlign: "center" }}
+                    />
                   )}
+                  actionSide="left"
                 />
               </Col>
             </Row>
-            <Row>
-              <div className="submit-buttons">
-                <div>
-                  <Button onClick={onHide}>Cancel</Button>
-                </div>
-                <div>
-                  <Button onClick={onSave}>Save</Button>
-                </div>
-              </div>
-            </Row>
           </Grid>
         </Modal.Body>
+        <Modal.Footer>
+          <Button className="pull-left" onClick={onHide}>
+            Cancel
+          </Button>
+
+          <Button intent="primary" onClick={onSave}>
+            Save
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   )
 
   function onHide() {
     setShowModal(false)
-  }
-
-  function editItem(item) {
-    isInMerged(item) ? removeItem(item) : addItem(item)
   }
 
   function isInMerged(item) {
@@ -112,7 +116,8 @@ const EditAssociatedPositions = ({
   }
 
   function addItem(item) {
-    setFinalAssociatedPositions([...finalAssociatedPositions, item])
+    !isInMerged(item) &&
+      setFinalAssociatedPositions([...finalAssociatedPositions, item])
   }
 
   function onSave() {

@@ -3,14 +3,15 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-const AssociatedPositions = ({ associatedPositions, action }) => {
+const AssociatedPositions = ({ associatedPositions, action, actionSide }) => {
   return (
     <Table>
       <thead>
         <tr>
+          {action && actionSide === "left" && <th>Action</th>}
           <th>Name</th>
           <th>Position</th>
-          {action && <th>Action</th>}
+          {action && actionSide === "right" && <th>Action</th>}
         </tr>
       </thead>
       <tbody>
@@ -30,11 +31,12 @@ const AssociatedPositions = ({ associatedPositions, action }) => {
     }
     return (
       <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
+        {action && actionSide === "left" && <td>{action(pos, idx)}</td>}
         <td>{personName}</td>
         <td>
           <LinkTo modelType="Position" model={pos} />
         </td>
-        {action && <td>{action(pos, idx)}</td>}
+        {action && actionSide === "right" && <td>{action(pos, idx)}</td>}
       </tr>
     )
   }
@@ -42,11 +44,13 @@ const AssociatedPositions = ({ associatedPositions, action }) => {
 
 AssociatedPositions.propTypes = {
   associatedPositions: PropTypes.array,
-  action: PropTypes.func
+  action: PropTypes.func,
+  actionSide: PropTypes.string
 }
 
 AssociatedPositions.defaultProps = {
-  associatedPositions: []
+  associatedPositions: [],
+  actionSide: "right"
 }
 
 export default AssociatedPositions
