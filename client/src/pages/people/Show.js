@@ -116,7 +116,7 @@ const GQL_GET_PERSON = gql`
 
 const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
   mutation($person: PersonInput!) {
-    updatePreviousPositions(person: $person)
+    updatePersonHistory(person: $person)
   }
 `
 
@@ -329,11 +329,11 @@ const PersonShow = ({ pageDispatchers }) => {
               )}
               {isAdmin && (
                 <EditHistory
+                  mainTitle="Edit position history"
                   history1={person.previousPositions}
                   initialHistory={person.previousPositions}
                   historyComp={PreviousPositions}
                   currentlyOccupyingEntity={person.position}
-                  midColTitle="New History"
                   externalButton
                   historyEntityType="position"
                   parentEntityType={person.role}

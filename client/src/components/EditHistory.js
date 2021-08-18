@@ -7,6 +7,7 @@ import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
+import RemoveButton from "components/RemoveButton"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -146,7 +147,7 @@ function EditHistory({
                 <Grid fluid>
                   <Row>
                     {history2 && (
-                      <Col sm={4}>
+                      <Col md={4}>
                         <HistoryComp
                           history={history1}
                           action={(item, index) => (
@@ -154,13 +155,13 @@ function EditHistory({
                               bsStyle="primary"
                               onClick={() => addItem(item)}
                             >
-                              Insert To End
+                              Insert Top
                             </Button>
                           )}
                         />
                       </Col>
                     )}
-                    <Col sm={history2 ? 4 : 12}>
+                    <Col md={history2 ? 4 : 12}>
                       <Form className="form-horizontal">
                         <div>
                           <ValidationMessages
@@ -175,7 +176,7 @@ function EditHistory({
                           <AdvancedSingleSelect
                             fieldName={singleSelectParameters.fieldName}
                             fieldLabel="Select a person"
-                            placeholder="Insert antoher person to history"
+                            placeholder="Insert another person to history"
                             overlayColumns={
                               singleSelectParameters.overlayColumns
                             }
@@ -208,7 +209,16 @@ function EditHistory({
                           }
 
                           return (
-                            <div key={item.uuid}>
+                            <div
+                              key={item.uuid}
+                              style={getStyle(
+                                idx,
+                                overlappingIndexesSet,
+                                invalidDateIndexesSet,
+                                !validLastItem &&
+                                  idx === values.history.length - 1
+                              )}
+                            >
                               <Fieldset
                                 title={`${idx + 1}-) ${
                                   item[historyEntityType].name
@@ -219,27 +229,20 @@ function EditHistory({
                                 }`}
                                 action={
                                   !isCurrent && (
-                                    <Button
-                                      bsStyle="danger"
+                                    <RemoveButton
+                                      title="Remove Item"
+                                      altText="Remove Item"
                                       onClick={() => removeItemFromHistory(idx)}
                                     >
                                       Remove
-                                    </Button>
+                                    </RemoveButton>
                                   )
                                 }
                               />
-                              <div
-                                style={getStyle(
-                                  idx,
-                                  overlappingIndexesSet,
-                                  invalidDateIndexesSet,
-                                  !validLastItem &&
-                                    idx === values.history.length - 1
-                                )}
-                              >
+                              <div className="date-container">
                                 <Field
                                   name={startTimeFieldName}
-                                  label="Start Time"
+                                  label={null}
                                   value={values.history[idx].startTime}
                                   onChange={value => {
                                     setFieldValue(
@@ -265,10 +268,11 @@ function EditHistory({
                                     <CustomDateInput id={startTimeFieldName} />
                                   }
                                 />
+                                {!isCurrent && <div>-</div>}
                                 {!isCurrent && (
                                   <Field
                                     name={endTimeFieldName}
-                                    label="End Time"
+                                    label={null}
                                     value={values.history[idx].endTime}
                                     onChange={value =>
                                       setFieldValue(
@@ -278,7 +282,10 @@ function EditHistory({
                                     }
                                     component={FieldHelper.SpecialField}
                                     widget={
-                                      <CustomDateInput id={endTimeFieldName} />
+                                      <CustomDateInput
+                                        id={endTimeFieldName}
+                                        style={{ width: "200px" }}
+                                      />
                                     }
                                   />
                                 )}
@@ -307,7 +314,7 @@ function EditHistory({
                       </Form>
                     </Col>
                     {history2 && (
-                      <Col sm={4}>
+                      <Col md={4}>
                         <HistoryComp
                           history={history2}
                           action={(item, index) => (
@@ -315,7 +322,7 @@ function EditHistory({
                               bsStyle="primary"
                               onClick={() => addItem(item)}
                             >
-                              Insert To End
+                              Insert Top
                             </Button>
                           )}
                         />
@@ -384,7 +391,6 @@ EditHistory.defaultProps = {
   historyEntityType: "person",
   parentEntityType: "position",
   currentlyOccupyingEntity: null,
-  midColTitle: "Merged History",
   mainTitle: "Pick and Choose History Items"
 }
 
@@ -550,7 +556,6 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
 }
 
 function sortHistory(history, hasCurrent) {
-  console.log("history: ", history)
   if (!hasCurrent) {
     return history.sort((a, b) => a.startTime - b.startTime)
   }

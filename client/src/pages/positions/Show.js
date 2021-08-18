@@ -49,7 +49,7 @@ const GQL_DELETE_POSITION = gql`
 
 const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
   mutation($position: PositionInput!) {
-    updatePreviousPeople(position: $position)
+    updatePositionPreviousPeople(position: $position)
   }
 `
 
@@ -330,6 +330,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 action={
                   canEdit && (
                     <EditHistory
+                      mainTitle="Edit person history"
                       history1={position.previousPeople}
                       initialHistory={position.previousPeople}
                       historyComp={PreviousPeople}

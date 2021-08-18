@@ -1,3 +1,13 @@
 .edit-history-dialog-lg {
   width: 90vw;
 }
+.date-container{
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 3%;
+}
+.date-container > div {
+  margin: 15px;
+}
