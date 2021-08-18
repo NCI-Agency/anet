@@ -19,6 +19,7 @@ const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
         className="toggle-section-button"
         style={{ marginBottom: "1rem" }}
         onClick={() => setShowValues(!showValues)}
+        variant="outline-secondary"
         id="toggleShowValues"
       >
         {showValues ? "Hide" : "Show"} {filteredValues.length} values

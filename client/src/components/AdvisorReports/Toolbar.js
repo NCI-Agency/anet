@@ -18,7 +18,9 @@ const Toolbar = ({ onFilterTextInput, onExportButtonClick }) => (
         />
       </div>
       <div className="col-sm-2">
-        <Button onClick={onExportButtonClick}>Export to CSV</Button>
+        <Button onClick={onExportButtonClick} variant="outline-secondary">
+          Export to CSV
+        </Button>
       </div>
     </div>
   </form>

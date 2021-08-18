@@ -231,17 +231,16 @@ const BoardDashboard = ({ pageDispatchers }) => {
       </div>
       <div>
         <Card>
-          <Button
-            variant="primary"
-            type="button"
-            onClick={() => setEdit(!edit)}
-          >
+          <Button variant="primary" onClick={() => setEdit(!edit)}>
             {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
           </Button>
 
           {edit && (
             <>
-              <Button onClick={() => engineRef.current.zoomToFit()}>
+              <Button
+                onClick={() => engineRef.current.zoomToFit()}
+                variant="outline-secondary"
+              >
                 <Icon icon={IconNames.ZOOM_TO_FIT} />
               </Button>
               <Button
@@ -249,6 +248,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   dagreEngineRef.current.redistribute(model)
                   engineRef.current.repaintCanvas()
                 }}
+                variant="outline-secondary"
               >
                 <Icon icon={IconNames.LAYOUT_AUTO} />
               </Button>
@@ -259,6 +259,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   })
                   FileSaver.saveAs(blob, "BoardDashboard.json")
                 }}
+                variant="outline-secondary"
               >
                 <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
               </Button>
@@ -301,7 +302,10 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   <>
                     <span>ANET entity:</span>
                     <br />
-                    <Button onClick={() => setSelectingEntity(true)}>
+                    <Button
+                      onClick={() => setSelectingEntity(true)}
+                      variant="outline-secondary"
+                    >
                       <LinkTo
                         modelType={editedNode.options.anetObjectType}
                         model={editedNode.options.anetObject}

@@ -560,18 +560,12 @@ const CompactPersonViewHeader = ({
       />
       <Buttons>
         {!noPerson && (
-          <Button
-            value="print"
-            type="button"
-            variant="primary"
-            onClick={onPrintClick}
-          >
+          <Button value="print" variant="primary" onClick={onPrintClick}>
             Print
           </Button>
         )}
         <Button
           value="detailedView"
-          type="button"
           variant="primary"
           onClick={returnToDefaultPage}
         >

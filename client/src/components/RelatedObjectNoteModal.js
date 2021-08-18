@@ -102,7 +102,11 @@ const RelatedObjectNoteModal = ({
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                <Button className="pull-left" onClick={close}>
+                <Button
+                  className="pull-left"
+                  onClick={close}
+                  variant="outline-secondary"
+                >
                   Cancel
                 </Button>
                 {_isEmpty(relatedObjects) && onDelete && (

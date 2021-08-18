@@ -1,4 +1,5 @@
-import { Button } from "@blueprintjs/core"
+import { Button, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import Leaflet from "components/Leaflet"
 import {
@@ -246,16 +247,21 @@ export function areAllSet(...args) {
 
 export function getInfoButton(infoText) {
   return (
-    <Tooltip2 content={infoText} intent="primary">
-      <Button minimal icon="info-sign" intent="primary" />
+    <Tooltip2 content={infoText} intent={Intent.PRIMARY}>
+      <Button minimal icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
     </Tooltip2>
   )
 }
 
 export function getClearButton(onClear) {
   return (
-    <Tooltip2 content="Clear field value" intent="danger">
-      <Button icon="delete" outlined intent="danger" onClick={onClear} />
+    <Tooltip2 content="Clear field value" intent={Intent.DANGER}>
+      <Button
+        icon={IconNames.DELETE}
+        outlined
+        intent={Intent.DANGER}
+        onClick={onClear}
+      />
     </Tooltip2>
   )
 }
@@ -266,12 +272,12 @@ export function getActivationButton(isActive, onClickAction, instanceName) {
       content={
         isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
       }
-      intent={isActive ? "danger" : "success"}
+      intent={isActive ? Intent.DANGER : Intent.SUCCESS}
     >
       <Button
-        icon={isActive ? "stop" : "play"}
+        icon={isActive ? IconNames.STOP : IconNames.PLAY}
         outlined
-        intent={isActive ? "danger" : "success"}
+        intent={isActive ? Intent.DANGER : Intent.SUCCESS}
         onClick={onClickAction}
       />
     </Tooltip2>
@@ -287,9 +293,11 @@ export function getActionButton(
   text = ""
 ) {
   const intent =
-    mergeState?.selectedMap?.[fieldName] === align ? "success" : "primary"
-  const icon = align === "right" ? "double-chevron-left" : ""
-  const rightIcon = align === "right" ? "" : "double-chevron-right"
+    mergeState?.selectedMap?.[fieldName] === align
+      ? Intent.SUCCESS
+      : Intent.PRIMARY
+  const icon = align === "right" ? IconNames.DOUBLE_CHEVRON_LEFT : ""
+  const rightIcon = align === "right" ? "" : IconNames.DOUBLE_CHEVRON_RIGHT
   return (
     <small>
       <Button

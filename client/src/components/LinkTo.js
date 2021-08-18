@@ -26,7 +26,7 @@ const LinkTo = ({
     componentProps.className = [
       className,
       "btn",
-      `btn-${button === true ? variant ?? "primary" : button}`
+      `btn-${button === true ? variant ?? "outline-secondary" : button}`
     ].join(" ")
   } else {
     componentProps.className = className

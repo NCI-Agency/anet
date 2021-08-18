@@ -74,7 +74,7 @@ const PeriodicAssessment = ({
               <Button
                 title="Edit assessment"
                 onClick={() => setShowAssessmentModalKey(note.uuid)}
-                size="xsmall"
+                size="xs"
                 variant="primary"
               >
                 <Icon icon={IconNames.EDIT} />
@@ -85,7 +85,7 @@ const PeriodicAssessment = ({
                 objectDisplay={"#" + note.uuid}
                 title="Delete assessment"
                 variant="primary"
-                buttonSize="xsmall"
+                buttonSize="xs"
               >
                 <img src={REMOVE_ICON} height={14} alt="Delete" />
               </ConfirmDestructive>

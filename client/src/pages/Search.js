@@ -736,7 +736,7 @@ const Search = ({
       <div className="float-start">
         {numResults > 0 && (
           <Dropdown id="dropdown-custom-1">
-            <Dropdown.Toggle>
+            <Dropdown.Toggle variant="outline-secondary">
               Export{" "}
               <img
                 src={DOWNLOAD_ICON}
@@ -777,6 +777,7 @@ const Search = ({
             onClick={openSaveModal}
             id="saveSearchButton"
             style={{ marginRight: 12 }}
+            variant="outline-secondary"
           >
             Save search
           </Button>
@@ -906,7 +907,6 @@ const Search = ({
                     <Button
                       id="saveSearchModalSubmitButton"
                       variant="primary"
-                      type="button"
                       onClick={submitForm}
                     >
                       Save

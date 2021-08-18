@@ -337,7 +337,6 @@ const ReportSummaryRow = ({ report }) => {
             modelType="Report"
             model={report}
             button
-            variant="secondary"
             className="read-report-button"
           >
             Read Report

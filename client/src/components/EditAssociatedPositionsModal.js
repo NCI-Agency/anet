@@ -156,7 +156,11 @@ const EditAssociatedPositionsModal = ({
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button className="pull-left" onClick={() => close(setFieldValue)}>
+            <Button
+              className="pull-left"
+              onClick={() => close(setFieldValue)}
+              variant="outline-secondary"
+            >
               Cancel
             </Button>
             <Button onClick={submitForm} variant="primary">

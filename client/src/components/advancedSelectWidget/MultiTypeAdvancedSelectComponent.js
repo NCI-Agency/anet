@@ -186,9 +186,9 @@ const MultiTypeAdvancedSelectComponent = ({
               const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
               return (
                 <Button
-                  variant="outline-secondary"
                   key={entityName}
                   value={entityName}
+                  variant="outline-secondary"
                 >
                   {entityLabel}
                 </Button>
