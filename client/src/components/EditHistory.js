@@ -1,4 +1,4 @@
-import { Button } from "@blueprintjs/core"
+import { Button, Intent } from "@blueprintjs/core"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -31,7 +31,7 @@ function EditHistory({
       style={{ display: "flex", flexDirection: "column" }}
     >
       <Button
-        intent="primary"
+        intent={Intent.PRIMARY}
         onClick={() => {
           // Set the state to initial value first if there were any changes
           setFinalHistory(getInitialState())
@@ -92,7 +92,7 @@ function EditHistory({
                         action={(item, index) => (
                           <Button
                             onClick={() => addItem(item)}
-                            intent="primary"
+                            intent={Intent.PRIMARY}
                           >
                             Insert To End
                           </Button>
@@ -123,7 +123,7 @@ function EditHistory({
                                 }`}
                                 action={
                                   <Button
-                                    intent="danger"
+                                    intent={Intent.DANGER}
                                     onClick={() => removeItemFromHistory(idx)}
                                   >
                                     Remove From History
@@ -187,7 +187,7 @@ function EditHistory({
                           <div>
                             <Button
                               id="saveSearchModalSubmitButton"
-                              intent="primary"
+                              intent={Intent.PRIMARY}
                               large
                               onClick={() => onSave(values)}
                               disabled={
@@ -209,7 +209,7 @@ function EditHistory({
                           action={(item, index) => (
                             <Button
                               onClick={() => addItem(item)}
-                              intent="primary"
+                              intent={Intent.PRIMARY}
                             >
                               Insert To End
                             </Button>

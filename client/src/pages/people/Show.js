@@ -177,12 +177,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   const action = (
     <div>
-      <Button
-        value="compactView"
-        type="button"
-        variant="primary"
-        onClick={onCompactClick}
-      >
+      <Button value="compactView" variant="primary" onClick={onCompactClick}>
         Summary / Print
       </Button>
       {canEdit && (
@@ -294,6 +289,7 @@ const PersonShow = ({ pageDispatchers }) => {
                     canChangePosition && (
                       <Button
                         onClick={() => setShowAssociatedPositionsModal(true)}
+                        variant="outline-secondary"
                       >
                         Change assigned {assignedRole}
                       </Button>

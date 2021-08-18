@@ -359,15 +359,24 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               />
             </div>
             {focusedOrg ? (
-              <Button onClick={() => setFocusedOrg(null)}>
+              <Button
+                onClick={() => setFocusedOrg(null)}
+                variant="outline-secondary"
+              >
                 All organizations
               </Button>
             ) : (
               <ButtonToggleGroup value={orgType} onChange={setOrgType}>
-                <Button value={Organization.TYPE.ADVISOR_ORG}>
+                <Button
+                  value={Organization.TYPE.ADVISOR_ORG}
+                  variant="outline-secondary"
+                >
                   {pluralize(Settings.fields.advisor.org.name)}
                 </Button>
-                <Button value={Organization.TYPE.PRINCIPAL_ORG}>
+                <Button
+                  value={Organization.TYPE.PRINCIPAL_ORG}
+                  variant="outline-secondary"
+                >
                   {pluralize(Settings.fields.principal.org.name)}
                 </Button>
               </ButtonToggleGroup>
@@ -381,6 +390,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={printPreview}
+              variant="outline-secondary"
             >
               Print
             </Button>
@@ -550,13 +560,13 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={showPreview}
+              variant="outline-secondary"
             >
               Preview
             </Button>
             <Button
               id="send-rollup-email"
               variant="primary"
-              type="button"
               onClick={submitForm}
               disabled={isSubmitting}
             >
