@@ -1,12 +1,16 @@
-import { Button } from "@blueprintjs/core"
+import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import Model from "components/Model"
 import { Field, Form, Formik } from "formik"
+import { Person } from "models"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Grid, Modal, Row } from "react-bootstrap"
+import { Button, Col, Grid, Modal, Row } from "react-bootstrap"
+import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import uuidv4 from "uuid/v4"
 import "./EditHistory.css"
@@ -20,10 +24,23 @@ function EditHistory({
   historyComp: HistoryComp,
   // currentlyOccupyingEntity used to assert the last item in the history and end time
   currentlyOccupyingEntity,
-  title
+  midColTitle,
+  mainTitle
 }) {
   const [showModal, setShowModal] = useState(false)
   const [finalHistory, setFinalHistory] = useState(getInitialState)
+
+  const personSearchQuery = {
+    status: Model.STATUS.ACTIVE,
+    role: Person.ROLE.ADVISOR
+  }
+
+  const personFilters = {
+    allPersons: {
+      label: "All",
+      queryVars: personSearchQuery
+    }
+  }
 
   return (
     <div
@@ -31,7 +48,6 @@ function EditHistory({
       style={{ display: "flex", flexDirection: "column" }}
     >
       <Button
-        intent="primary"
         onClick={() => {
           // Set the state to initial value first if there were any changes
           setFinalHistory(getInitialState())
@@ -47,7 +63,7 @@ function EditHistory({
         dialogClassName="edit-history-dialog"
       >
         <Modal.Header closeButton>
-          <Modal.Title>{title}</Modal.Title>
+          <Modal.Title>{mainTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Formik
@@ -85,20 +101,22 @@ function EditHistory({
               return (
                 <Grid fluid>
                   <Row>
-                    <Col sm={4}>
-                      <HistoryComp
-                        history={history1}
-                        action={(item, index) => (
-                          <Button
-                            onClick={() => addItem(item)}
-                            intent="primary"
-                          >
-                            Insert To End
-                          </Button>
-                        )}
-                      />
-                    </Col>
-                    <Col sm={history2 ? 4 : 8}>
+                    {history2 && (
+                      <Col sm={4}>
+                        <HistoryComp
+                          history={history1}
+                          action={(item, index) => (
+                            <Button
+                              bsStyle="primary"
+                              onClick={() => addItem(item)}
+                            >
+                              Insert To End
+                            </Button>
+                          )}
+                        />
+                      </Col>
+                    )}
+                    <Col sm={history2 ? 4 : 12}>
                       <Form className="form-horizontal">
                         <div>
                           <ValidationMessages
@@ -108,7 +126,31 @@ function EditHistory({
                             historyEntityType={historyEntityType}
                           />
                         </div>
-                        <h2 style={{ textAlign: "center" }}>Merged History</h2>
+                        <h2 style={{ textAlign: "center" }}>{midColTitle}</h2>
+                        {!history2 && (
+                          <AdvancedSingleSelect
+                            fieldName="person"
+                            fieldLabel="Select a person"
+                            placeholder="Insert antoher person to history"
+                            overlayColumns={["Name"]}
+                            overlayRenderRow={PersonSimpleOverlayRow}
+                            filterDefs={personFilters}
+                            onChange={value =>
+                              addItem({
+                                startTime: null,
+                                endTime: null,
+                                person: new Person(
+                                  value
+                                ).filterClientSideFields()
+                              })
+                            }
+                            objectType={Person}
+                            valueKey="name"
+                            fields="uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} }"
+                            addon={PEOPLE_ICON}
+                            vertical
+                          />
+                        )}
                         {values.history.map((item, idx) => {
                           // To be able to set fields inside the array state
                           const startTimeFieldName = `history[${idx}].startTime`
@@ -122,10 +164,10 @@ function EditHistory({
                                 }`}
                                 action={
                                   <Button
-                                    intent="danger"
+                                    bsStyle="danger"
                                     onClick={() => removeItemFromHistory(idx)}
                                   >
-                                    Remove From History
+                                    Remove
                                   </Button>
                                 }
                               />
@@ -186,13 +228,14 @@ function EditHistory({
                           <div>
                             <Button
                               id="saveSearchModalSubmitButton"
-                              intent="primary"
-                              large
+                              bsStyle="primary"
                               onClick={() => onSave(values)}
                               disabled={
-                                invalidDateIndexesSet.size ||
-                                overlapArrays.length ||
-                                !validLastItem
+                                !!(
+                                  invalidDateIndexesSet.size ||
+                                  overlapArrays.length ||
+                                  !validLastItem
+                                )
                               }
                             >
                               Save
@@ -207,8 +250,8 @@ function EditHistory({
                           history={history2}
                           action={(item, index) => (
                             <Button
+                              bsStyle="primary"
                               onClick={() => addItem(item)}
-                              intent="primary"
                             >
                               Insert To End
                             </Button>
@@ -270,14 +313,16 @@ EditHistory.propTypes = {
     PropTypes.string,
     PropTypes.object
   ]),
-  title: PropTypes.string
+  midColTitle: PropTypes.string,
+  mainTitle: PropTypes.string
 }
 EditHistory.defaultProps = {
   history2: null,
   initialHistory: null,
   historyEntityType: "person",
-  title: "Pick and Choose History Items",
-  currentlyOccupyingEntity: null
+  currentlyOccupyingEntity: null,
+  midColTitle: "Merged History",
+  mainTitle: "Pick and Choose History Items"
 }
 
 export default EditHistory

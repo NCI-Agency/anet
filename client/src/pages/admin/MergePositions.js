@@ -220,7 +220,8 @@ const MergePositions = ({ pageDispatchers }) => {
                       initialHistory={mergedPosition.previousPeople}
                       historyComp={PreviousPeople}
                       currentlyOccupyingEntity={mergedPosition.person}
-                      title="Pick and Choose people and dates for People History"
+                      midColTitle="Merged Position History"
+                      mainTitle="Pick and Choose people and dates for People History"
                       setHistory={history =>
                         dispatchMergeActions(
                           setAMergedField("previousPeople", history, null)
