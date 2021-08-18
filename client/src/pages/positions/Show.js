@@ -49,7 +49,7 @@ const GQL_DELETE_POSITION = gql`
 
 const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
   mutation($position: PositionInput!) {
-    updatePositionPreviousPeople(position: $position)
+    updatePositionHistory(position: $position)
   }
 `
 

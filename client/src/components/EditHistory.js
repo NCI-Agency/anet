@@ -14,7 +14,7 @@ import { Person, Position } from "models"
 import moment from "moment"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Button, Col, Grid, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -75,12 +75,22 @@ function EditHistory({
   midColTitle,
   mainTitle
 }) {
+  const getInitialState = useCallback(() => {
+    return giveEachItemUuid(initialHistory || history1 || [])
+  }, [initialHistory, history1])
   const [finalHistory, setFinalHistory] = useState(getInitialState)
 
   const singleSelectParameters = getSingleSelectParameters(
     historyEntityType,
     parentEntityType
   )
+
+  // Update finalHistory every time the modal is opened to check if the history is changed by changing the current entity.
+  useEffect(() => {
+    if (showModal) {
+      setFinalHistory(getInitialState())
+    }
+  }, [getInitialState, showModal])
 
   return (
     <div
@@ -91,7 +101,6 @@ function EditHistory({
         <Button
           disabled={_isEmpty(history1) && _isEmpty(history2) && !!history2}
           onClick={() => {
-            setFinalHistory(getInitialState())
             setShowModal(true)
           }}
         >
@@ -368,10 +377,6 @@ function EditHistory({
       </Modal>
     </div>
   )
-
-  function getInitialState() {
-    return giveEachItemUuid(initialHistory || history1 || [])
-  }
 
   function onHide() {
     setShowModal(false)
