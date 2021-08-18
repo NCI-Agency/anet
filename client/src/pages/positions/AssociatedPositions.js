@@ -3,13 +3,14 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-function AssociatedPositions({ associatedPositions }) {
+function AssociatedPositions({ associatedPositions, action }) {
   return (
     <Table>
       <thead>
         <tr>
           <th>Name</th>
           <th>Position</th>
+          {action && <th>Action</th>}
         </tr>
       </thead>
       <tbody>
@@ -33,13 +34,15 @@ function AssociatedPositions({ associatedPositions }) {
         <td>
           <LinkTo modelType="Position" model={pos} />
         </td>
+        {action && <td>{action(pos, idx)}</td>}
       </tr>
     )
   }
 }
 
 AssociatedPositions.propTypes = {
-  associatedPositions: PropTypes.array
+  associatedPositions: PropTypes.array,
+  action: PropTypes.func
 }
 
 AssociatedPositions.defaultProps = {

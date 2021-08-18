@@ -43,6 +43,7 @@ import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
+import EditAssociatedPositions from "../../components/EditAssociatedPositions"
 import AssociatedPositions from "../positions/AssociatedPositions"
 import PreviousPeople from "../positions/PreviousPeople"
 
@@ -196,11 +197,29 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Associated Positions"
                 value={
-                  <AssociatedPositions
-                    associatedPositions={mergedPosition.associatedPositions}
-                  />
+                  <>
+                    <AssociatedPositions
+                      associatedPositions={mergedPosition.associatedPositions}
+                    />
+                    <EditAssociatedPositions
+                      associatedPositions1={position1.associatedPositions}
+                      associatedPositions2={position2.associatedPositions}
+                      setAssociatedPositions={mergedAssociatedPositions =>
+                        dispatchMergeActions(
+                          setAMergedField(
+                            "associatedPositions",
+                            mergedAssociatedPositions,
+                            null
+                          )
+                        )
+                      }
+                      initialMergedAssociatedPositions={
+                        mergedPosition.associatedPositions
+                      }
+                    />
+                  </>
                 }
-                align="center"
+                align="column"
                 action={getClearButton(() =>
                   dispatchMergeActions(
                     setAMergedField("associatedPositions", [], null)
