@@ -86,7 +86,7 @@ const OrganizationLaydown = ({ organization }) => {
         action={
           <div>
             {numInactivePos > 0 && (
-              <Button onClick={toggleShowInactive}>
+              <Button onClick={toggleShowInactive} variant="outline-secondary">
                 {(showInactivePositions ? "Hide " : "Show ") +
                   numInactivePos +
                   " inactive position(s)"}

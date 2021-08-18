@@ -370,7 +370,7 @@ const ArrayOfObjectsField = fieldProps => {
             <Button
               className="pull-right"
               onClick={() => addObject(objDefault, arrayHelpers)}
-              variant="primary"
+              variant="secondary"
               id={`add-${name}`}
             >
               {addButtonLabel}

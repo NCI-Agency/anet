@@ -262,6 +262,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           onClick={() => {
             removeUser ? setRemoveUser(false) : closeModal()
           }}
+          variant="outline-secondary"
         >
           Cancel
         </Button>

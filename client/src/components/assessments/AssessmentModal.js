@@ -85,7 +85,11 @@ const AssessmentModal = ({
                   </div>
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button className="pull-left" onClick={closeModal}>
+                  <Button
+                    className="pull-left"
+                    onClick={closeModal}
+                    variant="outline-secondary"
+                  >
                     Cancel
                   </Button>
                   <Button

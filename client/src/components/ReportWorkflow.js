@@ -60,6 +60,7 @@ const ApprovalStepModal = ({ action }) => {
       <Button
         className={actionTypeCss + " btn-sm"}
         onClick={() => setShowModal(true)}
+        variant="outline-secondary"
       >
         <span>{step.name}</span>
       </Button>
@@ -102,7 +103,11 @@ export const ActionButton = ({ action }) => {
   return step ? (
     <ApprovalStepModal action={action} />
   ) : (
-    <Button className={actionType.cssClass + " btn-sm"} disabled>
+    <Button
+      className={actionType.cssClass + " btn-sm"}
+      variant="outline-secondary"
+      disabled
+    >
       <span>
         <LinkTo modelType="Person" model={action.person} isLink={false} />
       </span>

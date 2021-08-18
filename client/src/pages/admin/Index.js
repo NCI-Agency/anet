@@ -99,7 +99,6 @@ const AdminIndex = ({ pageDispatchers }) => {
     <Button
       disabled={actionLoading}
       variant="primary"
-      type="button"
       onClick={loadUserActivities}
     >
       {Array.isArray(recentActivities) || Array.isArray(recentUsers)
@@ -120,7 +119,6 @@ const AdminIndex = ({ pageDispatchers }) => {
             <div>
               <Button
                 variant="primary"
-                type="button"
                 onClick={submitForm}
                 disabled={isSubmitting}
               >
@@ -155,7 +153,6 @@ const AdminIndex = ({ pageDispatchers }) => {
               <Button
                 disabled={actionLoading}
                 variant="primary"
-                type="button"
                 onClick={clearCache}
                 style={{ width: "100%" }}
               >
@@ -169,7 +166,6 @@ const AdminIndex = ({ pageDispatchers }) => {
               <Button
                 disabled={actionLoading}
                 variant="primary"
-                type="button"
                 onClick={reloadDictionary}
                 style={{ width: "100%" }}
               >

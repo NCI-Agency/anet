@@ -87,7 +87,12 @@ const RelatedObjectNotes = ({
           style={{ fontSize: "8px", padding: 4 }}
           effect={["none", "none"]}
         />
-        <Button size="small" onClick={toggleHidden} title="Show notes">
+        <Button
+          size="sm"
+          onClick={toggleHidden}
+          title="Show notes"
+          variant="outline-secondary"
+        >
           <Icon icon={IconNames.COMMENT} />
         </Button>
       </div>
@@ -110,7 +115,12 @@ const RelatedObjectNotes = ({
           }}
         >
           <h4 style={{ paddingRight: 5 }}>Notes</h4>
-          <Button size="small" onClick={toggleHidden} title="hidden notes">
+          <Button
+            size="sm"
+            onClick={toggleHidden}
+            title="hidden notes"
+            variant="outline-secondary"
+          >
             <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
           </Button>
         </div>
@@ -203,7 +213,7 @@ const RelatedObjectNotes = ({
                       <Button
                         title="Edit note"
                         onClick={() => showRelatedObjectNoteModal(note.uuid)}
-                        size="xsmall"
+                        size="xs"
                         variant="primary"
                       >
                         <Icon icon={IconNames.EDIT} />
@@ -222,7 +232,7 @@ const RelatedObjectNotes = ({
                         objectDisplay={"#" + note.uuid}
                         title="Delete note"
                         variant="primary"
-                        buttonSize="xsmall"
+                        buttonSize="xs"
                       >
                         <img src={REMOVE_ICON} height={14} alt="Delete" />
                       </ConfirmDestructive>
