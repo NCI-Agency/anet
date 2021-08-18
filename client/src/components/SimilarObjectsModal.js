@@ -30,7 +30,11 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
         <TableComponent queryParams={queryParams} />
       </Modal.Body>
       <Modal.Footer>
-        <Button className="pull-left" onClick={onCancel}>
+        <Button
+          className="pull-left"
+          onClick={onCancel}
+          variant="outline-secondary"
+        >
           Cancel
         </Button>
       </Modal.Footer>

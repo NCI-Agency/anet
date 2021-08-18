@@ -162,7 +162,6 @@ const TaskForm = ({ edit, title, initialValues }) => {
             <Button
               key="submit"
               variant="primary"
-              type="button"
               onClick={submitForm}
               disabled={isSubmitting}
             >
@@ -444,13 +443,14 @@ const TaskForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
                     variant="primary"
-                    type="button"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >

@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Button, Callout } from "@blueprintjs/core"
+import { Button, Callout, Intent } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -124,7 +124,7 @@ const MergeLocations = ({ pageDispatchers }) => {
           </MidColTitle>
           {!areAllSet(location1, location2) && (
             <div style={{ padding: "16px 5%" }}>
-              <Callout intent="warning">
+              <Callout intent={Intent.WARNING}>
                 Please select <strong>both</strong> locations to proceed...
               </Callout>
             </div>
@@ -271,7 +271,7 @@ const MergeLocations = ({ pageDispatchers }) => {
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
           large
-          intent="primary"
+          intent={Intent.PRIMARY}
           text="Merge Locations"
           onClick={mergeLocations}
           disabled={

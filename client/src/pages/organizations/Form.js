@@ -116,7 +116,6 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
             <Button
               key="submit"
               variant="primary"
-              type="button"
               onClick={submitForm}
               disabled={isSubmitting}
             >
@@ -370,14 +369,15 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 {(isAdmin || !isPrincipalOrg) && (
                   <div>
                     <Button
                       id="formBottomSubmit"
                       variant="primary"
-                      type="button"
                       onClick={submitForm}
                       disabled={isSubmitting}
                     >

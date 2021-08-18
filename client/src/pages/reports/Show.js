@@ -379,11 +379,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         const action = (
           <div>
             {canEmail && (
-              <Button onClick={toggleEmailModal}>Email report</Button>
+              <Button onClick={toggleEmailModal} variant="outline-secondary">
+                Email report
+              </Button>
             )}
             <Button
               value="compactView"
-              type="button"
               variant="primary"
               onClick={onCompactClick}
             >
@@ -786,7 +787,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 <div className="right-button">
                   <Button
                     variant="primary"
-                    type="button"
                     onClick={() =>
                       submitComment(values.newComment, setFieldValue)
                     }
@@ -1259,7 +1259,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     )
     return _isEmpty(warnings) ? (
       <Button
-        type="button"
         variant="primary"
         size={size}
         className={className}
