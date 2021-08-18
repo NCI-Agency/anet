@@ -21,7 +21,9 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
           <AvatarComponent onChangePreview={setCurrentPreview} />
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={save}>Save</Button>
+          <Button onClick={save} variant="primary">
+            Save
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

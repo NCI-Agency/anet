@@ -87,7 +87,7 @@ const ApprovalsDefinition = ({
               <Button
                 className="pull-right"
                 onClick={() => addApprovalStep(arrayHelpers, values[fieldName])}
-                variant="primary"
+                variant="secondary"
                 id={`add${fieldName}Button`}
               >
                 {addButtonLabel}

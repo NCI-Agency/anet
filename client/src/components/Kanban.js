@@ -93,7 +93,11 @@ const Column = ({ name, tasks }) => {
         <br />
         <strong>{Settings.fields.task.longLabel}</strong>
         {"  "}
-        <Button size="xs" onClick={() => setOpen(!open)}>
+        <Button
+          size="xs"
+          onClick={() => setOpen(!open)}
+          variant="outline-secondary"
+        >
           TRIANGLE TOP OR TRIANGLE BOTTOM ICON
         </Button>
         <br />

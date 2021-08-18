@@ -346,7 +346,11 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
               <SavedSearchTable search={selectedSearch} />
             </Col>
             <Col className="text-end">
-              <Button style={{ marginRight: 12 }} onClick={showSearch}>
+              <Button
+                style={{ marginRight: 12 }}
+                onClick={showSearch}
+                variant="outline-secondary"
+              >
                 Show Search
               </Button>
               <ConfirmDestructive

@@ -246,7 +246,10 @@ const PositionShow = ({ pageDispatchers }) => {
                   position.person &&
                   position.person.uuid &&
                   canEdit && (
-                    <Button onClick={() => setShowAssignPersonModal(true)}>
+                    <Button
+                      onClick={() => setShowAssignPersonModal(true)}
+                      variant="outline-secondary"
+                    >
                       Change assigned person
                     </Button>
                   )
@@ -268,6 +271,7 @@ const PositionShow = ({ pageDispatchers }) => {
                       <p>
                         <Button
                           onClick={() => setShowAssignPersonModal(true)}
+                          variant="outline-secondary"
                           className="change-assigned-person"
                         >
                           Change assigned person
@@ -291,6 +295,7 @@ const PositionShow = ({ pageDispatchers }) => {
                   canEdit && (
                     <Button
                       onClick={() => setShowAssociatedPositionsModal(true)}
+                      variant="outline-secondary"
                     >
                       Change assigned {assignedRole}
                     </Button>

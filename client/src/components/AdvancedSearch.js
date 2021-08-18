@@ -1,4 +1,3 @@
-import { Classes } from "@blueprintjs/core"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
@@ -75,10 +74,7 @@ const AdvancedSearch = ({
     existingKeys.length < Object.keys(filterDefs).length
 
   const advancedSearchMenuContent = (
-    <Dropdown
-      className={Classes.POPOVER_DISMISS}
-      style={{ maxHeight: "400px", overflowY: "auto" }}
-    >
+    <Dropdown style={{ maxHeight: "400px", overflowY: "auto" }}>
       {Object.keys(filterDefs).map(filterKey => (
         <Dropdown.Item
           disabled={existingKeys.includes(filterKey)}
@@ -216,8 +212,7 @@ const AdvancedSearch = ({
                 }}
               >
                 <Button
-                  className={Classes.POPOVER_DISMISS}
-                  intent="danger"
+                  variant="outline-secondary"
                   onClick={onCancel}
                   style={{ marginLeft: 20 }}
                 >
@@ -225,9 +220,7 @@ const AdvancedSearch = ({
                 </Button>
                 <Button
                   variant="primary"
-                  className={Classes.POPOVER_DISMISS}
                   type="submit"
-                  intent="success"
                   onClick={onSubmit}
                   style={{ marginLeft: 20 }}
                 >

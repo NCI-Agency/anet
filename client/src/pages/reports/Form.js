@@ -440,7 +440,6 @@ const ReportForm = ({
           <div>
             <Button
               variant="primary"
-              type="button"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
               disabled={isSubmitting}
             >
@@ -1106,7 +1105,9 @@ const ReportForm = ({
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   {autoSavedAt && (
@@ -1131,7 +1132,6 @@ const ReportForm = ({
                   <Button
                     id="formBottomSubmit"
                     variant="primary"
-                    type="button"
                     onClick={() =>
                       onSubmit(values, { resetForm, setSubmitting })
                     }
