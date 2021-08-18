@@ -12,9 +12,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
@@ -29,6 +26,9 @@ import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSearchQuery> {
