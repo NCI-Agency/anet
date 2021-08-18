@@ -1,16 +1,16 @@
 package mil.dds.anet.resources;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import io.leangen.graphql.execution.ResolutionEnvironment;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
@@ -193,6 +193,20 @@ public class PersonResource {
 
     AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
+    return numRows;
+  }
+
+  @GraphQLMutation(name = "updatePersonHistory")
+  public int updatePersonHistory(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "person") Person p) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Person existing = dao.getByUuid(p.getUuid());
+    if (!canCreateOrUpdatePerson(user, existing, false)) {
+      throw new WebApplicationException("You do not have permissions to edit this person",
+          Status.FORBIDDEN);
+    }
+    final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
+    AnetAuditLogger.log("History updated for person {}", p);
     return numRows;
   }
 

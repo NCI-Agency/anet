@@ -1,14 +1,14 @@
 package mil.dds.anet.resources;
 
-import io.leangen.graphql.annotations.GraphQLArgument;
-import io.leangen.graphql.annotations.GraphQLMutation;
-import io.leangen.graphql.annotations.GraphQLQuery;
-import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -164,8 +164,20 @@ public class PositionResource {
     return numRows;
   }
 
+  @GraphQLMutation(name = "updatePositionHistory")
+  public int updatePositionPreviousPeople(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "position") Position pos) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position existing = dao.getByUuid(pos.getUuid());
+    assertCanUpdatePosition(user, existing);
+    final int numRows =
+        AnetObjectEngine.getInstance().getPositionDao().updatePositionPreviousPeople(pos);
+    AnetAuditLogger.log("History updated for position {}", pos);
+    return numRows;
+  }
+
   @GraphQLMutation(name = "putPersonInPosition")
-  public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
+  public int putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String positionUuid,
       @GraphQLArgument(name = "person") Person person) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -175,7 +187,7 @@ public class PositionResource {
     }
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
-    int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
+    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
     return numRows;
   }

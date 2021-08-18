@@ -1,10 +1,9 @@
 package mil.dds.anet.database;
 
-import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -18,6 +17,11 @@ import javax.cache.Cache.Entry;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ObjectArrays;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -33,9 +37,6 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.apache.commons.beanutils.PropertyUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
@@ -457,4 +458,38 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
+  @InTransaction
+  public int updatePersonHistory(Person p) {
+    final String personUuid = p.getUuid();
+    // Delete old history
+    final int numRows = getDbHandle()
+        .execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
+    // Add new history
+    for (final PersonPositionHistory history : p.getPreviousPositions()) {
+      updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
+          history.getEndTime());
+    }
+    return numRows;
+  }
+
+  void updatePeoplePositions(final String positionUuid, final String personUuid,
+      final Instant startTime, final Instant endTime) {
+    if (endTime == null) {
+      // we have to make an exception here, as MSSQL has problems inserting a null datetime
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
+    } else {
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    }
+  }
 }

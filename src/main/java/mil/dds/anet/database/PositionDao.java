@@ -12,6 +12,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
@@ -26,9 +29,6 @@ import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSearchQuery> {
@@ -538,12 +538,13 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     deleteForMerge("peoplePositions", "positionUuid", loserUuid);
     deleteForMerge("peoplePositions", "positionUuid", winnerUuid);
     if (Utils.isEmptyOrNull(winner.getPreviousPeople())) {
-      updatePeoplePositions(winnerUuid, winner.getPersonUuid(), Instant.now(), null);
+      AnetObjectEngine.getInstance().getPersonDao().updatePeoplePositions(winnerUuid,
+          winner.getPersonUuid(), Instant.now(), null);
     } else {
       // Store the history as given
       for (final PersonPositionHistory pph : winner.getPreviousPeople()) {
-        updatePeoplePositions(winnerUuid, pph.getPersonUuid(), pph.getStartTime(),
-            pph.getEndTime());
+        AnetObjectEngine.getInstance().getPersonDao().updatePeoplePositions(winnerUuid,
+            pph.getPersonUuid(), pph.getStartTime(), pph.getEndTime());
       }
     }
 
@@ -609,24 +610,17 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     return nr;
   }
 
-  private void updatePeoplePositions(final String positionUuid, final String personUuid,
-      final Instant startTime, final Instant endTime) {
-    if (endTime == null) {
-      // we have to make an exception here, as MSSQL has problems inserting a null datetime
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
-    } else {
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
-          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+  @InTransaction
+  public int updatePositionPreviousPeople(Position pos) {
+    final String posUuid = pos.getUuid();
+    // Delete old history
+    final int numRows = getDbHandle()
+        .execute("DELETE FROM \"peoplePositions\"  WHERE \"positionUuid\" = ?", posUuid);
+    // Add new history
+    for (final PersonPositionHistory history : pos.getPreviousPeople()) {
+      AnetObjectEngine.getInstance().getPersonDao().updatePeoplePositions(posUuid,
+          history.getPersonUuid(), history.getStartTime(), history.getEndTime());
     }
+    return numRows;
   }
 }
