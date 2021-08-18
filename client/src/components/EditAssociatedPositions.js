@@ -1,8 +1,8 @@
 import { Button } from "@blueprintjs/core"
+import AssociatedPositions from "components/AssociatedPositions"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Col, Grid, Modal, Row } from "react-bootstrap"
-import AssociatedPositions from "../pages/positions/AssociatedPositions"
 
 const EditAssociatedPositions = ({
   associatedPositions1,

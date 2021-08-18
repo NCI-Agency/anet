@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-function AssociatedPositions({ associatedPositions, action }) {
+const AssociatedPositions = ({ associatedPositions, action }) => {
   return (
     <Table>
       <thead>
