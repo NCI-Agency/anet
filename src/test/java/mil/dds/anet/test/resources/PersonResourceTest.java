@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -33,6 +35,7 @@ import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
+import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.PersonSearchSortBy;
 import mil.dds.anet.test.client.Position;
@@ -56,9 +59,10 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _CUSTOM_SENSITIVE_INFORMATION_FIELDS =
       "customSensitiveInformation { uuid customFieldName customFieldValue"
           + " relatedObjectType relatedObjectUuid createdAt updatedAt }";
-  private static final String _POSITION_FIELDS = "uuid name code type status organization { uuid }";
+  private static final String _POSITION_FIELDS =
+      "uuid name code type status organization { uuid } previousPeople";
   private static final String _PERSON_FIELDS =
-      "uuid name status role emailAddress phoneNumber rank biography country avatar code"
+      "uuid name status role emailAddress phoneNumber rank biography country avatar code previousPositions"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
           + " customFields";
   private static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
@@ -560,6 +564,90 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Bob has access to Christopf's politicalPosition
     checkSensitiveInformationEdit(christopfUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
         true);
+  }
+
+  @Test
+  public void testUpdatePersonHistory()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    Person person = getChristopfTopferness();
+    PersonPositionHistory hist1 = new PersonPositionHistory();
+    // Create a Position
+    final PositionInput testInput1 =
+        PositionInput.builder().withName("A Test Position created by updatePeopleHistoryTest 1")
+            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos1 = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput1);
+    assertThat(createdPos1).isNotNull();
+    assertThat(createdPos1.getUuid()).isNotNull();
+    assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
+
+    final PositionInput testInput2 =
+        PositionInput.builder().withName("A Test Position created by updatePeopleHistoryTest 2")
+            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos2 = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput2);
+    assertThat(createdPos2).isNotNull();
+    assertThat(createdPos2.getUuid()).isNotNull();
+    assertThat(createdPos2.getName()).isEqualTo(testInput2.getName());
+
+    hist1.setPerson(person);
+    hist1.setPosition(createdPos1);
+    hist1.setStartTime(Instant.now().minus(100, ChronoUnit.DAYS));
+    hist1.setEndTime(Instant.now().minus(50, ChronoUnit.DAYS));
+    PersonPositionHistory hist2 = new PersonPositionHistory();
+    hist2.setPerson(person);
+    hist2.setPosition(createdPos2);
+    hist2.setStartTime(Instant.now().minus(49, ChronoUnit.DAYS));
+    hist2.setEndTime(Instant.now());
+    person.getPreviousPositions().add(hist2);
+    List<PersonPositionHistory> historyList = new ArrayList<>();
+    historyList.add(hist1);
+    historyList.add(hist2);
+    person.setPreviousPositions(historyList);
+    final PersonInput personInput = getPersonInput(person);
+    adminMutationExecutor.updatePersonHistory("", personInput);
+    final Person personUpdated = adminQueryExecutor.person(FIELDS, personInput.getUuid());
+    assertThat(personUpdated).isNotNull();
+    assertEquals(historyList, personUpdated.getPreviousPositions());
+  }
+
+  @Test
+  public void testUpdatePositionHistory()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+
+    // Create a Position
+    final PositionInput testInput1 =
+        PositionInput.builder().withName("A Test Position created by updatePeopleHistoryTest 3")
+            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput1);
+    assertThat(createdPos).isNotNull();
+    assertThat(createdPos.getUuid()).isNotNull();
+    assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
+    List<PersonPositionHistory> prevPersons = new ArrayList<PersonPositionHistory>();
+    Person person1 = getBobBobtown();
+    Person person2 = getChristopfTopferness();
+    PersonPositionHistory hist1 = new PersonPositionHistory();
+    hist1.setPerson(person1);
+    hist1.setPosition(createdPos);
+    hist1.setStartTime(Instant.now().minus(100, ChronoUnit.DAYS));
+    hist1.setEndTime(Instant.now().minus(50, ChronoUnit.DAYS));
+    prevPersons.add(hist1);
+    PersonPositionHistory hist2 = new PersonPositionHistory();
+    hist2.setPerson(person2);
+    hist2.setPosition(createdPos);
+    hist2.setStartTime(Instant.now().minus(49, ChronoUnit.DAYS));
+    hist2.setEndTime(Instant.now());
+    prevPersons.add(hist2);
+    createdPos.setPreviousPeople(prevPersons);
+    final PositionInput positionInput = getPositionInput(createdPos);
+    adminMutationExecutor.updatePositionHistory("", positionInput);
+    final Position positionUpdated =
+        adminQueryExecutor.position(POSITION_FIELDS, positionInput.getUuid());
+    assertThat(positionUpdated).isNotNull();
+    assertEquals(prevPersons, positionUpdated.getPreviousPeople());
+
+
   }
 
   @Test
