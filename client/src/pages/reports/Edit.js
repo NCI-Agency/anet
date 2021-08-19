@@ -138,21 +138,23 @@ const ReportEdit = ({ pageDispatchers }) => {
 
   return (
     <div className="report-edit">
-      <RelatedObjectNotes
-        notes={report.notes}
-        relatedObject={
-          report.uuid && {
-            relatedObjectType: Report.relatedObjectType,
-            relatedObjectUuid: report.uuid,
-            relatedObject: report
-          }
-        }
-      />
       <ReportForm
         edit
         initialValues={reportInitialValues}
         title={`Report #${report.uuid}`}
         showSensitiveInfo={!!report.reportSensitiveInformation?.text}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={report.notes}
+            relatedObject={
+              report.uuid && {
+                relatedObjectType: Report.relatedObjectType,
+                relatedObjectUuid: report.uuid,
+                relatedObject: report
+              }
+            }
+          />
+        }
       />
     </div>
   )
