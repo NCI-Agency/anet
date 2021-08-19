@@ -633,7 +633,7 @@ const CompactReportViewHeader = ({
       <HeaderTitle value="title">Summary / Print</HeaderTitle>
       <DropdownButton
         title="Page Size"
-        variant="primary"
+        variant="outline-secondary"
         id="pageSizeButton"
         onSelect={setPageSize}
       >
