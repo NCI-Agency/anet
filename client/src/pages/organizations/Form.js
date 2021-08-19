@@ -46,7 +46,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const OrganizationForm = ({ edit, title, initialValues }) => {
+const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -113,6 +113,7 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
         }
         const action = (isAdmin || !isPrincipalOrg) && (
           <div>
+            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -443,7 +444,8 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
 OrganizationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Organization).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 OrganizationForm.defaultProps = {

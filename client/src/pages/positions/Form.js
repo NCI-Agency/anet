@@ -47,7 +47,7 @@ const GQL_UPDATE_POSITION = gql`
 `
 const MIN_CHARS_FOR_DUPLICATES = 3
 
-const PositionForm = ({ edit, title, initialValues }) => {
+const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -167,6 +167,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
           values.person.uuid
         const action = (
           <div>
+            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -436,7 +437,8 @@ const PositionForm = ({ edit, title, initialValues }) => {
 PositionForm.propTypes = {
   initialValues: PropTypes.instanceOf(Position).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 PositionForm.defaultProps = {

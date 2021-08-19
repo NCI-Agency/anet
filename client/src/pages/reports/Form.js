@@ -156,7 +156,8 @@ const ReportForm = ({
   edit,
   title,
   initialValues,
-  showSensitiveInfo: ssi
+  showSensitiveInfo: ssi,
+  notesComponent
 }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -438,6 +439,7 @@ const ReportForm = ({
         // Skip validation on save!
         const action = (
           <div>
+            {notesComponent}
             <Button
               variant="primary"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
@@ -1446,7 +1448,8 @@ ReportForm.propTypes = {
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  showSensitiveInfo: PropTypes.bool
+  showSensitiveInfo: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 ReportForm.defaultProps = {
