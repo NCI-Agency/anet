@@ -179,6 +179,9 @@
     "redux": "4.1.1",
     "redux-persist": "6.0.0",
     "resize-observer-polyfill": "1.5.1",
+    "slate": "0.65.3",
+    "slate-history": "0.65.3",
+    "slate-react": "0.65.3",
     "use-debounce": "7.0.0",
     "yup": "0.32.11"
   },
