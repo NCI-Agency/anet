@@ -82,19 +82,8 @@ const LocationShow = ({ pageDispatchers }) => {
             lng: location.lng
           })
         }
-        const action = canEdit && (
-          <LinkTo
-            modelType="Location"
-            model={location}
-            edit
-            button="primary"
-            id="editButton"
-          >
-            Edit
-          </LinkTo>
-        )
-        return (
-          <div>
+        const action = (
+          <>
             <RelatedObjectNotes
               notes={location.notes}
               relatedObject={
@@ -105,6 +94,23 @@ const LocationShow = ({ pageDispatchers }) => {
                 }
               }
             />
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo
+                  modelType="Location"
+                  model={location}
+                  edit
+                  button="primary"
+                  id="editButton"
+                >
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+          </>
+        )
+        return (
+          <div>
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset

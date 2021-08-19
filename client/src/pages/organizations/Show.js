@@ -239,6 +239,17 @@ const OrganizationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <div>
+            <RelatedObjectNotes
+              notes={organization.notes}
+              relatedObject={
+                organization.uuid && {
+                  relatedObjectType: Organization.relatedObjectType,
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
+                }
+              }
+            />
+
             {isAdmin && (
               <LinkTo
                 modelType="Organization"
@@ -290,16 +301,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
               </div>
             )}
 
-            <RelatedObjectNotes
-              notes={organization.notes}
-              relatedObject={
-                organization.uuid && {
-                  relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid,
-                  relatedObject: organization
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
