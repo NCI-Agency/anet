@@ -33,7 +33,7 @@ const CreateButton = () => {
               key={modelClass.resourceName}
               eventKey={modelClass}
               id={`new-${name.toLowerCase()}`}
-              onSelect={() => onSelect(modelClass)}
+              onClick={() => onSelect(modelClass)}
             >
               New {name}
             </Dropdown.Item>
