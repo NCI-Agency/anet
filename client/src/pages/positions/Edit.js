@@ -93,20 +93,22 @@ const PositionEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={position.notes}
-        relatedObject={
-          position.uuid && {
-            relatedObjectType: Position.relatedObjectType,
-            relatedObjectUuid: position.uuid,
-            relatedObject: position
-          }
-        }
-      />
       <PositionForm
         edit
         initialValues={position}
         title={`Position ${position.name}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={position.notes}
+            relatedObject={
+              position.uuid && {
+                relatedObjectType: Position.relatedObjectType,
+                relatedObjectUuid: position.uuid,
+                relatedObject: position
+              }
+            }
+          />
+        }
       />
     </div>
   )

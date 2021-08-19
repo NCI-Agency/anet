@@ -190,13 +190,8 @@ const TaskShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo modelType="Task" model={task} edit button="primary">
-            Edit
-          </LinkTo>
-        )
-        return (
-          <div>
+        const action = (
+          <>
             <RelatedObjectNotes
               notes={task.notes}
               relatedObject={
@@ -207,6 +202,17 @@ const TaskShow = ({ pageDispatchers }) => {
                 }
               }
             />
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo modelType="Task" model={task} edit button="primary">
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+          </>
+        )
+        return (
+          <div>
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
