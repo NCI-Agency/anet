@@ -56,7 +56,7 @@ const LOCATION_TYPES_SUPER_USER = [
   Location.LOCATION_TYPES.PRINCIPAL_LOCATION
 ]
 
-const LocationForm = ({ edit, title, initialValues }) => {
+const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -138,6 +138,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
         }
         const action = (
           <div>
+            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -373,7 +374,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
 LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 LocationForm.defaultProps = {

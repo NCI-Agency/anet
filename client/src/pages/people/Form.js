@@ -55,7 +55,13 @@ const GQL_UPDATE_PERSON = gql`
 `
 const MIN_CHARS_FOR_DUPLICATES = 2
 
-const PersonForm = ({ edit, title, saveText, initialValues }) => {
+const PersonForm = ({
+  edit,
+  title,
+  saveText,
+  initialValues,
+  notesComponent
+}) => {
   const { loadAppData, currentUser } = useContext(AppContext)
   const history = useHistory()
   const confirmHasReplacementButton = useRef(null)
@@ -173,6 +179,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
             : "Yes, I would like to inactivate this account"
         const action = (
           <>
+            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -778,7 +785,8 @@ PersonForm.propTypes = {
   initialValues: PropTypes.instanceOf(Person).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  saveText: PropTypes.string
+  saveText: PropTypes.string,
+  notesComponent: PropTypes.node
 }
 
 PersonForm.defaultProps = {

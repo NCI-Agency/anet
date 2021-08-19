@@ -111,16 +111,32 @@ const PositionShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo
-            modelType="Position"
-            model={position}
-            edit
-            button="primary"
-            className="edit-position"
-          >
-            Edit
-          </LinkTo>
+        const action = (
+          <>
+            <RelatedObjectNotes
+              notes={position.notes}
+              relatedObject={
+                position.uuid && {
+                  relatedObjectType: Position.relatedObjectType,
+                  relatedObjectUuid: position.uuid,
+                  relatedObject: position
+                }
+              }
+            />
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo
+                  modelType="Position"
+                  model={position}
+                  edit
+                  button="primary"
+                  className="edit-position"
+                >
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+          </>
         )
         return (
           <div>
@@ -136,16 +152,6 @@ const PositionShow = ({ pageDispatchers }) => {
               />
             </div>
 
-            <RelatedObjectNotes
-              notes={position.notes}
-              relatedObject={
-                position.uuid && {
-                  relatedObjectType: Position.relatedObjectType,
-                  relatedObjectUuid: position.uuid,
-                  relatedObject: position
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset

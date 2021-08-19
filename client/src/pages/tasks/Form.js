@@ -52,7 +52,7 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const TaskForm = ({ edit, title, initialValues }) => {
+const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -159,6 +159,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
         const fieldSettings = values.fieldSettings()
         const action = (
           <div>
+            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -538,7 +539,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
 TaskForm.propTypes = {
   initialValues: PropTypes.instanceOf(Task).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 TaskForm.defaultProps = {

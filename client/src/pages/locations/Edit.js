@@ -92,20 +92,22 @@ const LocationEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={location.notes}
-        relatedObject={
-          location.uuid && {
-            relatedObjectType: Location.relatedObjectType,
-            relatedObjectUuid: location.uuid,
-            relatedObject: location
-          }
-        }
-      />
       <LocationForm
         edit
         initialValues={location}
         title={`Location ${location.name}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={location.notes}
+            relatedObject={
+              location.uuid && {
+                relatedObjectType: Location.relatedObjectType,
+                relatedObjectUuid: location.uuid,
+                relatedObject: location
+              }
+            }
+          />
+        }
       />
     </div>
   )

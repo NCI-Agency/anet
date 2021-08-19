@@ -177,6 +177,16 @@ const PersonShow = ({ pageDispatchers }) => {
 
   const action = (
     <div>
+      <RelatedObjectNotes
+        notes={person.notes}
+        relatedObject={
+          person.uuid && {
+            relatedObjectType: Person.relatedObjectType,
+            relatedObjectUuid: person.uuid,
+            relatedObject: person
+          }
+        }
+      />
       <Button value="compactView" variant="primary" onClick={onCompactClick}>
         Summary / Print
       </Button>
@@ -217,16 +227,6 @@ const PersonShow = ({ pageDispatchers }) => {
                 onEnd={() => (localStorage.hasSeenPersonTour = "true")}
               />
             </div>
-            <RelatedObjectNotes
-              notes={person.notes}
-              relatedObject={
-                person.uuid && {
-                  relatedObjectType: Person.relatedObjectType,
-                  relatedObjectUuid: person.uuid,
-                  relatedObject: person
-                }
-              }
-            />
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset
