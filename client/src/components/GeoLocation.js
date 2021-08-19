@@ -17,7 +17,7 @@ import {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Form, FormGroup, Table } from "react-bootstrap"
+import { Col, Form, Row, Table } from "react-bootstrap"
 import utils from "utils"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
@@ -162,37 +162,39 @@ const MGRSFormField = ({
   }
 
   return (
-    <FormGroup style={{ marginBottom: 0 }}>
+    <Row style={{ marginBottom: 0 }}>
       <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
       <Col sm={7}>
-        <Col sm={4}>
-          <Field
-            name="displayedCoordinate"
-            component={FieldHelper.InputFieldNoLabel}
-            onChange={e => updateCoordinatesOnChange(e.target.value)}
-            onBlur={e => {
-              updateCoordinatesOnBlur(e.target.value)
+        <Row>
+          <Col sm={4}>
+            <Field
+              name="displayedCoordinate"
+              component={FieldHelper.InputFieldNoLabel}
+              onChange={e => updateCoordinatesOnChange(e.target.value)}
+              onBlur={e => {
+                updateCoordinatesOnBlur(e.target.value)
+              }}
+            />
+          </Col>
+          <CoordinateActionButtons
+            coordinates={coordinates}
+            isSubmitting={isSubmitting}
+            disabled={!displayedCoordinate}
+            onClear={() => {
+              setFieldTouched("displayedCoordinate", false, false)
+              setFieldValue("displayedCoordinate", null, false)
+              setFieldValue("lat", null, false)
+              setFieldValue("lng", null, false)
             }}
+            locationFormat={locationFormat}
+            setLocationFormat={setLocationFormat}
           />
-        </Col>
-        <CoordinateActionButtons
-          coordinates={coordinates}
-          isSubmitting={isSubmitting}
-          disabled={!displayedCoordinate}
-          onClear={() => {
-            setFieldTouched("displayedCoordinate", false, false)
-            setFieldValue("displayedCoordinate", null, false)
-            setFieldValue("lat", null, false)
-            setFieldValue("lng", null, false)
-          }}
-          locationFormat={locationFormat}
-          setLocationFormat={setLocationFormat}
-        />
+        </Row>
       </Col>
-    </FormGroup>
+    </Row>
   )
   // Lat-Lng fields are read only, no need to validate in onChange or onBlur
   function updateCoordinatesOnChange(val) {
@@ -247,49 +249,51 @@ const LatLonFormField = ({
     )
   }
   return (
-    <FormGroup style={{ marginBottom: 0 }}>
+    <Row style={{ marginBottom: 0 }}>
       <Col sm={2} as={Form.Label} htmlFor="lat">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
       <Col sm={7}>
-        <Col sm={3} style={{ marginRight: "8px" }}>
-          <Field
-            name="lat"
-            component={FieldHelper.InputFieldNoLabel}
-            onChange={e => setLatOnChange(e.target.value)}
-            onBlur={e => {
-              setParsedLatOnBlur(e.target.value)
+        <Row>
+          <Col sm={3} style={{ marginRight: "8px" }}>
+            <Field
+              name="lat"
+              component={FieldHelper.InputFieldNoLabel}
+              onChange={e => setLatOnChange(e.target.value)}
+              onBlur={e => {
+                setParsedLatOnBlur(e.target.value)
+              }}
+            />
+          </Col>
+          <Col sm={3}>
+            <Field
+              name="lng"
+              component={FieldHelper.InputFieldNoLabel}
+              onChange={e => setLngOnChange(e.target.value)}
+              onBlur={e => {
+                setParsedLngOnBlur(e.target.value)
+              }}
+            />
+          </Col>
+          <CoordinateActionButtons
+            coordinates={coordinates}
+            isSubmitting={isSubmitting}
+            disabled={!lat && lat !== 0 && !lng && lng !== 0}
+            onClear={() => {
+              // setting second param to false prevents validation since lat, lng can be null together
+              setFieldTouched("lat", false, false)
+              setFieldTouched("lng", false, false)
+              setFieldValue("displayedCoordinate", null)
+              setFieldValue("lat", null)
+              setFieldValue("lng", null)
             }}
+            locationFormat={locationFormat}
+            setLocationFormat={setLocationFormat}
           />
-        </Col>
-        <Col sm={3}>
-          <Field
-            name="lng"
-            component={FieldHelper.InputFieldNoLabel}
-            onChange={e => setLngOnChange(e.target.value)}
-            onBlur={e => {
-              setParsedLngOnBlur(e.target.value)
-            }}
-          />
-        </Col>
-        <CoordinateActionButtons
-          coordinates={coordinates}
-          isSubmitting={isSubmitting}
-          disabled={!lat && lat !== 0 && !lng && lng !== 0}
-          onClear={() => {
-            // setting second param to false prevents validation since lat, lng can be null together
-            setFieldTouched("lat", false, false)
-            setFieldTouched("lng", false, false)
-            setFieldValue("displayedCoordinate", null)
-            setFieldValue("lat", null)
-            setFieldValue("lng", null)
-          }}
-          locationFormat={locationFormat}
-          setLocationFormat={setLocationFormat}
-        />
+        </Row>
       </Col>
-    </FormGroup>
+    </Row>
   )
 
   // Don't parse in onChange, it limits user
