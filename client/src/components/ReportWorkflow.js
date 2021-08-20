@@ -64,7 +64,11 @@ const ApprovalStepModal = ({ action }) => {
       >
         <span>{step.name}</span>
       </Button>
-      <Modal centered show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        className="send-modal-under-searchbar"
+        show={showModal}
+        onHide={() => setShowModal(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Approvers for {step.name}</Modal.Title>
         </Modal.Header>
