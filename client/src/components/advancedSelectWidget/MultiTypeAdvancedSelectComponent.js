@@ -176,6 +176,7 @@ const MultiTypeAdvancedSelectComponent = ({
     <>
       {entityTypes.length > 1 && (
         <ButtonToggleGroup
+          size="sm"
           value={entityType}
           onChange={changeEntityType}
           style={{ marginBottom: "5px" }}

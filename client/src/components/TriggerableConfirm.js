@@ -1,6 +1,6 @@
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Modal } from "react-bootstrap"
+import { Button, Col, Modal } from "react-bootstrap"
 import "./TriggerableConfirm.css"
 
 const TriggerableConfirm = ({
@@ -38,6 +38,10 @@ const TriggerableConfirm = ({
       </Button>
 
       <Modal
+        centered
+        size="lg"
+        backdrop="static"
+        keyboard={false}
         show={show}
         onHide={handleClose}
         className="triggerable-confirm-bootstrap-modal"
@@ -46,17 +50,22 @@ const TriggerableConfirm = ({
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>{body}</Modal.Body>
-        <Modal.Footer>
-          <Button
-            className="float-start"
-            variant="outline-secondary"
-            onClick={handleClose}
-          >
-            {cancelText}
-          </Button>
-          <Button variant="primary" onClick={onConfirm}>
-            {confirmText}
-          </Button>
+        <Modal.Footer className="align-items-stretch">
+          <Col>
+            <Button
+              className="float-start"
+              variant="outline-secondary"
+              onClick={handleClose}
+              style={{ height: "100%" }}
+            >
+              {cancelText}
+            </Button>
+          </Col>
+          <Col>
+            <Button variant="primary" onClick={onConfirm}>
+              {confirmText}
+            </Button>
+          </Col>
         </Modal.Footer>
       </Modal>
     </>

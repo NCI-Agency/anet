@@ -36,7 +36,11 @@ const RelatedObjectNoteModal = ({
   const edit = !!note.uuid
 
   return (
-    <Modal centered show={showModal} onHide={close}>
+    <Modal
+      show={showModal}
+      onHide={close}
+      className="send-modal-under-searchbar"
+    >
       <Formik
         enableReinitialize
         onSubmit={onSubmit}
@@ -101,12 +105,8 @@ const RelatedObjectNoteModal = ({
                   />
                 </div>
               </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  className="pull-left"
-                  onClick={close}
-                  variant="outline-secondary"
-                >
+              <Modal.Footer style={{ justifyContent: "space-between" }}>
+                <Button onClick={close} variant="outline-secondary">
                   Cancel
                 </Button>
                 {_isEmpty(relatedObjects) && onDelete && (

@@ -153,7 +153,11 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   }
 
   return (
-    <Modal centered show={showModal} onHide={closeModal}>
+    <Modal
+      show={showModal}
+      onHide={closeModal}
+      className="send-modal-under-searchbar"
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           Assign Person to the{" "}
