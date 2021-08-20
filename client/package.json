@@ -135,6 +135,7 @@
     "draft-js-side-toolbar-plugin": "3.0.2",
     "draftail": "1.4.1",
     "email-addresses": "5.0.0",
+    "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.2.9",
     "graphiql": "1.4.2",
@@ -181,6 +182,7 @@
     "resize-observer-polyfill": "1.5.1",
     "slate": "0.65.3",
     "slate-history": "0.65.3",
+    "slate-hyperscript": "0.62.0",
     "slate-react": "0.65.3",
     "use-debounce": "7.0.0",
     "yup": "0.32.11"
