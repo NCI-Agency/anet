@@ -14,7 +14,11 @@ const OptionListModal = ({
   const [value, setValue] = useState("")
 
   return (
-    <Modal centered show={showModal} onHide={onCancel}>
+    <Modal
+      className="send-modal-under-searchbar"
+      show={showModal}
+      onHide={onCancel}
+    >
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
