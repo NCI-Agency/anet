@@ -382,7 +382,7 @@ const RowLabelS = styled.th`
 
 export const CompactRowContentS = styled.td`
   padding: 4px 1rem;
-  & .form-control-static {
+  & .form-control-plaintext {
     margin-bottom: 0;
     padding-top: 0;
   }
