@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Button, Callout, Intent } from "@blueprintjs/core"
+import { Callout, Intent } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -37,7 +37,7 @@ import useMergeObjects, {
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Container, FormGroup, Row } from "react-bootstrap"
+import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
@@ -313,12 +313,12 @@ const MergePositions = ({ pageDispatchers }) => {
       <Row>
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
-          large
-          intent={Intent.PRIMARY}
-          text="Merge Positions"
+          variant="primary"
           onClick={mergePositions}
           disabled={!areAllSet(position1, position2, mergedPosition?.name)}
-        />
+        >
+          Merge Positions
+        </Button>
       </Row>
     </Container>
   )
