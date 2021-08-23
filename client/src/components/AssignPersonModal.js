@@ -260,9 +260,8 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           </Container>
         )}
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer style={{ justifyContent: "space-between" }}>
         <Button
-          className="pull-left"
           onClick={() => {
             removeUser ? setRemoveUser(false) : closeModal()
           }}
