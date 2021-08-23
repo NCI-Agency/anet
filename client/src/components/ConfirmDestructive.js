@@ -13,6 +13,7 @@ const ConfirmDestructive = ({
   buttonClassName,
   buttonDisabled,
   buttonId,
+  setIsNotesCanvasVisible,
   children
 }) => {
   const confirmText = `Yes, I am sure that I want to ${operation} ${objectType} ${objectDisplay}`
@@ -33,6 +34,7 @@ const ConfirmDestructive = ({
       buttonClassName={buttonClassName}
       buttonDisabled={buttonDisabled}
       buttonId={buttonId}
+      setIsNotesCanvasVisible={setIsNotesCanvasVisible}
     >
       {children}
     </TriggerableConfirm>
@@ -49,6 +51,7 @@ ConfirmDestructive.propTypes = {
   buttonClassName: PropTypes.string,
   buttonDisabled: PropTypes.bool,
   buttonId: PropTypes.string,
+  setIsNotesCanvasVisible: PropTypes.func,
   children: PropTypes.node
 }
 ConfirmDestructive.defaultProps = {
