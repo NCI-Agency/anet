@@ -1,4 +1,4 @@
-import { AnchorButton, Intent } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   Popover2,
@@ -350,14 +350,13 @@ const CoordinateActionButtons = ({
   return (
     <Col sm={3} style={{ padding: "4px 8px" }}>
       <Tooltip2 content="Clear coordinates">
-        <AnchorButton
-          minimal
-          icon={IconNames.DELETE}
-          outlined
-          intent={Intent.DANGER}
+        <Button
+          variant="outline-danger"
           onClick={onClear}
           disabled={isSubmitting || disabled}
-        />
+        >
+          <Icon icon={IconNames.DELETE} />
+        </Button>
       </Tooltip2>
       <AllFormatsInfo
         coordinates={coordinates}
@@ -459,14 +458,13 @@ const AllFormatsInfo = ({
       }
     >
       <Tooltip2 content="Display all coordinate formats">
-        <AnchorButton
+        <Button
           style={{ marginLeft: "8px" }}
           id="gloc-info-btn"
-          minimal
-          icon={IconNames.INFO_SIGN}
-          intent={Intent.PRIMARY}
-          outlined={inForm}
-        />
+          variant={inForm ? "outline-primary" : "default"}
+        >
+          <Icon icon={IconNames.INFO_SIGN} />
+        </Button>
       </Tooltip2>
     </Popover2>
   )
