@@ -40,6 +40,7 @@ const RelatedObjectNoteModal = ({
       show={showModal}
       onHide={close}
       className="send-modal-under-searchbar"
+      style={{ zIndex: "10000000" }}
     >
       <Formik
         enableReinitialize
