@@ -1,4 +1,4 @@
-import { AnchorButton, Intent } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   Popover2,
@@ -17,7 +17,7 @@ import {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Form, Row, Table } from "react-bootstrap"
+import { Button, Col, Form, Row, Table } from "react-bootstrap"
 import utils from "utils"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
@@ -350,14 +350,13 @@ const CoordinateActionButtons = ({
   return (
     <Col sm={3} style={{ padding: "4px 8px" }}>
       <Tooltip2 content="Clear coordinates">
-        <AnchorButton
-          minimal
-          icon={IconNames.DELETE}
-          outlined
-          intent={Intent.DANGER}
+        <Button
+          variant="outline-danger"
           onClick={onClear}
           disabled={isSubmitting || disabled}
-        />
+        >
+          <Icon icon={IconNames.DELETE} />
+        </Button>
       </Tooltip2>
       <AllFormatsInfo
         coordinates={coordinates}
@@ -415,19 +414,19 @@ const AllFormatsInfo = ({
             <tbody>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
-                  <button
-                    type="button"
+                  <Button
                     name="location"
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)
                     }
+                    variant="outline-secondary"
                   >
                     {
                       Location.LOCATION_FORMAT_LABELS[
                         Location.LOCATION_FORMATS.LAT_LON
                       ]
                     }
-                  </button>
+                  </Button>
                 </td>
                 <td>
                   <LatLonFormField coordinates={coordinates} />
@@ -435,19 +434,19 @@ const AllFormatsInfo = ({
               </tr>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
-                  <button
-                    type="button"
+                  <Button
                     name="location"
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.MGRS)
                     }
+                    variant="outline-secondary"
                   >
                     {
                       Location.LOCATION_FORMAT_LABELS[
                         Location.LOCATION_FORMATS.MGRS
                       ]
                     }
-                  </button>
+                  </Button>
                 </td>
                 <td>
                   <MGRSFormField coordinates={coordinates} />
@@ -459,14 +458,13 @@ const AllFormatsInfo = ({
       }
     >
       <Tooltip2 content="Display all coordinate formats">
-        <AnchorButton
+        <Button
           style={{ marginLeft: "8px" }}
           id="gloc-info-btn"
-          minimal
-          icon={IconNames.INFO_SIGN}
-          intent={Intent.PRIMARY}
-          outlined={inForm}
-        />
+          variant={inForm ? "outline-primary" : "default"}
+        >
+          <Icon icon={IconNames.INFO_SIGN} />
+        </Button>
       </Tooltip2>
     </Popover2>
   )

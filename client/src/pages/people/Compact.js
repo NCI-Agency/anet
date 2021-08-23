@@ -521,7 +521,7 @@ const CompactPersonViewHeader = ({
       </label>
       <DropdownButton
         title="Page Size"
-        variant="primary"
+        variant="outline-secondary"
         id="pageSizeButton"
         onSelect={setPageSize}
       >
@@ -537,7 +537,7 @@ const CompactPersonViewHeader = ({
       </DropdownButton>
       <DropdownButton
         title="Presets"
-        variant="primary"
+        variant="outline-secondary"
         id="presetsButton"
         onSelect={fields =>
           onPresetSelect(fields, optionalFields, setOptionalFields)

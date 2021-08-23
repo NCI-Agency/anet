@@ -1,4 +1,3 @@
-import { Button, Intent } from "@blueprintjs/core"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -6,7 +5,7 @@ import { Field, Form, Formik } from "formik"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Container, Modal, Row } from "react-bootstrap"
+import { Button, Col, Container, Modal, Row } from "react-bootstrap"
 import Settings from "settings"
 import uuidv4 from "uuid/v4"
 import "./EditHistory.css"
@@ -31,7 +30,7 @@ function EditHistory({
       style={{ display: "flex", flexDirection: "column" }}
     >
       <Button
-        intent={Intent.PRIMARY}
+        variant="secondary"
         onClick={() => {
           // Set the state to initial value first if there were any changes
           setFinalHistory(getInitialState())
@@ -92,7 +91,7 @@ function EditHistory({
                         action={(item, index) => (
                           <Button
                             onClick={() => addItem(item)}
-                            intent={Intent.PRIMARY}
+                            variant="outline-secondary"
                           >
                             Insert To End
                           </Button>
@@ -123,7 +122,7 @@ function EditHistory({
                                 }`}
                                 action={
                                   <Button
-                                    intent={Intent.DANGER}
+                                    variant="danger"
                                     onClick={() => removeItemFromHistory(idx)}
                                   >
                                     Remove From History
@@ -186,9 +185,8 @@ function EditHistory({
                         <div className="submit-buttons">
                           <div>
                             <Button
-                              id="saveSearchModalSubmitButton"
-                              intent={Intent.PRIMARY}
-                              large
+                              id="editHistoryModalSubmitButton"
+                              variant="primary"
                               onClick={() => onSave(values)}
                               disabled={
                                 invalidDateIndexesSet.size ||
@@ -209,7 +207,7 @@ function EditHistory({
                           action={(item, index) => (
                             <Button
                               onClick={() => addItem(item)}
-                              intent={Intent.PRIMARY}
+                              variant="outline-secondary"
                             >
                               Insert To End
                             </Button>
