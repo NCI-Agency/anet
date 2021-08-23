@@ -627,48 +627,45 @@ const CompactReportViewHeader = ({
   optionalFields,
   setOptionalFields,
   setPageSize
-}) => {
-  return (
-    <Header>
-      <HeaderTitle value="title">Summary / Print</HeaderTitle>
-      <DropdownButton
-        title="Page Size"
-        variant="outline-secondary"
-        id="pageSizeButton"
-        onSelect={setPageSize}
-      >
-        {Object.keys(PAGE_SIZES).map(pageSize => (
-          <Dropdown.Item
-            key={PAGE_SIZES[pageSize].name}
-            eventKey={PAGE_SIZES[pageSize]}
-            style={{ minWidth: "205px" }}
-          >
-            {PAGE_SIZES[pageSize].name}
-          </Dropdown.Item>
-        ))}
-      </DropdownButton>
-      <SimpleMultiCheckboxDropdown
-        label="Optional Fields ⇓"
-        options={optionalFields}
-        setOptions={setOptionalFields}
-      />
-      <Buttons>
-        {!noReport && (
-          <Button value="print" variant="primary" onClick={onPrintClick}>
-            Print
-          </Button>
-        )}
-        <Button
-          value="detailedView"
-          variant="primary"
-          onClick={returnToDefaultPage}
+}) => (
+  <Header>
+    <HeaderTitle value="title">Summary / Print</HeaderTitle>
+    <DropdownButton
+      title="Page Size"
+      variant="outline-secondary"
+      id="pageSizeButton"
+    >
+      {Object.entries(PAGE_SIZES).map(([key, pageSize]) => (
+        <Dropdown.Item
+          key={key}
+          onClick={() => setPageSize(pageSize)}
+          style={{ minWidth: "205px" }}
         >
-          Detailed View
+          {pageSize.name}
+        </Dropdown.Item>
+      ))}
+    </DropdownButton>
+    <SimpleMultiCheckboxDropdown
+      label="Optional Fields ⇓"
+      options={optionalFields}
+      setOptions={setOptionalFields}
+    />
+    <Buttons>
+      {!noReport && (
+        <Button value="print" variant="primary" onClick={onPrintClick}>
+          Print
         </Button>
-      </Buttons>
-    </Header>
-  )
-}
+      )}
+      <Button
+        value="detailedView"
+        variant="primary"
+        onClick={returnToDefaultPage}
+      >
+        Detailed View
+      </Button>
+    </Buttons>
+  </Header>
+)
 
 CompactReportViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
