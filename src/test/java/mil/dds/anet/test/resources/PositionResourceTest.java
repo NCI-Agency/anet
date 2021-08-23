@@ -8,6 +8,7 @@ import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.text.Collator;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -618,7 +619,6 @@ public class PositionResourceTest extends AbstractResourceTest {
         fail("Unexpected ForbiddenException");
       }
     }
-
     // try to update a regular user position and make it super user
     final PositionInput p3 = getPositionInput(newPosition);
     try {
@@ -634,6 +634,41 @@ public class PositionResourceTest extends AbstractResourceTest {
         fail("Unexpected ForbiddenException");
       }
     }
+  }
+
+  @Test
+  public void testUpdatePositionHistory()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Organization ao = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
+        TestData.createAdvisorOrganizationInput(true));
+    final PositionInput testInput1 = PositionInput.builder()
+        .withName("A Test Position for edittting history").withType(PositionType.ADVISOR)
+        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
+
+    final Position createdPos = adminMutationExecutor.createPosition(FIELDS, testInput1);
+    assertThat(createdPos).isNotNull();
+    assertThat(createdPos.getUuid()).isNotNull();
+    assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
+    List<PersonPositionHistory> prevPersons = new ArrayList<PersonPositionHistory>();
+    Person person1 = getBobBobtown();
+    Person person2 = getChristopfTopferness();
+    PersonPositionHistory hist1 = new PersonPositionHistory();
+    hist1.setPerson(person1);
+    hist1.setStartTime(Instant.now().minus(100, ChronoUnit.DAYS));
+    hist1.setEndTime(Instant.now().minus(50, ChronoUnit.DAYS));
+    prevPersons.add(hist1);
+    PersonPositionHistory hist2 = new PersonPositionHistory();
+    hist2.setPerson(person2);
+    hist2.setStartTime(Instant.now().minus(49, ChronoUnit.DAYS));
+    hist2.setEndTime(Instant.now());
+    prevPersons.add(hist2);
+    createdPos.setPreviousPeople(prevPersons);
+    final PositionInput positionInput = getPositionInput(createdPos);
+    adminMutationExecutor.updatePositionHistory("", positionInput);
+    final Position positionUpdated = adminQueryExecutor.position(FIELDS, positionInput.getUuid());
+    assertThat(positionUpdated).isNotNull();
+    assertThat(positionUpdated.getPreviousPeople().size() == 2);
   }
 
   @Test

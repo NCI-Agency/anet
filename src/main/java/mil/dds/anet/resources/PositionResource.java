@@ -129,6 +129,7 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
 
+
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getCustomSensitiveInformation());
 
@@ -170,6 +171,11 @@ public class PositionResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
     assertCanUpdatePosition(user, existing);
+    if (AnetObjectEngine.getInstance().getPositionDao().hasPersonConflict(pos)) {
+      throw new WebApplicationException(
+          "There are time conflict between time you selected and selected positions's history ",
+          Status.CONFLICT);
+    }
     final int numRows =
         AnetObjectEngine.getInstance().getPositionDao().updatePositionPreviousPeople(pos);
     AnetAuditLogger.log("History updated for position {}", pos);

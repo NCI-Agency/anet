@@ -623,4 +623,26 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
     return numRows;
   }
+
+  public boolean hasPersonConflict(Position pos) {
+    boolean opResult = false;
+    List<PersonPositionHistory> previousPeople = pos.getPreviousPeople();
+    final String positionUuid = pos.getUuid();
+    for (PersonPositionHistory hist : previousPeople) {
+      final Instant startTime = hist.getStartTime();
+      final Instant endTime = hist.getEndTime();
+      final String personUuid = hist.getPersonUuid();
+      final List<Map<String, Object>> rs = getDbHandle().createQuery(
+          "SELECT COUNT(*)  FROM \"peoplePositions\" AS count WHERE (( \"createdAt\" BETWEEN :startTime AND :endTime ) OR"
+              + "( \"endedAt\" BETWEEN :startTime AND :endTime) OR (:startTime BETWEEN \"createdAt\" AND \"endedAt\") OR ( :endTime BETWEEN \"createdAt\" AND \"endedAt\" ) ) AND \"personUuid\" = :personUuid AND \"positionUuid\" != :positionUuid")
+          .bind("startTime", startTime).bind("endTime", endTime).bind("personUuid", personUuid)
+          .bind("positionUuid", positionUuid).map(new MapMapper(false)).list();;
+      final Map<String, Object> result = rs.get(0);
+      final int count = ((Number) result.get("count")).intValue();
+      if (count > 0) {
+        opResult = true;
+      }
+    }
+    return opResult;
+  }
 }

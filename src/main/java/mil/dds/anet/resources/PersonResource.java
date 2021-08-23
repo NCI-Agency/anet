@@ -205,6 +205,11 @@ public class PersonResource {
       throw new WebApplicationException("You do not have permissions to edit this person",
           Status.FORBIDDEN);
     }
+    if (AnetObjectEngine.getInstance().getPersonDao().hasPositionConflict(p)) {
+      throw new WebApplicationException(
+          "There are time conflict between time you selected and selected positions's history ",
+          Status.CONFLICT);
+    }
     final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
     AnetAuditLogger.log("History updated for person {}", p);
     return numRows;

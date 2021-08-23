@@ -35,6 +35,7 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.jdbi.v3.core.mapper.MapMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -491,5 +492,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
           .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
           .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
     }
+  }
+
+  public boolean hasPositionConflict(Person p) {
+    boolean opResult = false;
+    final String personUuid = p.getUuid();
+    List<PersonPositionHistory> previousPositions = p.getPreviousPositions();
+    for (PersonPositionHistory hist : previousPositions) {
+      final Instant startTime = hist.getStartTime();
+      final Instant endTime = hist.getEndTime();
+      final String positionUuid = hist.getPositionUuid();
+      final List<Map<String, Object>> rs = getDbHandle().createQuery(
+          "SELECT COUNT(*)  FROM \"peoplePositions\" AS count WHERE (( \"createdAt\" BETWEEN :startTime AND :endTime ) OR"
+              + "( \"endedAt\" BETWEEN :startTime AND :endTime) OR (:startTime BETWEEN \"createdAt\" AND \"endedAt\") OR ( :endTime BETWEEN \"createdAt\" AND \"endedAt\" ) ) AND \"positionUuid\" = :posUuid AND \"personUuid\" != :personUuid ")
+          .bind("startTime", startTime).bind("endTime", endTime).bind("posUuid", positionUuid)
+          .bind("personUuid", personUuid).map(new MapMapper(false)).list();;
+      final Map<String, Object> result = rs.get(0);
+      final int count = ((Number) result.get("count")).intValue();
+      if (count > 0) {
+        opResult = true;
+      }
+    }
+    return opResult;
   }
 }
