@@ -45,11 +45,3 @@
 .advanced-select-popover > .bp3-overlay > .bp3-transition-container {
   width: 100%;
 }
-
-a.page-link span.sr-only {
-  display: none;
-}
-
-span.page-link span.sr-only {
-  display: none;
-}
