@@ -1,15 +1,36 @@
+import LinkAnet from "components/editor/LinkAnet"
 import escapeHtml from "escape-html"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
 import { createEditor, Text } from "slate"
 import { withHistory } from "slate-history"
-import { Editable, Slate, withReact } from "slate-react"
+import { jsx } from "slate-hyperscript"
+import {
+  Editable,
+  Slate,
+  useFocused,
+  useSelected,
+  withReact
+} from "slate-react"
 import Toolbar from "./Toolbar"
 
 const SlateEditor = ({ value, onChange }) => {
-  const editor = useMemo(() => withReact(withHistory(createEditor())), [])
+  const withAnetLink = editor => {
+    const { isVoid, isInline } = editor
+
+    editor.isVoid = element =>
+      element.type === "anet-link" ? true : isVoid(element)
+
+    editor.isInline = element =>
+      element.type === "anet-link" ? true : isInline(element)
+
+    return editor
+  }
+  const editor = useMemo(
+    () => withReact(withHistory(withAnetLink(createEditor()))),
+    []
+  )
   const document = new DOMParser().parseFromString(value, "text/html")
-  const [value, setValue] = useState(initialValueSlate)
   const deserialized = deserialize(document.body)
   const [slateValue, setSlateValue] = useState(deserialized)
 
@@ -108,12 +129,20 @@ const deserialize = element => {
       return jsx("element", { type: "bulleted-list" }, children)
     case "OL":
       return jsx("element", { type: "numbered-list" }, children)
+    case "A":
+      return jsx(
+        "element",
+        { type: "anet-link", href: element.getAttribute("href") },
+        children
+      )
     default:
       return element.textContent
   }
 }
 
 const Element = ({ attributes, children, element }) => {
+  const selected = useSelected()
+  const focused = useFocused()
   switch (element.type) {
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
@@ -129,6 +158,22 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>
+    case "anet-link":
+      return (
+        <span
+          {...attributes}
+          style={{
+            padding: "1px",
+            verticalAlign: "baseline",
+            display: "inline-block",
+            borderRadius: "4px",
+            boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
+          }}
+        >
+          <LinkAnet url={element.href} />
+          {children}
+        </span>
+      )
     default:
       return <p {...attributes}>{children}</p>
   }
@@ -173,42 +218,5 @@ Leaf.propTypes = {
   children: PropTypes.node,
   leaf: PropTypes.object
 }
-
-const initialValueSlate = [
-  {
-    type: "paragraph",
-    children: [
-      { text: "This is editable " },
-      { text: "rich", bold: true },
-      { text: " text, " },
-      { text: "much", italic: true },
-      { text: " better than a " },
-      { text: "<textarea>", code: true },
-      { text: "!" }
-    ]
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text:
-          "Since it's rich text, you can do things like turn a selection of text "
-      },
-      { text: "bold", bold: true },
-      {
-        text:
-          ", or add a semantically rendered block quote in the middle of the page, like this:"
-      }
-    ]
-  },
-  {
-    type: "block-quote",
-    children: [{ text: "A wise quote." }]
-  },
-  {
-    type: "paragraph",
-    children: [{ text: "Try it out for yourself!" }]
-  }
-]
 
 export default SlateEditor
