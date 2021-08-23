@@ -805,6 +805,11 @@ table hr.attendee-divider {
   background-color: #2965cc;
 }
 
+.form-horizontal .form-label {
+  padding-top: 9px;
+  text-align: right;
+}
+
 .form-horizontal fieldset:last-child {
   margin-bottom: 10px;
 }
@@ -866,7 +871,7 @@ table hr.attendee-divider {
   width: 190px;
 }
 
-.form-control-static {
+.form-control-plaintext {
   /* The design calls for 18px of separation between static form rows.
     The form row already has padding-top: 7px and padding-bottom: 7px,
     and the form control has margin-bottom: 15px. 15 + x = 18 - (7 + 7); x = -11
@@ -1151,31 +1156,6 @@ header.searchPagination {
   a[href]:after {
     content: none;
   }
-
-  /* The following rules are from Bootstrap, but they're in media queries. Those media queries do not get picked up for @media print,
-    so we need to copy them here for the print view to see them. If we ever change the version of Bootstrap being used, we'll have
-    to re-copy the styles here to make the print view consistent. */
-  .form-horizontal .control-label {
-    padding-top: 7px;
-    margin-bottom: 0;
-    text-align: right;
-  }
-
-  .col-sm-1,
-  .col-sm-2,
-  .col-sm-3,
-  .col-sm-4,
-  .col-sm-5,
-  .col-sm-6,
-  .col-sm-7,
-  .col-sm-8,
-  .col-sm-9,
-  .col-sm-10,
-  .col-sm-11,
-  .col-sm-12 {
-    float: left;
-  }
-  /* end styles copied from bootstrap */
 
   /* Normally, the primary content is 9 columns. When we remove the nav, we'd like the primary content to expand to fill the remaining space.
     To do this, we'll override the 9 columns class and make the width 100% */

@@ -526,7 +526,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   label="Summary"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <div id="intent" className="form-control-static">
+                    <div id="intent" className="form-control-plaintext">
                       <p>
                         <strong>{Settings.fields.report.intent}:</strong>{" "}
                         {report.intent}
