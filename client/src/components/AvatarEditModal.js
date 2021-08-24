@@ -14,10 +14,11 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
       </Button>
 
       <Modal
+        centered
         show={showModal}
         onHide={close}
-        className="send-modal-under-searchbar"
         size="xl"
+        style={{ zIndex: "10000" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>

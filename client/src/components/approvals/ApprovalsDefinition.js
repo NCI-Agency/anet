@@ -85,7 +85,6 @@ const ApprovalsDefinition = ({
           render={arrayHelpers => (
             <div>
               <Button
-                className="pull-right"
                 onClick={() => addApprovalStep(arrayHelpers, values[fieldName])}
                 variant="secondary"
                 id={`add${fieldName}Button`}
@@ -105,11 +104,7 @@ const ApprovalsDefinition = ({
                   approval step that is not completely filled in.
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button
-                    className="pull-right"
-                    onClick={hideAddApprovalStepAlert}
-                    variant="primary"
-                  >
+                  <Button onClick={hideAddApprovalStepAlert} variant="primary">
                     OK
                   </Button>
                 </Modal.Footer>
@@ -126,7 +121,6 @@ const ApprovalsDefinition = ({
                 </Modal.Body>
                 <Modal.Footer>
                   <Button
-                    className="pull-right"
                     onClick={hideRemoveApprovalStepAlert}
                     variant="primary"
                   >

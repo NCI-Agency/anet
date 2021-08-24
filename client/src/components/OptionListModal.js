@@ -14,11 +14,7 @@ const OptionListModal = ({
   const [value, setValue] = useState("")
 
   return (
-    <Modal
-      className="send-modal-under-searchbar"
-      show={showModal}
-      onHide={onCancel}
-    >
+    <Modal centered show={showModal} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
@@ -37,12 +33,8 @@ const OptionListModal = ({
         </Container>
       </Modal.Body>
 
-      <Modal.Footer>
-        <Button
-          className="float-start"
-          variant="outline-secondary"
-          onClick={onCancel}
-        >
+      <Modal.Footer className="justify-content-between">
+        <Button variant="outline-secondary" onClick={onCancel}>
           Cancel
         </Button>
         <Button className="save-button" onClick={save} variant="primary">
