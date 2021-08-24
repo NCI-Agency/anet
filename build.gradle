@@ -57,7 +57,7 @@ run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
-String keycloakVersion = "15.0.0"
+String keycloakVersion = "15.0.2"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
