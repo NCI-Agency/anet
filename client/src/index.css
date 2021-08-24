@@ -1114,10 +1114,6 @@ header.searchPagination {
 }
 /* End of loading indicator */
 
-.send-modal-under-searchbar {
-  padding-top: 9rem;
-}
-
 .modal.in .modal-dialog {
   -webkit-transform: translate(0, 0);
   transform: translate(0, 150px);
