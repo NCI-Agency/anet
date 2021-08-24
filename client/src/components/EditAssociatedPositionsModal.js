@@ -109,11 +109,7 @@ const EditAssociatedPositionsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm }) => (
-        <Modal
-          className="send-modal-under-searchbar"
-          show={showModal}
-          onHide={() => close(setFieldValue)}
-        >
+        <Modal centered show={showModal} onHide={() => close(setFieldValue)}>
           <Modal.Header closeButton>
             <Modal.Title>Modify assigned {assignedRole}</Modal.Title>
           </Modal.Header>
@@ -159,9 +155,8 @@ const EditAssociatedPositionsModal = ({
               </Container>
             </Form>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="justify-content-between">
             <Button
-              className="pull-left"
               onClick={() => close(setFieldValue)}
               variant="outline-secondary"
             >

@@ -207,11 +207,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
   }
 
   return (
-    <Modal
-      show={showModal}
-      onHide={closeModal}
-      className="send-modal-under-searchbar"
-    >
+    <Modal centered show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
           Set Position for{" "}
@@ -311,7 +307,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
           </Container>
         )}
       </Modal.Body>
-      <Modal.Footer style={{ justifyContent: "space-between" }}>
+      <Modal.Footer className="justify-content-between">
         <Button
           onClick={() => {
             removeUser ? setRemoveUser(false) : closeModal()
