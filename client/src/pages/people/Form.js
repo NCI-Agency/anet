@@ -35,6 +35,7 @@ import {
   Col,
   FormCheck,
   FormGroup,
+  FormLabel,
   FormText,
   Row
 } from "react-bootstrap"
@@ -220,8 +221,8 @@ const PersonForm = ({
                   >
                     <FormGroup>
                       <Row style={{ marginBottom: "1rem" }}>
-                        <Col sm={2} as={Form.Label} htmlFor="lastName">
-                          <b>Name</b>
+                        <Col sm={2} as={FormLabel} htmlFor="lastName">
+                          Name
                         </Col>
                         <Col sm={7}>
                           <Row>
