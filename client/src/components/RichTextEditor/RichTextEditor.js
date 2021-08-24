@@ -1,4 +1,5 @@
 import LinkAnet from "components/editor/LinkAnet"
+import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import escapeHtml from "escape-html"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
@@ -170,7 +171,14 @@ const Element = ({ attributes, children, element }) => {
             boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
           }}
         >
-          <LinkAnet url={element.href} />
+          {element.href ? (
+            <LinkAnet url={element.href} />
+          ) : (
+            <LinkAnetEntity
+              type={element.entityType}
+              uuid={element.entityUuid}
+            />
+          )}
           {children}
         </span>
       )

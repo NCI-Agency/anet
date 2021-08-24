@@ -1,12 +1,15 @@
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useRef, useState } from "react"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
+import LinkSourceAnet from "./LinkSourceAnet"
 
 const LIST_TYPES = ["bulleted-list", "numbered-list"]
 
 const Toolbar = () => {
   const editor = useSlate()
+  const selectionRef = useRef(editor.selection)
+  const [showLinksModal, setShowLinksModal] = useState(false)
   return (
     <div>
       <MarkButton editor={editor} format="bold" text="Bold" />
@@ -19,6 +22,21 @@ const Toolbar = () => {
       <BlockButton editor={editor} format="heading-three" text="H3" />
       <BlockButton editor={editor} format="bulleted-list" text="UL" />
       <BlockButton editor={editor} format="numbered-list" text="OL" />
+      <button
+        type="button"
+        onClick={() => {
+          selectionRef.current = editor.selection
+          setShowLinksModal(true)
+        }}
+      >
+        Link
+      </button>
+      <LinkSourceAnet
+        editor={editor}
+        showModal={showLinksModal}
+        setShowModal={setShowLinksModal}
+        selection={selectionRef.current}
+      />
     </div>
   )
 }
