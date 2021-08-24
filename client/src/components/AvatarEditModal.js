@@ -17,6 +17,7 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
         show={showModal}
         onHide={close}
         className="send-modal-under-searchbar"
+        size="xl"
       >
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
