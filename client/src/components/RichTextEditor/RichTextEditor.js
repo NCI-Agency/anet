@@ -1,6 +1,7 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import escapeHtml from "escape-html"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
 import { createEditor, Text } from "slate"
@@ -13,6 +14,7 @@ import {
   useSelected,
   withReact
 } from "slate-react"
+import { getUrlFromEntityInfo } from "utils_links"
 import Toolbar from "./Toolbar"
 
 const SlateEditor = ({ value, onChange }) => {
@@ -96,6 +98,8 @@ const serialize = node => {
       return `<li>${children}</li>`
     case "numbered-list":
       return `<ol>${children}</ol>`
+    case "anet-link":
+      return `<a href=${getUrlFromEntityInfo(node)}>${node.children.text}</a>`
     default:
       return children
   }
@@ -105,6 +109,14 @@ const deserialize = element => {
   const children = Array.from(element.childNodes).map(deserialize)
   switch (element.nodeName) {
     case "BODY":
+      // Body must have at least one children node for user to be able to edit the text in it
+      if (_isEmpty(children)) {
+        return jsx(
+          "fragment",
+          {},
+          jsx("element", { type: "paragraph" }, [{ text: "" }])
+        )
+      }
       return jsx("fragment", {}, children)
     case "P":
       return jsx("element", { type: "paragraph" }, children)
@@ -137,7 +149,10 @@ const deserialize = element => {
         children
       )
     default:
-      return element.textContent
+      // Text cannot be the direct child of BODY. If the value is plain text without any html tags, we should be wrapped in a "<p></p>" tag
+      return element.parentNode.nodeName === "BODY"
+        ? jsx("element", { type: "paragraph" }, element.textContent)
+        : element.textContent
   }
 }
 
