@@ -43,7 +43,6 @@ function EditHistory({
         centered
         show={showModal}
         onHide={onHide}
-        size="lg"
         dialogClassName="edit-history-dialog"
       >
         <Modal.Header closeButton>
