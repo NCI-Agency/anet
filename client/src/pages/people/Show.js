@@ -37,7 +37,15 @@ import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import { Button, Col, Container, FormGroup, Row, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  Container,
+  FormGroup,
+  FormLabel,
+  Row,
+  Table
+} from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -565,7 +573,7 @@ const PersonShow = ({ pageDispatchers }) => {
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
-        <Col sm={2} as={Form.Label}>
+        <Col sm={2} as={FormLabel}>
           {assocTitle}
         </Col>
         <Col sm={10}>
