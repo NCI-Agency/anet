@@ -46,7 +46,7 @@ const Header = ({ minimalHeader, onHomeClick, toggleMenuAction }) => (
 
         {!minimalHeader && (
           <Col xs={3} sm={2} md={2} lg={1}>
-            <div style={{ paddingRight: 5 }} className="pull-right">
+            <div style={{ paddingRight: 5 }} className="float-end">
               <CreateButton />
             </div>
           </Col>

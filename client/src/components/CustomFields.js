@@ -368,7 +368,7 @@ const ArrayOfObjectsField = fieldProps => {
         render={arrayHelpers => (
           <div>
             <Button
-              className="pull-right"
+              className="float-end"
               onClick={() => addObject(objDefault, arrayHelpers)}
               variant="secondary"
               id={`add-${name}`}

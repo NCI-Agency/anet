@@ -84,7 +84,7 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
     >
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}

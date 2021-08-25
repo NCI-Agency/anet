@@ -340,7 +340,7 @@ const AdvancedSelect = ({
                       <UltimatePagination
                         Component="footer"
                         componentClassName="searchPagination"
-                        className="pull-right"
+                        className="float-end"
                         pageNum={pageNum}
                         pageSize={pageSize}
                         totalCount={totalCount}

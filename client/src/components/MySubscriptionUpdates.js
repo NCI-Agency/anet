@@ -138,7 +138,7 @@ const MySubscriptionUpdates = ({
           <UltimatePagination
             Component="header"
             componentClassName="searchPagination"
-            className="pull-right"
+            className="float-end"
             pageNum={pageNum}
             pageSize={pageSize}
             totalCount={totalCount}
