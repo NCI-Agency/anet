@@ -550,7 +550,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
             <Field
               name="comment"
               component={FieldHelper.InputField}
-              as="textarea"
+              asA="textarea"
               vertical
             />
           </Modal.Body>

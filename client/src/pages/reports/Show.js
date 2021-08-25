@@ -780,7 +780,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   name="newComment"
                   label="Add a comment"
                   component={FieldHelper.InputField}
-                  as="textarea"
+                  asA="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
                 />
@@ -918,7 +918,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="approvalComment"
           label="Approval comment"
           component={FieldHelper.InputField}
-          as="textarea"
+          asA="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -945,7 +945,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="requestChangesComment"
           label="Request changes comment"
           component={FieldHelper.InputField}
-          as="textarea"
+          asA="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -983,7 +983,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           <Field
             name="comment"
             component={FieldHelper.InputField}
-            as="textarea"
+            asA="textarea"
             vertical
           />
         </Modal.Body>
