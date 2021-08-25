@@ -20,7 +20,7 @@ const ACTION_TYPE_DETAILS = {
 const ApprovalStepModalStatus = ({ action }) => {
   if (action.type) {
     const actionType = ACTION_TYPE_DETAILS[action.type]
-    const cssClass = "label " + actionType.cssClass
+    const cssClass = "badge " + actionType.cssClass
     return (
       <span className={cssClass}>
         {actionType.text} by{" "}
@@ -40,7 +40,7 @@ const ApprovalStepModalStatus = ({ action }) => {
       </span>
     )
   }
-  return <span className="label pending">Pending</span>
+  return <span className="badge badge-pill pending">Pending</span>
 }
 ApprovalStepModalStatus.propTypes = {
   action: PropTypes.object.isRequired
