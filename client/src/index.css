@@ -175,6 +175,10 @@ fieldset.danger {
   padding: 0;
 }
 
+a.btn {
+  text-decoration: none;
+}
+
 .btn.btn-link {
   overflow: visible;
   width: 100%;
