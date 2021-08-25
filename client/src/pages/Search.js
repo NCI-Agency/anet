@@ -674,7 +674,7 @@ const Search = ({
               >
                 <img src={ORGANIZATIONS_ICON} alt="" /> Organizations{" "}
                 {hasOrganizationsResults && (
-                  <Badge pill bg="secondary">
+                  <Badge pill bg="secondary" className="float-end">
                     {numOrganizations}
                   </Badge>
                 )}
@@ -684,7 +684,7 @@ const Search = ({
                 <img src={PEOPLE_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}{" "}
                 {hasPeopleResults && (
-                  <Badge pill bg="secondary">
+                  <Badge pill bg="secondary" className="float-end">
                     {numPeople}
                   </Badge>
                 )}
@@ -694,7 +694,7 @@ const Search = ({
                 <img src={POSITIONS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}{" "}
                 {hasPositionsResults && (
-                  <Badge pill bg="secondary">
+                  <Badge pill bg="secondary" className="float-end">
                     {numPositions}
                   </Badge>
                 )}
@@ -704,7 +704,7 @@ const Search = ({
                 <img src={TASKS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}{" "}
                 {hasTasksResults && (
-                  <Badge pill bg="secondary">
+                  <Badge pill bg="secondary" className="float-end">
                     {numTasks}
                   </Badge>
                 )}
@@ -714,7 +714,7 @@ const Search = ({
                 <img src={LOCATIONS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}{" "}
                 {hasLocationsResults && (
-                  <Badge pill bg="secondary">
+                  <Badge pill bg="secondary" className="float-end">
                     {numLocations}
                   </Badge>
                 )}
@@ -724,7 +724,7 @@ const Search = ({
                 <img src={REPORTS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}{" "}
                 {hasReportsResults && (
-                  <Badge pill bg="secondary">
+                  <Badge pill bg="secondary" className="float-end">
                     {numReports}
                   </Badge>
                 )}
