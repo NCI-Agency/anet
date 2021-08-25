@@ -733,7 +733,7 @@ const Search = ({
           </Row>
         </Container>
       </SubNav>
-      <div className="float-start">
+      <div className="d-flex justify-content-end">
         {numResults > 0 && (
           <Dropdown id="dropdown-custom-1">
             <Dropdown.Toggle variant="outline-secondary">
@@ -770,13 +770,11 @@ const Search = ({
             </Dropdown.Menu>
           </Dropdown>
         )}
-      </div>
-      <div className="float-end">
         {!_isEmpty(searchQueryParams) && numResults >= 0 && (
           <Button
             onClick={openSaveModal}
             id="saveSearchButton"
-            style={{ marginRight: 12 }}
+            style={{ marginLeft: 12 }}
             variant="outline-secondary"
           >
             Save search
