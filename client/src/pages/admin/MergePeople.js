@@ -94,7 +94,7 @@ const MergePeople = ({ pageDispatchers }) => {
     <div>
       <Messages error={saveError} />
 
-      <h2 className="form-header">Merge People Tool</h2>
+      <h4 className="form-header">Merge People Tool</h4>
       <Alert variant="warning">
         <p>
           <b>Important</b>: Select the two duplicative people below. The loser

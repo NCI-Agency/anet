@@ -86,7 +86,7 @@ const MergeLocations = ({ pageDispatchers }) => {
     <Container fluid>
       <Row>
         <Messages error={saveError} warning={saveWarning} />
-        <h2>Merge Locations Tool</h2>
+        <h4>Merge Locations Tool</h4>
       </Row>
       <Row>
         <Col md={4} id="left-merge-loc-col">
