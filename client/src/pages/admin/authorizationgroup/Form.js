@@ -102,7 +102,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                 <Field
                   name="description"
                   component={FieldHelper.InputField}
-                  as="textarea"
+                  asA="textarea"
                   maxLength={Settings.maxTextFieldLength}
                   onKeyUp={event =>
                     countCharsLeft(

@@ -862,14 +862,13 @@ const ReportForm = ({
                     <FastField
                       name="keyOutcomes"
                       label={Settings.fields.report.keyOutcomes}
-                      asA="textarea"
                       component={FieldHelper.InputField}
+                      asA="textarea"
                       onChange={event => {
                         setFieldTouched("keyOutcomes", true, false)
                         setFieldValue("keyOutcomes", event.target.value, false)
                         validateFieldDebounced("keyOutcomes")
                       }}
-                      as="textarea"
                       maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
                         countCharsLeft(
@@ -894,9 +893,8 @@ const ReportForm = ({
                   <FastField
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps.label}
-                    asA="textarea"
                     component={FieldHelper.InputField}
-                    as="textarea"
+                    asA="textarea"
                     onChange={event => {
                       setFieldTouched("nextSteps", true, false)
                       setFieldValue("nextSteps", event.target.value, false)
