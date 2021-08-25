@@ -27,7 +27,7 @@
     "@babel/runtime": "7.15.3",
     "@graphql-cli/codegen": "2.1.1",
     "@graphql-codegen/schema-ast": "2.1.0",
-    "@graphql-codegen/visitor-plugin-common": "2.1.1",
+    "@graphql-codegen/visitor-plugin-common": "2.1.2",
     "@storybook/addon-essentials": "6.3.7",
     "@storybook/addon-links": "6.3.7",
     "@storybook/addon-postcss": "2.0.0",
