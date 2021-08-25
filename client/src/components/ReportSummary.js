@@ -331,7 +331,7 @@ const ReportSummaryRow = ({ report }) => {
           )}
         </Col>
       </Row>
-      <Row className="hide-for-print">
+      <Row className="d-print-none">
         <Col className="read-report-actions" md={12}>
           <LinkTo
             modelType="Report"

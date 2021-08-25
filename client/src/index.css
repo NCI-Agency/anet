@@ -981,10 +981,6 @@ header.searchPagination {
   vertical-align: baseline;
 }
 
-.only-show-for-print {
-  display: none;
-}
-
 .general-banner {
   padding: 7px;
   margin-bottom: 0;
@@ -1128,17 +1124,12 @@ header.searchPagination {
 }
 
 @media print {
-  .only-show-for-print {
-    display: inherit;
-  }
-
   .breadcrumb,
   .header,
   .banner,
   .add-new-comment,
   button,
   .btn,
-  .hide-for-print,
   .main-sidebar {
     display: none !important;
   }

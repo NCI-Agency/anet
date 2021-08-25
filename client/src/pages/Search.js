@@ -785,7 +785,7 @@ const Search = ({
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
       {!_isEmpty(searchQueryParams) && (
-        <h2 className="only-show-for-print">
+        <h2 className="d-none d-print-block">
           Search query: {searchQuery.text}
           <br />
           Filters: <SearchDescription searchQuery={searchQuery} />
