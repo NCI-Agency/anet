@@ -132,7 +132,7 @@ const Navigation = ({
   }, [inMyOrg, inMyCounterParts, inMyReports, inMyTasks, inMySubscriptions])
 
   return (
-    <Nav variant="pills" id="leftNav" className="flex-column hide-for-print">
+    <Nav variant="pills" id="leftNav" className="flex-column d-print-none">
       <SidebarLink
         id="nav-home-button"
         linkTo="/"

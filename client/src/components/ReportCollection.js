@@ -50,7 +50,7 @@ const ReportCollection = ({
               <ButtonToggleGroup
                 value={viewFormat}
                 onChange={setViewFormat}
-                className="hide-for-print"
+                className="d-print-none"
               >
                 {viewFormats.includes(FORMAT_TABLE) && (
                   <Button value={FORMAT_TABLE} variant="outline-secondary">
