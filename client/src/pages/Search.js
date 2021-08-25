@@ -240,7 +240,7 @@ const Organizations = ({
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={organizationQuery.pageSize}
         totalCount={totalCount}

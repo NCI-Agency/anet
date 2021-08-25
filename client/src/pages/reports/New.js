@@ -42,7 +42,7 @@ const ReportNew = ({ pageDispatchers }) => {
 
   return (
     <div className="report-new">
-      <div className="pull-right">
+      <div className="float-end">
         <GuidedTour
           title="Take a guided tour of the report page."
           tour={reportTour}

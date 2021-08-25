@@ -288,7 +288,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
             </SubNav>
 
             {currentUser.isSuperUser() && (
-              <div className="pull-right">
+              <div className="float-end">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."
                   tour={orgTour}

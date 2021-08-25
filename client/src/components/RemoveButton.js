@@ -11,7 +11,7 @@ const RemoveButton = ({
   disabled = false
 }) => (
   <Button
-    className="pull-right"
+    className="float-end"
     variant={buttonStyle}
     title={title}
     onClick={onClick}

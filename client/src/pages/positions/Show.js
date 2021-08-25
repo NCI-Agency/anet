@@ -140,7 +140,7 @@ const PositionShow = ({ pageDispatchers }) => {
         )
         return (
           <div>
-            <div className="pull-right">
+            <div className="float-end">
               <GuidedTour
                 title="Take a guided tour of this position's page."
                 tour={positionTour}
