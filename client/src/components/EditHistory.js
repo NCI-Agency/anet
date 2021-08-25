@@ -107,7 +107,7 @@ function EditHistory({
                             historyEntityType={historyEntityType}
                           />
                         </div>
-                        <h2 style={{ textAlign: "center" }}>Merged History</h2>
+                        <h4 style={{ textAlign: "center" }}>Merged History</h4>
                         {values.history.map((item, idx) => {
                           // To be able to set fields inside the array state
                           const startTimeFieldName = `history[${idx}].startTime`

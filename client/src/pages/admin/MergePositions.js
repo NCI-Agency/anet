@@ -75,7 +75,7 @@ const MergePositions = ({ pageDispatchers }) => {
     <Container fluid>
       <Row>
         <Messages error={saveError} />
-        <h2>Merge Positions Tool</h2>
+        <h4>Merge Positions Tool</h4>
       </Row>
       <Row>
         <Col md={4} id="left-merge-pos-col">

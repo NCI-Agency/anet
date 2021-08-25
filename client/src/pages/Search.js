@@ -783,11 +783,11 @@ const Search = ({
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
       {!_isEmpty(searchQueryParams) && (
-        <h2 className="d-none d-print-block">
+        <h4 className="d-none d-print-block">
           Search query: {searchQuery.text}
           <br />
           Filters: <SearchDescription searchQuery={searchQuery} />
-        </h2>
+        </h4>
       )}
       {_isEmpty(searchQueryParams) && (
         <Alert variant="warning">

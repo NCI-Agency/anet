@@ -60,8 +60,7 @@ fieldset {
   font-weight: normal;
 }
 
-h2.legend {
-  font-size: 2rem;
+h4.legend {
   margin-top: 1rem;
 }
 
@@ -461,7 +460,7 @@ li#search-nav .nav > li a {
   font-size: 1.4rem;
 }
 
-.report-summary h2 {
+.report-summary h4 {
   font-weight: bold;
 }
 
