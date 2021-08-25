@@ -34,7 +34,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import { EXCLUDED_ASSESSMENT_FIELDS } from "components/RelatedObjectNotes"
-import RichTextEditor from "components/RichTextEditor"
+import SlateEditor from "components/RichTextEditor/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
@@ -894,15 +894,7 @@ const ReportForm = ({
                       setFieldValue("reportText", value, true)
                     }
                   }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("reportText", true, false)
-                      }}
-                    />
-                  }
+                  widget={<SlateEditor />}
                 />
 
                 <Button
@@ -937,19 +929,7 @@ const ReportForm = ({
                             )
                           }
                         }}
-                        widget={
-                          <RichTextEditor
-                            className="reportSensitiveInformationField"
-                            onHandleBlur={() => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched(
-                                "reportSensitiveInformation.text",
-                                true,
-                                false
-                              )
-                            }}
-                          />
-                        }
+                        widget={<SlateEditor />}
                       />
                       <FastField
                         name="authorizationGroups"

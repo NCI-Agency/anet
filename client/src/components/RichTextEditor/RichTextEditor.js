@@ -33,7 +33,7 @@ const SlateEditor = ({ value, onChange }) => {
     () => withReact(withHistory(withAnetLink(createEditor()))),
     []
   )
-  const document = new DOMParser().parseFromString(value, "text/html")
+  const document = new DOMParser().parseFromString(value || "", "text/html")
   const deserialized = deserialize(document.body)
   const [slateValue, setSlateValue] = useState(deserialized)
 

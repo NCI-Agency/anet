@@ -16,7 +16,7 @@ import Model, {
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
-import RichTextEditor from "components/RichTextEditor"
+import SlateEditor from "components/RichTextEditor/RichTextEditor"
 import { FastField, FieldArray } from "formik"
 import { JSONPath } from "jsonpath-plus"
 import _cloneDeep from "lodash/cloneDeep"
@@ -39,7 +39,7 @@ export const SPECIAL_WIDGET_TYPES = {
 }
 const SPECIAL_WIDGET_COMPONENTS = {
   [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: LikertScale,
-  [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: RichTextEditor
+  [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: SlateEditor
 }
 
 const SpecialField = ({ name, widget, formikProps, ...otherFieldProps }) => {

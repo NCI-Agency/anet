@@ -8,7 +8,7 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import RelatedObjectsTable from "components/RelatedObjectsTable"
-import RichTextEditor from "components/RichTextEditor"
+import SlateEditor from "components/RichTextEditor/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -79,18 +79,10 @@ const RelatedObjectNoteModal = ({
                   <Messages error={error} />
                   <Field
                     name="text"
-                    value={noteText}
                     component={FieldHelper.SpecialField}
+                    value={noteText}
                     onChange={value => setFieldValue("text", value)}
-                    widget={
-                      <RichTextEditor
-                        className="textField"
-                        onHandleBlur={() => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("text", true, false)
-                        }}
-                      />
-                    }
+                    widget={<SlateEditor />}
                     vertical
                   />
                   <RelatedObjectsTable

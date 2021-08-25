@@ -19,7 +19,7 @@ import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
-import RichTextEditor from "components/RichTextEditor"
+import SlateEditor from "components/RichTextEditor/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
@@ -500,21 +500,14 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                 <FastField
                   name="biography"
                   component={FieldHelper.SpecialField}
+                  value={values.biography}
                   onChange={value => {
                     // prevent initial unnecessary render of RichTextEditor
                     if (!_isEqual(value, values.biography)) {
                       setFieldValue("biography", value)
                     }
                   }}
-                  widget={
-                    <RichTextEditor
-                      className="biography"
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("biography", true, false)
-                      }}
-                    />
-                  }
+                  widget={<SlateEditor />}
                 />
               </Fieldset>
 
