@@ -409,6 +409,7 @@ const ArrayObject = ({
       <RemoveButton
         title={`Remove this ${objLabel}`}
         altText={`Remove this ${objLabel}`}
+        buttonStyle="outline-danger"
         onClick={() => arrayHelpers.remove(index)}
       />
       <CustomFields

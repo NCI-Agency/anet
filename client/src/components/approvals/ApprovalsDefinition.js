@@ -165,6 +165,7 @@ const ApprovalsDefinition = ({
         <RemoveButton
           title="Remove this step"
           altText="Remove this step"
+          buttonStyle="outline-danger"
           onClick={() => removeApprovalStep(arrayHelpers, index, step)}
         />
 
