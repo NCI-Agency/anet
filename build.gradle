@@ -85,7 +85,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation 'org.ehcache:ehcache:3.9.5'
+	implementation 'org.ehcache:ehcache:3.9.6'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
@@ -162,8 +162,8 @@ jacoco {
 
 jacocoTestReport {
 	reports {
-		xml.enabled true
-		html.enabled false
+		xml.required = true
+		html.required = false
 	}
 }
 
@@ -240,7 +240,7 @@ run.args = ["server", anetConfig]
 task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["check", anetConfig]
 }
 
@@ -261,7 +261,7 @@ task dbWait(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Wait for the ANET database to become available."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["waitForDB", anetConfig]
 }
 
@@ -270,7 +270,7 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database initialization command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["init", anetConfig]
 	standardInput = System.in
 }
@@ -280,7 +280,7 @@ task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database status (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["db", "status", anetConfig]
 }
 
@@ -289,7 +289,7 @@ task dbPrep(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database preparation command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["dbScript", "-S", "prepare-${dbType}.sql", anetConfig]
 }
 
@@ -298,7 +298,7 @@ task dbMigrate(dependsOn: dbPrep, type: JavaExec) {
 	description = "Runs the ANET database migration (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["db", "migrate", anetConfig]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
@@ -310,7 +310,7 @@ task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database migration test (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["db", "test", anetConfig]
 }
 
@@ -319,7 +319,7 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database migration rollback (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["db", "rollback", anetConfig, "--count", "1"]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
@@ -331,7 +331,7 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database drop-all (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 
@@ -345,7 +345,7 @@ task dbLoad_mssql(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database load command for MS SQL; loads demo data."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	args = ["dbScript", "-S", "insertBaseData-mssql.sql", anetConfig]
 }
 
@@ -531,7 +531,7 @@ task dbMaintenance(dependsOn: 'compileJava', type: JavaExec) {
 	description = "Runs the ANET database maintenance command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = mainClassName
+	mainClass = mainClassName
 	def cmdline = ["maintenance"]
 	if (project.hasProperty("args")) {
 		cmdline.addAll(project.args.split("\\s+"))
