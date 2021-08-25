@@ -162,6 +162,8 @@ fields:
       maxTextFieldLength: 1000
     keyOutcomes: Key outcomes
     reportText: Key details
+    location:
+      filter: [PINPOINT_LOCATION, VIRTUAL_LOCATION]
 
   person:
     firstName: First name
@@ -262,6 +264,7 @@ fields:
             color: 'skyblue'
 
   location:
+    superUserTypeOptions: [PINPOINT_LOCATION]
     format: LAT_LON
 
   position:
@@ -308,6 +311,8 @@ fields:
       code:
         label: CE Post Number
         placeholder: the CE post number for this position
+      location:
+        filter: [PINPOINT_LOCATION]
 
     org:
       name: Advisor Organization
@@ -448,6 +453,8 @@ fields:
       code:
         label: Tashkil
         placeholder: the Afghan taskhil ID for this position
+      location:
+        filter: [PINPOINT_LOCATION]
 
     org:
       name: Afghan Government Organization
