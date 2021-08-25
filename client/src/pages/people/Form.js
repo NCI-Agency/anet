@@ -179,7 +179,7 @@ const PersonForm = ({
             ? "Yes, I would like to inactivate my predecessor's account and set up a new one for myself"
             : "Yes, I would like to inactivate this account"
         const action = (
-          <>
+          <div>
             {notesComponent}
             <Button
               key="submit"
@@ -189,7 +189,7 @@ const PersonForm = ({
             >
               {saveText}
             </Button>
-          </>
+          </div>
         )
 
         return (
