@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core"
+import { Icon, Intent } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   Popover2,
@@ -463,7 +463,7 @@ const AllFormatsInfo = ({
           id="gloc-info-btn"
           variant={inForm ? "outline-primary" : "default"}
         >
-          <Icon icon={IconNames.INFO_SIGN} />
+          <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
         </Button>
       </Tooltip2>
     </Popover2>
