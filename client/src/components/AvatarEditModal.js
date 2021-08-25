@@ -17,7 +17,7 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
         centered
         show={showModal}
         onHide={close}
-        size="xl"
+        size="lg"
         style={{ zIndex: "10000" }}
       >
         <Modal.Header closeButton>
