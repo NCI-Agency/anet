@@ -151,6 +151,10 @@ fieldset.danger {
   opacity: 0.5;
 }
 
+textarea.form-control {
+  height: auto;
+}
+
 #duration {
   width: 10em;
 }
