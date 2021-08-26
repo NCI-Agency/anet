@@ -1,49 +1,13 @@
-.fc .fc-button,
-.fc .fc-button-primary{
-    color: black;
-    background-color: white;
-    border-color: #ccc;
-}
+/* Override @fullcalendar styles (variables are in fullcalendar-vars.css) */
 
-.fc .fc-button-primary:disabled,
-.fc .fc-button-primary:active,
+.fc .fc-button-primary:not(:disabled):active,
 .fc .fc-button-primary:not(:disabled).fc-button-active {
-  color: #fff;
-  opacity: unset;
-  background-color: #337ab7;
-  border-color: #ccc;
+  color: var(--fc-button-active-text-color);
 }
-
-.fc .fc-button:not(:disabled):hover {
-    color: black;
-    background-color: #ccc;
-    border-color: #ccc;
-  }
-
-.fc .fc-button:focus,
-.fc .fc-button-primary:not(:disabled):active:focus,
-.fc .fc-button-primary:not(:disabled).fc-button-active:focus {
-  -webkit-box-shadow: unset;
-          box-shadow: unset;
+.fc .fc-button-primary:not(:disabled):hover {
+  color: var(--fc-button-hover-text-color);
 }
-
-.fc .fc-list-empty {
-  padding: 8px 4px;
-  border-width: 1px 0 0;
-  border-color: #ccc;
-}
-
-.fc .fc-list-empty .fc-list-empty-cushion {
-  margin: 0;
-}
-
-a.fc-col-header-cell-cushion, a.fc-col-header-cell-cushion:hover, a.fc-col-header-cell-cushion:focus,
-a.fc-list-day-text, a.fc-list-day-text:hover, a.fc-list-day-text:focus {
-  text-decoration: none;
-  cursor: default;
-  color: #363636;
-}
-
-.fc-event {
-  min-height: 20px;
+.fc .fc-button-primary:disabled {
+  color: var(--fc-button-disabled-text-color);
+  background-color: var(--fc-button-disabled-bg-color);
 }
