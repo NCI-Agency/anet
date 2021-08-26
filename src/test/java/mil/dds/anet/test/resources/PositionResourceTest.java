@@ -25,6 +25,7 @@ import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
+import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionSearchQueryInput;
@@ -650,21 +651,20 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(createdPos).isNotNull();
     assertThat(createdPos.getUuid()).isNotNull();
     assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
-    List<PersonPositionHistory> prevPersons = new ArrayList<PersonPositionHistory>();
+    List<PersonPositionHistoryInput> prevPersons = new ArrayList<PersonPositionHistoryInput>();
     Person person1 = getBobBobtown();
     Person person2 = getChristopfTopferness();
-    PersonPositionHistory hist1 = new PersonPositionHistory();
-    hist1.setPerson(person1);
-    hist1.setStartTime(Instant.now().minus(100, ChronoUnit.DAYS));
-    hist1.setEndTime(Instant.now().minus(50, ChronoUnit.DAYS));
-    prevPersons.add(hist1);
-    PersonPositionHistory hist2 = new PersonPositionHistory();
-    hist2.setPerson(person2);
-    hist2.setStartTime(Instant.now().minus(49, ChronoUnit.DAYS));
-    hist2.setEndTime(Instant.now());
-    prevPersons.add(hist2);
-    createdPos.setPreviousPeople(prevPersons);
+    PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
+        .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPerson(getPersonInput(person1))
+        .build();
+    PersonPositionHistoryInput histInput2 =
+        PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
+            .withEndTime(Instant.now()).withPerson(getPersonInput(person2)).build();
+    prevPersons.add(histInput1);
+    prevPersons.add(histInput2);
     final PositionInput positionInput = getPositionInput(createdPos);
+    positionInput.setPreviousPeople(prevPersons);
     adminMutationExecutor.updatePositionHistory("", positionInput);
     final Position positionUpdated = adminQueryExecutor.position(FIELDS, positionInput.getUuid());
     assertThat(positionUpdated).isNotNull();

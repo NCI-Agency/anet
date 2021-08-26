@@ -121,10 +121,7 @@ public class PersonResource {
     p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
-    if (!canCreateOrUpdatePerson(user, existing, false)) {
-      throw new WebApplicationException("You do not have permissions to edit this person",
-          Status.FORBIDDEN);
-    }
+    assertCanUpdatePerson(user, existing);
 
     if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
@@ -201,18 +198,23 @@ public class PersonResource {
       @GraphQLArgument(name = "person") Person p) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
+    assertCanUpdatePerson(user, existing);
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(),
+        p.getPreviousPositions(), true)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+    final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
+    AnetAuditLogger.log("History updated for person {} bye {}", p, user);
+    return numRows;
+  }
+
+  private void assertCanUpdatePerson(final Person user, final Person existing) {
     if (!canCreateOrUpdatePerson(user, existing, false)) {
       throw new WebApplicationException("You do not have permissions to edit this person",
           Status.FORBIDDEN);
     }
-    if (AnetObjectEngine.getInstance().getPersonDao().hasPositionConflict(p)) {
-      throw new WebApplicationException(
-          "There are time conflict between time you selected and selected positions's history ",
-          Status.CONFLICT);
-    }
-    final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
-    AnetAuditLogger.log("History updated for person {}", p);
-    return numRows;
   }
 
   @GraphQLQuery(name = "personList")

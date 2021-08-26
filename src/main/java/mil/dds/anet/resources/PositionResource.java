@@ -128,8 +128,6 @@ public class PositionResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
-
-
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getCustomSensitiveInformation());
 
@@ -166,19 +164,20 @@ public class PositionResource {
   }
 
   @GraphQLMutation(name = "updatePositionHistory")
-  public int updatePositionPreviousPeople(@GraphQLRootContext Map<String, Object> context,
+  public int updatePositionHistory(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
     assertCanUpdatePosition(user, existing);
-    if (AnetObjectEngine.getInstance().getPositionDao().hasPersonConflict(pos)) {
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(),
+        pos.getPreviousPeople(), false)) {
       throw new WebApplicationException(
-          "There are time conflict between time you selected and selected positions's history ",
+          "At least one of the positions in the history is occupied for the specified period.",
           Status.CONFLICT);
     }
     final int numRows =
         AnetObjectEngine.getInstance().getPositionDao().updatePositionPreviousPeople(pos);
-    AnetAuditLogger.log("History updated for position {}", pos);
+    AnetAuditLogger.log("History updated for position {} by {}", pos, user);
     return numRows;
   }
 

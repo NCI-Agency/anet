@@ -35,6 +35,7 @@ import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
+import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.PersonSearchSortBy;
 import mil.dds.anet.test.client.Position;
@@ -592,7 +593,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(createdPos1).isNotNull();
     assertThat(createdPos1.getUuid()).isNotNull();
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
-
+    PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
     final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
         .withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(org))
@@ -602,36 +603,25 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(createdPos2).isNotNull();
     assertThat(createdPos2.getUuid()).isNotNull();
     assertThat(createdPos2.getName()).isEqualTo(testInput2.getName());
-    PersonPositionHistory hist1 = new PersonPositionHistory();
-    Position p1 = new Position();
-    p1.setUuid(createdPos1.getUuid());
-    Position p2 = new Position();
-    p2.setUuid(createdPos2.getUuid());
-    hist1.setPosition(p1);
-    hist1.setStartTime(Instant.now().minus(100, ChronoUnit.DAYS));
-    hist1.setEndTime(Instant.now().minus(50, ChronoUnit.DAYS));
-    PersonPositionHistory hist2 = new PersonPositionHistory();
-    // hist2.setPerson(person);
-    hist2.setPosition(p2);
-    hist2.setStartTime(Instant.now().minus(49, ChronoUnit.DAYS));
-    hist2.setEndTime(Instant.now());
-    List<PersonPositionHistory> historyList = new ArrayList<>();
+    PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
+    PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
+        .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1).build();
+    PersonPositionHistoryInput hist2 = PersonPositionHistoryInput.builder()
+        .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput2).build();
+
+    List<PersonPositionHistoryInput> historyList = new ArrayList<>();
     historyList.add(hist1);
     historyList.add(hist2);
-    person.setPreviousPositions(historyList);
     final PersonInput personInput = getPersonInput(person);
+    personInput.setPreviousPositions(historyList);
     adminMutationExecutor.updatePersonHistory("", personInput);
     final Person personUpdated =
         adminQueryExecutor.person(PERSON_FIELDS_ONLY_HISTORY, personInput.getUuid());
-    // assertThat(personUpdated).isNotNull();
+    assertThat(personUpdated).isNotNull();
     List<PersonPositionHistory> previousPositions = personUpdated.getPreviousPositions();
-    if (previousPositions == null) {
-      throw new Exception("nul geldi kardaş burayı düzelt");
-    }
-    if (previousPositions.isEmpty()) {
-      throw new Exception("Boş geldi kardaş burayı düzelt");
-    }
-
+    assertThat(previousPositions).isNotNull();
     assertThat(previousPositions.size() == 2);
   }
 
