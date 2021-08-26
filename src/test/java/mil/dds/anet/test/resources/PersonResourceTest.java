@@ -578,8 +578,8 @@ public class PersonResourceTest extends AbstractResourceTest {
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
     assertThat(org.getUuid()).isNotNull();
 
-    final PersonInput persInput =
-        PersonInput.builder().withRole(Role.ADVISOR).withName("Winner for Merging").build();
+    final PersonInput persInput = PersonInput.builder().withRole(Role.ADVISOR)
+        .withName("Test person for edit history").build();
     Person person = adminMutationExecutor.createPerson(FIELDS, persInput);
     assertThat(person).isNotNull();
     assertThat(person.getUuid()).isNotNull();

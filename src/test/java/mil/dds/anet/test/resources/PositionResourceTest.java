@@ -651,9 +651,18 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(createdPos).isNotNull();
     assertThat(createdPos.getUuid()).isNotNull();
     assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
+
+    final PersonInput persInput1 = PersonInput.builder().withRole(Role.ADVISOR)
+        .withName("Test person for edit history").build();
+    Person person1 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput1);
+    assertThat(person1).isNotNull();
+    assertThat(person1.getUuid()).isNotNull();
+    final PersonInput persInput2 = PersonInput.builder().withRole(Role.ADVISOR)
+        .withName("Test person for edit history").build();
+    Person person2 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput2);
+    assertThat(person2).isNotNull();
+    assertThat(person2.getUuid()).isNotNull();
     List<PersonPositionHistoryInput> prevPersons = new ArrayList<PersonPositionHistoryInput>();
-    Person person1 = getBobBobtown();
-    Person person2 = getChristopfTopferness();
     PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPerson(getPersonInput(person1))
@@ -663,10 +672,11 @@ public class PositionResourceTest extends AbstractResourceTest {
             .withEndTime(Instant.now()).withPerson(getPersonInput(person2)).build();
     prevPersons.add(histInput1);
     prevPersons.add(histInput2);
-    final PositionInput positionInput = getPositionInput(createdPos);
-    positionInput.setPreviousPeople(prevPersons);
-    adminMutationExecutor.updatePositionHistory("", positionInput);
-    final Position positionUpdated = adminQueryExecutor.position(FIELDS, positionInput.getUuid());
+    PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())
+        .withPreviousPeople(prevPersons).build();
+    adminMutationExecutor.updatePositionHistory("", inputForTest);
+    final Position positionUpdated =
+        adminQueryExecutor.position(FIELDS, getPositionInput(createdPos).getUuid());
     assertThat(positionUpdated).isNotNull();
     assertThat(positionUpdated.getPreviousPeople().size() == 2);
   }
