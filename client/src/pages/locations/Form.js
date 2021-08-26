@@ -51,10 +51,8 @@ const LOCATION_TYPES_ADMIN = [
 ]
 
 // Location types to be shown to super users in the new location page.
-const LOCATION_TYPES_SUPER_USER = [
-  Location.LOCATION_TYPES.ADVISOR_LOCATION,
-  Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-]
+const LOCATION_TYPES_SUPER_USER =
+  Settings?.fields?.location?.superUserTypeOptions
 
 const LocationForm = ({ edit, title, initialValues }) => {
   const { currentUser } = useContext(AppContext)
@@ -204,7 +202,11 @@ const LocationForm = ({ edit, title, initialValues }) => {
                       component="select"
                       className="location-type-form-group form-control"
                     >
-                      <option value="">Please select a location type</option>
+                      <option value="">
+                        {!canEditName
+                          ? Location.humanNameOfType(values.type)
+                          : "Please select a location type"}
+                      </option>
                       {getDropdownOptionsForUser(currentUser).map(type => (
                         <option key={type} value={type}>
                           {Location.humanNameOfType(type)}
