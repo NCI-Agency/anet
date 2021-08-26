@@ -36,6 +36,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -497,35 +498,28 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @InTransaction
   public boolean hasHistoryConflict(final String uuid, final List<PersonPositionHistory> history,
       final boolean checkPerson) {
+    final String personPositionClause =
+        checkPerson ? "\"personUuid\" != :personUuid AND \"positionUuid\" = :positionUuid"
+            : "\"personUuid\" = :personUuid AND \"positionUuid\" != :positionUuid";
     for (final PersonPositionHistory pph : history) {
-      final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+      final Query q;
       final Instant endTime = pph.getEndTime();
-      List<Map<String, Object>> rs;
       if (endTime == null) {
-        rs = getDbHandle().createQuery(
-            "SELECT COUNT(*) FROM \"peoplePositions\" AS count WHERE ( (\"endedAt\" IS NOT NULL "
-                + " AND :startTime <= \"endedAt\" )  OR ( \"endedAt\" IS NULL) ) AND "
-                + (checkPerson
-                    ? "\"personUuid\" != :personUuid AND \"positionUuid\" = :positionUuid"
-                    : "\"personUuid\" = :personUuid AND \"positionUuid\" != :positionUuid"))
-            .bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
-            .bind("personUuid", checkPerson ? uuid : histUuid)
-            .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).list();
+        q = getDbHandle().createQuery("SELECT COUNT(*) FROM \"peoplePositions\" AS count WHERE ("
+            + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
+            + ") AND " + personPositionClause);
       } else {
-        rs = getDbHandle().createQuery(
-            "SELECT COUNT(*) FROM \"peoplePositions\" AS count WHERE ( ( \"endedAt\" IS NULL"
-                + " AND :endTime >= \"createdAt\" ) "
-                + "OR ( \"endedAt\" IS NOT NULL AND ( ( \"createdAt\" >= :startTime AND"
-                + "\"createdAt\" <= :endTime) OR ( \"endedAt\" >= :startTime AND \"endedAt\"<= :endTime ) OR ( :startTime >= \"createdAt\""
-                + " AND :startTime <= \"endedAt\" ) OR ( :endTime >= \"createdAt\" AND :endTime <= \"endedAt\" ) ) ) ) AND "
-                + (checkPerson
-                    ? "\"personUuid\" != :personUuid AND \"positionUuid\" = :positionUuid"
-                    : "\"personUuid\" = :personUuid AND \"positionUuid\" != :positionUuid"))
-            .bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
-            .bind("endTime", DaoUtils.asLocalDateTime(endTime))
-            .bind("personUuid", checkPerson ? uuid : histUuid)
-            .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).list();
+        q = getDbHandle().createQuery("SELECT COUNT(*) FROM \"peoplePositions\" AS count WHERE ("
+            + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
+            + " OR (\"endedAt\" IS NOT NULL AND"
+            + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
+            + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
       }
+      final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+      final List<Map<String, Object>> rs =
+          q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+              .bind("personUuid", checkPerson ? uuid : histUuid)
+              .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).list();
       final Map<String, Object> result = rs.get(0);
       final int count = ((Number) result.get("count")).intValue();
       if (count > 0) {
