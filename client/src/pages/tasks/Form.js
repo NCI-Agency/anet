@@ -22,7 +22,7 @@ import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import SlateEditor from "components/RichTextEditor/RichTextEditor"
+import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
@@ -366,7 +366,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         onChange={value => {
                           setFieldValue("assessment_customFieldEnum1", value)
                         }}
-                        widget={<SlateEditor />}
+                        widget={<RichTextEditor />}
                       />
                     )}
                   </>

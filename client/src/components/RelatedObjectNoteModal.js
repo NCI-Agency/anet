@@ -8,7 +8,7 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import RelatedObjectsTable from "components/RelatedObjectsTable"
-import SlateEditor from "components/RichTextEditor/RichTextEditor"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -82,7 +82,7 @@ const RelatedObjectNoteModal = ({
                     component={FieldHelper.SpecialField}
                     value={noteText}
                     onChange={value => setFieldValue("text", value)}
-                    widget={<SlateEditor />}
+                    widget={<RichTextEditor />}
                     vertical
                   />
                   <RelatedObjectsTable

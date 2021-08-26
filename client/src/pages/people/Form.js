@@ -19,7 +19,7 @@ import "components/NameInput.css"
 import NavigationWarning from "components/NavigationWarning"
 import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
-import SlateEditor from "components/RichTextEditor/RichTextEditor"
+import RichTextEditor from "components/RichTextEditor"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { FastField, Field, Form, Formik } from "formik"
@@ -507,7 +507,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       setFieldValue("biography", value)
                     }
                   }}
-                  widget={<SlateEditor />}
+                  widget={<RichTextEditor />}
                 />
               </Fieldset>
 
