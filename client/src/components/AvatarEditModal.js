@@ -26,7 +26,10 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
         <Modal.Body>
           <AvatarComponent onChangePreview={setCurrentPreview} />
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="justify-content-between">
+          <Button onClick={close} variant="outline-secondary">
+            Cancel
+          </Button>
           <Button onClick={save} variant="primary">
             Save
           </Button>
