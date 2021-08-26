@@ -1,0 +1,18 @@
+/* This file is included directly from postcss.config.js */
+
+:root {
+  /* Custom vars defined by us (for Calendar.css): */
+  --fc-button-active-text-color: #fff;
+  --fc-button-disabled-bg-color: #6c757d;
+  --fc-button-disabled-text-color: #fff;
+  --fc-button-hover-text-color: #fff;
+
+  /* Vars from https://github.com/fullcalendar/fullcalendar/blob/master/packages/common/src/styles/vars.css: */
+  --fc-button-text-color: #6c757d;
+  --fc-button-bg-color: #fff;
+  --fc-button-border-color: #6c757d;
+  --fc-button-hover-bg-color: #6c757d;
+  --fc-button-hover-border-color: #6c757d;
+  --fc-button-active-bg-color: #6c757d;
+  --fc-button-active-border-color: #6c757d;
+}
