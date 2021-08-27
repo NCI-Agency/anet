@@ -19,6 +19,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 
 public class PositionResource {
@@ -128,6 +129,7 @@ public class PositionResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
+
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getCustomSensitiveInformation());
 
@@ -168,6 +170,7 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
+    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople());
     assertCanUpdatePosition(user, existing);
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(),
         pos.getPreviousPeople(), false)) {

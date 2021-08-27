@@ -23,10 +23,10 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 
 public class PersonResource {
-
   private final PersonDao dao;
   private final AnetConfiguration config;
 
@@ -199,14 +199,17 @@ public class PersonResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
     assertCanUpdatePerson(user, existing);
+    ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions());
+
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(),
         p.getPreviousPositions(), true)) {
       throw new WebApplicationException(
           "At least one of the positions in the history is occupied for the specified period.",
           Status.CONFLICT);
     }
+
     final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
-    AnetAuditLogger.log("History updated for person {} bye {}", p, user);
+    AnetAuditLogger.log("History updated for person {} by {}", p, user);
     return numRows;
   }
 

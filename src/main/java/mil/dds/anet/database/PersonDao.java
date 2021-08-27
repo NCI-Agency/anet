@@ -505,24 +505,24 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final Query q;
       final Instant endTime = pph.getEndTime();
       if (endTime == null) {
-        q = getDbHandle().createQuery("SELECT COUNT(*) FROM \"peoplePositions\" AS count WHERE ("
+        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
             + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
             + ") AND " + personPositionClause);
       } else {
-        q = getDbHandle().createQuery("SELECT COUNT(*) FROM \"peoplePositions\" AS count WHERE ("
+        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
             + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
             + " OR (\"endedAt\" IS NOT NULL AND"
             + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
             + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
       }
       final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
-      final List<Map<String, Object>> rs =
-          q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+      final Number count =
+          (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
               .bind("personUuid", checkPerson ? uuid : histUuid)
-              .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).list();
-      final Map<String, Object> result = rs.get(0);
-      final int count = ((Number) result.get("count")).intValue();
-      if (count > 0) {
+              .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).one()
+              .get("count");
+
+      if (count.longValue() > 0) {
         return true;
       }
     }

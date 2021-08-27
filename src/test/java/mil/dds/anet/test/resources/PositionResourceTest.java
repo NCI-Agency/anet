@@ -620,6 +620,7 @@ public class PositionResourceTest extends AbstractResourceTest {
         fail("Unexpected ForbiddenException");
       }
     }
+
     // try to update a regular user position and make it super user
     final PositionInput p3 = getPositionInput(newPosition);
     try {
@@ -665,11 +666,13 @@ public class PositionResourceTest extends AbstractResourceTest {
     List<PersonPositionHistoryInput> prevPersons = new ArrayList<PersonPositionHistoryInput>();
     PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPerson(getPersonInput(person1))
         .build();
     PersonPositionHistoryInput histInput2 =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
-            .withEndTime(Instant.now()).withPerson(getPersonInput(person2)).build();
+            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
+            .withPerson(getPersonInput(person2)).build();
     prevPersons.add(histInput1);
     prevPersons.add(histInput2);
     PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())

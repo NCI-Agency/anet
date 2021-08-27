@@ -606,9 +606,11 @@ public class PersonResourceTest extends AbstractResourceTest {
     PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
     PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1).build();
     PersonPositionHistoryInput hist2 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput2).build();
 
     List<PersonPositionHistoryInput> historyList = new ArrayList<>();
