@@ -139,7 +139,7 @@ class ShowPerson extends Page {
       })
 
     // first focus on the text editor input
-    this.assessmentModalForm.$(".DraftEditor-editorContainer").click()
+    this.assessmentModalForm.$(".editor-container > .editable").click()
     if (prevTextToClear) {
       // remove previous text by deleting characters one by one
       const chars = [...prevTextToClear]

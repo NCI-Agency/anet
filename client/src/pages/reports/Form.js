@@ -894,7 +894,7 @@ const ReportForm = ({
                       setFieldValue("reportText", value, true)
                     }
                   }}
-                  widget={<RichTextEditor />}
+                  widget={<RichTextEditor className="reportTextField" />}
                 />
 
                 <Button
@@ -929,7 +929,9 @@ const ReportForm = ({
                             )
                           }
                         }}
-                        widget={<RichTextEditor />}
+                        widget={
+                          <RichTextEditor className="reportSensitiveInformationField" />
+                        }
                       />
                       <FastField
                         name="authorizationGroups"

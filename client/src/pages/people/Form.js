@@ -507,7 +507,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       setFieldValue("biography", value)
                     }
                   }}
-                  widget={<RichTextEditor />}
+                  widget={<RichTextEditor className="biography" />}
                 />
               </Fieldset>
 

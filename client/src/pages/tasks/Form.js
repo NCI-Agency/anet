@@ -366,7 +366,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         onChange={value => {
                           setFieldValue("assessment_customFieldEnum1", value)
                         }}
-                        widget={<RichTextEditor />}
+                        widget={<RichTextEditor className="textField" />}
                       />
                     )}
                   </>

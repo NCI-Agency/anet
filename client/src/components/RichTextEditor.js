@@ -18,7 +18,7 @@ import {
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
 
-const RichTextEditor = ({ value, onChange }) => {
+const RichTextEditor = ({ value, onChange, className }) => {
   const withAnetLink = editor => {
     const { isVoid, isInline } = editor
 
@@ -42,29 +42,32 @@ const RichTextEditor = ({ value, onChange }) => {
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
   return (
-    <Slate
-      editor={editor}
-      value={slateValue}
-      onChange={newValue => {
-        setSlateValue(newValue)
-        onChange(serialize(editor))
-      }}
-    >
-      <div className="editor-container">
-        <Toolbar />
-        <Editable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          className="editable"
-        />
-      </div>
-    </Slate>
+    <div className={className}>
+      <Slate
+        editor={editor}
+        value={slateValue}
+        onChange={newValue => {
+          setSlateValue(newValue)
+          onChange(serialize(editor))
+        }}
+      >
+        <div className="editor-container">
+          <Toolbar />
+          <Editable
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            className="editable"
+          />
+        </div>
+      </Slate>
+    </div>
   )
 }
 
 RichTextEditor.propTypes = {
   value: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  className: PropTypes.string
 }
 
 const serialize = node => {
