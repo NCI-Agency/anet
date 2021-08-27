@@ -277,6 +277,7 @@ const EnumField = fieldProps => {
   return (
     <FastField
       buttons={FieldHelper.customEnumButtons(choices)}
+      enableClear
       component={FieldHelper.RadioButtonToggleGroupField}
       {...otherFieldProps}
     />
