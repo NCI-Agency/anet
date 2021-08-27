@@ -122,7 +122,10 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
         {queries
           .filter(q => q.query !== null)
           .map((query, index) => (
-            <Col key={index} className="home-tile-col">
+            <Col
+              key={index}
+              className="home-tile-col d-flex align-items-stretch p-0"
+            >
               <HomeTile
                 query={query}
                 setSearchQuery={setSearchQuery}
