@@ -331,14 +331,14 @@ const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
           <b>Select a saved search</b>
         </Form.Label>
         <Col sm={10}>
-          <Form.Control as="select" onChange={onSaveSearchSelect}>
+          <Form.Select onChange={onSaveSearchSelect}>
             {savedSearches &&
               savedSearches.map(savedSearch => (
                 <option value={savedSearch.uuid} key={savedSearch.uuid}>
                   {savedSearch.name}
                 </option>
               ))}
-          </Form.Control>
+          </Form.Select>
         </Col>
       </Form.Group>
 
