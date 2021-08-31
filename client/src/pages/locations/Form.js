@@ -23,7 +23,7 @@ import _escape from "lodash/escape"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, FormSelect } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
 
@@ -203,17 +203,14 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                     setFieldValue("type", event.target.value, true)
                   }}
                   widget={
-                    <FastField
-                      component="select"
-                      className="location-type-form-group form-control"
-                    >
+                    <FormSelect className="location-type-form-group form-control">
                       <option value="">Please select a location type</option>
                       {getDropdownOptionsForUser(currentUser).map(type => (
                         <option key={type} value={type}>
                           {Location.humanNameOfType(type)}
                         </option>
                       ))}
-                    </FastField>
+                    </FormSelect>
                   }
                 />
 
