@@ -107,7 +107,7 @@
     "@apollo/client": "3.4.9",
     "@blueprintjs/core": "3.48.0",
     "@blueprintjs/datetime": "3.23.7",
-    "@blueprintjs/popover2": "0.11.2",
+    "@blueprintjs/popover2": "0.11.3",
     "@emotion/react": "11.4.1",
     "@emotion/styled": "11.3.0",
     "@fullcalendar/core": "5.9.0",
