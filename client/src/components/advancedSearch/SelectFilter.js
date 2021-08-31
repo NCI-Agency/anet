@@ -2,7 +2,7 @@ import useSearchFilter from "components/advancedSearch/hooks"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { FormGroup } from "react-bootstrap"
+import { Form as FormBS } from "react-bootstrap"
 import { deserializeSearchFilter } from "searchUtils"
 import utils from "utils"
 
@@ -44,15 +44,15 @@ const SelectFilter = ({
   return !asFormField ? (
     <>{optionsLabels[options.indexOf(value.value)]}</>
   ) : (
-    <FormGroup>
-      <select id={queryKey} value={value.value} onChange={handleChange}>
+    <FormBS.Group>
+      <FormBS.Select id={queryKey} value={value.value} onChange={handleChange}>
         {options.map((v, idx) => (
           <option key={idx} value={v}>
             {optionsLabels[idx]}
           </option>
         ))}
-      </select>
-    </FormGroup>
+      </FormBS.Select>
+    </FormBS.Group>
   )
 
   function handleChange(event) {
