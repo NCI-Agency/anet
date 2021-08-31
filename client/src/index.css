@@ -1270,4 +1270,8 @@ header.searchPagination {
   fieldset {
     padding: 1em;
   }
+
+  .form-horizontal .form-label {
+    text-align: left;
+  }
 }
