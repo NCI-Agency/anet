@@ -1455,7 +1455,7 @@
     resize-observer-polyfill "^1.5.1"
     tslib "~1.13.0"
 
-"@blueprintjs/core@^3.48.0", "@blueprintjs/core@^3.49.0":
+"@blueprintjs/core@^3.49.0":
   version "3.49.0"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.49.0.tgz#cfb8c5c62ae206877cb199f9a7ba350c07c98af3"
   integrity sha512-vtcmNiCATAZw5yuiBEsgPg1vnBL1MGemT7etGiKGNwqcTI+uWeCb78h6thzLoPWxq5/2aPwmzQcMDq3w5lYMdQ==
@@ -1473,12 +1473,12 @@
     resize-observer-polyfill "^1.5.1"
     tslib "~1.13.0"
 
-"@blueprintjs/datetime@3.23.7":
-  version "3.23.7"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/datetime/-/datetime-3.23.7.tgz#b8495248fdfceb86b9362d796d217e0a419f9f7a"
-  integrity sha512-jBVFUqx6zmY2HxYaJspd7rqGTeK3v3lA4AFqCQnMAazbbhyTkZU2qAveg+hspI5us+DBGpbOXQqzkonOXYZF3Q==
+"@blueprintjs/datetime@3.23.8":
+  version "3.23.8"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/datetime/-/datetime-3.23.8.tgz#ce86c951635de6ec081a8ff8fb4874f1abcbee41"
+  integrity sha512-pswzb1V0Md9nrNCTEr4WBXIL7ZdTHZCRolDC7W5DMktl0gv4KkLunzniMqZU0Vx5Ysot+uoOrvE4wa+GsFKzVw==
   dependencies:
-    "@blueprintjs/core" "^3.48.0"
+    "@blueprintjs/core" "^3.49.0"
     classnames "^2.2"
     react-day-picker "7.4.9"
     react-lifecycles-compat "^3.0.4"
