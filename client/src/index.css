@@ -141,11 +141,6 @@ fieldset.danger {
   font-weight: bold;
 }
 
-.form-control {
-  height: 38px;
-  font-size: 1.1em;
-}
-
 .form-control-icon {
   position: absolute;
   top: 4px;
@@ -972,13 +967,6 @@ header.searchPagination {
 
 .advanced-search .col-xs-3 select {
   margin-top: -8px;
-}
-
-.advanced-search select {
-  height: 32px;
-}
-.advanced-search select[multiple] {
-  height: 64px;
 }
 
 .advanced-search .col-xs-1 .btn,
