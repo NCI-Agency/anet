@@ -19,6 +19,12 @@
       }
     },
     {
+      "matchPackagePatterns": ["^org.liquibase"],
+      "groupName": "org.liquibase",
+      "groupSlug": "org.liquibase"
+    },
+    
+    {
       "matchPackageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
       "allowedVersions": "/^.*\\.jre8$/"
     },
