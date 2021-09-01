@@ -26,6 +26,9 @@ body {
   height: 100vh;
 }
 
+a {
+  font-size: 15px;
+}
 a:focus {
   outline: none;
 }
