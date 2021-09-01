@@ -176,9 +176,7 @@ const Navigation = ({
             </SidebarLink>
           )}
 
-          <span style={{ lineHeight: "10px" }}>
-            <Nav id="reports-nav" />
-          </span>
+          <Nav id="reports-nav" style={{ lineHeight: "10px" }} />
 
           {isAdvisor && currentUser.position?.uuid && (
             <>
@@ -248,9 +246,7 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
-      <span style={{ lineHeight: "10px" }}>
-        <Nav id="advisor-org-nav" />
-      </span>
+      <Nav id="advisor-org-nav" style={{ lineHeight: "10px" }} />
 
       <NavDropdown
         title={Settings.fields.principal.org.allOrgName}
@@ -273,9 +269,7 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
-      <span style={{ lineHeight: "10px" }}>
-        <Nav id="principal-org-nav" />
-      </span>
+      <Nav id="principal-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
         id="daily-rollup-nav"
