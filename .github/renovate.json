@@ -12,6 +12,10 @@
       "minor": {
         "groupName": "most non-major dependencies",
         "groupSlug": "most-minor-patch"
+      },
+      "patch": {
+        "groupName": "most non-major dependencies",
+        "groupSlug": "most-minor-patch"
       }
     },
     {
