@@ -26,6 +26,13 @@ body {
   height: 100vh;
 }
 
+a {
+  font-size: 15px;
+}
+a:focus {
+  outline: none;
+}
+
 h5 {
   text-decoration: underline;
 }
@@ -135,11 +142,6 @@ fieldset.danger {
 
 .form-label {
   font-weight: bold;
-}
-
-.form-control {
-  height: 38px;
-  font-size: 1.1em;
 }
 
 .form-control-icon {
@@ -936,6 +938,10 @@ header.searchPagination {
   font-size: 0.8em;
 }
 
+.offcanvas.offcanvas-end.show:focus {
+  outline: none;
+}
+
 .advanced-select-popover .bp3-popover2-content-sizing {
   width: 100% !important;
 }
@@ -968,13 +974,6 @@ header.searchPagination {
 
 .advanced-search .col-xs-3 select {
   margin-top: -8px;
-}
-
-.advanced-search select {
-  height: 32px;
-}
-.advanced-search select[multiple] {
-  height: 64px;
 }
 
 .advanced-search .col-xs-1 .btn,
@@ -1277,5 +1276,9 @@ header.searchPagination {
 
   fieldset {
     padding: 1em;
+  }
+
+  .form-horizontal .form-label {
+    text-align: left;
   }
 }

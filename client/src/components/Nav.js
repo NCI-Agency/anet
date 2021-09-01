@@ -176,7 +176,7 @@ const Navigation = ({
             </SidebarLink>
           )}
 
-          <Nav id="reports-nav" />
+          <Nav id="reports-nav" style={{ lineHeight: "10px" }} />
 
           {isAdvisor && currentUser.position?.uuid && (
             <>
@@ -246,7 +246,7 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
-      <Nav id="advisor-org-nav" />
+      <Nav id="advisor-org-nav" style={{ lineHeight: "10px" }} />
 
       <NavDropdown
         title={Settings.fields.principal.org.allOrgName}
@@ -269,7 +269,7 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
-      <Nav id="principal-org-nav" />
+      <Nav id="principal-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
         id="daily-rollup-nav"
@@ -296,7 +296,7 @@ const Navigation = ({
 
       {inAdmin && (
         <Nav className="flex-column">
-          <span id="style-nav">
+          <span id="style-nav" style={{ lineHeight: "10px" }}>
             <Nav.Item>
               <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
                 <Nav.Link>Merge people</Nav.Link>

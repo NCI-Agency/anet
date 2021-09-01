@@ -47,7 +47,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Collapse, FormCheck } from "react-bootstrap"
+import { Button, Collapse, FormCheck, FormSelect } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -439,7 +439,6 @@ const ReportForm = ({
         // Skip validation on save!
         const action = (
           <div>
-            {notesComponent}
             <Button
               variant="primary"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
@@ -447,6 +446,7 @@ const ReportForm = ({
             >
               {submitText}
             </Button>
+            {notesComponent}
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
@@ -641,16 +641,13 @@ const ReportForm = ({
                       setFieldValue("cancelledReason", event.target.value, true)
                     }}
                     widget={
-                      <FastField
-                        component="select"
-                        className="cancelled-reason-form-group form-control"
-                      >
+                      <FormSelect className="cancelled-reason-form-group">
                         {cancelledReasonOptions.map(reason => (
                           <option key={reason.value} value={reason.value}>
                             {reason.label}
                           </option>
                         ))}
-                      </FastField>
+                      </FormSelect>
                     }
                   />
                 )}

@@ -192,16 +192,6 @@ const TaskShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <>
-            <RelatedObjectNotes
-              notes={task.notes}
-              relatedObject={
-                task.uuid && {
-                  relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid,
-                  relatedObject: task
-                }
-              }
-            />
             {canEdit && (
               <span style={{ marginLeft: "1rem" }}>
                 <LinkTo modelType="Task" model={task} edit button="primary">
@@ -209,6 +199,18 @@ const TaskShow = ({ pageDispatchers }) => {
                 </LinkTo>
               </span>
             )}
+            <span className="ms-3">
+              <RelatedObjectNotes
+                notes={task.notes}
+                relatedObject={
+                  task.uuid && {
+                    relatedObjectType: Task.relatedObjectType,
+                    relatedObjectUuid: task.uuid,
+                    relatedObject: task
+                  }
+                }
+              />
+            </span>
           </>
         )
         return (

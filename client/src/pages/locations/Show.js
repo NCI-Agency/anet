@@ -84,16 +84,6 @@ const LocationShow = ({ pageDispatchers }) => {
         }
         const action = (
           <>
-            <RelatedObjectNotes
-              notes={location.notes}
-              relatedObject={
-                location.uuid && {
-                  relatedObjectType: Location.relatedObjectType,
-                  relatedObjectUuid: location.uuid,
-                  relatedObject: location
-                }
-              }
-            />
             {canEdit && (
               <span style={{ marginLeft: "1rem" }}>
                 <LinkTo
@@ -107,6 +97,18 @@ const LocationShow = ({ pageDispatchers }) => {
                 </LinkTo>
               </span>
             )}
+            <span className="ms-3">
+              <RelatedObjectNotes
+                notes={location.notes}
+                relatedObject={
+                  location.uuid && {
+                    relatedObjectType: Location.relatedObjectType,
+                    relatedObjectUuid: location.uuid,
+                    relatedObject: location
+                  }
+                }
+              />
+            </span>
           </>
         )
         return (

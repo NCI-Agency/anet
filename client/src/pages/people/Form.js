@@ -36,6 +36,7 @@ import {
   FormCheck,
   FormGroup,
   FormLabel,
+  FormSelect,
   FormText,
   Row
 } from "react-bootstrap"
@@ -180,7 +181,6 @@ const PersonForm = ({
             : "Yes, I would like to inactivate this account"
         const action = (
           <div>
-            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -189,6 +189,7 @@ const PersonForm = ({
             >
               {saveText}
             </Button>
+            {notesComponent}
           </div>
         )
 
@@ -534,7 +535,7 @@ const PersonForm = ({
                   label={Settings.fields.person.rank}
                   component={FieldHelper.SpecialField}
                   widget={
-                    <FastField component="select" className="form-control">
+                    <FormSelect>
                       <option />
                       {ranks.map(rank => (
                         <option key={rank.value} value={rank.value}>
@@ -542,7 +543,7 @@ const PersonForm = ({
                           {rank.description && ` - ( ${rank.description} )`}
                         </option>
                       ))}
-                    </FastField>
+                    </FormSelect>
                   }
                 />
                 <FastField
@@ -550,11 +551,11 @@ const PersonForm = ({
                   label={Settings.fields.person.gender}
                   component={FieldHelper.SpecialField}
                   widget={
-                    <FastField component="select" className="form-control">
+                    <FormSelect>
                       <option />
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
-                    </FastField>
+                    </FormSelect>
                   }
                 />
                 <FastField
@@ -562,14 +563,14 @@ const PersonForm = ({
                   label={Settings.fields.person.country}
                   component={FieldHelper.SpecialField}
                   widget={
-                    <FastField component="select" className="form-control">
+                    <FormSelect>
                       <option />
                       {countries.map(country => (
                         <option key={country} value={country}>
                           {country}
                         </option>
                       ))}
-                    </FastField>
+                    </FormSelect>
                   }
                 />
                 <FastField

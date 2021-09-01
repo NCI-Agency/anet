@@ -378,16 +378,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       {({ isValid, setFieldValue, values }) => {
         const action = (
           <div>
-            <RelatedObjectNotes
-              notes={report.notes}
-              relatedObject={
-                uuid && {
-                  relatedObjectType: Report.relatedObjectType,
-                  relatedObjectUuid: uuid,
-                  relatedObject: report
-                }
-              }
-            />
             {canEmail && (
               <Button onClick={toggleEmailModal} variant="outline-secondary">
                 Email report
@@ -406,6 +396,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               </LinkTo>
             )}
             {canSubmit && renderSubmitButton(!isValid)}
+            <RelatedObjectNotes
+              notes={report.notes}
+              relatedObject={
+                uuid && {
+                  relatedObjectType: Report.relatedObjectType,
+                  relatedObjectUuid: uuid,
+                  relatedObject: report
+                }
+              }
+            />
           </div>
         )
 
