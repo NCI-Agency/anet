@@ -26,6 +26,7 @@
 
 .btn-link {
     color: var(--anet-blue);
+    font-size: 15px;
 }
 .btn-link:hover {
     color: var(--anet-blue-dark);
