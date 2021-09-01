@@ -239,17 +239,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <div>
-            <RelatedObjectNotes
-              notes={organization.notes}
-              relatedObject={
-                organization.uuid && {
-                  relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid,
-                  relatedObject: organization
-                }
-              }
-            />
-
             {isAdmin && (
               <LinkTo
                 modelType="Organization"
@@ -273,6 +262,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <RelatedObjectNotes
+              notes={organization.notes}
+              relatedObject={
+                organization.uuid && {
+                  relatedObjectType: Organization.relatedObjectType,
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
+                }
+              }
+            />
           </div>
         )
         return (

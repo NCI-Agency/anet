@@ -113,7 +113,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         }
         const action = (isAdmin || !isPrincipalOrg) && (
           <div>
-            {notesComponent}
             <Button
               key="submit"
               variant="primary"
@@ -122,6 +121,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             >
               Save Organization
             </Button>
+            {notesComponent}
           </div>
         )
         const tasksFilters = {
