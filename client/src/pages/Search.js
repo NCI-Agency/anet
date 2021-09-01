@@ -658,7 +658,7 @@ const Search = ({
   return (
     <div>
       <SubNav subnavElemId="search-nav">
-        <Container>
+        <Container className="p-0">
           <Row style={{ paddingLeft: 0 }}>
             <div>
               <Button onClick={history.goBack} variant="link" size="sm">
