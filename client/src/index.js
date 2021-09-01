@@ -10,6 +10,7 @@ import { Provider } from "react-redux"
 import { BrowserRouter, Route } from "react-router-dom"
 import { persistStore } from "redux-persist"
 import { PersistGate } from "redux-persist/lib/integration/react"
+import "./bootstrapOverrides.css"
 import "./index.css"
 import configureStore from "./store/configureStore"
 
