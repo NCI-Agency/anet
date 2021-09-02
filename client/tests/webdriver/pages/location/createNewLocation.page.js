@@ -12,7 +12,7 @@ class CreateNewLocation extends Page {
   }
 
   get nameRequiredError() {
-    return browser.$('//span[contains(text(),"name is a required field")]')
+    return browser.$('//div[contains(text(),"name is a required field")]')
   }
 
   get nameField() {
@@ -20,7 +20,7 @@ class CreateNewLocation extends Page {
   }
 
   get typeRequiredError() {
-    return browser.$('//span[contains(text(),"type is a required field")]')
+    return browser.$('//div[contains(text(),"type is a required field")]')
   }
 
   get typeField() {
@@ -36,11 +36,13 @@ class CreateNewLocation extends Page {
   }
 
   get modalCloseButton() {
-    return this.modalContent.$("button.close")
+    return this.modalContent.$(".btn-close")
   }
 
   get similarLocation() {
-    return this.modalContent.$("tbody tr:first-child td:first-child a")
+    return this.modalContent.$(
+      ".modal-content tbody tr:first-child td:first-child a"
+    )
   }
 
   get latField() {
@@ -52,7 +54,7 @@ class CreateNewLocation extends Page {
   }
 
   get allFormatsPopover() {
-    return this.form.$("a#gloc-info-btn")
+    return this.form.$("button#gloc-info-btn")
   }
 
   // parent of MGRS table data => tr
@@ -86,8 +88,8 @@ class CreateNewLocation extends Page {
   }
 
   latLngErrorsDisplayed() {
-    const latError = browser.$('//span[contains(text(), "Latitude must be")]')
-    const lngError = browser.$('//span[contains(text(), "Longitude must be")]')
+    const latError = browser.$('//div[contains(text(), "Latitude must be")]')
+    const lngError = browser.$('//div[contains(text(), "Longitude must be")]')
     latError.waitForExist()
     lngError.waitForExist()
     latError.waitForDisplayed()
