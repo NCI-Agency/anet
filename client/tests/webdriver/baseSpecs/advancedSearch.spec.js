@@ -69,7 +69,9 @@ describe("When using advanced search", () => {
     )
     // Select all common filters now
     ALL_COMMON_FILTERS.forEach(filter => {
-      AdvancedSearch.getSearchFilter(filter).click()
+      if (AdvancedSearch.getSearchFilter(filter).isClickable()) {
+        AdvancedSearch.getSearchFilter(filter).click()
+      }
     })
   })
   it("Should show the common filter and default filters for each anet object type", () => {
