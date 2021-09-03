@@ -1,28 +1,38 @@
 import { initOptions, keycloak } from "keycloak"
 
-keycloak
-  .init({ onLoad: initOptions.onLoad })
-  .then(authenticated => {
+;(async() => {
+  keycloak.onTokenExpired = () =>
+    keycloak
+      .updateToken()
+      .then(() => {
+        console.info("Token refreshed")
+      })
+      .catch(error => {
+        console.warn(
+          "Keycloak client failed to refresh token, re-authentication is needed"
+        )
+        console.warn(error)
+      })
+
+  try {
+    const authenticated = await keycloak.init({ onLoad: initOptions.onLoad })
     if (!authenticated) {
+      console.info("Keycloak client not authenticated, reloading page...")
       window.location.reload()
-    } else {
-      console.info("Authenticated successfully")
+      return
     }
+  } catch (error) {
+    console.info("Error occurred during Keycloak client initialization")
+    console.err(error)
+    return
+  }
 
+  console.info("Authenticated successfully")
+  try {
     require("index.js")
-  })
-  .catch(() => {
-    console.warn("Authentication failed")
-  })
-
-keycloak.onTokenExpired = () =>
-  keycloak
-    .updateToken()
-    .then(refreshed => {
-      console.info("Token refreshed")
-    })
-    .catch(() => {
-      console.warn("Failed to refresh token, re-authentication is needed")
-    })
+  } catch (error) {
+    console.error(error)
+  }
+})()
 
 export default keycloak
