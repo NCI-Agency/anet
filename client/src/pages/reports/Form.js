@@ -47,7 +47,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Collapse, FormCheck, FormSelect } from "react-bootstrap"
+import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -537,11 +537,11 @@ const ReportForm = ({
                   }
                 >
                   {isFutureEngagement && (
-                    <Form.Text>
+                    <FormBS.Text>
                       <span className="text-success">
                         This will create a planned engagement
                       </span>
-                    </Form.Text>
+                    </FormBS.Text>
                   )}
                 </FastField>
 
@@ -612,7 +612,7 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
-                      <FormCheck
+                      <FormBS.Check
                         type="checkbox"
                         label="This engagement was cancelled"
                         className="cancelled-checkbox"
@@ -641,13 +641,13 @@ const ReportForm = ({
                       setFieldValue("cancelledReason", event.target.value, true)
                     }}
                     widget={
-                      <FormSelect className="cancelled-reason-form-group">
+                      <FormBS.Select className="cancelled-reason-form-group">
                         {cancelledReasonOptions.map(reason => (
                           <option key={reason.value} value={reason.value}>
                             {reason.label}
                           </option>
                         ))}
-                      </FormSelect>
+                      </FormBS.Select>
                     }
                   />
                 )}
