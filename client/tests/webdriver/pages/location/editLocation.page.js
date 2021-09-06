@@ -21,7 +21,7 @@ class EditLocation extends Page {
   }
 
   get allFormatsPopover() {
-    return browser.$("a#gloc-info-btn")
+    return browser.$("button#gloc-info-btn")
   }
 
   // parent of MGRS table data => tr
