@@ -22,12 +22,12 @@ class ShowTask extends Page {
 
   get editMonthlyAssessmentButton() {
     return this.monthlyAssessmentsTable.$(
-      'div.panel-primary button[title="Edit assessment"]'
+      'div.card button[title="Edit assessment"]'
     )
   }
 
   get deleteMonthlyAssessmentButton() {
-    return browser.$('div.panel-primary button[title="Delete assessment"]')
+    return browser.$$("div.card button.btn.btn-primary.btn-xs")[1]
   }
 
   get deleteConfirmButton() {
@@ -43,11 +43,13 @@ class ShowTask extends Page {
   }
 
   get shownAssessmentPanel() {
-    return this.monthlyAssessmentsTable.$("td:first-child .panel-primary")
+    return this.monthlyAssessmentsTable.$(
+      "tbody tr:last-child td:first-child .card"
+    )
   }
 
   get shownAssessmentDetails() {
-    return this.shownAssessmentPanel.$$("div.form-control-static")
+    return this.shownAssessmentPanel.$$("div.card-body .form-control-plaintext")
   }
 
   waitForAssessmentModalForm(reverse = false) {
@@ -70,8 +72,8 @@ class ShowTask extends Page {
     browser.keys(valuesArr[0])
 
     const button = this.assessmentModalForm
-      .$(".form-group .btn-group")
-      .$(`label[id="${valuesArr[1]}"]`)
+      .$(".btn-group")
+      .$(`label[for="Project status_${valuesArr[1]}"]`)
     // wait for a bit, clicks and do double click, sometimes it does not go through
     browser.pause(300)
     button.click({ x: 10, y: 10 })
