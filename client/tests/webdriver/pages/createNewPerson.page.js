@@ -38,7 +38,7 @@ class CreatePerson extends Page {
   }
 
   get modalCloseButton() {
-    return this.modalContent.$("button.close")
+    return this.modalContent.$("button.btn-close")
   }
 
   get similarPerson() {
@@ -46,11 +46,11 @@ class CreatePerson extends Page {
   }
 
   get rolePrincipalButton() {
-    return browser.$("#rolePrincipalButton")
+    return browser.$('label[for="PRINCIPAL"]')
   }
 
   get roleAdvisorButton() {
-    return browser.$("#roleAdvisorButton")
+    return browser.$('label[for="ADVISOR"]')
   }
 
   get emailAddress() {
