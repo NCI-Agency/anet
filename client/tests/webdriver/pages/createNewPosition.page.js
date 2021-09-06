@@ -19,7 +19,7 @@ class CreatePosition extends Page {
   }
 
   get modalCloseButton() {
-    return this.modalContent.$("button.close")
+    return this.modalContent.$("button.btn-close")
   }
 
   get similarPosition() {
@@ -27,15 +27,15 @@ class CreatePosition extends Page {
   }
 
   get positionNameHelpBlock() {
-    return browser.$("#fg-name .help-block")
+    return browser.$("#fg-name div.invalid-feedback")
   }
 
   get typeAdvisorButton() {
-    return browser.$("#typeAdvisorButton")
+    return browser.$('label[for="ADVISOR"]')
   }
 
   get typePrincipalButton() {
-    return browser.$("#typePrincipalButton")
+    return browser.$('label[for="PRINCIPAL"]')
   }
 
   get organizationInput() {
@@ -43,7 +43,7 @@ class CreatePosition extends Page {
   }
 
   get organizationHelpBlock() {
-    return browser.$("#fg-organization .help-block")
+    return browser.$("#fg-organization div.invalid-feedback")
   }
 
   get orgAdvancedSelectFirstItem() {
@@ -57,7 +57,7 @@ class CreatePosition extends Page {
   }
 
   get locationHelpBlock() {
-    return browser.$("#fg-location .help-block")
+    return browser.$("#fg-location div.invalid-feedback")
   }
 
   get locAdvancedSelectFirstItem() {
