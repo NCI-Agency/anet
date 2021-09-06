@@ -38,7 +38,7 @@ class Home extends Page {
   }
 
   get linksMenuButton() {
-    return browser.$("#nav-links-button")
+    return browser.$('//a[text()="My Work"]')
   }
 
   get myOrgLink() {
@@ -50,7 +50,7 @@ class Home extends Page {
   }
 
   get myCounterpartsLink() {
-    return browser.$("#my-counterparts-nav")
+    return browser.$('//a//span[text()="My Counterparts"]')
   }
 
   get myCounterpartsNotifications() {
