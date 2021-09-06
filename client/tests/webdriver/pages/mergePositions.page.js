@@ -8,7 +8,7 @@ class MergePositions extends Page {
   }
 
   get title() {
-    return browser.$('//h2[contains(text(),"Merge Positions")]')
+    return browser.$('//h4[contains(text(),"Merge Positions")]')
   }
 
   get leftPositionField() {
@@ -32,7 +32,7 @@ class MergePositions extends Page {
   }
 
   get mergePositionsButton() {
-    return browser.$('//button//span[text()="Merge Positions"]')
+    return browser.$('//button[text()="Merge Positions"]')
   }
 
   getUseAllButton(side) {
