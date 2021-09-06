@@ -69,11 +69,11 @@ class ShowPerson extends Page {
   }
 
   get editAssessmentButton() {
-    return browser.$('div.panel-primary button[title="Edit assessment"]')
+    return browser.$('div.card button[title="Edit assessment"]')
   }
 
   get deleteAssessmentButton() {
-    return browser.$('div.panel-primary button[title="Delete assessment"]')
+    return browser.$$("div.card button.btn.btn-primary.btn-xs")[1]
   }
 
   get deleteConfirmButton() {
@@ -89,11 +89,11 @@ class ShowPerson extends Page {
   }
 
   get shownAssessmentPanel() {
-    return this.assessmentsTable.$("td:nth-child(2) .panel-primary")
+    return this.assessmentsTable.$("td:nth-child(2) .card")
   }
 
   get shownAssessmentDetails() {
-    return this.shownAssessmentPanel.$$("div.form-control-static")
+    return this.shownAssessmentPanel.$$("div.card-body .form-control-plaintext")
   }
 
   get quarterlyAssessmentContainer() {
@@ -128,9 +128,11 @@ class ShowPerson extends Page {
 
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
     this.assessmentModalForm
-      .$$(".form-group .btn-group")
+      .$$(".modal-content .btn-group")
       .forEach((btnGroup, index) => {
-        const button = btnGroup.$(`label[id="${valuesArr[index]}"]`)
+        const button = btnGroup.$(
+          `label[for="Test question ${index + 1}_${valuesArr[index]}"]`
+        )
         // wait for a bit, clicks and do double click, sometimes it does not go through
         browser.pause(300)
         button.click({ x: 10, y: 10 })
