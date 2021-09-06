@@ -42,11 +42,11 @@ class Home extends Page {
   }
 
   get myOrgLink() {
-    return browser.$("#my-organization")
+    return browser.$('//a//span[text()="My Organization"]')
   }
 
   get myTasksLink() {
-    return browser.$("#my-tasks-nav")
+    return browser.$('//a//span[text()="My Objective / Efforts"]')
   }
 
   get myCounterpartsLink() {
