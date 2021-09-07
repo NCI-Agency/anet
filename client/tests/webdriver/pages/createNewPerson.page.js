@@ -103,7 +103,7 @@ class CreatePerson extends Page {
 
   get numberCustomFieldHelpText() {
     return this.numberCustomFieldContainer.$(
-      '//span[contains(text(), "greater than")]'
+      '//div[contains(text(), "greater than")]'
     )
   }
 
@@ -114,11 +114,15 @@ class CreatePerson extends Page {
   }
 
   get greenButton() {
-    return this.customFieldsContainer.$('label[id="GREEN"]')
+    return this.customFieldsContainer.$(
+      'label[for="Choose one of the colours_GREEN"]'
+    )
   }
 
   get amberButton() {
-    return this.customFieldsContainer.$('label[id="AMBER"]')
+    return this.customFieldsContainer.$(
+      'label[for="Choose one of the colours_AMBER"]'
+    )
   }
 
   get addArrayObjectButton() {

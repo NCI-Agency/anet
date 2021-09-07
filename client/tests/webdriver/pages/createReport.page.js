@@ -117,7 +117,9 @@ export class CreateReport extends Page {
   }
 
   getEngagementTypesButtonByName(name) {
-    return this.engagementTypesFieldFormGroup.$(`label[id="${name}"]`)
+    return this.engagementTypesFieldFormGroup.$(
+      `label[for="Engagement types_${name}"]`
+    )
   }
 
   get fieldsToggledVisibilityByTrainButton() {
@@ -150,11 +152,11 @@ export class CreateReport extends Page {
   }
 
   get numberTrainedFieldShowed() {
-    return this.numberTrainedFormGroup.$("div.form-control-static")
+    return this.numberTrainedFormGroup.$("div.form-control-plaintext")
   }
 
-  get numberTrainedHelpText() {
-    return this.numberTrainedFormGroup.$("div.form-text")
+  get numberTrainedErrorText() {
+    return this.numberTrainedFormGroup.$("div.invalid-feedback")
   }
 
   getTestMultiReferenceFieldAdvancedSelectItem(n) {
