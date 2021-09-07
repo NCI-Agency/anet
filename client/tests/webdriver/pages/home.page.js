@@ -13,7 +13,7 @@ class Home extends Page {
   }
 
   get securityBanner() {
-    const banner = browser.$("#topbar .banner")
+    const banner = browser.$("#topbar .banner div:nth-child(2)")
     banner.waitForExist()
     banner.waitForDisplayed()
     return banner
