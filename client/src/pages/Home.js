@@ -10,6 +10,7 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
+import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -19,7 +20,6 @@ import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
-import MySavedSearches from "pages/searches/MySavedSearches"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button, Grid, Row } from "react-bootstrap"
@@ -330,10 +330,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
         />
       </Fieldset>
 
-      <MySavedSearches
-        setSearchQuery={setSearchQuery}
-        pageDispatchers={pageDispatchers}
-      />
+      <MySubscriptionUpdates />
     </div>
   )
 }
