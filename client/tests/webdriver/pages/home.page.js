@@ -42,7 +42,7 @@ class Home extends Page {
   }
 
   get myOrgLink() {
-    return browser.$('//a//span[text()="My Organization"]')
+    return browser.$('//a//span[contains(text(), "My Organization")]')
   }
 
   get myTasksLink() {
