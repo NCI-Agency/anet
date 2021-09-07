@@ -160,11 +160,15 @@ class CreatePerson extends Page {
   }
 
   get leftButton() {
-    return this.sensitiveFieldsContainer.$('label[id="LEFT"]')
+    return this.sensitiveFieldsContainer.$(
+      'label[for="Position on the political spectrum_LEFT"]'
+    )
   }
 
   get middleButton() {
-    return this.sensitiveFieldsContainer.$('label[id="MIDDLE"]')
+    return this.sensitiveFieldsContainer.$(
+      'label[for="Position on the political spectrum_MIDDLE"]'
+    )
   }
 
   getCustomFieldContainerByName(name) {
