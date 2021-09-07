@@ -59,7 +59,7 @@ export class CreateReport extends Page {
   }
 
   get testReferenceFieldHelpText() {
-    return this.testReferenceFieldFormGroup.$('span[class="help-block"]')
+    return this.testReferenceFieldFormGroup.$("div.form-text")
   }
 
   get testReferenceField() {
@@ -91,7 +91,7 @@ export class CreateReport extends Page {
   }
 
   get testMultiReferenceFieldHelpText() {
-    return this.testMultiReferenceFieldFormGroup.$('span[class="help-block"]')
+    return this.testMultiReferenceFieldFormGroup.$("div.form-text")
   }
 
   get testMultiReferenceField() {
@@ -154,7 +154,7 @@ export class CreateReport extends Page {
   }
 
   get numberTrainedHelpText() {
-    return this.numberTrainedFormGroup.$('span[class="help-block"]')
+    return this.numberTrainedFormGroup.$("div.form-text")
   }
 
   getTestMultiReferenceFieldAdvancedSelectItem(n) {
