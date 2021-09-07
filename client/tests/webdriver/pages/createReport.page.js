@@ -37,7 +37,7 @@ export class CreateReport extends Page {
   }
 
   get positiveAtmosphere() {
-    return browser.$("#positiveAtmos")
+    return browser.$('label[for="Atmospherics_POSITIVE"]')
   }
 
   getCustomFieldFormGroup(id) {
