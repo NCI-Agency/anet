@@ -54,11 +54,11 @@ class Home extends Page {
   }
 
   get myCounterpartsNotifications() {
-    return this.myCounterpartsLink.$("span:last-child")
+    return this.myCounterpartsLink.$("span.badge")
   }
 
   get myTasksNotifications() {
-    return this.myTasksLink.$("span:last-child")
+    return this.myTasksLink.$("span.badge")
   }
 
   get onboardingPopover() {
