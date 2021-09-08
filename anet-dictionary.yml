@@ -809,6 +809,156 @@ fields:
         - endOfTourDate
         - biography
         - arrayFieldName
+      assessments:
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            role:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Role of Interpreter
+              choices:
+                Translating:
+                  label: Translating
+                Advising:
+                  label: Advising
+            overallMeetingEvaluation:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Overall Meeting Evaluation
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "U":
+                  label: Unfair
+                  color: '#fc5a03'
+              visibleWhen: $[[?(@ && @.role === 'Translating')]]
+            professionalKnowledge:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Professional Knowledge
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "U":
+                  label: Unfair
+                  color: '#fc5a03'
+              visibleWhen: $[[?(@ && @.role === 'Translating')]]
+            reliability:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Reliability (response time, willingness to work)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "U":
+                  label: Unfair
+                  color: '#fc5a03'
+              visibleWhen: $[[?(@ && @.role === 'Translating')]]
+            posture:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Posture (politeness, clothing)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "U":
+                  label: Unfair
+                  color: '#fc5a03'
+              visibleWhen: $[[?(@ && @.role === 'Translating')]]
+            comments:
+                test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+                type: special_field
+                label: Comments
+                widget: richTextEditor
+                style:
+                  height: 100px
+                visibleWhen: $[[?(@ && @.role === 'Translating')]]
+        - recurrence: monthly
+          questions:
+            writtenTranslation:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Written translation evaluation
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "U":
+                  label: Unfair
+                  color: '#fc5a03'
+            comments:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: special_field
+              label: Comments
+              widget: richTextEditor
+              style:
+                height: 100px
+        - recurrence: annually
+          questions:
+            test1:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              label: Annually
+              choices:
+                "1":
+                  label: one
+                  color: '#c2ffb3'
+                "2":
+                  label: two
+                  color: '#ffe396'
+                "3":
+                  label: three
+                  color: '#ff8279'
     position:
       name: NATO Billet
       type: ANET User
