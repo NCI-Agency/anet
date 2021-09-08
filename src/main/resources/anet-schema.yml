@@ -692,6 +692,10 @@ properties:
               numberOfFieldsInLeftColumn:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced
+              assessments:
+                type: array
+                items:
+                  "$ref": "#/$defs/assessmentDef"
           position:
             type: object
             additionalProperties: false
