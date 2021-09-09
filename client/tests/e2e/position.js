@@ -267,7 +267,7 @@ test("Update permissions while changing positions", async t => {
     await element.click()
     // Grab the position information type from the position page.
     const $infoText = await $(
-      "div.scroll-anchor-container div#fg-type.form-group div.form-control-static"
+      "div.scroll-anchor-container div#fg-type div.form-control-plaintext"
     )
     // Wait until the information is displayed.
     await t.context.driver.wait(until.elementIsVisible($infoText), mediumWaitMs)
@@ -287,8 +287,8 @@ test("Update permissions while changing positions", async t => {
 
   // Click to the given advisor name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    testUsers[testUserMapper.super_user_2].personName,
-    testUsers[testUserMapper.super_user_2].positionName
+    testUsers[testUserMapper.super_user_2].personName, // Dwight
+    testUsers[testUserMapper.super_user_2].positionName // EF 5.1 Super User Sales 2
   )
   // Wait for transition.
   await t.context.driver.sleep(mediumWaitMs)
@@ -349,8 +349,8 @@ test("Update permissions while changing positions", async t => {
 
   // Click to the given advisor name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    testUsers[testUserMapper.advisor_2].personName,
-    testUsers[testUserMapper.advisor_2].positionName
+    testUsers[testUserMapper.advisor_2].personName, // Kevin
+    testUsers[testUserMapper.advisor_2].positionName // EF 5.1 Advisor Accounting
   )
   // Wait for transition.
   await t.context.driver.sleep(mediumWaitMs)
@@ -400,7 +400,7 @@ test("Update permissions while changing positions", async t => {
 
   // Grab the specified position from the DOM.
   const positionButton = await t.context.driver.findElement(
-    By.linkText(testUsers[testUserMapper.advisor_1].positionName)
+    By.linkText(testUsers[testUserMapper.advisor_1].positionName) // EF 5.1 Advisor Quality Assurance (Creed)
   )
   // Click on the position link.
   await positionButton.click()
@@ -415,7 +415,9 @@ test("Update permissions while changing positions", async t => {
   // Wait for transition
   await t.context.driver.sleep(mediumWaitMs)
   // Grab the person input field
-  const personInputField = await t.context.driver.findElement(By.css("#person"))
+  const personInputField = await t.context.driver.findElement(
+    By.css("input#person")
+  )
   // Click on the input field
   await personInputField.click()
   // Wait for transition
@@ -426,7 +428,7 @@ test("Update permissions while changing positions", async t => {
     for (const item of listItems) {
       if (
         (await item.getText()) ===
-        testUsers[testUserMapper.super_user_1].personName
+        testUsers[testUserMapper.super_user_1].personName // Jim
       ) {
         await item.click()
         await t.context.driver.sleep(mediumWaitMs)
@@ -434,7 +436,7 @@ test("Update permissions while changing positions", async t => {
       }
     }
     // Grab pagination buttons
-    const pagination = await t.context.driver.findElements(By.css("a"))
+    const pagination = await t.context.driver.findElements(By.css("span"))
     for (const item of pagination) {
       if ((await item.getText()) === "›") {
         await item.click()
@@ -452,7 +454,7 @@ test("Update permissions while changing positions", async t => {
   await t.context.driver.sleep(mediumWaitMs)
   // Grab the position information type from the position page.
   const $infoText = await $(
-    "div.scroll-anchor-container div#fg-type.form-group div.form-control-static"
+    "div.scroll-anchor-container div#fg-type div.form-control-plaintext"
   )
   // Wait until the information is displayed.
   await t.context.driver.wait(until.elementIsVisible($infoText), mediumWaitMs)
