@@ -39,7 +39,7 @@ export default class Person extends Model {
   static customFields = Settings.fields.person.customFields
 
   static customSensitiveInformation =
-    Settings.fields.person.customSensitiveInformation
+    Settings.fields.person.customSensitiveInformation || {}
 
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(Person.customFields)
