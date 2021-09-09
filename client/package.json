@@ -184,7 +184,7 @@
     "lint": "NODE_ENV=development eslint '*.js' 'config/**/*.js' 'platform/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
     "lint-fix": "NODE_ENV=development prettier-eslint --write '*.js' 'config/**/*.js' 'platform/**/*.js' 'src/**/*.js' 'stories/**/*.js' 'tests/**/*.js'",
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
-    "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",
+    "test-all": "yarn run test-jest && yarn run test-e2e && yarn run test-wdio && yarn run test-wdio-ie",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava --config ava.config.js",
     "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} SUITE=${TEST_WDIO_SUITE:-withCustomFields}; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js --suite base --suite ${SUITE}",
     "test-jest": "export ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models|utils)'",
