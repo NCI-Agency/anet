@@ -1100,21 +1100,22 @@ const ReportForm = ({
             </Form>
           </div>
         )
-
-        function getLocationFilters() {
-          const locationFilters = {}
-          Settings?.fields?.report?.location?.filter.map(
-            filter =>
-              (locationFilters[filter] = {
-                label: Location.humanNameOfType(filter),
-                queryVars: { type: filter }
-              })
-          )
-          return locationFilters
-        }
       }}
     </Formik>
   )
+
+  function getLocationFilters() {
+    return Settings?.fields?.report?.location?.filter.reduce(
+      (accumulator, filter) => {
+        accumulator[filter] = {
+          label: Location.humanNameOfType(filter),
+          queryVars: { type: filter }
+        }
+        return accumulator
+      },
+      {}
+    )
+  }
 
   function getReportType(values) {
     return values.engagementDate && Report.isFuture(values.engagementDate)

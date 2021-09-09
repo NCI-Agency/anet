@@ -237,9 +237,10 @@ const AdvancedSelect = ({
     if (
       !_isEqualWith(latestFilterDefs, filterDefs, utils.treatFunctionsAsEqual)
     ) {
+      setFilterType(firstFilter)
       setLatestFilterDefs(filterDefs)
     }
-  }, [filterDefs, latestFilterDefs])
+  }, [filterDefs, latestFilterDefs, firstFilter])
 
   useEffect(() => {
     if (latestSelectedValueAsString.current !== selectedValueAsString) {

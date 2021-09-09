@@ -427,17 +427,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required:
-          [
-            shortLabel,
-            shortName,
-            longLabel,
-            longName,
-            topLevel,
-            subLevel,
-            taskedOrganizations,
-            responsiblePositions,
-          ]
+        required: [shortLabel, shortName, longLabel, longName, topLevel, subLevel, taskedOrganizations, responsiblePositions]
         properties:
           shortLabel:
             type: string

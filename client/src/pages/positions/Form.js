@@ -306,7 +306,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={getLocationFilters()}
+                      filterDefs={getLocationFilters(values)}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
                       valueKey="name"
@@ -357,23 +357,21 @@ const PositionForm = ({ edit, title, initialValues }) => {
             </Form>
           </div>
         )
-
-        function getLocationFilters() {
-          const locationFilters = {}
-          Settings?.fields[
-            values.type === Position.TYPE.ADVISOR ? "advisor" : "principal"
-          ]?.position?.location?.filter.map(
-            filter =>
-              (locationFilters[filter] = {
-                label: Location.humanNameOfType(filter),
-                queryVars: { type: filter }
-              })
-          )
-          return locationFilters
-        }
       }}
     </Formik>
   )
+
+  function getLocationFilters(values) {
+    return Settings?.fields[
+      values.type === Position.TYPE.ADVISOR ? "advisor" : "principal"
+    ]?.position?.location?.filter.reduce((accummulator, filter) => {
+      accummulator[filter] = {
+        label: Location.humanNameOfType(filter),
+        queryVars: { type: filter }
+      }
+      return accummulator
+    }, {})
+  }
 
   function onCancel() {
     history.goBack()
