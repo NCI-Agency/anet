@@ -297,7 +297,7 @@ test.beforeEach(t => {
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()
       const $advancedSelectSuggestion = await t.context.$(
-        `${popoverSelector} tbody tr:first-child td input`
+        `${popoverSelector} tbody tr:first-child td:first-child input`
       )
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput
