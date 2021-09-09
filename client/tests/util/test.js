@@ -317,11 +317,13 @@ test.beforeEach(t => {
       )
     },
     async clickMenuLinksButton() {
-      const $menuLinksButton = await t.context.$("#nav-links-button")
+      const $menuLinksButton = await t.context.$(
+        "#leftNav div:nth-child(3) > a"
+      )
       await $menuLinksButton.click()
     },
     async clickMyOrgLink() {
-      const $myOrgLink = await t.context.$("#my-organization")
+      const $myOrgLink = await t.context.$('a[href*="/organizations/"]')
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
       await $myOrgLink.click()
       await t.context.waitForLoadingFinished()
