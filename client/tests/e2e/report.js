@@ -37,12 +37,12 @@ test.serial("Draft and submit a report", async t => {
 
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
-    "vt"
+    "ge"
   )
 
   t.is(
     await $locationAdvancedSelect.getAttribute("value"),
-    "VTC",
+    "General Hospital",
     "Clicking a location advanced single select widget suggestion populates the input field."
   )
 
@@ -536,7 +536,7 @@ test.serial(
     await $locationShortcutButton.click()
     t.is(
       await $locationInput.getAttribute("value"),
-      "VTC",
+      "General Hospital",
       "Clicking the shortcut adds a location"
     )
 

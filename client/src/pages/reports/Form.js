@@ -303,44 +303,6 @@ const ReportForm = ({
         }
         const currentOrg =
           currentUser.position && currentUser.position.organization
-        const locationFilters = {
-          virtual: {
-            label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.VIRTUAL_LOCATION
-            ),
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.VIRTUAL_LOCATION
-            }
-          },
-          principal: {
-            label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-            ),
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-            }
-          },
-          advisor: {
-            label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.ADVISOR_LOCATION
-            ),
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.ADVISOR_LOCATION
-            }
-          },
-          pinpoint: {
-            label: Location.humanNameOfType(
-              Location.LOCATION_TYPES.PINPOINT_LOCATION
-            ),
-            queryVars: {
-              status: Model.STATUS.ACTIVE,
-              type: Location.LOCATION_TYPES.PINPOINT_LOCATION
-            }
-          }
-        }
 
         const reportPeopleFilters = {
           all: {
@@ -579,7 +541,7 @@ const ReportForm = ({
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={locationFilters}
+                      filterDefs={getLocationFilters()}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
                       valueKey="name"
@@ -1141,6 +1103,19 @@ const ReportForm = ({
       }}
     </Formik>
   )
+
+  function getLocationFilters() {
+    return Settings?.fields?.report?.location?.filter.reduce(
+      (accumulator, filter) => {
+        accumulator[filter] = {
+          label: Location.humanNameOfType(filter),
+          queryVars: { type: filter }
+        }
+        return accumulator
+      },
+      {}
+    )
+  }
 
   function getReportType(values) {
     return values.engagementDate && Report.isFuture(values.engagementDate)

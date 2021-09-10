@@ -1,7 +1,9 @@
 import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
+import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -367,39 +369,49 @@ const ButtonToggleGroupField = ({
   addon,
   vertical,
   buttons,
+  enableClear,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
     () => (
-      <ToggleButtonGroup
-        type={type}
-        defaultValue={field.value}
-        {...field}
-        {...otherProps}
-      >
-        {buttons.map((button, index) => {
-          if (!button) {
-            return null
-          }
-          let { label, value, color, style, ...props } = button
-          if (color) {
-            if (
-              field.value === value ||
-              (Array.isArray(field.value) && field.value.includes(value))
-            ) {
-              style = { ...style, backgroundColor: color }
+      <>
+        <ToggleButtonGroup
+          type={type}
+          defaultValue={field.value}
+          {...field}
+          {...otherProps}
+        >
+          {buttons.map((button, index) => {
+            if (!button) {
+              return null
             }
-            style = { ...style, borderColor: color, borderWidth: "2px" }
-          }
-          return (
-            <ToggleButton {...props} key={value} value={value} style={style}>
-              {label}
-            </ToggleButton>
-          )
-        })}
-      </ToggleButtonGroup>
+            let { label, value, color, style, ...props } = button
+            if (color) {
+              if (
+                field.value === value ||
+                (Array.isArray(field.value) && field.value.includes(value))
+              ) {
+                style = { ...style, backgroundColor: color }
+              }
+              style = { ...style, borderColor: color, borderWidth: "2px" }
+            }
+            return (
+              <ToggleButton {...props} key={value} value={value} style={style}>
+                {label}
+              </ToggleButton>
+            )
+          })}
+        </ToggleButtonGroup>
+        {!_isEmpty(buttons) && enableClear && (
+          <RemoveButton
+            title="Clear choice"
+            alt="Clear choice"
+            onClick={() => form.setFieldValue(field.name, "", false)}
+          />
+        )}
+      </>
     ),
-    [buttons, field, otherProps, type]
+    [buttons, field, form, enableClear, otherProps, type]
   )
   return (
     <Field
@@ -423,7 +435,8 @@ ButtonToggleGroupField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  buttons: PropTypes.array
+  buttons: PropTypes.array,
+  enableClear: PropTypes.bool
 }
 
 export const RadioButtonToggleGroupField = ({

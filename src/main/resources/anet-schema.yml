@@ -489,6 +489,18 @@ properties:
             type: string
             title: The label for report's engagement details
             description: Used in the UI where report's engagement details are shown.
+          location:
+            type: object
+            additionalProperties: false
+            required: [filter]
+            properties:
+              filter:
+                type: array
+                uniqueItems: true
+                items:
+                  type: string
+                  enum:
+                    [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
           customFields:
             type: object
             additionalProperties:
@@ -573,6 +585,13 @@ properties:
         additionalProperties: false
         required: [format]
         properties:
+          superUserTypeOptions:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              enum:
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
           format:
             type: string
             title: Default format for location
@@ -664,6 +683,18 @@ properties:
                 description: Used in the UI for the type/permissions of an advisor position.
               code:
                 "$ref": "#/$defs/inputField"
+              location:
+                type: object
+                additionalProperties: false
+                required: [filter]
+                properties:
+                  filter:
+                    type: array
+                    uniqueItems: true
+                    items:
+                      type: string
+                      enum:
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
 
           org:
             type: object
@@ -736,6 +767,18 @@ properties:
                 description: Used in the UI for the type/permissions of a principal position.
               code:
                 "$ref": "#/$defs/inputField"
+              location:
+                type: object
+                additionalProperties: false
+                required: [filter]
+                properties:
+                  filter:
+                    type: array
+                    uniqueItems: true
+                    items:
+                      type: string
+                      enum:
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
 
           org:
             type: object

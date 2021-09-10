@@ -12,8 +12,18 @@
       "minor": {
         "groupName": "most non-major dependencies",
         "groupSlug": "most-minor-patch"
+      },
+      "patch": {
+        "groupName": "most non-major dependencies",
+        "groupSlug": "most-minor-patch"
       }
     },
+    {
+      "matchPackagePatterns": ["^org.liquibase"],
+      "groupName": "org.liquibase",
+      "groupSlug": "org.liquibase"
+    },
+
     {
       "matchPackageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
       "allowedVersions": "/^.*\\.jre11$/"
