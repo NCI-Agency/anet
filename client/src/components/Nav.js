@@ -116,6 +116,7 @@ const Nav = ({
   const inMySubscriptions = path.indexOf("/subscriptions/mine") === 0
   const inInsights = path.indexOf("/insights") === 0
   const inDashboards = path.indexOf("/dashboards") === 0
+  const inMySavedSearches = path.indexOf("/search/mine") === 0
 
   const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
   const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
@@ -129,11 +130,19 @@ const Nav = ({
       inMyCounterParts ||
       inMyReports ||
       inMyTasks ||
-      inMySubscriptions
+      inMySubscriptions ||
+      inMySavedSearches
     ) {
       setIsMenuLinksOpened(true)
     }
-  }, [inMyOrg, inMyCounterParts, inMyReports, inMyTasks, inMySubscriptions])
+  }, [
+    inMyOrg,
+    inMyCounterParts,
+    inMyReports,
+    inMyTasks,
+    inMySubscriptions,
+    inMySavedSearches
+  ])
 
   return (
     <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
@@ -223,6 +232,13 @@ const Nav = ({
             id="my-subscriptions"
           >
             My Subscriptions
+          </SidebarLink>
+          <SidebarLink
+            linkTo={{ pathname: "/search/mine" }}
+            handleOnClick={resetPages}
+            id="my-searches"
+          >
+            My Saved Searches
           </SidebarLink>
         </BSNav>
       </Collapse>
