@@ -28,7 +28,7 @@ import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo } from "react"
-import { Button, HelpBlock, Table } from "react-bootstrap"
+import { Badge, Button, HelpBlock, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
@@ -286,9 +286,42 @@ const EnumField = fieldProps => {
 
 const enumHumanValue = (choices, fieldVal) => {
   if (Array.isArray(fieldVal)) {
-    return fieldVal && fieldVal.map(k => choices[k]?.label).join(", ")
+    return (
+      <div>
+        {fieldVal.map((k, index) => (
+          <span key={k}>
+            <Badge
+              style={{
+                fontSize: "inherit",
+                fontWeight: "inherit",
+                lineHeight: "inherit",
+                color: "black",
+                backgroundColor: choices[k]?.color || "white"
+              }}
+            >
+              {choices[k]?.label}
+            </Badge>
+            {index < fieldVal.length - 1 && ", "}
+          </span>
+        ))}
+      </div>
+    )
   } else {
-    return fieldVal && choices[fieldVal]?.label
+    return (
+      fieldVal && (
+        <Badge
+          style={{
+            fontSize: "inherit",
+            fontWeight: "inherit",
+            lineHeight: "inherit",
+            color: "black",
+            backgroundColor: choices[fieldVal]?.color || "white"
+          }}
+        >
+          {choices[fieldVal]?.label}
+        </Badge>
+      )
+    )
   }
 }
 
