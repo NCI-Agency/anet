@@ -331,12 +331,12 @@ async function validateAdminPrincipalOrgPermissions(t) {
   await $editPrincipalOrgButton.click()
   await assertElementEnabled(
     t,
-    "#typeAdvisorButton",
+    'label[for="ADVISOR_ORG"]',
     "Field advisorOrgButton of a principal organization should be enabled for admins"
   )
   await assertElementEnabled(
     t,
-    "#typePrincipalButton",
+    'label[for="PRINCIPAL_ORG"]',
     "Field principalOrgButton of a principal organization should be enabled for admins"
   )
   await assertElementEnabled(

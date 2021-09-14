@@ -37,7 +37,7 @@ export class CreateReport extends Page {
   }
 
   get positiveAtmosphere() {
-    return browser.$("#positiveAtmos")
+    return browser.$('label[for="Atmospherics_POSITIVE"]')
   }
 
   getCustomFieldFormGroup(id) {
@@ -59,7 +59,7 @@ export class CreateReport extends Page {
   }
 
   get testReferenceFieldHelpText() {
-    return this.testReferenceFieldFormGroup.$('span[class="help-block"]')
+    return this.testReferenceFieldFormGroup.$("div.form-text")
   }
 
   get testReferenceField() {
@@ -91,7 +91,7 @@ export class CreateReport extends Page {
   }
 
   get testMultiReferenceFieldHelpText() {
-    return this.testMultiReferenceFieldFormGroup.$('span[class="help-block"]')
+    return this.testMultiReferenceFieldFormGroup.$("div.form-text")
   }
 
   get testMultiReferenceField() {
@@ -117,7 +117,9 @@ export class CreateReport extends Page {
   }
 
   getEngagementTypesButtonByName(name) {
-    return this.engagementTypesFieldFormGroup.$(`label[id="${name}"]`)
+    return this.engagementTypesFieldFormGroup.$(
+      `label[for="Engagement types_${name}"]`
+    )
   }
 
   get fieldsToggledVisibilityByTrainButton() {
@@ -150,11 +152,11 @@ export class CreateReport extends Page {
   }
 
   get numberTrainedFieldShowed() {
-    return this.numberTrainedFormGroup.$("div.form-control-static")
+    return this.numberTrainedFormGroup.$("div.form-control-plaintext")
   }
 
-  get numberTrainedHelpText() {
-    return this.numberTrainedFormGroup.$('span[class="help-block"]')
+  get numberTrainedErrorText() {
+    return this.numberTrainedFormGroup.$("div.invalid-feedback")
   }
 
   getTestMultiReferenceFieldAdvancedSelectItem(n) {
