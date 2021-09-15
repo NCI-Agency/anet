@@ -54,7 +54,7 @@ public class TestData {
 
   public static LocationInput createLocationInput(String name, Double lat, Double lng) {
     return LocationInput.builder().withName(name).withStatus(Status.ACTIVE).withLat(lat)
-        .withType(LocationType.PINPOINT_LOCATION).withLng(lng).build();
+        .withType(LocationType.POINT_LOCATION).withLng(lng).build();
   }
 
   public static PositionInput createPositionInput() {
