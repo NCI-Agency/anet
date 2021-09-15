@@ -528,7 +528,7 @@ properties:
                 items:
                   type: string
                   enum:
-                    [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                    [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
           customFields:
             type: object
             additionalProperties:
@@ -615,7 +615,7 @@ properties:
             items:
               type: string
               enum:
-                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
           format:
             type: string
             title: Default format for location
@@ -718,7 +718,7 @@ properties:
                     items:
                       type: string
                       enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
 
           org:
             type: object
@@ -802,7 +802,7 @@ properties:
                     items:
                       type: string
                       enum:
-                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, PINPOINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+                        [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
 
           org:
             type: object
