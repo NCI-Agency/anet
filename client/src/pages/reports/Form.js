@@ -894,6 +894,7 @@ const ReportForm = ({
                       setFieldValue("reportText", value, true)
                     }
                   }}
+                  onHandleBlur={() => setFieldTouched("reportText")}
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 

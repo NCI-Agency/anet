@@ -18,7 +18,7 @@ import {
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
 
-const RichTextEditor = ({ value, onChange, className }) => {
+const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
   const withAnetLink = editor => {
     const { isVoid, isInline } = editor
 
@@ -56,6 +56,7 @@ const RichTextEditor = ({ value, onChange, className }) => {
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
+            onBlur={onHandleBlur}
             className="editable"
           />
         </div>
@@ -67,6 +68,7 @@ const RichTextEditor = ({ value, onChange, className }) => {
 RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
+  onHandleBlur: PropTypes.func,
   className: PropTypes.string
 }
 

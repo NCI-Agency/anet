@@ -252,6 +252,20 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
   if (!_isEmpty(validations)) {
     validations.forEach(validation => {
       const { params, type } = validation
+      if (fieldConfig.widget === "richTextEditor" && type === "required") {
+        // Empty html like <p></p> must be invalid if the richTextEditor field is required
+        fieldTypeYupSchema = fieldTypeYupSchema.test(
+          "rte-required",
+          "rte-required-error",
+          function(htmlString) {
+            return utils.isEmptyHtml(htmlString)
+              ? this.createError({
+                message: params?.[0] || ""
+              })
+              : true
+          }
+        )
+      }
       if (!fieldTypeYupSchema[type]) {
         return
       }

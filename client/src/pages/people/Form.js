@@ -507,6 +507,7 @@ const PersonForm = ({ edit, title, saveText, initialValues }) => {
                       setFieldValue("biography", value)
                     }
                   }}
+                  onHandleBlur={() => setFieldTouched("biography", true, false)}
                   widget={<RichTextEditor className="biography" />}
                 />
               </Fieldset>
