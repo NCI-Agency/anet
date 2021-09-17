@@ -118,17 +118,18 @@ const serialize = node => {
 }
 
 const deserialize = element => {
-  const children = Array.from(element.childNodes).map(deserialize)
+  let children = Array.from(element.childNodes).map(deserialize)
+  // Body must have at least one children node for user to be able to edit the text in it
+  // Every other node must have a non-empty array of children
+  if (element.nodeName !== "#text" && _isEmpty(children)) {
+    children =
+      element.nodeName === "BODY"
+        ? jsx("element", { type: "paragraph" }, [{ text: "" }])
+        : [{ text: "" }]
+  }
+
   switch (element.nodeName) {
     case "BODY":
-      // Body must have at least one children node for user to be able to edit the text in it
-      if (_isEmpty(children)) {
-        return jsx(
-          "fragment",
-          {},
-          jsx("element", { type: "paragraph" }, [{ text: "" }])
-        )
-      }
       return jsx("fragment", {}, children)
     case "P":
       return jsx("element", { type: "paragraph" }, children)
