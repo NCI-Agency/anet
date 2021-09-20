@@ -5,6 +5,7 @@ const common = require("./webpack.common.js")
 const paths = require("./paths")
 
 module.exports = merge.merge(common.clientConfig, {
+  target: "web",
   mode: "development",
   resolve: {
     modules: [paths.appSrc, "node_modules", "platform/web-dev"]
