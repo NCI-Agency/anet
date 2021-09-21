@@ -655,27 +655,28 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     final PersonInput persInput1 = PersonInput.builder().withRole(Role.ADVISOR)
         .withName("Test person for edit history").build();
-    Person person1 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput1);
+    final Person person1 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput1);
     assertThat(person1).isNotNull();
     assertThat(person1.getUuid()).isNotNull();
     final PersonInput persInput2 = PersonInput.builder().withRole(Role.ADVISOR)
         .withName("Test person for edit history").build();
-    Person person2 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput2);
+    final Person person2 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput2);
     assertThat(person2).isNotNull();
     assertThat(person2.getUuid()).isNotNull();
-    List<PersonPositionHistoryInput> prevPersons = new ArrayList<PersonPositionHistoryInput>();
-    PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
+    final List<PersonPositionHistoryInput> prevPersons =
+        new ArrayList<PersonPositionHistoryInput>();
+    final PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPerson(getPersonInput(person1))
         .build();
-    PersonPositionHistoryInput histInput2 =
+    final PersonPositionHistoryInput histInput2 =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
             .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
             .withPerson(getPersonInput(person2)).build();
     prevPersons.add(histInput1);
     prevPersons.add(histInput2);
-    PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())
+    final PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())
         .withPreviousPeople(prevPersons).build();
     adminMutationExecutor.updatePositionHistory("", inputForTest);
     final Position positionUpdated =

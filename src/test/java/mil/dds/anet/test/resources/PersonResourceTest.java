@@ -580,7 +580,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     final PersonInput persInput = PersonInput.builder().withRole(Role.ADVISOR)
         .withName("Test person for edit history").build();
-    Person person = adminMutationExecutor.createPerson(FIELDS, persInput);
+    final Person person = adminMutationExecutor.createPerson(FIELDS, persInput);
     assertThat(person).isNotNull();
     assertThat(person.getUuid()).isNotNull();
     // Create a Position
@@ -593,7 +593,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(createdPos1).isNotNull();
     assertThat(createdPos1.getUuid()).isNotNull();
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
-    PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
+    final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
     final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
         .withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(org))
@@ -603,17 +603,17 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(createdPos2).isNotNull();
     assertThat(createdPos2.getUuid()).isNotNull();
     assertThat(createdPos2.getName()).isEqualTo(testInput2.getName());
-    PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
-    PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
+    final PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
+    final PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1).build();
-    PersonPositionHistoryInput hist2 = PersonPositionHistoryInput.builder()
+    final PersonPositionHistoryInput hist2 = PersonPositionHistoryInput.builder()
         .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
         .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
         .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput2).build();
 
-    List<PersonPositionHistoryInput> historyList = new ArrayList<>();
+    final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
     historyList.add(hist1);
     historyList.add(hist2);
     final PersonInput personInput = getPersonInput(person);
@@ -622,7 +622,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person personUpdated =
         adminQueryExecutor.person(PERSON_FIELDS_ONLY_HISTORY, personInput.getUuid());
     assertThat(personUpdated).isNotNull();
-    List<PersonPositionHistory> previousPositions = personUpdated.getPreviousPositions();
+    final List<PersonPositionHistory> previousPositions = personUpdated.getPreviousPositions();
     assertThat(previousPositions).isNotNull();
     assertThat(previousPositions.size() == 2);
   }
