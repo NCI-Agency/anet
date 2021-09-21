@@ -538,7 +538,7 @@ function getInvalidDateIndexes(inputHistory) {
   const history = inputHistory || []
   history.forEach((item, index) => {
     const endTime = item.endTime || Infinity
-    if (item.startTime >= endTime) {
+    if (item.startTime > endTime) {
       invalidIndexes.push(index)
     }
   })
