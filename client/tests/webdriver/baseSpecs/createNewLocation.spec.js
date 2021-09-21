@@ -8,6 +8,8 @@ import {
   SIMILAR_LOCATION
 } from "./locationUtils"
 
+const SHORT_WAIT_MS = 1000
+
 describe("When creating a new Location", () => {
   it("Should not create a location without name & type input", () => {
     CreateNewLocation.open()
@@ -23,10 +25,12 @@ describe("When creating a new Location", () => {
     CreateNewLocation.typeField.selectByIndex(LOCATION_TYPE.index)
     CreateNewLocation.duplicatesButton.waitForDisplayed()
     CreateNewLocation.duplicatesButton.click()
+    browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
     CreateNewLocation.modalContent.waitForDisplayed()
     const similar = CreateNewLocation.similarLocation.getText()
     CreateNewLocation.modalCloseButton.waitForDisplayed()
     CreateNewLocation.modalCloseButton.click()
+    browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
     CreateNewLocation.modalContent.waitForDisplayed({ reverse: true })
     expect(similar).to.equal("Kabul Hospital")
   })
