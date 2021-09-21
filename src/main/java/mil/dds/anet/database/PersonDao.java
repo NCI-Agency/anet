@@ -474,27 +474,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return numRows;
   }
 
-  void updatePeoplePositions(final String positionUuid, final String personUuid,
-      final Instant startTime, final Instant endTime) {
-    if (endTime == null) {
-      // we have to make an exception here, as MSSQL has problems inserting a null datetime
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
-    } else {
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
-          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
-    }
-  }
-
   @InTransaction
   public boolean hasHistoryConflict(final String uuid, final List<PersonPositionHistory> history,
       final boolean checkPerson) {
@@ -527,5 +506,27 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       }
     }
     return false;
+  }
+
+  @InTransaction
+  protected void updatePeoplePositions(final String positionUuid, final String personUuid,
+      final Instant startTime, final Instant endTime) {
+    if (endTime == null) {
+      // we have to make an exception here, as MSSQL has problems inserting a null datetime
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
+    } else {
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    }
   }
 }
