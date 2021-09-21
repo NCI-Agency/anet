@@ -458,6 +458,7 @@ const AllFormatsInfo = ({
           style={{ marginLeft: "8px" }}
           id="gloc-info-btn"
           minimal
+          data-testid="info-button"
           icon="info-sign"
           intent="primary"
           outlined={inForm}
