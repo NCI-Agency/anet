@@ -335,6 +335,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   externalButton
                   historyEntityType="position"
                   parentEntityType={person.role}
+                  parentEntityUuid1={person.uuid}
                   showModal={showHistoryModal}
                   setShowModal={setShowHistoryModal}
                   setHistory={history => onSavePreviousPositions(history)}

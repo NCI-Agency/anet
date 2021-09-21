@@ -336,6 +336,7 @@ const PositionShow = ({ pageDispatchers }) => {
                       currentlyOccupyingEntity={position.person}
                       midColTitle="New History"
                       parentEntityType={position.type}
+                      parentEntityUuid1={position.uuid}
                       showModal={showEditHistoryModal}
                       setShowModal={setShowEditHistoryModal}
                       setHistory={history => {

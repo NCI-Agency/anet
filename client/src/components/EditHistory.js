@@ -36,7 +36,7 @@ const PERSON_SINGLE_SELECT_PARAMETERS = {
   },
   objectType: Person,
   fields:
-    "uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} }",
+    "uuid name rank role avatar(size: 32) position { uuid name type organization {uuid} } previousPositions { startTime endTime position { uuid }}",
   addon: PEOPLE_ICON
 }
 
@@ -55,7 +55,7 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
   },
   objectType: Position,
   fields:
-    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatar(size: 32) }",
+    "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatar(size: 32) } previousPeople { startTime endTime person {uuid} }",
   addon: POSITIONS_ICON
 }
 
@@ -66,6 +66,8 @@ function EditHistory({
   setHistory,
   historyEntityType,
   parentEntityType,
+  parentEntityUuid1,
+  parentEntityUuid2,
   historyComp: HistoryComp,
   externalButton,
   showModal,
@@ -130,7 +132,14 @@ function EditHistory({
               const invalidDateIndexesSet = new Set(
                 getInvalidDateIndexes(values.history)
               )
-
+              const occupiedEntityIndexesSet = new Set(
+                getOccupiedEntityIndexes(
+                  values.history,
+                  historyEntityType,
+                  parentEntityUuid1,
+                  parentEntityUuid2
+                )
+              )
               const hasCurrent = !_isEmpty(currentlyOccupyingEntity)
               const lastItem = values.history[values.history.length - 1]
               // For last item to be valid:
@@ -174,6 +183,7 @@ function EditHistory({
                             overlapArrays={overlapArrays}
                             isInvalidLastItem={!validLastItem}
                             invalidDateIndexesSet={invalidDateIndexesSet}
+                            occupiedEntityIndexesSet={occupiedEntityIndexesSet}
                             historyEntityType={historyEntityType}
                           />
                         </div>
@@ -222,7 +232,8 @@ function EditHistory({
                                 overlappingIndexesSet,
                                 invalidDateIndexesSet,
                                 !validLastItem &&
-                                  idx === values.history.length - 1
+                                  idx === values.history.length - 1,
+                                occupiedEntityIndexesSet
                               )}
                             >
                               <Fieldset
@@ -328,7 +339,8 @@ function EditHistory({
                                 !!(
                                   invalidDateIndexesSet.size ||
                                   overlapArrays.length ||
-                                  !validLastItem
+                                  !validLastItem ||
+                                  occupiedEntityIndexesSet.size
                                 )
                               }
                             >
@@ -402,6 +414,8 @@ EditHistory.propTypes = {
   setHistory: PropTypes.func.isRequired,
   historyEntityType: PropTypes.string,
   parentEntityType: PropTypes.string.isRequired,
+  parentEntityUuid1: PropTypes.string.isRequired,
+  parentEntityUuid2: PropTypes.string,
   historyComp: PropTypes.func,
   externalButton: PropTypes.bool,
   showModal: PropTypes.bool.isRequired,
@@ -426,18 +440,22 @@ export default EditHistory
 
 function ValidationMessages({
   invalidDateIndexesSet,
+  occupiedEntityIndexesSet,
   overlapArrays,
   historyEntityType,
   isInvalidLastItem
 }) {
+  // Don't show all errors to the user at once. Showing them according to a priority gives the user a nice path to create a valid history
+  // First; all the startTimes must be before the endTimes
   const showInvalidMessage = invalidDateIndexesSet.size
-  /* Don't even show overlaps if there are invalid date ranges */
+  // Second; all history items must be available between the specified dates
+  const showOccupiedEntityMessage =
+    !invalidDateIndexesSet.size && occupiedEntityIndexesSet.size
+  // Third; there must be no overlapping items in the created history
   const showOverlappingMessage =
-    !invalidDateIndexesSet.size && overlapArrays.length
-
+    !occupiedEntityIndexesSet.size && overlapArrays.length
   // This is the last warning, if everything is fixed, show it
-  const showLastItemInvalid =
-    !showInvalidMessage && !showOverlappingMessage && isInvalidLastItem
+  const showLastItemInvalid = !showOverlappingMessage && isInvalidLastItem
 
   return (
     <>
@@ -449,6 +467,19 @@ function ValidationMessages({
               <li key={val}>
                 {historyEntityType} #{val + 1}'s start time is later than end
                 time
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ) : null}
+      {showOccupiedEntityMessage ? (
+        <fieldset style={getOccupiedEntityStyle()}>
+          <legend>Internal history conflicts</legend>
+          <ul>
+            {Array.from(occupiedEntityIndexesSet).map(val => (
+              <li key={val}>
+                {historyEntityType} #{val + 1} is occupied between specified
+                dates
               </li>
             ))}
           </ul>
@@ -486,6 +517,7 @@ function ValidationMessages({
 
 ValidationMessages.propTypes = {
   invalidDateIndexesSet: PropTypes.object,
+  occupiedEntityIndexesSet: PropTypes.object,
   overlapArrays: PropTypes.array,
   historyEntityType: PropTypes.string,
   isInvalidLastItem: PropTypes.bool
@@ -514,6 +546,42 @@ function getInvalidDateIndexes(inputHistory) {
   return invalidIndexes
 }
 
+function getOccupiedEntityIndexes(
+  inputHistory,
+  historyEntityType,
+  parentEntityUuid1,
+  parentEntityUuid2
+) {
+  const invalidIndexes = []
+  let historyProp
+  let selfHistoryProp
+  if (historyEntityType === "position") {
+    historyProp = "previousPeople"
+    selfHistoryProp = "person"
+  } else if (historyEntityType === "person") {
+    historyProp = "previousPositions"
+    selfHistoryProp = "position"
+  }
+  const history = inputHistory || []
+  history.forEach((item, index) => {
+    const selfHistory = item[historyEntityType][historyProp] || []
+    const selfHistoryFiltered = selfHistory.filter(
+      item =>
+        item?.[selfHistoryProp]?.uuid !== parentEntityUuid1 &&
+        item?.[selfHistoryProp]?.uuid !== parentEntityUuid2
+    )
+    const currStartTime = item.startTime
+    const currEndTime = item.endTime
+    // Check if the current input causes conflicts in the history
+    const overlappingDateIndexes = getOverlappingPeriodIndexes([
+      { startTime: currStartTime, endTime: currEndTime },
+      ...selfHistoryFiltered
+    ])
+    !_isEmpty(overlappingDateIndexes) && invalidIndexes.push(index)
+  })
+  return invalidIndexes
+}
+
 function getIvalidDateWarningStyle() {
   return { outline: "2px dashed red" }
 }
@@ -526,7 +594,17 @@ function getLastItemInvalidStyle() {
   return { outline: "2px dashed darkred" }
 }
 
-function getStyle(index, overlapSet, invalidDatesSet, isInvalidLastItem) {
+function getOccupiedEntityStyle() {
+  return { outline: "2px dashed darkorange" }
+}
+
+function getStyle(
+  index,
+  overlapSet,
+  invalidDatesSet,
+  isInvalidLastItem,
+  occupiedEntityIndexesSet
+) {
   if (invalidDatesSet.has(index)) {
     return getIvalidDateWarningStyle()
     // If there is an invalid date, we shouldn't even check for overlaps
@@ -535,6 +613,14 @@ function getStyle(index, overlapSet, invalidDatesSet, isInvalidLastItem) {
     // If both of the warnings dealt with, show this last
   } else if (!invalidDatesSet.size && !overlapSet.size && isInvalidLastItem) {
     return getLastItemInvalidStyle()
+  } else if (
+    !invalidDatesSet.size &&
+    !overlapSet.size &&
+    !isInvalidLastItem &&
+    occupiedEntityIndexesSet.size &&
+    occupiedEntityIndexesSet.has(index)
+  ) {
+    return getOccupiedEntityStyle()
   }
 }
 

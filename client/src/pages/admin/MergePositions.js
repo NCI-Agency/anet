@@ -223,6 +223,8 @@ const MergePositions = ({ pageDispatchers }) => {
                       showModal={showHistoryModal}
                       setShowModal={setShowHistoryModal}
                       currentlyOccupyingEntity={mergedPosition.person}
+                      parentEntityUuid1={position1.uuid}
+                      parentEntityUuid2={position2.uuid}
                       midColTitle="Merged Position History"
                       mainTitle="Pick and Choose people and dates for People History"
                       setHistory={history =>
