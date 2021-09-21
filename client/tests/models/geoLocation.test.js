@@ -40,7 +40,7 @@ describe("In the location form", () => {
   })
   it("We should be able to see MGRS label and input field", () => {
     render(GeoLocationTest())
-    const infoButton = screen.getByRole("button", { name: "info-sign" })
+    const infoButton = screen.getByTestId("info-button")
     expect(infoButton).toBeInTheDocument()
     act(() => {
       fireEvent.click(infoButton)

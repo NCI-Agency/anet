@@ -1,3 +1,4 @@
+import PropTypes from "prop-types"
 import React from "react"
 
 function bannerClassName(level) {
@@ -30,4 +31,9 @@ const GeneralBanner = props => {
     return null
   }
 }
+
+GeneralBanner.propTypes = {
+  options: PropTypes.object
+}
+
 export default GeneralBanner

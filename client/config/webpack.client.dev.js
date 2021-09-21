@@ -4,7 +4,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const common = require("./webpack.common.js")
 const paths = require("./paths")
 
-const clientConfig = merge.merge(common.clientConfig, {
+module.exports = merge.merge(common.clientConfig, {
+  target: "web",
   mode: "development",
   resolve: {
     modules: ["platform/web-dev", paths.appSrc, "node_modules"]
@@ -43,5 +44,3 @@ const clientConfig = merge.merge(common.clientConfig, {
     new webpack.HotModuleReplacementPlugin()
   ]
 })
-
-module.exports = clientConfig

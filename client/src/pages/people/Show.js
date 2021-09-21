@@ -254,7 +254,6 @@ const PersonShow = ({ pageDispatchers }) => {
                         updatedAt={person.updatedAt}
                         refetch={refetch}
                         setError={error => {
-                          console.log("is it called")
                           setStateError(error)
                           jumpToTop()
                         }}

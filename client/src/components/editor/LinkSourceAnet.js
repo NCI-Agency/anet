@@ -1,31 +1,34 @@
+import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useCallback } from "react"
 import { Modal } from "react-bootstrap"
 import "./LinkSource.css"
-import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import createEntity from "./utils/createEntity"
 
 const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
-  function onConfirm(value, objectType) {
-    // Retrieve entity URL and label
-    const ModelClass = Models[objectType]
-    const modelInstance = new ModelClass(value)
-    const entityLabel = modelInstance.toString()
-    const entityUrl = ModelClass.pathFor(modelInstance)
+  const onConfirm = useCallback(
+    (value, objectType) => {
+      // Retrieve entity URL and label
+      const ModelClass = Models[objectType]
+      const modelInstance = new ModelClass(value)
+      const entityLabel = modelInstance.toString()
+      const entityUrl = ModelClass.pathFor(modelInstance)
 
-    const nextState = createEntity(
-      editorState,
-      entityType.type,
-      {
-        url: entityUrl
-      },
-      entityLabel,
-      "IMMUTABLE"
-    )
+      const nextState = createEntity(
+        editorState,
+        entityType.type,
+        {
+          url: entityUrl
+        },
+        entityLabel,
+        "IMMUTABLE"
+      )
 
-    onComplete(nextState)
-  }
+      onComplete(nextState)
+    },
+    [editorState, entityType, onComplete]
+  )
 
   return (
     <Modal show aria-labelledby="Link chooser" onHide={onClose}>
