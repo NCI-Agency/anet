@@ -959,7 +959,7 @@ fields:
         label: Tashkil
         placeholder: the Afghan taskhil ID for this position
       location:
-          filter: [PINPOINT_LOCATION]
+        filter: [PINPOINT_LOCATION]
 
     org:
       name: Afghan Government Organization
