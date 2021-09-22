@@ -816,14 +816,14 @@ fields:
             role:
               test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
               type: enum
-              label: Role of Interpreter
+              label: Role of Linguist
               choices:
                 Translating:
                   label: Translating
-                Advising:
-                  label: Advising
+                Interpreting:
+                  label: Interpreting
             overallMeetingEvaluation:
-              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.role === "Translating")]
               type: enum
               label: Overall Meeting Evaluation
               choices:
@@ -842,9 +842,8 @@ fields:
                 "U":
                   label: Unfair
                   color: '#fc5a03'
-              visibleWhen: $[[?(@ && @.role === 'Translating')]]
             professionalKnowledge:
-              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.role === "Translating")]
               type: enum
               label: Professional Knowledge
               choices:
@@ -863,9 +862,8 @@ fields:
                 "U":
                   label: Unfair
                   color: '#fc5a03'
-              visibleWhen: $[[?(@ && @.role === 'Translating')]]
             reliability:
-              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.role === "Translating")]
               type: enum
               label: Reliability (response time, willingness to work)
               choices:
@@ -884,9 +882,8 @@ fields:
                 "U":
                   label: Unfair
                   color: '#fc5a03'
-              visibleWhen: $[[?(@ && @.role === 'Translating')]]
             posture:
-              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.role === "Translating")]
               type: enum
               label: Posture (politeness, clothing)
               choices:
@@ -905,15 +902,20 @@ fields:
                 "U":
                   label: Unfair
                   color: '#fc5a03'
-              visibleWhen: $[[?(@ && @.role === 'Translating')]]
-            comments:
-                test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
-                type: special_field
-                label: Comments
-                widget: richTextEditor
-                style:
-                  height: 100px
-                visibleWhen: $[[?(@ && @.role === 'Translating')]]
+            translatorComments:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.role === "Translating")]
+              type: special_field
+              label: Comments for translator
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterComments:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.role === "Interpreting")]
+              type: special_field
+              label: Comments for interpreter
+              widget: richTextEditor
+              style:
+                height: 100px
         - recurrence: monthly
           questions:
             writtenTranslation:
