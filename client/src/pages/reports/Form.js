@@ -412,10 +412,7 @@ const ReportForm = ({
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
-        let relatedObject
-        if (hasAssessments) {
-          relatedObject = Report.filterClientSideFields(new Report(values))
-        }
+        const relatedObject = hasAssessments ? new Report(values) : {}
 
         return (
           <div className="report-form">
