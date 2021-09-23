@@ -1,4 +1,4 @@
-package mil.dds.anet.utils;
+package mil.dds.anet.test.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.Test;
 
 public class UtilsTest {

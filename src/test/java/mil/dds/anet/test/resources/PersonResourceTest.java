@@ -48,8 +48,8 @@ import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
+import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
