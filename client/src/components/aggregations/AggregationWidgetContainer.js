@@ -4,6 +4,7 @@ import LikertScaleAndPieWidget from "components/aggregations/LikertScaleAndPieWi
 import PieWidget from "components/aggregations/PieWidget"
 import ReportsByTaskWidget from "components/aggregations/ReportsByTaskWidget"
 import ReportsMapWidget from "components/aggregations/ReportsMapWidget"
+import RichTextWidget from "components/aggregations/RichTextWidget"
 import {
   countPerDateAggregation,
   countPerValueAggregation,
@@ -11,6 +12,7 @@ import {
   numbersListAggregation,
   objectsListAggregation,
   reportsByTaskAggregation,
+  richTextAggregation,
   valuesListAggregation
 } from "components/aggregations/utils"
 import {
@@ -34,6 +36,7 @@ export const AGGERGATION_WIDGET_TYPE = {
   IQR_BOX_PLOT: "iqrBoxPlot",
   CALENDAR: "calendar",
   REPORTS_MAP: "reportsMap",
+  RICH_TEXT: "richText",
   DEFAULT: "default"
 }
 
@@ -45,6 +48,7 @@ const AGGREGATION_WIDGET_COMPONENTS = {
   [AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK]: ReportsByTaskWidget,
   [AGGERGATION_WIDGET_TYPE.REPORTS_MAP]: ReportsMapWidget,
   [AGGERGATION_WIDGET_TYPE.CALENDAR]: CalendarWidget,
+  [AGGERGATION_WIDGET_TYPE.RICH_TEXT]: RichTextWidget,
   [AGGERGATION_WIDGET_TYPE.DEFAULT]: DefaultAggWidget
 }
 
@@ -58,7 +62,7 @@ const DEFAULT_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
   [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: {
     [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]:
       AGGERGATION_WIDGET_TYPE.LIKERT_SCALE_AND_PIE,
-    [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: AGGERGATION_WIDGET_TYPE.DEFAULT
+    [SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR]: AGGERGATION_WIDGET_TYPE.RICH_TEXT
   }
 }
 
@@ -69,7 +73,8 @@ export const AGGREGATION_TYPE = {
   NUMBERS_LIST: "numbersList",
   VALUES_LIST: "valuesList",
   OBJECTS_LIST: "objectsList",
-  LIKERT_SCALE_AND_PIE_AGG: "likertScaleAndPieAgg"
+  LIKERT_SCALE_AND_PIE_AGG: "likertScaleAndPieAgg",
+  RICH_TEXT_AGG: "richText"
 }
 
 const DEFAULT_AGGREGATION_TYPE_PER_WIDGET_TYPE = {
@@ -81,6 +86,7 @@ const DEFAULT_AGGREGATION_TYPE_PER_WIDGET_TYPE = {
   [AGGERGATION_WIDGET_TYPE.REPORTS_MAP]: AGGREGATION_TYPE.OBJECTS_LIST,
   [AGGERGATION_WIDGET_TYPE.IQR_BOX_PLOT]: AGGREGATION_TYPE.NUMBERS_LIST,
   [AGGERGATION_WIDGET_TYPE.CALENDAR]: AGGREGATION_TYPE.OBJECTS_LIST,
+  [AGGERGATION_WIDGET_TYPE.RICH_TEXT]: AGGREGATION_TYPE.RICH_TEXT_AGG,
   [AGGERGATION_WIDGET_TYPE.DEFAULT]: AGGREGATION_TYPE.VALUES_LIST
 }
 
@@ -91,7 +97,8 @@ const AGGREGATION_TYPE_FUNCTION = {
   [AGGREGATION_TYPE.NUMBERS_LIST]: numbersListAggregation,
   [AGGREGATION_TYPE.VALUES_LIST]: valuesListAggregation,
   [AGGREGATION_TYPE.OBJECTS_LIST]: objectsListAggregation,
-  [AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG]: likertScaleAndPieAggregation
+  [AGGREGATION_TYPE.LIKERT_SCALE_AND_PIE_AGG]: likertScaleAndPieAggregation,
+  [AGGREGATION_TYPE.RICH_TEXT_AGG]: richTextAggregation
 }
 
 export const getAggregationWidget = (
