@@ -15,7 +15,7 @@ import { deserializeQueryParams } from "components/SearchFilters"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, ControlLabel, FormControl, FormGroup } from "react-bootstrap"
+import { Button, Col, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import utils from "utils"
@@ -70,33 +70,41 @@ const MySavedSearches = ({ setSearchQuery, pageDispatchers }) => {
   return (
     <Fieldset title="Saved searches">
       <Messages error={stateError} />
-      <FormGroup controlId="savedSearchSelect">
-        <ControlLabel>Select a saved search</ControlLabel>
-        <FormControl componentClass="select" onChange={onSaveSearchSelect}>
-          {savedSearches &&
-            savedSearches.map(savedSearch => (
-              <option value={savedSearch.uuid} key={savedSearch.uuid}>
-                {savedSearch.name}
-              </option>
-            ))}
-        </FormControl>
-      </FormGroup>
+      <Form.Group as={Row} className="mb-3" controlId="savedSearchSelect">
+        <Form.Label column sm={2}>
+          <b>Select a saved search</b>
+        </Form.Label>
+        <Col sm={10}>
+          <Form.Select onChange={onSaveSearchSelect}>
+            {savedSearches &&
+              savedSearches.map(savedSearch => (
+                <option value={savedSearch.uuid} key={savedSearch.uuid}>
+                  {savedSearch.name}
+                </option>
+              ))}
+          </Form.Select>
+        </Col>
+      </Form.Group>
 
       {selectedSearch && (
         <div>
-          <div className="pull-right">
-            <Button style={{ marginRight: 12 }} onClick={showSearch}>
-              Show Search
-            </Button>
-            <ConfirmDestructive
-              onConfirm={onConfirmDelete}
-              objectType="search"
-              objectDisplay={selectedSearch.name}
-              bsStyle="danger"
-              buttonLabel="Delete Search"
-            />
-          </div>
-          <SavedSearchTable search={selectedSearch} />
+          <Row>
+            <Col sm={8}>
+              <SavedSearchTable search={selectedSearch} />
+            </Col>
+            <Col className="text-end">
+              <Button style={{ marginRight: 12 }} onClick={showSearch}>
+                Show Search
+              </Button>
+              <ConfirmDestructive
+                onConfirm={onConfirmDelete}
+                objectType="search"
+                objectDisplay={selectedSearch.name}
+                variant="danger"
+                buttonLabel="Delete Search"
+              />
+            </Col>
+          </Row>
         </div>
       )}
     </Fieldset>
