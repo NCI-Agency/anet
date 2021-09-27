@@ -21,11 +21,12 @@ const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
         onClick={() => setShowValues(!showValues)}
         id="toggleShowValues"
       >
-        {showValues ? "Hide" : "Show"} {filteredValues.length} values
+        {showValues ? "Hide" : "Show"} {filteredValues.length}{" "}
+        {utils.pluralizeWord(filteredValues.length, "value")}
       </Button>
       <Collapse in={showValues}>
         <Table>
-          <tbody>
+          <tbody style={{ display: "table", width: "100%" }}>
             {filteredValues.map((val, index) => (
               <tr key={index}>
                 <td>{JSON.stringify(val)}</td>
