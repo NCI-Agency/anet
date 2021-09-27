@@ -62,7 +62,13 @@ const TriggerableConfirm = ({
             </Button>
           </Col>
           <Col>
-            <Button variant="primary" onClick={onConfirm}>
+            <Button
+              variant="primary"
+              onClick={() => {
+                onConfirm()
+                handleClose()
+              }}
+            >
               {confirmText}
             </Button>
           </Col>
@@ -72,7 +78,7 @@ const TriggerableConfirm = ({
   )
 }
 TriggerableConfirm.propTypes = {
-  onConfirm: PropTypes.func,
+  onConfirm: PropTypes.func.isRequired,
   title: PropTypes.string,
   body: PropTypes.string,
   confirmText: PropTypes.string,
