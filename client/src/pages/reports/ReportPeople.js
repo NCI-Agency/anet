@@ -203,7 +203,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
     const isRemovingSelfAuthor =
       Person.isEqual(currentUser, person) && person.author
     if (isRemovingSelfAuthor) {
-      toast("You cannot remove yourself from authors list", {
+      toast.warning("You cannot remove yourself from authors list", {
         toastId: "removingPrimaryAttendee"
       })
       return false
@@ -218,7 +218,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
       !anyAuthorsBesideCurrentPerson && person.author
 
     if (isTheLastAuthorBeingRemoved) {
-      toast("You must provide at least 1 author for a report", {
+      toast.warning("You must provide at least 1 author for a report", {
         toastId: "removingLastAuthor"
       })
       return false
@@ -230,7 +230,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   function passesAttendeeValidationSteps(person) {
     // Prevent removal of primary attendee without making someone else primary
     if (person.attendee && person.primary) {
-      toast("Select a primary first to remove this person", {
+      toast.warning("Select a primary first to remove this person", {
         toastId: "removingPrimaryAttendee"
       })
       return false
