@@ -276,7 +276,7 @@ const AdminIndex = ({ pageDispatchers }) => {
         setRecentUsers(byUser)
         setLastLoaded(moment())
         toast.success(
-          "Recent activities & recent users are loaded succesfully",
+          "Recent activities & recent users are loaded successfully",
           {
             toastId: "success-load-recent"
           }
