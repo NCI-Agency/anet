@@ -243,7 +243,8 @@ const MySubscriptionUpdates = ({
                             updatedAt={null}
                             refetch={() => {
                               refetch()
-                              refetchCallback()
+                              typeof refetchCallback === "function" &&
+                                refetchCallback()
                             }}
                             setError={error => setSaveError(error)}
                           />
@@ -266,9 +267,9 @@ const MySubscriptionUpdates = ({
 }
 
 MySubscriptionUpdates.propTypes = {
-  forceRefetch: PropTypes.bool.isRequired,
-  setForceRefetch: PropTypes.func.isRequired,
-  refetchCallback: PropTypes.func.isRequired,
+  forceRefetch: PropTypes.bool,
+  setForceRefetch: PropTypes.func,
+  refetchCallback: PropTypes.func,
   pageDispatchers: PageDispatchersPropType
 }
 

@@ -45,16 +45,14 @@ const MIN_CHARS_FOR_DUPLICATES = 3
 const LOCATION_TYPES_ADMIN = [
   Location.LOCATION_TYPES.ADVISOR_LOCATION,
   Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
-  Location.LOCATION_TYPES.PINPOINT_LOCATION,
+  Location.LOCATION_TYPES.POINT_LOCATION,
   Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
   Location.LOCATION_TYPES.VIRTUAL_LOCATION
 ]
 
 // Location types to be shown to super users in the new location page.
-const LOCATION_TYPES_SUPER_USER = [
-  Location.LOCATION_TYPES.ADVISOR_LOCATION,
-  Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-]
+const LOCATION_TYPES_SUPER_USER =
+  Settings?.fields?.location?.superUserTypeOptions
 
 const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
@@ -204,7 +202,11 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                   }}
                   widget={
                     <FormSelect className="location-type-form-group form-control">
-                      <option value="">Please select a location type</option>
+                      <option value="">
+                        {!canEditName
+                          ? Location.humanNameOfType(values.type)
+                          : "Please select a location type"}
+                      </option>
                       {getDropdownOptionsForUser(currentUser).map(type => (
                         <option key={type} value={type}>
                           {Location.humanNameOfType(type)}

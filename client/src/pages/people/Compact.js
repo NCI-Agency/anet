@@ -137,7 +137,7 @@ const CUSTOM_FIELD_OPTIONS = Object.entries(
 }, {})
 
 const SENSITIVE_FIELD_OPTIONS = Object.entries(
-  Settings.fields.person.customSensitiveInformation
+  Settings.fields.person.customSensitiveInformation || {}
 ).reduce((accum, [k, v]) => {
   accum[k] = { text: v.label, active: false }
   return accum

@@ -141,7 +141,7 @@ const AdvancedSelect = ({
 
   const latestSelectedValueAsString = useRef(selectedValueAsString)
   const latestQueryParams = useRef(queryParams)
-  const latestFilterDefs = useRef(filterDefs)
+  const [latestFilterDefs, setLatestFilterDefs] = useState(filterDefs)
   const overlayContainer = useRef()
   const searchInput = useRef()
   const latestRequest = useRef()
@@ -157,7 +157,7 @@ const AdvancedSelect = ({
   const [fetchType, setFetchType] = useState(FETCH_TYPE.NONE)
   const [doReset, setDoReset] = useState(false)
 
-  const selectedFilter = latestFilterDefs.current[filterType]
+  const selectedFilter = latestFilterDefs[filterType]
   const renderSelectedWithDelete = renderSelected
     ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
     : null
@@ -168,15 +168,15 @@ const AdvancedSelect = ({
 
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilter.list) {
+      if (!selectedFilter?.list) {
         const resourceName = objectType.resourceName
-        const listName = selectedFilter.listName || objectType.listName
+        const listName = selectedFilter?.listName || objectType.listName
         const queryVars = { pageNum, pageSize }
         if (latestQueryParams.current) {
           Object.assign(queryVars, latestQueryParams.current)
         }
-        if (selectedFilter.queryVars) {
-          Object.assign(queryVars, selectedFilter.queryVars)
+        if (selectedFilter?.queryVars) {
+          Object.assign(queryVars, selectedFilter?.queryVars)
         }
         if (searchTerms) {
           Object.assign(queryVars, { text: searchTerms + "*" })
@@ -215,9 +215,9 @@ const AdvancedSelect = ({
       objectType.resourceName,
       pageNum,
       pageSize,
-      selectedFilter.list,
-      selectedFilter.listName,
-      selectedFilter.queryVars
+      selectedFilter?.list,
+      selectedFilter?.listName,
+      selectedFilter?.queryVars
     ]
   )
 
@@ -237,15 +237,12 @@ const AdvancedSelect = ({
 
   useEffect(() => {
     if (
-      !_isEqualWith(
-        latestFilterDefs.current,
-        filterDefs,
-        utils.treatFunctionsAsEqual
-      )
+      !_isEqualWith(latestFilterDefs, filterDefs, utils.treatFunctionsAsEqual)
     ) {
-      latestFilterDefs.current = filterDefs
+      setFilterType(firstFilter)
+      setLatestFilterDefs(filterDefs)
     }
-  }, [filterDefs])
+  }, [filterDefs, latestFilterDefs, firstFilter])
 
   useEffect(() => {
     if (latestSelectedValueAsString.current !== selectedValueAsString) {
@@ -269,7 +266,7 @@ const AdvancedSelect = ({
         }
       }))
     }
-  }, [filterType, pageNum, pageSize, selectedFilter.list])
+  }, [filterType, pageNum, pageSize, selectedFilter?.list])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {

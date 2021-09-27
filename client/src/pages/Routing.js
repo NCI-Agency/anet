@@ -37,7 +37,8 @@ import MyReports from "pages/reports/MyReports"
 import ReportNew from "pages/reports/New"
 import ReportShow from "pages/reports/Show"
 import RollupShow from "pages/rollup/Show"
-import Search from "pages/Search"
+import MySavedSearches from "pages/searches/MySavedSearches"
+import Search from "pages/searches/Search"
 import MySubscriptions from "pages/subscriptions/Mine"
 import TaskEdit from "pages/tasks/Edit"
 import MyTasks from "pages/tasks/MyTasks"
@@ -46,14 +47,23 @@ import TaskShow from "pages/tasks/Show"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
 import { Redirect, Route, Switch } from "react-router-dom"
+
 const Routing = () => {
   const { currentUser } = useContext(AppContext)
   return (
     <Switch>
       <Route exact path={PAGE_URLS.HOME} component={Home} />
-      <Route path={PAGE_URLS.SEARCH} component={Search} />
       <Route path={PAGE_URLS.ROLLUP} component={RollupShow} />
       <Route path={PAGE_URLS.HELP} component={Help} />
+      <Route
+        path={PAGE_URLS.SEARCH}
+        render={({ match: { url } }) => (
+          <Switch>
+            <Route exact path={`${url}/`} component={Search} />
+            <Route path={`${url}/mine`} component={MySavedSearches} />
+          </Switch>
+        )}
+      />
       <Route
         path={PAGE_URLS.REPORTS}
         render={({ match: { url } }) => (

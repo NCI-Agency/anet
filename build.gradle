@@ -1,9 +1,9 @@
 plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
-	id "com.github.node-gradle.node" version "3.1.0"
-	id "com.diffplug.spotless" version "5.14.3"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17"
+	id "com.github.node-gradle.node" version "3.1.1"
+	id "com.diffplug.spotless" version "5.15.1"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17.2"
 }
 
 apply plugin: 'java'
@@ -18,8 +18,8 @@ apply plugin: 'com.graphql_java_generator.graphql-gradle-plugin'
 sourceCompatibility = 1.8
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String dropwizardVersion = "2.0.24"
-String logbackVersion = "1.2.5"
+String dropwizardVersion = "2.0.25"
+String logbackVersion = "1.2.6"
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
@@ -115,7 +115,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.17'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.17.2'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -123,14 +123,14 @@ dependencies {
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
-	testImplementation 'org.assertj:assertj-core:3.20.2'
+	testImplementation 'org.assertj:assertj-core:3.21.0'
 
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
 }
 
 configurations.all {
@@ -138,7 +138,7 @@ configurations.all {
 	exclude module: 'xalan'
 
 	// Force this transitive dependency to the pre-v3 version for Java 8:
-	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.1'
+	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.2'
 }
 
 test {

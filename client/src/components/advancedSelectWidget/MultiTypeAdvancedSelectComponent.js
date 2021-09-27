@@ -13,7 +13,7 @@ import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Model from "components/Model"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -152,10 +152,10 @@ const MultiTypeAdvancedSelectComponent = ({
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
     widgetTypeMapping[entityType]
   )
-  function changeEntityType(newEntityType) {
+  const changeEntityType = useCallback(newEntityType => {
     setEntityType(newEntityType)
     setAdvancedSelectProps(widgetTypeMapping[newEntityType])
-  }
+  }, [])
   const searchPlaceholder = useMemo(() => {
     const [key] = Object.entries(ENTITY_TYPES).find(
       ([, et]) => et === entityType

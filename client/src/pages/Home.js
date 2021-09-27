@@ -7,47 +7,26 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import ConfirmDestructive from "components/ConfirmDestructive"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
+import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import {
-  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import SavedSearchTable from "components/SavedSearchTable"
 import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
-import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
-import { Button, Col, Container, Form, Row } from "react-bootstrap"
+import React, { useContext } from "react"
+import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
-import utils from "utils"
-
-const GQL_GET_SAVED_SEARCHES = gql`
-  query {
-    savedSearches: mySearches {
-      uuid
-      name
-      objectType
-      query
-    }
-  }
-`
-
-const GQL_DELETE_SAVED_SEARCH = gql`
-  mutation($uuid: String!) {
-    deleteSavedSearch(uuid: $uuid)
-  }
-`
 
 const GQL_GET_REPORT_COUNT = gql`
   query($reportQuery: ReportSearchQueryInput) {
@@ -293,124 +272,6 @@ HomeTiles.propTypes = {
   currentUser: PropTypes.instanceOf(Person)
 }
 
-const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
-  const history = useHistory()
-  const [stateError, setStateError] = useState(null)
-  const [selectedSearch, setSelectedSearch] = useState(null)
-  const { loading, error, data, refetch } = API.useApiQuery(
-    GQL_GET_SAVED_SEARCHES
-  )
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  if (done) {
-    return result
-  }
-
-  let savedSearches = []
-  if (data) {
-    savedSearches = data.savedSearches
-    if (_isEmpty(savedSearches)) {
-      if (selectedSearch) {
-        // Clear selection
-        setSelectedSearch(null)
-      }
-    } else if (!savedSearches.includes(selectedSearch)) {
-      // Select first one
-      setSelectedSearch(savedSearches[0])
-    }
-  }
-
-  return (
-    <>
-      <Messages error={stateError} />
-      <Form.Group as={Row} className="mb-3" controlId="savedSearchSelect">
-        <Form.Label column sm={2}>
-          <b>Select a saved search</b>
-        </Form.Label>
-        <Col sm={10}>
-          <Form.Select onChange={onSaveSearchSelect}>
-            {savedSearches &&
-              savedSearches.map(savedSearch => (
-                <option value={savedSearch.uuid} key={savedSearch.uuid}>
-                  {savedSearch.name}
-                </option>
-              ))}
-          </Form.Select>
-        </Col>
-      </Form.Group>
-
-      {selectedSearch && (
-        <div>
-          <Row>
-            <Col sm={8}>
-              <SavedSearchTable search={selectedSearch} />
-            </Col>
-            <Col className="text-end">
-              <Button
-                style={{ marginRight: 12 }}
-                onClick={showSearch}
-                variant="outline-secondary"
-              >
-                Show Search
-              </Button>
-              <ConfirmDestructive
-                onConfirm={onConfirmDelete}
-                objectType="search"
-                objectDisplay={selectedSearch.name}
-                variant="danger"
-                buttonLabel="Delete Search"
-              />
-            </Col>
-          </Row>
-        </div>
-      )}
-    </>
-  )
-
-  function onSaveSearchSelect(event) {
-    const uuid = event && event.target ? event.target.value : event
-    const search = savedSearches.find(el => el.uuid === uuid)
-    setSelectedSearch(search)
-  }
-
-  function showSearch() {
-    if (selectedSearch) {
-      const objType = SEARCH_OBJECT_TYPES[selectedSearch.objectType]
-      const queryParams = utils.parseJsonSafe(selectedSearch.query)
-      deserializeQueryParams(objType, queryParams, deserializeCallback)
-    }
-  }
-
-  function deserializeCallback(objectType, filters, text) {
-    // We update the Redux state
-    setSearchQuery({
-      objectType: objectType,
-      filters: filters,
-      text: text
-    })
-    history.push("/search")
-  }
-
-  function onConfirmDelete() {
-    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
-      .then(data => {
-        refetch()
-      })
-      .catch(error => {
-        setStateError(error)
-        jumpToTop()
-      })
-  }
-}
-
-SavedSearches.propTypes = {
-  setSearchQuery: PropTypes.func.isRequired,
-  pageDispatchers: PageDispatchersPropType
-}
-
 const Home = ({ setSearchQuery, pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
@@ -473,12 +334,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
         />
       </Fieldset>
 
-      <Fieldset title="Saved searches">
-        <SavedSearches
-          setSearchQuery={setSearchQuery}
-          pageDispatchers={pageDispatchers}
-        />
-      </Fieldset>
+      <MySubscriptionUpdates />
     </div>
   )
 }

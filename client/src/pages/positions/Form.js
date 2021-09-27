@@ -184,12 +184,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             queryVars: {}
           }
         }
-        const locationFilters = {
-          activeLocations: {
-            label: "All locations",
-            queryVars: { status: Model.STATUS.ACTIVE }
-          }
-        }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty} />
@@ -314,16 +309,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={locationFilters}
+                      filterDefs={getLocationFilters(values)}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
-                      queryParams={{
-                        status: Model.STATUS.ACTIVE,
-                        type:
-                          values.type === Position.TYPE.ADVISOR
-                            ? Location.LOCATION_TYPES.ADVISOR_LOCATION
-                            : Location.LOCATION_TYPES.PRINCIPAL_LOCATION
-                      }}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
                     />
@@ -376,6 +364,18 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       }}
     </Formik>
   )
+
+  function getLocationFilters(values) {
+    return Settings?.fields[
+      values.type === Position.TYPE.ADVISOR ? "advisor" : "principal"
+    ]?.position?.location?.filter.reduce((accummulator, filter) => {
+      accummulator[filter] = {
+        label: Location.humanNameOfType(filter),
+        queryVars: { type: filter }
+      }
+      return accummulator
+    }, {})
+  }
 
   function onCancel() {
     history.goBack()
