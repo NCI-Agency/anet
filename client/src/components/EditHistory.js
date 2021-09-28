@@ -635,7 +635,10 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
   if (historyEntityType === "person") {
     const personSearchQuery = {
       status: Model.STATUS.ACTIVE,
-      role: parentEntityType
+      role:
+        parentEntityType === Position.TYPE.PRINCIPAL
+          ? Person.ROLE.PRINCIPAL
+          : Person.ROLE.ADVISOR
     }
 
     const personFilters = {
@@ -652,13 +655,13 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
         queryVars: {
           status: Position.STATUS.ACTIVE,
           type:
-            parentEntityType === "ADVISOR"
-              ? [
+            parentEntityType === Person.ROLE.PRINCIPAL
+              ? Position.TYPE.PRINCIPAL
+              : [
                 Position.TYPE.ADVISOR,
                 Position.TYPE.SUPER_USER,
                 Position.TYPE.ADMINSTRATOR
               ]
-              : Position.TYPE.PRINCIPAL
         }
       }
     }
