@@ -292,6 +292,7 @@ const enumHumanValue = (choices, fieldVal) => {
         {fieldVal.map((k, index) => (
           <span key={k}>
             <Badge
+              bg={null} // we want to override the colors
               style={{
                 fontSize: "inherit",
                 fontWeight: "inherit",
@@ -311,6 +312,7 @@ const enumHumanValue = (choices, fieldVal) => {
     return (
       fieldVal && (
         <Badge
+          bg={null} // we want to override the colors
           style={{
             fontSize: "inherit",
             fontWeight: "inherit",
