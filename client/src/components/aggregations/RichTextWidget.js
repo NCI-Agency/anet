@@ -7,7 +7,7 @@ import React, { useState } from "react"
 import { Button, Collapse, Table } from "react-bootstrap"
 import utils from "utils"
 
-const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
+const RichTextWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
   const [showValues, setShowValues] = useState(false)
   const filteredValues = values.filter(value => !utils.isNullOrUndefined(value))
   if (_isEmpty(filteredValues)) {
@@ -29,7 +29,7 @@ const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
           <tbody style={{ display: "table", width: "100%" }}>
             {filteredValues.map((val, index) => (
               <tr key={index}>
-                <td>{JSON.stringify(val)}</td>
+                <td>{val}</td>
               </tr>
             ))}
           </tbody>
@@ -38,7 +38,7 @@ const DefaultAggWidget = ({ values, whenUnspecified, ...otherWidgetProps }) => {
     </div>
   )
 }
-DefaultAggWidget.propTypes = aggregationWidgetPropTypes
-DefaultAggWidget.defaultProps = aggregationWidgetDefaultProps
+RichTextWidget.propTypes = aggregationWidgetPropTypes
+RichTextWidget.defaultProps = aggregationWidgetDefaultProps
 
-export default DefaultAggWidget
+export default RichTextWidget

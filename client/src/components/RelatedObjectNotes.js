@@ -42,16 +42,21 @@ export const EXCLUDED_ASSESSMENT_FIELDS = [
   INVISIBLE_CUSTOM_FIELDS_FIELD
 ]
 
+const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT, NOTE_TYPE.PARTNER_ASSESSMENT]
+
 const RelatedObjectNotes = ({
   notesElemId,
   relatedObject,
   notes: notesProp
 }) => {
   const { currentUser } = useContext(AppContext)
-  const latestNotesProp = useRef(notesProp)
+  const notesFiltered = notesProp.filter(
+    note => !EXCLUDED_NOTE_TYPES.includes(note.type)
+  )
+  const latestNotesProp = useRef(notesFiltered)
   const notesPropUnchanged = _isEqualWith(
     latestNotesProp.current,
-    notesProp,
+    notesFiltered,
     utils.treatFunctionsAsEqual
   )
 
@@ -62,17 +67,17 @@ const RelatedObjectNotes = ({
     setShowRelatedObjectNoteModalKey
   ] = useState(null)
   const [noteType, setNoteType] = useState(null)
-  const [notes, setNotes] = useState(notesProp)
+  const [notes, setNotes] = useState(notesFiltered)
 
   const notesElem = document.getElementById(notesElemId)
 
   useEffect(() => {
     if (!notesPropUnchanged) {
-      latestNotesProp.current = notesProp
+      latestNotesProp.current = notesFiltered
       setError(null)
-      setNotes(notesProp)
+      setNotes(notesFiltered)
     }
-  }, [notesPropUnchanged, notesProp])
+  }, [notesPropUnchanged, notesFiltered])
 
   const renderPortal = () => {
     const noNotes = _isEmpty(notes)
@@ -170,9 +175,9 @@ const RelatedObjectNotes = ({
             const isJson = note.type !== NOTE_TYPE.FREE_TEXT
             const jsonFields =
               isJson && note.text ? utils.parseJsonSafe(note.text) : {}
-            const noteText = isJson
-              ? jsonFields.text
-              : parseHtmlWithLinkTo(note.text)
+            const noteText = parseHtmlWithLinkTo(
+              isJson ? jsonFields.text : note.text
+            )
             return (
               <Panel
                 key={note.uuid}
@@ -249,40 +254,6 @@ const RelatedObjectNotes = ({
                           <em>'{jsonFields.newValue}'</em>:
                         </span>
                       ))}
-                    {note.type === NOTE_TYPE.PARTNER_ASSESSMENT && (
-                      <>
-                        <h4>
-                          <u>
-                            <b>Old-style partner assessment</b>
-                          </u>
-                        </h4>
-                        {Object.keys(jsonFields)
-                          .filter(field => field !== "text")
-                          .map(field => (
-                            <p key={field}>
-                              <i>{field}</i>: <b>{jsonFields[field]}</b>
-                            </p>
-                          ))}
-                      </>
-                    )}
-                    {note.type === NOTE_TYPE.ASSESSMENT && (
-                      <>
-                        <h4>
-                          <u>
-                            <b>Assessment</b>
-                          </u>
-                        </h4>
-                        {Object.keys(jsonFields)
-                          .filter(
-                            field => !EXCLUDED_ASSESSMENT_FIELDS.includes(field)
-                          )
-                          .map(field => (
-                            <p key={field}>
-                              <i>{field}</i>: <b>{jsonFields[field]}</b>
-                            </p>
-                          ))}
-                      </>
-                    )}
                   </div>
                   <div
                     style={{
