@@ -180,7 +180,7 @@ const OBJECT_TYPE_TO_VALIDATOR = {
 // validations for every type of objects
 function validForGeneral(otherMergeable, newMergeable, mergeableType) {
   if (sameMergeable(otherMergeable, newMergeable)) {
-    toast(`Please select different ${mergeableType}`)
+    toast.warning(`Please select different ${mergeableType}`)
     return false
   }
   return true
@@ -188,11 +188,11 @@ function validForGeneral(otherMergeable, newMergeable, mergeableType) {
 
 function validPositions(otherPos, newPos) {
   if (!sameOrganization(otherPos, newPos)) {
-    toast("Please select two positions with the same organization")
+    toast.warning("Please select two positions with the same organization")
     return false
   }
   if (bothPosOccupied(otherPos, newPos)) {
-    toast("Please select at least one unoccupied position")
+    toast.warning("Please select at least one unoccupied position")
     return false
   }
   return true
@@ -220,7 +220,7 @@ export function unassignedPerson(position1, position2, mergedPosition) {
     position1?.person?.uuid &&
     !position2?.person?.uuid
   ) {
-    toast(msg)
+    toast.warning(msg)
     return true
   } else if (
     // only position2 has it
@@ -228,7 +228,7 @@ export function unassignedPerson(position1, position2, mergedPosition) {
     !position1?.person?.uuid &&
     position2?.person?.uuid
   ) {
-    toast(msg)
+    toast.warning(msg)
     return true
   } else {
     return false

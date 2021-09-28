@@ -1222,7 +1222,7 @@ const ReportForm = ({
           autoSaveSettings.current.autoSaveTimeout.add(
             autoSaveSettings.current.autoSaveTimeout
           ) // exponential back-off
-          toast.error(
+          toast.warning(
             `There was an error autosaving your ${getReportType(
               autoSaveSettings.current.values
             )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
