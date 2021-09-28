@@ -2,8 +2,8 @@ plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.1"
-	id "com.diffplug.spotless" version "5.15.1"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17.2"
+	id "com.diffplug.spotless" version "5.15.2"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17.3"
 }
 
 apply plugin: 'java'
@@ -76,7 +76,7 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre8'
-	implementation 'org.postgresql:postgresql:42.2.23' // If using postgresql
+	implementation 'org.postgresql:postgresql:42.2.24' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
@@ -115,7 +115,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.17.2'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.17.3'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -129,8 +129,8 @@ dependencies {
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 configurations.all {
