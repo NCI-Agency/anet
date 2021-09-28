@@ -1,11 +1,25 @@
 import PropTypes from "prop-types"
 import React from "react"
 
+export const GENERAL_BANNER_LEVEL = "GENERAL_BANNER_LEVEL"
+export const GENERAL_BANNER_TEXT = "GENERAL_BANNER_TEXT"
+export const GENERAL_BANNER_VISIBILITY = "GENERAL_BANNER_VISIBILITY"
+export const GENERAL_BANNER_TITLE = "Announcement"
+
 export const GENERAL_BANNER_LEVELS = {
   NOTICE: { value: "notice", className: "alert-info", label: "Blue" },
   SUCCESS: { value: "success", className: "alert-success", label: "Green" },
   ERROR: { value: "error", className: "alert-danger", label: "Red" },
   ALERT: { value: "alert", className: "alert-warning", label: "Yellow" }
+}
+
+export const GENERAL_BANNER_VISIBILITIES = {
+  USERS_ONLY: { value: 1, label: "Users only" },
+  SUPER_USERS_AND_ADMINISTRATORS: {
+    value: 2,
+    label: "Super users and administrators only"
+  },
+  ALL: { value: 3, label: "Users, super users and administrators" }
 }
 
 function bannerClassName(level) {

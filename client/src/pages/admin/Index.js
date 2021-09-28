@@ -4,7 +4,12 @@ import API from "api"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import { GENERAL_BANNER_LEVELS } from "components/GeneralBanner"
+import {
+  GENERAL_BANNER_LEVEL,
+  GENERAL_BANNER_LEVELS,
+  GENERAL_BANNER_VISIBILITIES,
+  GENERAL_BANNER_VISIBILITY
+} from "components/GeneralBanner"
 import Messages from "components/Messages"
 import {
   jumpToTop,
@@ -23,8 +28,12 @@ import uuidv4 from "uuid/v4"
 
 const DROPDOWN_FIELDS = [
   {
-    name: "GENERAL_BANNER_LEVEL",
+    name: GENERAL_BANNER_LEVEL,
     options: GENERAL_BANNER_LEVELS
+  },
+  {
+    name: GENERAL_BANNER_VISIBILITY,
+    options: GENERAL_BANNER_VISIBILITIES
   }
 ]
 
