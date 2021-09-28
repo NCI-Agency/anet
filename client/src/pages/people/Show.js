@@ -177,11 +177,13 @@ const PersonShow = ({ pageDispatchers }) => {
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
   const canAddAssessment =
-    isAdmin ||
-    currentUser.position.associatedPositions
-      .filter(ap => ap.person)
-      .map(ap => ap.person.uuid)
-      .includes(person.uuid)
+    Position.isAdvisor(position) ||
+    (Position.isPrincipal(position) &&
+      (isAdmin ||
+        currentUser.position.associatedPositions
+          .filter(ap => ap.person)
+          .map(ap => ap.person.uuid)
+          .includes(person.uuid)))
 
   const action = (
     <div>
