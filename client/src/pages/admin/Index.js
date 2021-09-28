@@ -4,6 +4,12 @@ import API from "api"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import {
+  GENERAL_BANNER_LEVEL,
+  GENERAL_BANNER_LEVELS,
+  GENERAL_BANNER_VISIBILITIES,
+  GENERAL_BANNER_VISIBILITY
+} from "components/GeneralBanner"
 import Messages from "components/Messages"
 import {
   jumpToTop,
@@ -19,6 +25,17 @@ import { Button, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
 import uuidv4 from "uuid/v4"
+
+const DROPDOWN_FIELDS = [
+  {
+    name: GENERAL_BANNER_LEVEL,
+    options: GENERAL_BANNER_LEVELS
+  },
+  {
+    name: GENERAL_BANNER_VISIBILITY,
+    options: GENERAL_BANNER_VISIBILITIES
+  }
+]
 
 const GQL_GET_ADMIN_SETTINGS = gql`
   query {
@@ -132,13 +149,39 @@ const AdminIndex = ({ pageDispatchers }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title="Site settings" action={action} />
               <Fieldset>
-                {Object.map(settings, (key, value) => (
-                  <Field
-                    key={key}
-                    name={key}
-                    component={FieldHelper.InputField}
-                  />
-                ))}
+                {Object.map(settings, (key, value) => {
+                  const dropdownField = DROPDOWN_FIELDS.find(
+                    field => field.name === key
+                  )
+                  if (dropdownField) {
+                    return (
+                      <Field
+                        name={key}
+                        key={key}
+                        component={FieldHelper.SpecialField}
+                        widget={
+                          <Field component="select" className="form-control">
+                            {Object.values(dropdownField.options).map(
+                              option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              )
+                            )}
+                          </Field>
+                        }
+                      >
+                      </Field>
+                    )
+                  }
+                  return (
+                    <Field
+                      key={key}
+                      name={key}
+                      component={FieldHelper.InputField}
+                    />
+                  )
+                })}
               </Fieldset>
               <div className="submit-buttons">
                 <div />
