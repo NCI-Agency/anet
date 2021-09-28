@@ -384,7 +384,6 @@ const ButtonToggleGroupField = ({
   enableClear,
   ...otherProps
 }) => {
-  const fieldLabel = label
   const widgetElem = useMemo(
     () => (
       <>
@@ -411,8 +410,8 @@ const ButtonToggleGroupField = ({
             return (
               <ToggleButton
                 {...props}
-                id={`${fieldLabel ? `${fieldLabel}_` : ""}${value}`}
-                key={`${fieldLabel ? `${fieldLabel}_` : ""}${value}`}
+                id={`${field.name}${value}`}
+                key={`${field.name}${value}`}
                 value={value}
                 style={style}
                 variant="outline-secondary"
@@ -431,7 +430,7 @@ const ButtonToggleGroupField = ({
         )}
       </>
     ),
-    [buttons, field, form, enableClear, otherProps, type, fieldLabel]
+    [buttons, field, form, enableClear, otherProps, type]
   )
   return (
     <Field
