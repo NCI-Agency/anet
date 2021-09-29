@@ -28,7 +28,8 @@ export const RECURRENCE_TYPE = {
   MONTHLY: "monthly",
   QUARTERLY: "quarterly",
   SEMIANNUALLY: "semiannually",
-  ANNUALLY: "annually"
+  ANNUALLY: "annually",
+  ON_DEMAND: "ondemand"
 }
 
 const PERIOD_FORMAT = {
