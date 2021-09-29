@@ -68,6 +68,7 @@ const VersionBox = styled.h6`
   @media (max-width: 768px) {
     display: none;
   }
+  font-size: 12px;
 `
 
 const ConnectionBanner = ({ connection }) => {
