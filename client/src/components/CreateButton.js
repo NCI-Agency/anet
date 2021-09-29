@@ -47,6 +47,7 @@ const CreateButton = () => {
         variant="primary"
         onClick={() => onSelect(modelClass)}
         id="createButton"
+        style={{ whiteSpace: "nowrap" }}
       >
         New{" "}
         {(modelClass.displayName() || modelClass.resourceName).toLowerCase()}
