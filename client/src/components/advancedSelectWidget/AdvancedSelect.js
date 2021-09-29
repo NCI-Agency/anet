@@ -390,7 +390,11 @@ const AdvancedSelect = ({
                         textSizeAdjust: "10px"
                       }}
                     >
-                      <img src={addon} style={{ height: "25px" }} alt="" />
+                      {typeof addon === "string" ? (
+                        <img src={addon} style={{ height: "20px" }} alt="" />
+                      ) : (
+                        addon
+                      )}
                     </InputGroup.Text>
                   )}
                   {extraAddon && (
