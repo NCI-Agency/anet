@@ -15,7 +15,7 @@ import moment from "moment"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useState } from "react"
-import { Button, Col, Grid, Modal, Row } from "react-bootstrap"
+import { Alert, Button, Col, Grid, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import uuidv4 from "uuid/v4"
@@ -58,6 +58,8 @@ const POSITION_SINGLE_SELECT_PARAMETERS = {
     "uuid name code type organization { uuid shortName longName identificationCode} person { uuid name rank role avatar(size: 32) } previousPeople { startTime endTime person {uuid} }",
   addon: POSITIONS_ICON
 }
+
+const INVALID_ENTRY_STYLE = { borderRadius: "4px", backgroundColor: "#F2DEDE" }
 
 function EditHistory({
   history1,
@@ -438,6 +440,29 @@ EditHistory.defaultProps = {
 
 export default EditHistory
 
+function ValidationMessage({ title, keysAndMessages }) {
+  return (
+    <Alert bsStyle="danger">
+      <legend>{title}</legend>
+      <ul>
+        {keysAndMessages.map(({ key, msg }) => (
+          <li key={key}>{msg}</li>
+        ))}
+      </ul>
+    </Alert>
+  )
+}
+
+ValidationMessage.propTypes = {
+  title: PropTypes.string.isRequired,
+  keysAndMessages: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      msg: PropTypes.string.isRequired
+    })
+  ).isRequired
+}
+
 function ValidationMessages({
   invalidDateIndexesSet,
   occupiedEntityIndexesSet,
@@ -445,72 +470,72 @@ function ValidationMessages({
   historyEntityType,
   isInvalidLastItem
 }) {
-  // Don't show all errors to the user at once. Showing them according to a priority gives the user a nice path to create a valid history
+  // Don't show all errors to the user at once.
+  // Showing them according to a priority gives the user a nice path to create a valid history.
   // First; all the startTimes must be before the endTimes
-  const showInvalidMessage = invalidDateIndexesSet.size
+  const showInvalidMessage = !!invalidDateIndexesSet.size
   // Second; all history items must be available between the specified dates
   const showOccupiedEntityMessage =
-    !invalidDateIndexesSet.size && occupiedEntityIndexesSet.size
+    !showInvalidMessage && !!occupiedEntityIndexesSet.size
   // Third; there must be no overlapping items in the created history
   const showOverlappingMessage =
-    !occupiedEntityIndexesSet.size && overlapArrays.length
+    !showInvalidMessage && !showOccupiedEntityMessage && !!overlapArrays.length
   // This is the last warning, if everything is fixed, show it
-  const showLastItemInvalid = !showOverlappingMessage && isInvalidLastItem
+  const showLastItemInvalid =
+    !showInvalidMessage &&
+    !showOccupiedEntityMessage &&
+    !showOverlappingMessage &&
+    isInvalidLastItem
 
   return (
     <>
-      {showInvalidMessage ? (
-        <fieldset style={getIvalidDateWarningStyle()}>
-          <legend>Invalid date ranges errors</legend>
-          <ul>
-            {Array.from(invalidDateIndexesSet).map(val => (
-              <li key={val}>
-                {historyEntityType} #{val + 1}'s start time is later than end
-                time
-              </li>
-            ))}
-          </ul>
-        </fieldset>
-      ) : null}
-      {showOccupiedEntityMessage ? (
-        <fieldset style={getOccupiedEntityStyle()}>
-          <legend>Internal history conflicts</legend>
-          <ul>
-            {Array.from(occupiedEntityIndexesSet).map(val => (
-              <li key={val}>
-                {historyEntityType} #{val + 1} is occupied between specified
-                dates
-              </li>
-            ))}
-          </ul>
-        </fieldset>
-      ) : null}
-      {showOverlappingMessage ? (
-        <fieldset style={getOverlapWarningStyle()}>
-          <legend>Overlapping {historyEntityType}s error</legend>
-          <ul>
-            {overlapArrays.map(o => (
-              <li key={`${o[0]}-${o[1]}`}>
-                {historyEntityType} #{o[0] + 1} overlaps with{" "}
-                {historyEntityType} #{o[1] + 1}
-              </li>
-            ))}
-          </ul>
-        </fieldset>
-      ) : null}
-      {showLastItemInvalid ? (
-        <fieldset style={getLastItemInvalidStyle()}>
-          <legend>Last {historyEntityType} invalid error</legend>
-          <p>
-            Last {historyEntityType} should be consistent with currently
-            assigned {historyEntityType}. If there is an active{" "}
-            {historyEntityType}, there should be at least one{" "}
-            {historyEntityType} in history.Also, last {historyEntityType}'s end
-            time should be empty. If there is no assigned {historyEntityType},
-            it shouldn't be empty
-          </p>
-        </fieldset>
-      ) : null}
+      {showInvalidMessage && (
+        <ValidationMessage
+          title="Invalid date ranges errors"
+          keysAndMessages={Array.from(invalidDateIndexesSet).map(val => ({
+            key: `${val}`,
+            msg: `${historyEntityType} #${
+              val + 1
+            }'s start time is later than end time`
+          }))}
+        />
+      )}
+      {showOccupiedEntityMessage && (
+        <ValidationMessage
+          title="Internal history conflicts"
+          keysAndMessages={Array.from(occupiedEntityIndexesSet).map(val => ({
+            key: `${val}`,
+            msg: `${historyEntityType} #${
+              val + 1
+            } is occupied between specified dates`
+          }))}
+        />
+      )}
+      {showOverlappingMessage && (
+        <ValidationMessage
+          title={`Overlapping ${historyEntityType}s error`}
+          keysAndMessages={overlapArrays.map(o => ({
+            key: `${o[0]}-${o[1]}`,
+            msg: `${historyEntityType} #${
+              o[0] + 1
+            } overlaps with ${historyEntityType} #${o[1] + 1}`
+          }))}
+        />
+      )}
+      {showLastItemInvalid && (
+        <ValidationMessage
+          title={`Last ${historyEntityType} invalid errorInvalid date ranges errors`}
+          keysAndMessages={[
+            {
+              key: "0",
+              msg: `Last ${historyEntityType} should be consistent with currently assigned ${historyEntityType}.
+                If there is an active ${historyEntityType}, there should be at least one ${historyEntityType} in history.
+                Also, last ${historyEntityType}'s end time should be empty.
+                If there is no assigned ${historyEntityType}, it shouldn't be empty`
+            }
+          ]}
+        />
+      )}
     </>
   )
 }
@@ -582,22 +607,6 @@ function getOccupiedEntityIndexes(
   return invalidIndexes
 }
 
-function getIvalidDateWarningStyle() {
-  return { outline: "2px dashed red" }
-}
-
-function getOverlapWarningStyle() {
-  return { outline: "2px dashed orange" }
-}
-
-function getLastItemInvalidStyle() {
-  return { outline: "2px dashed darkred" }
-}
-
-function getOccupiedEntityStyle() {
-  return { outline: "2px dashed darkorange" }
-}
-
 function getStyle(
   index,
   overlapSet,
@@ -605,23 +614,21 @@ function getStyle(
   isInvalidLastItem,
   occupiedEntityIndexesSet
 ) {
-  if (invalidDatesSet.has(index)) {
-    return getIvalidDateWarningStyle()
-    // If there is an invalid date, we shouldn't even check for overlaps
-  } else if (!invalidDatesSet.size && overlapSet.has(index)) {
-    return getOverlapWarningStyle()
-    // If both of the warnings dealt with, show this last
-  } else if (!invalidDatesSet.size && !overlapSet.size && isInvalidLastItem) {
-    return getLastItemInvalidStyle()
-  } else if (
-    !invalidDatesSet.size &&
-    !overlapSet.size &&
-    !isInvalidLastItem &&
-    occupiedEntityIndexesSet.size &&
-    occupiedEntityIndexesSet.has(index)
+  let style = {}
+  if (
+    invalidDatesSet.has(index) ||
+    (!invalidDatesSet.size && occupiedEntityIndexesSet.has(index)) ||
+    (!invalidDatesSet.size &&
+      !occupiedEntityIndexesSet.size &&
+      overlapSet.has(index)) ||
+    (!invalidDatesSet.size &&
+      !occupiedEntityIndexesSet.size &&
+      !overlapSet.size &&
+      isInvalidLastItem)
   ) {
-    return getOccupiedEntityStyle()
+    style = INVALID_ENTRY_STYLE
   }
+  return style
 }
 
 function giveEachItemUuid(history) {
