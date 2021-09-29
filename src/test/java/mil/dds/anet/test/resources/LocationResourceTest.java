@@ -132,7 +132,7 @@ public class LocationResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create Loser Location
     final LocationInput firstLocationInput = LocationInput.builder()
-        .withName("MergeLocationsTest First Location").withType(LocationType.PINPOINT_LOCATION)
+        .withName("MergeLocationsTest First Location").withType(LocationType.POINT_LOCATION)
         .withLat(47.613442).withLng(-52.740936).withStatus(Status.ACTIVE).build();
 
     final Location firstLocation = adminMutationExecutor.createLocation(FIELDS, firstLocationInput);
@@ -141,7 +141,7 @@ public class LocationResourceTest extends AbstractResourceTest {
 
     // Create Winner Location
     final LocationInput secondLocationInput = LocationInput.builder()
-        .withName("MergeLocationsTest Second Location").withType(LocationType.PINPOINT_LOCATION)
+        .withName("MergeLocationsTest Second Location").withType(LocationType.POINT_LOCATION)
         .withLat(47.561517).withLng(-52.70876).withStatus(Status.ACTIVE).build();
 
     final Location secondLocation =

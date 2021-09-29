@@ -69,13 +69,13 @@ import mil.dds.anet.test.client.TaskSearchSortBy;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.test.integration.utils.TestApp;
+import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReportsResourceTest extends AbstractResourceTest {
+public class ReportResourceTest extends AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

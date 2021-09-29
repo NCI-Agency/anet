@@ -19,8 +19,8 @@ public class Location extends AbstractCustomizableAnetBean
   public static final String DUMMY_LOCATION_UUID = "-1";
 
   public enum LocationType {
-    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), PINPOINT_LOCATION("PP"),
-    ADVISOR_LOCATION("PPA"), PRINCIPAL_LOCATION("PPP"), VIRTUAL_LOCATION("V");
+    PHYSICAL_LOCATION("P"), GEOGRAPHICAL_AREA("PA"), POINT_LOCATION("PP"), ADVISOR_LOCATION("PPA"),
+    PRINCIPAL_LOCATION("PPP"), VIRTUAL_LOCATION("V");
 
     private static final Map<String, LocationType> BY_CODE = new HashMap<>();
     static {

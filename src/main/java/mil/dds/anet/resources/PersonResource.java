@@ -23,10 +23,10 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 
 public class PersonResource {
-
   private final PersonDao dao;
   private final AnetConfiguration config;
 
@@ -121,10 +121,7 @@ public class PersonResource {
     p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
-    if (!canCreateOrUpdatePerson(user, existing, false)) {
-      throw new WebApplicationException("You do not have permissions to edit this person",
-          Status.FORBIDDEN);
-    }
+    assertCanUpdatePerson(user, existing);
 
     if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
@@ -195,6 +192,33 @@ public class PersonResource {
     AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
+  }
+
+  @GraphQLMutation(name = "updatePersonHistory")
+  public int updatePersonHistory(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "person") Person p) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Person existing = dao.getByUuid(p.getUuid());
+    assertCanUpdatePerson(user, existing);
+    ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions());
+
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(),
+        p.getPreviousPositions(), true)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+
+    final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
+    AnetAuditLogger.log("History updated for person {} by {}", p, user);
+    return numRows;
+  }
+
+  private void assertCanUpdatePerson(final Person user, final Person existing) {
+    if (!canCreateOrUpdatePerson(user, existing, false)) {
+      throw new WebApplicationException("You do not have permissions to edit this person",
+          Status.FORBIDDEN);
+    }
   }
 
   @GraphQLQuery(name = "personList")

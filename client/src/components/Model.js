@@ -684,6 +684,13 @@ export default class Model {
     return filteredAssessmentConfig
   }
 
+  static clearInvalidAssessmentQuestions(assessment, validQuestions) {
+    Object.keys(assessment).forEach(
+      question =>
+        !validQuestions.includes(question) && delete assessment[question]
+    )
+  }
+
   static populateCustomFields(entity) {
     entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       entity.customFields

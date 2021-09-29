@@ -519,7 +519,7 @@ export const searchFilters = function() {
   const locationTypeOptions = [
     Location.LOCATION_TYPES.ADVISOR_LOCATION,
     Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
-    Location.LOCATION_TYPES.PINPOINT_LOCATION,
+    Location.LOCATION_TYPES.POINT_LOCATION,
     Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
     Location.LOCATION_TYPES.VIRTUAL_LOCATION
   ]

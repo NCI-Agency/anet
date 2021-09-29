@@ -60,12 +60,14 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES
 		(lower(newid()), 'JACKSON, Jack', 0, 0, 'hunter+jack@example.com', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', 'jack', '89003390-168e-4dc3-a582-5b38ae264bdd', 'Germany', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@example.com', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', '06547ee2-dcc3-420c-96cb-5f3bb3793b4d', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(lower(newid()), 'SOLENOID, Selena', 0, 0, 'hunter+selena@example.com', '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', 'selena', 'ce1df48e-fd6e-4dc4-bc00-9bb65a0d6910', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('00b19ebf-0d4d-4b0f-93c8-9023ccb59c49', 'SOLENOID, Selena', 0, 0, 'hunter+selena@example.com', '+1-111-1111', 'CIV', 'Selena is a test advisor in EF 1.2', 'selena', 'ce1df48e-fd6e-4dc4-bc00-9bb65a0d6910', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		('df9c7381-56ac-4bc5-8e24-ec524bccd7e9', 'ERINSON, Erin', 0, 0, 'hunter+erin@example.com', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', 'erin', '04c29bab-7b20-4ff2-8583-8ad3dbcff4d6', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@example.com', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', '5b585887-1c3d-4f47-bccb-cdfebfd6e919', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(lower(newid()), 'DVISOR, A', 0, 0, 'hunter+aDvisor@example.com', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'd09a55cf-6aa4-4bbf-8bf3-055ddcb4d27c', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('39d02d26-49eb-43b5-9cec-344777213a67', 'DVISOR, A', 0, 0, 'hunter+aDvisor@example.com', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'd09a55cf-6aa4-4bbf-8bf3-055ddcb4d27c', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'31cba227-f6c6-49e9-9483-fce441bea624', 'BRATTON, Creed', 0, 0, 'creed+bratton@example.com', '+444-44-4444', 'CIV', 'Let me first settle in.', 'creed', 'efad3f0d-3cd0-40fc-ac7e-90a1fa343e89', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'MALONE, Kevin', 0, 0, 'kevin+malone@example.com', '+444-44-4444', 'CIV', 'Sometimes numbers just dont add up.', 'kevin', 'cf05120c-bb43-408f-93ac-609c996a9da5', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'GUIST, Lin', 0, 0, 'lin+guist@example.com', '+444-44-4444', 'CIV', 'Lin can speak so many languages', 'lin', '<UUID>', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'PRETER, Inter', 0, 0, 'inter+preter@example.com', '+444-44-4444', 'CIV', 'Inter is fluent in various languages', 'inter', '<UUID>', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Advisor with no position for testing
 		(lower(newid()), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'REPORTGUY, Ima', 0, 0, 'ima+reportguy@example.com', '+444-44-4545', 'CIV', 'I need a career change', 'reportguy', NULL, 'France', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -144,7 +146,7 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid
 		(lower(newid()), 'EF 1.1 Advisor for Space Issues', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 Advisor for Interagency Advising', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 SuperUser', 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(lower(newid()), 'EF 1.2 Advisor', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('525d6c4b-deaa-4218-b8fd-abfb7c81a4c2', 'EF 1.2 Advisor', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.1 Advisor B', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.1 Advisor for Accounting', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.1 Advisor for Kites', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -152,7 +154,7 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid
 		(lower(newid()), 'EF 2.2 Advisor C', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.2 Advisor D', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.2 Old and Inactive', 0, 1, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(lower(newid()), 'EF 2.2 Advisor Sewing Facilities', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('2b7d86a9-3ed4-4843-ab4e-136c3ab109bf', 'EF 2.2 Advisor Sewing Facilities', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.2 Advisor Local Kebabs', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.2 Super User', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 2.2 Final Reviewer', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -166,7 +168,9 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid
 		(lower(newid()), 'EF 5.1 Advisor Accounting', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 5.1 Super User Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 5.1 Super User Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(lower(newid()), 'EF 9 Advisor <empty>', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+		(lower(newid()), 'EF 9 Advisor <empty>', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'LNG Advisor A', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(lower(newid()), 'LNG Advisor B', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Andrew in the EF 1 Manager Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
@@ -194,15 +198,26 @@ INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where emailAddress = 'hunter+jack@example.com'), @positionTimestamp);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+jack@example.com') WHERE name = 'EF 2.1 Advisor B';
 
+-- Rotate advisors through billets ending up with Dvisor in the EF 2.2 Advisor Sewing Facilities Billet and Selena in the EF 1.2 Advisor Billet
+SET @positionTimestamp = CURRENT_TIMESTAMP;
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where emailAddress = 'hunter+selena@example.com'), @positionTimestamp);
+UPDATE peoplePositions SET endedAt = @positionTimestamp WHERE positionUuid = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where emailAddress = 'hunter+advisor@example.com'), @positionTimestamp);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+advisor@example.com') WHERE name = 'EF 2.2 Advisor Sewing Facilities';
+
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where emailAddress = 'hunter+advisor@example.com'), @positionTimestamp);
+UPDATE peoplePositions SET endedAt = @positionTimestamp WHERE positionUuid = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where emailAddress = 'hunter+selena@example.com'), @positionTimestamp);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+selena@example.com') WHERE name = 'EF 1.2 Advisor';
+
 -- Put Elizabeth into the EF 1.1 Advisor A Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 1.1 Advisor A'), (SELECT uuid from people where emailAddress = 'hunter+liz@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+liz@example.com') WHERE name = 'EF 1.1 Advisor A';
-
--- Put Selena into the EF 1.2 Advisor Billet
-INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
-	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where emailAddress = 'hunter+selena@example.com'), CURRENT_TIMESTAMP);
-UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'hunter+selena@example.com') WHERE name = 'EF 1.2 Advisor';
 
 -- Put Reina into the EF 2.2 Advisor C Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
@@ -254,8 +269,20 @@ INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
 	VALUES ((SELECT uuid from positions where name = 'EF 5 Admin'), (SELECT uuid from people where emailAddress = 'michael+scott@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'michael+scott@example.com') WHERE name = 'EF 5 Admin';
 
+-- Put Lin into the LNG Advisor A
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'LNG Advisor A'), (SELECT uuid from people where emailAddress = 'lin+guist@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'lin+guist@example.com') WHERE name = 'LNG Advisor A';
+
+-- Put Inter into the LNG Advisor B
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'LNG Advisor B'), (SELECT uuid from people where emailAddress = 'inter+preter@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'inter+preter@example.com') WHERE name = 'LNG Advisor B';
+
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANET Administrators','', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
+	VALUES (lower(newid()), 'LNG','Linguistic', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 1', 'Planning Programming, Budgeting and Execution', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)
@@ -324,7 +351,9 @@ UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE sh
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 4') WHERE name LIKE 'EF 4%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 5') WHERE name LIKE 'EF 5%';
 UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='EF 5.1') WHERE name LIKE 'EF 5.1%';
-UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName='ANET Administrators') where name = 'ANET Administrator';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='LNG') WHERE name LIKE 'LNG%';
+UPDATE positions SET organizationUuid = (SELECT uuid FROM organizations WHERE shortName ='ANET Administrators') where name = 'ANET Administrator';
+
 
 -- Create the EF 1.1 approval process
 INSERT INTO approvalSteps (uuid, relatedObjectUuid, name, type)

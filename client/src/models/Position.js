@@ -136,6 +136,13 @@ export default class Position extends Model {
         rank
         role
         avatar(size: 32)
+        previousPositions {
+          startTime
+          endTime
+          position {
+            uuid
+          }
+        }
       }
     }
     location {

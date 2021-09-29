@@ -141,7 +141,7 @@ const PeriodicAssessment = ({
     API.mutation(GQL_DELETE_NOTE, { uuid })
       .then(() => {
         onUpdateAssessment()
-        toast("Successfully deleted")
+        toast.success("Successfully deleted")
       })
       .catch(error => {
         toast.error(error.message.split(":").pop())

@@ -280,7 +280,7 @@ enum LocationType {
   ADVISOR_LOCATION
   GEOGRAPHICAL_AREA
   PHYSICAL_LOCATION
-  PINPOINT_LOCATION
+  POINT_LOCATION
   PRINCIPAL_LOCATION
   VIRTUAL_LOCATION
 }
@@ -313,7 +313,7 @@ type Mutation {
   mergePeople(copyPosition: Boolean = false, loserUuid: String, winnerUuid: String): Int
   mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
   publishReport(uuid: String): Int!
-  putPersonInPosition(person: PersonInput, uuid: String): Int
+  putPersonInPosition(person: PersonInput, uuid: String): Int!
   rejectReport(comment: CommentInput, uuid: String): Int!
   reloadDictionary: String
   saveAdminSettings(settings: [AdminSettingInput]): Int
@@ -325,7 +325,9 @@ type Mutation {
   updateNote(note: NoteInput): Note
   updateOrganization(organization: OrganizationInput): Int
   updatePerson(person: PersonInput): Int
+  updatePersonHistory(person: PersonInput): Int!
   updatePosition(position: PositionInput): Int
+  updatePositionHistory(position: PositionInput): Int!
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
   updateReportAssessments(assessments: [NoteInput], report: ReportInput): Int!
   updateTask(task: TaskInput): Int
