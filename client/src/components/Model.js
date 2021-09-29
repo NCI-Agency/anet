@@ -10,7 +10,10 @@ import {
   RECURRENCE_TYPE
 } from "periodUtils"
 import PropTypes from "prop-types"
-import encodeQuery from "querystring/encode"
+/* NOTE: When encodeQuery is imported without curly braces, VSCode was
+    not recognizing it. Putting it between curly braces solved the problem
+    and no bugs generated due to this so far. */
+import { encodeQuery } from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -600,6 +603,25 @@ export default class Model {
           obj.assessment.__recurrence === recurrence &&
           dateBelongsToPeriod(obj.assessment.__periodStart, period)
       )
+  }
+
+  /**
+   * Filters ondemand assessments inside the notes object and returns them sorted
+   * with respect to their assessmentDate.
+   * @returns {object}
+   */
+  getOndemandAssessments() {
+    const onDemandNotes = this.notes
+      .filter(a => a.type === "ASSESSMENT")
+      .filter(a => JSON.parse(a.text).__recurrence === "ondemand")
+    // Sort the notes before visualizing them inside of a Card.
+    const sortedOnDemandNotes = onDemandNotes.sort((a, b) => {
+      return (
+        new Date(JSON.parse(a.text).assessmentDate) -
+        new Date(JSON.parse(b.text).assessmentDate)
+      )
+    })
+    return sortedOnDemandNotes
   }
 
   static getInstantAssessmentsDetailsForEntities(
