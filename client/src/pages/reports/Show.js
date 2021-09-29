@@ -845,7 +845,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   )
 
   function renderNoPositionAssignedText() {
-    const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+    const alertStyle = {
+      marginBottom: "1rem",
+      textAlign: "center",
+      zIndex: "-1"
+    }
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
     const advisorPositionSingular = Settings.fields.advisor.position.name
