@@ -1181,14 +1181,15 @@ header.searchPagination {
   align-items: center;
 }
 
-#fg-position > .col-sm-3 {
+#fg-position > .col-sm-3,
+#fg-prevPositions > .col-sm-3 {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
 }
 
-#fg-position > .col-sm-3 > * {
+#fg-position > .col-sm-3 > *, #fg-prevPositions > .col-sm-3 > * {
   margin-left: 10px;
 }
 

@@ -5,6 +5,7 @@ import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -34,6 +35,8 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -457,4 +460,73 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
+  @InTransaction
+  public int updatePersonHistory(Person p) {
+    final String personUuid = p.getUuid();
+    // Delete old history
+    final int numRows = getDbHandle()
+        .execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
+    // Add new history
+    for (final PersonPositionHistory history : p.getPreviousPositions()) {
+      updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
+          history.getEndTime());
+    }
+    return numRows;
+  }
+
+  @InTransaction
+  public boolean hasHistoryConflict(final String uuid, final List<PersonPositionHistory> history,
+      final boolean checkPerson) {
+    final String personPositionClause =
+        checkPerson ? "\"personUuid\" != :personUuid AND \"positionUuid\" = :positionUuid"
+            : "\"personUuid\" = :personUuid AND \"positionUuid\" != :positionUuid";
+    for (final PersonPositionHistory pph : history) {
+      final Query q;
+      final Instant endTime = pph.getEndTime();
+      if (endTime == null) {
+        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
+            + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
+            + ") AND " + personPositionClause);
+      } else {
+        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
+            + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
+            + " OR (\"endedAt\" IS NOT NULL AND"
+            + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
+            + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+      }
+      final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+      final Number count =
+          (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+              .bind("personUuid", checkPerson ? uuid : histUuid)
+              .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).one()
+              .get("count");
+
+      if (count.longValue() > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @InTransaction
+  protected void updatePeoplePositions(final String positionUuid, final String personUuid,
+      final Instant startTime, final Instant endTime) {
+    if (endTime == null) {
+      // we have to make an exception here, as MSSQL has problems inserting a null datetime
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
+    } else {
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    }
+  }
 }

@@ -19,6 +19,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 
 public class PositionResource {
@@ -164,8 +165,27 @@ public class PositionResource {
     return numRows;
   }
 
+  @GraphQLMutation(name = "updatePositionHistory")
+  public int updatePositionHistory(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "position") Position pos) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position existing = dao.getByUuid(pos.getUuid());
+    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople());
+    assertCanUpdatePosition(user, existing);
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(),
+        pos.getPreviousPeople(), false)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+    final int numRows =
+        AnetObjectEngine.getInstance().getPositionDao().updatePositionPreviousPeople(pos);
+    AnetAuditLogger.log("History updated for position {} by {}", pos, user);
+    return numRows;
+  }
+
   @GraphQLMutation(name = "putPersonInPosition")
-  public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
+  public int putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String positionUuid,
       @GraphQLArgument(name = "person") Person person) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -175,7 +195,7 @@ public class PositionResource {
     }
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
-    int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
+    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
     return numRows;
   }
