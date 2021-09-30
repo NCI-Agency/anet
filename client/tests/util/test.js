@@ -299,6 +299,9 @@ test.beforeEach(t => {
       const $advancedSelectSuggestion = await t.context.$(
         `${popoverSelector} tbody tr:first-child td:first-child input`
       )
+      // Move element into view
+      const actions = t.context.driver.actions({ async: true })
+      await actions.move({ origin: $advancedSelectSuggestion }).perform()
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput
     },
