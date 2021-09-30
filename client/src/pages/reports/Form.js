@@ -413,10 +413,7 @@ const ReportForm = ({
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
-        let relatedObject
-        if (hasAssessments) {
-          relatedObject = Report.filterClientSideFields(new Report(values))
-        }
+        const relatedObject = hasAssessments ? new Report(values) : {}
 
         return (
           <div className="report-form">
@@ -1225,7 +1222,7 @@ const ReportForm = ({
           autoSaveSettings.current.autoSaveTimeout.add(
             autoSaveSettings.current.autoSaveTimeout
           ) // exponential back-off
-          toast.error(
+          toast.warning(
             `There was an error autosaving your ${getReportType(
               autoSaveSettings.current.values
             )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
@@ -1303,13 +1300,23 @@ const ReportForm = ({
     reportUuid
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
-    const entitiesAssessments = values[asessmentsFieldName]
+    const valuesCopy = _cloneDeep(values)
+    const entitiesAssessments = valuesCopy[asessmentsFieldName]
     return Object.entries(entitiesAssessments)
       .filter(
         ([key, assessment]) =>
           entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
       .map(([key, assessment]) => {
+        const entity = entities.find(e => e.uuid === key)
+        const validQuestions = Object.keys(
+          Model.filterAssessmentConfig(
+            entity.getInstantAssessmentConfig(),
+            entity,
+            new Report(values)
+          )
+        )
+        Model.clearInvalidAssessmentQuestions(assessment, validQuestions)
         assessment.__recurrence = RECURRENCE_TYPE.ONCE
         assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
@@ -1325,7 +1332,7 @@ const ReportForm = ({
             }
           ],
           text: customFieldsJSONString(
-            values,
+            valuesCopy,
             true,
             `${asessmentsFieldName}.${key}`
           )

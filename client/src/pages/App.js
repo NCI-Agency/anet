@@ -198,7 +198,7 @@ const App = ({ pageDispatchers, pageProps }) => {
           principalOrganizations: appState.principalOrganizations
         }}
       >
-        <ToastContainer />
+        <ToastContainer theme="colored" />
         <ReactTooltip id="tooltip-top" place="top" className="tooltip-top" />
         <Routing />
       </ResponsiveLayout>

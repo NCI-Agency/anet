@@ -6,6 +6,7 @@ import AssignPersonModal from "components/AssignPersonModal"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import EditHistory from "components/EditHistory"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -46,6 +47,12 @@ const GQL_DELETE_POSITION = gql`
   }
 `
 
+const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
+  mutation($position: PositionInput!) {
+    updatePositionHistory(position: $position)
+  }
+`
+
 const PositionShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -54,6 +61,7 @@ const PositionShow = ({ pageDispatchers }) => {
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
+  const [showEditHistoryModal, setShowEditHistoryModal] = useState(false)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
@@ -329,7 +337,28 @@ const PositionShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              <Fieldset title="Previous position holders" id="previous-people">
+              <Fieldset
+                title="Previous position holders"
+                id="previous-people"
+                action={
+                  canEdit && (
+                    <EditHistory
+                      mainTitle="Edit person history"
+                      history1={position.previousPeople}
+                      initialHistory={position.previousPeople}
+                      currentlyOccupyingEntity={position.person}
+                      midColTitle="New History"
+                      parentEntityType={position.type}
+                      parentEntityUuid1={position.uuid}
+                      showModal={showEditHistoryModal}
+                      setShowModal={setShowEditHistoryModal}
+                      setHistory={history => {
+                        onSavePreviousPeople(history)
+                      }}
+                    />
+                  )
+                }
+              >
                 <PreviousPeople history={position.previousPeople} />
               </Fieldset>
               {Settings.fields.position.customFields && (
@@ -382,6 +411,17 @@ const PositionShow = ({ pageDispatchers }) => {
       .then(data => {
         history.push("/", { success: "Position deleted" })
       })
+      .catch(error => {
+        setStateError(error)
+        jumpToTop()
+      })
+  }
+
+  function onSavePreviousPeople(history) {
+    const newPosition = position.filterClientSideFields()
+    newPosition.previousPeople = history
+    API.mutation(GQL_UPDATE_PREVIOUS_PEOPLE, { position: newPosition })
+      .then(data => refetch())
       .catch(error => {
         setStateError(error)
         jumpToTop()

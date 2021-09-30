@@ -8,6 +8,7 @@ import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.text.Collator;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
+import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionSearchQueryInput;
@@ -634,6 +636,53 @@ public class PositionResourceTest extends AbstractResourceTest {
         fail("Unexpected ForbiddenException");
       }
     }
+  }
+
+  @Test
+  public void testUpdatePositionHistory()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Organization ao = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
+        TestData.createAdvisorOrganizationInput(true));
+    final PositionInput testInput1 = PositionInput.builder()
+        .withName("A Test Position for edittting history").withType(PositionType.ADVISOR)
+        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao))
+        .withLocation(getLocationInput(getGeneralHospital())).build();
+
+    final Position createdPos = adminMutationExecutor.createPosition(FIELDS, testInput1);
+    assertThat(createdPos).isNotNull();
+    assertThat(createdPos.getUuid()).isNotNull();
+    assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
+
+    final PersonInput persInput1 = PersonInput.builder().withRole(Role.ADVISOR)
+        .withName("Test person for edit history").build();
+    final Person person1 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput1);
+    assertThat(person1).isNotNull();
+    assertThat(person1.getUuid()).isNotNull();
+    final PersonInput persInput2 = PersonInput.builder().withRole(Role.ADVISOR)
+        .withName("Test person for edit history").build();
+    final Person person2 = adminMutationExecutor.createPerson(PERSON_FIELDS, persInput2);
+    assertThat(person2).isNotNull();
+    assertThat(person2.getUuid()).isNotNull();
+    final List<PersonPositionHistoryInput> prevPersons =
+        new ArrayList<PersonPositionHistoryInput>();
+    final PersonPositionHistoryInput histInput1 = PersonPositionHistoryInput.builder()
+        .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPerson(getPersonInput(person1))
+        .build();
+    final PersonPositionHistoryInput histInput2 =
+        PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
+            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
+            .withPerson(getPersonInput(person2)).build();
+    prevPersons.add(histInput1);
+    prevPersons.add(histInput2);
+    final PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())
+        .withPreviousPeople(prevPersons).build();
+    adminMutationExecutor.updatePositionHistory("", inputForTest);
+    final Position positionUpdated =
+        adminQueryExecutor.position(FIELDS, getPositionInput(createdPos).getUuid());
+    assertThat(positionUpdated).isNotNull();
+    assertThat(positionUpdated.getPreviousPeople().size() == 2);
   }
 
   @Test

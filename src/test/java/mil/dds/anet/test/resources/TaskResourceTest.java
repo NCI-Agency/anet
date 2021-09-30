@@ -26,7 +26,7 @@ import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.TaskSearchQueryInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
-import mil.dds.anet.utils.UtilsTest;
+import mil.dds.anet.test.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class TaskResourceTest extends AbstractResourceTest {

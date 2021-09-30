@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import AggregationWidgetContainer, {
-  AGGERGATION_WIDGET_TYPE,
+  AGGREGATION_WIDGET_TYPE,
   AGGREGATION_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
@@ -42,7 +42,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   },
   location: {
     aggregation: {
-      widget: AGGERGATION_WIDGET_TYPE.REPORTS_MAP
+      widget: AGGREGATION_WIDGET_TYPE.REPORTS_MAP
     }
   },
   state: {
@@ -63,7 +63,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
   tasks: {
     aggregation: {
       aggregationType: AGGREGATION_TYPE.REPORTS_BY_TASK,
-      widget: AGGERGATION_WIDGET_TYPE.REPORTS_BY_TASK
+      widget: AGGREGATION_WIDGET_TYPE.REPORTS_BY_TASK
     },
     label: pluralize(Settings.fields.task.subLevel.shortLabel)
   },

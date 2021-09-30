@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.text.Collator;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -33,6 +34,8 @@ import mil.dds.anet.test.client.OrganizationSearchQueryInput;
 import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
+import mil.dds.anet.test.client.PersonPositionHistory;
+import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.PersonSearchSortBy;
 import mil.dds.anet.test.client.Position;
@@ -45,8 +48,8 @@ import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
+import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class PersonResourceTest extends AbstractResourceTest {
@@ -61,6 +64,8 @@ public class PersonResourceTest extends AbstractResourceTest {
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
           + " customFields";
+  private static final String PERSON_FIELDS_ONLY_HISTORY =
+      "{ uuid previousPositions { startTime endTime position { uuid } } }";
   private static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
   protected static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
@@ -560,6 +565,66 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Bob has access to Christopf's politicalPosition
     checkSensitiveInformationEdit(christopfUuid, "bob", ImmutableList.of(POLITICAL_POSITION_FIELD),
         true);
+  }
+
+  @Test
+  public void testUpdatePersonHistory() throws Exception {
+    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
+        .withText("EF 6").withType(OrganizationType.ADVISOR_ORG).build();
+    final AnetBeanList_Organization orgs =
+        jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), query);
+    assertThat(orgs.getList().size()).isGreaterThan(0);
+    final Organization org = orgs.getList().stream()
+        .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
+    assertThat(org.getUuid()).isNotNull();
+
+    final PersonInput persInput = PersonInput.builder().withRole(Role.ADVISOR)
+        .withName("Test person for edit history").build();
+    final Person person = adminMutationExecutor.createPerson(FIELDS, persInput);
+    assertThat(person).isNotNull();
+    assertThat(person.getUuid()).isNotNull();
+    // Create a Position
+    final PositionInput testInput1 = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("Test Position for person history edit  1")
+        .withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos1 = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput1);
+    assertThat(createdPos1).isNotNull();
+    assertThat(createdPos1.getUuid()).isNotNull();
+    assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
+    final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
+    final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("Test Position for person history edit 2")
+        .withOrganization(getOrganizationInput(org))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos2 = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput2);
+    assertThat(createdPos2).isNotNull();
+    assertThat(createdPos2.getUuid()).isNotNull();
+    assertThat(createdPos2.getName()).isEqualTo(testInput2.getName());
+    final PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
+    final PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
+        .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1).build();
+    final PersonPositionHistoryInput hist2 =
+        PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
+            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
+            .withPosition(posInput2).build();
+
+    final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
+    historyList.add(hist1);
+    historyList.add(hist2);
+    final PersonInput personInput = getPersonInput(person);
+    personInput.setPreviousPositions(historyList);
+    adminMutationExecutor.updatePersonHistory("", personInput);
+    final Person personUpdated =
+        adminQueryExecutor.person(PERSON_FIELDS_ONLY_HISTORY, personInput.getUuid());
+    assertThat(personUpdated).isNotNull();
+    final List<PersonPositionHistory> previousPositions = personUpdated.getPreviousPositions();
+    assertThat(previousPositions).isNotNull();
+    assertThat(previousPositions.size() == 2);
   }
 
   @Test
