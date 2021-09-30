@@ -31,7 +31,6 @@ const CustomDateInput = ({
   maxDate,
   placement,
   withTime,
-  maxDate,
   value,
   onChange,
   onBlur
@@ -93,7 +92,6 @@ CustomDateInput.propTypes = {
   maxDate: PropTypes.instanceOf(Date),
   placement: PropTypes.string,
   withTime: PropTypes.bool,
-  maxDate: PropTypes.object,
   value: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,

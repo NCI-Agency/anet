@@ -10,10 +10,7 @@ import {
   RECURRENCE_TYPE
 } from "periodUtils"
 import PropTypes from "prop-types"
-/* NOTE: When encodeQuery is imported without curly braces, VSCode was
-    not recognizing it. Putting it between curly braces solved the problem
-    and no bugs generated due to this so far. */
-import { encodeQuery } from "querystring/encode"
+import encodeQuery from "querystring/encode"
 import utils from "utils"
 import * as yup from "yup"
 
@@ -611,9 +608,11 @@ export default class Model {
    * @returns {object}
    */
   getOndemandAssessments() {
-    const onDemandNotes = this.notes
-      .filter(a => a.type === "ASSESSMENT")
-      .filter(a => JSON.parse(a.text).__recurrence === "ondemand")
+    const onDemandNotes = this.notes.filter(
+      a =>
+        a.type === "ASSESSMENT" &&
+        JSON.parse(a.text).__recurrence === RECURRENCE_TYPE.ON_DEMAND
+    )
     // Sort the notes before visualizing them inside of a Card.
     const sortedOnDemandNotes = onDemandNotes.sort((a, b) => {
       return (

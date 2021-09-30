@@ -165,6 +165,7 @@ const ReadonlyTextField = fieldProps => {
 
 const DateField = fieldProps => {
   const { name, withTime, maxDate, ...otherFieldProps } = fieldProps
+  console.log(maxDate)
   return (
     <FastField
       name={name}
@@ -906,10 +907,6 @@ const CustomField = ({
   invisibleFields,
   vertical
 }) => {
-  const dateLimit =
-    fieldName === "entityAssessment.assessmentDate"
-      ? moment().toDate()
-      : moment().add(20, "years").endOf("year").toDate()
   const { type, helpText, authorizationGroupUuids } = fieldConfig
   let extraColElem
   if (authorizationGroupUuids) {
@@ -965,23 +962,16 @@ const CustomField = ({
         return {
           formikProps
         }
+      case CUSTOM_FIELD_TYPE.DATE:
+        return {
+          maxDate:
+            fieldName === "entityAssessment.assessmentDate" || moment().toDate()
+        }
       default:
         return {}
     }
-  }, [fieldConfig, formikProps, invisibleFields, type])
-  return FieldComponent.name === "DateField" ? (
-    <FieldComponent
-      name={fieldName}
-      onChange={handleChange}
-      vertical={vertical}
-      extraColElem={extraColElem}
-      maxDate={dateLimit}
-      {...fieldProps}
-      {...extraProps}
-    >
-      {helpText && <HelpBlock>{helpText}</HelpBlock>}
-    </FieldComponent>
-  ) : FieldComponent ? (
+  }, [fieldConfig, fieldName, formikProps, invisibleFields, type])
+  return FieldComponent ? (
     <FieldComponent
       name={fieldName}
       onChange={handleChange}

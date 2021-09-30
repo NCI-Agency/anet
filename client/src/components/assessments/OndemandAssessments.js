@@ -11,7 +11,7 @@ import Model, { NOTE_TYPE } from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
 import moment from "moment"
-import { PeriodsDetailsPropType } from "periodUtils"
+import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { Button, Panel, Table } from "react-bootstrap"
@@ -43,7 +43,7 @@ const OnDemandAssessments = ({
   const [showModal, setShowModal] = useState(false)
   // Used to determine if the AssessmentModal is in edit mode or create mode.
   const [editModeObject, setEditModeObject] = useState({
-    questionareResults: {},
+    questionnaireResults: {},
     uuid: ""
   })
   // 'assessmentConfig' has question set for ondemand assessments defined in the dictionary
@@ -69,25 +69,38 @@ const OnDemandAssessments = ({
         <>
           <div
             style={
-              sortedOnDemandNotes.length - 1 !== index
+              index !== sortedOnDemandNotes.length - 1
                 ? {
                   color: "red",
                   paddingBottom: "3px",
                   margin: "0 -1rem 1rem 0",
                   borderBottom: "2px solid lightgrey"
                 }
-                : {
-                  paddingBottom: "3px",
-                  marginBottom: "1rem",
-                  borderBottom: "2px solid lightgrey"
-                }
+                : moment(assessmentFieldsObject.assessmentDate)
+                  .add(
+                    Settings.fields.principal
+                      .onDemandAssessmentExpirationDays,
+                    "days"
+                  )
+                  .isBefore(moment())
+                  ? {
+                    color: "red",
+                    paddingBottom: "3px",
+                    marginBottom: "1rem",
+                    borderBottom: "2px solid lightgrey"
+                  }
+                  : {
+                    paddingBottom: "3px",
+                    marginBottom: "1rem",
+                    borderBottom: "2px solid lightgrey"
+                  }
             }
           >
             <b>
               {/* Only the last object in the sortedOnDemandNotes can be valid.
                   If the expiration date of the last object is older than NOW,
                   it is also expired. */}
-              {sortedOnDemandNotes.length - 1 !== index
+              {index !== sortedOnDemandNotes.length - 1
                 ? "Expired"
                 : `${
                   moment(assessmentFieldsObject.assessmentDate)
@@ -138,7 +151,7 @@ const OnDemandAssessments = ({
                     title="Edit assessment"
                     onClick={() => {
                       setEditModeObject({
-                        questionareResults: assessmentFieldsObject,
+                        questionnaireResults: assessmentFieldsObject,
                         uuid: note.uuid
                       })
                       setShowModal(true)
@@ -201,7 +214,7 @@ const OnDemandAssessments = ({
       API.mutation(GQL_DELETE_NOTE, { uuid })
         .then(() => {
           onUpdateAssessment()
-          toast("Successfully deleted")
+          toast.success("Successfully deleted")
         })
         .catch(error => {
           toast.error(error.message.split(":").pop())
@@ -245,88 +258,94 @@ const OnDemandAssessments = ({
     setVSCards(assessmentCards)
   }, [assessmentCards])
 
-  return (
-    <div style={{ ...style }}>
-      <Fieldset
-        title={"Assessment results - on demand"}
-        id={`entity-assessments-results-${recurrence}`}
-      >
-        <PeriodsNavigation
-          offset={tableLocation}
-          onChange={setTableLocation}
-          disabledLeft={tableLocation === 0}
-          disabledRight={
-            vsCards.length + tableLocation === numberOfPeriods ||
-            vsCards.length < numberOfPeriods
-          }
-        />
-        <div style={{ display: "flex" }}>
-          <Table
-            condensed
-            className="assessments-table"
-            style={{ tableLayout: "fixed" }}
-          >
-            <tbody>
-              <tr>{createColumns(numberOfPeriods)}</tr>
-            </tbody>
-          </Table>
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <Button bsStyle="primary" onClick={() => setShowModal(true)}>
-            {addAssessmentLabel}
-          </Button>
-        </div>
-      </Fieldset>
-
-      {/* If 'uuid' has a value of empty string, it means AssessmentModal is in
-          create mode. If it has the value of the note uuid, then the AssessmentModal
-          is in edit mode.
-          If the 'assessment' has an empty object, it means AsessmentModal is in
-          create mode. If it has the ondemand assessment values, AssessmentModal
-          is in edit mode.
-          The above conditions should be satisfied at the same time. */}
-      <AssessmentModal
-        showModal={showModal}
-        note={{
-          type: NOTE_TYPE.ASSESSMENT,
-          noteRelatedObjects: [
-            {
-              relatedObjectType: entityType.relatedObjectType,
-              relatedObjectUuid: entity.uuid
+  if (recurrence !== RECURRENCE_TYPE.ON_DEMAND) {
+    console.error(
+      `Recurrence type is not ${RECURRENCE_TYPE.ON_DEMAND}. Component will not be rendered!`
+    )
+  } else {
+    return (
+      <div style={{ ...style }}>
+        <Fieldset
+          title={"Assessment results - on demand"}
+          id={`entity-assessments-results-${recurrence}`}
+        >
+          <PeriodsNavigation
+            offset={tableLocation}
+            onChange={setTableLocation}
+            disabledLeft={tableLocation === 0}
+            disabledRight={
+              vsCards.length + tableLocation === numberOfPeriods ||
+              vsCards.length < numberOfPeriods
             }
-          ],
-          uuid:
-            Object.keys(editModeObject.questionareResults).length > 0
-              ? editModeObject.uuid
-              : ""
-        }}
-        assessment={editModeObject.questionareResults}
-        title={`Assessment for ${entity.toString()}`}
-        assessmentYupSchema={assessmentYupSchema}
-        recurrence={recurrence}
-        assessmentPeriod={{
-          start: moment() // This prop is required but has no impact on this component.
-        }}
-        assessmentConfig={filteredAssessmentConfig}
-        onSuccess={() => {
-          setShowModal(false)
-          onUpdateAssessment()
-          /* Set the table position in a way that the user always sees the
-              latest card in the table after addition of an ondemand assessment. */
-          setTableLocation(
-            vsCards.length >= numberOfPeriods
-              ? numberOfPeriods - vsCards.length - 1
-              : 0
-          )
-          setEditModeObject({ questionareResults: {}, uuid: {} })
-        }}
-        onCancel={() => {
-          setShowModal(false)
-          setEditModeObject({ questionareResults: {}, uuid: {} })
-        }}
-      />
-    </div>
-  )
+          />
+          <div style={{ display: "flex" }}>
+            <Table
+              condensed
+              className="assessments-table"
+              style={{ tableLayout: "fixed" }}
+            >
+              <tbody>
+                <tr>{createColumns(numberOfPeriods)}</tr>
+              </tbody>
+            </Table>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <Button bsStyle="primary" onClick={() => setShowModal(true)}>
+              {addAssessmentLabel}
+            </Button>
+          </div>
+        </Fieldset>
+
+        {/* If 'uuid' has a value of empty string, it means AssessmentModal is in
+            create mode. If it has the value of the note uuid, then the AssessmentModal
+            is in edit mode.
+            If the 'assessment' has an empty object, it means AsessmentModal is in
+            create mode. If it has the ondemand assessment values, AssessmentModal
+            is in edit mode.
+            The above conditions should be satisfied at the same time. */}
+        <AssessmentModal
+          showModal={showModal}
+          note={{
+            type: NOTE_TYPE.ASSESSMENT,
+            noteRelatedObjects: [
+              {
+                relatedObjectType: entityType.relatedObjectType,
+                relatedObjectUuid: entity.uuid
+              }
+            ],
+            uuid:
+              Object.keys(editModeObject.questionnaireResults).length > 0
+                ? editModeObject.uuid
+                : ""
+          }}
+          assessment={editModeObject.questionnaireResults}
+          title={`Assessment for ${entity.toString()}`}
+          assessmentYupSchema={assessmentYupSchema}
+          recurrence={recurrence}
+          assessmentPeriod={{
+            start: moment() // This prop is required but has no impact on this component.
+          }}
+          assessmentConfig={filteredAssessmentConfig}
+          onSuccess={() => {
+            setShowModal(false)
+            onUpdateAssessment()
+            /* Set the table position in a way that the user always sees the
+                latest card in the table after addition of an ondemand assessment. */
+            setTableLocation(
+              vsCards.length >= numberOfPeriods
+                ? numberOfPeriods - vsCards.length - 1
+                : 0
+            )
+            setEditModeObject({ questionnaireResults: {}, uuid: {} })
+          }}
+          onCancel={() => {
+            setShowModal(false)
+            setEditModeObject({ questionnaireResults: {}, uuid: {} })
+          }}
+        />
+      </div>
+    )
+  }
 }
 OnDemandAssessments.propTypes = {
   style: PropTypes.object,
