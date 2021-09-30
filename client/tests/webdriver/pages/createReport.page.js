@@ -37,7 +37,7 @@ export class CreateReport extends Page {
   }
 
   get positiveAtmosphere() {
-    return browser.$('label[for="Atmospherics_POSITIVE"]')
+    return browser.$('label[for="atmosphere_POSITIVE"]')
   }
 
   getCustomFieldFormGroup(id) {
@@ -118,7 +118,7 @@ export class CreateReport extends Page {
 
   getEngagementTypesButtonByName(name) {
     return this.engagementTypesFieldFormGroup.$(
-      `label[for="Engagement types_${name}"]`
+      `label[for="formCustomFields.multipleButtons_${name}"]`
     )
   }
 

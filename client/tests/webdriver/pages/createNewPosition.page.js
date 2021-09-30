@@ -31,11 +31,11 @@ class CreatePosition extends Page {
   }
 
   get typeAdvisorButton() {
-    return browser.$('label[for="ADVISOR"]')
+    return browser.$('label[for="type_ADVISOR"]')
   }
 
   get typePrincipalButton() {
-    return browser.$('label[for="PRINCIPAL"]')
+    return browser.$('label[for="type_PRINCIPAL"]')
   }
 
   get organizationInput() {

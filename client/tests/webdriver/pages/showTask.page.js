@@ -73,7 +73,7 @@ class ShowTask extends Page {
 
     const button = this.assessmentModalForm
       .$(".btn-group")
-      .$(`label[for="Project status_${valuesArr[1]}"]`)
+      .$(`label[for="entityAssessment.status_${valuesArr[1]}"]`)
     // wait for a bit, clicks and do double click, sometimes it does not go through
     browser.pause(300)
     button.click({ x: 10, y: 10 })

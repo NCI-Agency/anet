@@ -46,11 +46,11 @@ class CreatePerson extends Page {
   }
 
   get rolePrincipalButton() {
-    return browser.$('label[for="PRINCIPAL"]')
+    return browser.$('label[for="role_PRINCIPAL"]')
   }
 
   get roleAdvisorButton() {
-    return browser.$('label[for="ADVISOR"]')
+    return browser.$('label[for="role_ADVISOR"]')
   }
 
   get emailAddress() {
@@ -115,13 +115,13 @@ class CreatePerson extends Page {
 
   get greenButton() {
     return this.customFieldsContainer.$(
-      'label[for="Choose one of the colours_GREEN"]'
+      'label[for="formCustomFields.colourOptions_GREEN"]'
     )
   }
 
   get amberButton() {
     return this.customFieldsContainer.$(
-      'label[for="Choose one of the colours_AMBER"]'
+      'label[for="formCustomFields.colourOptions_AMBER"]'
     )
   }
 
@@ -161,13 +161,13 @@ class CreatePerson extends Page {
 
   get leftButton() {
     return this.sensitiveFieldsContainer.$(
-      'label[for="Position on the political spectrum_LEFT"]'
+      'label[for="formSensitiveFields.politicalPosition_LEFT"]'
     )
   }
 
   get middleButton() {
     return this.sensitiveFieldsContainer.$(
-      'label[for="Position on the political spectrum_MIDDLE"]'
+      'label[for="formSensitiveFields.politicalPosition_MIDDLE"]'
     )
   }
 

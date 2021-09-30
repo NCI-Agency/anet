@@ -131,7 +131,7 @@ class ShowPerson extends Page {
       .$$(".modal-content .btn-group")
       .forEach((btnGroup, index) => {
         const button = btnGroup.$(
-          `label[for="Test question ${index + 1}_${valuesArr[index]}"]`
+          `label[for$=".test${index + 1}_${valuesArr[index]}"]`
         )
         // wait for a bit, clicks and do double click, sometimes it does not go through
         browser.pause(300)

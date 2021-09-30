@@ -45,9 +45,7 @@ test.serial("Draft and submit a report", async t => {
     "Clicking a location advanced single select widget suggestion populates the input field."
   )
 
-  const $positiveAtmosphereButton = await $(
-    'label[for="Atmospherics_POSITIVE"]'
-  )
+  const $positiveAtmosphereButton = await $('label[for="atmosphere_POSITIVE"]')
   await $positiveAtmosphereButton.click()
 
   const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
@@ -550,7 +548,7 @@ test.serial(
     )
 
     const $positiveAtmosphereButton = await $(
-      'label[for="Atmospherics_POSITIVE"]'
+      'label[for="atmosphere_POSITIVE"]'
     )
     await $positiveAtmosphereButton.click()
 
@@ -560,9 +558,7 @@ test.serial(
       "Why was this engagement positive? (optional)"
     )
 
-    const $neutralAtmosphereButton = await $(
-      'label[for="Atmospherics_NEUTRAL"]'
-    )
+    const $neutralAtmosphereButton = await $('label[for="atmosphere_NEUTRAL"]')
     await $neutralAtmosphereButton.click()
     t.is(
       (await $atmosphereDetails.getAttribute("placeholder")).trim(),
@@ -570,7 +566,7 @@ test.serial(
     )
 
     const $negativeAtmosphereButton = await $(
-      'label[for="Atmospherics_NEGATIVE"]'
+      'label[for="atmosphere_NEGATIVE"]'
     )
     await $negativeAtmosphereButton.click()
     t.is(

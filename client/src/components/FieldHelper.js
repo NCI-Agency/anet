@@ -410,8 +410,8 @@ const ButtonToggleGroupField = ({
             return (
               <ToggleButton
                 {...props}
-                id={`${field.name}${value}`}
-                key={`${field.name}${value}`}
+                id={`${field.name}_${value}`}
+                key={`${field.name}_${value}`}
                 value={value}
                 style={style}
                 variant="outline-secondary"
