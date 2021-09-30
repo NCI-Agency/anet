@@ -501,8 +501,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
   public static String generateCurrentPositionFilter(String personJoinColumn,
       String dateFilterColumn, String placeholderName) {
-    // it is possible this would be better implemented using WHERE NOT EXISTS instead of the
-    // left
+    // it is possible this would be better implemented using WHERE NOT EXISTS instead of the left
     // join
     return String.format(
         "JOIN \"peoplePositions\" pp ON pp.\"personUuid\" = %1$s  AND pp.\"createdAt\" <= %2$s "
@@ -521,6 +520,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   public int mergePositions(Position winner, Position loser) {
     final String winnerUuid = winner.getUuid();
     final String loserUuid = loser.getUuid();
+    // Get some data related to the existing position in the database
+    final Position existingPos = getByUuid(winnerUuid);
+    final List<Position> existingAssociatedPositions =
+        existingPos.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
+
     // Clear loser's code to prevent update conflicts (code must be unique)
     getDbHandle()
         .createUpdate("/* clearPositionCode */ UPDATE \"positions\""
@@ -543,18 +547,18 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             pph.getPersonUuid(), pph.getStartTime(), pph.getEndTime());
       }
     }
-    // update positionRelationships
-    final Position existingPos = getByUuid(winnerUuid);
-    final List<Position> existingAssociatedPositions =
-        existingPos.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
-    final Set<String> winnerExApUuids =
+
+    // Update positionRelationships with given input on winnerPosition
+    final Set<String> existingApUuids =
         existingAssociatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
     // delete common relations of merging positions
-    if (!Utils.isEmptyOrNull(winnerExApUuids)) {
-      getDbHandle().createUpdate(
-          "UPDATE \"positionRelationships\" SET deleted = :deleted WHERE (\"positionUuid_a\" IN (<winnerExApUuids>) OR "
-              + "\"positionUuid_b\" IN (<winnerExApUuids>)) AND (\"positionUuid_a\" = :loserUuid OR \"positionUuid_b\" = :loserUuid)")
-          .bind("deleted", true).bindList("winnerExApUuids", winnerExApUuids)
+    if (!existingApUuids.isEmpty()) {
+      getDbHandle()
+          .createUpdate("UPDATE \"positionRelationships\" SET deleted = :deleted"
+              + " WHERE (\"positionUuid_a\" IN (<winnerExApUuids>)"
+              + " OR \"positionUuid_b\" IN (<winnerExApUuids>))"
+              + " AND (\"positionUuid_a\" = :loserUuid OR \"positionUuid_b\" = :loserUuid)")
+          .bind("deleted", true).bindList("winnerExApUuids", existingApUuids)
           .bind("loserUuid", loserUuid).execute();
     }
     // transfer loser's relations to winners
@@ -570,25 +574,27 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             + " WHERE \"positionUuid_b\" = :loserUuid")
         .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
         .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+    // delete unused relations
     final Set<String> winnerApUuids =
-        Utils.isEmptyOrNull(winner.getAssociatedPositions()) ? Collections.emptySet()
+        winner.getAssociatedPositions() == null ? Collections.emptySet()
             : winner.getAssociatedPositions().stream().map(ap -> ap.getUuid())
                 .collect(Collectors.toSet());
-    // delete unused relation
-    if (!winnerApUuids.isEmpty()) {
-      getDbHandle().createUpdate("UPDATE \"positionRelationships\""
-          + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
-          + " WHERE (\"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid) AND"
-          + " (\"positionUuid_a\" NOT IN (<winnerList>)  AND \"positionUuid_b\" NOT IN (<winnerList>)"
-          + ")").bind("winnerUuid", winnerUuid).bind("deleted", true)
-          .bindList("winnerList", winnerApUuids)
+    if (winnerApUuids.isEmpty()) {
+      getDbHandle()
+          .createUpdate("UPDATE \"positionRelationships\""
+              + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
+              + " WHERE \"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid")
+          .bind("deleted", true).bind("winnerUuid", winnerUuid)
           .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
     } else {
       getDbHandle()
           .createUpdate("UPDATE \"positionRelationships\""
               + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
-              + " WHERE (\"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid)")
-          .bind("winnerUuid", winnerUuid).bind("deleted", true)
+              + " WHERE (\"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid)"
+              + " AND \"positionUuid_a\" NOT IN (<winnerList>)"
+              + " AND \"positionUuid_b\" NOT IN (<winnerList>)")
+          .bind("deleted", true).bind("winnerUuid", winnerUuid)
+          .bindList("winnerList", winnerApUuids)
           .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
     }
 
