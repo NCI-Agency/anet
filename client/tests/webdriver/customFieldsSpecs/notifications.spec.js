@@ -34,7 +34,6 @@ describe("Home page", () => {
       expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
       expect(Home.myTasksNotifications.getText()).to.equal("1")
     })
-    // FIXME: The test below does not work on local
     it("Should see that Nick has no counterparts and no tasks with pending assessments", () => {
       Home.open("/", "nick")
       Home.linksMenuButton.click()
