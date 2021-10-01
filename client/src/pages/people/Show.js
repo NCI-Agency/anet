@@ -560,7 +560,6 @@ const PersonShow = ({ pageDispatchers }) => {
       <Tooltip content="Edit history" position="top">
         <Button
           onClick={() => setShowHistoryModal(true)}
-          bsStyle="primary"
           className="edit-history"
         >
           <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />

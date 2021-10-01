@@ -444,7 +444,7 @@ export default EditHistory
 
 function ValidationMessage({ title, keysAndMessages }) {
   return (
-    <Alert bsStyle="danger">
+    <Alert variant="danger">
       <legend>{title}</legend>
       <ul>
         {keysAndMessages.map(({ key, msg }) => (
