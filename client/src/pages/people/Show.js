@@ -449,9 +449,6 @@ const PersonShow = ({ pageDispatchers }) => {
       biography: "biography"
     }
 
-    const idExceptions = {
-      position: "current-position"
-    }
     // map fields that have specific human person
     const humanValuesExceptions = {
       biography: parseHtmlWithLinkTo(person.biography),
@@ -476,7 +473,6 @@ const PersonShow = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={humanValuesExceptions[key]}
           className={classNameExceptions[key]}
-          id={idExceptions[key]}
         />
       )
 
