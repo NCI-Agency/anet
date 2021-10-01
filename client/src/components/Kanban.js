@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
 import { EngagementTrends } from "components/Trends"
@@ -98,10 +100,17 @@ const Column = ({ name, tasks }) => {
           onClick={() => setOpen(!open)}
           variant="outline-secondary"
         >
-          TRIANGLE TOP OR TRIANGLE BOTTOM ICON
+          <Icon
+            icon={
+              open
+                ? IconNames.SYMBOL_TRIANGLE_UP
+                : IconNames.SYMBOL_TRIANGLE_DOWN
+            }
+          >
+          </Icon>
         </Button>
         <br />
-        {open && tasks.map(task => <Card task={task} key={task.uuid} />)}
+        {open && tasks.map(task => <CardView task={task} key={task.uuid} />)}
       </Card.Body>
     </Card>
   )
