@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Icon, IconSize, Tooltip } from "@blueprintjs/core"
+import { Icon, IconSize } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
@@ -44,8 +44,10 @@ import {
   Container,
   FormGroup,
   FormLabel,
+  OverlayTrigger,
   Row,
-  Table
+  Table,
+  Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
@@ -499,31 +501,42 @@ const PersonShow = ({ pageDispatchers }) => {
   function getPositionActions() {
     const editPositionButton =
       hasPosition && canChangePosition ? (
-        <Tooltip content="Edit position" position="top">
-          <LinkTo
-            modelType="Position"
-            model={position}
-            edit
-            button="primary"
-            showIcon={false}
-            showAvatar={false}
-          >
-            <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
-          </LinkTo>
-        </Tooltip>
+        <OverlayTrigger
+          key="edit-position-overlay"
+          placement="top"
+          overlay={<Tooltip id="edit-position-tooltip">Edit position</Tooltip>}
+        >
+          <span>
+            <LinkTo
+              modelType="Position"
+              model={position}
+              edit
+              button="primary"
+              showIcon={false}
+              showAvatar={false}
+            >
+              <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+            </LinkTo>
+          </span>
+        </OverlayTrigger>
       ) : null
 
     const changePositionButton =
       hasPosition && canChangePosition ? (
-        <Tooltip content="Change position" position="top">
+        <OverlayTrigger
+          key="change-position-overlay"
+          placement="top"
+          overlay={
+            <Tooltip id="change-position-tooltip">Change Position</Tooltip>
+          }
+        >
           <Button
             onClick={() => setShowAssignPositionModal(true)}
-            variant="primary"
             className="change-assigned-position"
           >
             <Icon iconSize={IconSize.LARGE} icon={IconNames.EXCHANGE} />
           </Button>
-        </Tooltip>
+        </OverlayTrigger>
       ) : null
 
     // when the person is not in a position, any super user can assign them.
@@ -531,14 +544,17 @@ const PersonShow = ({ pageDispatchers }) => {
 
     const assignPositionButton =
       !hasPosition && canAssignPosition ? (
-        <Tooltip content="Assign a position" position="top">
-          <Button
-            onClick={() => setShowAssignPositionModal(true)}
-            variant="primary"
-          >
+        <OverlayTrigger
+          key="assign-position-overlay"
+          placement="top"
+          overlay={
+            <Tooltip id="assign-position-tooltip">Assign a position</Tooltip>
+          }
+        >
+          <Button onClick={() => setShowAssignPositionModal(true)}>
             <Icon iconSize={IconSize.LARGE} icon={IconNames.INSERT} />
           </Button>
-        </Tooltip>
+        </OverlayTrigger>
       ) : null
 
     // if current user has no access for position actions return null so extraColElem will disappear
@@ -557,14 +573,18 @@ const PersonShow = ({ pageDispatchers }) => {
 
   function getPreviousPositionsActions() {
     const editHistoryButton = isAdmin ? (
-      <Tooltip content="Edit history" position="top">
+      <OverlayTrigger
+        key="edit-history-overlay"
+        placement="top"
+        overlay={<Tooltip id="edit-history-tooltip">Edit history</Tooltip>}
+      >
         <Button
           onClick={() => setShowHistoryModal(true)}
           className="edit-history"
         >
           <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
         </Button>
-      </Tooltip>
+      </OverlayTrigger>
     ) : null
 
     return <>{editHistoryButton}</>
