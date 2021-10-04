@@ -371,8 +371,7 @@ MergePositions.propTypes = {
 const MidColTitle = styled.div`
   display: flex;
   height: 39px;
-  margin-top: 25px;
-  margin-bottom: 15px;
+  margin-top: 19px;
   border-bottom: 1px solid #cccccc;
   border-top: 1px solid #cccccc;
   justify-content: space-between;
