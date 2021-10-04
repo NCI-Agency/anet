@@ -27,7 +27,7 @@ class ShowTask extends Page {
   }
 
   get deleteMonthlyAssessmentButton() {
-    return browser.$$("div.card button.btn.btn-primary.btn-xs")[1]
+    return browser.$$("div.card button.btn.btn-outline-secondary.btn-xs")[1]
   }
 
   get deleteConfirmButton() {
