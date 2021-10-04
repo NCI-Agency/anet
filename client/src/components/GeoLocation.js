@@ -1,4 +1,4 @@
-import { Icon, Intent } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   Popover2,
@@ -249,7 +249,7 @@ const LatLonFormField = ({
     )
   }
   return (
-    <Row style={{ marginBottom: 0 }}>
+    <Row>
       <Col sm={2} as={Form.Label} htmlFor="lat">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
@@ -348,7 +348,7 @@ const CoordinateActionButtons = ({
   setLocationFormat
 }) => {
   return (
-    <Col sm={3} style={{ padding: "4px 8px" }}>
+    <Col sm={3} style={{ padding: "0 8px" }}>
       <Tooltip2 content="Clear coordinates">
         <Button
           variant="outline-danger"
@@ -464,7 +464,7 @@ const AllFormatsInfo = ({
           variant={inForm ? "outline-primary" : "default"}
           data-testid="info-button"
         >
-          <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+          <Icon icon={IconNames.INFO_SIGN} />
         </Button>
       </Tooltip2>
     </Popover2>

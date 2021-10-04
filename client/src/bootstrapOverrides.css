@@ -24,6 +24,16 @@
     border-color: var(--anet-blue);
 }
 
+.btn-outline-primary {
+    color: var(--anet-blue);
+    border-color: var(--anet-blue);
+}
+.btn-outline-primary:hover {
+    color: white;
+    background-color: var(--anet-blue);
+    border-color: var(--anet-blue);
+}
+
 .btn-link {
     color: var(--anet-blue);
     font-size: 15px;
