@@ -1,4 +1,6 @@
 import { Meta } from "@storybook/addon-docs"
+import subscribeIcon from "./assets/subscribe.png"
+import unsubscribeIcon from "./assets/unsubscribe.png"
 
 <Meta title="ANET User Stories/Subscriptions" />
 
@@ -35,11 +37,11 @@ task itself).
 You can subscribe to an object by e.g. searching for it, then going to that object's details page,
 and clicking on the grey icon:
 
-![Subscribe](images/subscribe.png)
+<img src={subscribeIcon} />
 
 If you've already subscribed to the object, the icon will change to the green icon:
 
-![Unsubscribe](images/unsubscribe.png)
+<img src={unsubscribeIcon} />
 
 and clicking on it will unsubscribe you from that object. Under **My Work** in the navigation menu
 you find an entry **My Subscriptions**. Clicking on it shows you a page with two tables: your update
