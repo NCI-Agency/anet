@@ -45,7 +45,7 @@ const TriggerableConfirm = ({
         show={show}
         onHide={handleClose}
         className="triggerable-confirm-bootstrap-modal"
-        style={{ zIndex: "10000" }}
+        style={{ zIndex: "1300" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>

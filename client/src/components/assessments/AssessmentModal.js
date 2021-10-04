@@ -40,7 +40,12 @@ const AssessmentModal = ({
   )
   return (
     <>
-      <Modal centered show={showModal} onHide={closeModal}>
+      <Modal
+        centered
+        show={showModal}
+        onHide={closeModal}
+        style={{ zIndex: "1150" }}
+      >
         <Formik
           enableReinitialize
           onSubmit={onAssessmentSubmit}

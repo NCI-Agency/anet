@@ -99,7 +99,7 @@ const RelatedObjectNotes = ({
         onHide={handleClose}
         placement="end"
         backdrop={false}
-        style={{ zIndex: "10000", marginTop: "140px" }}
+        style={{ zIndex: "1200", marginTop: "140px" }}
       >
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Notes</Offcanvas.Title>
