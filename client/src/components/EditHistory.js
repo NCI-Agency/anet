@@ -116,7 +116,8 @@ function EditHistory({
         centered
         show={showModal}
         onHide={onHide}
-        dialogClassName={`${history2 && "edit-history-dialog-lg"}`}
+        size={history2 && "lg"}
+        style={{ zIndex: "1300" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{mainTitle}</Modal.Title>
