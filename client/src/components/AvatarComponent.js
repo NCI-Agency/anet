@@ -11,6 +11,7 @@ const AvatarComponent = ({ onChangePreview }) => {
         shadingColor="black"
         closeIconColor="white"
         backgroundColor="white"
+        width="512"
         imageWidth="512" // image
       />
     </span>
