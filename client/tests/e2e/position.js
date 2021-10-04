@@ -50,7 +50,7 @@ test("Move someone in and out of a position", async t => {
   )
   await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
 
-  const $notAssignedMsg = await $("div#current-position")
+  const $notAssignedMsg = await $("div#position")
   await t.context.driver.wait(
     until.elementIsVisible($notAssignedMsg),
     mediumWaitMs
