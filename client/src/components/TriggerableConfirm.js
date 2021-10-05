@@ -54,7 +54,7 @@ const TriggerableConfirm = ({
         <Modal.Footer className="align-items-stretch">
           <Col>
             <Button
-              className="float-start h-100"
+              className="float-start"
               variant="outline-secondary"
               onClick={handleClose}
             >
@@ -63,6 +63,7 @@ const TriggerableConfirm = ({
           </Col>
           <Col>
             <Button
+              className="float-end"
               variant="primary"
               onClick={() => {
                 onConfirm()

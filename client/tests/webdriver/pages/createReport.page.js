@@ -224,9 +224,7 @@ export class CreateReport extends Page {
   }
 
   get confirmButton() {
-    return browser.$(
-      '//button[contains(text(),"Yes, I am sure that I want to delete report")]'
-    )
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {

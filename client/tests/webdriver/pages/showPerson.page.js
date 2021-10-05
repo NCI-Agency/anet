@@ -77,7 +77,7 @@ class ShowPerson extends Page {
   }
 
   get deleteConfirmButton() {
-    return browser.$('//button[contains(text(), "I am sure")]')
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   get assessmentModalForm() {

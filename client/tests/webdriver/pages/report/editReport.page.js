@@ -26,15 +26,11 @@ class EditReport extends Page {
   }
 
   confirmDeleteButton(uuid) {
-    return this.confirmModal.$(
-      `//button[text()="Yes, I am sure that I want to delete report ${uuid}"]`
-    )
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   confirmUnpublishButton(uuid) {
-    return this.confirmModal.$(
-      `//button[text()="Yes, I am sure that I want to unpublish report #${uuid}"]`
-    )
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   deleteReport(uuid) {

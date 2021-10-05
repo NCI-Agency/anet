@@ -15,10 +15,10 @@ const ConfirmDestructive = ({
   buttonId,
   children
 }) => {
-  const confirmText = `Yes, I am sure that I want to ${operation} ${objectType} ${objectDisplay}`
+  const confirmText = "Yes, I am sure"
   const cancelText = "No, I am not entirely sure at this point"
   const title = `Confirm to ${operation} ${objectType}`
-  const body = `Are you sure you want to ${operation} this ${objectType}? This cannot be undone.`
+  const body = `Are you sure you want to ${operation} ${objectType} ${objectDisplay}? This cannot be undone.`
 
   return (
     <TriggerableConfirm
