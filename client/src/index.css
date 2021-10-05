@@ -1245,7 +1245,7 @@ header.searchPagination {
   }
 
   .search-popover-target ~ .bp3-overlay > .bp3-popover2-transition-container {
-    left: -20vw !important;
+    left: 5vw !important;
     width: 90vw;
   }
 
