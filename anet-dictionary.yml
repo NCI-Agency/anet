@@ -816,7 +816,8 @@ fields:
             linguistRole:
               test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
               type: enum
-              label: "What was the linguist's role?"
+              helpText: "What was the linguist's role?"
+              label: "Linguist Role"
               choices:
                 translator:
                   label: Translator
@@ -825,7 +826,8 @@ fields:
             translatorGotAdequateTime:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
               type: enum
-              label: "Did you provide the translator with adequate time to finish the translation?"
+              helpText: "Did you provide the translator with adequate time to finish the translation?"
+              label: Provided adequate time (Translator)
               choices:
                 yes:
                   label: "Yes"
@@ -834,7 +836,8 @@ fields:
             translatorMetDeadline:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
               type: enum
-              label: "Did the translator meet the deadline?"
+              helpText: "Did the translator meet the deadline?"
+              label: Met the deadline (Translator)
               choices:
                 yes:
                   label: "Yes"
@@ -843,7 +846,8 @@ fields:
             translatorSubjectVocabularyScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
               type: enum
-              label: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+              helpText: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+              label: Subject vocabulary (Translator)
               choices:
                 "EX":
                   label: Excellent
@@ -863,14 +867,15 @@ fields:
             translatorSubjectComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator" && @.translatorSubjectVocabularyScore === "B")]
               type: special_field
-              label: "Comment on bad translator subject vocabulary"
+              helpText: "Comment on bad translator subject vocabulary"
+              label: Vocabulary comments (Translator)
               widget: richTextEditor
               style:
                 height: 100px
             translatorOverallScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
               type: enum
-              label: "Overall translation evaluation"
+              label: "Overall evaluation (Translator)"
               choices:
                 "EX":
                   label: Excellent
@@ -890,14 +895,16 @@ fields:
             translatorOverallComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator" && @.translatorOverallScore === "B")]
               type: special_field
-              label: "Comment on bad overall translator evaluation"
+              helpText: "Comment on bad overall translator evaluation"
+              label: Overall comments (Translator)
               widget: richTextEditor
               style:
                 height: 100px
             interpreterHadPreMeeting:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "Did you hold a pre-meeting with the interpreter?"
+              helpText: "Did you hold a pre-meeting with the interpreter?"
+              label: Pre-meeting (Interpreter)
               choices:
                 yes:
                   label: "Yes"
@@ -906,7 +913,8 @@ fields:
             interpreterProvidedWithNecessarySubjectMaterial:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
+              helpText: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
+              label: Subject material provided (Interpreter)
               choices:
                 yes:
                   label: "Yes"
@@ -915,7 +923,8 @@ fields:
             interpreterSubjectVocabularyScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+              helpText: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+              label: Subject vocabulary (Interpreter)
               choices:
                 "EX":
                   label: Excellent
@@ -935,14 +944,16 @@ fields:
             interpreterSubjectVocabularyComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterSubjectVocabularyScore === "B")]
               type: special_field
-              label: "Comment on bad interpreter subject vocabulary"
+              helpText: "Comment on bad interpreter subject vocabulary"
+              label: Vocabulary comments (Interpreter)
               widget: richTextEditor
               style:
                 height: 100px
             interpreterSubjectUnderstandingScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
+              helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
+              label: Subject understanding (Interpreter)
               choices:
                 "EX":
                   label: Excellent
@@ -962,14 +973,16 @@ fields:
             interpreterSubjectUnderstandingComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterSubjectUnderstandingScore === "B")]
               type: special_field
-              label: "Comment on bad interpreter subject understanding"
+              helpText: "Comment on bad interpreter subject understanding"
+              label: Subject understanding comments (Interpreter)
               widget: richTextEditor
               style:
                 height: 100px
             interpreterWorkEthicScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "How was the interpreter’s work ethic?"
+              helpText: "How was the interpreter’s work ethic?"
+              label: Work ethic (Interpreter)
               choices:
                 "EX":
                   label: Excellent
@@ -989,14 +1002,16 @@ fields:
             interpreterWorkEthicComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterWorkEthicScore === "B")]
               type: special_field
-              label: "Comment on bad interpreter work ethic"
+              helpText: "Comment on bad interpreter work ethic"
+              label: Work ethic comments (Interpreter)
               widget: richTextEditor
               style:
                 height: 100px
             interpreterPostureScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "How was the interpreter’s posture (Polite behavior, clothing)?"
+              helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
+              label: Posture (Interpreter)
               choices:
                 "EX":
                   label: Excellent
@@ -1016,14 +1031,16 @@ fields:
             interpreterPostureComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterPostureScore === "B")]
               type: special_field
-              label: "Comment on bad interpreter posture"
+              helpText: "Comment on bad interpreter posture"
+              label: Posture comments (Interpreter)
               widget: richTextEditor
               style:
                 height: 100px
             interpreterRoleScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
+              helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
+              label: Role score (Interpreter)
               choices:
                 "EX":
                   label: Excellent
@@ -1043,14 +1060,15 @@ fields:
             interpreterRoleComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterRoleScore === "B")]
               type: special_field
-              label: "Comment on bad interpreter role"
+              helpText: "Comment on bad interpreter role"
+              label: Role comment (Interpreter)
               widget: richTextEditor
               style:
                 height: 100px
             interpreterInterpretationOverallScore:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               type: enum
-              label: "Overall interpretation evaluation"
+              label: "Overall evaluation (Interpreter)"
               choices:
                 "EX":
                   label: Excellent
@@ -1070,7 +1088,8 @@ fields:
             interpreterInterpretationOverallComment:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterInterpretationOverallScore === "B")]
               type: special_field
-              label: "Comment on bad overall interpreter evaluation"
+              helpText: "Comment on bad overall interpreter evaluation"
+              label: Overall evaluation comment (Interpreter)
               widget: richTextEditor
               style:
                 height: 100px
