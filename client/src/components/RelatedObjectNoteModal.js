@@ -110,7 +110,7 @@ const RelatedObjectNoteModal = ({
                     onConfirm={() => onDelete(note.uuid)}
                     objectType="note"
                     objectDisplay={"#" + note.uuid}
-                    variant="warning"
+                    variant="danger"
                     buttonLabel="Delete note"
                   />
                 )}

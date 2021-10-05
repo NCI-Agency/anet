@@ -378,7 +378,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     onConfirm={onConfirmDelete}
                     objectType="position"
                     objectDisplay={"#" + position.uuid}
-                    variant="warning"
+                    variant="danger"
                     buttonLabel="Delete position"
                     buttonClassName="float-end"
                   />

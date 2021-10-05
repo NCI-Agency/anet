@@ -829,7 +829,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     onConfirm={onConfirmDelete}
                     objectType="report"
                     objectDisplay={"#" + uuid}
-                    variant="warning"
+                    variant="danger"
                     buttonLabel={`Delete ${reportType}`}
                     buttonClassName="float-end"
                   />

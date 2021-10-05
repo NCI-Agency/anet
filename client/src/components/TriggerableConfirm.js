@@ -64,7 +64,7 @@ const TriggerableConfirm = ({
           <Col>
             <Button
               className="float-end"
-              variant="primary"
+              variant="danger"
               onClick={() => {
                 onConfirm()
                 handleClose()

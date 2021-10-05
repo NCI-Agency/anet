@@ -212,7 +212,7 @@ const RelatedObjectNotes = ({
                                 objectType="note"
                                 objectDisplay={"#" + note.uuid}
                                 title="Delete note"
-                                variant="outline-secondary"
+                                variant="outline-danger"
                                 buttonSize="xs"
                               >
                                 <Icon icon={IconNames.TRASH} />

@@ -90,7 +90,7 @@ const PeriodicAssessment = ({
                     objectType="note"
                     objectDisplay={"#" + note.uuid}
                     title="Delete assessment"
-                    variant="outline-secondary"
+                    variant="outline-danger"
                     buttonSize="xs"
                   >
                     <Icon icon={IconNames.TRASH} />

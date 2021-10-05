@@ -1079,7 +1079,7 @@ const ReportForm = ({
                       onConfirm={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
-                      variant="warning"
+                      variant="danger"
                       buttonLabel={`Delete this ${getReportType(values)}`}
                       buttonDisabled={isSubmitting}
                     />
