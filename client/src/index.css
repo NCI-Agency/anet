@@ -814,9 +814,13 @@ table hr.attendee-divider {
   background-color: #2965cc;
 }
 
+.form-horizontal .label-align,
+.form-horizontal .form-label {
+  text-align: right;
+}
+
 .form-horizontal .form-label {
   padding-top: 9px;
-  text-align: right;
 }
 
 .form-horizontal fieldset:last-child {
@@ -1280,6 +1284,7 @@ header.searchPagination {
     padding: 1em;
   }
 
+  .form-horizontal .label-align,
   .form-horizontal .form-label {
     text-align: left;
   }

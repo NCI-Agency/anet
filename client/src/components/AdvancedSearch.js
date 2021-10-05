@@ -335,7 +335,7 @@ const SearchFilter = ({
   return (
     <FormGroup controlId={queryKey} className="form-group">
       <Row>
-        <Col xs={12} sm={3} lg={2}>
+        <Col xs={12} sm={3} lg={2} className="label-align">
           <FormLabel>{label}</FormLabel>
         </Col>
         <Col xs={10} sm={8} lg={9}>
