@@ -130,7 +130,7 @@ const MergeLocations = ({ pageDispatchers }) => {
             </div>
           )}
           {areAllSet(location1, location2, mergedLocation) && (
-            <>
+            <fieldset>
               <LocationField
                 label="Name"
                 value={mergedLocation.name}
@@ -252,7 +252,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                     )
                   }
                 )}
-            </>
+            </fieldset>
           )}
         </Col>
         <Col md={4} id="right-merge-loc-col">
@@ -380,7 +380,7 @@ const LocationColumn = ({
         </AdvancedSingleSelect>
       </FormGroup>
       {areAllSet(location) && (
-        <>
+        <fieldset>
           <LocationField
             label="Name"
             fieldName="name"
@@ -556,7 +556,7 @@ const LocationColumn = ({
                 )
               }
             )}
-        </>
+        </fieldset>
       )}
     </div>
   )

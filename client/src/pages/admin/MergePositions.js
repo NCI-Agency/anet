@@ -127,7 +127,7 @@ const MergePositions = ({ pageDispatchers }) => {
             </div>
           )}
           {areAllSet(position1, position2, mergedPosition) && (
-            <>
+            <fieldset>
               <PositionField
                 label="Name"
                 value={mergedPosition.name}
@@ -304,7 +304,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               {getLeafletMap("merged-location", mergedPosition.location)}
-            </>
+            </fieldset>
           )}
         </Col>
         <Col md={4} id="right-merge-pos-col">
@@ -425,7 +425,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
         />
       </FormGroup>
       {areAllSet(position) && (
-        <>
+        <fieldset>
           <PositionField
             label="Name"
             fieldName="name"
@@ -621,7 +621,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             dispatchMergeActions={dispatchMergeActions}
           />
           {getLeafletMap(`merge-position-map-${align}`, position.location)}
-        </>
+        </fieldset>
       )}
     </PositionCol>
   )
