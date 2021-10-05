@@ -704,7 +704,12 @@ const Search = ({
                 <img src={TASKS_ICON} alt="" />{" "}
                 {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}{" "}
                 {hasTasksResults && (
-                  <Badge pill bg="secondary" className="float-end">
+                  <Badge
+                    pill
+                    bg="secondary"
+                    className="float-end"
+                    style={{ marginLeft: "10px" }}
+                  >
                     {numTasks}
                   </Badge>
                 )}
