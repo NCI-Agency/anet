@@ -391,6 +391,9 @@ const ButtonToggleGroupField = ({
           type={type}
           defaultValue={field.value}
           {...field}
+          // null out onBlur to prevent errors like: "Formik called `handleBlur`,
+          // but you forgot to pass an `id` or `name` attribute to your input"
+          onBlur={null}
           {...otherProps}
         >
           {buttons.map((button, index) => {
