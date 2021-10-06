@@ -34,8 +34,10 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
     () => withReact(withHistory(withAnetLink(createEditor()))),
     []
   )
-  const document = new DOMParser().parseFromString(value || "", "text/html")
-  const deserialized = deserialize(document.body)
+  const deserialized = useMemo(() => {
+    const document = new DOMParser().parseFromString(value || "", "text/html")
+    return deserialize(document.body)
+  }, [value])
   const [slateValue, setSlateValue] = useState(deserialized)
 
   const renderElement = useCallback(props => <Element {...props} />, [])
