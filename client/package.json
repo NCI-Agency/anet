@@ -173,6 +173,7 @@
     "react-tooltip": "4.2.21",
     "react-ultimate-pagination": "1.2.0",
     "react-use-dimensions": "1.2.1",
+    "reduce-css-calc": "2.1.8",
     "redux": "4.1.1",
     "redux-persist": "6.0.0",
     "resize-observer-polyfill": "1.5.1",

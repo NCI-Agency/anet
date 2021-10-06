@@ -1,9 +1,9 @@
 import { TRAFFIC_LIGHTS_LEVELS } from "components/graphs/utils"
+import SvgText from "components/SvgText"
 import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef } from "react"
-import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
 import utils from "utils"
 
@@ -124,7 +124,7 @@ const LikertScale = ({
               height={Math.max(0, containerHeight - 11)}
               width={Math.max(0, endX - startX)}
             />
-            <Text
+            <SvgText
               fill={active ? "black" : "gray"}
               fontWeight={active ? "bold" : "normal"}
               x={startX + 2}
@@ -134,7 +134,7 @@ const LikertScale = ({
               verticalAnchor="start"
             >
               {level.label}
-            </Text>
+            </SvgText>
           </React.Fragment>
         )
       })}
