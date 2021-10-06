@@ -206,6 +206,16 @@ a.btn {
   display: none;
 }
 
+.light-colored-toggle-button:hover {
+  background-color: rgb(230, 230, 230);
+  color: black;
+}
+
+.dark-colored-toggle-button:hover {
+  background-color: rgb(170, 170, 170);
+  color: white;
+}
+
 .dropdown-menu {
   overflow-y: auto;
   max-height: 400px;

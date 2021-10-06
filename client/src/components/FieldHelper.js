@@ -401,19 +401,31 @@ const ButtonToggleGroupField = ({
               return null
             }
             let { label, value, color, style, ...props } = button
+            const textColor = utils.getContrastYIQ(color ?? "")
             if (color) {
               if (
                 field.value === value ||
                 (Array.isArray(field.value) && field.value.includes(value))
               ) {
-                style = { ...style, backgroundColor: color }
+                style = { ...style, backgroundColor: color, color: textColor }
               }
-              style = { ...style, borderColor: color, borderWidth: "2px" }
+              style = {
+                ...style,
+                borderColor: color,
+                borderWidth: "2px"
+              }
             }
             return (
               <ToggleButton
                 {...props}
                 id={`${field.name}_${value}`}
+                className={
+                  color
+                    ? textColor === "black"
+                      ? "light-colored-toggle-button"
+                      : "dark-colored-toggle-button"
+                    : ""
+                }
                 key={`${field.name}_${value}`}
                 value={value}
                 style={style}
