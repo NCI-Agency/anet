@@ -176,7 +176,13 @@ const TaskShow = ({ pageDispatchers }) => {
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
   const TaskCustomFieldEnum1 = DictionaryField(Field)
+  const cfe1Button =
+    Settings.fields.task.customFieldEnum1?.enum?.[task.customFieldEnum1]
+  const cfe1Buttons = cfe1Button ? { [task.customFieldEnum1]: cfe1Button } : {}
   const TaskCustomFieldEnum2 = DictionaryField(Field)
+  const cfe2Button =
+    Settings.fields.task.customFieldEnum2?.enum?.[task.customFieldEnum2]
+  const cfe2Buttons = cfe2Button ? { [task.customFieldEnum2]: cfe2Button } : {}
 
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
@@ -337,7 +343,9 @@ const TaskShow = ({ pageDispatchers }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.ReadonlyField}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={true}
+                      buttons={FieldHelper.customEnumButtons(cfe1Buttons)}
                     />
                   )}
                   {Settings.fields.task.customFieldEnum2 && (
@@ -347,7 +355,9 @@ const TaskShow = ({ pageDispatchers }) => {
                         "enum"
                       )}
                       name="customFieldEnum2"
-                      component={FieldHelper.ReadonlyField}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={true}
+                      buttons={FieldHelper.customEnumButtons(cfe2Buttons)}
                     />
                   )}
                 </Fieldset>
