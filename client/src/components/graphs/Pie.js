@@ -55,7 +55,7 @@ const Pie = ({ label, segmentFill, segmentLabel, data, width, height }) => {
       .attr("y", "0.35em")
       .style("font-weight", "bold")
       .style("font-size", "12px")
-      .style("fill", d => utils.getContrastYIQ(segmentFill(d) ?? ""))
+      .style("fill", d => utils.getContrastYIQ(segmentFill(d)))
       .text(segmentLabel)
 
     labels.exit().remove()

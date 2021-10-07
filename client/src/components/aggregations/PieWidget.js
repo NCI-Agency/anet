@@ -27,7 +27,7 @@ const PieWidget = ({
       {showLegend && (
         <div className="pieLegend">
           {Object.map(legend, (key, choice) => {
-            const textColor = utils.getContrastYIQ(choice.color ?? "")
+            const textColor = utils.getContrastYIQ(choice.color)
             return (
               <React.Fragment key={key}>
                 <span

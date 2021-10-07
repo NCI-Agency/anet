@@ -402,7 +402,7 @@ const ButtonToggleGroupField = ({
               return null
             }
             let { label, value, color, style, ...props } = button
-            const textColor = utils.getContrastYIQ(color ?? "")
+            const textColor = utils.getContrastYIQ(color)
             if (color) {
               if (
                 field.value === value ||
