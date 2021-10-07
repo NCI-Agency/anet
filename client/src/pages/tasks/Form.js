@@ -346,11 +346,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={
-                        disabled
-                          ? FieldHelper.ReadonlyField
-                          : FieldHelper.RadioButtonToggleGroupField
-                      }
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={disabled}
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
@@ -391,11 +388,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={
-                      disabled
-                        ? FieldHelper.ReadonlyField
-                        : FieldHelper.RadioButtonToggleGroupField
-                    }
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    disabled={disabled}
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
