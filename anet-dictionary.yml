@@ -282,13 +282,13 @@ fields:
         helpText: Basic / Intermediate / Advanced
         visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         levels:
-          - color: lightGray
+          - color: yellow
             endValue: 3
             label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
-          - color: lightGray
+          - color: orange
             endValue: 7
             label: intermediate
-          - color: lightGray
+          - color: blue
             endValue: 10
             label: advanced advanced advanced advanced
       trainingDate:
