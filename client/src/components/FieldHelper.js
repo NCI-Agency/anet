@@ -381,6 +381,7 @@ const ButtonToggleGroupField = ({
   addon,
   vertical,
   buttons,
+  disabled,
   enableClear,
   ...otherProps
 }) => {
@@ -418,6 +419,7 @@ const ButtonToggleGroupField = ({
             return (
               <ToggleButton
                 {...props}
+                disabled={disabled}
                 id={`${field.name}_${value}`}
                 className={
                   color
@@ -445,7 +447,7 @@ const ButtonToggleGroupField = ({
         )}
       </>
     ),
-    [buttons, field, form, enableClear, otherProps, type]
+    [buttons, field, form, disabled, enableClear, otherProps, type]
   )
   return (
     <Field
@@ -470,6 +472,7 @@ ButtonToggleGroupField.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   buttons: PropTypes.array,
+  disabled: PropTypes.bool,
   enableClear: PropTypes.bool
 }
 
