@@ -379,6 +379,11 @@ button.home-tile.btn {
   text-align: center;
 }
 
+form.advanced-search-form ~ div.bp3-overlay.bp3-overlay-open.bp3-overlay-inline div.advanced-search.form-horizontal {
+  max-height: 70vh;
+  overflow: auto;
+}
+
 .dropdown-toggle::after {
   transition: 0.3s ease;
 }
