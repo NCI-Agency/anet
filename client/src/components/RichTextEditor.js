@@ -3,6 +3,7 @@ import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import "components/editor/RichTextEditor.css"
 import Toolbar from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
+import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
@@ -34,11 +35,11 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
     () => withReact(withHistory(withAnetLink(createEditor()))),
     []
   )
-  const deserialized = useMemo(() => {
+
+  const [slateValue, setSlateValue] = useState(() => {
     const document = new DOMParser().parseFromString(value || "", "text/html")
     return deserialize(document.body)
-  }, [value])
-  const [slateValue, setSlateValue] = useState(deserialized)
+  })
 
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
@@ -50,7 +51,7 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
         value={slateValue}
         onChange={newValue => {
           setSlateValue(newValue)
-          onChange(serialize(editor))
+          serializeDebounced(editor, onChange)
         }}
       >
         <div className="editor-container">
@@ -74,7 +75,7 @@ RichTextEditor.propTypes = {
   className: PropTypes.string
 }
 
-const serialize = node => {
+const serialize = (node, onChange) => {
   if (Text.isText(node)) {
     let string = escapeHtml(node.text)
     if (node.bold) {
@@ -115,9 +116,12 @@ const serialize = node => {
     case "anet-link":
       return `<a href="${getUrlFromEntityInfo(node)}">${node.children.text}</a>`
     default:
+      onChange(children)
       return children
   }
 }
+
+const serializeDebounced = debounce(serialize, 100)
 
 const deserialize = element => {
   let children = Array.from(element.childNodes).map(deserialize)
