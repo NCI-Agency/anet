@@ -2,6 +2,7 @@ import SVGCanvas from "components/graphs/SVGCanvas"
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
+import utils from "utils"
 
 const Pie = ({ label, segmentFill, segmentLabel, data, width, height }) => {
   const canvasRef = useRef(null)
@@ -54,6 +55,7 @@ const Pie = ({ label, segmentFill, segmentLabel, data, width, height }) => {
       .attr("y", "0.35em")
       .style("font-weight", "bold")
       .style("font-size", "12px")
+      .style("fill", d => utils.getContrastYIQ(segmentFill(d) ?? ""))
       .text(segmentLabel)
 
     labels.exit().remove()
