@@ -1,6 +1,7 @@
 import { IconSize } from "@blueprintjs/core"
 import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
 import * as changeCase from "change-case"
+import * as d3 from "d3"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
@@ -237,30 +238,31 @@ export default {
   /**
    * Used to determine whether the text should be black or white
    * depending on the specified background color.
-   * @param {string} hexcolor Hexadecimal color code
+   * @param {string} color Hexadecimal color code or color name
    * @returns Text color
    */
-  getContrastYIQ: function(hexcolor) {
-    // If a leading # is provided, remove it
-    if (hexcolor.slice(0, 1) === "#") {
-      hexcolor = hexcolor.slice(1)
+  getContrastYIQ: function(color) {
+    // pick a default
+    const defaultColor = "white"
+    if (!color) {
+      return defaultColor
     }
 
-    // If a three-character hexcode, make six-character
-    if (hexcolor.length === 3) {
-      hexcolor = hexcolor
-        .split("")
-        .map(function(hex) {
-          return hex + hex
-        })
-        .join("")
+    let c = d3.color(color)
+    if (
+      !c &&
+      (color.length === 3 || color.length === 6) &&
+      color.slice(0, 1) !== "#"
+    ) {
+      // Might be hexcode without leading "#", prepend it and try again
+      c = d3.color(`#${color}`)
     }
 
-    // Convert to RGB value
-    const r = parseInt(hexcolor.substr(0, 2), 16)
-    const g = parseInt(hexcolor.substr(2, 2), 16)
-    const b = parseInt(hexcolor.substr(4, 2), 16)
-    const yiq = (r * 299 + g * 587 + b * 114) / 1000
+    if (!c) {
+      return defaultColor
+    }
+
+    const yiq = (c.r * 299 + c.g * 587 + c.b * 114) / 1000
     return yiq >= 128 ? "black" : "white"
   }
 }
