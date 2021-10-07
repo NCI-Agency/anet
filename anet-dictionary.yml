@@ -148,6 +148,18 @@ fields:
         RED:
           label: Red
           color: '#ff8279'
+    customFieldEnum2:
+      label: Project future
+      enum:
+        BLUE:
+          label: Blue
+          color: '#0000ff'
+        WHITE:
+          label: White
+          color: '#ffffff'
+        BLACK:
+          label: Black
+          color: '#000000'
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization...
