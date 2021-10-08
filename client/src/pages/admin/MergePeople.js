@@ -58,7 +58,7 @@ const GQL_MERGE_PERSON = gql`
 const MergePeople = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
-
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Person
   )
@@ -227,9 +227,15 @@ const MergePeople = ({ pageDispatchers }) => {
                       history2={person2.previousPositions}
                       initialHistory={mergedPerson.previousPositions}
                       historyComp={PreviousPositions}
+                      showModal={showHistoryModal}
+                      setShowModal={setShowHistoryModal}
                       currentlyOccupyingEntity={mergedPerson.position}
+                      parentEntityUuid1={person1.uuid}
+                      parentEntityUuid2={person2.uuid}
                       historyEntityType="position"
-                      title="Pick and Choose positions and dates for Positions History"
+                      parentEntityType="person"
+                      midColTitle="Merged Person History"
+                      mainTitle="Pick and Choose positions and dates for Positions History"
                       setHistory={history =>
                         dispatchMergeActions(
                           setAMergedField("previousPositions", history, null)
@@ -434,7 +440,7 @@ const MergePeople = ({ pageDispatchers }) => {
     }
     const loser = mergedPerson.uuid === person1.uuid ? person2 : person1
     mergedPerson.customFields = customFieldsJSONString(mergedPerson)
-    const winnerPerson = Person.filterClientSideFilters(mergedPerson)
+    const winnerPerson = Person.filterClientSideFields(mergedPerson)
     API.mutation(GQL_MERGE_PERSON, {
       loserUuid: loser.uuid,
       winnerPerson

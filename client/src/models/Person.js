@@ -220,6 +220,13 @@ export default class Person extends Model {
       position {
         uuid
         name
+        previousPeople {
+          startTime
+          endTime
+          person {
+            uuid
+          }
+        }
       }
     }
     customFields
