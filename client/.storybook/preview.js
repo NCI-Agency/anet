@@ -1,5 +1,8 @@
+import { addDecorator } from "@storybook/react"
 import "bootstrap/dist/css/bootstrap.css"
 import "index.css"
+import React from "react"
+import { MemoryRouter } from "react-router"
 
 export const parameters = {
   actions: { argTypesRegex: "^on[A-Z].*" },
@@ -11,3 +14,7 @@ export const parameters = {
         : a[1].id.localeCompare(b[1].id, undefined, { numeric: true })
   }
 }
+
+addDecorator(story => (
+  <MemoryRouter initialEntries={["/"]}>{story()}</MemoryRouter>
+))
