@@ -3,7 +3,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Modal } from "react-bootstrap"
 import { Transforms } from "slate"
-import "./LinkSource.css"
 
 const LinkSourceAnet = ({ editor, showModal, setShowModal, selection }) => {
   function insertAnetObject(value, objectType) {

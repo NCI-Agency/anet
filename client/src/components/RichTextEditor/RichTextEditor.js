@@ -15,6 +15,7 @@ import {
   withReact
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
+import "./RichTextEditor.css"
 import Toolbar from "./Toolbar"
 
 const SlateEditor = ({ value, onChange }) => {
@@ -49,8 +50,14 @@ const SlateEditor = ({ value, onChange }) => {
         onChange(serialize(editor))
       }}
     >
-      <Toolbar />
-      <Editable renderElement={renderElement} renderLeaf={renderLeaf} />
+      <div className="editor-container">
+        <Toolbar />
+        <Editable
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          className="editable"
+        />
+      </div>
     </Slate>
   )
 }
