@@ -19,29 +19,26 @@ import Settings from "settings"
 import utils from "utils"
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
+  const { showFloatingMenu, topbarOffset } = useContext(ResponsiveLayoutContext)
   const ScrollLinkNavItem = ScrollLink(Nav.Link)
   return (
-    <ResponsiveLayoutContext.Consumer>
-      {context => (
-        <ScrollLinkNavItem
-          activeClass="active"
-          to={to}
-          spy
-          smooth
-          duration={500}
-          containerId="main-viewport"
-          onClick={() => {
-            context.showFloatingMenu(false)
-            utils.pushHash(to)
-          }}
-          // TODO: fix the need for offset
-          offset={-context.topbarOffset}
-          disabled={disabled}
-        >
-          {children}
-        </ScrollLinkNavItem>
-      )}
-    </ResponsiveLayoutContext.Consumer>
+    <ScrollLinkNavItem
+      activeClass="active"
+      to={to}
+      spy
+      smooth
+      duration={500}
+      containerId="main-viewport"
+      onClick={() => {
+        showFloatingMenu(false)
+        utils.pushHash(to)
+      }}
+      // TODO: fix the need for offset
+      offset={-topbarOffset}
+      disabled={disabled}
+    >
+      {children}
+    </ScrollLinkNavItem>
   )
 }
 AnchorNavItem.propTypes = {
