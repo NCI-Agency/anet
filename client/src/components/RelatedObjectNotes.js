@@ -13,6 +13,7 @@ import Model, {
   NOTE_TYPE
 } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import { Person } from "models"
@@ -48,6 +49,7 @@ const RelatedObjectNotes = ({
   notes: notesProp
 }) => {
   const { currentUser } = useContext(AppContext)
+  const { topbarOffset } = useContext(ResponsiveLayoutContext)
   const notesFiltered = notesProp.filter(
     note => !EXCLUDED_NOTE_TYPES.includes(note.type)
   )
@@ -99,7 +101,7 @@ const RelatedObjectNotes = ({
         onHide={handleClose}
         placement="end"
         backdrop={false}
-        style={{ zIndex: "1200", marginTop: "140px" }}
+        style={{ zIndex: "1200", marginTop: topbarOffset }}
       >
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Notes</Offcanvas.Title>
