@@ -165,7 +165,6 @@ const ReadonlyTextField = fieldProps => {
 
 const DateField = fieldProps => {
   const { name, withTime, maxDate, ...otherFieldProps } = fieldProps
-  console.log(maxDate)
   return (
     <FastField
       name={name}
@@ -965,7 +964,9 @@ const CustomField = ({
       case CUSTOM_FIELD_TYPE.DATE:
         return {
           maxDate:
-            fieldName === "entityAssessment.assessmentDate" || moment().toDate()
+            fieldName === "entityAssessment.assessmentDate"
+              ? moment().toDate()
+              : undefined
         }
       default:
         return {}
