@@ -5,9 +5,10 @@ import Toolbar from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
+import _trim from "lodash/trim"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
-import { createEditor, Text } from "slate"
+import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
 import {
@@ -20,19 +21,8 @@ import {
 import { getUrlFromEntityInfo } from "utils_links"
 
 const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
-  const withAnetLink = editor => {
-    const { isVoid, isInline } = editor
-
-    editor.isVoid = element =>
-      element.type === "anet-link" ? true : isVoid(element)
-
-    editor.isInline = element =>
-      element.type === "anet-link" ? true : isInline(element)
-
-    return editor
-  }
   const editor = useMemo(
-    () => withReact(withHistory(withAnetLink(createEditor()))),
+    () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
   )
 
@@ -73,6 +63,30 @@ RichTextEditor.propTypes = {
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
   className: PropTypes.string
+}
+
+const withHtml = editor => {
+  const { insertData } = editor
+  editor.insertData = data => {
+    const html = data?.getData("text/html")
+    if (html) {
+      const parsed = new DOMParser().parseFromString(html, "text/html")
+      const nodes = deserialize(parsed.body)
+      Transforms.insertNodes(editor, nodes)
+    } else {
+      insertData(data)
+    }
+  }
+  return editor
+}
+
+const withAnetLink = editor => {
+  const { isVoid, isInline } = editor
+  editor.isVoid = element =>
+    element.type === "anet-link" ? true : isVoid(element)
+  editor.isInline = element =>
+    element.type === "anet-link" ? true : isInline(element)
+  return editor
 }
 
 const serialize = (node, onChange) => {
@@ -124,6 +138,13 @@ const serialize = (node, onChange) => {
 const serializeDebounced = debounce(serialize, 100)
 
 const deserialize = element => {
+  if (
+    element.nodeName === "#text" &&
+    _isEmpty(_trim(element.textContent, "\n"))
+  ) {
+    // Skip empty elements
+    return null
+  }
   let children = Array.from(element.childNodes).map(deserialize)
   // Body must have at least one children node for user to be able to edit the text in it
   // Every other node must have a non-empty array of children
@@ -140,8 +161,10 @@ const deserialize = element => {
     case "P":
       return jsx("element", { type: "paragraph" }, children)
     case "STRONG":
+    case "B":
       return jsx("text", { bold: true }, children)
     case "EM":
+    case "I":
       return jsx("text", { italic: true }, children)
     case "U":
       return jsx("text", { underline: true }, children)
@@ -154,6 +177,7 @@ const deserialize = element => {
     case "H3":
       return jsx("element", { type: "heading-three" }, children)
     case "BLOCKQUOTE":
+    case "CITE":
       return jsx("element", { type: "block-quote" }, children)
     case "LI":
       return jsx("element", { type: "list-item" }, children)
