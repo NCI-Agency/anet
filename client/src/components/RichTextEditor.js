@@ -98,9 +98,6 @@ const serialize = (node, onChange) => {
     if (node.italic) {
       string = `<em>${string}</em>`
     }
-    if (node.code) {
-      string = `<code>${string}</code>`
-    }
     if (node.underline) {
       string = `<u>${string}</u>`
     }
@@ -111,22 +108,22 @@ const serialize = (node, onChange) => {
   }
   const children = node.children.map(n => serialize(n)).join("")
   switch (node.type) {
-    case "paragraph":
-      return `<p>${children}</p>`
-    case "block-quote":
-      return `<blockquote>${children}</blockquote>`
-    case "bulleted-list":
-      return `<ul>${children}</ul>`
     case "heading-one":
       return `<h1>${children}</h1>`
     case "heading-two":
       return `<h2>${children}</h2>`
     case "heading-three":
       return `<h3>${children}</h3>`
-    case "list-item":
-      return `<li>${children}</li>`
+    case "paragraph":
+      return `<p>${children}</p>`
     case "numbered-list":
       return `<ol>${children}</ol>`
+    case "bulleted-list":
+      return `<ul>${children}</ul>`
+    case "list-item":
+      return `<li>${children}</li>`
+    case "block-quote":
+      return `<blockquote>${children}</blockquote>`
     case "anet-link":
       return `<a href="${getUrlFromEntityInfo(node)}">${node.children.text}</a>`
     default:
@@ -158,8 +155,31 @@ const deserialize = element => {
   switch (element.nodeName) {
     case "BODY":
       return jsx("fragment", {}, children)
+    case "H1":
+      return jsx("element", { type: "heading-one" }, children)
+    case "H2":
+      return jsx("element", { type: "heading-two" }, children)
+    case "H3":
+      return jsx("element", { type: "heading-three" }, children)
     case "P":
-      return jsx("element", { type: "paragraph" }, children)
+      return element.parentNode.nodeName === "LI"
+        ? jsx("text", {}, children)
+        : jsx("element", { type: "paragraph" }, children)
+    case "OL":
+      return jsx("element", { type: "numbered-list" }, children)
+    case "UL":
+      return jsx("element", { type: "bulleted-list" }, children)
+    case "LI":
+      return jsx("element", { type: "list-item" }, children)
+    case "BLOCKQUOTE":
+    case "CITE":
+      return jsx("element", { type: "block-quote" }, children)
+    case "A":
+      return jsx(
+        "element",
+        { type: "anet-link", href: element.getAttribute("href") },
+        children
+      )
     case "STRONG":
     case "B":
       return jsx("text", { bold: true }, children)
@@ -170,29 +190,9 @@ const deserialize = element => {
       return jsx("text", { underline: true }, children)
     case "STRIKE":
       return jsx("text", { strikethrough: true }, children)
-    case "H1":
-      return jsx("element", { type: "heading-one" }, children)
-    case "H2":
-      return jsx("element", { type: "heading-two" }, children)
-    case "H3":
-      return jsx("element", { type: "heading-three" }, children)
-    case "BLOCKQUOTE":
-    case "CITE":
-      return jsx("element", { type: "block-quote" }, children)
-    case "LI":
-      return jsx("element", { type: "list-item" }, children)
-    case "UL":
-      return jsx("element", { type: "bulleted-list" }, children)
-    case "OL":
-      return jsx("element", { type: "numbered-list" }, children)
-    case "A":
-      return jsx(
-        "element",
-        { type: "anet-link", href: element.getAttribute("href") },
-        children
-      )
     default:
-      // Text cannot be the direct child of BODY. If the value is plain text without any html tags, we should be wrapped in a "<p></p>" tag
+      // Text cannot be the direct child of BODY.
+      // If the value is plain text without any html tags, it should be wrapped in a "<p></p>" tag
       return element.parentNode.nodeName === "BODY"
         ? jsx("element", { type: "paragraph" }, element.textContent)
         : element.textContent
@@ -203,20 +203,20 @@ const Element = ({ attributes, children, element }) => {
   const selected = useSelected()
   const focused = useFocused()
   switch (element.type) {
-    case "block-quote":
-      return <blockquote {...attributes}>{children}</blockquote>
-    case "bulleted-list":
-      return <ul {...attributes}>{children}</ul>
     case "heading-one":
       return <h1 {...attributes}>{children}</h1>
     case "heading-two":
       return <h2 {...attributes}>{children}</h2>
     case "heading-three":
       return <h3 {...attributes}>{children}</h3>
-    case "list-item":
-      return <li {...attributes}>{children}</li>
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>
+    case "bulleted-list":
+      return <ul {...attributes}>{children}</ul>
+    case "list-item":
+      return <li {...attributes}>{children}</li>
+    case "block-quote":
+      return <blockquote {...attributes}>{children}</blockquote>
     case "anet-link":
       return (
         <span
@@ -255,27 +255,15 @@ const Leaf = ({ attributes, children, leaf }) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }
-
-  if (leaf.code) {
-    children = <code>{children}</code>
-  }
-
   if (leaf.italic) {
     children = <em>{children}</em>
   }
-
   if (leaf.underline) {
     children = <u>{children}</u>
   }
-
   if (leaf.strikethrough) {
     children = <strike>{children}</strike>
   }
-
-  if (leaf.highlight) {
-    children = <span style={{ backgroundColor: "yellow" }}>{children}</span>
-  }
-
   return <span {...attributes}>{children}</span>
 }
 
