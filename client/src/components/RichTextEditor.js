@@ -89,7 +89,7 @@ const withAnetLink = editor => {
   return editor
 }
 
-const serialize = (node, onChange) => {
+const serialize = node => {
   if (Text.isText(node)) {
     let string = escapeHtml(node.text)
     if (node.bold) {
@@ -127,12 +127,15 @@ const serialize = (node, onChange) => {
     case "anet-link":
       return `<a href="${getUrlFromEntityInfo(node)}">${node.children.text}</a>`
     default:
-      onChange(children)
       return children
   }
 }
 
-const serializeDebounced = debounce(serialize, 100)
+const serializeDebounced = debounce((node, onChange) => {
+  const serialized = serialize(node)
+  onChange(serialized)
+  return serialized
+}, 100)
 
 const deserialize = element => {
   if (
