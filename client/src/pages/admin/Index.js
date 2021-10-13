@@ -21,7 +21,7 @@ import { Field, Form, Formik } from "formik"
 import moment from "moment"
 import UserActivityTable from "pages/admin/UserActivityTable"
 import React, { useContext, useState } from "react"
-import { Button, Col, Container, Row } from "react-bootstrap"
+import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
 import uuidv4 from "uuid/v4"
@@ -158,7 +158,7 @@ const AdminIndex = ({ pageDispatchers }) => {
                         key={key}
                         component={FieldHelper.SpecialField}
                         widget={
-                          <Field component="select" className="form-control">
+                          <FormSelect className="form-control">
                             {Object.values(dropdownField.options).map(
                               option => (
                                 <option key={option.value} value={option.value}>
@@ -166,7 +166,7 @@ const AdminIndex = ({ pageDispatchers }) => {
                                 </option>
                               )
                             )}
-                          </Field>
+                          </FormSelect>
                         }
                       >
                       </Field>
