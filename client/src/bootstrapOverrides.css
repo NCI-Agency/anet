@@ -3,6 +3,10 @@
     --anet-blue-dark: rgb(0, 92, 153);
 }
 
+.btn {
+    font-size: 0.9rem;
+}
+
 .btn-primary {
     background-color: var(--anet-blue);
     border-color: var(--anet-blue);
