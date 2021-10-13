@@ -70,7 +70,13 @@ const withHtml = editor => {
   editor.insertData = data => {
     const html = data?.getData("text/html")
     if (html) {
-      const parsed = new DOMParser().parseFromString(html, "text/html")
+      // Strip whitespace surrounding newlines between > and <
+      // This avoids creating empty paragraphs!
+      const htmlNoNewlines = html.replace(/>\s*(\r\n|\n|\r)\s*</gm, "><")
+      const parsed = new DOMParser().parseFromString(
+        htmlNoNewlines,
+        "text/html"
+      )
       const nodes = deserialize(parsed.body)
       Transforms.insertNodes(editor, nodes)
     } else {
