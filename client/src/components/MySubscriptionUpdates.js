@@ -145,13 +145,7 @@ const MySubscriptionUpdates = ({
             goToPage={setPageNum}
           />
 
-          <Table
-            striped
-            condensed
-            hover
-            responsive
-            className="subscriptionUpdates_table"
-          >
+          <Table striped hover responsive className="subscriptionUpdates_table">
             <thead>
               <tr>
                 <th />
