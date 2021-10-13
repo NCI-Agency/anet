@@ -581,10 +581,6 @@ button {
   margin-bottom: 0;
 }
 
-table.borderless td {
-  border: none !important;
-}
-
 table hr.attendee-divider {
   margin: 0px;
 }
