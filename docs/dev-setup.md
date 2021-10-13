@@ -236,8 +236,8 @@ All of the frontend code is in the `client/` directory.
 ### Initial Setup
 1. You can run all client-side scripts via Yarn through Gradle. Otherwise, make sure you have the proper nodejs and yarn in your path; example:
     ```
-    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.10
-    export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v12.14.1-linux-x64
+    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.15
+    export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v14.18.1-linux-x64
     export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
     cd client/
     ```
