@@ -362,22 +362,18 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.SpecialField}
-                        onChange={value =>
+                        onChange={value => {
                           setFieldValue("assessment_customFieldEnum1", value)
-                        }
-                        widget={
-                          <RichTextEditor
-                            className="textField"
-                            onHandleBlur={() => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched(
-                                "assessment_customFieldEnum1",
-                                true,
-                                false
-                              )
-                            }}
-                          />
-                        }
+                        }}
+                        onHandleBlur={() => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched(
+                            "assessment_customFieldEnum1",
+                            true,
+                            false
+                          )
+                        }}
+                        widget={<RichTextEditor className="textField" />}
                       />
                     )}
                   </>

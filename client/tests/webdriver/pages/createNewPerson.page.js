@@ -78,7 +78,7 @@ class CreatePerson extends Page {
   }
 
   get biography() {
-    return browser.$(".biography .public-DraftEditor-content")
+    return browser.$(".biography .editable")
   }
 
   get submitButton() {
