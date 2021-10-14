@@ -1,52 +1,58 @@
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
-import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useCallback } from "react"
 import { Modal } from "react-bootstrap"
-import "./LinkSource.css"
-import createEntity from "./utils/createEntity"
+import { Transforms } from "slate"
 
-const LinkSourceAnet = ({ editorState, entityType, onComplete, onClose }) => {
-  const onConfirm = useCallback(
+const LinkSourceAnet = ({ editor, showModal, setShowModal, selection }) => {
+  const insertAnetObject = useCallback(
     (value, objectType) => {
-      // Retrieve entity URL and label
-      const ModelClass = Models[objectType]
-      const modelInstance = new ModelClass(value)
-      const entityLabel = modelInstance.toString()
-      const entityUrl = ModelClass.pathFor(modelInstance)
+      const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
 
-      const nextState = createEntity(
-        editorState,
-        entityType.type,
-        {
-          url: entityUrl
-        },
-        entityLabel,
-        "IMMUTABLE"
-      )
-
-      onComplete(nextState)
+      if (selection) {
+        Transforms.insertNodes(editor, anetLinkNode, {
+          at: { path: selection.focus.path, offset: selection.focus.offset },
+          select: true
+        })
+      } else {
+        Transforms.insertNodes(editor, anetLinkNode, {
+          select: true
+        })
+      }
+      setShowModal(false)
     },
-    [editorState, entityType, onComplete]
+    [editor, selection, setShowModal]
   )
-
   return (
-    <Modal show aria-labelledby="Link chooser" onHide={onClose}>
+    <Modal
+      show={showModal}
+      aria-labelledby="Link chooser"
+      onHide={() => setShowModal(false)}
+    >
       <Modal.Header closeButton>
         <Modal.Title>Link to ANET entity</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <MultiTypeAdvancedSelectComponent onConfirm={onConfirm} />
+        <MultiTypeAdvancedSelectComponent onConfirm={insertAnetObject} />
       </Modal.Body>
     </Modal>
   )
 }
 
 LinkSourceAnet.propTypes = {
-  editorState: PropTypes.object,
-  entityType: PropTypes.object,
-  onComplete: PropTypes.func,
-  onClose: PropTypes.func
+  editor: PropTypes.object.isRequired,
+  showModal: PropTypes.bool,
+  setShowModal: PropTypes.func.isRequired,
+  selection: PropTypes.object
+}
+
+function createAnetLinkNode(entityType, entityUuid) {
+  return {
+    type: "anet-link",
+    entityType: entityType,
+    entityUuid: entityUuid,
+    children: [{ text: "" }]
+  }
 }
 
 export default LinkSourceAnet
