@@ -170,7 +170,10 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
-    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople());
+    Person person = existing.getPerson();
+    final boolean hasPerson = !(person == null);
+    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), hasPerson, false,
+        hasPerson ? person.getUuid() : null);
     assertCanUpdatePosition(user, existing);
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
         pos.getPreviousPeople(), false)) {
@@ -262,9 +265,10 @@ public class PositionResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
-
-    ResourceUtils.validateHistoryInput(winnerPosition.getUuid(),
-        winnerPosition.getPreviousPeople());
+    final Person person = winnerPosition.getPerson();
+    final boolean hasPerson = !(person == null);
+    ResourceUtils.validateHistoryInput(winnerPosition.getUuid(), winnerPosition.getPreviousPeople(),
+        hasPerson, false, hasPerson ? person.getUuid() : null);
     assertCanUpdatePosition(user, winnerPosition);
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);

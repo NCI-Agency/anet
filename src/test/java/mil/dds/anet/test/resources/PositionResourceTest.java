@@ -721,7 +721,17 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(secondPosition).isNotNull();
     assertThat(secondPosition.getUuid()).isNotNull();
 
+    final PersonPositionHistoryInput hist =
+        PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
+            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
+            .withPerson(getPersonInput(testPerson)).withPosition(getPositionInput(secondPosition))
+            .build();
+
+    final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
+    historyList.add(hist);
     final PositionInput mergedPositionInput = getPositionInput(firstPosition);
+    mergedPositionInput.setPreviousPeople(historyList);
+    mergedPositionInput.setPerson(getPersonInput(testPerson));
     mergedPositionInput.setStatus(secondPosition.getStatus());
     mergedPositionInput.setType(secondPosition.getType());
 

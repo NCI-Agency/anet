@@ -345,14 +345,56 @@ public class PersonResourceTest extends AbstractResourceTest {
         adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
-    // Create a second person
-    final PersonInput winnerInput =
-        PersonInput.builder().withRole(Role.ADVISOR).withName("Winner for Merging").build();
+    final PositionInput testInput1 = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("Test Position for person history edit  1")
+        .withOrganization(getOrganizationInput(ao))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos1 = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput1);
+    assertThat(createdPos1).isNotNull();
+    assertThat(createdPos1.getUuid()).isNotNull();
+    assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
+    final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
+    final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
+        .withName("Test Position for person history edit 2")
+        .withOrganization(getOrganizationInput(ao))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+
+    final Position createdPos2 = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput2);
+    assertThat(createdPos2).isNotNull();
+    assertThat(createdPos2.getUuid()).isNotNull();
+    assertThat(createdPos2.getName()).isEqualTo(testInput2.getName());
+    final PositionInput posInput2 = PositionInput.builder().withUuid(createdPos2.getUuid()).build();
+    final PersonPositionHistoryInput hist1 = PersonPositionHistoryInput.builder()
+        .withCreatedAt(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withStartTime(Instant.now().minus(100, ChronoUnit.DAYS))
+        .withEndTime(Instant.now().minus(50, ChronoUnit.DAYS)).withPosition(posInput1).build();
+    final PersonPositionHistoryInput hist2 =
+        PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
+            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
+            .withPosition(posInput2).build();
+
+    final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
+    historyList.add(hist1);
+    historyList.add(hist2);
+
+    final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
+        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).withPreviousPositions(historyList)
+        .withPosition(posInput2)
+        // set HTML of biography
+        .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
+        // set JSON of customFields
+        .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput()).withGender("Female")
+        .withCountry("Canada").withCode("1234568")
+        .withEndOfTourDate(
+            ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
+        .build();
+
     final Person winner = adminMutationExecutor.createPerson(FIELDS, winnerInput);
     assertThat(winner).isNotNull();
     assertThat(winner.getUuid()).isNotNull();
-
-    nrUpdated = adminMutationExecutor.mergePeople("", false, loser.getUuid(), winner.getUuid());
+    winnerInput.setUuid(winner.getUuid());
+    nrUpdated = adminMutationExecutor.mergePeople("", loser.getUuid(), winnerInput);
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
@@ -376,7 +418,7 @@ public class PersonResourceTest extends AbstractResourceTest {
         adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
-    nrUpdated = adminMutationExecutor.mergePeople("", true, loser.getUuid(), winner.getUuid());
+    nrUpdated = adminMutationExecutor.mergePeople("", loser.getUuid(), winnerInput);
     assertThat(nrUpdated).isEqualTo(1);
 
     // Assert that loser is gone.
@@ -387,7 +429,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // Assert that the winner is in the position.
-    winnerPos = adminQueryExecutor.position(POSITION_FIELDS, created.getUuid());
+    winnerPos = adminQueryExecutor.position(POSITION_FIELDS, createdPos2.getUuid());
     assertThat(winnerPos.getPerson().getUuid()).isEqualTo(winner.getUuid());
   }
 

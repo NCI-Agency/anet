@@ -49,9 +49,7 @@ import utils from "utils"
 
 const GQL_MERGE_PERSON = gql`
   mutation($loserUuid: String!, $winnerPerson: PersonInput!) {
-    mergePeople(loserUuid: $loserUuid, winnerPerson: $winnerPerson) {
-      uuid
-    }
+    mergePeople(loserUuid: $loserUuid, winnerPerson: $winnerPerson) 
   }
 `
 
@@ -446,8 +444,8 @@ const MergePeople = ({ pageDispatchers }) => {
       winnerPerson
     })
       .then(res => {
-        if (res.mergePeople) {
-          history.push(Person.pathFor({ uuid: res.mergePeople.uuid }), {
+        if (res) {
+          history.push(Person.pathFor({ uuid: mergedPerson.uuid }), {
             success: "People merged. Displaying merged Person below."
           })
         }

@@ -649,6 +649,5 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
             + "WHERE uuid = :positionUuid")
         .bind("personUuid", personUuid).bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now()))
         .bind("positionUuid", positionUuid).execute();
-
   }
 }

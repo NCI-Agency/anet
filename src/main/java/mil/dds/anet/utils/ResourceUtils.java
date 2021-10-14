@@ -11,7 +11,8 @@ public class ResourceUtils {
       "At least one of the positions in the history is occupied for the specified period.";
 
   public static void validateHistoryInput(final String uuid,
-      final List<PersonPositionHistory> previousPositions) {
+      final List<PersonPositionHistory> previousPositions, final boolean hasRelation,
+      final boolean checkPerson, final String relationUuid) {
     // Check if uuid is null
     if (uuid == null) {
       throw new WebApplicationException("Uuid cannot be null.", Status.BAD_REQUEST);
@@ -26,10 +27,21 @@ public class ResourceUtils {
 
       if (pph.getEndTime() == null) {
         // Check if end time is null more than once
-        if (seenNullEndTime) {
+        if (seenNullEndTime || !hasRelation) {
           throw new WebApplicationException(
               "There cannot be more than one history entry without an end time.",
               Status.BAD_REQUEST);
+        }
+        if (checkPerson) {
+          if (!pph.getPosition().getUuid().equals(relationUuid)) {
+            throw new WebApplicationException("History must be compatible with person's relation.",
+                Status.BAD_REQUEST);
+          }
+        } else {
+          if (!pph.getPerson().getUuid().equals(relationUuid)) {
+            throw new WebApplicationException(
+                "History must be compatible with positions's relation.", Status.BAD_REQUEST);
+          }
         }
         seenNullEndTime = true;
       } else {
@@ -39,6 +51,11 @@ public class ResourceUtils {
               Status.BAD_REQUEST);
         }
       }
+    }
+    // if has relation and there is no entry in pph
+    if (hasRelation && !seenNullEndTime) {
+      throw new WebApplicationException(
+          "There cannot be more than one history entry without an end time.", Status.BAD_REQUEST);
     }
 
     // Check for conflicts

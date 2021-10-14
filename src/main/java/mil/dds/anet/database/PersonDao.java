@@ -400,7 +400,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     deleteForMerge("peoplePositions", "personUuid", loserUuid);
     updatePersonHistory(winner);
 
-
     // update note authors
     updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
 
@@ -472,9 +471,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     final int numRows = getDbHandle()
         .execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
     // Add new history
-    for (final PersonPositionHistory history : p.getPreviousPositions()) {
-      updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
-          history.getEndTime());
+    if (p.getPreviousPositions() != null) {
+      for (final PersonPositionHistory history : p.getPreviousPositions()) {
+        updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
+            history.getEndTime());
+      }
     }
     return numRows;
   }

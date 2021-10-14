@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -22,67 +24,94 @@ public class ResourceUtilsTest {
   @Test
   public void testValidateHistoryInput() {
     final Object[][] testData = new Object[][] {
-        // Each item has: { isValid, uuid, start time, end time, … }
+        // Each item has: { isValid,checkPerson,hasRelation,relationUuid, uuid, start time, end
+        // time, … }
         // - null uuid
-        {false, null, "2004-02-27T00:00:00.000Z", "2004-02-28T00:00:00.000Z"},
+        {false, true, false, null, null, "personel", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-28T00:00:00.000Z"},
         // - null startTime
-        {false, "uuid", null, "2004-02-28T00:00:00.000Z"},
+        {false, true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", null,
+            "2004-02-28T00:00:00.000Z"},
         // - two null endTime's
-        {false, "uuid", "2004-02-27T00:00:00.000Z", null, "2004-02-27T00:00:00.000Z", null},
+        {false, true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            null, "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
         // - endTime before startTime
-        {false, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-26T23:59:59.999Z"},
+        {false, true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-26T23:59:59.999Z"},
         // - overlap
-        {false, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T02:00:00.000Z",
-            "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z"},
-        {false, "uuid", "2004-02-27T00:00:00.000Z", null, "2004-02-27T01:00:00.000Z",
+        {false, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T02:00:00.000Z", "uuid", "posUuid", "2004-02-27T01:00:00.000Z",
             "2004-02-27T03:00:00.000Z"},
+        {false, true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z",
+            null, "persUuid", "posUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z"},
         // - very long history with overlap
-        {false, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.001Z", "2004-02-27T00:00:00.000Z",
-            null},
+        {false, true, true, "relPosUuid", "uuid", "persUuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.001Z", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
         // - no history at all
-        {true, "uuid"},
+        {true, true, false, null, "uuid"},
         // - valid history
-        {true, "uuid", "2004-02-27T00:00:00.000Z", null},
-        {true, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z"},
-        {true, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z"},
-        {true, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z"},
-        {true, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T01:00:00.000Z",
-            "2004-02-27T01:00:00.000Z", "2004-02-27T02:00:00.000Z"},
-        // - very long history
-        {true, "uuid", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
-            "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z", "2004-02-27T00:00:00.000Z",
+        {true, true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z",
             null},
+        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z"},
+        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T01:00:00.000Z"},
+        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z"},
+        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T01:00:00.000Z", "uuid", "posUuid", "2004-02-27T01:00:00.000Z",
+            "2004-02-27T02:00:00.000Z"},
+        // - very long history
+        {true, true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+            "2004-02-27T00:00:00.000Z", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
         // end
     };
 
     for (final Object[] testItem : testData) {
       int i = 0;
       final boolean isValid = (boolean) testItem[i++];
+      final boolean checkPerson = (boolean) testItem[i++];
+      final boolean hasRelation = (boolean) testItem[i++];
+      final String relationUuid = (String) testItem[i++];
       final String uuid = (String) testItem[i++];
       final List<PersonPositionHistory> hist = new ArrayList<>();
       while (i < testItem.length) {
         final PersonPositionHistory pph = new PersonPositionHistory();
+        final Person person = new Person();
+        person.setUuid((String) testItem[i++]);
+        pph.setPerson(person);
+
+        final Position position = new Position();
+        position.setUuid((String) testItem[i++]);
+        pph.setPosition(position);
         pph.setStartTime(toInstant(testItem[i++]));
         pph.setEndTime(toInstant(testItem[i++]));
         hist.add(pph);
       }
       logger.debug("checking {}", Arrays.toString(testItem));
       try {
-        ResourceUtils.validateHistoryInput(uuid, hist);
+        ResourceUtils.validateHistoryInput(uuid, hist, hasRelation, checkPerson, relationUuid);
         if (!isValid) {
           fail("Expected a WebApplicationException");
         }
