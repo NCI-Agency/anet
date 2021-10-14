@@ -116,7 +116,7 @@ function EditHistory({
         centered
         show={showModal}
         onHide={onHide}
-        size={history2 && "lg"}
+        dialogClassName={`edit-history-dialog ${history2 && "merge"}`}
         style={{ zIndex: "1300" }}
       >
         <Modal.Header closeButton>
@@ -262,71 +262,65 @@ function EditHistory({
                                 }
                               />
                               <div className="date-container">
-                                <span>From</span>
-                                <Field
-                                  name={startTimeFieldName}
-                                  label={null}
-                                  value={values.history[idx].startTime}
-                                  onChange={value => {
-                                    setFieldValue(
-                                      startTimeFieldName,
-                                      value?.valueOf()
-                                    )
-                                    setFinalHistory(
-                                      sortHistory(
-                                        values.history.map((item, index) =>
-                                          index === idx
-                                            ? {
-                                              ...item,
-                                              startTime: value?.valueOf()
-                                            }
-                                            : item
-                                        ),
-                                        hasCurrent
-                                      )
-                                    )
-                                  }}
-                                  component={FieldHelper.SpecialField}
-                                  widget={
-                                    <CustomDateInput
-                                      id={startTimeFieldName}
-                                      maxDate={moment().toDate()}
-                                    />
-                                  }
-                                />
-                                <span>to</span>
-                                {!isCurrent ? (
+                                <div className="inner-container">
+                                  <div className="date-text">From</div>
                                   <Field
-                                    name={endTimeFieldName}
+                                    name={startTimeFieldName}
                                     label={null}
-                                    value={values.history[idx].endTime}
-                                    onChange={value =>
+                                    value={values.history[idx].startTime}
+                                    onChange={value => {
                                       setFieldValue(
-                                        endTimeFieldName,
+                                        startTimeFieldName,
                                         value?.valueOf()
                                       )
-                                    }
+                                      setFinalHistory(
+                                        sortHistory(
+                                          values.history.map((item, index) =>
+                                            index === idx
+                                              ? {
+                                                ...item,
+                                                startTime: value?.valueOf()
+                                              }
+                                              : item
+                                          ),
+                                          hasCurrent
+                                        )
+                                      )
+                                    }}
                                     component={FieldHelper.SpecialField}
                                     widget={
                                       <CustomDateInput
-                                        id={endTimeFieldName}
+                                        id={startTimeFieldName}
                                         maxDate={moment().toDate()}
-                                        style={{
-                                          width: "200px"
-                                        }}
                                       />
                                     }
                                   />
-                                ) : (
-                                  <div
-                                    style={{
-                                      width: "200px",
-                                      margin: "0 -15px"
-                                    }}
-                                  >
-                                    present
-                                  </div>
-                                )}
+                                </div>
+                                <div className="inner-container">
+                                  <div className="date-text">to</div>
+                                  {!isCurrent ? (
+                                    <Field
+                                      name={endTimeFieldName}
+                                      label={null}
+                                      value={values.history[idx].endTime}
+                                      onChange={value =>
+                                        setFieldValue(
+                                          endTimeFieldName,
+                                          value?.valueOf()
+                                        )
+                                      }
+                                      component={FieldHelper.SpecialField}
+                                      widget={
+                                        <CustomDateInput
+                                          id={endTimeFieldName}
+                                          maxDate={moment().toDate()}
+                                        />
+                                      }
+                                    />
+                                  ) : (
+                                    <div className="date-input">present</div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           )
