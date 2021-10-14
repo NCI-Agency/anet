@@ -597,21 +597,18 @@ const PersonForm = ({
                 <FastField
                   name="biography"
                   component={FieldHelper.SpecialField}
+                  value={values.biography}
                   onChange={value => {
                     // prevent initial unnecessary render of RichTextEditor
                     if (!_isEqual(value, values.biography)) {
                       setFieldValue("biography", value)
                     }
                   }}
-                  widget={
-                    <RichTextEditor
-                      className="biography"
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("biography", true, false)
-                      }}
-                    />
-                  }
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("biography", true, false)
+                  }}
+                  widget={<RichTextEditor className="biography" />}
                 />
               </Fieldset>
 

@@ -27,7 +27,21 @@ const RelatedObjectNoteModal = ({
 }) => {
   const yupSchema = yup.object().shape({
     type: yup.string().required(),
-    text: yup.string().default("")
+    text: yup
+      .string()
+      .test(
+        "text",
+        "text error",
+        // can't use arrow function here because of binding to 'this'
+        function(text) {
+          return utils.isEmptyHtml(text)
+            ? this.createError({
+              message: "You must provide the text"
+            })
+            : true
+        }
+      )
+      .default("")
   })
   const [error, setError] = useState(null)
   const [relatedObjects, setRelatedObjects] = useState(
@@ -82,15 +96,11 @@ const RelatedObjectNoteModal = ({
                     value={noteText}
                     component={FieldHelper.SpecialField}
                     onChange={value => setFieldValue("text", value)}
-                    widget={
-                      <RichTextEditor
-                        className="textField"
-                        onHandleBlur={() => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("text", true, false)
-                        }}
-                      />
-                    }
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("text", true, false)
+                    }}
+                    widget={<RichTextEditor />}
                     vertical
                   />
                   <RelatedObjectsTable

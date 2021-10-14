@@ -891,15 +891,11 @@ const ReportForm = ({
                       setFieldValue("reportText", value, true)
                     }
                   }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("reportText", true, false)
-                      }}
-                    />
-                  }
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("reportText", true, false)
+                  }}
+                  widget={<RichTextEditor className="reportTextField" />}
                 />
 
                 <div style={{ textAlign: "center" }}>
@@ -939,18 +935,16 @@ const ReportForm = ({
                             )
                           }
                         }}
+                        onHandleBlur={() => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched(
+                            "reportSensitiveInformation.text",
+                            true,
+                            false
+                          )
+                        }}
                         widget={
-                          <RichTextEditor
-                            className="reportSensitiveInformationField"
-                            onHandleBlur={() => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched(
-                                "reportSensitiveInformation.text",
-                                true,
-                                false
-                              )
-                            }}
-                          />
+                          <RichTextEditor className="reportSensitiveInformationField" />
                         }
                       />
                       <FastField

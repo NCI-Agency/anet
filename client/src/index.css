@@ -1140,6 +1140,10 @@ header.searchPagination {
   opacity: 1;
 }
 
+.modal-dialog {
+  width: 650px;
+}
+
 @page {
   margin: 0;
 }

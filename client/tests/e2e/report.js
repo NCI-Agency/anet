@@ -157,13 +157,12 @@ test.serial("Draft and submit a report", async t => {
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")
   await pageHelpers.writeInForm(
-    ".reportTextField .public-DraftEditor-content",
+    ".reportTextField .editable",
     "engagement details",
-    shortWaitMs // wait for Draftail to save the editor contents
+    shortWaitMs // wait for Slate to save the editor contents
   )
 
-  const editorCssPath =
-    ".reportSensitiveInformationField .public-DraftEditor-content"
+  const editorCssPath = ".reportSensitiveInformationField .editable"
   const $reportSensitiveInformationField = await $(editorCssPath)
   t.false(
     await $reportSensitiveInformationField.isDisplayed(),
@@ -179,7 +178,7 @@ test.serial("Draft and submit a report", async t => {
   await pageHelpers.writeInForm(
     editorCssPath,
     "sensitive info",
-    shortWaitMs // wait for Draftail to save the editor contents
+    shortWaitMs // wait for Slate to save the editor contents
   )
   const $addAuthGroupShortcutButtons = await $$(
     "#meeting-details .shortcut-list button"

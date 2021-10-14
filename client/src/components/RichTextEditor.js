@@ -1,235 +1,290 @@
 import LinkAnet from "components/editor/LinkAnet"
-import LinkSourceAnet from "components/editor/LinkSourceAnet"
-import createNewlinePlugin from "components/editor/plugins/newlinePlugin"
-import { convertFromHTML, convertToHTML } from "draft-convert"
-import { convertFromRaw, convertToRaw } from "draft-js"
-import {
-  BlockquoteButton,
-  BoldButton,
-  HeadlineOneButton,
-  HeadlineTwoButton,
-  ItalicButton,
-  OrderedListButton,
-  UnderlineButton,
-  UnorderedListButton
-} from "draft-js-buttons"
-import createSideToolbarPlugin from "draft-js-side-toolbar-plugin"
-import { BLOCK_TYPE, DraftailEditor, ENTITY_TYPE, INLINE_STYLE } from "draftail"
-import _isEqual from "lodash/isEqual"
+import LinkAnetEntity from "components/editor/LinkAnetEntity"
+import "components/editor/RichTextEditor.css"
+import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
+import escapeHtml from "escape-html"
+import { debounce } from "lodash"
+import _isEmpty from "lodash/isEmpty"
+import _trim from "lodash/trim"
 import PropTypes from "prop-types"
-import React, { Component } from "react"
+import React, { useCallback, useMemo, useState } from "react"
+import { createEditor, Text, Transforms } from "slate"
+import { withHistory } from "slate-history"
+import { jsx } from "slate-hyperscript"
+import {
+  Editable,
+  Slate,
+  useFocused,
+  useSelected,
+  withReact
+} from "slate-react"
+import { getUrlFromEntityInfo } from "utils_links"
 
-import "draft-js/dist/Draft.css"
-import "draftail/dist/draftail.css"
-import "draft-js-side-toolbar-plugin/lib/plugin.css"
-import "components/RichTextEditor.css"
+const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
+  const [showLinksModal, setShowLinksModal] = useState(false)
+  const editor = useMemo(
+    () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
+    []
+  )
 
-const newlinePlugin = createNewlinePlugin()
+  const [slateValue, setSlateValue] = useState(() => {
+    const document = new DOMParser().parseFromString(value || "", "text/html")
+    return deserialize(document.body)
+  })
 
-const BLOCK_TYPES = [
-  { type: BLOCK_TYPE.HEADER_ONE },
-  { type: BLOCK_TYPE.HEADER_TWO },
-  { type: BLOCK_TYPE.HEADER_THREE },
-  { type: BLOCK_TYPE.BLOCKQUOTE },
-  {
-    type: BLOCK_TYPE.UNORDERED_LIST_ITEM,
-    icon: [
-      "m 96,107.19101 a 96,93.417462 0 1 0 96,93.41746 96,93.417462 0 0 0 -96,-93.41746 z m 0,311.39154 A 96,93.417462 0 1 0 192,512 96,93.417462 0 0 0 96,418.58255 Z m 0,311.39152 a 96,93.417462 0 1 0 96,93.41747 96,93.417462 0 0 0 -96,-93.41747 z m 896,31.13916 H 352 a 32,31.139153 0 0 0 -32,31.13915 v 62.27831 a 32,31.139153 0 0 0 32,31.13914 h 640 a 32,31.139153 0 0 0 32,-31.13914 v -62.27831 a 32,31.139153 0 0 0 -32,-31.13915 z m 0,-622.78306 H 352 a 32,31.139153 0 0 0 -32,31.13915 v 62.2783 a 32,31.139153 0 0 0 32,31.13916 h 640 a 32,31.139153 0 0 0 32,-31.13916 v -62.2783 a 32,31.139153 0 0 0 -32,-31.13915 z m 0,311.39153 H 352 a 32,31.139153 0 0 0 -32,31.13915 v 62.27831 a 32,31.139153 0 0 0 32,31.13915 h 640 a 32,31.139153 0 0 0 32,-31.13915 V 480.86085 A 32,31.139153 0 0 0 992,449.7217 Z"
-    ]
-  },
-  {
-    type: BLOCK_TYPE.ORDERED_LIST_ITEM,
-    icon: [
-      "m 123.54,843.67568 35,-46.07064 a 39.84,45.544767 0 0 0 10.14,-32.4438 v -7.56793 C 168.68,740.78839 161,731.64286 146,731.64286 H 32 a 16,18.291072 0 0 0 -16,18.29106 v 36.58216 a 16,18.291072 0 0 0 16,18.29106 h 45.66 a 314.82,359.89971 0 0 0 -22,28.14539 l -11.22,16.00468 c -8,11.59196 -10.5,23.16107 -5.6,34.02139 l 2.1,4.41272 c 6,13.16958 12.58,18.01671 24.5,18.01671 h 9.46 c 20.66,0 31.88,5.57879 31.88,20.78323 0,10.79175 -8.4,18.79409 -28.72,18.79409 a 83.08,94.976387 0 0 1 -30.94,-7.13353 c -12.98,-8.87118 -23.48,-8.00234 -31.2,7.13353 L 4.74,966.27156 c -7.44,14.01554 -6.38,26.79643 5.26,36.44494 15.42,10.7232 40.76,21.5835 74,21.5835 68.32,0 97,-52.01524 97,-100.87526 -0.06,-32.87821 -18.24,-68.04278 -57.46,-79.74906 z M 992,438.98572 H 352 a 32,36.582142 0 0 0 -32,36.58214 v 73.16428 a 32,36.582142 0 0 0 32,36.58215 h 640 a 32,36.582142 0 0 0 32,-36.58215 V 475.56786 A 32,36.582142 0 0 0 992,438.98572 Z M 992,73.16428 H 352 a 32,36.582142 0 0 0 -32,36.58214 v 73.1643 a 32,36.582142 0 0 0 32,36.58214 h 640 a 32,36.582142 0 0 0 32,-36.58214 v -73.1643 A 32,36.582142 0 0 0 992,73.16428 Z m 0,731.64286 H 352 a 32,36.582142 0 0 0 -32,36.58214 v 73.1643 a 32,36.582142 0 0 0 32,36.58214 h 640 a 32,36.582142 0 0 0 32,-36.58214 v -73.1643 a 32,36.582142 0 0 0 -32,-36.58214 z m -960,-512.15 h 128 a 16,18.291072 0 0 0 16,-18.29106 V 237.78392 A 16,18.291072 0 0 0 160,219.49286 H 128 V 18.29108 A 16,18.291072 0 0 0 112,0 H 64 A 16,18.291072 0 0 0 49.72,10.10583 l -16,36.58214 A 16,18.291072 0 0 0 48,73.16428 H 64 V 219.49286 H 32 a 16,18.291072 0 0 0 -16,18.29106 v 36.58216 a 16,18.291072 0 0 0 16,18.29106 z M 24.18,658.47858 H 160 A 16,18.291072 0 0 0 176,640.1875 V 603.60536 A 16,18.291072 0 0 0 160,585.31429 H 82.64 c 6.58,-23.5269 96.68,-42.70966 96.68,-129.04351 0,-66.44231 -50,-90.44936 -88.94,-90.44936 -42.72,0 -67.6,22.86386 -80.92,42.86971 -8.74,12.78089 -6,24.7844 5.6,35.14172 l 17.16,15.73032 c 11.22,10.42591 22,5.64737 32.24,-5.57878 a 26.88,30.729 0 0 1 18.92,-8.77971 c 6.66,0 18.56,3.56676 18.56,20.00586 C 102,494.29334 0,515.14516 0,623.24539 v 9.14554 c 0,16.9421 10.16,26.08765 24.18,26.08765 z"
-    ]
-  }
-]
+  const renderElement = useCallback(props => <Element {...props} />, [])
+  const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-const INLINE_STYLES = [
-  { type: INLINE_STYLE.BOLD },
-  { type: INLINE_STYLE.ITALIC },
-  {
-    type: INLINE_STYLE.UNDERLINE,
-    icon: [
-      "m -110.45248,-36.817494 h 28.503379 v 25.631677 h -28.503379 z",
-      "m 529.75865,840.37772 c 158.31765,0 286.98061,-119.02958 286.98061,-265.4935 V 220.89293 H 697.16399 v 353.99129 c 0,85.4004 -75.09325,154.8712 -167.40534,154.8712 -92.3121,0 -167.40535,-69.4708 -167.40535,-154.8712 V 220.89293 H 242.77804 v 353.99129 c 0,146.46392 128.66297,265.4935 286.98061,265.4935 z m -334.81072,88.49784 v 88.49774 h 669.62145 v -88.49774 z"
-    ]
-  },
-  { type: INLINE_STYLE.STRIKETHROUGH },
-  { type: INLINE_STYLE.MARK }
-]
-
-const ENTITY_CONTROL = {
-  LINK: {
-    // Unique type shared between entity instances.
-    type: ENTITY_TYPE.LINK,
-    // Describes the entity in the editor UI, concisely.
-    description: "Add a link to an ANET entity",
-    // Describes the entity in the editor UI.
-    label: "ANET entity",
-    // Represents the entity in the editor UI.
-    icon: [
-      "M440.236 635.766c-13.31 0-26.616-5.076-36.77-15.23-95.134-95.136-95.134-249.934 0-345.070l192-192c46.088-46.086 107.36-71.466 172.534-71.466s126.448 25.38 172.536 71.464c95.132 95.136 95.132 249.934 0 345.070l-87.766 87.766c-20.308 20.308-53.23 20.308-73.54 0-20.306-20.306-20.306-53.232 0-73.54l87.766-87.766c54.584-54.586 54.584-143.404 0-197.99-26.442-26.442-61.6-41.004-98.996-41.004s-72.552 14.562-98.996 41.006l-192 191.998c-54.586 54.586-54.586 143.406 0 197.992 20.308 20.306 20.306 53.232 0 73.54-10.15 10.152-23.462 15.23-36.768 15.23z",
-      "M256 1012c-65.176 0-126.45-25.38-172.534-71.464-95.134-95.136-95.134-249.934 0-345.070l87.764-87.764c20.308-20.306 53.234-20.306 73.54 0 20.308 20.306 20.308 53.232 0 73.54l-87.764 87.764c-54.586 54.586-54.586 143.406 0 197.992 26.44 26.44 61.598 41.002 98.994 41.002s72.552-14.562 98.998-41.006l192-191.998c54.584-54.586 54.584-143.406 0-197.992-20.308-20.308-20.306-53.232 0-73.54 20.306-20.306 53.232-20.306 73.54 0.002 95.132 95.134 95.132 249.932 0.002 345.068l-192.002 192c-46.090 46.088-107.364 71.466-172.538 71.466z"
-    ],
-    // React component providing the UI to manage entities of this type.
-    source: LinkSourceAnet,
-    // React component to display inline entities.
-    decorator: LinkAnet,
-    // React component to display block-level entities.
-    block: PropTypes.func,
-    // Array of attributes the entity uses, to preserve when filtering entities on paste. If undefined, all entity data is preserved.
-    attributes: null,
-    // Attribute - regex mapping, to whitelist entities based on their data on paste.
-    // For example, { url: '^https:' } will only preserve links that point to HTTPS URLs.
-    whitelist: {
-      href: "."
-    }
-  }
-}
-
-const importerConfig = {
-  htmlToEntity: (nodeName, node, createEntity) => {
-    if (nodeName === "a") {
-      return createEntity(ENTITY_TYPE.LINK, "IMMUTABLE", {
-        url: node.href
-      })
-    }
-
-    if (nodeName === "hr") {
-      return createEntity(ENTITY_TYPE.HORIZONTAL_RULE, "IMMUTABLE", {})
-    }
-
-    return null
-  },
-  htmlToBlock: nodeName => {
-    if (nodeName === "hr" || nodeName === "img") {
-      // "atomic" blocks is how Draft.js structures block-level entities.
-      return "atomic"
-    }
-
-    return null
-  },
-  htmlToStyle: (nodeName, node, currentStyle) => {
-    return currentStyle
-  }
-}
-
-const exporterConfig = {
-  blockToHTML: block => {
-    if (block.type === BLOCK_TYPE.BLOCKQUOTE) {
-      return <blockquote />
-    }
-
-    // Discard atomic blocks, as they get converted based on their entity.
-    if (block.type === BLOCK_TYPE.ATOMIC) {
-      return {
-        start: "",
-        end: ""
-      }
-    }
-
-    return null
-  },
-
-  entityToHTML: (entity, originalText) => {
-    if (entity.type === ENTITY_TYPE.LINK) {
-      return <a href={entity.data.url}>{originalText}</a>
-    }
-
-    if (entity.type === ENTITY_TYPE.HORIZONTAL_RULE) {
-      return <hr />
-    }
-
-    return originalText
-  },
-
-  styleToHTML: style => {
-    if (style === INLINE_STYLE.STRIKETHROUGH) {
-      return <strike />
-    }
-  }
-}
-
-const fromHTML = html => convertToRaw(convertFromHTML(importerConfig)(html))
-const toHTML = raw =>
-  raw ? convertToHTML(exporterConfig)(convertFromRaw(raw)) : ""
-
-class RichTextEditor extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      sideToolbarPlugin: createSideToolbarPlugin(),
-      content: {}
-    }
-    this.editorRef = React.createRef()
-    this.focus = () => this.editorRef.current.focus()
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      !_isEqual(this.state.content, nextState.content) ||
-      !_isEqual(this.props.className, nextProps.className)
-    )
-  }
-
-  render() {
-    const { className, value, onChange, onHandleBlur } = this.props
-    const { sideToolbarPlugin } = this.state
-    const { SideToolbar } = sideToolbarPlugin
-    return (
-      <div className={className} onClick={this.focus}>
-        <DraftailEditor
-          ref={this.editorRef}
-          id="rich-text"
-          ariaDescribedBy="rich-text-editor"
-          blockTypes={BLOCK_TYPES}
-          entityTypes={[ENTITY_CONTROL.LINK]}
-          inlineStyles={INLINE_STYLES}
-          maxListNesting={4}
-          onSave={rawContent => {
-            if (onChange) {
-              onChange(toHTML(rawContent))
-            }
-          }}
-          onBlur={onHandleBlur}
-          stateSaveInterval={100}
-          plugins={[sideToolbarPlugin, newlinePlugin]}
-          rawContentState={value ? fromHTML(value) : null}
-          showUndoControl
-          showRedoControl
-          spellCheck
-          stripPastedStyles={false}
-          bottomToolbar={props => (
-            <>
-              <SideToolbar>
-                {externalProps => (
-                  <>
-                    <HeadlineOneButton {...externalProps} />
-                    <HeadlineTwoButton {...externalProps} />
-                    <BlockquoteButton {...externalProps} />
-                    <ItalicButton {...externalProps} />
-                    <BoldButton {...externalProps} />
-                    <UnderlineButton {...externalProps} />
-                    <UnorderedListButton {...externalProps} />
-                    <OrderedListButton {...externalProps} />
-                  </>
-                )}
-              </SideToolbar>
-            </>
-          )}
-        />
-      </div>
-    )
-  }
+  return (
+    <div className={className}>
+      <Slate
+        editor={editor}
+        value={slateValue}
+        onChange={newValue => {
+          setSlateValue(newValue)
+          serializeDebounced(editor, onChange)
+        }}
+      >
+        <div className="editor-container">
+          <Toolbar
+            showLinksModal={showLinksModal}
+            setShowLinksModal={setShowLinksModal}
+          />
+          <Editable
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            onBlur={onHandleBlur}
+            onKeyDown={e => handleOnKeyDown(e, editor, setShowLinksModal)}
+            className="editable"
+          />
+        </div>
+      </Slate>
+    </div>
+  )
 }
 
 RichTextEditor.propTypes = {
-  className: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
-  onHandleBlur: PropTypes.func
+  onHandleBlur: PropTypes.func,
+  className: PropTypes.string
+}
+
+const withHtml = editor => {
+  const { insertData } = editor
+  editor.insertData = data => {
+    const html = data?.getData("text/html")
+    if (html) {
+      // Strip whitespace surrounding newlines between > and <
+      // This avoids creating empty paragraphs!
+      const htmlNoNewlines = html.replace(/>\s*(\r\n|\n|\r)\s*</gm, "><")
+      const parsed = new DOMParser().parseFromString(
+        htmlNoNewlines,
+        "text/html"
+      )
+      const nodes = deserialize(parsed.body)
+      Transforms.insertNodes(editor, nodes)
+    } else {
+      insertData(data)
+    }
+  }
+  return editor
+}
+
+const withAnetLink = editor => {
+  const { isVoid, isInline } = editor
+  editor.isVoid = element =>
+    element.type === "anet-link" ? true : isVoid(element)
+  editor.isInline = element =>
+    element.type === "anet-link" ? true : isInline(element)
+  return editor
+}
+
+const serialize = node => {
+  if (Text.isText(node)) {
+    let string = escapeHtml(node.text)
+    if (node.bold) {
+      string = `<strong>${string}</strong>`
+    }
+    if (node.italic) {
+      string = `<em>${string}</em>`
+    }
+    if (node.underline) {
+      string = `<u>${string}</u>`
+    }
+    if (node.strikethrough) {
+      string = `<strike>${string}</strike>`
+    }
+    return string
+  }
+  const children = node.children.map(n => serialize(n)).join("")
+  switch (node.type) {
+    case "heading-one":
+      return `<h1>${children}</h1>`
+    case "heading-two":
+      return `<h2>${children}</h2>`
+    case "heading-three":
+      return `<h3>${children}</h3>`
+    case "paragraph":
+      return `<p>${children}</p>`
+    case "numbered-list":
+      return `<ol>${children}</ol>`
+    case "bulleted-list":
+      return `<ul>${children}</ul>`
+    case "list-item":
+      return `<li>${children}</li>`
+    case "block-quote":
+      return `<blockquote>${children}</blockquote>`
+    case "anet-link":
+      return `<a href="${getUrlFromEntityInfo(node)}">${node.children.text}</a>`
+    default:
+      return children
+  }
+}
+
+const serializeDebounced = debounce((node, onChange) => {
+  const serialized = serialize(node)
+  onChange(serialized)
+  return serialized
+}, 100)
+
+const deserialize = element => {
+  if (
+    element.nodeName === "#text" &&
+    _isEmpty(_trim(element.textContent, "\n"))
+  ) {
+    // Skip empty elements
+    return null
+  }
+  let children = Array.from(element.childNodes).map(deserialize)
+  // Body must have at least one children node for user to be able to edit the text in it
+  // Every other node must have a non-empty array of children
+  if (element.nodeName !== "#text" && _isEmpty(children)) {
+    children =
+      element.nodeName === "BODY"
+        ? jsx("element", { type: "paragraph" }, [{ text: "" }])
+        : [{ text: "" }]
+  }
+
+  switch (element.nodeName) {
+    case "BODY":
+      return jsx("fragment", {}, children)
+    case "H1":
+      return jsx("element", { type: "heading-one" }, children)
+    case "H2":
+      return jsx("element", { type: "heading-two" }, children)
+    case "H3":
+      return jsx("element", { type: "heading-three" }, children)
+    case "P":
+      return element.parentNode.nodeName === "LI"
+        ? jsx("text", {}, children)
+        : jsx("element", { type: "paragraph" }, children)
+    case "OL":
+      return jsx("element", { type: "numbered-list" }, children)
+    case "UL":
+      return jsx("element", { type: "bulleted-list" }, children)
+    case "LI":
+      return jsx("element", { type: "list-item" }, children)
+    case "BLOCKQUOTE":
+    case "CITE":
+      return jsx("element", { type: "block-quote" }, children)
+    case "A":
+      return jsx(
+        "element",
+        { type: "anet-link", href: element.getAttribute("href") },
+        children
+      )
+    case "STRONG":
+    case "B":
+      return jsx("text", { bold: true }, children)
+    case "EM":
+    case "I":
+      return jsx("text", { italic: true }, children)
+    case "U":
+      return jsx("text", { underline: true }, children)
+    case "STRIKE":
+      return jsx("text", { strikethrough: true }, children)
+    default:
+      // Text cannot be the direct child of BODY.
+      // If the value is plain text without any html tags, it should be wrapped in a "<p></p>" tag
+      return element.parentNode.nodeName === "BODY"
+        ? jsx("element", { type: "paragraph" }, element.textContent)
+        : element.textContent
+  }
+}
+
+const Element = ({ attributes, children, element }) => {
+  const selected = useSelected()
+  const focused = useFocused()
+  switch (element.type) {
+    case "heading-one":
+      return <h1 {...attributes}>{children}</h1>
+    case "heading-two":
+      return <h2 {...attributes}>{children}</h2>
+    case "heading-three":
+      return <h3 {...attributes}>{children}</h3>
+    case "numbered-list":
+      return <ol {...attributes}>{children}</ol>
+    case "bulleted-list":
+      return <ul {...attributes}>{children}</ul>
+    case "list-item":
+      return <li {...attributes}>{children}</li>
+    case "block-quote":
+      return <blockquote {...attributes}>{children}</blockquote>
+    case "anet-link":
+      return (
+        <span
+          {...attributes}
+          style={{
+            padding: "1px",
+            verticalAlign: "baseline",
+            display: "inline-block",
+            borderRadius: "4px",
+            boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
+          }}
+        >
+          {element.href ? (
+            <LinkAnet url={element.href} />
+          ) : (
+            <LinkAnetEntity
+              type={element.entityType}
+              uuid={element.entityUuid}
+            />
+          )}
+          {children}
+        </span>
+      )
+    default:
+      return <p {...attributes}>{children}</p>
+  }
+}
+
+Element.propTypes = {
+  attributes: PropTypes.object.isRequired,
+  children: PropTypes.node,
+  element: PropTypes.object
+}
+
+const Leaf = ({ attributes, children, leaf }) => {
+  if (leaf.bold) {
+    children = <strong>{children}</strong>
+  }
+  if (leaf.italic) {
+    children = <em>{children}</em>
+  }
+  if (leaf.underline) {
+    children = <u>{children}</u>
+  }
+  if (leaf.strikethrough) {
+    children = <strike>{children}</strike>
+  }
+  return <span {...attributes}>{children}</span>
+}
+
+Leaf.propTypes = {
+  attributes: PropTypes.object.isRequired,
+  children: PropTypes.node,
+  leaf: PropTypes.object
 }
 
 export default RichTextEditor

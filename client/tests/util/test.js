@@ -309,7 +309,7 @@ test.beforeEach(t => {
       const $meetingGoalInput = await t.context.$(inputSelector)
       await $meetingGoalInput.sendKeys(text)
       if (delay) {
-        await t.context.driver.sleep(delay) // wait e.g. for Draftail to save the editor contents
+        await t.context.driver.sleep(delay) // wait e.g. for Slate to save the editor contents
       }
     },
     async assertReportShowStatusText(t, text) {
