@@ -1,7 +1,7 @@
 import LinkAnet from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import "components/editor/RichTextEditor.css"
-import Toolbar from "components/editor/Toolbar"
+import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
@@ -21,6 +21,7 @@ import {
 import { getUrlFromEntityInfo } from "utils_links"
 
 const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
+  const [showLinksModal, setShowLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
@@ -45,11 +46,15 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
         }}
       >
         <div className="editor-container">
-          <Toolbar />
+          <Toolbar
+            showLinksModal={showLinksModal}
+            setShowLinksModal={setShowLinksModal}
+          />
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onBlur={onHandleBlur}
+            onKeyDown={e => handleOnKeyDown(e, editor, setShowLinksModal)}
             className="editable"
           />
         </div>

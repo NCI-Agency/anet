@@ -1,6 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import PropTypes from "prop-types"
-import React, { useRef, useState } from "react"
+import React, { useRef } from "react"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
 import LinkSourceAnet from "./LinkSourceAnet"
@@ -13,10 +13,9 @@ const BUTTON_TYPES = {
   MODAL: "modal"
 }
 
-const Toolbar = () => {
+const Toolbar = ({ showLinksModal, setShowLinksModal }) => {
   const editor = useSlate()
   const selectionRef = useRef(editor.selection)
-  const [showLinksModal, setShowLinksModal] = useState(false)
 
   return (
     <>
@@ -104,7 +103,13 @@ const Toolbar = () => {
   )
 }
 
-function toggleBlock(editor, format) {
+Toolbar.propTypes = {
+  showLinksModal: PropTypes.bool.isRequired,
+  setShowLinksModal: PropTypes.func.isRequired
+}
+
+function toggleBlock(editor, format, event) {
+  event?.preventDefault?.()
   const isActive = isBlockActive(editor, format)
   const isList = LIST_TYPES.includes(format)
 
@@ -131,7 +136,8 @@ function isBlockActive(editor, format) {
   return !!match
 }
 
-function toggleMark(editor, format) {
+function toggleMark(editor, format, event) {
+  event?.preventDefault?.()
   if (isMarkActive(editor, format)) {
     Editor.removeMark(editor, format)
   } else {
@@ -203,6 +209,65 @@ EditorToggleButton.propTypes = {
   setShowModal: PropTypes.func,
   selectionRef: PropTypes.object,
   onClick: PropTypes.func
+}
+
+export const handleOnKeyDown = (event, editor, setShowLinksModal) => {
+  const key = event.key
+  if (event.altKey) {
+    switch (key) {
+      case "1":
+        toggleBlock(editor, "heading-one", event)
+        break
+      case "2":
+        toggleBlock(editor, "heading-two", event)
+        break
+      case "3":
+        toggleBlock(editor, "heading-three", event)
+        break
+      case "n":
+        toggleBlock(editor, "numbered-list", event)
+        break
+      case "b":
+        toggleBlock(editor, "bulleted-list", event)
+        break
+      case "q":
+        toggleBlock(editor, "block-quote", event)
+        break
+      default:
+        break
+    }
+  }
+  if (event.ctrlKey) {
+    switch (key) {
+      case "b":
+        toggleMark(editor, "bold", event)
+        break
+      case "i":
+        toggleMark(editor, "italic", event)
+        break
+      case "u":
+        toggleMark(editor, "underline", event)
+        break
+      case "X":
+        toggleMark(editor, "strikethrough", event)
+        break
+      case "K":
+        event.preventDefault()
+        setShowLinksModal(true)
+        break
+      case "y":
+      case "Z":
+        event.preventDefault()
+        editor.redo()
+        break
+      case "z":
+        event.preventDefault()
+        editor.undo()
+        break
+      default:
+        break
+    }
+  }
 }
 
 export default Toolbar
