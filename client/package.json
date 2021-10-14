@@ -87,7 +87,6 @@
     "jest": "27.2.5",
     "js-yaml": "4.1.0",
     "json-loader": "0.5.7",
-    "mini-css-extract-plugin": "2.4.2",
     "moment-timezone": "0.5.33",
     "postcss": "8.3.9",
     "postcss-calc": "8.0.0",
