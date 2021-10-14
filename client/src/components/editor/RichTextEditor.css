@@ -16,18 +16,22 @@
   padding: 1rem;
 }
 
-.editor-toggle-button {
+.editor-toggle-button-container {
   flex-grow: 1;
   flex-shrink: 1;
-  border: none;
-  background-color: white;
-  padding: 6px 12px;
   border-left: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
 }
 
-.editor-toggle-button:first-child {
+.editor-toggle-button-container:first-child {
   border-left: none;
+}
+
+.editor-toggle-button {
+  width: 100%;
+  border: none;
+  background-color: white;
+  padding: 6px 12px;
 }
 
 .editor-toggle-button:hover {

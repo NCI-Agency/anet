@@ -1,4 +1,5 @@
 import { Icon } from "@blueprintjs/core"
+import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { Editor, Transforms } from "slate"
@@ -25,60 +26,70 @@ const Toolbar = ({ showLinksModal, setShowLinksModal }) => {
           editor={editor}
           format="bold"
           icon="bold"
+          tooltipText="Bold (Ctrl + b)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="italic"
           icon="italic"
+          tooltipText="Italic (Ctrl + i)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="underline"
           icon="underline"
+          tooltipText="Underline (Ctrl + u)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
           format="strikethrough"
           icon="strikethrough"
+          tooltipText="Strikethrough (Ctrl + ⇧ + x)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="block-quote"
           icon="citation"
+          tooltipText="Block quote (Alt + q)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="heading-one"
           icon="header-one"
+          tooltipText="Heading one (Alt + 1)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="heading-two"
           icon="header-two"
+          tooltipText="Heading two (Alt + 2)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="heading-three"
           icon="header-three"
+          tooltipText="Heading three (Alt + 3)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="bulleted-list"
           icon="properties"
+          tooltipText="Bulleted list (Alt + b)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.BLOCK}
           editor={editor}
           format="numbered-list"
           icon="numbered-list"
+          tooltipText="Numbered list (Alt + n)"
         />
         <EditorToggleButton
           type={BUTTON_TYPES.MODAL}
@@ -89,9 +100,18 @@ const Toolbar = ({ showLinksModal, setShowLinksModal }) => {
           showModal={showLinksModal}
           setShowModal={setShowLinksModal}
           selectionRef={selectionRef}
+          tooltipText="ANET link (Ctrl + ⇧ + k)"
         />
-        <EditorToggleButton icon="undo" onClick={editor.undo} />
-        <EditorToggleButton icon="redo" onClick={editor.redo} />
+        <EditorToggleButton
+          icon="undo"
+          onClick={editor.undo}
+          tooltipText="Undo (Ctrl + z)"
+        />
+        <EditorToggleButton
+          icon="redo"
+          onClick={editor.redo}
+          tooltipText="Redo (Ctrl + y or Ctrl + ⇧ + z)"
+        />
       </div>
       <LinkSourceAnet
         editor={editor}
@@ -156,6 +176,7 @@ const EditorToggleButton = ({
   format,
   icon,
   text,
+  tooltipText,
   showModal,
   setShowModal,
   selectionRef,
@@ -184,18 +205,25 @@ const EditorToggleButton = ({
   }
 
   return (
-    <button
-      type="button"
-      className={`editor-toggle-button ${isActive ? "active" : ""}`}
-      tabIndex={-1}
-      onMouseDown={event => {
-        event.preventDefault()
-        onMouseDown()
-      }}
+    <Tooltip2
+      content={tooltipText}
+      position="top"
+      hoverOpenDelay={1000}
+      className="editor-toggle-button-container"
     >
-      <Icon icon={icon} />
-      {text}
-    </button>
+      <button
+        type="button"
+        className={`editor-toggle-button ${isActive ? "active" : ""}`}
+        tabIndex={-1}
+        onMouseDown={event => {
+          event.preventDefault()
+          onMouseDown()
+        }}
+      >
+        <Icon icon={icon} />
+        {text}
+      </button>
+    </Tooltip2>
   )
 }
 
@@ -205,6 +233,7 @@ EditorToggleButton.propTypes = {
   format: PropTypes.string,
   icon: PropTypes.string,
   text: PropTypes.string,
+  tooltipText: PropTypes.string,
   showModal: PropTypes.bool,
   setShowModal: PropTypes.func,
   selectionRef: PropTypes.object,
