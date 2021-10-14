@@ -241,7 +241,8 @@ EditorToggleButton.propTypes = {
 }
 
 export const handleOnKeyDown = (event, editor, setShowLinksModal) => {
-  const key = event.key
+  // Ignore the state of CapsLock
+  const key = event.shiftKey ? event.key.toUpperCase() : event.key.toLowerCase()
   if (event.altKey) {
     switch (key) {
       case "1":
