@@ -1134,8 +1134,8 @@ header.searchPagination {
   opacity: 1;
 }
 
-.modal-dialog {
-  width: 650px;
+.rich-text-modal {
+  min-width: 650px;
 }
 
 @page {

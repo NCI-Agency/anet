@@ -50,7 +50,13 @@ const RelatedObjectNoteModal = ({
   const edit = !!note.uuid
 
   return (
-    <Modal centered show={showModal} onHide={close} style={{ zIndex: "1300" }}>
+    <Modal
+      centered
+      show={showModal}
+      onHide={close}
+      style={{ zIndex: "1300" }}
+      dialogClassName="rich-text-modal"
+    >
       <Formik
         enableReinitialize
         onSubmit={onSubmit}
