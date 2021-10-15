@@ -72,7 +72,6 @@ const RelatedObjectsTable = ({
                       <td id={"relatedObjectsDelete_" + nro.relatedObjectUuid}>
                         <RemoveButton
                           title="Unlink object"
-                          altText="Unlink object"
                           onClick={() => {
                             const newRelatedObjects = relatedObjects.filter(
                               item =>

@@ -171,7 +171,6 @@ const BasePositionTable = ({
                     <td id={"positionDelete_" + pos.uuid}>
                       <RemoveButton
                         title="Remove position"
-                        altText="Remove position"
                         onClick={() => onDelete(pos)}
                       />
                     </td>

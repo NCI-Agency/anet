@@ -253,7 +253,6 @@ function EditHistory({
                                   !isCurrent && (
                                     <RemoveButton
                                       title="Remove Item"
-                                      altText="Remove Item"
                                       onClick={() => removeItemFromHistory(idx)}
                                     >
                                       Remove

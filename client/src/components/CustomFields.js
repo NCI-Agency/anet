@@ -445,8 +445,6 @@ const ArrayObject = ({
     <Fieldset title={`${objLabel} ${index + 1}`}>
       <RemoveButton
         title={`Remove this ${objLabel}`}
-        altText={`Remove this ${objLabel}`}
-        buttonStyle="outline-danger"
         onClick={() => arrayHelpers.remove(index)}
       />
       <CustomFields
@@ -588,7 +586,6 @@ const AnetObjectField = ({
               <td className="col-xs-1">
                 <RemoveButton
                   title={`Unlink this ${fieldValue.type}`}
-                  altText={`Unlink this ${fieldValue.type}`}
                   onClick={() => setFieldValue(name, null)}
                 />
               </td>
@@ -698,7 +695,6 @@ const ArrayOfAnetObjectsField = ({
                 <td className="col-xs-1">
                   <RemoveButton
                     title={`Unlink this ${entity.type}`}
-                    altText={`Unlink this ${entity.type}`}
                     onClick={() => {
                       let found = false
                       const newValue = fieldValue.filter(e => {

@@ -1,13 +1,14 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import PropTypes from "prop-types"
 import React from "react"
 import { Button } from "react-bootstrap"
-import REMOVE_ICON from "resources/delete.png"
 
 const RemoveButton = ({
   title,
   altText,
   onClick,
-  buttonStyle = "default",
+  buttonStyle = "outline-danger",
   disabled = false
 }) => (
   <Button
@@ -17,7 +18,7 @@ const RemoveButton = ({
     onClick={onClick}
     disabled={disabled}
   >
-    <img src={REMOVE_ICON} height={14} alt={altText} />
+    <Icon icon={IconNames.REMOVE} />
   </Button>
 )
 

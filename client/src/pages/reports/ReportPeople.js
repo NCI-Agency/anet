@@ -151,7 +151,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             {!isCurrentEditor && (
               <RemoveButton
                 title="Remove person"
-                altText="Remove person"
                 onClick={() => onDelete(person)}
               />
             )}

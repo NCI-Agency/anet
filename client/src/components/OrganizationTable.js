@@ -138,7 +138,6 @@ const BaseOrganizationTable = ({
                     <td id={"organizationDelete_" + org.uuid}>
                       <RemoveButton
                         title="Remove organization"
-                        altText="Remove organization"
                         onClick={() => onDelete(org)}
                       />
                     </td>

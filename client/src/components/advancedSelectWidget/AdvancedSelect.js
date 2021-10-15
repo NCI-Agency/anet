@@ -397,9 +397,7 @@ const AdvancedSelect = ({
                       )}
                     </InputGroup.Text>
                   )}
-                  {extraAddon && (
-                    <InputGroup.Text>{extraAddon}</InputGroup.Text>
-                  )}
+                  {extraAddon}
                 </InputGroup>
               </Popover2>
             </InputGroup>

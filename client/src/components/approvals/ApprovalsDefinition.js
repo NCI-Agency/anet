@@ -45,7 +45,6 @@ const ApproverTable = ({ approvers, onDelete }) => (
           <td>
             <RemoveButton
               title="Remove approver"
-              altText="Remove approver"
               onClick={() => onDelete(approver)}
             />
           </td>
@@ -164,8 +163,6 @@ const ApprovalsDefinition = ({
       <Fieldset title={`Step ${index + 1}`} key={index}>
         <RemoveButton
           title="Remove this step"
-          altText="Remove this step"
-          buttonStyle="outline-danger"
           onClick={() => removeApprovalStep(arrayHelpers, index, step)}
         />
 

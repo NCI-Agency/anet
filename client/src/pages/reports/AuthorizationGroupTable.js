@@ -23,11 +23,7 @@ const AuthorizationGroupTable = ({
           <td>{ag.description}</td>
           {showDelete && (
             <td>
-              <RemoveButton
-                title="Remove group"
-                altText="Remove group"
-                onClick={() => onDelete(ag)}
-              />
+              <RemoveButton title="Remove group" onClick={() => onDelete(ag)} />
             </td>
           )}
         </tr>

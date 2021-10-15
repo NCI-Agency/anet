@@ -14,6 +14,7 @@ import { Location } from "models"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
+import RemoveButton from "./components/RemoveButton"
 
 const MERGE_SIDES = ["left", "right"]
 
@@ -259,9 +260,7 @@ export function getInfoButton(infoText) {
 export function getClearButton(onClear) {
   return (
     <Tooltip2 content="Clear field value" intent={Intent.DANGER}>
-      <Button variant="outline-danger" onClick={onClear}>
-        <Icon icon={IconNames.DELETE} />
-      </Button>
+      <RemoveButton onClick={onClear} />
     </Tooltip2>
   )
 }

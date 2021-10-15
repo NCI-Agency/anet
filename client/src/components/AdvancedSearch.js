@@ -117,20 +117,14 @@ const AdvancedSearch = ({
 
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
                     visibility:
                       possibleFilterTypes.length > 1 && objectType
                         ? "visible"
-                        : "hidden"
+                        : "hidden",
+                    marginLeft: "1rem"
                   }}
                 >
-                  <RemoveButton
-                    title="Clear type"
-                    altText="Clear type"
-                    onClick={clearObjectType}
-                    buttonStyle="link"
-                  />
+                  <RemoveButton title="Clear type" onClick={clearObjectType} />
                 </div>
               </ButtonGroupContainerS>
             </FormGroup>
@@ -348,12 +342,10 @@ const SearchFilter = ({
             />
           </div>
         </Col>
-        <Col xs={1} sm={1} lg={1}>
+        <Col xs={2} sm={1} lg={1}>
           <RemoveButton
             title="Remove this filter"
-            altText="Remove this filter"
             onClick={() => onRemove(filter)}
-            buttonStyle="link"
           />
         </Col>
       </Row>
@@ -383,7 +375,7 @@ SearchFilter.propTypes = {
 const ButtonGroupContainerS = styled.div`
   display: flex;
   flex-direction: row;
-  padding: 10px;
+  justify-content: space-between;
 
   & > .btn-group {
     display: flex;

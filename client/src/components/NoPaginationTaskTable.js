@@ -73,7 +73,6 @@ const NoPaginationTaskTable = ({
                     <td id={"taskDelete_" + task.uuid}>
                       <RemoveButton
                         title={`Remove ${fieldSettings.shortLabel}`}
-                        altText={`Remove ${fieldSettings.shortLabel}`}
                         onClick={() => onDelete(task)}
                       />
                     </td>
