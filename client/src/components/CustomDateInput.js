@@ -44,7 +44,7 @@ const CustomDateInput = ({
     : Settings.dateFormats.forms.input.date
   const inputFormat = dateFormats[0]
   const timePickerProps = !withTime
-    ? {}
+    ? undefined // NOTE: Empty object does not hide timepicker
     : {
       precision: TimePrecision.MINUTE,
       selectAllOnFocus: true

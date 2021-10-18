@@ -14,7 +14,7 @@ import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import { Button, Panel, Table } from "react-bootstrap"
+import { Badge, Button, Panel, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
@@ -57,6 +57,10 @@ const OnDemandAssessments = ({
     assessmentConfig,
     entity
   )
+  filteredAssessmentConfig.expirationDate.helpText = `
+    If this field is left empty, the assessment will be valid for 
+    ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
+  `
 
   // Cards array updated before loading the page & after every save of ondemand assessment.
   const assessmentCards = useMemo(() => {
@@ -65,6 +69,18 @@ const OnDemandAssessments = ({
     sortedOnDemandNotes.forEach((note, index) => {
       const parentFieldName = `assessment-${note.uuid}`
       const assessmentFieldsObject = JSON.parse(note.text)
+      // Fill the 'expirationDate' field if it is empty
+      if (!assessmentFieldsObject.expirationDate) {
+        assessmentFieldsObject.expirationDate = moment(
+          assessmentFieldsObject.assessmentDate
+        )
+          .add(
+            Settings.fields.principal.onDemandAssessmentExpirationDays,
+            "days"
+          )
+          .toDate()
+          .toISOString()
+      }
       cards.push(
         <>
           <div
@@ -76,13 +92,9 @@ const OnDemandAssessments = ({
                   margin: "0 -1rem 1rem 0",
                   borderBottom: "2px solid lightgrey"
                 }
-                : moment(assessmentFieldsObject.assessmentDate)
-                  .add(
-                    Settings.fields.principal
-                      .onDemandAssessmentExpirationDays,
-                    "days"
-                  )
-                  .isBefore(moment())
+                : moment(assessmentFieldsObject.expirationDate).isBefore(
+                  moment()
+                )
                   ? {
                     color: "red",
                     paddingBottom: "3px",
@@ -100,26 +112,39 @@ const OnDemandAssessments = ({
               {/* Only the last object in the sortedOnDemandNotes can be valid.
                   If the expiration date of the last object is older than NOW,
                   it is also expired. */}
-              {index !== sortedOnDemandNotes.length - 1
-                ? "Expired"
-                : `${
-                  moment(assessmentFieldsObject.assessmentDate)
-                    .add(
-                      Settings.fields.principal
-                        .onDemandAssessmentExpirationDays,
-                      "days"
-                    )
-                    .isBefore(moment())
-                    ? "Expired"
-                    : "Valid until " +
-                        moment(assessmentFieldsObject.assessmentDate)
-                          .add(
-                            Settings.fields.principal
-                              .onDemandAssessmentExpirationDays,
-                            "days"
-                          )
-                          .format("DD MMMM YYYY")
-                }`}{" "}
+              {index !== sortedOnDemandNotes.length - 1 ? (
+                "Expired"
+              ) : moment(assessmentFieldsObject.expirationDate).isBefore(
+                moment()
+              ) ? (
+                  "Expired"
+                ) : (
+                  <>
+                    Valid until{" "}
+                    {moment(assessmentFieldsObject.expirationDate).format(
+                      "DD MMMM YYYY"
+                    )}{" "}
+                    <Badge>
+                      {/* true flag in the diff function returns the precise days
+                          between two dates, e.g., '1,4556545' days. 'ceil' function
+                          from Math library is used to round it to the nearest greatest
+                          integer so that user sees an integer as the number of days left */}
+                      {Math.ceil(
+                        moment(assessmentFieldsObject.expirationDate).diff(
+                          moment(),
+                          "days",
+                          true
+                        )
+                      )}{" "}
+                      of{" "}
+                      {moment(assessmentFieldsObject.expirationDate).diff(
+                        moment(assessmentFieldsObject.assessmentDate),
+                        "days"
+                      )}{" "}
+                      days left
+                    </Badge>
+                  </>
+                )}
             </b>
           </div>
           <Panel key={index} bsStyle="primary" style={{ borderRadius: "15px" }}>
@@ -227,17 +252,21 @@ const OnDemandAssessments = ({
     canAddAssessment,
     numberOfPeriods
   ])
-  // Holds JSX elements (assessment cards). 'vs' stands for 'Vetting & Screening'.
-  const [vsCards, setVSCards] = useState(assessmentCards)
+  // Holds JSX element array (assessment cards).
+  const [onDemandAssessmentCards, setOnDemandAssessmentCards] = useState(
+    assessmentCards
+  )
   /* Used for navigating when PeriodsNavigation buttons are pressed. Initial value
       should show the valid card in the table to the user when the page is loaded. */
   const [tableLocation, setTableLocation] = useState(
-    vsCards.length >= numberOfPeriods ? numberOfPeriods - vsCards.length : 0
+    onDemandAssessmentCards.length >= numberOfPeriods
+      ? numberOfPeriods - onDemandAssessmentCards.length
+      : 0
   )
 
   /**
-   * Puts the top three elements of vsCards into table columns. If the number
-   * of cards in the vsCards array is smaller than 'numberOfPeriods', then
+   * Puts the top three elements of onDemandAssessmentCards into table columns. If the number
+   * of cards in the onDemandAssessmentCards array is smaller than 'numberOfPeriods', then
    * empty columns are placed into the table.
    * @param {number} numberOfPeriods How many columns should be displayed inside of the table.
    * @returns {JSX.Element[]}
@@ -246,16 +275,18 @@ const OnDemandAssessments = ({
     numberOfPeriods => {
       const columns = []
       for (let index = 0; index < numberOfPeriods; index++) {
-        columns.push(<td key={index}>{vsCards[index - tableLocation]}</td>)
+        columns.push(
+          <td key={index}>{onDemandAssessmentCards[index - tableLocation]}</td>
+        )
       }
       return columns
     },
-    [vsCards, tableLocation]
+    [onDemandAssessmentCards, tableLocation]
   )
 
   // Trigger re-render of cards after a save of ondemand assessments.
   useEffect(() => {
-    setVSCards(assessmentCards)
+    setOnDemandAssessmentCards(assessmentCards)
   }, [assessmentCards])
 
   if (recurrence !== RECURRENCE_TYPE.ON_DEMAND) {
@@ -274,8 +305,9 @@ const OnDemandAssessments = ({
             onChange={setTableLocation}
             disabledLeft={tableLocation === 0}
             disabledRight={
-              vsCards.length + tableLocation === numberOfPeriods ||
-              vsCards.length < numberOfPeriods
+              onDemandAssessmentCards.length + tableLocation ===
+                numberOfPeriods ||
+              onDemandAssessmentCards.length < numberOfPeriods
             }
           />
           <div style={{ display: "flex" }}>
@@ -332,8 +364,8 @@ const OnDemandAssessments = ({
             /* Set the table position in a way that the user always sees the
                 latest card in the table after addition of an ondemand assessment. */
             setTableLocation(
-              vsCards.length >= numberOfPeriods
-                ? numberOfPeriods - vsCards.length - 1
+              onDemandAssessmentCards.length >= numberOfPeriods
+                ? numberOfPeriods - onDemandAssessmentCards.length - 1
                 : 0
             )
             setEditModeObject({ questionnaireResults: {}, uuid: {} })

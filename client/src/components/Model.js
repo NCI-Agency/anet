@@ -275,6 +275,23 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
     })
   }
 
+  /* Additional validation for specific assessments. */
+  if (fieldKey === "expirationDate") {
+    fieldTypeYupSchema = fieldTypeYupSchema.when(
+      "assessmentDate",
+      (assessmentDate, schema) => {
+        if (assessmentDate) {
+          return schema.min(
+            assessmentDate,
+            `${label} must be later than ${moment(assessmentDate).format(
+              "DD-MM-YYYY"
+            )}`
+          )
+        }
+      }
+    )
+  }
+
   let fieldYupSchema = yup.mixed().nullable().default(null)
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
