@@ -597,6 +597,9 @@ test.serial(
     )
 
     const $cancelledCheckbox = await $(".cancelled-checkbox")
+    // Move element into view
+    const actions = t.context.driver.actions({ async: true })
+    await actions.move({ origin: $cancelledCheckbox }).perform()
     await $cancelledCheckbox.click()
 
     await assertElementNotPresent(
