@@ -103,7 +103,7 @@ function EditHistory({
     >
       {!externalButton && (
         <Button
-          variant="secondary"
+          variant="outline-secondary"
           disabled={_isEmpty(history1) && _isEmpty(history2) && !!history2}
           onClick={() => {
             setShowModal(true)
