@@ -1225,6 +1225,12 @@ fields:
             assessmentDate:
               type: date
               label: Screening and vetting date
+              validations:
+                - type: required
+                  params: [You must provide the assessment date]
+            expirationDate:
+              type: date
+              label: Expiration date
             question1:
               type: enum
               label: Screening and vetting level

@@ -273,7 +273,9 @@ $defs:
             questions:
               assessmentDate:
                 type: date
-              required: [assessmentDate]
+              expirationDate:
+                type: date
+              required: [assessmentDate, expirationDate]
 
 # definition for custom sensitive information
   customSensitiveInformation:
