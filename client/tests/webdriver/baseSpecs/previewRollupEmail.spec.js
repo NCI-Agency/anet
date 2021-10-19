@@ -45,7 +45,7 @@ describe("Preview rollup page", () => {
       browser.closeWindow()
       // Switch back and close dialog
       browser.switchToWindow(currentHandle)
-      browser.$("button.close").click()
+      browser.$("button.btn-close").click()
     })
   })
 })

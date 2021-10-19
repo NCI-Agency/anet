@@ -396,9 +396,11 @@ const Navigation = ({
       )}
 
       {Settings.keycloakConfiguration.showLogoutLink && (
-        <NavItem href="/api/logout" onClick={resetPages}>
-          Logout
-        </NavItem>
+        <Nav.Item>
+          <Nav.Link href="/api/logout" onClick={resetPages}>
+            Logout
+          </Nav.Link>
+        </Nav.Item>
       )}
     </Nav>
   )
