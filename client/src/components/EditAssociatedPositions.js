@@ -1,8 +1,10 @@
-import { Button } from "@blueprintjs/core"
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import AssociatedPositions from "components/AssociatedPositions"
+import RemoveButton from "components/RemoveButton"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, Grid, Modal, Row } from "react-bootstrap"
+import { Button, Col, Container, Modal, Row } from "react-bootstrap"
 
 const EditAssociatedPositions = ({
   associatedPositions1,
@@ -21,7 +23,7 @@ const EditAssociatedPositions = ({
       style={{ display: "flex", flexDirection: "column" }}
     >
       <Button
-        intent="primary"
+        variant="outline-secondary"
         onClick={() => {
           setShowModal(true)
           setFinalAssociatedPositions(initialMergedAssociatedPositions)
@@ -30,63 +32,60 @@ const EditAssociatedPositions = ({
         Edit Associated Positions
       </Button>
       <Modal
+        centered
         show={showModal}
         onHide={onHide}
-        dialogClassName="edit-history-dialog-lg"
+        dialogClassName="edit-associated-positions-dialog"
+        style={{ zIndex: "1300" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Grid fluid>
+          <Container fluid>
             <Row>
-              <Col md={4}>
+              <Col md={4} id="edit-ap-left">
                 <AssociatedPositions
                   associatedPositions={associatedPositions1}
                   action={item => (
                     <Button
-                      icon=""
-                      rightIcon="double-chevron-right"
-                      intent={isInMerged(item) ? "success" : "primary"}
+                      variant={isInMerged(item) ? "success" : "primary"}
                       onClick={() => addItem(item)}
                       style={{ textAlign: "center" }}
-                    />
+                    >
+                      <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
+                    </Button>
                   )}
                 />
               </Col>
-              <Col md={4}>
+              <Col md={4} id="edit-ap-mid">
                 <h2 style={{ textAlign: "center" }}>
                   Merged Associated Positions
                 </h2>
                 <AssociatedPositions
                   associatedPositions={finalAssociatedPositions}
                   action={item => (
-                    <Button
-                      icon="delete"
-                      outlined
-                      intent="danger"
-                      onClick={() => removeItem(item)}
-                    />
+                    <RemoveButton onClick={() => removeItem(item)} />
                   )}
                 />
               </Col>
-              <Col md={4}>
+              <Col md={4} id="edit-ap-right">
                 <AssociatedPositions
                   associatedPositions={associatedPositions2}
                   action={item => (
                     <Button
-                      icon="double-chevron-left"
-                      rightIcon=""
-                      intent={isInMerged(item) ? "success" : "primary"}
+                      variant={isInMerged(item) ? "success" : "primary"}
                       onClick={() => addItem(item)}
                       style={{ textAlign: "center" }}
-                    />
+                    >
+                      <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
+                    </Button>
                   )}
                   actionSide="left"
                 />
               </Col>
             </Row>
-          </Grid>
+          </Container>
         </Modal.Body>
         <Modal.Footer>
           <Button className="pull-left" onClick={onHide}>
