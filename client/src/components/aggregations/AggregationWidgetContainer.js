@@ -25,7 +25,7 @@ import { CUSTOM_FIELD_TYPE } from "components/Model"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
-import { Col, ControlLabel, FormGroup } from "react-bootstrap"
+import { Col, Form, FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 export const AGGREGATION_WIDGET_TYPE = {
@@ -186,13 +186,13 @@ const AggregationWidgetContainer = ({
       <div id={widgetId}>
         {vertical ? (
           <>
-            {label !== null && <ControlLabel>{label}</ControlLabel>}
+            {label !== null && <Form.Label>{label}</Form.Label>}
             {widgetElem}
           </>
         ) : (
           <>
             {label !== null && (
-              <Col sm={2} componentClass={ControlLabel}>
+              <Col sm={2} as={Form.Label}>
                 {label}
               </Col>
             )}

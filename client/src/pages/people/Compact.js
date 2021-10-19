@@ -35,7 +35,7 @@ import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, DropdownButton, MenuItem, Table } from "react-bootstrap"
+import { Button, Dropdown, DropdownButton, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -497,90 +497,80 @@ const CompactPersonViewHeader = ({
   setPageSize,
   leftColumnFields,
   setLeftColumnFields
-}) => {
-  return (
-    <Header>
-      <label
-        htmlFor="leftColumnNumber"
-        key="lefColumnNumber"
-        style={{
-          display: "flex",
-          alignItems: "center"
-        }}
-      >
-        Left Column Fields
-        <input
-          type="number"
-          id="leftColumnNumber"
-          min="0"
-          className="form-control"
-          style={{ width: "60px", marginLeft: "5px" }}
-          value={leftColumnFields}
-          onChange={e => setLeftColumnFields(e.target.value)}
-        />
-      </label>
-      <DropdownButton
-        title="Page Size"
-        bsStyle="primary"
-        id="pageSizeButton"
-        onSelect={setPageSize}
-      >
-        {Object.keys(PAGE_SIZES).map(pageSize => (
-          <MenuItem
-            key={PAGE_SIZES[pageSize].name}
-            eventKey={PAGE_SIZES[pageSize]}
-            style={{ minWidth: "205px" }}
-          >
-            {PAGE_SIZES[pageSize].name}
-          </MenuItem>
-        ))}
-      </DropdownButton>
-      <DropdownButton
-        title="Presets"
-        bsStyle="primary"
-        id="presetsButton"
-        onSelect={fields =>
-          onPresetSelect(fields, optionalFields, setOptionalFields)
-        }
-      >
-        {PRESETS.map(preset => (
-          <MenuItem
-            key={preset.name}
-            eventKey={preset.fields}
-            style={{ minWidth: "185px" }}
-          >
-            {preset.label}
-          </MenuItem>
-        ))}
-      </DropdownButton>
-      <SimpleMultiCheckboxDropdown
-        label="Optional Fields ⇓"
-        options={optionalFields}
-        setOptions={setOptionalFields}
+}) => (
+  <Header>
+    <label
+      htmlFor="leftColumnNumber"
+      key="lefColumnNumber"
+      style={{
+        display: "flex",
+        alignItems: "center"
+      }}
+    >
+      Left Column Fields
+      <input
+        type="number"
+        id="leftColumnNumber"
+        min="0"
+        className="form-control"
+        style={{ width: "60px", marginLeft: "5px" }}
+        value={leftColumnFields}
+        onChange={e => setLeftColumnFields(e.target.value)}
       />
-      <Buttons>
-        {!noPerson && (
-          <Button
-            value="print"
-            type="button"
-            bsStyle="primary"
-            onClick={onPrintClick}
-          >
-            Print
-          </Button>
-        )}
-        <Button
-          value="detailedView"
-          type="button"
-          bsStyle="primary"
-          onClick={returnToDefaultPage}
+    </label>
+    <DropdownButton
+      title="Page Size"
+      variant="outline-secondary"
+      id="pageSizeButton"
+    >
+      {Object.entries(PAGE_SIZES).map(([key, pageSize]) => (
+        <Dropdown.Item
+          key={key}
+          onClick={() => setPageSize(pageSize)}
+          style={{ minWidth: "205px" }}
         >
-          Detailed View
+          {pageSize.name}
+        </Dropdown.Item>
+      ))}
+    </DropdownButton>
+    <DropdownButton
+      title="Presets"
+      variant="outline-secondary"
+      id="presetsButton"
+    >
+      {PRESETS.map(preset => (
+        <Dropdown.Item
+          key={preset.name}
+          onClick={() =>
+            onPresetSelect(preset.fields, optionalFields, setOptionalFields)
+          }
+          style={{ minWidth: "185px" }}
+        >
+          {preset.label}
+        </Dropdown.Item>
+      ))}
+    </DropdownButton>
+    <SimpleMultiCheckboxDropdown
+      label="Optional Fields ⇓"
+      options={optionalFields}
+      setOptions={setOptionalFields}
+    />
+    <Buttons>
+      {!noPerson && (
+        <Button value="print" variant="primary" onClick={onPrintClick}>
+          Print
         </Button>
-      </Buttons>
-    </Header>
-  )
-}
+      )}
+      <Button
+        value="detailedView"
+        variant="primary"
+        onClick={returnToDefaultPage}
+      >
+        Detailed View
+      </Button>
+    </Buttons>
+  </Header>
+)
 
 CompactPersonViewHeader.propTypes = {
   onPrintClick: PropTypes.func,

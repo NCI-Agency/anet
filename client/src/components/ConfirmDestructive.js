@@ -1,47 +1,54 @@
-import "components/react-confirm-bootstrap.css"
+import TriggerableConfirm from "components/TriggerableConfirm"
 import PropTypes from "prop-types"
 import React from "react"
-import { Button } from "react-bootstrap"
-import Confirm from "react-confirm-bootstrap"
 
 const ConfirmDestructive = ({
   onConfirm,
   operation,
   objectType,
   objectDisplay,
-  bsStyle,
+  variant,
   buttonLabel,
-  children,
-  ...otherProps
+  buttonSize,
+  buttonClassName,
+  buttonDisabled,
+  buttonId,
+  children
 }) => {
-  const confirmText = `Yes, I am sure that I want to ${operation} ${objectType} ${objectDisplay}`
+  const confirmText = "Yes, I am sure"
+  const cancelText = "No, I am not entirely sure at this point"
   const title = `Confirm to ${operation} ${objectType}`
-  const body = `Are you sure you want to ${operation} this ${objectType}? This cannot be undone.`
+  const body = `Are you sure you want to ${operation} ${objectType} ${objectDisplay}? This cannot be undone.`
 
   return (
-    <Confirm
+    <TriggerableConfirm
       onConfirm={onConfirm}
       title={title}
       body={body}
       confirmText={confirmText}
-      cancelText="No, I am not entirely sure at this point"
-      dialogClassName="react-confirm-bootstrap-modal"
-      confirmBSStyle="primary"
+      cancelText={cancelText}
+      variant={variant}
+      buttonLabel={buttonLabel}
+      buttonSize={buttonSize}
+      buttonClassName={buttonClassName}
+      buttonDisabled={buttonDisabled}
+      buttonId={buttonId}
     >
-      <Button bsStyle={bsStyle} {...otherProps}>
-        {buttonLabel}
-        {children}
-      </Button>
-    </Confirm>
+      {children}
+    </TriggerableConfirm>
   )
 }
 ConfirmDestructive.propTypes = {
   onConfirm: PropTypes.func.isRequired,
-  objectType: PropTypes.string.isRequired,
   operation: PropTypes.string.isRequired,
+  objectType: PropTypes.string.isRequired,
   objectDisplay: PropTypes.string.isRequired,
-  bsStyle: PropTypes.string,
+  variant: PropTypes.string,
   buttonLabel: PropTypes.string,
+  buttonSize: PropTypes.string,
+  buttonClassName: PropTypes.string,
+  buttonDisabled: PropTypes.bool,
+  buttonId: PropTypes.string,
   children: PropTypes.node
 }
 ConfirmDestructive.defaultProps = {

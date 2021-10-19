@@ -31,6 +31,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import { deserializeQueryParams } from "components/SearchFilters"
+import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
@@ -40,8 +41,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
-import Confirm from "react-confirm-bootstrap"
+import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -377,12 +377,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         const action = (
           <div>
             {canEmail && (
-              <Button onClick={toggleEmailModal}>Email report</Button>
+              <Button onClick={toggleEmailModal} variant="outline-secondary">
+                Email report
+              </Button>
             )}
             <Button
               value="compactView"
-              type="button"
-              bsStyle="primary"
+              variant="primary"
               onClick={onCompactClick}
             >
               Summary / Print
@@ -393,13 +394,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               </LinkTo>
             )}
             {canSubmit && renderSubmitButton(!isValid)}
-          </div>
-        )
-
-        return (
-          <div className="report-show">
-            {renderEmailModal(values, setFieldValue)}
-
             <RelatedObjectNotes
               notes={report.notes}
               relatedObject={
@@ -410,6 +404,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 }
               }
             />
+          </div>
+        )
+
+        return (
+          <div className="report-show">
+            {renderEmailModal(values, setFieldValue)}
+
             <Messages success={saveSuccess} error={saveError} />
 
             {report.isPublished() && (
@@ -523,7 +524,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   label="Summary"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <div id="intent" className="form-control-static">
+                    <div id="intent" className="form-control-plaintext">
                       <p>
                         <strong>{Settings.fields.report.intent}:</strong>{" "}
                         {report.intent}
@@ -777,14 +778,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   name="newComment"
                   label="Add a comment"
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  asA="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
                 />
                 <div className="right-button">
                   <Button
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={() =>
                       submitComment(values.newComment, setFieldValue)
                     }
@@ -818,9 +818,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         objectType="report"
                         operation="unpublish"
                         objectDisplay={"#" + uuid}
-                        bsStyle="warning"
+                        variant="warning"
                         buttonLabel={`Unpublish ${reportType}`}
-                        className="pull-left"
+                        buttonClassName="float-start"
                       />
                     </div>
                 )}
@@ -829,9 +829,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     onConfirm={onConfirmDelete}
                     objectType="report"
                     objectDisplay={"#" + uuid}
-                    bsStyle="warning"
+                    variant="danger"
                     buttonLabel={`Delete ${reportType}`}
-                    className="pull-right"
+                    buttonClassName="float-end"
                   />
                 </div>
               </div>
@@ -843,7 +843,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   )
 
   function renderNoPositionAssignedText() {
-    const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+    const alertStyle = {
+      marginBottom: "1rem",
+      textAlign: "center",
+      zIndex: "-1"
+    }
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
     const advisorPositionSingular = Settings.fields.advisor.position.name
@@ -916,7 +920,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="approvalComment"
           label="Approval comment"
           component={FieldHelper.InputField}
-          componentClass="textarea"
+          asA="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -943,7 +947,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="requestChangesComment"
           label="Request changes comment"
           component={FieldHelper.InputField}
-          componentClass="textarea"
+          asA="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -956,7 +960,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function renderEmailModal(values, setFieldValue) {
     return (
-      <Modal show={showEmailModal} onHide={toggleEmailModal}>
+      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Modal.Header closeButton>
           <Modal.Title>Email {reportTypeUpperFirst}</Modal.Title>
         </Modal.Header>
@@ -968,27 +972,27 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             validate={email => handleEmailValidation(email)}
             vertical
           >
-            <HelpBlock>
+            <FormText>
               One or more email addresses, comma separated, e.g.:
               <br />
               <em>
                 jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X"
                 &lt;x@example.org&gt;
               </em>
-            </HelpBlock>
+            </FormText>
           </Field>
 
           <Field
             name="comment"
             component={FieldHelper.InputField}
-            componentClass="textarea"
+            asA="textarea"
             vertical
           />
         </Modal.Body>
 
         <Modal.Footer>
           <Button
-            bsStyle="primary"
+            variant="primary"
             onClick={() => emailReport(values, setFieldValue)}
           >
             Send Email
@@ -1169,23 +1173,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         : []
     )
     return _isEmpty(warnings) ? (
-      <Button bsStyle="warning" onClick={confirmHandler}>
+      <Button variant="warning" onClick={confirmHandler}>
         {label}
       </Button>
     ) : (
-      <Confirm
+      <TriggerableConfirm
         onConfirm={confirmHandler}
         title="Request changes?"
         body={renderValidationWarnings(warnings, "rejecting")}
         confirmText="Request changes anyway"
         cancelText="Cancel change request"
-        dialogClassName="react-confirm-bootstrap-modal"
-        confirmBSStyle="primary"
-      >
-        <Button bsStyle="warning" onClick={confirmHandler}>
-          {label}
-        </Button>
-      </Confirm>
+        variant="warning"
+        buttonLabel={label}
+      />
     )
   }
 
@@ -1261,9 +1261,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     )
     return _isEmpty(warnings) ? (
       <Button
-        type="button"
-        bsStyle="primary"
-        bsSize={size}
+        variant="primary"
+        size={size}
         className={className}
         onClick={confirmHandler}
         disabled={disabled}
@@ -1272,26 +1271,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         {label}
       </Button>
     ) : (
-      <Confirm
+      <TriggerableConfirm
         onConfirm={confirmHandler}
         title={title}
         body={renderValidationWarnings(warnings, submitType)}
         confirmText={confirmText}
         cancelText={cancelText}
-        dialogClassName="react-confirm-bootstrap-modal"
-        confirmBSStyle="primary"
-      >
-        <Button
-          type="button"
-          bsStyle="primary"
-          bsSize={size}
-          className={className}
-          disabled={disabled}
-          id={id}
-        >
-          {label}
-        </Button>
-      </Confirm>
+        variant="primary"
+        buttonLabel={label}
+        buttonSize={size}
+        buttonClassName={className}
+        buttonDisabled={disabled}
+        buttonId={id}
+      />
     )
   }
 
@@ -1314,7 +1306,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       : `The following errors must be fixed before ${submitType} this ${reportType}:`
     const style = report.isFuture() ? "info" : "danger"
     return (
-      <Alert bsStyle={style}>
+      <Alert variant={style}>
         {warning}
         <ul>
           {validationErrors.map((error, idx) => (
@@ -1330,7 +1322,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       return null
     }
     return (
-      <Alert bsStyle="warning">
+      <Alert variant="warning">
         The following warnings should be addressed before {submitType} this{" "}
         {reportType}:
         <ul>

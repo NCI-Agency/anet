@@ -1,12 +1,4 @@
-/* Copied from https://github.com/twbs/bootstrap/pull/18775/files */
 html {
-  /*
-   * IE11 & Edge make the scrollbar overlap the content and automatically hide itself when not in use.
-   * Unfortunately, the auto-showing of the scrollbar is sometimes too sensitive,
-   * thus making it hard to click on stuff near the right edge of the page.
-   * So we add this style to force IE11 & Edge to use a "normal", non-overlapping, non-auto-hiding scrollbar.
-   * See https://github.com/twbs/bootstrap/issues/18543
-   */
   height: 100%;
 }
 
@@ -24,6 +16,13 @@ body {
 
 .anet {
   height: 100vh;
+}
+
+a {
+  font-size: 15px;
+}
+a:focus {
+  outline: none;
 }
 
 h5 {
@@ -60,8 +59,7 @@ fieldset {
   font-weight: normal;
 }
 
-h2.legend {
-  font-size: 2rem;
+h4.legend {
   margin-top: 1rem;
 }
 
@@ -134,9 +132,8 @@ fieldset.danger {
   width: 100%;
 }
 
-.form-control {
-  height: 38px;
-  font-size: 1.1em;
+.form-label {
+  font-weight: bold;
 }
 
 .form-control-icon {
@@ -146,6 +143,10 @@ fieldset.danger {
   height: 26px;
   z-index: 5;
   opacity: 0.5;
+}
+
+textarea.form-control {
+  height: auto;
 }
 
 #duration {
@@ -172,6 +173,10 @@ fieldset.danger {
   padding: 0;
 }
 
+a.btn {
+  text-decoration: none;
+}
+
 .btn.btn-link {
   overflow: visible;
   width: 100%;
@@ -189,6 +194,20 @@ fieldset.danger {
   display: none;
 }
 
+.btn.btn-outline-secondary input {
+  display: none;
+}
+
+.light-colored-toggle-button:hover {
+  background-color: rgb(230, 230, 230);
+  color: black;
+}
+
+.dark-colored-toggle-button:hover {
+  background-color: rgb(170, 170, 170);
+  color: white;
+}
+
 .dropdown-menu {
   overflow-y: auto;
   max-height: 400px;
@@ -204,9 +223,38 @@ fieldset.danger {
   background-color: #e0e0e0;
 }
 
-.nav > li > a:hover,
-.nav .open > a:focus {
+.nav-pills .nav-link:hover {
   background-color: #e0e0e0;
+  text-decoration: none;
+  color: #337ab7;
+}
+
+.nav #style-nav .nav-item .nav-link {
+  margin: 2px 0 2px 1rem;
+}
+
+.nav #style-nav .nav-item .nav-link.active {
+  margin-left: 1rem;
+  background-color: transparent;
+  color: #337ab7;
+  border-left: 5px solid #337ab7;
+  border-radius: 0;
+  padding-left: 10px;
+}
+
+.nav #style-nav .nav-item .nav-link.active:hover {
+  background-color: #e0e0e0;
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.dropdown-item {
+  white-space: normal;
+  word-break: normal;
+}
+
+.dropdown-item:hover {
+  text-decoration: none;
 }
 
 .header .logo img,
@@ -298,11 +346,10 @@ button.home-tile.btn {
   font-weight: 900;
 }
 
-.home-tile:hover {
+.home-tile-col:hover {
   background: #dae3ee;
 }
-.home-tile:hover,
-.home-tile:focus {
+.home-tile-col:focus {
   text-decoration: none;
 }
 
@@ -324,11 +371,16 @@ button.home-tile.btn {
   text-align: center;
 }
 
-.caret {
+form.advanced-search-form ~ div.bp3-overlay.bp3-overlay-open.bp3-overlay-inline div.advanced-search.form-horizontal {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.dropdown-toggle::after {
   transition: 0.3s ease;
 }
 
-.caret-rotate {
+.dropdown-toggle-rotate::after {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
 }
@@ -338,17 +390,18 @@ button.home-tile.btn {
   margin-right: 6px;
 }
 
-.nav-pills li.active > #nav-links-button {
+#nav-links-opened {
   background-color: #e0e0e0;
   color: #337ab7;
+  border-radius: 0.25rem;
 }
 
 .nav > .nav > li > a {
-  border-left: 4px solid rgba(0, 0, 0, 0);
+  border-left: 4px solid rgba(155, 145, 145, 0);
   padding: 4px 4px 4px 38px;
 }
 
-.nav .nav > li.active > a {
+.nav .nav-link > .active > a {
   border-left: 4px solid #1772b8;
 }
 
@@ -424,7 +477,7 @@ li#search-nav .nav > li a {
   font-size: 1.4rem;
 }
 
-.report-summary h2 {
+.report-summary h4 {
   font-weight: bold;
 }
 
@@ -518,10 +571,6 @@ button {
 
 .getting-started-grid p {
   margin-bottom: 0;
-}
-
-table.borderless td {
-  border: none !important;
 }
 
 table hr.attendee-divider {
@@ -768,6 +817,15 @@ table hr.attendee-divider {
   background-color: #2965cc;
 }
 
+.form-horizontal .label-align,
+.form-horizontal .form-label {
+  text-align: right;
+}
+
+.form-horizontal .form-label {
+  padding-top: 9px;
+}
+
 .form-horizontal fieldset:last-child {
   margin-bottom: 10px;
 }
@@ -829,7 +887,7 @@ table hr.attendee-divider {
   width: 190px;
 }
 
-.form-control-static {
+.form-control-plaintext {
   /* The design calls for 18px of separation between static form rows.
     The form row already has padding-top: 7px and padding-bottom: 7px,
     and the form control has margin-bottom: 15px. 15 + x = 18 - (7 + 7); x = -11
@@ -887,22 +945,26 @@ header.searchPagination {
   font-size: 0.8em;
 }
 
+.offcanvas.offcanvas-end.show:focus {
+  outline: none;
+}
+
 .advanced-select-popover .bp3-popover2-content-sizing {
-	width: 100% !important;
+  width: 100% !important;
 }
 
 .advanced-select-popover span.bp3-popover2-target {
-	display: block;
-	width: 100%;
+  display: block;
+  width: 100%;
 }
 
 .advanced-select-popover .bp3-popover2-transition-container {
-	top: 50px !important;
+  top: 50px !important;
 }
 
 .advanced-select-popover .bp3-popover2-content {
-	min-width: 400px;
-	max-width: 90vw !important;
+  min-width: 400px;
+  max-width: 90vw !important;
 }
 
 .advanced-search {
@@ -921,26 +983,9 @@ header.searchPagination {
   margin-top: -8px;
 }
 
-.advanced-search select {
-  height: 32px;
-}
-.advanced-search select[multiple] {
-  height: 64px;
-}
-
-.advanced-search .col-xs-1 .btn,
-.advanced-search .col-sm-1 .btn {
-  padding-left: 0;
-  text-align: left;
-}
-
 .advanced-search .col-xs-1 .btn img,
 .advanced-search .col-sm-1 .btn img {
   vertical-align: baseline;
-}
-
-.only-show-for-print {
-  display: none;
 }
 
 .general-banner {
@@ -1077,8 +1122,12 @@ header.searchPagination {
   transform: translate(0, 150px);
 }
 
-.modal-dialog {
-  width: 650px;
+.fade.in.modal {
+  opacity: 1;
+}
+
+.rich-text-modal {
+  min-width: 650px;
 }
 
 @page {
@@ -1086,17 +1135,12 @@ header.searchPagination {
 }
 
 @media print {
-  .only-show-for-print {
-    display: inherit;
-  }
-
   .breadcrumb,
   .header,
   .banner,
   .add-new-comment,
   button,
   .btn,
-  .hide-for-print,
   .main-sidebar {
     display: none !important;
   }
@@ -1114,31 +1158,6 @@ header.searchPagination {
   a[href]:after {
     content: none;
   }
-
-  /* The following rules are from Bootstrap, but they're in media queries. Those media queries do not get picked up for @media print,
-    so we need to copy them here for the print view to see them. If we ever change the version of Bootstrap being used, we'll have
-    to re-copy the styles here to make the print view consistent. */
-  .form-horizontal .control-label {
-    padding-top: 7px;
-    margin-bottom: 0;
-    text-align: right;
-  }
-
-  .col-sm-1,
-  .col-sm-2,
-  .col-sm-3,
-  .col-sm-4,
-  .col-sm-5,
-  .col-sm-6,
-  .col-sm-7,
-  .col-sm-8,
-  .col-sm-9,
-  .col-sm-10,
-  .col-sm-11,
-  .col-sm-12 {
-    float: left;
-  }
-  /* end styles copied from bootstrap */
 
   /* Normally, the primary content is 9 columns. When we remove the nav, we'd like the primary content to expand to fill the remaining space.
     To do this, we'll override the 9 columns class and make the width 100% */
@@ -1185,21 +1204,17 @@ header.searchPagination {
   align-items: center;
 }
 
-#fg-position > .col-sm-3,
-#fg-prevPositions > .col-sm-3 {
+#fg-position .col-sm-3,
+#fg-prevPositions .col-sm-3 {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
 }
 
-#fg-position > .col-sm-3 > *, #fg-prevPositions > .col-sm-3 > * {
+#fg-position .col-sm-3 > *,
+#fg-prevPositions .col-sm-3 > * {
   margin-left: 10px;
-}
-
-.react-confirm-bootstrap-modal .modal-content {
-  width: max-content;
-  white-space: wrap;
 }
 
 @media screen and (max-width: 768px) {
@@ -1231,7 +1246,7 @@ header.searchPagination {
   }
 
   .search-popover-target ~ .bp3-overlay > .bp3-popover2-transition-container {
-    left: -20vw !important;
+    left: 5vw !important;
     width: 90vw;
   }
 
@@ -1244,11 +1259,6 @@ header.searchPagination {
   }
   .home-tile-row .row > * {
     width: 33%;
-  }
-  /* Pagination button list shouldn't float on small screens */
-  .pagination.pull-right {
-    float: none !important;
-    display: block;
   }
 
   /* hide guide tour on small screen as it is broken */
@@ -1275,12 +1285,8 @@ header.searchPagination {
     padding: 1em;
   }
 
-  .react-confirm-bootstrap-modal .modal-footer {
-    flex-direction: column;
-  }
-
-  .react-confirm-bootstrap-modal .modal-footer button {
-    white-space: normal;
-    margin-bottom: 0.5rem;
+  .form-horizontal .label-align,
+  .form-horizontal .form-label {
+    text-align: left;
   }
 }

@@ -10,7 +10,8 @@ test("Move someone in and out of a position", async t => {
     By,
     until,
     shortWaitMs,
-    mediumWaitMs
+    mediumWaitMs,
+    longWaitMs
   } = t.context
 
   await t.context.get("/", "rebecca")
@@ -27,7 +28,7 @@ test("Move someone in and out of a position", async t => {
     personName,
     positionName
   )
-  await t.context.driver.sleep(mediumWaitMs) // wait for transition
+  await t.context.driver.sleep(longWaitMs) // wait for transition
 
   const $changeAssignedPositionButton = await $(
     "button.change-assigned-position"
@@ -35,6 +36,9 @@ test("Move someone in and out of a position", async t => {
   await t.context.driver.wait(
     until.elementIsVisible($changeAssignedPositionButton)
   )
+  // Move element into view
+  const actions = t.context.driver.actions({ async: true })
+  await actions.move({ origin: $changeAssignedPositionButton }).perform()
   await $changeAssignedPositionButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
@@ -50,7 +54,7 @@ test("Move someone in and out of a position", async t => {
   )
   await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
 
-  const $notAssignedMsg = await $("div#current-position")
+  const $notAssignedMsg = await $("div#position")
   await t.context.driver.wait(
     until.elementIsVisible($notAssignedMsg),
     mediumWaitMs
@@ -184,7 +188,8 @@ test("Update permissions while changing positions", async t => {
     By,
     until,
     shortWaitMs,
-    mediumWaitMs
+    mediumWaitMs,
+    longWaitMs
   } = t.context
 
   const testUserMapper = {
@@ -269,7 +274,7 @@ test("Update permissions while changing positions", async t => {
     await element.click()
     // Grab the position information type from the position page.
     const $infoText = await $(
-      "div.scroll-anchor-container div#fg-type.form-group div.form-control-static"
+      "div.scroll-anchor-container div#fg-type div.form-control-plaintext"
     )
     // Wait until the information is displayed.
     await t.context.driver.wait(until.elementIsVisible($infoText), mediumWaitMs)
@@ -289,17 +294,22 @@ test("Update permissions while changing positions", async t => {
 
   // Click to the given advisor name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    testUsers[testUserMapper.super_user_2].personName,
-    testUsers[testUserMapper.super_user_2].positionName
+    testUsers[testUserMapper.super_user_2].personName, // Dwight
+    testUsers[testUserMapper.super_user_2].positionName // EF 5.1 Super User Sales 2
   )
   // Wait for transition.
-  await t.context.driver.sleep(mediumWaitMs)
+  await t.context.driver.sleep(longWaitMs)
   // Grab the "Change position" button.
-  let $changeAssignedPositionButton = await $("button.change-assigned-position")
+  const $changeAssignedPositionButton = await $(
+    "button.change-assigned-position"
+  )
   // Wait for the button to be displayed.
   await t.context.driver.wait(
     until.elementIsVisible($changeAssignedPositionButton)
   )
+  // Move element into view
+  const actions = t.context.driver.actions({ async: true })
+  await actions.move({ origin: $changeAssignedPositionButton }).perform()
   // Click on the "Change position" button.
   await $changeAssignedPositionButton.click()
   // Wait for dialog to appear.
@@ -351,19 +361,24 @@ test("Update permissions while changing positions", async t => {
 
   // Click to the given advisor name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    testUsers[testUserMapper.advisor_2].personName,
-    testUsers[testUserMapper.advisor_2].positionName
+    testUsers[testUserMapper.advisor_2].personName, // Kevin
+    testUsers[testUserMapper.advisor_2].positionName // EF 5.1 Advisor Accounting
   )
   // Wait for transition.
-  await t.context.driver.sleep(mediumWaitMs)
+  await t.context.driver.sleep(longWaitMs)
   // Grab the "Change position" button.
-  $changeAssignedPositionButton = await $("button.change-assigned-position")
+  const $changeAssignedPositionButton2 = await $(
+    "button.change-assigned-position"
+  )
   // Wait for the button to be displayed.
   await t.context.driver.wait(
-    until.elementIsVisible($changeAssignedPositionButton)
+    until.elementIsVisible($changeAssignedPositionButton2)
   )
+  // Move element into view
+  const actions2 = t.context.driver.actions({ async: true })
+  await actions2.move({ origin: $changeAssignedPositionButton2 }).perform()
   // Click on the "Change position" button.
-  await $changeAssignedPositionButton.click()
+  await $changeAssignedPositionButton2.click()
   // Wait for dialog to appear.
   await t.context.driver.sleep(shortWaitMs)
   // Grab the "Remove Person" button.
@@ -402,7 +417,7 @@ test("Update permissions while changing positions", async t => {
 
   // Grab the specified position from the DOM.
   const positionButton = await t.context.driver.findElement(
-    By.linkText(testUsers[testUserMapper.advisor_1].positionName)
+    By.linkText(testUsers[testUserMapper.advisor_1].positionName) // EF 5.1 Advisor Quality Assurance (Creed)
   )
   // Click on the position link.
   await positionButton.click()
@@ -417,7 +432,9 @@ test("Update permissions while changing positions", async t => {
   // Wait for transition
   await t.context.driver.sleep(mediumWaitMs)
   // Grab the person input field
-  const personInputField = await t.context.driver.findElement(By.css("#person"))
+  const personInputField = await t.context.driver.findElement(
+    By.css("input#person")
+  )
   // Click on the input field
   await personInputField.click()
   // Wait for transition
@@ -428,7 +445,7 @@ test("Update permissions while changing positions", async t => {
     for (const item of listItems) {
       if (
         (await item.getText()) ===
-        testUsers[testUserMapper.super_user_1].personName
+        testUsers[testUserMapper.super_user_1].personName // Jim
       ) {
         await item.click()
         await t.context.driver.sleep(mediumWaitMs)
@@ -436,7 +453,7 @@ test("Update permissions while changing positions", async t => {
       }
     }
     // Grab pagination buttons
-    const pagination = await t.context.driver.findElements(By.css("a"))
+    const pagination = await t.context.driver.findElements(By.css("span"))
     for (const item of pagination) {
       if ((await item.getText()) === "›") {
         await item.click()
@@ -454,7 +471,7 @@ test("Update permissions while changing positions", async t => {
   await t.context.driver.sleep(mediumWaitMs)
   // Grab the position information type from the position page.
   const $infoText = await $(
-    "div.scroll-anchor-container div#fg-type.form-group div.form-control-static"
+    "div.scroll-anchor-container div#fg-type div.form-control-plaintext"
   )
   // Wait until the information is displayed.
   await t.context.driver.wait(until.elementIsVisible($infoText), mediumWaitMs)

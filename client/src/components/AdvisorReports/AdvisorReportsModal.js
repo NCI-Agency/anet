@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 import React from "react"
 
 const AdvisorReportsModal = props => (
-  <SimpleModal title={props.name} size="large">
+  <SimpleModal title={props.name} size="lg">
     <AdvisorReportsTable
       columnGroups={props.columnGroups}
       orgUuid={props.uuid}

@@ -13,6 +13,7 @@ describe("Home page", () => {
       Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
+      browser.pause(1000)
       expect(Home.myCounterpartsNotifications.getText()).to.equal("1")
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myTasksNotifications.isExisting()).to.be.false
@@ -22,6 +23,7 @@ describe("Home page", () => {
       Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
+      browser.pause(1000)
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
       expect(Home.myTasksNotifications.getText()).to.equal("1")
@@ -31,6 +33,7 @@ describe("Home page", () => {
       Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
       Home.myTasksLink.waitForDisplayed()
+      browser.pause(1000)
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
       expect(Home.myTasksNotifications.getText()).to.equal("1")

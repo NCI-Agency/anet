@@ -23,13 +23,13 @@ describe("Create authorization group form page", () => {
         "this is just a test authorization group"
       )
       CreateAuthorizationGroup.statusActiveButton.waitForDisplayed()
-      expect(
-        CreateAuthorizationGroup.statusActiveButton.getAttribute("class")
-      ).to.include("active")
+      expect(CreateAuthorizationGroup.statusActiveInput.getValue()).to.be.equal(
+        "ACTIVE"
+      )
       CreateAuthorizationGroup.statusInactiveButton.waitForDisplayed()
       expect(
-        CreateAuthorizationGroup.statusInactiveButton.getAttribute("class")
-      ).to.not.include("active")
+        CreateAuthorizationGroup.statusInactiveInput.getValue()
+      ).to.not.equal("ACTIVE")
       CreateAuthorizationGroup.statusInactiveButton.click()
       // eslint-disable-next-line no-unused-expressions
       expect($(".positions_table").isExisting()).to.be.false

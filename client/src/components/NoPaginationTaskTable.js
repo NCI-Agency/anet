@@ -22,7 +22,7 @@ const NoPaginationTaskTable = ({
   return (
     <div id={id}>
       {tasksExist ? (
-        <Table striped condensed hover responsive className="tasks_table">
+        <Table striped hover responsive className="tasks_table">
           <thead>
             <tr>
               <th>Name</th>
@@ -73,7 +73,6 @@ const NoPaginationTaskTable = ({
                     <td id={"taskDelete_" + task.uuid}>
                       <RemoveButton
                         title={`Remove ${fieldSettings.shortLabel}`}
-                        altText={`Remove ${fieldSettings.shortLabel}`}
                         onClick={() => onDelete(task)}
                       />
                     </td>

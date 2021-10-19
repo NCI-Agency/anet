@@ -47,7 +47,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
+import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -156,7 +156,8 @@ const ReportForm = ({
   edit,
   title,
   initialValues,
-  showSensitiveInfo: ssi
+  showSensitiveInfo: ssi,
+  notesComponent
 }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -228,7 +229,7 @@ const ReportForm = ({
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =
     currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()
-  const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+  const alertStyle = { marginBottom: "1rem", textAlign: "center", zIndex: "-1" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
@@ -401,13 +402,13 @@ const ReportForm = ({
         const action = (
           <div>
             <Button
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
               disabled={isSubmitting}
             >
               {submitText}
             </Button>
+            {notesComponent}
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
@@ -452,7 +453,7 @@ const ReportForm = ({
                   name="intent"
                   label={Settings.fields.report.intent}
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  asA="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
                   onChange={event => {
@@ -495,11 +496,11 @@ const ReportForm = ({
                   }
                 >
                   {isFutureEngagement && (
-                    <HelpBlock>
+                    <FormBS.Text>
                       <span className="text-success">
                         This will create a planned engagement
                       </span>
-                    </HelpBlock>
+                    </FormBS.Text>
                   )}
                 </FastField>
 
@@ -570,8 +571,9 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
-                      <Checkbox
-                        inline
+                      <FormBS.Check
+                        type="checkbox"
+                        label="This engagement was cancelled"
                         className="cancelled-checkbox"
                         checked={values.cancelled}
                         onClick={event =>
@@ -584,9 +586,7 @@ const ReportForm = ({
                             true
                           )
                         }
-                      >
-                        This engagement was cancelled
-                      </Checkbox>
+                      />
                     }
                   />
                 )}
@@ -600,16 +600,13 @@ const ReportForm = ({
                       setFieldValue("cancelledReason", event.target.value, true)
                     }}
                     widget={
-                      <FastField
-                        component="select"
-                        className="cancelled-reason-form-group form-control"
-                      >
+                      <FormBS.Select className="cancelled-reason-form-group">
                         {cancelledReasonOptions.map(reason => (
                           <option key={reason.value} value={reason.value}>
                             {reason.label}
                           </option>
                         ))}
-                      </FastField>
+                      </FormBS.Select>
                     }
                   />
                 )}
@@ -822,12 +819,12 @@ const ReportForm = ({
                       name="keyOutcomes"
                       label={Settings.fields.report.keyOutcomes}
                       component={FieldHelper.InputField}
+                      asA="textarea"
                       onChange={event => {
                         setFieldTouched("keyOutcomes", true, false)
                         setFieldValue("keyOutcomes", event.target.value, false)
                         validateFieldDebounced("keyOutcomes")
                       }}
-                      componentClass="textarea"
                       maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
                         countCharsLeft(
@@ -853,7 +850,7 @@ const ReportForm = ({
                     name="nextSteps"
                     label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
-                    componentClass="textarea"
+                    asA="textarea"
                     onChange={event => {
                       setFieldTouched("nextSteps", true, false)
                       setFieldValue("nextSteps", event.target.value, false)
@@ -901,14 +898,19 @@ const ReportForm = ({
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 
-                <Button
-                  className="center-block toggle-section-button"
-                  style={{ marginBottom: "1rem" }}
-                  onClick={toggleReportText}
-                  id="toggleSensitiveInfo"
-                >
-                  {showSensitiveInfo ? "Hide" : "Add"} sensitive information
-                </Button>
+                <div style={{ textAlign: "center" }}>
+                  <Button
+                    variant="outline-secondary"
+                    className="center-block toggle-section-button"
+                    style={{
+                      marginBottom: "1rem"
+                    }}
+                    onClick={toggleReportText}
+                    id="toggleSensitiveInfo"
+                  >
+                    {showSensitiveInfo ? "Hide" : "Add"} sensitive information
+                  </Button>
+                </div>
 
                 <Collapse in={showSensitiveInfo}>
                   {(values.reportSensitiveInformation || !edit) && (
@@ -1053,7 +1055,9 @@ const ReportForm = ({
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   {autoSavedAt && (
@@ -1069,16 +1073,15 @@ const ReportForm = ({
                       onConfirm={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
-                      bsStyle="warning"
+                      variant="danger"
                       buttonLabel={`Delete this ${getReportType(values)}`}
-                      disabled={isSubmitting}
+                      buttonDisabled={isSubmitting}
                     />
                   )}
                   {/* Skip validation on save! */}
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={() =>
                       onSubmit(values, { resetForm, setSubmitting })
                     }
@@ -1416,7 +1419,8 @@ ReportForm.propTypes = {
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  showSensitiveInfo: PropTypes.bool
+  showSensitiveInfo: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 ReportForm.defaultProps = {

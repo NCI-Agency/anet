@@ -30,7 +30,7 @@ import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import {
   Button,
-  Checkbox,
+  FormCheck,
   ListGroup,
   ListGroupItem,
   Nav
@@ -193,19 +193,35 @@ const OrganizationShow = ({ pageDispatchers }) => {
       : null
   const isMyOrg = myOrg && organization.uuid === myOrg.uuid
   const orgSubNav = (
-    <Nav>
-      <AnchorNavItem to="info">Info</AnchorNavItem>
-      <AnchorNavItem to="supportedPositions">Supported positions</AnchorNavItem>
-      <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
-      {!isPrincipalOrg && (
-        <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
-      )}
-      {organization.isTaskEnabled() && (
-        <AnchorNavItem to="tasks">
-          {pluralize(Settings.fields.task.shortLabel)}
-        </AnchorNavItem>
-      )}
-      <AnchorNavItem to="reports">Reports</AnchorNavItem>
+    <Nav className="flex-column">
+      <span id="style-nav">
+        <Nav.Item>
+          <AnchorNavItem to="info">Info</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="supportedPositions">
+            Supported positions
+          </AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
+        </Nav.Item>
+        {!isPrincipalOrg && (
+          <Nav.Item>
+            <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
+          </Nav.Item>
+        )}
+        {organization.isTaskEnabled() && (
+          <Nav.Item>
+            <AnchorNavItem to="tasks">
+              {pluralize(Settings.fields.task.shortLabel)}
+            </AnchorNavItem>
+          </Nav.Item>
+        )}
+        <Nav.Item>
+          <AnchorNavItem to="reports">Reports</AnchorNavItem>
+        </Nav.Item>
+      </span>
     </Nav>
   )
   const reportQueryParams = {
@@ -246,6 +262,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <RelatedObjectNotes
+              notes={organization.notes}
+              relatedObject={
+                organization.uuid && {
+                  relatedObjectType: Organization.relatedObjectType,
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
+                }
+              }
+            />
           </div>
         )
         return (
@@ -261,7 +287,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
             </SubNav>
 
             {currentUser.isSuperUser() && (
-              <div className="pull-right">
+              <div className="float-end">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."
                   tour={orgTour}
@@ -274,16 +300,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
               </div>
             )}
 
-            <RelatedObjectNotes
-              notes={organization.notes}
-              relatedObject={
-                organization.uuid && {
-                  relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid,
-                  relatedObject: organization
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -435,23 +451,24 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     <>
                       <Button
                         value="toggle-filter"
-                        className="btn btn-sm"
+                        size="sm"
                         onClick={() =>
                           setFilterPendingApproval(!filterPendingApproval)
                         }
+                        variant="outline-secondary"
                       >
                         {filterPendingApproval
                           ? "Show all reports"
                           : "Show pending approval"}
                       </Button>
-                      <Checkbox
+                      <FormCheck
+                        type="checkbox"
+                        label="include reports from sub-orgs"
                         checked={includeChildrenOrgs}
                         onChange={() =>
                           setIncludeChildrenOrgs(!includeChildrenOrgs)
                         }
-                      >
-                        include reports from sub-orgs
-                      </Checkbox>
+                      />
                     </>
                   }
                 />

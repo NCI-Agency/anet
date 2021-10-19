@@ -17,20 +17,20 @@ class EditReport extends Page {
     return browser.$('//button[text()="Unpublish report"]')
   }
 
+  get confirmModal() {
+    return browser.$("div.triggerable-confirm-bootstrap-modal")
+  }
+
   get alertSuccess() {
     return browser.$(".alert-success")
   }
 
   confirmDeleteButton(uuid) {
-    return browser.$(
-      `//div[@class="modal-footer"]//button[text()="Yes, I am sure that I want to delete report ${uuid}"]`
-    )
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   confirmUnpublishButton(uuid) {
-    return browser.$(
-      `//div[@class="modal-footer"]//button[text()="Yes, I am sure that I want to unpublish report #${uuid}"]`
-    )
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   deleteReport(uuid) {

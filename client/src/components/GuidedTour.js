@@ -54,7 +54,7 @@ const GuidedTour = ({ autostart, title, tour, onEnd }) => {
   const titleText = title || "New to ANET? Take a guided tour"
   return (
     <Button
-      bsStyle="link"
+      variant="link"
       onClick={startTour}
       className="persistent-tour-launcher"
     >

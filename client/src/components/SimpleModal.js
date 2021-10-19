@@ -12,7 +12,8 @@ const SimpleModal = props => {
       </span>
 
       <Modal
-        bsSize={props.size}
+        centered
+        size={props.size}
         show={showModal}
         onHide={() => setShowModal(false)}
       >
@@ -21,7 +22,12 @@ const SimpleModal = props => {
         </Modal.Header>
         <Modal.Body>{props.children}</Modal.Body>
         <Modal.Footer>
-          <Button onClick={() => setShowModal(false)}>Close</Button>
+          <Button
+            onClick={() => setShowModal(false)}
+            variant="outline-secondary"
+          >
+            Close
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

@@ -176,7 +176,13 @@ const TaskShow = ({ pageDispatchers }) => {
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
   const TaskCustomFieldEnum1 = DictionaryField(Field)
+  const cfe1Button =
+    Settings.fields.task.customFieldEnum1?.enum?.[task.customFieldEnum1]
+  const cfe1Buttons = cfe1Button ? { [task.customFieldEnum1]: cfe1Button } : {}
   const TaskCustomFieldEnum2 = DictionaryField(Field)
+  const cfe2Button =
+    Settings.fields.task.customFieldEnum2?.enum?.[task.customFieldEnum2]
+  const cfe2Buttons = cfe2Button ? { [task.customFieldEnum2]: cfe2Button } : {}
 
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
@@ -190,23 +196,31 @@ const TaskShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo modelType="Task" model={task} edit button="primary">
-            Edit
-          </LinkTo>
+        const action = (
+          <>
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo modelType="Task" model={task} edit button="primary">
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+            <span className="ms-3">
+              <RelatedObjectNotes
+                notes={task.notes}
+                relatedObject={
+                  task.uuid && {
+                    relatedObjectType: Task.relatedObjectType,
+                    relatedObjectUuid: task.uuid,
+                    relatedObject: task
+                  }
+                }
+              />
+            </span>
+          </>
         )
         return (
           <div>
-            <RelatedObjectNotes
-              notes={task.notes}
-              relatedObject={
-                task.uuid && {
-                  relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid,
-                  relatedObject: task
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -245,10 +259,10 @@ const TaskShow = ({ pageDispatchers }) => {
                     name="shortName"
                     component={FieldHelper.ReadonlyField}
                   />
-                  {/* Override componentClass and style from dictProps */}
+                  {/* Override as and style from dictProps */}
                   <LongNameField
                     dictProps={fieldSettings.longName}
-                    componentClass="div"
+                    as="div"
                     style={{}}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
@@ -329,7 +343,9 @@ const TaskShow = ({ pageDispatchers }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.ReadonlyField}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={true}
+                      buttons={FieldHelper.customEnumButtons(cfe1Buttons)}
                     />
                   )}
                   {Settings.fields.task.customFieldEnum2 && (
@@ -339,7 +355,9 @@ const TaskShow = ({ pageDispatchers }) => {
                         "enum"
                       )}
                       name="customFieldEnum2"
-                      component={FieldHelper.ReadonlyField}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={true}
+                      buttons={FieldHelper.customEnumButtons(cfe2Buttons)}
                     />
                   )}
                 </Fieldset>

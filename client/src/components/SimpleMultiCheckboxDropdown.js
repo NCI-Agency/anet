@@ -1,6 +1,7 @@
 import styled from "@emotion/styled"
 import PropTypes from "prop-types"
 import React, { useRef, useState } from "react"
+import { Button } from "react-bootstrap"
 import { useOutsideClick } from "utils"
 
 /**
@@ -15,12 +16,12 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
 
   return (
     <DropdownButton ref={dropDownRef} active={active}>
-      <button
-        className="btn btn-primary"
+      <Button
+        variant="outline-secondary"
         onClick={() => setActive(curr => !curr)}
       >
         {label}
-      </button>
+      </Button>
       <div>
         <div>
           {Object.entries(options).map(([optionKey, option]) => (
@@ -46,8 +47,8 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
             </label>
           ))}
           <div>
-            <button
-              className="btn btn-primary"
+            <Button
+              variant="secondary"
               onClick={() =>
                 setOptions(prev => {
                   const newer = { ...prev }
@@ -57,9 +58,9 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
               }
             >
               Select All
-            </button>
-            <button
-              className="btn btn-primary"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() =>
                 setOptions(prev => {
                   const newer = { ...prev }
@@ -69,7 +70,7 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
               }
             >
               Clear All
-            </button>
+            </Button>
           </div>
         </div>
       </div>

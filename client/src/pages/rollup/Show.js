@@ -32,7 +32,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useMemo, useState } from "react"
-import { Button, HelpBlock, Modal } from "react-bootstrap"
+import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
@@ -359,15 +359,24 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               />
             </div>
             {focusedOrg ? (
-              <Button onClick={() => setFocusedOrg(null)}>
+              <Button
+                onClick={() => setFocusedOrg(null)}
+                variant="outline-secondary"
+              >
                 All organizations
               </Button>
             ) : (
               <ButtonToggleGroup value={orgType} onChange={setOrgType}>
-                <Button value={Organization.TYPE.ADVISOR_ORG}>
+                <Button
+                  value={Organization.TYPE.ADVISOR_ORG}
+                  variant="outline-secondary"
+                >
                   {pluralize(Settings.fields.advisor.org.name)}
                 </Button>
-                <Button value={Organization.TYPE.PRINCIPAL_ORG}>
+                <Button
+                  value={Organization.TYPE.PRINCIPAL_ORG}
+                  variant="outline-secondary"
+                >
                   {pluralize(Settings.fields.principal.org.name)}
                 </Button>
               </ButtonToggleGroup>
@@ -381,13 +390,14 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={printPreview}
+              variant="outline-secondary"
             >
               Print
             </Button>
             <Button
               id="email-rollup"
               onClick={toggleEmailModal}
-              bsStyle="primary"
+              variant="primary"
             >
               Email rollup
             </Button>
@@ -511,7 +521,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   function renderEmailModal(formikProps) {
     const { isSubmitting, submitForm } = formikProps
     return (
-      <Modal show={showEmailModal} onHide={toggleEmailModal}>
+      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Form>
           <Modal.Header closeButton>
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
@@ -528,19 +538,19 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               validate={email => handleEmailValidation(email)}
               vertical
             >
-              <HelpBlock>
+              <FormText>
                 One or more email addresses, comma separated, e.g.:
                 <br />
                 <em>
                   jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr.
                   X" &lt;x@example.org&gt;
                 </em>
-              </HelpBlock>
+              </FormText>
             </Field>
             <Field
               name="comment"
               component={FieldHelper.InputField}
-              componentClass="textarea"
+              asA="textarea"
               vertical
             />
           </Modal.Body>
@@ -550,13 +560,13 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={showPreview}
+              variant="outline-secondary"
             >
               Preview
             </Button>
             <Button
               id="send-rollup-email"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >

@@ -50,22 +50,32 @@ const ReportCollection = ({
               <ButtonToggleGroup
                 value={viewFormat}
                 onChange={setViewFormat}
-                className="hide-for-print"
+                className="d-print-none"
               >
                 {viewFormats.includes(FORMAT_TABLE) && (
-                  <Button value={FORMAT_TABLE}>Table</Button>
+                  <Button value={FORMAT_TABLE} variant="outline-secondary">
+                    Table
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_SUMMARY) && (
-                  <Button value={FORMAT_SUMMARY}>Summary</Button>
+                  <Button value={FORMAT_SUMMARY} variant="outline-secondary">
+                    Summary
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_CALENDAR) && (
-                  <Button value={FORMAT_CALENDAR}>Calendar</Button>
+                  <Button value={FORMAT_CALENDAR} variant="outline-secondary">
+                    Calendar
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_MAP) && (
-                  <Button value={FORMAT_MAP}>Map</Button>
+                  <Button value={FORMAT_MAP} variant="outline-secondary">
+                    Map
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_STATISTICS) && (
-                  <Button value={FORMAT_STATISTICS}>Statistics</Button>
+                  <Button value={FORMAT_STATISTICS} variant="outline-secondary">
+                    Statistics
+                  </Button>
                 )}
               </ButtonToggleGroup>
             )}

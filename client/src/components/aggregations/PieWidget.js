@@ -5,6 +5,7 @@ import {
 import Pie from "components/graphs/Pie"
 import PropTypes from "prop-types"
 import React from "react"
+import utils from "utils"
 
 const PieWidget = ({
   values,
@@ -25,13 +26,22 @@ const PieWidget = ({
       />
       {showLegend && (
         <div className="pieLegend">
-          {Object.map(legend, (key, choice) => (
-            <React.Fragment key={key}>
-              <span style={{ backgroundColor: choice.color }}>
-                {choice.label}{" "}
-              </span>
-            </React.Fragment>
-          ))}
+          {Object.map(legend, (key, choice) => {
+            const textColor = utils.getContrastYIQ(choice.color)
+            return (
+              <React.Fragment key={key}>
+                <span
+                  style={{
+                    backgroundColor: choice.color,
+                    color: textColor,
+                    padding: "2px"
+                  }}
+                >
+                  {choice.label}
+                </span>
+              </React.Fragment>
+            )
+          })}
         </div>
       )}
     </>

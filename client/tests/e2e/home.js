@@ -50,7 +50,8 @@ test("Home Page", async t => {
   const $hopscotchNext = await $(".hopscotch-next")
   await $hopscotchNext.click()
 
-  const $myReportsLink = await $("#leftNav > li:nth-child(10) > a")
+  await t.context.pageHelpers.clickMenuLinksButton()
+  const $myReportsLink = await $('a[href*="/reports/mine"]')
   await $myReportsLink.click()
   await t.context.driver.sleep(shortWaitMs) // wait for transition
   await assertElementNotPresent(

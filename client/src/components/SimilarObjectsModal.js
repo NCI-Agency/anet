@@ -22,16 +22,16 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
 
   const TableComponent = TABLE_COMPONENTS[objectType]
   return !TableComponent ? null : (
-    <Modal show={true} onHide={onCancel}>
+    <Modal centered show={true} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>Possible Duplicates</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <TableComponent queryParams={queryParams} />
       </Modal.Body>
-      <Modal.Footer>
-        <Button className="pull-left" onClick={onCancel}>
-          Cancel
+      <Modal.Footer className="justify-content-between">
+        <Button onClick={onCancel} variant="outline-secondary">
+          Close
         </Button>
       </Modal.Footer>
     </Modal>

@@ -95,7 +95,7 @@ dependencies {
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.11.2'
-	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20200713.1'
+	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 	// Authentication
 	implementation 'de.ahus1.keycloak.dropwizard:keycloak-dropwizard:1.2.0'

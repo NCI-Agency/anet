@@ -48,7 +48,7 @@ describe("Onboard new user login", () => {
       .$("..")
       .$("..")
       .$("..")
-      .$("span.help-block")
+      .$("div.invalid-feedback")
     errorMessage.waitForExist()
     errorMessage.waitForDisplayed()
     expect(errorMessage.getText()).to.equal(

@@ -7,10 +7,11 @@ import React from "react"
 import { Link } from "react-router-dom"
 
 const LinkTo = ({
-  componentClass,
+  as,
   children,
   edit,
   button,
+  variant,
   showIcon,
   showAvatar,
   isLink,
@@ -25,7 +26,7 @@ const LinkTo = ({
     componentProps.className = [
       className,
       "btn",
-      `btn-${button === true ? "default" : button}`
+      `btn-${button === true ? variant ?? "outline-secondary" : button}`
     ].join(" ")
   } else {
     componentProps.className = className
@@ -82,7 +83,7 @@ const LinkTo = ({
     to = model
   }
 
-  const LinkToComponent = componentClass
+  const LinkToComponent = as
   return (
     <LinkToComponent to={to} style={style} {...componentProps}>
       <>
@@ -95,11 +96,7 @@ const LinkTo = ({
 }
 
 LinkTo.propTypes = {
-  componentClass: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.func,
-    PropTypes.object
-  ]),
+  as: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
   children: PropTypes.node,
   className: PropTypes.string,
 
@@ -111,6 +108,7 @@ LinkTo.propTypes = {
   // Configures this link to look like a button. Set it to true to make it a button,
   // or pass a string to set a button type
   button: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+  variant: PropTypes.string,
 
   target: PropTypes.string,
   whenUnspecified: PropTypes.string,
@@ -120,7 +118,7 @@ LinkTo.propTypes = {
 }
 
 LinkTo.defaultProps = {
-  componentClass: Link,
+  as: Link,
   showIcon: true,
   showAvatar: true,
   isLink: true,

@@ -44,7 +44,7 @@ class CreateTask extends Page {
 
   get questionsFieldWarningText() {
     return this.firstQuestionsFieldContainer.$(
-      '//span[contains(text(), "Invalid")]'
+      '//div[contains(text(), "Invalid")]'
     )
   }
 

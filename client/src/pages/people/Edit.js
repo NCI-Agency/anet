@@ -109,21 +109,23 @@ const PersonEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={person.notes}
-        relatedObject={
-          person.uuid && {
-            relatedObjectType: Person.relatedObjectType,
-            relatedObjectUuid: person.uuid,
-            relatedObject: person
-          }
-        }
-      />
       <PersonForm
         initialValues={person}
         edit
         title={legendText}
         saveText={saveText}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={person.notes}
+            relatedObject={
+              person.uuid && {
+                relatedObjectType: Person.relatedObjectType,
+                relatedObjectUuid: person.uuid,
+                relatedObject: person
+              }
+            }
+          />
+        }
       />
     </div>
   )

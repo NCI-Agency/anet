@@ -17,9 +17,8 @@ import {
 } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Panel } from "react-bootstrap"
+import { Button, Card, Col, Row } from "react-bootstrap"
 import { toast } from "react-toastify"
-import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 
 const GQL_DELETE_NOTE = gql`
@@ -44,71 +43,65 @@ const PeriodicAssessment = ({
   const periodDisplay = periodToString(period)
 
   return (
-    <Panel bsStyle="primary" style={{ borderRadius: "15px" }}>
-      <Panel.Heading
-        style={{
-          padding: "1px 1px",
-          borderTopLeftRadius: "15px",
-          borderTopRightRadius: "15px",
-          paddingRight: "10px",
-          paddingLeft: "10px",
-          // whiteSpace: "nowrap", TODO: disabled for now as not working well in IE11
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-end"
-        }}
-      >
-        <>
-          <i>
-            {moment(note.updatedAt).format(
-              Settings.dateFormats.forms.displayShort.withTime
+    <Card>
+      <Card.Header>
+        <Row>
+          <Col xs={8}>
+            <Row>
+              <i>
+                {moment(note.updatedAt).format(
+                  Settings.dateFormats.forms.displayShort.withTime
+                )}
+              </i>{" "}
+            </Row>
+            <Row>
+              <LinkTo modelType="Person" model={note.author} />
+            </Row>
+          </Col>
+          <Col xs={4} className="text-end">
+            {canEditAssessment && (
+              <>
+                <Button
+                  title="Edit assessment"
+                  onClick={() => setShowAssessmentModalKey(note.uuid)}
+                  size="xs"
+                  variant="outline-secondary"
+                >
+                  <Icon icon={IconNames.EDIT} />
+                </Button>
+                <AssessmentModal
+                  showModal={showAssessmentModalKey === note.uuid}
+                  note={note}
+                  assessment={assessment}
+                  assessmentYupSchema={assessmentYupSchema}
+                  assessmentConfig={assessmentConfig}
+                  assessmentPeriod={period}
+                  recurrence={recurrence}
+                  title={`Assessment for ${entity.toString()} for ${periodDisplay}`}
+                  onSuccess={() => {
+                    setShowAssessmentModalKey(null)
+                    onUpdateAssessment()
+                  }}
+                  onCancel={() => setShowAssessmentModalKey(null)}
+                />
+                <span style={{ marginLeft: "5px" }}>
+                  <ConfirmDestructive
+                    onConfirm={() => deleteNote(note.uuid)}
+                    objectType="note"
+                    objectDisplay={"#" + note.uuid}
+                    title="Delete assessment"
+                    variant="outline-danger"
+                    buttonSize="xs"
+                  >
+                    <Icon icon={IconNames.TRASH} />
+                  </ConfirmDestructive>
+                </span>
+              </>
             )}
-          </i>{" "}
-          <LinkTo
-            modelType="Person"
-            model={note.author}
-            style={{ color: "white" }}
-          />
-          {canEditAssessment && (
-            <>
-              <Button
-                title="Edit assessment"
-                onClick={() => setShowAssessmentModalKey(note.uuid)}
-                bsSize="xsmall"
-                bsStyle="primary"
-              >
-                <Icon icon={IconNames.EDIT} />
-              </Button>
-              <ConfirmDestructive
-                onConfirm={() => deleteNote(note.uuid)}
-                objectType="note"
-                objectDisplay={"#" + note.uuid}
-                title="Delete assessment"
-                bsSize="xsmall"
-                bsStyle="primary"
-              >
-                <img src={REMOVE_ICON} height={14} alt="Delete" />
-              </ConfirmDestructive>
-              <AssessmentModal
-                showModal={showAssessmentModalKey === note.uuid}
-                note={note}
-                assessment={assessment}
-                assessmentYupSchema={assessmentYupSchema}
-                assessmentConfig={assessmentConfig}
-                assessmentPeriod={period}
-                recurrence={recurrence}
-                title={`Assessment for ${entity.toString()} for ${periodDisplay}`}
-                onSuccess={() => {
-                  setShowAssessmentModalKey(null)
-                  onUpdateAssessment()
-                }}
-                onCancel={() => setShowAssessmentModalKey(null)}
-              />
-            </>
-          )}
-        </>
-      </Panel.Heading>
-      <Panel.Body>
+          </Col>
+        </Row>
+      </Card.Header>
+      <Card.Body>
         <div
           style={{
             overflowWrap: "break-word",
@@ -133,8 +126,8 @@ const PeriodicAssessment = ({
             }}
           </Formik>
         </div>
-      </Panel.Body>
-    </Panel>
+      </Card.Body>
+    </Card>
   )
 
   function deleteNote(uuid) {
@@ -243,7 +236,7 @@ export const PeriodicAssessmentsRows = ({
                 {periodsAllowNewAssessment[index] && (
                   <>
                     <Button
-                      bsStyle="primary"
+                      variant="primary"
                       onClick={() => setShowAssessmentModalKey(modalKey)}
                     >
                       {addAssessmentLabel}

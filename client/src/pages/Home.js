@@ -22,7 +22,7 @@ import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Button, Grid, Row } from "react-bootstrap"
+import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -54,7 +54,7 @@ const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
   const totalCount = data && data.reportList && data.reportList.totalCount
   return (
     <Button
-      bsStyle="link"
+      variant="link"
       onClick={event => onClickDashboard(query, event)}
       className="home-tile"
     >
@@ -96,20 +96,24 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const queries = getQueriesForUser(currentUser)
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         {queries
           .filter(q => q.query !== null)
           .map((query, index) => (
-            <HomeTile
+            <Col
               key={index}
-              query={query}
-              setSearchQuery={setSearchQuery}
-              pageDispatchers={pageDispatchers}
-            />
+              className="home-tile-col d-flex align-items-stretch p-0"
+            >
+              <HomeTile
+                query={query}
+                setSearchQuery={setSearchQuery}
+                pageDispatchers={pageDispatchers}
+              />
+            </Col>
           ))}
       </Row>
-    </Grid>
+    </Container>
   )
 
   function getQueriesForUser(currentUser) {
@@ -272,7 +276,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
-  const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+  const alertStyle = { marginBottom: "1rem", textAlign: "center", zIndex: "-1" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   useBoilerplate({
@@ -283,7 +287,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
 
   return (
     <div>
-      <div className="pull-right">
+      <div style={{ width: "inherit" }} className="float-end">
         <GuidedTour
           title="Take a guided tour of the home page."
           tour={currentUser.isSuperUser() ? superUserTour : userTour}

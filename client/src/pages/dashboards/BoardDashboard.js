@@ -14,12 +14,12 @@ import {
 } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
 import {
-  PathFindingLinkFactory,
-  DagreEngine
+  DagreEngine,
+  PathFindingLinkFactory
 } from "@projectstorm/react-diagrams-routing"
 import { DEFAULT_PAGE_PROPS } from "actions"
-import LinkTo from "components/LinkTo"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -29,7 +29,7 @@ import FileSaver from "file-saver"
 import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Badge, Button, Modal, Panel } from "react-bootstrap"
+import { Badge, Button, Card, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import DOWNLOAD_ICON from "resources/download.png"
@@ -230,18 +230,17 @@ const BoardDashboard = ({ pageDispatchers }) => {
         )}
       </div>
       <div>
-        <Panel>
-          <Button
-            bsStyle="primary"
-            type="button"
-            onClick={() => setEdit(!edit)}
-          >
+        <Card>
+          <Button variant="primary" onClick={() => setEdit(!edit)}>
             {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
           </Button>
 
           {edit && (
             <>
-              <Button onClick={() => engineRef.current.zoomToFit()}>
+              <Button
+                onClick={() => engineRef.current.zoomToFit()}
+                variant="outline-secondary"
+              >
                 <Icon icon={IconNames.ZOOM_TO_FIT} />
               </Button>
               <Button
@@ -249,6 +248,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   dagreEngineRef.current.redistribute(model)
                   engineRef.current.repaintCanvas()
                 }}
+                variant="outline-secondary"
               >
                 <Icon icon={IconNames.LAYOUT_AUTO} />
               </Button>
@@ -259,18 +259,19 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   })
                   FileSaver.saveAs(blob, "BoardDashboard.json")
                 }}
+                variant="outline-secondary"
               >
                 <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
               </Button>
             </>
           )}
-        </Panel>
+        </Card>
 
         {edit && (
           <>
-            <Panel bsStyle="primary">
-              <Panel.Heading>Node palette</Panel.Heading>
-              <Panel.Body style={{ display: "flex", flexDirection: "column" }}>
+            <Card variant="primary">
+              <Card.Heading>Node palette</Card.Heading>
+              <Card.Body style={{ display: "flex", flexDirection: "column" }}>
                 {Object.values(Models).map(Model => {
                   const instance = new Model()
                   const modelName = instance.constructor.resourceName
@@ -292,16 +293,19 @@ const BoardDashboard = ({ pageDispatchers }) => {
                 <span>
                   <i>Click or drag into diagram</i>
                 </span>
-              </Panel.Body>
-            </Panel>
-            <Panel bsStyle="primary">
-              <Panel.Heading>Node editor</Panel.Heading>
-              <Panel.Body>
+              </Card.Body>
+            </Card>
+            <Card variant="primary">
+              <Card.Heading>Node editor</Card.Heading>
+              <Card.Body>
                 {editedNode ? (
                   <>
                     <span>ANET entity:</span>
                     <br />
-                    <Button onClick={() => setSelectingEntity(true)}>
+                    <Button
+                      onClick={() => setSelectingEntity(true)}
+                      variant="outline-secondary"
+                    >
                       <LinkTo
                         modelType={editedNode.options.anetObjectType}
                         model={editedNode.options.anetObject}
@@ -314,8 +318,9 @@ const BoardDashboard = ({ pageDispatchers }) => {
                     <i>Select an item on diagram</i>
                   </span>
                 )}
-              </Panel.Body>
+              </Card.Body>
               <Modal
+                centered
                 show={selectingEntity}
                 onHide={() => setSelectingEntity(false)}
               >
@@ -333,7 +338,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
                   />
                 </Modal.Body>
               </Modal>
-            </Panel>
+            </Card>
           </>
         )}
       </div>

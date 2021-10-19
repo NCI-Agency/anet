@@ -80,9 +80,9 @@ describe("When working with custom fields for different anet objects", () => {
 
     it("Should persist previous invalid data when toggling field's visibility", () => {
       CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
-      CreateReport.numberTrainedHelpText.waitForExist()
+      CreateReport.numberTrainedErrorText.waitForExist()
       // Actually see the validation warning
-      expect(CreateReport.numberTrainedHelpText.getText()).to.equal(
+      expect(CreateReport.numberTrainedErrorText.getText()).to.equal(
         "Number trained must be greater than or equal to 1"
       )
       const trainButton = CreateReport.getEngagementTypesButtonByName(
@@ -102,8 +102,8 @@ describe("When working with custom fields for different anet objects", () => {
 
     it("Should validate visible field", () => {
       CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
-      CreateReport.numberTrainedHelpText.waitForExist()
-      expect(CreateReport.numberTrainedHelpText.getText()).to.include(
+      CreateReport.numberTrainedErrorText.waitForExist()
+      expect(CreateReport.numberTrainedErrorText.getText()).to.include(
         "Number trained must be greater than or equal to 1"
       )
       CreateReport.submitForm()

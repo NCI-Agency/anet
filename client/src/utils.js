@@ -1,6 +1,7 @@
 import { IconSize } from "@blueprintjs/core"
 import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
 import * as changeCase from "change-case"
+import * as d3 from "d3"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
@@ -232,6 +233,37 @@ export default {
 
   pluralizeWord: function(count, word) {
     return count > 1 ? pluralize.plural(word) : word
+  },
+
+  /**
+   * Used to determine whether the text should be black or white
+   * depending on the specified background color.
+   * @param {string} color Hexadecimal color code or color name
+   * @returns Text color
+   */
+  getContrastYIQ: function(color) {
+    // pick a default
+    const defaultColor = "white"
+    if (!color) {
+      return defaultColor
+    }
+
+    let c = d3.color(color)
+    if (
+      !c &&
+      (color.length === 3 || color.length === 6) &&
+      color.slice(0, 1) !== "#"
+    ) {
+      // Might be hexcode without leading "#", prepend it and try again
+      c = d3.color(`#${color}`)
+    }
+
+    if (!c) {
+      return defaultColor
+    }
+
+    const yiq = (c.r * 299 + c.g * 587 + c.b * 114) / 1000
+    return yiq >= 128 ? "black" : "white"
   }
 }
 

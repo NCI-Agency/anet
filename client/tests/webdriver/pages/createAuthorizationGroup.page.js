@@ -19,12 +19,22 @@ class CreateAuthorizationGroup extends Page {
     return browser.$("#description")
   }
 
+  /* React Bootstrap v2 hides the input and styles the label. Input is not clickable.
+        In order to click toggleButtonGroup, label needs to be grabbed */
+  get statusActiveInput() {
+    return browser.$("input#status_ACTIVE")
+  }
+
+  get statusInactiveInput() {
+    return browser.$("input#status_INACTIVE")
+  }
+
   get statusActiveButton() {
-    return browser.$("#statusActiveButton")
+    return browser.$('label[for="status_ACTIVE"]')
   }
 
   get statusInactiveButton() {
-    return browser.$("#statusInactiveButton")
+    return browser.$('label[for="status_INACTIVE"]')
   }
 
   get positionsInput() {

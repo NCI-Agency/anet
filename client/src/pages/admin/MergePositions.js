@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Button, Callout } from "@blueprintjs/core"
+import { Callout, Intent } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -37,7 +37,7 @@ import useMergeObjects, {
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, FormGroup, Grid, Row } from "react-bootstrap"
+import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
@@ -73,10 +73,10 @@ const MergePositions = ({ pageDispatchers }) => {
   const mergedPosition = mergeState.merged
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         <Messages error={saveError} />
-        <h2>Merge Positions Tool</h2>
+        <h4>Merge Positions Tool</h4>
       </Row>
       <Row>
         <Col md={4} id="left-merge-pos-col">
@@ -111,14 +111,14 @@ const MergePositions = ({ pageDispatchers }) => {
           </MidColTitle>
           {!areAllSet(position1, position2) && (
             <div style={{ padding: "16px 5%" }}>
-              <Callout intent="warning">
+              <Callout intent={Intent.WARNING}>
                 Please select <strong>both</strong> positions to proceed...
               </Callout>
             </div>
           )}
           {areAllSet(position1, position2, !mergedPosition) && (
             <div style={{ padding: "16px 5%" }}>
-              <Callout intent="primary">
+              <Callout intent={Intent.PRIMARY}>
                 - You must choose a <strong>name</strong> field. It
                 automatically fills organization and type
                 <br />- You also need to select the person from the filled
@@ -127,7 +127,7 @@ const MergePositions = ({ pageDispatchers }) => {
             </div>
           )}
           {areAllSet(position1, position2, mergedPosition) && (
-            <>
+            <fieldset>
               <PositionField
                 label="Name"
                 value={mergedPosition.name}
@@ -304,7 +304,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               {getLeafletMap("merged-location", mergedPosition.location)}
-            </>
+            </fieldset>
           )}
         </Col>
         <Col md={4} id="right-merge-pos-col">
@@ -319,14 +319,14 @@ const MergePositions = ({ pageDispatchers }) => {
       <Row>
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
-          large
-          intent="primary"
-          text="Merge Positions"
+          variant="primary"
           onClick={mergePositions}
           disabled={!areAllSet(position1, position2, mergedPosition?.name)}
-        />
+        >
+          Merge Positions
+        </Button>
       </Row>
-    </Grid>
+    </Container>
   )
 
   function mergePositions() {
@@ -371,8 +371,7 @@ MergePositions.propTypes = {
 const MidColTitle = styled.div`
   display: flex;
   height: 39px;
-  margin-top: 25px;
-  margin-bottom: 15px;
+  margin-top: 19px;
   border-bottom: 1px solid #cccccc;
   border-top: 1px solid #cccccc;
   justify-content: space-between;
@@ -426,7 +425,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
         />
       </FormGroup>
       {areAllSet(position) && (
-        <>
+        <fieldset>
           <PositionField
             label="Name"
             fieldName="name"
@@ -622,7 +621,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             dispatchMergeActions={dispatchMergeActions}
           />
           {getLeafletMap(`merge-position-map-${align}`, position.location)}
-        </>
+        </fieldset>
       )}
     </PositionCol>
   )

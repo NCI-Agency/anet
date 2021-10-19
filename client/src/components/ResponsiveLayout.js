@@ -1,4 +1,4 @@
-import Nav from "components/Nav"
+import Navigation from "components/Nav"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import TopBar from "components/TopBar"
 import PropTypes from "prop-types"
@@ -64,7 +64,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
     return () => unlistenHistory()
   }, [history])
 
-  const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
+  const sidebarClass = floatingMenu ? "nav-overlay" : "d-none d-sm-block"
 
   return (
     <ResponsiveLayoutContext.Provider
@@ -95,14 +95,13 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
               className={`main-sidebar ${sidebarClass}`}
             >
               <div style={sidebar}>
-                <Nav {...sidebarData} />
+                <Navigation {...sidebarData} />
               </div>
             </div>
           )}
           <Element name="mainViewport" id="main-viewport">
             {children}
           </Element>
-          <Element name="notesView" id="notes-view" className="notes-hidden" />
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>

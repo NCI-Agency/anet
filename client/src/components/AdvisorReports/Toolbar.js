@@ -6,7 +6,7 @@ const Toolbar = ({ onFilterTextInput, onExportButtonClick }) => (
   <form className="advisor-reports-form">
     <div className="row">
       <div className="col-sm-8">
-        <label className="sr-only" htmlFor="advisorSearch">
+        <label className="visually-hidden" htmlFor="advisorSearch">
           Search organizations
         </label>
         <input
@@ -18,7 +18,9 @@ const Toolbar = ({ onFilterTextInput, onExportButtonClick }) => (
         />
       </div>
       <div className="col-sm-2">
-        <Button onClick={onExportButtonClick}>Export to CSV</Button>
+        <Button onClick={onExportButtonClick} variant="outline-secondary">
+          Export to CSV
+        </Button>
       </div>
     </div>
   </form>

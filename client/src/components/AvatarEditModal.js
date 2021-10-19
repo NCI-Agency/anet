@@ -8,18 +8,31 @@ const AvatarEditModal = ({ title, onAvatarUpdate }) => {
   const [currentPreview, setCurrentPreview] = useState(null)
 
   return (
-    <div>
-      <button onClick={open}>{title}</button>
+    <div style={{ marginTop: "10px" }}>
+      <Button variant="outline-secondary" onClick={open}>
+        {title}
+      </Button>
 
-      <Modal show={showModal} onHide={close}>
+      <Modal
+        centered
+        show={showModal}
+        onHide={close}
+        size="lg"
+        style={{ zIndex: "1202" }}
+      >
         <Modal.Header closeButton>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <AvatarComponent onChangePreview={setCurrentPreview} />
         </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={save}>Save</Button>
+        <Modal.Footer className="justify-content-between">
+          <Button onClick={close} variant="outline-secondary">
+            Cancel
+          </Button>
+          <Button onClick={save} variant="primary">
+            Save
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

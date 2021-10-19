@@ -138,20 +138,14 @@ const MySubscriptionUpdates = ({
           <UltimatePagination
             Component="header"
             componentClassName="searchPagination"
-            className="pull-right"
+            className="float-end"
             pageNum={pageNum}
             pageSize={pageSize}
             totalCount={totalCount}
             goToPage={setPageNum}
           />
 
-          <Table
-            striped
-            condensed
-            hover
-            responsive
-            className="subscriptionUpdates_table"
-          >
+          <Table striped hover responsive className="subscriptionUpdates_table">
             <thead>
               <tr>
                 <th />
