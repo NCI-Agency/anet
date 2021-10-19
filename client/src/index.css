@@ -1217,6 +1217,10 @@ header.searchPagination {
   margin-left: 10px;
 }
 
+div[id*='fg-entityAssessment'] {
+  margin-bottom: 1rem;
+}
+
 @media screen and (max-width: 768px) {
   #main-viewport {
     padding-top: 8px;

@@ -14,9 +14,8 @@ import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import { Badge, Button, Panel, Table } from "react-bootstrap"
+import { Badge, Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
-import REMOVE_ICON from "resources/delete.png"
 import Settings from "settings"
 
 const GQL_DELETE_NOTE = gql`
@@ -124,7 +123,7 @@ const OnDemandAssessments = ({
                     {moment(assessmentFieldsObject.expirationDate).format(
                       "DD MMMM YYYY"
                     )}{" "}
-                    <Badge>
+                    <Badge bg="secondary" style={{ paddingBottom: "3px" }}>
                       {/* true flag in the diff function returns the precise days
                           between two dates, e.g., '1,4556545' days. 'ceil' function
                           from Math library is used to round it to the nearest greatest
@@ -147,66 +146,63 @@ const OnDemandAssessments = ({
                 )}
             </b>
           </div>
-          <Panel key={index} bsStyle="primary" style={{ borderRadius: "15px" }}>
-            <Panel.Heading
-              style={{
-                padding: "1px 1px",
-                borderTopLeftRadius: "15px",
-                borderTopRightRadius: "15px",
-                paddingRight: "10px",
-                paddingLeft: "10px",
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "flex-end"
-              }}
-            >
-              <i>
-                {moment(note.updatedAt).format(
-                  Settings.dateFormats.forms.displayShort.withTime
-                )}
-              </i>{" "}
-              <LinkTo
-                modelType="Person"
-                model={note.author}
-                style={{ color: "white" }}
-              />
-              {canAddAssessment && (
-                <>
-                  <Button
-                    title="Edit assessment"
-                    onClick={() => {
-                      setEditModeObject({
-                        questionnaireResults: assessmentFieldsObject,
-                        uuid: note.uuid
-                      })
-                      setShowModal(true)
-                    }}
-                    bsSize="xsmall"
-                    bsStyle="primary"
-                  >
-                    <Icon icon={IconNames.EDIT} />
-                  </Button>
-                  <ConfirmDestructive
-                    onConfirm={() => {
-                      deleteNote(note.uuid)
-                      setTableLocation(
-                        assessmentCards.length > numberOfPeriods
-                          ? numberOfPeriods - assessmentCards.length + 1
-                          : 0
-                      )
-                    }}
-                    objectType="note"
-                    objectDisplay={"#" + note.uuid}
-                    title="Delete assessment"
-                    bsSize="xsmall"
-                    bsStyle="primary"
-                  >
-                    <img src={REMOVE_ICON} height={14} alt="Delete" />
-                  </ConfirmDestructive>
-                </>
-              )}
-            </Panel.Heading>
-            <Panel.Body>
+          <Card key={index}>
+            <Card.Header>
+              <Row>
+                <Col xs={8}>
+                  <Row>
+                    <i>
+                      {moment(note.updatedAt).format(
+                        Settings.dateFormats.forms.displayShort.withTime
+                      )}
+                    </i>{" "}
+                  </Row>
+                  <Row>
+                    <LinkTo modelType="Person" model={note.author} />
+                  </Row>
+                </Col>
+                <Col xs={4} className="text-end">
+                  {canAddAssessment && (
+                    <>
+                      <Button
+                        title="Edit assessment"
+                        onClick={() => {
+                          setEditModeObject({
+                            questionnaireResults: assessmentFieldsObject,
+                            uuid: note.uuid
+                          })
+                          setShowModal(true)
+                        }}
+                        size="xs"
+                        variant="outline-secondary"
+                      >
+                        <Icon icon={IconNames.EDIT} />
+                      </Button>
+                      <span style={{ marginLeft: "5px" }}>
+                        <ConfirmDestructive
+                          onConfirm={() => {
+                            deleteNote(note.uuid)
+                            setTableLocation(
+                              assessmentCards.length > numberOfPeriods
+                                ? numberOfPeriods - assessmentCards.length + 1
+                                : 0
+                            )
+                          }}
+                          objectType="note"
+                          objectDisplay={"#" + note.uuid}
+                          title="Delete assessment"
+                          variant="outline-danger"
+                          buttonSize="xs"
+                        >
+                          <Icon icon={IconNames.TRASH} />
+                        </ConfirmDestructive>
+                      </span>
+                    </>
+                  )}
+                </Col>
+              </Row>
+            </Card.Header>
+            <Card.Body>
               <div>
                 <Formik
                   enableReinitialize
@@ -228,8 +224,8 @@ const OnDemandAssessments = ({
                   }}
                 </Formik>
               </div>
-            </Panel.Body>
-          </Panel>
+            </Card.Body>
+          </Card>
         </>
       )
     })
@@ -312,7 +308,7 @@ const OnDemandAssessments = ({
           />
           <div style={{ display: "flex" }}>
             <Table
-              condensed
+              responsive
               className="assessments-table"
               style={{ tableLayout: "fixed" }}
             >
@@ -322,7 +318,7 @@ const OnDemandAssessments = ({
             </Table>
           </div>
           <div style={{ textAlign: "center" }}>
-            <Button bsStyle="primary" onClick={() => setShowModal(true)}>
+            <Button onClick={() => setShowModal(true)}>
               {addAssessmentLabel}
             </Button>
           </div>
