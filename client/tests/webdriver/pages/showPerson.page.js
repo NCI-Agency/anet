@@ -142,6 +142,8 @@ class ShowPerson extends Page {
 
     // first focus on the text editor input
     this.assessmentModalForm.$(".editor-container > .editable").click()
+    // Wait for the editor to be focused
+    browser.pause(300)
     if (prevTextToClear) {
       // remove previous text by deleting characters one by one
       const chars = [...prevTextToClear]
@@ -149,6 +151,8 @@ class ShowPerson extends Page {
       // maybe we clicked at the beginning of the text, Backspace doesn't clear
       browser.keys(chars.map(char => "Delete"))
     }
+    // Wait for the previous value to be deleted
+    browser.pause(300)
     // fourth value is the text field
     browser.keys(valuesArr[3])
     browser.pause(300)
