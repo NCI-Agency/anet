@@ -5,6 +5,7 @@ logs/*
 *.swp
 # ignore personal ide settings folders
 .vscode/
+client/jsconfig.json
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

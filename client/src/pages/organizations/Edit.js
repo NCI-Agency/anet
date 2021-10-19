@@ -102,20 +102,22 @@ const OrganizationEdit = ({ pageDispatchers }) => {
   initInvisibleFields(organization, Settings.fields.organization.customFields)
   return (
     <div>
-      <RelatedObjectNotes
-        notes={organization.notes}
-        relatedObject={
-          organization.uuid && {
-            relatedObjectType: Organization.relatedObjectType,
-            relatedObjectUuid: organization.uuid,
-            relatedObject: organization
-          }
-        }
-      />
       <OrganizationForm
         edit
         initialValues={organization}
         title={`Organization ${organization.shortName}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={organization.notes}
+            relatedObject={
+              organization.uuid && {
+                relatedObjectType: Organization.relatedObjectType,
+                relatedObjectUuid: organization.uuid,
+                relatedObject: organization
+              }
+            }
+          />
+        }
       />
     </div>
   )

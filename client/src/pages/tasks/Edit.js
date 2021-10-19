@@ -127,20 +127,22 @@ const TaskEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={task.notes}
-        relatedObject={
-          task.uuid && {
-            relatedObjectType: Task.relatedObjectType,
-            relatedObjectUuid: task.uuid,
-            relatedObject: task
-          }
-        }
-      />
       <TaskForm
         edit
         initialValues={task}
         title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={task.notes}
+            relatedObject={
+              task.uuid && {
+                relatedObjectType: Task.relatedObjectType,
+                relatedObjectUuid: task.uuid,
+                relatedObject: task
+              }
+            }
+          />
+        }
       />
     </div>
   )

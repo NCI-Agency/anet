@@ -50,7 +50,13 @@ const RelatedObjectNoteModal = ({
   const edit = !!note.uuid
 
   return (
-    <Modal show={showModal} onHide={close}>
+    <Modal
+      centered
+      show={showModal}
+      onHide={close}
+      style={{ zIndex: "1300" }}
+      dialogClassName="rich-text-modal"
+    >
       <Formik
         enableReinitialize
         onSubmit={onSubmit}
@@ -111,8 +117,8 @@ const RelatedObjectNoteModal = ({
                   />
                 </div>
               </Modal.Body>
-              <Modal.Footer>
-                <Button className="pull-left" onClick={close}>
+              <Modal.Footer className="justify-content-between">
+                <Button onClick={close} variant="outline-secondary">
                   Cancel
                 </Button>
                 {_isEmpty(relatedObjects) && onDelete && (
@@ -120,14 +126,14 @@ const RelatedObjectNoteModal = ({
                     onConfirm={() => onDelete(note.uuid)}
                     objectType="note"
                     objectDisplay={"#" + note.uuid}
-                    bsStyle="warning"
+                    variant="danger"
                     buttonLabel="Delete note"
                   />
                 )}
                 {!_isEmpty(relatedObjects) && (
                   <Button
                     onClick={submitForm}
-                    bsStyle="primary"
+                    variant="primary"
                     disabled={isSubmitting || !isValid}
                   >
                     Save

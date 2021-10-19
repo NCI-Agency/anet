@@ -119,20 +119,38 @@ const PositionShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo
-            modelType="Position"
-            model={position}
-            edit
-            button="primary"
-            className="edit-position"
-          >
-            Edit
-          </LinkTo>
+        const action = (
+          <>
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo
+                  modelType="Position"
+                  model={position}
+                  edit
+                  button="primary"
+                  className="edit-position"
+                >
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+            <span className="ms-3">
+              <RelatedObjectNotes
+                notes={position.notes}
+                relatedObject={
+                  position.uuid && {
+                    relatedObjectType: Position.relatedObjectType,
+                    relatedObjectUuid: position.uuid,
+                    relatedObject: position
+                  }
+                }
+              />
+            </span>
+          </>
         )
         return (
           <div>
-            <div className="pull-right">
+            <div className="float-end">
               <GuidedTour
                 title="Take a guided tour of this position's page."
                 tour={positionTour}
@@ -144,16 +162,6 @@ const PositionShow = ({ pageDispatchers }) => {
               />
             </div>
 
-            <RelatedObjectNotes
-              notes={position.notes}
-              relatedObject={
-                position.uuid && {
-                  relatedObjectType: Position.relatedObjectType,
-                  relatedObjectUuid: position.uuid,
-                  relatedObject: position
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
@@ -254,7 +262,10 @@ const PositionShow = ({ pageDispatchers }) => {
                   position.person &&
                   position.person.uuid &&
                   canEdit && (
-                    <Button onClick={() => setShowAssignPersonModal(true)}>
+                    <Button
+                      onClick={() => setShowAssignPersonModal(true)}
+                      variant="outline-secondary"
+                    >
                       Change assigned person
                     </Button>
                   )
@@ -276,6 +287,7 @@ const PositionShow = ({ pageDispatchers }) => {
                       <p>
                         <Button
                           onClick={() => setShowAssignPersonModal(true)}
+                          variant="outline-secondary"
                           className="change-assigned-person"
                         >
                           Change assigned person
@@ -299,6 +311,7 @@ const PositionShow = ({ pageDispatchers }) => {
                   canEdit && (
                     <Button
                       onClick={() => setShowAssociatedPositionsModal(true)}
+                      variant="outline-secondary"
                     >
                       Change assigned {assignedRole}
                     </Button>
@@ -365,9 +378,9 @@ const PositionShow = ({ pageDispatchers }) => {
                     onConfirm={onConfirmDelete}
                     objectType="position"
                     objectDisplay={"#" + position.uuid}
-                    bsStyle="warning"
+                    variant="danger"
                     buttonLabel="Delete position"
-                    className="pull-right"
+                    buttonClassName="float-end"
                   />
                 </div>
               </div>

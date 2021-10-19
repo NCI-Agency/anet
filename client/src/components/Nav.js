@@ -1,4 +1,3 @@
-import { Collapse } from "@blueprintjs/core"
 import { clearSearchQuery, resetPages } from "actions"
 import AppContext from "components/AppContext"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
@@ -7,13 +6,7 @@ import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useState } from "react"
-import {
-  Badge,
-  MenuItem,
-  Nav as BSNav,
-  NavDropdown,
-  NavItem
-} from "react-bootstrap"
+import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
 import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
@@ -26,29 +19,26 @@ import Settings from "settings"
 import utils from "utils"
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
-  const ScrollLinkNavItem = ScrollLink(NavItem)
+  const { showFloatingMenu, topbarOffset } = useContext(ResponsiveLayoutContext)
+  const ScrollLinkNavItem = ScrollLink(Nav.Link)
   return (
-    <ResponsiveLayoutContext.Consumer>
-      {context => (
-        <ScrollLinkNavItem
-          activeClass="active"
-          to={to}
-          spy
-          smooth
-          duration={500}
-          containerId="main-viewport"
-          onClick={() => {
-            context.showFloatingMenu(false)
-            utils.pushHash(to)
-          }}
-          // TODO: fix the need for offset
-          offset={-context.topbarOffset}
-          disabled={disabled}
-        >
-          {children}
-        </ScrollLinkNavItem>
-      )}
-    </ResponsiveLayoutContext.Consumer>
+    <ScrollLinkNavItem
+      activeClass="active"
+      to={to}
+      spy
+      smooth
+      duration={500}
+      containerId="main-viewport"
+      onClick={() => {
+        showFloatingMenu(false)
+        utils.pushHash(to)
+      }}
+      // TODO: fix the need for offset
+      offset={-topbarOffset}
+      disabled={disabled}
+    >
+      {children}
+    </ScrollLinkNavItem>
   )
 }
 AnchorNavItem.propTypes = {
@@ -64,25 +54,28 @@ const SidebarLink = ({
   id,
   setIsMenuLinksOpened
 }) => (
-  <Link
-    to={linkTo}
+  <Nav.Item
     onClick={() => {
       handleOnClick()
       setIsMenuLinksOpened && setIsMenuLinksOpened()
     }}
   >
-    <NavItem id={id}>{children}</NavItem>
-  </Link>
+    <Link to={linkTo}>
+      <Nav.Link eventKey={id}>
+        <span>{children}</span>
+      </Nav.Link>
+    </Link>
+  </Nav.Item>
 )
 SidebarLink.propTypes = {
   linkTo: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   children: PropTypes.node,
   handleOnClick: PropTypes.func,
   setIsMenuLinksOpened: PropTypes.func,
-  id: PropTypes.string
+  id: PropTypes.string.isRequired
 }
 
-const Nav = ({
+const Navigation = ({
   advisorOrganizations,
   principalOrganizations,
   resetPages,
@@ -145,8 +138,9 @@ const Nav = ({
   ])
 
   return (
-    <BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
+    <Nav variant="pills" id="leftNav" className="flex-column d-print-none">
       <SidebarLink
+        id="nav-home-button"
         linkTo="/"
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
@@ -154,30 +148,33 @@ const Nav = ({
         Home
       </SidebarLink>
 
-      <BSNav id="search-nav" />
+      <Nav id="search-nav" />
 
-      <NavItem
-        active={isMenuLinksOpened}
-        id="nav-links-button"
+      <Nav.Item
+        id={isMenuLinksOpened ? "nav-links-opened" : ""}
+        active={isMenuLinksOpened ? 1 : 0}
         style={{ paddingTop: "2px" }}
         onClick={() => setIsMenuLinksOpened(!isMenuLinksOpened)}
       >
-        {Settings?.menuOptions?.menuLinksDropdownTitle ?? "My Work"}
-        <span
-          className={isMenuLinksOpened ? "caret caret-rotate" : "caret"}
-          style={{ marginLeft: "0.5rem" }}
-        >
-        </span>
-      </NavItem>
+        <Nav.Link>
+          {Settings?.menuOptions?.menuLinksDropdownTitle ?? "My Work"}
+          <span
+            className={
+              isMenuLinksOpened
+                ? "dropdown-toggle dropdown-toggle-rotate"
+                : "dropdown-toggle"
+            }
+            style={{ marginLeft: "0.255em" }}
+          >
+          </span>
+        </Nav.Link>
+      </Nav.Item>
 
-      <Collapse isOpen={isMenuLinksOpened}>
-        <BSNav
-          bsStyle="pills"
-          stacked
-          style={{ paddingLeft: "1rem", paddingTop: "2px" }}
-        >
+      <Collapse in={isMenuLinksOpened}>
+        <div style={{ marginLeft: "1rem" }}>
           {currentUser.uuid && (
             <SidebarLink
+              id="my-reports-nav"
               linkTo={{ pathname: "/reports/mine" }}
               handleOnClick={resetPages}
             >
@@ -185,14 +182,14 @@ const Nav = ({
             </SidebarLink>
           )}
 
-          <BSNav id="reports-nav" />
+          <Nav id="reports-nav" style={{ lineHeight: "10px" }} />
 
           {isAdvisor && currentUser.position?.uuid && (
             <>
               <SidebarLink
+                id="my-tasks-nav"
                 linkTo={{ pathname: "/tasks/mine" }}
                 handleOnClick={resetPages}
-                id="my-tasks-nav"
               >
                 {`My ${pluralize(taskShortLabel)}`}
                 {notifications?.tasksWithPendingAssessments?.length ? (
@@ -202,9 +199,9 @@ const Nav = ({
                 ) : null}
               </SidebarLink>
               <SidebarLink
+                id="my-counterparts-nav"
                 linkTo={{ pathname: "/positions/counterparts" }}
                 handleOnClick={resetPages}
-                id="my-counterparts-nav"
               >
                 My Counterparts
                 {notifications?.counterpartsWithPendingAssessments?.length ? (
@@ -218,9 +215,9 @@ const Nav = ({
 
           {myOrg && (
             <SidebarLink
+              id="my-organization-nav"
               linkTo={Organization.pathFor(myOrg)}
               handleOnClick={resetPages}
-              id="my-organization"
             >
               My Organization <br />
               <small>{myOrg.shortName}</small>
@@ -240,7 +237,7 @@ const Nav = ({
           >
             My Saved Searches
           </SidebarLink>
-        </BSNav>
+        </div>
       </Collapse>
 
       <NavDropdown
@@ -257,12 +254,12 @@ const Nav = ({
               setIsMenuLinksOpened(false)
             }}
           >
-            <MenuItem>{org.shortName}</MenuItem>
+            <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
           </Link>
         ))}
       </NavDropdown>
 
-      <BSNav id="advisor-org-nav" />
+      <Nav id="advisor-org-nav" style={{ lineHeight: "10px" }} />
 
       <NavDropdown
         title={Settings.fields.principal.org.allOrgName}
@@ -280,14 +277,15 @@ const Nav = ({
               setIsMenuLinksOpened(false)
             }}
           >
-            <MenuItem>{org.shortName}</MenuItem>
+            <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
           </Link>
         ))}
       </NavDropdown>
 
-      <BSNav id="principal-org-nav" />
+      <Nav id="principal-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
+        id="daily-rollup-nav"
         linkTo="/rollup"
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
@@ -296,44 +294,64 @@ const Nav = ({
       </SidebarLink>
 
       {currentUser.isAdmin() && (
-        <LinkContainer
-          to="/admin"
-          onClick={() => {
-            clearSearchQuery()
-            setIsMenuLinksOpened(false)
-          }}
-        >
-          <NavItem>Admin</NavItem>
-        </LinkContainer>
+        <Nav.Item>
+          <LinkContainer
+            to="/admin"
+            onClick={() => {
+              clearSearchQuery()
+              setIsMenuLinksOpened(false)
+            }}
+          >
+            <Nav.Link>Admin</Nav.Link>
+          </LinkContainer>
+        </Nav.Item>
       )}
 
       {inAdmin && (
-        <BSNav>
-          <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
-            <NavItem>Merge people</NavItem>
-          </LinkContainer>
-          <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
-            <NavItem>Merge positions</NavItem>
-          </LinkContainer>
-          <LinkContainer to="/admin/mergeLocations" onClick={resetPages}>
-            <NavItem>Merge locations</NavItem>
-          </LinkContainer>
-          <LinkContainer to="/admin/authorizationGroups" onClick={resetPages}>
-            <NavItem>Authorization groups</NavItem>
-          </LinkContainer>
-          <SidebarLink linkTo="/admin/graphiql" handleOnClick={resetPages}>
-            GraphQL
-          </SidebarLink>
-        </BSNav>
+        <Nav className="flex-column">
+          <span id="style-nav" style={{ lineHeight: "10px" }}>
+            <Nav.Item>
+              <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
+                <Nav.Link>Merge people</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
+                <Nav.Link>Merge positions</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer to="/admin/mergeLocations" onClick={resetPages}>
+                <Nav.Link>Merge locations</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer
+                to="/admin/authorizationGroups"
+                onClick={resetPages}
+              >
+                <Nav.Link>Authorization groups</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <SidebarLink
+              id="grapgQL-nav"
+              linkTo="/admin/graphiql"
+              handleOnClick={resetPages}
+            >
+              GraphQL
+            </SidebarLink>
+          </span>
+        </Nav>
       )}
 
       {externalDocumentationUrl && externalDocumentationUrlText && (
-        <NavItem href={externalDocumentationUrl} target="_extdocs">
+        <Nav.Item href={externalDocumentationUrl} target="_extdocs">
           {externalDocumentationUrlText}
-        </NavItem>
+        </Nav.Item>
       )}
 
       <SidebarLink
+        id="help-nav"
         linkTo="/help"
         handleOnClick={resetPages}
         setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
@@ -352,7 +370,9 @@ const Nav = ({
                 setIsMenuLinksOpened(false)
               }}
             >
-              <MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
+              <NavDropdown.Item>
+                {INSIGHT_DETAILS[insight].navTitle}
+              </NavDropdown.Item>
             </Link>
           ))}
         </NavDropdown>
@@ -369,23 +389,23 @@ const Nav = ({
                 setIsMenuLinksOpened(false)
               }}
             >
-              <MenuItem>{dashboard.label}</MenuItem>
+              <NavDropdown.Item>{dashboard.label}</NavDropdown.Item>
             </Link>
           ))}
         </NavDropdown>
       )}
-    </BSNav>
+    </Nav>
   )
 }
 
-Nav.propTypes = {
+Navigation.propTypes = {
   advisorOrganizations: PropTypes.array,
   principalOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
-Nav.defaultProps = {
+Navigation.defaultProps = {
   advisorOrganizations: [],
   principalOrganizations: []
 }
@@ -418,4 +438,4 @@ NotificationBadge.propTypes = {
 
 export default connect(null, mapDispatchToProps, null, {
   pure: false
-})(Nav)
+})(Navigation)

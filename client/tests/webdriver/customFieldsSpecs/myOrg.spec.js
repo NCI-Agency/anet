@@ -6,7 +6,8 @@ describe("My Organization page", () => {
   beforeEach("Open the My Organization page", () => {
     Home.openAsAdminUser()
     Home.linksMenuButton.click()
-    const myOrgUrl = Home.myOrgLink.getAttribute("href")
+    Home.myOrgLink.waitForExist()
+    const myOrgUrl = Home.myOrgLink.parentElement().getAttribute("href")
     MyOrg.openAsAdminUser(myOrgUrl)
   })
 

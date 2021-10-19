@@ -25,6 +25,7 @@ const LinkSourceAnet = ({ editor, showModal, setShowModal, selection }) => {
   )
   return (
     <Modal
+      centered
       show={showModal}
       aria-labelledby="Link chooser"
       onHide={() => setShowModal(false)}

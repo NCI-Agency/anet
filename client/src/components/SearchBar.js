@@ -27,7 +27,7 @@ export const SearchPopover = ({
       boundary="window"
       captureDismiss
       content={popoverContent}
-      interactionKind={Popover2InteractionKind.CLICK_TARGET_ONLY}
+      interactionKind={Popover2InteractionKind.CLICK}
       placement="bottom-start"
       usePortal={false}
       autoFocus={true}
@@ -101,11 +101,19 @@ const SearchBar = ({
             id="searchBarInput"
           />
           {!showAdvancedSearch && (
-            <InputGroup.Button>
-              <Button onClick={onSubmit} id="searchBarSubmit">
-                <img src={SEARCH_ICON} height={16} alt="Search" />
-              </Button>
-            </InputGroup.Button>
+            <Button
+              onClick={onSubmit}
+              id="searchBarSubmit"
+              variant="outline-light"
+              style={{ borderColor: "#ced4da" }}
+            >
+              <img
+                src={SEARCH_ICON}
+                height={16}
+                alt="Search"
+                style={{ color: "white" }}
+              />
+            </Button>
           )}
         </InputGroup>
       </Form>

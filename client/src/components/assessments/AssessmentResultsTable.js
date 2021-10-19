@@ -132,7 +132,7 @@ const AssessmentResultsTable = ({
           >
             <PeriodsNavigation offset={offset} onChange={setOffset} />
             <Table
-              condensed
+              borderless
               responsive
               className="assessments-table"
               style={{ tableLayout: "fixed" }}

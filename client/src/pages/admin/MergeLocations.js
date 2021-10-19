@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client"
-import { Button, Callout } from "@blueprintjs/core"
+import { Callout, Intent } from "@blueprintjs/core"
 import styled from "@emotion/styled"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
@@ -36,7 +36,7 @@ import useMergeObjects, {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
-import { Col, FormGroup, Grid, Row } from "react-bootstrap"
+import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -83,10 +83,10 @@ const MergeLocations = ({ pageDispatchers }) => {
   }, [location1, location2])
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         <Messages error={saveError} warning={saveWarning} />
-        <h2>Merge Locations Tool</h2>
+        <h4>Merge Locations Tool</h4>
       </Row>
       <Row>
         <Col md={4} id="left-merge-loc-col">
@@ -124,13 +124,13 @@ const MergeLocations = ({ pageDispatchers }) => {
           </MidColTitle>
           {!areAllSet(location1, location2) && (
             <div style={{ padding: "16px 5%" }}>
-              <Callout intent="warning">
+              <Callout intent={Intent.WARNING}>
                 Please select <strong>both</strong> locations to proceed...
               </Callout>
             </div>
           )}
           {areAllSet(location1, location2, mergedLocation) && (
-            <>
+            <fieldset>
               <LocationField
                 label="Name"
                 value={mergedLocation.name}
@@ -252,7 +252,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                     )
                   }
                 )}
-            </>
+            </fieldset>
           )}
         </Col>
         <Col md={4} id="right-merge-loc-col">
@@ -270,9 +270,7 @@ const MergeLocations = ({ pageDispatchers }) => {
       <Row>
         <Button
           style={{ width: "98%", margin: "16px 1%" }}
-          large
-          intent="primary"
-          text="Merge Locations"
+          variant="primary"
           onClick={mergeLocations}
           disabled={
             !areAllSet(
@@ -282,9 +280,11 @@ const MergeLocations = ({ pageDispatchers }) => {
               mergedLocation?.type
             )
           }
-        />
+        >
+          Merge Locations
+        </Button>
       </Row>
-    </Grid>
+    </Container>
   )
 
   function mergeLocations() {
@@ -318,8 +318,7 @@ MergeLocations.propTypes = {
 const MidColTitle = styled.div`
   display: flex;
   height: 39px;
-  margin-top: 25px;
-  margin-bottom: 15px;
+  margin-top: 19px;
   border-bottom: 1px solid #cccccc;
   border-top: 1px solid #cccccc;
   justify-content: space-between;
@@ -381,7 +380,7 @@ const LocationColumn = ({
         </AdvancedSingleSelect>
       </FormGroup>
       {areAllSet(location) && (
-        <>
+        <fieldset>
           <LocationField
             label="Name"
             fieldName="name"
@@ -557,7 +556,7 @@ const LocationColumn = ({
                 )
               }
             )}
-        </>
+        </fieldset>
       )}
     </div>
   )

@@ -2,7 +2,7 @@ import CreateButton from "components/CreateButton"
 import SearchBar from "components/SearchBar"
 import PropTypes from "prop-types"
 import React from "react"
-import { Col, Grid, Row } from "react-bootstrap"
+import { Col, Container, Row } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import menuLogo from "resources/anet-menu.svg"
 import logo from "resources/logo.svg"
@@ -17,19 +17,23 @@ const backgroundCss = {
 
 const Header = ({ minimalHeader, onHomeClick, toggleMenuAction }) => (
   <header style={backgroundCss} className="header">
-    <Grid fluid>
+    <Container fluid>
       <Row>
         <Col xs={3} sm={3} md={2} lg={2}>
           {minimalHeader ? (
-            <span className="logo hidden-xs">
+            <span>
               <img src={logo} alt="ANET Logo" />
             </span>
           ) : (
-            <Link to="/" className="logo hidden-xs" onClick={onHomeClick}>
+            <Link
+              className="logo d-none d-sm-block"
+              to="/"
+              onClick={onHomeClick}
+            >
               <img src={logo} alt="ANET logo" />
             </Link>
           )}
-          <span className="logo visible-xs">
+          <span className="logo d-xs-block d-sm-none">
             <img src={menuLogo} alt="ANET Menu" onClick={toggleMenuAction} />
           </span>
         </Col>
@@ -42,13 +46,13 @@ const Header = ({ minimalHeader, onHomeClick, toggleMenuAction }) => (
 
         {!minimalHeader && (
           <Col xs={3} sm={2} md={2} lg={1}>
-            <div style={{ paddingRight: 5 }} className="pull-right">
+            <div style={{ paddingRight: 5 }} className="float-end">
               <CreateButton />
             </div>
           </Col>
         )}
       </Row>
-    </Grid>
+    </Container>
   </header>
 )
 Header.propTypes = {

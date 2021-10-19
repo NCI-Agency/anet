@@ -12,7 +12,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
-import { Badge, Col, Grid, Label, Row } from "react-bootstrap"
+import { Badge, Col, Container, Row } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -151,7 +151,7 @@ const ReportSummary = ({
   return (
     <div>
       <UltimatePaginationTopDown
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
@@ -184,7 +184,7 @@ const ReportSummaryRow = ({ report }) => {
   const className = `report-${report.getStateForClassName()}`
 
   return (
-    <Grid fluid className="report-summary">
+    <Container fluid className="report-summary">
       {report.isDraft() && (
         <p>
           <span className={className} />
@@ -239,11 +239,11 @@ const ReportSummaryRow = ({ report }) => {
       <Row>
         <Col md={12}>
           {report.engagementDate && (
-            <Label bsStyle="default" className="engagement-date">
+            <Badge bg="secondary" className="engagement-date">
               {moment(report.engagementDate).format(
                 Report.getEngagementDateFormat()
               )}
-            </Label>
+            </Badge>
           )}
         </Col>
       </Row>
@@ -269,7 +269,9 @@ const ReportSummaryRow = ({ report }) => {
               <strong>Location: </strong>
               <LinkTo modelType="Location" model={report.location} />
               {"  "}
-              <Badge>{Location.humanNameOfType(report.location.type)}</Badge>
+              <Badge bg="secondary">
+                {Location.humanNameOfType(report.location.type)}
+              </Badge>
             </span>
           </Col>
         </Row>
@@ -329,7 +331,7 @@ const ReportSummaryRow = ({ report }) => {
           )}
         </Col>
       </Row>
-      <Row className="hide-for-print">
+      <Row className="d-print-none">
         <Col className="read-report-actions" md={12}>
           <LinkTo
             modelType="Report"
@@ -337,11 +339,11 @@ const ReportSummaryRow = ({ report }) => {
             button
             className="read-report-button"
           >
-            Read report
+            Read Report
           </LinkTo>
         </Col>
       </Row>
-    </Grid>
+    </Container>
   )
 }
 

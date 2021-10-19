@@ -297,8 +297,11 @@ test.beforeEach(t => {
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()
       const $advancedSelectSuggestion = await t.context.$(
-        `${popoverSelector} tbody tr:first-child td input`
+        `${popoverSelector} tbody tr:first-child td:first-child input`
       )
+      // Move element into view
+      const actions = t.context.driver.actions({ async: true })
+      await actions.move({ origin: $advancedSelectSuggestion }).perform()
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput
     },
@@ -317,11 +320,13 @@ test.beforeEach(t => {
       )
     },
     async clickMenuLinksButton() {
-      const $menuLinksButton = await t.context.$("#nav-links-button")
+      const $menuLinksButton = await t.context.$(
+        "#leftNav div:nth-child(3) > a"
+      )
       await $menuLinksButton.click()
     },
     async clickMyOrgLink() {
-      const $myOrgLink = await t.context.$("#my-organization")
+      const $myOrgLink = await t.context.$('a[href*="/organizations/"]')
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
       await $myOrgLink.click()
       await t.context.waitForLoadingFinished()

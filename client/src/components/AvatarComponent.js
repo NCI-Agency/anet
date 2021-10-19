@@ -1,6 +1,6 @@
+import PropTypes from "prop-types"
 import React from "react"
 import Avatar from "react-avatar-edit"
-import PropTypes from "prop-types"
 
 // More info about this component: https://github.com/kirill3333/react-avatar
 const AvatarComponent = ({ onChangePreview }) => {
@@ -8,11 +8,11 @@ const AvatarComponent = ({ onChangePreview }) => {
     <span style={{ margin: "0 auto", display: "table", overflow: "scroll" }}>
       <Avatar
         onCrop={onCrop}
-        shadingColor="white"
-        closeIconColor="black"
+        shadingColor="black"
+        closeIconColor="white"
         backgroundColor="white"
+        width="512"
         imageWidth="512" // image
-        width="512" // editor
       />
     </span>
   )

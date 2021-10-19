@@ -3,7 +3,7 @@ import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
-import { Radio, Table } from "react-bootstrap"
+import { Form, Table } from "react-bootstrap"
 
 const AdvancedSelectOverlayTable = ({
   fieldName,
@@ -74,7 +74,7 @@ const AdvancedSingleSelectOverlayTableBase = ({
   <AdvancedSelectOverlayTable
     {...otherProps}
     selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
-    selectItemComponent={<Radio />}
+    selectItemComponent={<Form.Check type="radio" />}
   />
 )
 AdvancedSingleSelectOverlayTableBase.propTypes = {

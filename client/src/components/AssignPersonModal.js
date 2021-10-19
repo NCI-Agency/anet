@@ -13,8 +13,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react"
 import {
   Button,
   Col,
+  Container,
   FormGroup,
-  Grid,
   Modal,
   Row,
   Table
@@ -153,7 +153,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
   }
 
   return (
-    <Modal show={showModal} onHide={closeModal}>
+    <Modal centered show={showModal} onHide={closeModal}>
       <Modal.Header closeButton>
         <Modal.Title>
           Assign Person to the{" "}
@@ -167,7 +167,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
             {!removeUser && (
               <>
                 <Button
-                  bsStyle="danger"
+                  variant="danger"
                   onClick={() => {
                     if (
                       Position.isAdvisor(latestPositionProp.current) ||
@@ -204,7 +204,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
           </div>
         )}
         {!removeUser && (
-          <Grid fluid>
+          <Container fluid>
             <Row>
               <Col md={12}>
                 <FormGroup controlId="person" required>
@@ -227,7 +227,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
               </Col>
             </Row>
             {person && person.uuid && (
-              <Table striped condensed hover responsive>
+              <Table striped hover responsive>
                 <thead>
                   <tr>
                     <th>Rank</th>
@@ -253,15 +253,15 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
               </Table>
             )}
             {<Messages error={error} />}
-          </Grid>
+          </Container>
         )}
       </Modal.Body>
-      <Modal.Footer>
+      <Modal.Footer className="justify-content-between">
         <Button
-          className="pull-left"
           onClick={() => {
             removeUser ? setRemoveUser(false) : closeModal()
           }}
+          variant="outline-secondary"
         >
           Cancel
         </Button>
@@ -277,7 +277,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
             }
             setRemoveUser(false)
           }}
-          bsStyle="primary"
+          variant="primary"
           className="save-button"
           type="submit"
         >

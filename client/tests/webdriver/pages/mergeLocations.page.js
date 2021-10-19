@@ -8,7 +8,7 @@ class MergeLocations extends Page {
   }
 
   get title() {
-    return browser.$('//h2[contains(text(),"Merge Locations")]')
+    return browser.$('//h4[contains(text(),"Merge Locations")]')
   }
 
   get leftLocationField() {
@@ -32,7 +32,7 @@ class MergeLocations extends Page {
   }
 
   get mergeLocationsButton() {
-    return browser.$('//button//span[text()="Merge Locations"]')
+    return browser.$('//button[text()="Merge Locations"]')
   }
 
   getUseAllButton(side) {

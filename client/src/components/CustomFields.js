@@ -28,7 +28,7 @@ import _upperFirst from "lodash/upperFirst"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo } from "react"
-import { Badge, Button, HelpBlock, Table } from "react-bootstrap"
+import { Badge, Button, Form, Table } from "react-bootstrap"
 import Settings from "settings"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
@@ -223,6 +223,7 @@ const JsonField = fieldProps => {
       : fieldValue
   return (
     <FastField
+      asA="textarea"
       name={name}
       value={value}
       component={FieldHelper.InputField}
@@ -291,6 +292,7 @@ const enumHumanValue = (choices, fieldVal) => {
         {fieldVal.map((k, index) => (
           <span key={k}>
             <Badge
+              bg={null} // we want to override the colors
               style={{
                 fontSize: "inherit",
                 fontWeight: "inherit",
@@ -310,6 +312,7 @@ const enumHumanValue = (choices, fieldVal) => {
     return (
       fieldVal && (
         <Badge
+          bg={null} // we want to override the colors
           style={{
             fontSize: "inherit",
             fontWeight: "inherit",
@@ -402,9 +405,9 @@ const ArrayOfObjectsField = fieldProps => {
         render={arrayHelpers => (
           <div>
             <Button
-              className="pull-right"
+              className="float-end"
               onClick={() => addObject(objDefault, arrayHelpers)}
-              bsStyle="primary"
+              variant="secondary"
               id={`add-${name}`}
             >
               {addButtonLabel}
@@ -442,7 +445,6 @@ const ArrayObject = ({
     <Fieldset title={`${objLabel} ${index + 1}`}>
       <RemoveButton
         title={`Remove this ${objLabel}`}
-        altText={`Remove this ${objLabel}`}
         onClick={() => arrayHelpers.remove(index)}
       />
       <CustomFields
@@ -575,7 +577,7 @@ const AnetObjectField = ({
     >
       {children}
       {fieldValue.type && fieldValue.uuid && (
-        <Table id={`${name}-value`} striped condensed hover responsive>
+        <Table id={`${name}-value`} striped hover responsive>
           <tbody>
             <tr>
               <td>
@@ -584,7 +586,6 @@ const AnetObjectField = ({
               <td className="col-xs-1">
                 <RemoveButton
                   title={`Unlink this ${fieldValue.type}`}
-                  altText={`Unlink this ${fieldValue.type}`}
                   onClick={() => setFieldValue(name, null)}
                 />
               </td>
@@ -621,7 +622,7 @@ const ReadonlyAnetObjectField = ({
       humanValue={
         type &&
         uuid && (
-          <Table id={`${name}-value`} striped condensed hover responsive>
+          <Table id={`${name}-value`} striped hover responsive>
             <tbody>
               <tr>
                 <td>
@@ -684,7 +685,7 @@ const ArrayOfAnetObjectsField = ({
     >
       {children}
       {!_isEmpty(fieldValue) && (
-        <Table id={`${name}-value`} striped condensed hover responsive>
+        <Table id={`${name}-value`} striped hover responsive>
           <tbody>
             {fieldValue.map(entity => (
               <tr key={entity.uuid}>
@@ -694,7 +695,6 @@ const ArrayOfAnetObjectsField = ({
                 <td className="col-xs-1">
                   <RemoveButton
                     title={`Unlink this ${entity.type}`}
-                    altText={`Unlink this ${entity.type}`}
                     onClick={() => {
                       let found = false
                       const newValue = fieldValue.filter(e => {
@@ -743,7 +743,7 @@ const ReadonlyArrayOfAnetObjectsField = ({
       isCompact={isCompact}
       humanValue={
         !_isEmpty(fieldValue) && (
-          <Table id={`${name}-value`} striped condensed hover responsive>
+          <Table id={`${name}-value`} striped hover responsive>
             <tbody>
               {fieldValue.map(entity => (
                 <tr key={entity.uuid}>
@@ -864,12 +864,6 @@ export const CustomFieldsContainer = props => {
 
   return (
     <>
-      <FastField
-        type="text"
-        value=""
-        name={invisibleFieldsFieldName}
-        className="hidden"
-      />
       <CustomFields invisibleFields={invisibleFields} {...props} />
     </>
   )
@@ -978,7 +972,7 @@ const CustomField = ({
       {...fieldProps}
       {...extraProps}
     >
-      {helpText && <HelpBlock>{helpText}</HelpBlock>}
+      {helpText && <Form.Text as="div">{helpText}</Form.Text>}
     </FieldComponent>
   ) : (
     <FastField

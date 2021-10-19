@@ -208,7 +208,7 @@ fields:
     longName:
       label: Objective / Effort description
       placeholder: Enter an objective / effort description, example ....
-      componentClass: textarea
+      as: textarea
       style:
         height: 400px
     topLevel:
@@ -220,7 +220,7 @@ fields:
       longName:
         label: Description of this Objective
         placeholder: Enter a description for this Objective, example ....
-        componentClass: textarea
+        as: textarea
         style:
           height: 400px
       assessments:
@@ -246,7 +246,7 @@ fields:
       longName:
         label: Effort description
         placeholder: Enter an effort description, example ....
-        componentClass: textarea
+        as: textarea
         style:
           height: 400px
       assessments:
@@ -360,7 +360,7 @@ fields:
             label: Questions
             helpText: JSON that defines the assessment (you need to know what you are doing)
             placeholder: Fill in valid JSON
-            componentClass: textarea
+            as: textarea
             style:
               height: 200px
 
@@ -602,7 +602,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@.colourOptions === 'GREEN')]
@@ -683,7 +683,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@.colourOptions === 'GREEN')]
@@ -764,7 +764,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@.colourOptions === 'GREEN')]
@@ -846,7 +846,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@.colourOptions === 'GREEN')]

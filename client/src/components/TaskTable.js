@@ -93,20 +93,13 @@ const BaseTaskTable = ({
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table
-          striped
-          condensed
-          hover
-          responsive
-          className="tasks_table"
-          id={id}
-        >
+        <Table striped hover responsive className="tasks_table" id={id}>
           <thead>
             <tr>
               <th>Name</th>

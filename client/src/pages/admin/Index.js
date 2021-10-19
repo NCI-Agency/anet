@@ -21,7 +21,7 @@ import { Field, Form, Formik } from "formik"
 import moment from "moment"
 import UserActivityTable from "pages/admin/UserActivityTable"
 import React, { useContext, useState } from "react"
-import { Button, Col, Grid, Row } from "react-bootstrap"
+import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
 import uuidv4 from "uuid/v4"
@@ -115,8 +115,7 @@ const AdminIndex = ({ pageDispatchers }) => {
   const userActivitiesActionButton = (
     <Button
       disabled={actionLoading}
-      bsStyle="primary"
-      type="button"
+      variant="primary"
       onClick={loadUserActivities}
     >
       {Array.isArray(recentActivities) || Array.isArray(recentUsers)
@@ -136,8 +135,7 @@ const AdminIndex = ({ pageDispatchers }) => {
           const action = (
             <div>
               <Button
-                bsStyle="primary"
-                type="button"
+                variant="primary"
                 onClick={submitForm}
                 disabled={isSubmitting}
               >
@@ -160,7 +158,7 @@ const AdminIndex = ({ pageDispatchers }) => {
                         key={key}
                         component={FieldHelper.SpecialField}
                         widget={
-                          <Field component="select" className="form-control">
+                          <FormSelect className="form-control">
                             {Object.values(dropdownField.options).map(
                               option => (
                                 <option key={option.value} value={option.value}>
@@ -168,7 +166,7 @@ const AdminIndex = ({ pageDispatchers }) => {
                                 </option>
                               )
                             )}
-                          </Field>
+                          </FormSelect>
                         }
                       >
                       </Field>
@@ -192,13 +190,12 @@ const AdminIndex = ({ pageDispatchers }) => {
         }}
       </Formik>
       <Fieldset title="Site actions">
-        <Grid fluid>
+        <Container fluid>
           <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
             <Col md={2}>
               <Button
                 disabled={actionLoading}
-                bsStyle="primary"
-                type="button"
+                variant="primary"
                 onClick={clearCache}
                 style={{ width: "100%" }}
               >
@@ -211,8 +208,7 @@ const AdminIndex = ({ pageDispatchers }) => {
             <Col md={2}>
               <Button
                 disabled={actionLoading}
-                bsStyle="primary"
-                type="button"
+                variant="primary"
                 onClick={reloadDictionary}
                 style={{ width: "100%" }}
               >
@@ -225,7 +221,7 @@ const AdminIndex = ({ pageDispatchers }) => {
               immediately without restarting the server.
             </Col>
           </Row>
-        </Grid>
+        </Container>
       </Fieldset>
       <Fieldset
         title={getTitleText(recentActivities, "Recent Activities")}

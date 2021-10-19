@@ -1,0 +1,30 @@
+/*
+ * Style overrides for TriggerableConfirm,
+ * to show it on front of the TopBar,
+ * and make the buttons align well.
+ */
+
+.triggerable-confirm-bootstrap-modal {
+  z-index: 1150;
+  display: flex !important;
+}
+
+.triggerable-confirm-bootstrap-modal .modal-content {
+  width: max-content;
+  white-space: wrap;
+}
+
+.triggerable-confirm-bootstrap-modal .modal-footer {
+  display: flex !important;
+}
+
+@media screen and (max-width: 768px) {
+  .triggerable-confirm-bootstrap-modal .modal-footer {
+    flex-direction: column;
+  }
+
+  .triggerable-confirm-bootstrap-modal .modal-footer button {
+    white-space: normal;
+    margin-bottom: 0.5rem;
+  }
+}

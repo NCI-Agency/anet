@@ -1,4 +1,5 @@
-import { Button } from "@blueprintjs/core"
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import Leaflet from "components/Leaflet"
 import {
@@ -11,7 +12,9 @@ import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Location } from "models"
 import React, { useCallback, useReducer } from "react"
+import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
+import RemoveButton from "./components/RemoveButton"
 
 const MERGE_SIDES = ["left", "right"]
 
@@ -246,16 +249,18 @@ export function areAllSet(...args) {
 
 export function getInfoButton(infoText) {
   return (
-    <Tooltip2 content={infoText} intent="primary">
-      <Button minimal icon="info-sign" intent="primary" />
+    <Tooltip2 content={infoText} intent={Intent.PRIMARY}>
+      <Button variant="default">
+        <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+      </Button>
     </Tooltip2>
   )
 }
 
 export function getClearButton(onClear) {
   return (
-    <Tooltip2 content="Clear field value" intent="danger">
-      <Button icon="delete" outlined intent="danger" onClick={onClear} />
+    <Tooltip2 content="Clear field value" intent={Intent.DANGER}>
+      <RemoveButton onClick={onClear} />
     </Tooltip2>
   )
 }
@@ -266,14 +271,14 @@ export function getActivationButton(isActive, onClickAction, instanceName) {
       content={
         isActive ? `Deactivate ${instanceName}` : `Activate ${instanceName}`
       }
-      intent={isActive ? "danger" : "success"}
+      intent={isActive ? Intent.DANGER : Intent.SUCCESS}
     >
       <Button
-        icon={isActive ? "stop" : "play"}
-        outlined
-        intent={isActive ? "danger" : "success"}
+        variant={isActive ? "outline-danger" : "outline-success"}
         onClick={onClickAction}
-      />
+      >
+        <Icon icon={isActive ? IconNames.STOP : IconNames.PLAY} />
+      </Button>
     </Tooltip2>
   )
 }
@@ -286,21 +291,20 @@ export function getActionButton(
   disabled = false,
   text = ""
 ) {
-  const intent =
-    mergeState?.selectedMap?.[fieldName] === align ? "success" : "primary"
-  const icon = align === "right" ? "double-chevron-left" : ""
-  const rightIcon = align === "right" ? "" : "double-chevron-right"
   return (
     <small>
       <Button
-        icon={icon}
-        rightIcon={rightIcon}
-        intent={intent}
-        text={text}
+        variant={
+          mergeState?.selectedMap?.[fieldName] === align ? "success" : "primary"
+        }
         onClick={onClickAction}
         disabled={disabled}
         style={{ textAlign: "center" }}
-      />
+      >
+        {align === "right" && <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />}
+        {text}
+        {align !== "right" && <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />}
+      </Button>
     </small>
   )
 }

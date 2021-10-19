@@ -88,11 +88,25 @@ const OrganizationFilter = ({
           value={value.orgRecurseStrategy}
           onChange={handleChangeOrgRecurseStrategy}
         >
-          <ToggleButton value={RECURSE_STRATEGY.NONE}>exact match</ToggleButton>
-          <ToggleButton value={RECURSE_STRATEGY.CHILDREN}>
+          <ToggleButton
+            id="orgRecurseStrategyNone"
+            value={RECURSE_STRATEGY.NONE}
+            variant="outline-secondary"
+          >
+            exact match
+          </ToggleButton>
+          <ToggleButton
+            id="orgRecurseStrategyChildren"
+            value={RECURSE_STRATEGY.CHILDREN}
+            variant="outline-secondary"
+          >
             include sub-orgs
           </ToggleButton>
-          <ToggleButton value={RECURSE_STRATEGY.PARENTS}>
+          <ToggleButton
+            id="orgRecurseStrategyParents"
+            value={RECURSE_STRATEGY.PARENTS}
+            variant="outline-secondary"
+          >
             include parent orgs
           </ToggleButton>
         </ToggleButtonGroup>

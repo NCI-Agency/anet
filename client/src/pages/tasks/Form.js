@@ -52,7 +52,7 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const TaskForm = ({ edit, title, initialValues }) => {
+const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -161,13 +161,13 @@ const TaskForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save {fieldSettings.shortLabel}
             </Button>
+            {notesComponent}
           </div>
         )
         return (
@@ -188,6 +188,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
                   dictProps={fieldSettings.longName}
                   name="longName"
                   component={FieldHelper.InputField}
+                  asA="textarea"
                 />
 
                 {disabled ? (
@@ -345,11 +346,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={
-                        disabled
-                          ? FieldHelper.ReadonlyField
-                          : FieldHelper.RadioButtonToggleGroupField
-                      }
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={disabled}
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
@@ -386,11 +384,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={
-                      disabled
-                        ? FieldHelper.ReadonlyField
-                        : FieldHelper.RadioButtonToggleGroupField
-                    }
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    disabled={disabled}
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
@@ -440,13 +435,14 @@ const TaskForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -534,7 +530,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
 TaskForm.propTypes = {
   initialValues: PropTypes.instanceOf(Task).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 TaskForm.defaultProps = {

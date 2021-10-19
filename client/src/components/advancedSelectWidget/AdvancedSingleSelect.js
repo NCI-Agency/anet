@@ -6,7 +6,7 @@ import * as FieldHelper from "components/FieldHelper"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
-import REMOVE_ICON from "resources/delete.png"
+import RemoveButton from "../RemoveButton"
 
 const AdvancedSingleSelect = props => {
   return (
@@ -20,13 +20,7 @@ const AdvancedSingleSelect = props => {
       }
       extraAddon={
         props.showRemoveButton && !_isEmpty(props.value) ? (
-          <img
-            style={{ cursor: "pointer" }}
-            src={REMOVE_ICON}
-            height={16}
-            alt=""
-            onClick={handleRemoveItem}
-          />
+          <RemoveButton title="Clear selection" onClick={handleRemoveItem} />
         ) : null
       }
     />

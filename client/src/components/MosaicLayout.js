@@ -7,6 +7,7 @@ import _cloneDeep from "lodash/cloneDeep"
 import _dropRight from "lodash/dropRight"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
+import { Button } from "react-bootstrap"
 import {
   Corner,
   createBalancedTreeFromLeaves,
@@ -48,13 +49,14 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
       <div className={classNames(Classes.NAVBAR)}>
         <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
           <Icon iconSize={IconSize.LARGE} icon={IconNames.MENU} />
-          <button
+          <Button
             className={classNames(Classes.BUTTON)}
             onClick={autoArrange}
+            variant="outline-secondary"
             title="Auto Arrange"
           >
             <Icon icon={IconNames.GRID_VIEW} />
-          </button>
+          </Button>
           {renderButtons()}
           {description && (
             <span className="chart-description">{description}</span>
@@ -70,16 +72,17 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
     visualizations.forEach(viz => {
       if (!leaves.includes(viz.id)) {
         buttons.push(
-          <button
+          <Button
             key={viz.id}
             className={classNames(Classes.BUTTON)}
             onClick={() => addChart(viz.id)}
+            variant="outline-secondary"
             title={viz.title}
           >
             {viz.icons.map((icon, i) => (
               <Icon key={i} icon={icon} />
             ))}
-          </button>
+          </Button>
         )
       }
     })

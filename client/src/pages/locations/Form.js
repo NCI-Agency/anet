@@ -23,7 +23,7 @@ import _escape from "lodash/escape"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, FormSelect } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
 
@@ -54,7 +54,7 @@ const LOCATION_TYPES_ADMIN = [
 const LOCATION_TYPES_SUPER_USER =
   Settings?.fields?.location?.superUserTypeOptions
 
-const LocationForm = ({ edit, title, initialValues }) => {
+const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -138,13 +138,13 @@ const LocationForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save Location
             </Button>
+            {notesComponent}
           </div>
         )
 
@@ -168,7 +168,10 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   extraColElem={
                     !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
-                        <Button onClick={() => setShowSimilarLocations(true)}>
+                        <Button
+                          onClick={() => setShowSimilarLocations(true)}
+                          variant="outline-secondary"
+                        >
                           <Icon
                             icon={IconNames.WARNING_SIGN}
                             intent={Intent.WARNING}
@@ -198,10 +201,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                     setFieldValue("type", event.target.value, true)
                   }}
                   widget={
-                    <FastField
-                      component="select"
-                      className="location-type-form-group form-control"
-                    >
+                    <FormSelect className="location-type-form-group form-control">
                       <option value="">
                         {!canEditName
                           ? Location.humanNameOfType(values.type)
@@ -212,7 +212,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
                           {Location.humanNameOfType(type)}
                         </option>
                       ))}
-                    </FastField>
+                    </FormSelect>
                   }
                 />
 
@@ -279,13 +279,14 @@ const LocationForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -372,7 +373,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
 LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 LocationForm.defaultProps = {

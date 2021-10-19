@@ -35,7 +35,7 @@ import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, DropdownButton, MenuItem } from "react-bootstrap"
+import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -627,54 +627,45 @@ const CompactReportViewHeader = ({
   optionalFields,
   setOptionalFields,
   setPageSize
-}) => {
-  return (
-    <Header>
-      <HeaderTitle value="title">Summary / Print</HeaderTitle>
-      <DropdownButton
-        title="Page Size"
-        bsStyle="primary"
-        id="pageSizeButton"
-        onSelect={setPageSize}
-      >
-        {Object.keys(PAGE_SIZES).map(pageSize => (
-          <MenuItem
-            key={PAGE_SIZES[pageSize].name}
-            eventKey={PAGE_SIZES[pageSize]}
-            style={{ minWidth: "205px" }}
-          >
-            {PAGE_SIZES[pageSize].name}
-          </MenuItem>
-        ))}
-      </DropdownButton>
-      <SimpleMultiCheckboxDropdown
-        label="Optional Fields ⇓"
-        options={optionalFields}
-        setOptions={setOptionalFields}
-      />
-      <Buttons>
-        {!noReport && (
-          <Button
-            value="print"
-            type="button"
-            bsStyle="primary"
-            onClick={onPrintClick}
-          >
-            Print
-          </Button>
-        )}
-        <Button
-          value="detailedView"
-          type="button"
-          bsStyle="primary"
-          onClick={returnToDefaultPage}
+}) => (
+  <Header>
+    <HeaderTitle value="title">Summary / Print</HeaderTitle>
+    <DropdownButton
+      title="Page Size"
+      variant="outline-secondary"
+      id="pageSizeButton"
+    >
+      {Object.entries(PAGE_SIZES).map(([key, pageSize]) => (
+        <Dropdown.Item
+          key={key}
+          onClick={() => setPageSize(pageSize)}
+          style={{ minWidth: "205px" }}
         >
-          Detailed View
+          {pageSize.name}
+        </Dropdown.Item>
+      ))}
+    </DropdownButton>
+    <SimpleMultiCheckboxDropdown
+      label="Optional Fields ⇓"
+      options={optionalFields}
+      setOptions={setOptionalFields}
+    />
+    <Buttons>
+      {!noReport && (
+        <Button value="print" variant="primary" onClick={onPrintClick}>
+          Print
         </Button>
-      </Buttons>
-    </Header>
-  )
-}
+      )}
+      <Button
+        value="detailedView"
+        variant="primary"
+        onClick={returnToDefaultPage}
+      >
+        Detailed View
+      </Button>
+    </Buttons>
+  </Header>
+)
 
 CompactReportViewHeader.propTypes = {
   onPrintClick: PropTypes.func,

@@ -15,7 +15,7 @@ import moment from "moment"
 import { getOverlappingPeriodIndexes } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useState } from "react"
-import { Alert, Button, Col, Grid, Modal, Row } from "react-bootstrap"
+import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import uuidv4 from "uuid/v4"
@@ -103,6 +103,7 @@ function EditHistory({
     >
       {!externalButton && (
         <Button
+          variant="outline-secondary"
           disabled={_isEmpty(history1) && _isEmpty(history2) && !!history2}
           onClick={() => {
             setShowModal(true)
@@ -112,9 +113,11 @@ function EditHistory({
         </Button>
       )}
       <Modal
+        centered
         show={showModal}
         onHide={onHide}
-        dialogClassName={`${history2 && "edit-history-dialog-lg"}`}
+        dialogClassName={`edit-history-dialog ${history2 && "merge"}`}
+        style={{ zIndex: "1300" }}
       >
         <Modal.Header closeButton>
           <Modal.Title>{mainTitle}</Modal.Title>
@@ -161,7 +164,7 @@ function EditHistory({
               const validLastItem = validWhenNoOccupant || validWhenOccupant
 
               return (
-                <Grid fluid>
+                <Container fluid>
                   <Row>
                     {history2 && (
                       <Col md={4}>
@@ -169,7 +172,7 @@ function EditHistory({
                           history={history1}
                           action={(item, index) => (
                             <Button
-                              bsStyle="primary"
+                              variant="outline-secondary"
                               onClick={() => addItem(item)}
                             >
                               Add
@@ -189,7 +192,7 @@ function EditHistory({
                             historyEntityType={historyEntityType}
                           />
                         </div>
-                        <h2 style={{ textAlign: "center" }}>{midColTitle}</h2>
+                        <h4 style={{ textAlign: "center" }}>{midColTitle}</h4>
                         {!history2 && (
                           <AdvancedSingleSelect
                             fieldName={singleSelectParameters.fieldName}
@@ -250,7 +253,6 @@ function EditHistory({
                                   !isCurrent && (
                                     <RemoveButton
                                       title="Remove Item"
-                                      altText="Remove Item"
                                       onClick={() => removeItemFromHistory(idx)}
                                     >
                                       Remove
@@ -259,71 +261,65 @@ function EditHistory({
                                 }
                               />
                               <div className="date-container">
-                                <span>From</span>
-                                <Field
-                                  name={startTimeFieldName}
-                                  label={null}
-                                  value={values.history[idx].startTime}
-                                  onChange={value => {
-                                    setFieldValue(
-                                      startTimeFieldName,
-                                      value?.valueOf()
-                                    )
-                                    setFinalHistory(
-                                      sortHistory(
-                                        values.history.map((item, index) =>
-                                          index === idx
-                                            ? {
-                                              ...item,
-                                              startTime: value?.valueOf()
-                                            }
-                                            : item
-                                        ),
-                                        hasCurrent
-                                      )
-                                    )
-                                  }}
-                                  component={FieldHelper.SpecialField}
-                                  widget={
-                                    <CustomDateInput
-                                      id={startTimeFieldName}
-                                      maxDate={moment().toDate()}
-                                    />
-                                  }
-                                />
-                                <span>to</span>
-                                {!isCurrent ? (
+                                <div className="inner-container">
+                                  <div className="date-text">From</div>
                                   <Field
-                                    name={endTimeFieldName}
+                                    name={startTimeFieldName}
                                     label={null}
-                                    value={values.history[idx].endTime}
-                                    onChange={value =>
+                                    value={values.history[idx].startTime}
+                                    onChange={value => {
                                       setFieldValue(
-                                        endTimeFieldName,
+                                        startTimeFieldName,
                                         value?.valueOf()
                                       )
-                                    }
+                                      setFinalHistory(
+                                        sortHistory(
+                                          values.history.map((item, index) =>
+                                            index === idx
+                                              ? {
+                                                ...item,
+                                                startTime: value?.valueOf()
+                                              }
+                                              : item
+                                          ),
+                                          hasCurrent
+                                        )
+                                      )
+                                    }}
                                     component={FieldHelper.SpecialField}
                                     widget={
                                       <CustomDateInput
-                                        id={endTimeFieldName}
+                                        id={startTimeFieldName}
                                         maxDate={moment().toDate()}
-                                        style={{
-                                          width: "200px"
-                                        }}
                                       />
                                     }
                                   />
-                                ) : (
-                                  <div
-                                    style={{
-                                      width: "200px",
-                                      margin: "0 -15px"
-                                    }}
-                                  >
-                                    present
-                                  </div>
-                                )}
+                                </div>
+                                <div className="inner-container">
+                                  <div className="date-text">to</div>
+                                  {!isCurrent ? (
+                                    <Field
+                                      name={endTimeFieldName}
+                                      label={null}
+                                      value={values.history[idx].endTime}
+                                      onChange={value =>
+                                        setFieldValue(
+                                          endTimeFieldName,
+                                          value?.valueOf()
+                                        )
+                                      }
+                                      component={FieldHelper.SpecialField}
+                                      widget={
+                                        <CustomDateInput
+                                          id={endTimeFieldName}
+                                          maxDate={moment().toDate()}
+                                        />
+                                      }
+                                    />
+                                  ) : (
+                                    <div className="date-input">present</div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           )
@@ -334,8 +330,8 @@ function EditHistory({
                           </div>
                           <div>
                             <Button
-                              id="saveSearchModalSubmitButton"
-                              bsStyle="primary"
+                              id="editHistoryModalSubmitButton"
+                              variant="primary"
                               onClick={() => onSave(values)}
                               disabled={
                                 !!(
@@ -358,7 +354,7 @@ function EditHistory({
                           history={history2}
                           action={(item, index) => (
                             <Button
-                              bsStyle="primary"
+                              variant="outline-secondary"
                               onClick={() => addItem(item)}
                             >
                               Add
@@ -368,7 +364,7 @@ function EditHistory({
                       </Col>
                     )}
                   </Row>
-                </Grid>
+                </Container>
               )
 
               function removeItemFromHistory(idx) {
@@ -442,7 +438,7 @@ export default EditHistory
 
 function ValidationMessage({ title, keysAndMessages }) {
   return (
-    <Alert bsStyle="danger">
+    <Alert variant="danger">
       <legend>{title}</legend>
       <ul>
         {keysAndMessages.map(({ key, msg }) => (

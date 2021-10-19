@@ -13,7 +13,7 @@ class Home extends Page {
   }
 
   get securityBanner() {
-    const banner = browser.$("#topbar .banner")
+    const banner = browser.$("#topbar .banner div:nth-child(2)")
     banner.waitForExist()
     banner.waitForDisplayed()
     return banner
@@ -38,27 +38,27 @@ class Home extends Page {
   }
 
   get linksMenuButton() {
-    return browser.$("#nav-links-button")
+    return browser.$('//a[text()="My Work"]')
   }
 
   get myOrgLink() {
-    return browser.$("#my-organization")
+    return browser.$('//a//span[contains(text(), "My Organization")]')
   }
 
   get myTasksLink() {
-    return browser.$("#my-tasks-nav")
+    return browser.$('//a//span[text()="My Objective / Efforts"]')
   }
 
   get myCounterpartsLink() {
-    return browser.$("#my-counterparts-nav")
+    return browser.$('//a//span[text()="My Counterparts"]')
   }
 
   get myCounterpartsNotifications() {
-    return this.myCounterpartsLink.$("span:last-child")
+    return this.myCounterpartsLink.$("span.badge")
   }
 
   get myTasksNotifications() {
-    return this.myTasksLink.$("span:last-child")
+    return this.myTasksLink.$("span.badge")
   }
 
   get onboardingPopover() {

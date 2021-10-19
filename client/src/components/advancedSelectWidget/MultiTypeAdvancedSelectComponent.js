@@ -175,13 +175,22 @@ const MultiTypeAdvancedSelectComponent = ({
   return (
     <>
       {entityTypes.length > 1 && (
-        <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
+        <ButtonToggleGroup
+          size="sm"
+          value={entityType}
+          onChange={changeEntityType}
+          style={{ marginBottom: "5px" }}
+        >
           {Object.entries(ENTITY_TYPES)
             .filter(([, et]) => entityTypes.includes(et))
             .map(([key, entityName]) => {
               const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
               return (
-                <Button key={entityName} value={entityName}>
+                <Button
+                  key={entityName}
+                  value={entityName}
+                  variant="outline-secondary"
+                >
                   {entityLabel}
                 </Button>
               )

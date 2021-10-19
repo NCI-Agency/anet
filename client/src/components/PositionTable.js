@@ -121,20 +121,13 @@ const BasePositionTable = ({
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table
-          striped
-          condensed
-          hover
-          responsive
-          className="positions_table"
-          id={id}
-        >
+        <Table striped hover responsive className="positions_table" id={id}>
           <thead>
             <tr>
               <th>Name</th>
@@ -178,7 +171,6 @@ const BasePositionTable = ({
                     <td id={"positionDelete_" + pos.uuid}>
                       <RemoveButton
                         title="Remove position"
-                        altText="Remove position"
                         onClick={() => onDelete(pos)}
                       />
                     </td>

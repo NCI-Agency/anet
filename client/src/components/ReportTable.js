@@ -128,7 +128,7 @@ const ReportTable = ({
   return (
     <div>
       <UltimatePaginationTopDown
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}

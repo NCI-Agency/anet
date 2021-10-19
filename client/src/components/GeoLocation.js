@@ -1,4 +1,5 @@
-import { AnchorButton } from "@blueprintjs/core"
+import { Icon, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import {
   Popover2,
   Popover2InteractionKind,
@@ -16,7 +17,7 @@ import {
 import { Location } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
+import { Button, Col, Form, Row, Table } from "react-bootstrap"
 import utils from "utils"
 
 export const GEO_LOCATION_DISPLAY_TYPE = {
@@ -161,37 +162,39 @@ const MGRSFormField = ({
   }
 
   return (
-    <FormGroup style={{ marginBottom: 0 }}>
-      <Col sm={2} componentClass={ControlLabel} htmlFor="displayedCoordinate">
+    <Row style={{ marginBottom: 0 }}>
+      <Col sm={2} as={Form.Label} htmlFor="displayedCoordinate">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
       <Col sm={7}>
-        <Col sm={4}>
-          <Field
-            name="displayedCoordinate"
-            component={FieldHelper.InputFieldNoLabel}
-            onChange={e => updateCoordinatesOnChange(e.target.value)}
-            onBlur={e => {
-              updateCoordinatesOnBlur(e.target.value)
+        <Row>
+          <Col sm={4}>
+            <Field
+              name="displayedCoordinate"
+              component={FieldHelper.InputFieldNoLabel}
+              onChange={e => updateCoordinatesOnChange(e.target.value)}
+              onBlur={e => {
+                updateCoordinatesOnBlur(e.target.value)
+              }}
+            />
+          </Col>
+          <CoordinateActionButtons
+            coordinates={coordinates}
+            isSubmitting={isSubmitting}
+            disabled={!displayedCoordinate}
+            onClear={() => {
+              setFieldTouched("displayedCoordinate", false, false)
+              setFieldValue("displayedCoordinate", null, false)
+              setFieldValue("lat", null, false)
+              setFieldValue("lng", null, false)
             }}
+            locationFormat={locationFormat}
+            setLocationFormat={setLocationFormat}
           />
-        </Col>
-        <CoordinateActionButtons
-          coordinates={coordinates}
-          isSubmitting={isSubmitting}
-          disabled={!displayedCoordinate}
-          onClear={() => {
-            setFieldTouched("displayedCoordinate", false, false)
-            setFieldValue("displayedCoordinate", null, false)
-            setFieldValue("lat", null, false)
-            setFieldValue("lng", null, false)
-          }}
-          locationFormat={locationFormat}
-          setLocationFormat={setLocationFormat}
-        />
+        </Row>
       </Col>
-    </FormGroup>
+    </Row>
   )
   // Lat-Lng fields are read only, no need to validate in onChange or onBlur
   function updateCoordinatesOnChange(val) {
@@ -246,49 +249,51 @@ const LatLonFormField = ({
     )
   }
   return (
-    <FormGroup style={{ marginBottom: 0 }}>
-      <Col sm={2} componentClass={ControlLabel} htmlFor="lat">
+    <Row>
+      <Col sm={2} as={Form.Label} htmlFor="lat">
         {Location.LOCATION_FORMAT_LABELS[locationFormat]}
       </Col>
 
       <Col sm={7}>
-        <Col sm={3} style={{ marginRight: "8px" }}>
-          <Field
-            name="lat"
-            component={FieldHelper.InputFieldNoLabel}
-            onChange={e => setLatOnChange(e.target.value)}
-            onBlur={e => {
-              setParsedLatOnBlur(e.target.value)
+        <Row>
+          <Col sm={3} style={{ marginRight: "8px" }}>
+            <Field
+              name="lat"
+              component={FieldHelper.InputFieldNoLabel}
+              onChange={e => setLatOnChange(e.target.value)}
+              onBlur={e => {
+                setParsedLatOnBlur(e.target.value)
+              }}
+            />
+          </Col>
+          <Col sm={3}>
+            <Field
+              name="lng"
+              component={FieldHelper.InputFieldNoLabel}
+              onChange={e => setLngOnChange(e.target.value)}
+              onBlur={e => {
+                setParsedLngOnBlur(e.target.value)
+              }}
+            />
+          </Col>
+          <CoordinateActionButtons
+            coordinates={coordinates}
+            isSubmitting={isSubmitting}
+            disabled={!lat && lat !== 0 && !lng && lng !== 0}
+            onClear={() => {
+              // setting second param to false prevents validation since lat, lng can be null together
+              setFieldTouched("lat", false, false)
+              setFieldTouched("lng", false, false)
+              setFieldValue("displayedCoordinate", null)
+              setFieldValue("lat", null)
+              setFieldValue("lng", null)
             }}
+            locationFormat={locationFormat}
+            setLocationFormat={setLocationFormat}
           />
-        </Col>
-        <Col sm={3}>
-          <Field
-            name="lng"
-            component={FieldHelper.InputFieldNoLabel}
-            onChange={e => setLngOnChange(e.target.value)}
-            onBlur={e => {
-              setParsedLngOnBlur(e.target.value)
-            }}
-          />
-        </Col>
-        <CoordinateActionButtons
-          coordinates={coordinates}
-          isSubmitting={isSubmitting}
-          disabled={!lat && lat !== 0 && !lng && lng !== 0}
-          onClear={() => {
-            // setting second param to false prevents validation since lat, lng can be null together
-            setFieldTouched("lat", false, false)
-            setFieldTouched("lng", false, false)
-            setFieldValue("displayedCoordinate", null)
-            setFieldValue("lat", null)
-            setFieldValue("lng", null)
-          }}
-          locationFormat={locationFormat}
-          setLocationFormat={setLocationFormat}
-        />
+        </Row>
       </Col>
-    </FormGroup>
+    </Row>
   )
 
   // Don't parse in onChange, it limits user
@@ -343,16 +348,15 @@ const CoordinateActionButtons = ({
   setLocationFormat
 }) => {
   return (
-    <Col sm={3} style={{ padding: "4px 8px" }}>
+    <Col sm={3} style={{ padding: "0 8px" }}>
       <Tooltip2 content="Clear coordinates">
-        <AnchorButton
-          minimal
-          icon="delete"
-          outlined
-          intent="danger"
+        <Button
+          variant="outline-danger"
           onClick={onClear}
           disabled={isSubmitting || disabled}
-        />
+        >
+          <Icon icon={IconNames.DELETE} />
+        </Button>
       </Tooltip2>
       <AllFormatsInfo
         coordinates={coordinates}
@@ -410,19 +414,19 @@ const AllFormatsInfo = ({
             <tbody>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
-                  <button
-                    type="button"
+                  <Button
                     name="location"
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.LAT_LON)
                     }
+                    variant="outline-secondary"
                   >
                     {
                       Location.LOCATION_FORMAT_LABELS[
                         Location.LOCATION_FORMATS.LAT_LON
                       ]
                     }
-                  </button>
+                  </Button>
                 </td>
                 <td>
                   <LatLonFormField coordinates={coordinates} />
@@ -430,19 +434,19 @@ const AllFormatsInfo = ({
               </tr>
               <tr>
                 <td style={{ whiteSpace: "nowrap" }}>
-                  <button
-                    type="button"
+                  <Button
                     name="location"
                     onClick={() =>
                       setLocationFormat(Location.LOCATION_FORMATS.MGRS)
                     }
+                    variant="outline-secondary"
                   >
                     {
                       Location.LOCATION_FORMAT_LABELS[
                         Location.LOCATION_FORMATS.MGRS
                       ]
                     }
-                  </button>
+                  </Button>
                 </td>
                 <td>
                   <MGRSFormField coordinates={coordinates} />
@@ -454,15 +458,17 @@ const AllFormatsInfo = ({
       }
     >
       <Tooltip2 content="Display all coordinate formats">
-        <AnchorButton
+        <Button
           style={{ marginLeft: "8px" }}
           id="gloc-info-btn"
-          minimal
+          variant={inForm ? "outline-primary" : "default"}
           data-testid="info-button"
-          icon="info-sign"
-          intent="primary"
-          outlined={inForm}
-        />
+        >
+          <Icon
+            intent={inForm ? Intent.NONE : Intent.PRIMARY}
+            icon={IconNames.INFO_SIGN}
+          />
+        </Button>
       </Tooltip2>
     </Popover2>
   )

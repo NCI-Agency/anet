@@ -38,7 +38,7 @@ class CreatePerson extends Page {
   }
 
   get modalCloseButton() {
-    return this.modalContent.$("button.close")
+    return this.modalContent.$("button.btn-close")
   }
 
   get similarPerson() {
@@ -46,11 +46,11 @@ class CreatePerson extends Page {
   }
 
   get rolePrincipalButton() {
-    return browser.$("#rolePrincipalButton")
+    return browser.$('label[for="role_PRINCIPAL"]')
   }
 
   get roleAdvisorButton() {
-    return browser.$("#roleAdvisorButton")
+    return browser.$('label[for="role_ADVISOR"]')
   }
 
   get emailAddress() {
@@ -103,7 +103,7 @@ class CreatePerson extends Page {
 
   get numberCustomFieldHelpText() {
     return this.numberCustomFieldContainer.$(
-      '//span[contains(text(), "greater than")]'
+      '//div[contains(text(), "greater than")]'
     )
   }
 
@@ -114,11 +114,15 @@ class CreatePerson extends Page {
   }
 
   get greenButton() {
-    return this.customFieldsContainer.$('label[id="GREEN"]')
+    return this.customFieldsContainer.$(
+      'label[for="formCustomFields.colourOptions_GREEN"]'
+    )
   }
 
   get amberButton() {
-    return this.customFieldsContainer.$('label[id="AMBER"]')
+    return this.customFieldsContainer.$(
+      'label[for="formCustomFields.colourOptions_AMBER"]'
+    )
   }
 
   get addArrayObjectButton() {
@@ -156,11 +160,15 @@ class CreatePerson extends Page {
   }
 
   get leftButton() {
-    return this.sensitiveFieldsContainer.$('label[id="LEFT"]')
+    return this.sensitiveFieldsContainer.$(
+      'label[for="formSensitiveFields.politicalPosition_LEFT"]'
+    )
   }
 
   get middleButton() {
-    return this.sensitiveFieldsContainer.$('label[id="MIDDLE"]')
+    return this.sensitiveFieldsContainer.$(
+      'label[for="formSensitiveFields.politicalPosition_MIDDLE"]'
+    )
   }
 
   getCustomFieldContainerByName(name) {

@@ -25,7 +25,7 @@ import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, HelpBlock } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -47,7 +47,7 @@ const GQL_UPDATE_POSITION = gql`
 `
 const MIN_CHARS_FOR_DUPLICATES = 3
 
-const PositionForm = ({ edit, title, initialValues }) => {
+const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -169,13 +169,13 @@ const PositionForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save Position
             </Button>
+            {notesComponent}
           </div>
         )
         const organizationFilters = {
@@ -214,14 +214,14 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   onChange={value => setFieldValue("status", value)}
                 >
                   {willAutoKickPerson && (
-                    <HelpBlock>
+                    <Form.Text>
                       <span className="text-danger">
                         Setting this position to inactive will automatically
                         remove{" "}
                         <LinkTo modelType="Person" model={values.person} /> from
                         this position.
                       </span>
-                    </HelpBlock>
+                    </Form.Text>
                   )}
                 </FastField>
 
@@ -265,7 +265,10 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   extraColElem={
                     !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
                       <>
-                        <Button onClick={() => setShowSimilarPositions(true)}>
+                        <Button
+                          onClick={() => setShowSimilarPositions(true)}
+                          variant="outline-secondary"
+                        >
                           <Icon
                             icon={IconNames.WARNING_SIGN}
                             intent={Intent.WARNING}
@@ -340,13 +343,14 @@ const PositionForm = ({ edit, title, initialValues }) => {
               )}
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -433,7 +437,8 @@ const PositionForm = ({ edit, title, initialValues }) => {
 PositionForm.propTypes = {
   initialValues: PropTypes.instanceOf(Position).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 PositionForm.defaultProps = {

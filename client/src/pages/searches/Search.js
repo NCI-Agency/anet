@@ -49,10 +49,11 @@ import {
   Alert,
   Badge,
   Button,
+  Container,
   Dropdown,
-  MenuItem,
   Modal,
   Nav,
+  Row,
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
@@ -239,7 +240,7 @@ const Organizations = ({
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={organizationQuery.pageSize}
         totalCount={totalCount}
@@ -657,54 +658,90 @@ const Search = ({
   return (
     <div>
       <SubNav subnavElemId="search-nav">
-        <div>
-          <Button onClick={history.goBack} bsStyle="link">
-            &lt; Return to previous page
-          </Button>
-        </div>
-        <Nav stacked bsStyle="pills">
-          <AnchorNavItem to="organizations" disabled={!hasOrganizationsResults}>
-            <img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-            {hasOrganizationsResults && (
-              <Badge pullRight>{numOrganizations}</Badge>
-            )}
-          </AnchorNavItem>
+        <Container className="p-0">
+          <Row style={{ paddingLeft: 0 }}>
+            <div>
+              <Button onClick={history.goBack} variant="link" size="sm">
+                &lt; Return to previous page
+              </Button>
+            </div>
+          </Row>
+          <Row style={{ paddingLeft: "2rem", marginBottom: "5px" }}>
+            <Nav variant="pills" className="flex-column">
+              <AnchorNavItem
+                to="organizations"
+                disabled={!hasOrganizationsResults}
+              >
+                <img src={ORGANIZATIONS_ICON} alt="" /> Organizations{" "}
+                {hasOrganizationsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numOrganizations}
+                  </Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="people" disabled={!hasPeopleResults}>
-            <img src={PEOPLE_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}
-            {hasPeopleResults && <Badge pullRight>{numPeople}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="people" disabled={!hasPeopleResults}>
+                <img src={PEOPLE_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}{" "}
+                {hasPeopleResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numPeople}
+                  </Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="positions" disabled={!hasPositionsResults}>
-            <img src={POSITIONS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}
-            {hasPositionsResults && <Badge pullRight>{numPositions}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="positions" disabled={!hasPositionsResults}>
+                <img src={POSITIONS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}{" "}
+                {hasPositionsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numPositions}
+                  </Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="tasks" disabled={!hasTasksResults}>
-            <img src={TASKS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}
-            {hasTasksResults && <Badge pullRight>{numTasks}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="tasks" disabled={!hasTasksResults}>
+                <img src={TASKS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}{" "}
+                {hasTasksResults && (
+                  <Badge
+                    pill
+                    bg="secondary"
+                    className="float-end"
+                    style={{ marginLeft: "10px" }}
+                  >
+                    {numTasks}
+                  </Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="locations" disabled={!hasLocationsResults}>
-            <img src={LOCATIONS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}
-            {hasLocationsResults && <Badge pullRight>{numLocations}</Badge>}
-          </AnchorNavItem>
+              <AnchorNavItem to="locations" disabled={!hasLocationsResults}>
+                <img src={LOCATIONS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}{" "}
+                {hasLocationsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numLocations}
+                  </Badge>
+                )}
+              </AnchorNavItem>
 
-          <AnchorNavItem to="reports" disabled={!hasReportsResults}>
-            <img src={REPORTS_ICON} alt="" />{" "}
-            {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}
-            {hasReportsResults && <Badge pullRight>{numReports}</Badge>}
-          </AnchorNavItem>
-        </Nav>
+              <AnchorNavItem to="reports" disabled={!hasReportsResults}>
+                <img src={REPORTS_ICON} alt="" />{" "}
+                {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}{" "}
+                {hasReportsResults && (
+                  <Badge pill bg="secondary" className="float-end">
+                    {numReports}
+                  </Badge>
+                )}
+              </AnchorNavItem>
+            </Nav>
+          </Row>
+        </Container>
       </SubNav>
-      <div className="pull-right">
+      <div className="d-flex justify-content-end">
         {numResults > 0 && (
           <Dropdown id="dropdown-custom-1">
-            <Dropdown.Toggle>
+            <Dropdown.Toggle variant="outline-secondary">
               Export{" "}
               <img
                 src={DOWNLOAD_ICON}
@@ -714,27 +751,27 @@ const Search = ({
             </Dropdown.Toggle>
             {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
             <Dropdown.Menu className="super-colors">
-              <MenuItem
+              <Dropdown.Item
                 onClick={() =>
                   exportResults(searchQueryParams, queryTypes, "xlsx", setError)
                 }
               >
                 Excel (xlsx)
-              </MenuItem>
-              <MenuItem
+              </Dropdown.Item>
+              <Dropdown.Item
                 onClick={() =>
                   exportResults(searchQueryParams, queryTypes, "kml", setError)
                 }
               >
                 Google Earth (kml)
-              </MenuItem>
-              <MenuItem
+              </Dropdown.Item>
+              <Dropdown.Item
                 onClick={() =>
                   exportResults(searchQueryParams, queryTypes, "nvg", setError)
                 }
               >
                 NATO Vector Graphics (nvg)
-              </MenuItem>
+              </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         )}
@@ -742,7 +779,8 @@ const Search = ({
           <Button
             onClick={openSaveModal}
             id="saveSearchButton"
-            style={{ marginRight: 12 }}
+            style={{ marginLeft: 12 }}
+            variant="outline-secondary"
           >
             Save search
           </Button>
@@ -750,19 +788,19 @@ const Search = ({
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
       {!_isEmpty(searchQueryParams) && (
-        <h2 className="only-show-for-print">
+        <h4 className="d-none d-print-block">
           Search query: {searchQuery.text}
           <br />
           Filters: <SearchDescription searchQuery={searchQuery} />
-        </h2>
+        </h4>
       )}
       {_isEmpty(searchQueryParams) && (
-        <Alert bsStyle="warning">
+        <Alert variant="warning">
           <b>You did not enter any search criteria.</b>
         </Alert>
       )}
       {!_isEmpty(searchQueryParams) && numResults === 0 && (
-        <Alert bsStyle="warning">
+        <Alert variant="warning">
           <b>No search results found!</b>
         </Alert>
       )}
@@ -848,7 +886,7 @@ const Search = ({
 
   function renderSaveModal() {
     return (
-      <Modal show={showSaveSearch} onHide={closeSaveModal}>
+      <Modal centered show={showSaveSearch} onHide={closeSaveModal}>
         <Modal.Header closeButton>
           <Modal.Title>Save search</Modal.Title>
         </Modal.Header>
@@ -871,8 +909,7 @@ const Search = ({
                   <div>
                     <Button
                       id="saveSearchModalSubmitButton"
-                      bsStyle="primary"
-                      type="button"
+                      variant="primary"
                       onClick={submitForm}
                     >
                       Save

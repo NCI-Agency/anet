@@ -3,11 +3,9 @@ const CircularDependencyPlugin = require("circular-dependency-plugin")
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const ESLintPlugin = require("eslint-webpack-plugin")
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const webpack = require("webpack")
 const paths = require("./paths")
 
-const devMode = process.env.NODE_ENV !== "production"
 const commonConfig = {
   module: {
     rules: [
@@ -71,7 +69,7 @@ const commonConfig = {
       {
         test: /\.css$/,
         use: [
-          devMode ? "style-loader" : MiniCssExtractPlugin.loader,
+          "style-loader",
           { loader: "css-loader", options: { importLoaders: 1 } },
           "postcss-loader"
         ]
@@ -135,7 +133,7 @@ module.exports = {
       // new webpack.optimize.CommonsChunkPlugin({
       //     name: 'manifest'
       //   })
-    ].concat(devMode ? [] : [new MiniCssExtractPlugin()]),
+    ],
     cache: {
       type: "filesystem",
       buildDependencies: {

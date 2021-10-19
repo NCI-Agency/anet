@@ -1,0 +1,11 @@
+.Draftail-Editor .DraftEditor-root {
+  min-height: 10rem;
+}
+
+.Draftail-Editor--focus .Draftail-Toolbar {
+  top: -15px;
+}
+
+.Draftail-block--unstyled {
+  margin: 0.75rem 0;
+}

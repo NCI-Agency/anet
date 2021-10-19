@@ -47,7 +47,7 @@ fields:
     longName:
       label: Objective / Effort description
       placeholder: Enter an objective / effort description, example ....
-      componentClass: textarea
+      as: textarea
       style:
         height: 400px
     topLevel:
@@ -59,7 +59,7 @@ fields:
       longName:
         label: Description of this Objective
         placeholder: Enter a description for this Objective, example ....
-        componentClass: textarea
+        as: textarea
         style:
           height: 400px
       assessments:
@@ -85,7 +85,7 @@ fields:
       longName:
         label: Effort description
         placeholder: Enter an effort description, example ....
-        componentClass: textarea
+        as: textarea
         style:
           height: 400px
       assessments:
@@ -148,6 +148,18 @@ fields:
         RED:
           label: Red
           color: '#ff8279'
+    customFieldEnum2:
+      label: Project future
+      enum:
+        BLUE:
+          label: Blue
+          color: '#0000ff'
+        WHITE:
+          label: White
+          color: '#ffffff'
+        BLACK:
+          label: Black
+          color: '#000000'
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization...
@@ -199,7 +211,7 @@ fields:
             label: Questions
             helpText: JSON that defines the assessment (you need to know what you are doing)
             placeholder: Fill in valid JSON
-            componentClass: textarea
+            as: textarea
             style:
               height: 200px
 
@@ -270,13 +282,13 @@ fields:
         helpText: Basic / Intermediate / Advanced
         visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         levels:
-          - color: lightGray
+          - color: yellow
             endValue: 3
             label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
-          - color: lightGray
+          - color: orange
             endValue: 7
             label: intermediate
-          - color: lightGray
+          - color: blue
             endValue: 10
             label: advanced advanced advanced advanced
       trainingDate:
@@ -469,7 +481,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
@@ -572,7 +584,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
@@ -653,7 +665,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
@@ -735,7 +747,7 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        as: textarea
         style:
           height: 200px
         visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
@@ -1158,7 +1170,7 @@ fields:
                   color: '#c2ffb3'
                 "2":
                   label: two
-                  color: '#ff8279'
+                  color: '#ffe396'
                 "3":
                   label: three
                   color: '#ff8279'

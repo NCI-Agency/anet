@@ -40,7 +40,12 @@ const AssessmentModal = ({
   )
   return (
     <>
-      <Modal show={showModal} onHide={closeModal}>
+      <Modal
+        centered
+        show={showModal}
+        onHide={closeModal}
+        style={{ zIndex: "1150" }}
+      >
         <Formik
           enableReinitialize
           onSubmit={onAssessmentSubmit}
@@ -84,13 +89,13 @@ const AssessmentModal = ({
                     />
                   </div>
                 </Modal.Body>
-                <Modal.Footer>
-                  <Button className="pull-left" onClick={closeModal}>
+                <Modal.Footer className="justify-content-between">
+                  <Button onClick={closeModal} variant="outline-secondary">
                     Cancel
                   </Button>
                   <Button
                     onClick={submitForm}
-                    bsStyle="primary"
+                    variant="primary"
                     disabled={isSubmitting}
                   >
                     Save

@@ -2,8 +2,8 @@ import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import RemoveButton from "components/RemoveButton"
@@ -103,20 +103,13 @@ const BaseOrganizationTable = ({
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table
-          striped
-          condensed
-          hover
-          responsive
-          className="organizations_table"
-          id={id}
-        >
+        <Table striped hover responsive className="organizations_table" id={id}>
           <thead>
             <tr>
               <th>Name</th>
@@ -145,7 +138,6 @@ const BaseOrganizationTable = ({
                     <td id={"organizationDelete_" + org.uuid}>
                       <RemoveButton
                         title="Remove organization"
-                        altText="Remove organization"
                         onClick={() => onDelete(org)}
                       />
                     </td>

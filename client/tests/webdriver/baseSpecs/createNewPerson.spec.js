@@ -26,7 +26,9 @@ describe("Create new Person form page", () => {
       CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
       CreatePerson.gender.click()
       CreatePerson.lastName.click()
-      const errorMessage = browser.$('select[name="gender"] + span.help-block')
+      const errorMessage = browser.$(
+        'select[name="gender"] + div.invalid-feedback'
+      )
       errorMessage.waitForExist()
       errorMessage.waitForDisplayed()
       expect(errorMessage.getText()).to.equal("You must provide the Gender")
@@ -79,7 +81,9 @@ describe("Create new Person form page", () => {
       )
       CreatePerson.emailAddress.setValue("notValidEmail@")
       CreatePerson.lastName.click()
-      const errorMessage = browser.$("input#emailAddress + span.help-block")
+      const errorMessage = browser.$(
+        "input#emailAddress + div.invalid-feedback"
+      )
       errorMessage.waitForExist()
       errorMessage.waitForDisplayed()
       expect(errorMessage.getText()).to.equal("Email must be a valid email")
@@ -138,7 +142,7 @@ describe("Create new Person form page", () => {
       CreatePerson.roleAdvisorButton.click()
       CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
       CreatePerson.lastName.click()
-      let errorMessage = browser.$("input#emailAddress + span.help-block")
+      let errorMessage = browser.$("input#emailAddress + div.invalid-feedback")
       // element should *not* be visible!
       errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       CreatePerson.rank.selectByAttribute(
@@ -161,7 +165,7 @@ describe("Create new Person form page", () => {
         .$("..")
         .$("..")
         .$("..")
-        .$("span.help-block")
+        .$("div.invalid-feedback")
       errorMessage.waitForExist()
       errorMessage.waitForDisplayed()
       expect(errorMessage.getText()).to.equal(
@@ -180,7 +184,9 @@ describe("Create new Person form page", () => {
           VALID_PERSON_ADVISOR.emailAddress
       )
       CreatePerson.lastName.click()
-      const errorMessage = browser.$("input#emailAddress + span.help-block")
+      const errorMessage = browser.$(
+        "input#emailAddress + div.invalid-feedback"
+      )
       // element should *not* be visible!
       errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
       CreatePerson.rank.selectByAttribute(

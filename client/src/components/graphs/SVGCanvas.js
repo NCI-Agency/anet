@@ -33,8 +33,12 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
             left: "15px"
           }}
         >
-          <Button onClick={() => zoomFn(1)}>+</Button>
-          <Button onClick={() => zoomFn(-1)}>-</Button>
+          <Button onClick={() => zoomFn(1)} variant="outline-secondary">
+            +
+          </Button>
+          <Button onClick={() => zoomFn(-1)} variant="outline-secondary">
+            -
+          </Button>
         </div>
       )}
       {exportTitle && (
@@ -47,7 +51,7 @@ const SVGCanvas = ({ width, height, exportTitle, zoomFn, children }) => {
             right: "15px"
           }}
         >
-          <Button onClick={() => exportSvg()}>
+          <Button onClick={() => exportSvg()} variant="outline-secondary">
             <img
               src={DOWNLOAD_ICON}
               height={16}
