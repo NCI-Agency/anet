@@ -188,7 +188,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   dictProps={fieldSettings.longName}
                   name="longName"
                   component={FieldHelper.InputField}
-                  asA="textarea"
                 />
 
                 {disabled ? (

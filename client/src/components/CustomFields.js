@@ -227,7 +227,6 @@ const JsonField = fieldProps => {
       : fieldValue
   return (
     <FastField
-      asA="textarea"
       name={name}
       value={value}
       component={FieldHelper.InputField}
