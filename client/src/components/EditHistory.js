@@ -326,7 +326,12 @@ function EditHistory({
                         })}
                         <div className="submit-buttons">
                           <div>
-                            <Button onClick={onHide}>Cancel</Button>
+                            <Button
+                              onClick={onHide}
+                              variant="outline-secondary"
+                            >
+                              Cancel
+                            </Button>
                           </div>
                           <div>
                             <Button
