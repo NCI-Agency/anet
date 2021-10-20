@@ -76,7 +76,7 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre8'
-	implementation 'org.postgresql:postgresql:42.2.24' // If using postgresql
+	implementation 'org.postgresql:postgresql:42.3.0' // If using postgresql
 	implementation 'org.liquibase:liquibase-core:4.3.5'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
@@ -91,7 +91,7 @@ dependencies {
 	implementation 'com.github.waffle:waffle-jna:1.9.1'
 	implementation 'com.graphql-java:java-dataloader:2.2.3'
 	implementation 'io.leangen.graphql:spqr:0.11.2'
-	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.1'
+	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 
 	// Used for converting GraphQL request output to XML:
