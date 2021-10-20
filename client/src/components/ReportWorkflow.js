@@ -60,7 +60,7 @@ const ApprovalStepModal = ({ action }) => {
       <Button
         className={actionTypeCss + " btn-sm"}
         onClick={() => setShowModal(true)}
-        variant="outline-secondary"
+        variant="default"
       >
         <span>{step.name}</span>
       </Button>
