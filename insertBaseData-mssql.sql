@@ -1027,6 +1027,23 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	FROM positions p
 	WHERE p.type = 3;
 
+-- Add notes to the positions that will be merged
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Merge one position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'positions', p.uuid
+	FROM positions p
+	WHERE p.uuid = '25fe500c-3503-4ba8-a9a4-09b29b50c1f1';
+
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Merge two position note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'positions', p.uuid
+	FROM positions p
+	WHERE p.uuid = 'e87f0f60-ad13-4c1c-96f7-672c595b81c7';
+
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ERINSON, Erin');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
