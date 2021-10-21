@@ -42,8 +42,8 @@ After this information is up to date, you’re ready to use ANET.
 
 ## Workflows for Advisors
 
-*These workflows are the ones that will be most helpful for advisors. Super Users and Admins are
-also able to complete these workflows.*
+*These workflows are the ones that will be most helpful for advisors. Super Users and Administrators
+are also able to complete these workflows.*
 
 ### Drafting and Submitting Reports
 
@@ -304,10 +304,10 @@ objects are of specific interest for a person in that position.
 
 ## Workflows for Super Users
 
-*These workflows are the ones that will be most helpful for Super Users. Admins are also able to
-complete these workflows. Super Users and Admins have advanced capabilities within ANET. Super Users
-are able to manage information for their organization, and admins are able to manage information
-across the system.*
+*These workflows are the ones that will be most helpful for Super Users. Administrators are also
+able to complete these workflows. Super Users and Administrators have advanced capabilities within
+ANET. Super Users are able to manage information for their organization, and Administrators are able
+to manage information across the system.*
 
 ### Reviewing Reports
 
@@ -371,7 +371,7 @@ To create a new person in ANET:
     1. Person: You can search for the person who fills this position in this field.
     1. Permissions: This drop down menu lets you choose what permission someone with this role
        should have in ANET. Super Users can assign positions the permissions of an advisor or Super
-       User. Admins have the added ability to assign positions administrative permissions.
+       User. Administrators have the added ability to assign positions administrative permissions.
     1. Assigned Position Relationships: You can list which advisees an advisor in this role is
        responsible for advising. If you’re creating a new Afghan principal, you can identify which
        position is responsible for advising them by searching in this bar and adding that role.
@@ -475,11 +475,12 @@ After the report has been approved by someone in the final step, their report wi
 rollup. If, along the way, one of the reviewers request changes to the report, the report will be
 returned to the author for corrections. The report will then need to be resubmitted.
 
-## Workflows for Admins
+## Workflows for Administrators
 
-*These workflows are the ones that will be most helpful for Admins. Admins are able to complete all
-of the workflows available to Advisors and Super Users. They also have a few additional capabilities
-within the ANET front end outlined here.*
+*These workflows are the ones that will be most helpful for Administrators. Administrators are able
+to complete all of the workflows available to Advisors and Super Users. They also have a few
+additional capabilities within the ANET front end outlined here, which can be found in the left-hand
+menu under **“Admin”**.*
 
 ### Setting a Default Approval Organization
 
@@ -494,7 +495,7 @@ be responsible for reviewing reports submitted by an advisor without an organiza
 this, you should check to see if they’ve been added to a position, and whether or not that position
 has an organization.
 
-To set the default approval organization, start by selecting “Admins” from the left-hand menu bar on
+To set the default approval organization, start by selecting “Admin” from the left-hand menu bar on
 the home screen. From there, you’ll see a field called “Default approval organization”. To change
 the default approval organization, enter the number of the organization that you would like to be
 the default organization. Once you’re done, click the “Save settings” button at the bottom of the
@@ -502,8 +503,8 @@ page.
 
 ### Updating the Security Banner Text and Color
 
-Admins have the ability to modify the color and text of the security banner. To modify these
-settings, start by clicking on “Admins” on the left-hand menu on the home screen. From there, you
+Administrators have the ability to modify the color and text of the security banner. To modify these
+settings, start by clicking on “Admin” on the left-hand menu on the home screen. From there, you
 can change the text of the security banner by entering your desired text in the “Security banner
 text” field. Similarly, you can change the color by entering your desired color in the “Security
 banner color” field. For the color, you can use names, rgb values or hex strings; see e.g. the
