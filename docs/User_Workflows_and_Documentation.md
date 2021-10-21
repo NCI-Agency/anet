@@ -506,9 +506,10 @@ Admins have the ability to modify the color and text of the security banner. To 
 settings, start by clicking on “Admins” on the left-hand menu on the home screen. From there, you
 can change the text of the security banner by entering your desired text in the “Security banner
 text” field. Similarly, you can change the color by entering your desired color in the “Security
-banner color” field.
+banner color” field. For the color, you can use names, rgb values or hex strings; see e.g. the
+[W3Schools Colors Tutorial](https://www.w3schools.com/colors/default.asp).
 
-### Updating the General Banner Text and Announcement Level and banner visibility
+### Updating the General Banner Text and Level and Visibility
 
 Admins have the ability to modify the color and text of the general announcement banner. To modify
 these settings, start by clicking on “Admins” on the left-hand menu on the home screen.
@@ -516,18 +517,18 @@ these settings, start by clicking on “Admins” on the left-hand menu on the h
 From there, you can change the text of the general banner by entering your desired text in the
 “General banner text” field.
 
-The Announcement level can be changed by entering one of the following announcement levels.
+The banner level can be changed by entering one of the following announcement levels.
 
-* notice - shows a blue banner on top of the page, the default value
-* success - shows a green banner on top of the page
-* error - shows a red banner on top of the page
-* alert - shows an orange banner on top of the page
+* **Blue** - shows a blue banner on top of the page, the default value
+* **Green** - shows a green banner on top of the page
+* **Red** - shows a red banner on top of the page
+* **Yellow** - shows a yellow banner on top of the page
 
 The banner visibility can be changed by choosing one of the following three settings:
 
-* 1 - only show users the banner, the default value
-* 2 - only show super users the banner
-* 3 - show users AND super users the banner
+* **Users only** - only show users the banner, the default value
+* **Super users and administrators only** - only show super users and administrators the banner
+* **Users, super users and administrators** - show users, super users and administrators the banner
 
 The banner will only be visible when a text has been entered and the user role fits the selected
 visibility level.
