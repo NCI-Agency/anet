@@ -39,8 +39,43 @@ class MergePositions extends Page {
     return browser.$("table > tbody > tr:first-child > td:nth-child(2) > span")
   }
 
+  get editAssociatedPositionsButton() {
+    return browser.$('//button[text()="Edit Associated Positions"]')
+  }
+
+  get editAssociatedPositionsModal() {
+    return browser.$(
+      "//div[contains(@class, 'edit-associated-positions-dialog')]"
+    )
+  }
+
+  get saveAssociatedPositionsButton() {
+    return this.editAssociatedPositionsModal.$('//button[text()="Save"]')
+  }
+
   get mergePositionsButton() {
     return browser.$('//button[text()="Merge Positions"]')
+  }
+
+  get samePositionsToast() {
+    return browser.$('//div[text()="Please select different positions"]')
+  }
+
+  get occupiedPositionsToast() {
+    return browser.$(
+      '//div[text()="Please select at least one unoccupied position"]'
+    )
+  }
+
+  get winnerAssociatedPositions() {
+    const associatedPositionRows = browser.$$("#assigned-principal tbody tr")
+    const winnerAps = associatedPositionRows.map(elem => {
+      return {
+        person: elem.$$("td")[0].getText(),
+        position: elem.$$("td")[1].getText()
+      }
+    })
+    return winnerAps
   }
 
   getUseAllButton(side) {
@@ -62,20 +97,30 @@ class MergePositions extends Page {
     )
   }
 
-  getAssociatedPosition(side, text) {
-    const mapper = text === "Name" ? 1 : 2
-    const associatedPositionElement = browser.$(
-      `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]/following-sibling::div/table/tbody/tr/td[${mapper}]`
+  getAssociatedPositions(side) {
+    const associatedPositionElements = browser.$$(
+      `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]//following-sibling::div//table//tbody//tr`
     )
-    return associatedPositionElement.$("a")
+    const associatedPositions = associatedPositionElements.map(elem => {
+      return {
+        person: elem.$$("td")[0].getText(),
+        position: elem.$$("td")[1].getText()
+      }
+    })
+    return associatedPositions
   }
 
-  getPreviousPeople(side, text) {
-    const mapper = text === "Name" ? 1 : 2
-    const previousPeopleElement = browser.$(
-      `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div/table/tbody/tr/td[${mapper}]`
+  getPreviousPeople(side) {
+    const previousPeopleElements = browser.$$(
+      `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div//table//tbody//tr`
     )
-    return mapper === 1 ? previousPeopleElement.$("a") : previousPeopleElement
+    const previousPeople = previousPeopleElements.map(elem => {
+      return {
+        name: elem.$$("td")[0].getText(),
+        date: elem.$$("td")[1].getText()
+      }
+    })
+    return previousPeople
   }
 
   waitForAdvancedSelectLoading(compareStr) {
@@ -122,6 +167,23 @@ class MergePositions extends Page {
         timeoutMsg: "Couldn't see the success alert in time"
       }
     )
+  }
+
+  getAssociatedPositionsInModal(side) {
+    const selectedSide = browser.$$(`#edit-ap-${side} tbody tr`)
+    const associatedPositions = selectedSide.map(elem => {
+      return {
+        // On the right column first td is button while on the other columns last td is the button
+        person: elem.$$("td")[side === "right" ? 1 : 0].getText(),
+        position: elem.$$("td")[side === "right" ? 2 : 1].getText()
+      }
+    })
+    return associatedPositions
+  }
+
+  getAssociatedPositionActionButton(side, index) {
+    const selectedRow = browser.$$(`#edit-ap-${side} tbody tr`)[index]
+    return selectedRow.$$("td")[side === "right" ? 0 : 2].$("button")
   }
 }
 
