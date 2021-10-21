@@ -93,7 +93,6 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
   })
-
   it("Should not allow to select the same positions", () => {
     MergePositions.rightPositionField.setValue(
       EXAMPLE_POSITIONS.validLeft.search
@@ -105,7 +104,6 @@ describe("Merge positions page", () => {
 
     MergePositions.samePositionsToast.waitForDisplayed()
   })
-
   it("Should not allow to select two occupied positions", () => {
     MergePositions.rightPositionField.setValue(
       EXAMPLE_POSITIONS.occupiedRight.search
@@ -117,7 +115,6 @@ describe("Merge positions page", () => {
 
     MergePositions.occupiedPositionsToast.waitForDisplayed()
   })
-
   it("Should display fields values of the right position", () => {
     // Search and select a position from right position field.
     MergePositions.rightPositionField.setValue(
@@ -158,7 +155,6 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validRight.previousPeople
     )
   })
-
   it("Should be able to select all fields from left position", () => {
     MergePositions.getUseAllButton("left").click()
 
@@ -195,7 +191,6 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.location
     )
   })
-
   it("Should be able to select all fields from right position", () => {
     MergePositions.getUseAllButton("right").click()
 
@@ -232,7 +227,6 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validRight.location
     )
   })
-
   it("Sould be able to select from both left and right side.", () => {
     MergePositions.getSelectButton("left", "Name").click()
     MergePositions.waitForColumnToChange(
@@ -264,7 +258,6 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.previousPeople
     )
   })
-
   it("Should display correct values on the left column", () => {
     MergePositions.getUseAllButton("left").click()
     MergePositions.waitForColumnToChange(
@@ -332,12 +325,10 @@ describe("Merge positions page", () => {
     MergePositions.saveAssociatedPositionsButton.click()
     expect(MergePositions.getAssociatedPositions("mid")).to.eql(afterPicked)
   })
-
   it("Should be able to merge both positions when winner is left position", () => {
     MergePositions.mergePositionsButton.click()
     MergePositions.waitForSuccessAlert()
   })
-
   it("Should merge positions when winner's associated positions are a combination from both positions", () => {
     const winnerApsAfterMerge = [
       { person: "Unfilled", position: "EF 1.1 Advisor B" },
@@ -345,7 +336,6 @@ describe("Merge positions page", () => {
     ]
     expect(MergePositions.winnerAssociatedPositions).to.eql(winnerApsAfterMerge)
   })
-
   it("Should merge notes of the both positions", () => {
     MergePositions.showNotesButton.click()
     // Wait for offcanvas to open
@@ -357,7 +347,6 @@ describe("Merge positions page", () => {
       ])
     ).to.eq(true)
   })
-
   it("Should be able to delete the loser position", () => {
     MergePositions.openPage(
       `/positions/${EXAMPLE_POSITIONS.validRight.posUuid}`
