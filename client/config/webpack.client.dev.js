@@ -22,7 +22,7 @@ module.exports = merge.merge(common.clientConfig, {
   devServer: {
     hot: true,
     historyApiFallback: true,
-    contentBase: "public",
+    static: [paths.public],
     port: process.env.DEV_PORT,
     proxy: [
       {
@@ -40,7 +40,6 @@ module.exports = merge.merge(common.clientConfig, {
       publicUrl: "/",
       inject: true,
       template: "public/index.hbs"
-    }),
-    new webpack.HotModuleReplacementPlugin()
+    })
   ]
 })

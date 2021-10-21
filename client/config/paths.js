@@ -31,6 +31,7 @@ module.exports = {
   appIndexJs: resolveApp("src/index.js"),
   appPackageJson: resolveApp("package.json"),
   appSrc: resolveApp("src"),
+  public: resolveApp("public"),
   clientBuild: resolveApp("build"),
   testSrc: resolveApp("tests"),
   appNodeModules: resolveApp("node_modules"),
