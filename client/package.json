@@ -52,7 +52,7 @@
     "babel-preset-react-app": "10.0.0",
     "chai": "4.3.4",
     "chalk": "4.1.2",
-    "chromatic": "5.10.2",
+    "chromatic": "6.0.4",
     "chromedriver": "94.0.0",
     "circular-dependency-plugin": "5.2.2",
     "clean-webpack-plugin": "4.0.0",
