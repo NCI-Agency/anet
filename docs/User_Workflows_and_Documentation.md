@@ -15,6 +15,29 @@ their engagements, and share that information across the mission as needed. ANET
 capabilities make it easy for advising organizations and mission leadership to gain context on
 engagements which can shape future decision making.
 
+### Sensitive information and Authorization Groups
+
+In general, almost all information in ANET is accessible to all fully authenticated users. However,
+in some places, ANET can record sensitive information. This comes in two different flavors:
+
+1. sensitive information text as part of engagement reports
+1. custom sensitive information fields for e.g. people, as defined in the ANET dictionary
+   (configuration)
+
+For both flavors, access to the sensitive information is first and foremost restricted to people
+holding active positions in the chosen authorization groups. For engagement reports, authors are
+allowed to select these authorization groups themselves. For the custom sensitive information
+fields, the authorization groups that have access are defined in the ANET configuration, by the
+application administrator.
+
+In addition to people in the authorization groups, sensitive information in engagement reports is
+also accessible to the report's author(s). And sensitive information for people or positions is also
+accessible to those people's or position's counterparts.
+
+Administrators define the available authorization groups, and who is in them. These groups should
+have a descriptive name, so report authors know which ones to choose. Also, administrators have
+access to all information.
+
 ### Using ANET for the first time
 
 #### Accessing ANET
@@ -533,3 +556,33 @@ The banner visibility can be changed by choosing one of the following three sett
 
 The banner will only be visible when a text has been entered and the user role fits the selected
 visibility level.
+
+### Authorization Groups for Sensitive information
+
+As stated in the [Sensitive information and Authorization Groups](#sensitive-information-and-authorization-groups)
+section, access to sensitive information is restricted to the chosen authorization groups. As an
+administrator, you define the available authorization groups, and who is in them. Under the
+**“Admin”** section there's an entry **“Authorization groups”** where you will find a list of the
+currently defined authorization groups. From the list you can view details of each group, and also
+edit them by clicking **“Edit”**. From the top right **“Create”** button you can create new
+authorization groups.
+
+Make sure to give each authorization group a descriptive name, so report authors know which ones to
+choose. Add the positions belonging to the group. The people currently occupying those positions
+(as shown in the *Current Occupant* column in the details page of the group) will have access to
+sensitive information restricted to this group. Setting a group to *Inactive* means the group will
+no longer be shown to report authors when selecting groups for sensitive information text in an
+engagement report.
+
+To add groups in the dictionary, you need to record the group's unique identifier, called *uuid*,
+which you can find in the URL bar of your browser. E.g. if you're looking at an authorization
+group's detail page, the URL will end with something like
+`…/admin/authorizationGroups/39a78d51-c351-452c-9206-4305ec8dd76d` ⇒ the uuid you need in this
+case is `39a78d51-c351-452c-9206-4305ec8dd76d`; in the dictionary you'd specify that as:
+```
+        authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+```
+To add more groups, separate them with a comma, like so:
+```
+        authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d', 'c21e7321-7ec5-4837-8805-a302f9575754']
+```
