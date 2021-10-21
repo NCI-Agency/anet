@@ -78,6 +78,14 @@ class MergePositions extends Page {
     return winnerAps
   }
 
+  get showNotesButton() {
+    return browser.$('button[title="Show notes"]')
+  }
+
+  get noteCards() {
+    return browser.$$(".offcanvas .card")
+  }
+
   getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
     return browser.$(`#mid-merge-pos-col ${button} > button`)
@@ -184,6 +192,19 @@ class MergePositions extends Page {
   getAssociatedPositionActionButton(side, index) {
     const selectedRow = browser.$$(`#edit-ap-${side} tbody tr`)[index]
     return selectedRow.$$("td")[side === "right" ? 0 : 2].$("button")
+  }
+
+  areNotesExist(notes) {
+    let areExist = true
+    const allNoteTexts = this.noteCards.map(card =>
+      card.$$(".card-body > div")[1].getText()
+    )
+    notes.forEach(note => {
+      if (!allNoteTexts.includes(note)) {
+        areExist = false
+      }
+    })
+    return areExist
   }
 }
 

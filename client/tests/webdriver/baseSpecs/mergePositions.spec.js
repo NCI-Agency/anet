@@ -21,7 +21,8 @@ const EXAMPLE_POSITIONS = {
         date: `${moment().format("DD MMMM YYYY")} -  `
       }
     ],
-    location: "Unspecified"
+    location: "Unspecified",
+    notes: ["Merge one position note"]
   },
   validRight: {
     search: "merge two",
@@ -37,7 +38,8 @@ const EXAMPLE_POSITIONS = {
     ],
     previousPeople: [],
     location: "Unspecified",
-    posUuid: "e87f0f60-ad13-4c1c-96f7-672c595b81c7"
+    posUuid: "e87f0f60-ad13-4c1c-96f7-672c595b81c7",
+    notes: ["Merge two position note"]
   },
   occupiedRight: {
     search: "cost adder",
@@ -342,6 +344,18 @@ describe("Merge positions page", () => {
       { person: "Unfilled", position: "EF 1.1 Advisor D" }
     ]
     expect(MergePositions.winnerAssociatedPositions).to.eql(winnerApsAfterMerge)
+  })
+
+  it("Should merge notes of the both positions", () => {
+    MergePositions.showNotesButton.click()
+    // Wait for offcanvas to open
+    browser.pause(100)
+    expect(
+      MergePositions.areNotesExist([
+        ...EXAMPLE_POSITIONS.validLeft.notes,
+        ...EXAMPLE_POSITIONS.validRight.notes
+      ])
+    ).to.eq(true)
   })
 
   it("Should be able to delete the loser position", () => {
