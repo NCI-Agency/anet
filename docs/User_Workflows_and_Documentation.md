@@ -172,31 +172,54 @@ has now become a report for a past engagement.
 
 ### My ANET Snapshot
 
-The “My ANET Snapshot” on the homepage gives you a quick look into some important information about
+The “My ANET snapshot” on the homepage gives you a quick look into some important information about
 your reports. Each of these sections quickly shows you how many reports of that type there are. To
-see the reports themselves, just click on the number.
+see the reports themselves, just click on the number. Depending on your role, some of these sections
+may not be visible to you.
 
-#### Reports Pending Approval
+#### All Draft Reports (administrators only)
 
-In the first box, labelled “Reports Pending Approval” you can see how many of your reports need to
-be approved before they’ll be added to the daily rollup. If you’re a Super User, this number tells
-you how many reports have been submitted by advisors that you need to review.
+This shows you how many draft reports you have, that still need to be completed and submitted.
+(known bug)
 
-#### My organization’s recent reports
+#### My Draft Reports (advisors only)
+
+This shows you how many draft reports you have, that still need to be completed and submitted.
+
+#### My Reports Pending Approval
+
+This shows you how many of your reports need to be approved before they’ll be added to the daily
+rollup.
+
+#### Reports Pending My Approval (approvers only)
+
+This shows you how many reports are awaiting your approval.
+
+#### All Reports Pending Approval (administrators only)
+
+This shows you how many reports are awaiting approval.
+
+#### All Approved Reports (administrators only)
+
+This shows you how many reports have been approved.
+
+#### My Organization’s Reports in the Last 7 Days
 
 On a given day, several advisors in your advising organization may submit reports. The number of
-reports submitted by members of your organization is listed in the second section of the “My ANET
-Snapshot”.
+reports submitted, in the last 7 days, by members of your organization is listed here.
 
-#### My reports in the last 24 hours
+#### My Organization’s Planned Engagements
 
-This section quickly displays reports you have drafted or submitted in the last 24 hours.
+This section displays how many future engagements have been created by members of your organization.
 
-#### Upcoming Engagements
+#### All Planned Engagements (administrators only)
 
-This section displays how many future engagements you have created. Future engagements are draft
-reports which have a date in the future. To learn more about future engagements, please see that
-section above.
+This section displays how many future engagements have been created.
+
+#### Reports with Sensitive Information
+
+This shows you how many reports have been published with sensitive information that is accessible to
+you.
 
 ### Searching
 
@@ -216,13 +239,14 @@ you could search for it as described above. To easily check the search results, 
 search by clicking the “Save search” button at the top. Give your saved search a meaningful name so
 you will be able to find it.
 
-When you’ve saved your search this way, the results will display on the homepage under “Saved
-Searches”. You can also toggle between multiple saved searches by clicking on the dropdown menu
-under “Saved Searches” and selecting the search results you’d like to view. Should you no longer be
-interested in that saved search, you can remove it by clicking the “Delete Search” button. You can
-also view the complete search results for a saved search by clicking the “Show Search” button. In
-addition to the top matching reports, this will also show you additional pages of results, as well
-as possible results for other types of information.
+When you’ve saved your search this way, the results will display under “My Work” with the “My Saved
+Searches” option. You can also toggle between multiple saved searches by clicking on the dropdown
+menu at “Select a saved search” and selecting the search results you’d like to view. Should you no
+longer be/interested in that saved search, you can remove it by clicking the “Delete Search” button.
+Initially, selecting a saved search only shows you the reports matching that search; you can also
+view the complete search results for a saved search by clicking the “Show Search” button. In
+addition to the matching reports, this will also show you possible results for other types of
+information.
 
 ### Daily Rollup
 
@@ -236,8 +260,8 @@ submitted within the last 24 hours. You can also quickly view cancelled engageme
 
 ### Delete Draft Reports
 
-If you ever need to delete a draft report—if, for example you accidentally create one—you can do so
-by [BLANK].
+If you ever need to delete a draft report — if, for example you accidentally create one — you can do
+so by clicking the *Delete this report* button at the bottom of the report's edit page.
 
 Please note that you cannot delete reports that have been submitted for approval, or those which
 have already been approved and added to the daily rollup.
@@ -256,41 +280,45 @@ know. The email will include the comment explaining why the report needs changes
 edit and resubmit the report.
 
 In order to edit the report, you’ll first need to navigate to the report in ANET. You can do this by
-clicking on the link provided in the email, or clicking on “My Reports” on the left-hand menu of the
-homepage. When you find and click into the report, you can review the comment the reviewer left.
+clicking on the link provided in the email, or clicking on “My Work” on the left-hand menu, then
+clicking “My Reports”. When you find and click into the report, you can review the comment the
+reviewer left.
 
-To edit the report, click on the “Actions” button on the top right of the page, and select the edit
-option. You’ll then be editing a draft version of the report. Once you’ve made the changes you need
-to make, you can save and resubmit the report for approval.
+To edit the report, click on the “Edit” button on the top right of the page. You’ll then be editing
+a draft version of the report. Once you’ve made the changes you need to make, you can save and
+resubmit the report for approval.
 
 ### View Principals You Advise
 
 Keeping track of who you’re advising is a critical part of the TAA mission. ANET provides a couple
-of ways to view the Principals you’re advising.
+of ways to view the principals you’re advising, also known as your *counterparts*.
 
-One way to find this information is to search for your name in the search bar at the top of the
-homepage. When you find yourself among the search results, click on your name. You’ll be taken to a
-page with your profile information, including your contact information, the position you hold, and
-reports you’ve authored or are mentioned in. In the “Position” section of the page, you’ll see a
-subsection called “Advises”. This section lists principals you advice.
+One way to find this information is to look at the page with your own details. In the top bar, next
+to your name, there's an *(edit)* link. Click that, and you’ll be taken to a page with your profile
+information, including your contact information, the position you hold, and reports you’ve authored
+or are mentioned in. In the “Assigned Principal” section of the page, you’ll see a subsection called
+“Advises”. This section lists principals you advise.
+
+Another way to find your counterparts is by clicking on “My Work” on the left hand menu, and then
+clicking on “My Counterparts”. On that page you can also see whether you have pending assessments
+for your counterparts that you still need to complete.
 
 You can also get to your profile information by navigating to your advising organization. You do
-this by clicking on “Advisor Organizations” on the left hand menu, and selecting your advising
-organization. Once there, click on “Laydown” in the submenu on the left-hand of the page. You can
-find yourself under “Supported Laydown”.
+this by clicking on “My Work” on the left hand menu, and then clicking on “My Organization”. You can
+find yourself under “Supported Positions”.
 
 To see if other advisors are advising your principal, you can click on their name to view their
-profile information. Under the “Position” section, you’ll see the subsection called “Advised by”
-which lists their advisors.
+profile information. Under the “Assigned Advisor” section, you’ll see the subsection called “Is
+advised by” which lists their advisors.
 
 ### Emailing Individual Reports
 
 When you read a report that you think someone else may want to read, you can quickly and easily
 email it to them from within ANET. To send someone a report:
 
-1. Click the “Actions” button on the top right of the report
-1. Select the “Email Report” option
-1. You’ll be prompted to search for the name of the person you’d like to send the report to.
+1. Go to the report's preview page.
+1. Click the “Email report” button.
+1. You’ll be prompted to enter the email addresses of the people you’d like to send the report to.
 1. You also have the option to include a comment in the email. Once you’ve added the comment, click
    the “Send Email” button and you’re all set.
 
@@ -333,7 +361,7 @@ If you've already subscribed to the object, the icon will change to the green ic
 
 ![Unsubscribe](images/unsubscribe.png)
 
-and clicking on it will unsubscribe you from that object. Under **My Work** in the navigation menu
+and clicking on it will unsubscribe you from that object. Under **My Work** on the navigation menu
 you find an entry **My Subscriptions**. Clicking on it shows you a page with two tables: your update
 feed (*My Subscription Updates*) and your subscriptions (*My Subscriptions*). You can browse through
 both tables; they also have a clickable icon to unsubscribe from objects you are no longer
@@ -357,10 +385,10 @@ advisors’ reports before they are released to the daily rollup. One way to qui
 you need to review:
 
 1. Start on the ANET homepage and click on the box within the ANET snapshot called displaying a
-   number and the words “Pending my approval”.
+   number and the words “Reports pending my approval”.
 1. Clicking there will take you to a page of the reports that are waiting on your approval.
-1. Select the report you’d like to review by clicking on the “Read full report” button visible on
-   the bottom right of the report summary.
+1. Select the report you’d like to review by clicking on the “Read Report” button visible on
+   the bottom left of the report summary.
 1. There, you’ll be able to see the entire report, including the executive summary which will be
    displayed in the daily rollup.
 1. Below the report summary, you can can request changes and comment by clicking on the “Request
@@ -399,7 +427,7 @@ To create a new person in ANET:
 
 ### Creating a new position
 
-To create a new person in ANET:
+To create a new position in ANET:
 
 1. Click on the “Create” button on the top right-hand side of the page.
 1. Then select “New Position” from the dropdown menu of options.
@@ -446,19 +474,19 @@ To create a new organization:
 1. Enter a description of the organization in the “Description” field.
 1. Finally, click “Save organization” on the bottom of the page.
 
-### Creating a new Task / Pillar
+### Creating a new Task
 
-To create a new Task / Pillar:
+To create a new Task:
 
 1. Click on the “Create” button on the right-hand side of the home page.
 1. Then, select “New Task” from the options.
 1. In the “Short name” field, enter the short name of the task.
 1. In the “Long name” field, enter the long name of the task.
-1. In the “Responsible org” field, search for the organization or suborganization that will use this
-   task.
+1. In the “Responsible org” field, search for the organization or sub-organization that will use
+   this task.
 1. Finally, click the “Save task” button on the bottom of the page.
 
-### Editing people, positions, locations, organizations, and Tasks
+### Editing People, Positions, Locations, Organizations, and Tasks
 
 There are several ways to find the person, position, locations, organizations, or tasks that you’d
 like to edit. In most cases, the easiest way to find this information is to search for it by name,
@@ -468,8 +496,8 @@ person you’re hoping to edit.
 
 Once you find what you’re hoping to edit by searching, click on it from the search results page. You
 will be taken to a page that lets you view the detailed information about that person, place, or
-object. When you’re there, click on the “Actions” button on the top right-hand side of the page, and
-select the “Edit” option. You’ll then be able to make and save changes.
+object. When you’re there, click on the “Edit” button on the top right-hand side of the page. You’ll
+then be able to make and save changes.
 
 ### Understanding People and Positions
 
@@ -520,7 +548,7 @@ returned to the author for corrections. The report will then need to be resubmit
 
 *These workflows are the ones that will be most helpful for Administrators. Administrators are able
 to complete all of the workflows available to Advisors and Super Users. They also have a few
-additional capabilities within the ANET front end outlined here, which can be found in the left-hand
+additional capabilities within the ANET front end outlined here, which can be found on the left-hand
 menu under **“Admin”**.*
 
 ### Setting a Default Approval Organization
@@ -553,8 +581,8 @@ banner color” field. For the color, you can use names, rgb values or hex strin
 
 ### Updating the General Banner Text and Level and Visibility
 
-Admins have the ability to modify the color and text of the general announcement banner. To modify
-these settings, start by clicking on “Admins” on the left-hand menu on the home screen.
+Administrators have the ability to modify the color and text of the general announcement banner. To
+modify these settings, start by clicking on “Admin” on the left-hand menu on the home screen.
 
 From there, you can change the text of the general banner by entering your desired text in the
 “General banner text” field.
