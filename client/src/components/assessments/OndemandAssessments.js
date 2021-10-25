@@ -84,24 +84,30 @@ const OnDemandAssessments = ({
         <>
           <div
             style={
-              index !== sortedOnDemandNotes.length - 1
-                ? {
-                  color: "red",
-                  paddingBottom: "3px",
-                  margin: "0 -1rem 1rem 0",
-                  borderBottom: "2px solid lightgrey"
-                }
-                : moment(assessmentFieldsObject.expirationDate).isBefore(
-                  moment()
-                )
+              moment(assessmentFieldsObject.expirationDate).isBefore(moment())
+                ? index === sortedOnDemandNotes.length - 1
                   ? {
                     color: "red",
                     paddingBottom: "3px",
-                    marginBottom: "1rem",
+                    margin: "0 -1rem 1rem 0",
                     borderBottom: "2px solid lightgrey"
                   }
                   : {
+                    color: "grey",
                     paddingBottom: "3px",
+                    margin: "0 -1rem 1rem 0",
+                    borderBottom: "2px solid lightgrey"
+                  }
+                : index !== sortedOnDemandNotes.length - 1
+                  ? {
+                    color: "grey",
+                    paddingBottom: "3px",
+                    margin: "0 -1rem 1rem 0",
+                    borderBottom: "2px solid lightgrey"
+                  }
+                  : {
+                    color: "green",
+                    paddingBottom: "2px",
                     marginBottom: "1rem",
                     borderBottom: "2px solid lightgrey"
                   }
@@ -111,12 +117,12 @@ const OnDemandAssessments = ({
               {/* Only the last object in the sortedOnDemandNotes can be valid.
                   If the expiration date of the last object is older than NOW,
                   it is also expired. */}
-              {index !== sortedOnDemandNotes.length - 1 ? (
-                "Expired"
-              ) : moment(assessmentFieldsObject.expirationDate).isBefore(
+              {moment(assessmentFieldsObject.expirationDate).isBefore(
                 moment()
               ) ? (
                   "Expired"
+                ) : index !== sortedOnDemandNotes.length - 1 ? (
+                  "No longer valid"
                 ) : (
                   <>
                     Valid until{" "}
@@ -308,7 +314,6 @@ const OnDemandAssessments = ({
           />
           <div style={{ display: "flex" }}>
             <Table
-              responsive
               className="assessments-table"
               style={{ tableLayout: "fixed" }}
             >
@@ -358,17 +363,20 @@ const OnDemandAssessments = ({
             setShowModal(false)
             onUpdateAssessment()
             /* Set the table position in a way that the user always sees the
-                latest card in the table after addition of an ondemand assessment. */
-            setTableLocation(
-              onDemandAssessmentCards.length >= numberOfPeriods
-                ? numberOfPeriods - onDemandAssessmentCards.length - 1
-                : 0
-            )
-            setEditModeObject({ questionnaireResults: {}, uuid: {} })
+                latest card in the table after addition of an ondemand assessment.
+                Also make sure editing does not shift. */
+            if (Object.keys(editModeObject.questionnaireResults).length === 0) {
+              setTableLocation(
+                onDemandAssessmentCards.length >= numberOfPeriods
+                  ? numberOfPeriods - onDemandAssessmentCards.length - 1
+                  : 0
+              )
+            }
+            setEditModeObject({ questionnaireResults: {}, uuid: "" })
           }}
           onCancel={() => {
             setShowModal(false)
-            setEditModeObject({ questionnaireResults: {}, uuid: {} })
+            setEditModeObject({ questionnaireResults: {}, uuid: "" })
           }}
         />
       </div>
