@@ -9,11 +9,12 @@ question still isn’t answered, please email the system administrator at [BLANK
 
 ### What is the Advisor Network (ANET)?
 
-ANET is an online tool designed to aid the Resolute Support mission to train, advise, and assist
-(TAA) the Afghan government. It does this by giving advisors an easy way to record the outcomes of
-their engagements, and share that information across the mission as needed. ANET’s advanced search
-capabilities make it easy for advising organizations and mission leadership to gain context on
-engagements which can shape future decision making.
+ANET is an online tool designed to aid Train, Advise, and Assist (TAA) missions between NATO
+advisors, and the people receiving the TAA, called principals in the context of ANET. It does this
+by giving advisors an easy way to record the outcomes of their engagements, and share that
+information across the mission as needed. ANET’s advanced search capabilities make it easy for
+advising organizations and mission leadership to gain context on engagements which can shape future
+decision making.
 
 ### Sensitive information and Authorization Groups
 
@@ -42,9 +43,9 @@ access to all information.
 
 #### Accessing ANET
 
-To log in for the first time, you’ll need to log onto a computer with access Afghan Mission Network.
-When you’ve done that, open up a web browser and go to the ANET webpage. Then you’ll be able to use
-the Advisor Network (ANET).
+To log in for the first time, you’ll need to log onto a computer with access inside the mission
+network. When you’ve done that, open up a web browser and go to the ANET webpage. Then you’ll be
+able to use the Advisor Network (ANET).
 
 ANET logs you in with your existing credentials, so as long as you can log into your computer, you
 should be able to access ANET and already be logged in to your account.
@@ -442,8 +443,8 @@ To create a new position in ANET:
        should have in ANET. Super Users can assign positions the permissions of an advisor or Super
        User. Administrators have the added ability to assign positions administrative permissions.
     1. Assigned Position Relationships: You can list which advisees an advisor in this role is
-       responsible for advising. If you’re creating a new Afghan principal, you can identify which
-       position is responsible for advising them by searching in this bar and adding that role.
+       responsible for advising. If you’re creating a new principal, you can identify which position
+       is responsible for advising them by searching in this bar and adding that role.
     1. Location: You can optionally add where this person is located by searching for that location
        in this field.
 1. Once you’ve filled in the information on this page, click the “Save position” button on the
@@ -466,8 +467,7 @@ To create a new organization:
 1. Click on the “Create” button on the right-hand side of the home page.
 1. Then, select “New Organization” from the options.
 1. On the “Create a new Organization” page, first indicate if the organization you need to create is
-   an advisor organization (NATO), or an organization within the Afghan Government by toggling
-   between those options.
+   an advisor organization (NATO), or a principal organization by toggling between those options.
 1. Then, if the organization you’re creating is part of another organization, you can add that
    parent organization by searching for it by name in the “Parent organization” field.
 1. In the “Name” field, enter the name of the organization you’re creating.
@@ -508,10 +508,10 @@ people and positions.
 #### Positions
 
 Positions live within organizations and have relationships assigned to them to indicate who is
-advised by that position, or who advises that position in the case of Afghan principals. Positions
-are also what get assigned permissions in ANET. That way, as people rotate in and out of theatre,
-their permissions, roles, and advisees remain constant as they take over someone’s role. When you
-create or edit a position, you can add the person currently filling that position to it.
+advised by that position, or who advises that position in the case of principals. Positions are also
+what get assigned permissions in ANET. That way, as people rotate in and out of theatre, their
+permissions, roles, and advisees remain constant as they take over someone’s role. When you create
+or edit a position, you can add the person currently filling that position to it.
 
 #### People
 
