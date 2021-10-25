@@ -1,5 +1,5 @@
 import styled from "@emotion/styled"
-import { setHeightOfAField } from "mergeUtils"
+import { ALIGN_OPTIONS, setHeightOfAField } from "mergeUtils"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 
@@ -51,24 +51,15 @@ const MergeField = ({
 }
 
 const ROW_DIRECTION = {
-  column: "row",
-  right: "row-reverse",
-  left: "row",
-  center: "row"
-}
-
-const FLEX_DIRECTION = {
-  column: "column",
-  right: "row",
-  left: "row",
-  center: "row"
+  [ALIGN_OPTIONS.LEFT]: "row",
+  [ALIGN_OPTIONS.CENTER]: "row",
+  [ALIGN_OPTIONS.RIGHT]: "row-reverse"
 }
 
 const TEXT_ALIGN = {
-  right: "right",
-  left: "left",
-  center: "center",
-  column: "center"
+  [ALIGN_OPTIONS.LEFT]: "left",
+  [ALIGN_OPTIONS.CENTER]: "center",
+  [ALIGN_OPTIONS.RIGHT]: "right"
 }
 
 const MergeFieldBox = styled.div`
@@ -85,24 +76,23 @@ const LabelBox = styled.div`
   font-weight: bold;
   text-decoration: underline;
 `
-const ALIGN_TO_JUSTIFY = {
-  center: "center",
-  left: "flex-start",
-  right: "flex-end"
+const ALIGN_ITEMS = {
+  [ALIGN_OPTIONS.LEFT]: "flex-start",
+  [ALIGN_OPTIONS.CENTER]: "center",
+  [ALIGN_OPTIONS.RIGHT]: "flex-end"
 }
 
 const ValueBox = styled.div`
   display: flex;
-  flex-direction: ${props => FLEX_DIRECTION[props.align]};
-  justify-content: ${props => ALIGN_TO_JUSTIFY[props.align]};
-  align-items: center;
+  flex-direction: column;
+  align-items: ${props => ALIGN_ITEMS[props.align]};
 `
 
 MergeField.propTypes = {
   label: PropTypes.string.isRequired,
   fieldName: PropTypes.string.isRequired,
   value: PropTypes.node,
-  align: PropTypes.oneOf(["left", "right", "center", "column"]).isRequired,
+  align: PropTypes.oneOf(Object.values(ALIGN_OPTIONS)).isRequired,
   action: PropTypes.node,
   mergeState: PropTypes.object,
   dispatchMergeActions: PropTypes.func

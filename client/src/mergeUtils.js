@@ -18,6 +18,12 @@ import RemoveButton from "./components/RemoveButton"
 
 const MERGE_SIDES = ["left", "right"]
 
+export const ALIGN_OPTIONS = {
+  LEFT: "left",
+  CENTER: "center",
+  RIGHT: "right"
+}
+
 export const getOtherSide = side =>
   side === MERGE_SIDES[0] ? MERGE_SIDES[1] : MERGE_SIDES[0]
 
