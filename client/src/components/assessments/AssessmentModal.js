@@ -44,7 +44,7 @@ const AssessmentModal = ({
         centered
         show={showModal}
         onHide={closeModal}
-        style={{ zIndex: "1220" }}
+        style={{ zIndex: "1250" }}
       >
         <Formik
           enableReinitialize
