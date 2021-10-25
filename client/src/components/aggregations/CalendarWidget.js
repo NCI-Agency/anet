@@ -21,7 +21,7 @@ const CalendarWidget = ({
   hasPrevNext
 }) => {
   const calendarComponentRef = useRef(null)
-  const events = GET_CALENDAR_EVENTS_FROM[valueType](values)
+  const events = GET_CALENDAR_EVENTS_FROM[valueType]?.(values)
   const history = useHistory()
   if (_isEmpty(events)) {
     return whenUnspecified
