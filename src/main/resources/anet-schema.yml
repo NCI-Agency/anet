@@ -106,6 +106,7 @@ $defs:
               type: string
             filterValue:
               type: [array, string, number, boolean]
+      deprecated: boolean
       validations:
         type: array
         items:
