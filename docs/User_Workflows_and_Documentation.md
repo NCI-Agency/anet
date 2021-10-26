@@ -312,6 +312,12 @@ To see if other advisors are advising your principal, you can click on their nam
 profile information. Under the “Assigned Advisor” section, you’ll see the subsection called “Is
 advised by” which lists their advisors.
 
+#### Sensitive Information for Your Counterparts
+
+As stated in the [Sensitive information and Authorization Groups](#sensitive-information-and-authorization-groups)
+section, people might have several fields containing sensitive information. If they are one of your
+counterparts, you are allowed to view that information.
+
 ### Emailing Individual Reports
 
 When you read a report that you think someone else may want to read, you can quickly and easily
