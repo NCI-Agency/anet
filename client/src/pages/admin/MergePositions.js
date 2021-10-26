@@ -70,8 +70,8 @@ const MergePositions = ({ pageDispatchers }) => {
     pageDispatchers
   })
 
-  const position1 = mergeState[mergeSides[0]]
-  const position2 = mergeState[mergeSides[1]]
+  const position1 = mergeState[mergeSides.LEFT]
+  const position2 = mergeState[mergeSides.RIGHT]
   const mergedPosition = mergeState.merged
 
   return (
@@ -93,8 +93,10 @@ const MergePositions = ({ pageDispatchers }) => {
           <MidColTitle>
             {getActionButton(
               () =>
-                dispatchMergeActions(selectAllFields(position1, mergeSides[0])),
-              mergeSides[0],
+                dispatchMergeActions(
+                  selectAllFields(position1, mergeSides.LEFT)
+                ),
+              mergeSides.LEFT,
               mergeState,
               null,
               !areAllSet(position1, position2),
@@ -103,8 +105,10 @@ const MergePositions = ({ pageDispatchers }) => {
             <h4 style={{ margin: "0" }}>Merged Position</h4>
             {getActionButton(
               () =>
-                dispatchMergeActions(selectAllFields(position2, mergeSides[1])),
-              mergeSides[1],
+                dispatchMergeActions(
+                  selectAllFields(position2, mergeSides.RIGHT)
+                ),
+              mergeSides.RIGHT,
               mergeState,
               null,
               !areAllSet(position1, position2),

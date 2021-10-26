@@ -16,7 +16,10 @@ import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import RemoveButton from "./components/RemoveButton"
 
-const MERGE_SIDES = ["left", "right"]
+const MERGE_SIDES = {
+  LEFT: "left",
+  RIGHT: "right"
+}
 
 export const ALIGN_OPTIONS = {
   LEFT: "left",
@@ -25,7 +28,7 @@ export const ALIGN_OPTIONS = {
 }
 
 export const getOtherSide = side =>
-  side === MERGE_SIDES[0] ? MERGE_SIDES[1] : MERGE_SIDES[0]
+  side === MERGE_SIDES.LEFT ? MERGE_SIDES.RIGHT : MERGE_SIDES.LEFT
 
 const ACTIONS = {
   SET_MERGEABLE: 1,
@@ -76,8 +79,8 @@ export function setHeightOfAField(fieldName, data) {
 }
 
 const INITIAL_STATE = {
-  [MERGE_SIDES[0]]: null, // initial value of left mergeable
-  [MERGE_SIDES[1]]: null,
+  [MERGE_SIDES.LEFT]: null, // initial value of left mergeable
+  [MERGE_SIDES.RIGHT]: null,
   merged: null,
   heightMap: null, // keep track of fields height, maximum heighted field of 2 columns wins
   selectedMap: null // keep track of which col field selected, [fieldName]: "left", "right" or none can be selected
@@ -151,10 +154,7 @@ const useMergeObjects = mergeableType => {
   const dispatchWrapper = useCallback(
     action => {
       if (action.type === ACTIONS.SET_MERGEABLE) {
-        const otherSide =
-          action.payload.side === MERGE_SIDES[0]
-            ? MERGE_SIDES[1]
-            : MERGE_SIDES[0]
+        const otherSide = getOtherSide(action.payload.side)
         const incMergeable = action.payload.data
         const otherMergeable = mergeState[otherSide]
 
