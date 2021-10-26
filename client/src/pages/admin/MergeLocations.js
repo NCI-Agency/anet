@@ -30,6 +30,7 @@ import useMergeObjects, {
   getClearButton,
   getInfoButton,
   getLeafletMap,
+  MERGE_SIDES,
   selectAllFields,
   setAMergedField,
   setMergeable
@@ -58,7 +59,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
-  const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
+  const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Location
   )
 
@@ -68,8 +69,8 @@ const MergeLocations = ({ pageDispatchers }) => {
     pageDispatchers
   })
 
-  const location1 = mergeState[mergeSides.LEFT]
-  const location2 = mergeState[mergeSides.RIGHT]
+  const location1 = mergeState[MERGE_SIDES.LEFT]
+  const location2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedLocation = mergeState.merged
 
   useEffect(() => {
@@ -106,9 +107,9 @@ const MergeLocations = ({ pageDispatchers }) => {
             {getActionButton(
               () =>
                 dispatchMergeActions(
-                  selectAllFields(location1, mergeSides.LEFT)
+                  selectAllFields(location1, MERGE_SIDES.LEFT)
                 ),
-              mergeSides.LEFT,
+              MERGE_SIDES.LEFT,
               mergeState,
               null,
               !areAllSet(location1, location2),
@@ -118,9 +119,9 @@ const MergeLocations = ({ pageDispatchers }) => {
             {getActionButton(
               () =>
                 dispatchMergeActions(
-                  selectAllFields(location2, mergeSides.RIGHT)
+                  selectAllFields(location2, MERGE_SIDES.RIGHT)
                 ),
-              mergeSides.RIGHT,
+              MERGE_SIDES.RIGHT,
               mergeState,
               null,
               !areAllSet(location1, location2),

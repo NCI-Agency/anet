@@ -16,7 +16,7 @@ import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
 import RemoveButton from "./components/RemoveButton"
 
-const MERGE_SIDES = {
+export const MERGE_SIDES = {
   LEFT: "left",
   RIGHT: "right"
 }
@@ -174,7 +174,7 @@ const useMergeObjects = mergeableType => {
     [mergeState, mergeableType, validForThatType]
   )
 
-  return [mergeState, dispatchWrapper, MERGE_SIDES]
+  return [mergeState, dispatchWrapper]
 }
 // FIXME: Fill when ready
 const OBJECT_TYPE_TO_VALIDATOR = {

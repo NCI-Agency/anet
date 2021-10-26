@@ -32,6 +32,7 @@ import useMergeObjects, {
   getInfoButton,
   getLeafletMap,
   getOtherSide,
+  MERGE_SIDES,
   selectAllFields,
   setAMergedField,
   setMergeable,
@@ -60,7 +61,7 @@ const MergePositions = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
-  const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
+  const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Position
   )
 
@@ -70,8 +71,8 @@ const MergePositions = ({ pageDispatchers }) => {
     pageDispatchers
   })
 
-  const position1 = mergeState[mergeSides.LEFT]
-  const position2 = mergeState[mergeSides.RIGHT]
+  const position1 = mergeState[MERGE_SIDES.LEFT]
+  const position2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPosition = mergeState.merged
 
   return (
@@ -94,9 +95,9 @@ const MergePositions = ({ pageDispatchers }) => {
             {getActionButton(
               () =>
                 dispatchMergeActions(
-                  selectAllFields(position1, mergeSides.LEFT)
+                  selectAllFields(position1, MERGE_SIDES.LEFT)
                 ),
-              mergeSides.LEFT,
+              MERGE_SIDES.LEFT,
               mergeState,
               null,
               !areAllSet(position1, position2),
@@ -106,9 +107,9 @@ const MergePositions = ({ pageDispatchers }) => {
             {getActionButton(
               () =>
                 dispatchMergeActions(
-                  selectAllFields(position2, mergeSides.RIGHT)
+                  selectAllFields(position2, MERGE_SIDES.RIGHT)
                 ),
-              mergeSides.RIGHT,
+              MERGE_SIDES.RIGHT,
               mergeState,
               null,
               !areAllSet(position1, position2),
