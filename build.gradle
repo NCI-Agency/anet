@@ -105,7 +105,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	implementation 'com.qindesign:snowy-json:0.15.0'
+	implementation 'com.qindesign:snowy-json:0.16.0'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.0.0'

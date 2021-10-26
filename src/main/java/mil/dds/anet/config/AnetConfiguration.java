@@ -261,7 +261,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       e.getValue().values().stream()
           .filter(
               err -> !err.isPruned() && !err.result && !err.value.toString().startsWith("https://"))
-          .sorted(Comparator.comparing(err -> err.loc.keyword)).forEach(err -> {
+          .sorted(Comparator.comparing(err -> err.loc.schema)).forEach(err -> {
             logger.error("JSON error: {} at {}", err.value,
                 Utils.isEmptyOrNull(err.loc.instance) ? "<root>" : err.loc.instance);
           });
