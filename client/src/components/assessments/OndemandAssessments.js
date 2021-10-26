@@ -7,7 +7,11 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model, { NOTE_TYPE } from "components/Model"
+import Model, {
+  NOTE_TYPE,
+  ENTITY_ON_DEMAND_ASSESSMENT_DATE,
+  ENTITY_ON_DEMAND_EXPIRATION_DATE
+} from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
 import moment from "moment"
@@ -17,6 +21,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { Badge, Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import utils from "utils"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -56,7 +61,7 @@ const OnDemandAssessments = ({
     assessmentConfig,
     entity
   )
-  filteredAssessmentConfig.expirationDate.helpText = `
+  filteredAssessmentConfig[ENTITY_ON_DEMAND_EXPIRATION_DATE].helpText = `
     If this field is left empty, the assessment will be valid for 
     ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
   `
@@ -67,11 +72,11 @@ const OnDemandAssessments = ({
     const sortedOnDemandNotes = entity.getOndemandAssessments()
     sortedOnDemandNotes.forEach((note, index) => {
       const parentFieldName = `assessment-${note.uuid}`
-      const assessmentFieldsObject = JSON.parse(note.text)
+      const assessmentFieldsObject = utils.parseJsonSafe(note.text)
       // Fill the 'expirationDate' field if it is empty
-      if (!assessmentFieldsObject.expirationDate) {
-        assessmentFieldsObject.expirationDate = moment(
-          assessmentFieldsObject.assessmentDate
+      if (!assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]) {
+        assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE] = moment(
+          assessmentFieldsObject[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
         )
           .add(
             Settings.fields.principal.onDemandAssessmentExpirationDays,
@@ -84,7 +89,9 @@ const OnDemandAssessments = ({
         <>
           <div
             style={
-              moment(assessmentFieldsObject.expirationDate).isBefore(moment())
+              moment(
+                assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
+              ).isBefore(moment())
                 ? index === sortedOnDemandNotes.length - 1
                   ? {
                     color: "red",
@@ -117,33 +124,35 @@ const OnDemandAssessments = ({
               {/* Only the last object in the sortedOnDemandNotes can be valid.
                   If the expiration date of the last object is older than NOW,
                   it is also expired. */}
-              {moment(assessmentFieldsObject.expirationDate).isBefore(
-                moment()
-              ) ? (
+              {moment(
+                assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
+              ).isBefore(moment()) ? (
                   "Expired"
                 ) : index !== sortedOnDemandNotes.length - 1 ? (
                   "No longer valid"
                 ) : (
                   <>
                     Valid until{" "}
-                    {moment(assessmentFieldsObject.expirationDate).format(
-                      "DD MMMM YYYY"
-                    )}{" "}
+                    {moment(
+                      assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
+                    ).format("DD MMMM YYYY")}{" "}
                     <Badge bg="secondary" style={{ paddingBottom: "3px" }}>
                       {/* true flag in the diff function returns the precise days
                           between two dates, e.g., '1,4556545' days. 'ceil' function
                           from Math library is used to round it to the nearest greatest
                           integer so that user sees an integer as the number of days left */}
                       {Math.ceil(
-                        moment(assessmentFieldsObject.expirationDate).diff(
-                          moment(),
-                          "days",
-                          true
-                        )
+                        moment(
+                          assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
+                        ).diff(moment(), "days", true)
                       )}{" "}
                       of{" "}
-                      {moment(assessmentFieldsObject.expirationDate).diff(
-                        moment(assessmentFieldsObject.assessmentDate),
+                      {moment(
+                        assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
+                      ).diff(
+                        moment(
+                          assessmentFieldsObject[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
+                        ),
                         "days"
                       )}{" "}
                       days left

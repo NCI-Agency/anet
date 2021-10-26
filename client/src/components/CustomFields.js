@@ -13,7 +13,9 @@ import Model, {
   CUSTOM_FIELD_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   INVISIBLE_CUSTOM_FIELDS_FIELD,
-  SENSITIVE_CUSTOM_FIELDS_PARENT
+  SENSITIVE_CUSTOM_FIELDS_PARENT,
+  ENTITY_ASSESSMENT_PARENT_FIELD,
+  ENTITY_ON_DEMAND_ASSESSMENT_DATE
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
@@ -964,7 +966,8 @@ const CustomField = ({
       case CUSTOM_FIELD_TYPE.DATE:
         return {
           maxDate:
-            fieldName === "entityAssessment.assessmentDate"
+            fieldName ===
+            `${ENTITY_ASSESSMENT_PARENT_FIELD}.${ENTITY_ON_DEMAND_ASSESSMENT_DATE}`
               ? moment().toDate()
               : undefined
         }

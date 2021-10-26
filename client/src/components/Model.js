@@ -275,23 +275,6 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
     })
   }
 
-  /* Additional validation for specific assessments. */
-  if (fieldKey === "expirationDate") {
-    fieldTypeYupSchema = fieldTypeYupSchema.when(
-      "assessmentDate",
-      (assessmentDate, schema) => {
-        if (assessmentDate) {
-          return schema.min(
-            assessmentDate,
-            `${label} must be later than ${moment(assessmentDate).format(
-              "DD-MM-YYYY"
-            )}`
-          )
-        }
-      }
-    )
-  }
-
   let fieldYupSchema = yup.mixed().nullable().default(null)
   if (!_isEmpty(label)) {
     fieldYupSchema = fieldYupSchema.label(label)
@@ -332,6 +315,8 @@ export const createYupObjectShape = (
 }
 
 export const ENTITY_ASSESSMENT_PARENT_FIELD = "entityAssessment"
+export const ENTITY_ON_DEMAND_ASSESSMENT_DATE = "assessmentDate"
+export const ENTITY_ON_DEMAND_EXPIRATION_DATE = "expirationDate"
 
 export const createAssessmentSchema = (
   assessmentConfig,
@@ -341,6 +326,25 @@ export const createAssessmentSchema = (
     assessmentConfig,
     parentFieldName
   )
+
+  /** *********** Additional validation section for specific assessment fields. *************/
+  if (assessmentSchemaShape.fields.expirationDate) {
+    assessmentSchemaShape.fields.expirationDate = assessmentSchemaShape.fields.expirationDate.when(
+      ENTITY_ON_DEMAND_ASSESSMENT_DATE,
+      (assessmentDate, schema) => {
+        if (assessmentDate) {
+          return schema.min(
+            assessmentDate,
+            `${
+              assessmentConfig.expirationDate.label
+            } must be later than ${moment(assessmentDate).format("DD-MM-YYYY")}`
+          )
+        }
+      }
+    )
+  }
+  /******************************************************************************************/
+
   return yup.object().shape({
     [parentFieldName]: assessmentSchemaShape
   })
@@ -628,13 +632,15 @@ export default class Model {
     const onDemandNotes = this.notes.filter(
       a =>
         a.type === "ASSESSMENT" &&
-        JSON.parse(a.text).__recurrence === RECURRENCE_TYPE.ON_DEMAND
+        utils.parseJsonSafe(a.text).__recurrence === RECURRENCE_TYPE.ON_DEMAND
     )
     // Sort the notes before visualizing them inside of a Card.
     const sortedOnDemandNotes = onDemandNotes.sort((a, b) => {
       return (
-        new Date(JSON.parse(a.text).assessmentDate) -
-        new Date(JSON.parse(b.text).assessmentDate)
+        new Date(
+          utils.parseJsonSafe(a.text)[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
+        ) -
+        new Date(utils.parseJsonSafe(b.text)[ENTITY_ON_DEMAND_ASSESSMENT_DATE])
       )
     })
     return sortedOnDemandNotes
