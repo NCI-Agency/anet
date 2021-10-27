@@ -3,7 +3,7 @@ import { VettingAndScreening } from "./VettingAndScreening.stories.js"
 
 <Meta title="Anet User Stories" />
 
-# Vetting & Screening
+## Vetting & Screening
 
 In order to add a new vetting and screening assessment, simply find the 
 **Assessment results - on demand** section in the counterpart (principal)
@@ -16,7 +16,7 @@ form. Below, there is a live component filled in with multiple assessments. The 
   <VettingAndScreening />
 </Story>
 
-## Validity of Assessments & Coloring
+### Validity of Assessments & Coloring
 
 Please pay attention to the `Screening and vetting date` and `Expiration date` fields when form modal is visible. They are
 essential for calculating the expiration of an assessment. The assessment cards are sorted according to the `Screening and vetting date` information and the assessment with the most recent `Screening and vetting date` information is placed in right-most-order in the list.
@@ -30,13 +30,13 @@ There are two conditions for an assessment to be invalid:
 - If a new assessment is added before the current one expires; in this case **<span style={{color: "grey"}}>No longer valid</span>** status will be displayed.
 - If the current date is later than `Expiration date`; in this case **<span style={{color: "grey"}}>Expired</span>** status will be displayed (note that the text color would be red if there are no recent assessments).
 
-## Navigation
+### Navigation
 
 _previous period_ and _next period_ buttons can be used to navigate between assessment cards. _next period_ button takes you to recent cards and _previous period_ button moves you in the opposite direction. If there are no cards to be shown in either direction, buttons become disabled.
 
 Addition and deletion operations results in shifting the cards to make sure user sees the most recent assessment in the list. Edition operation does not trigger shifting of cards.
 
-## Assessment Card Layout
+### Assessment Card Layout
 
 Light grey area above assessment cards are called card header and there are 4 aspects to pay attention:
 
@@ -47,7 +47,7 @@ Light grey area above assessment cards are called card header and there are 4 as
 
 Below the light grey area called card body, you can see the values of the corresponding assessment. 
 
-## Final Remarks
+### Final Remarks
 
 Deletion of an assessments might change the validity of the remaining cards
 
