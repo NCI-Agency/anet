@@ -43,7 +43,7 @@ fields:
     longName:
       label: Objective / Effort description
       placeholder: Enter an objective / effort description, example ....
-      as: textarea
+      asA: textarea
       style:
         height: 400px
     topLevel:
@@ -55,7 +55,7 @@ fields:
       longName:
         label: Description of this Objective
         placeholder: Enter a description for this Objective, example ....
-        as: textarea
+        asA: textarea
         style:
           height: 400px
       assessments:
@@ -81,7 +81,7 @@ fields:
       longName:
         label: Effort description
         placeholder: Enter an effort description, example ....
-        as: textarea
+        asA: textarea
         style:
           height: 400px
       assessments:
