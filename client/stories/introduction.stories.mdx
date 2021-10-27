@@ -7,23 +7,47 @@ import { Meta } from "@storybook/addon-docs"
 Welcome to ANET! We hope you’re finding it easy to use. In the information below, we describe a
 little bit about how the system works, and some of the major uses cases for this software. If you do
 need help, you can read below to see if there are instructions for what you’re trying to do. If your
-question still isn’t answered, please email the system administrator at [BLANK].
+question still isn’t answered, please email the system administrator.
 
 ## What is the Advisor Network (ANET)?
 
-ANET is an online tool designed to aid the Resolute Support mission to train, advise, and assist
-(TAA) the Afghan government. It does this by giving advisors an easy way to record the outcomes of
-their engagements, and share that information across the mission as needed. ANET’s advanced search
-capabilities make it easy for advising organizations and mission leadership to gain context on
-engagements which can shape future decision making.
+ANET is an online tool designed to aid Train, Advise, and Assist (TAA) missions between NATO
+advisors, and the people receiving the TAA, called principals in the context of ANET. It does this
+by giving advisors an easy way to record the outcomes of their engagements, and share that
+information across the mission as needed. ANET’s advanced search capabilities make it easy for
+advising organizations and mission leadership to gain context on engagements which can shape future
+decision making.
+
+## Sensitive information and Authorization Groups
+
+In general, almost all information in ANET is accessible to all fully authenticated users. However,
+in some places, ANET can record sensitive information. This comes in two different flavors:
+
+1. sensitive information text as part of engagement reports
+1. custom sensitive information fields for e.g. people, as defined in the ANET dictionary
+   (configuration)
+
+For both flavors, access to the sensitive information is first and foremost restricted to people
+holding active positions in the chosen authorization groups. For engagement reports, authors are
+allowed to select these authorization groups themselves. For the custom sensitive information
+fields, the authorization groups that have access are defined in the ANET configuration, by the
+application administrator.
+
+In addition to people in the authorization groups, sensitive information in engagement reports is
+also accessible to the report's author(s). And sensitive information for people or positions is also
+accessible to those people's or position's counterparts.
+
+Administrators define the available authorization groups, and who is in them. These groups should
+have a descriptive name, so report authors know which ones to choose. Also, administrators have
+access to all information.
 
 ## Using ANET for the first time
 
 ### Accessing ANET
 
-To log in for the first time, you’ll need to log onto a computer with access Afghan Mission Network.
-When you’ve done that, open up a web browser and go to the ANET webpage. Then you’ll be able to use
-the Advisor Network (ANET).
+To log in for the first time, you’ll need to log onto a computer with access inside the mission
+network. When you’ve done that, open up a web browser and go to the ANET webpage. Then you’ll be
+able to use the Advisor Network (ANET).
 
 ANET logs you in with your existing credentials, so as long as you can log into your computer, you
 should be able to access ANET and already be logged in to your account.
