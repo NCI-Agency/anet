@@ -41,3 +41,7 @@
 .editor-toggle-button.active{
   background-color: #ccc;
 }
+
+.editor-link-chooser {
+  z-index: 1300;
+}

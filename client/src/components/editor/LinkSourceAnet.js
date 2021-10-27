@@ -28,6 +28,7 @@ const LinkSourceAnet = ({ editor, showModal, setShowModal, selection }) => {
       centered
       show={showModal}
       aria-labelledby="Link chooser"
+      className="editor-link-chooser"
       onHide={() => setShowModal(false)}
     >
       <Modal.Header closeButton>

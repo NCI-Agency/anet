@@ -40,7 +40,7 @@ $defs:
           type: string
           title: The placeholder for this field
           description: Used in the UI where a placeholder for the field is shown (example input).
-        as:
+        asA:
           type: string
           title: The bootstrap component class
           description: Used to determine how the user interface of this particular field looks.
@@ -92,7 +92,7 @@ $defs:
         type: object
       placeholder:
         type: string
-      as:
+      asA:
         type: string
       filters:
         type: array
@@ -215,7 +215,7 @@ $defs:
       recurrence:
         title: recurrence of an assessment
         type: string
-        enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually]
+        enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually, ondemand]
         default: once
       relatedObjectType:
         title: object type context in which the assessment will be made
@@ -227,6 +227,21 @@ $defs:
         type: object
         additionalProperties:
           "$ref": "#/$defs/customField"
+    dependencies:
+      recurrence:
+        oneOf:
+        - properties:
+            recurrence:
+              enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually]
+        - properties:
+            recurrence:
+              enum: [ondemand]
+            questions:
+              assessmentDate:
+                type: date
+              expirationDate:
+                type: date
+              required: [assessmentDate, expirationDate]
 
 # definition for custom sensitive information
   customSensitiveInformation:
@@ -723,7 +738,9 @@ properties:
         additionalProperties: false
         required: [person, position, org]
         properties:
-
+          onDemandAssessmentExpirationDays:
+            type: number
+            additionalProperties: false
           person:
             type: object
             additionalProperties: false

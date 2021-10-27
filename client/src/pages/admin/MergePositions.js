@@ -5,7 +5,9 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AssociatedPositions from "components/AssociatedPositions"
 import { customFieldsJSONString } from "components/CustomFields"
+import EditAssociatedPositions from "components/EditAssociatedPositions"
 import EditHistory from "components/EditHistory"
 import LinkTo from "components/LinkTo"
 import PositionField from "components/MergeField"
@@ -22,6 +24,7 @@ import {
   useBoilerplate
 } from "components/Page"
 import useMergeObjects, {
+  ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
   getActivationButton,
@@ -29,6 +32,7 @@ import useMergeObjects, {
   getInfoButton,
   getLeafletMap,
   getOtherSide,
+  MERGE_SIDES,
   selectAllFields,
   setAMergedField,
   setMergeable,
@@ -43,7 +47,6 @@ import { useHistory } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
-import AssociatedPositions from "../positions/AssociatedPositions"
 import PreviousPeople from "../positions/PreviousPeople"
 
 const GQL_MERGE_POSITION = gql`
@@ -58,7 +61,7 @@ const MergePositions = ({ pageDispatchers }) => {
   const history = useHistory()
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
-  const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
+  const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Position
   )
 
@@ -68,8 +71,8 @@ const MergePositions = ({ pageDispatchers }) => {
     pageDispatchers
   })
 
-  const position1 = mergeState[mergeSides[0]]
-  const position2 = mergeState[mergeSides[1]]
+  const position1 = mergeState[MERGE_SIDES.LEFT]
+  const position2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedPosition = mergeState.merged
 
   return (
@@ -83,7 +86,7 @@ const MergePositions = ({ pageDispatchers }) => {
           <PositionColumn
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
-            align={mergeSides[0]}
+            align={ALIGN_OPTIONS.LEFT}
             label="Position 1"
           />
         </Col>
@@ -91,8 +94,10 @@ const MergePositions = ({ pageDispatchers }) => {
           <MidColTitle>
             {getActionButton(
               () =>
-                dispatchMergeActions(selectAllFields(position1, mergeSides[0])),
-              mergeSides[0],
+                dispatchMergeActions(
+                  selectAllFields(position1, MERGE_SIDES.LEFT)
+                ),
+              MERGE_SIDES.LEFT,
               mergeState,
               null,
               !areAllSet(position1, position2),
@@ -101,8 +106,10 @@ const MergePositions = ({ pageDispatchers }) => {
             <h4 style={{ margin: "0" }}>Merged Position</h4>
             {getActionButton(
               () =>
-                dispatchMergeActions(selectAllFields(position2, mergeSides[1])),
-              mergeSides[1],
+                dispatchMergeActions(
+                  selectAllFields(position2, MERGE_SIDES.RIGHT)
+                ),
+              MERGE_SIDES.RIGHT,
               mergeState,
               null,
               !areAllSet(position1, position2),
@@ -131,7 +138,7 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Name"
                 value={mergedPosition.name}
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Name is required.")}
                 fieldName="name"
                 mergeState={mergeState}
@@ -145,7 +152,7 @@ const MergePositions = ({ pageDispatchers }) => {
                     model={mergedPosition.organization}
                   />
                 }
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Organization is required.")}
                 fieldName="organization"
                 mergeState={mergeState}
@@ -154,7 +161,7 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Type"
                 value={mergedPosition.type}
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Type is required.")}
                 fieldName="type"
                 mergeState={mergeState}
@@ -163,7 +170,7 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Code"
                 value={mergedPosition.code}
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(setAMergedField("code", "", null))
                 )}
@@ -174,7 +181,7 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Status"
                 value={mergedPosition.status}
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getActivationButton(
                   Position.isActive(mergedPosition),
                   () =>
@@ -196,11 +203,29 @@ const MergePositions = ({ pageDispatchers }) => {
               <PositionField
                 label="Associated Positions"
                 value={
-                  <AssociatedPositions
-                    associatedPositions={mergedPosition.associatedPositions}
-                  />
+                  <>
+                    <AssociatedPositions
+                      associatedPositions={mergedPosition.associatedPositions}
+                    />
+                    <EditAssociatedPositions
+                      associatedPositions1={position1.associatedPositions}
+                      associatedPositions2={position2.associatedPositions}
+                      setAssociatedPositions={mergedAssociatedPositions =>
+                        dispatchMergeActions(
+                          setAMergedField(
+                            "associatedPositions",
+                            mergedAssociatedPositions,
+                            null
+                          )
+                        )
+                      }
+                      initialMergedAssociatedPositions={
+                        mergedPosition.associatedPositions
+                      }
+                    />
+                  </>
                 }
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(
                     setAMergedField("associatedPositions", [], null)
@@ -235,7 +260,7 @@ const MergePositions = ({ pageDispatchers }) => {
                     />
                   </>
                 }
-                align="column"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(
                     setAMergedField("previousPeople", [], null)
@@ -250,7 +275,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 value={
                   <LinkTo modelType="Person" model={mergedPosition.person} />
                 }
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(setAMergedField("person", "", null))
                 )}
@@ -270,7 +295,7 @@ const MergePositions = ({ pageDispatchers }) => {
                         key={fieldName}
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
-                        align="center"
+                        align={ALIGN_OPTIONS.CENTER}
                         action={getClearButton(() =>
                           dispatchMergeActions(
                             setAMergedField(
@@ -295,7 +320,7 @@ const MergePositions = ({ pageDispatchers }) => {
                     model={mergedPosition.location}
                   />
                 }
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(setAMergedField("location", "", null))
                 )}
@@ -309,7 +334,7 @@ const MergePositions = ({ pageDispatchers }) => {
         </Col>
         <Col md={4} id="right-merge-pos-col">
           <PositionColumn
-            align={mergeSides[1]}
+            align={ALIGN_OPTIONS.RIGHT}
             label="Position 2"
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

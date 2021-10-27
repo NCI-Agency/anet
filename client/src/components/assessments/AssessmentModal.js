@@ -1,7 +1,8 @@
 import API from "api"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString
+  customFieldsJSONString,
+  SPECIAL_WIDGET_TYPES
 } from "components/CustomFields"
 import Messages from "components/Messages"
 import Model, {
@@ -30,6 +31,9 @@ const AssessmentModal = ({
   onCancel
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
+  const hasRichTextEditor = Object.values(assessmentConfig).find(
+    question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  )
   const edit = !!note.uuid
   const initialValues = useMemo(
     () =>
@@ -44,7 +48,8 @@ const AssessmentModal = ({
         centered
         show={showModal}
         onHide={closeModal}
-        style={{ zIndex: "1150" }}
+        dialogClassName={hasRichTextEditor && "rich-text-modal"}
+        style={{ zIndex: "1250" }}
       >
         <Formik
           enableReinitialize

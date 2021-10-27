@@ -23,12 +23,14 @@ import {
 } from "components/Page"
 import { convertLatLngToMGRS } from "geoUtils"
 import useMergeObjects, {
+  ALIGN_OPTIONS,
   areAllSet,
   getActionButton,
   getActivationButton,
   getClearButton,
   getInfoButton,
   getLeafletMap,
+  MERGE_SIDES,
   selectAllFields,
   setAMergedField,
   setMergeable
@@ -57,7 +59,7 @@ const MergeLocations = ({ pageDispatchers }) => {
   const [saveWarning, setSaveWarning] = useState(null)
   const [locationFormat, setLocationFormat] = useState(Location.locationFormat)
   const locationFormatLabel = Location.LOCATION_FORMAT_LABELS[locationFormat]
-  const [mergeState, dispatchMergeActions, mergeSides] = useMergeObjects(
+  const [mergeState, dispatchMergeActions] = useMergeObjects(
     MODEL_TO_OBJECT_TYPE.Location
   )
 
@@ -67,8 +69,8 @@ const MergeLocations = ({ pageDispatchers }) => {
     pageDispatchers
   })
 
-  const location1 = mergeState[mergeSides[0]]
-  const location2 = mergeState[mergeSides[1]]
+  const location1 = mergeState[MERGE_SIDES.LEFT]
+  const location2 = mergeState[MERGE_SIDES.RIGHT]
   const mergedLocation = mergeState.merged
 
   useEffect(() => {
@@ -93,7 +95,7 @@ const MergeLocations = ({ pageDispatchers }) => {
           <LocationColumn
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
-            align={mergeSides[0]}
+            align={ALIGN_OPTIONS.LEFT}
             label="Location 1"
             locationFormat={locationFormat}
             setLocationFormat={setLocationFormat}
@@ -104,8 +106,10 @@ const MergeLocations = ({ pageDispatchers }) => {
           <MidColTitle>
             {getActionButton(
               () =>
-                dispatchMergeActions(selectAllFields(location1, mergeSides[0])),
-              mergeSides[0],
+                dispatchMergeActions(
+                  selectAllFields(location1, MERGE_SIDES.LEFT)
+                ),
+              MERGE_SIDES.LEFT,
               mergeState,
               null,
               !areAllSet(location1, location2),
@@ -114,8 +118,10 @@ const MergeLocations = ({ pageDispatchers }) => {
             <h4 style={{ margin: "0" }}>Merged Location</h4>
             {getActionButton(
               () =>
-                dispatchMergeActions(selectAllFields(location2, mergeSides[1])),
-              mergeSides[1],
+                dispatchMergeActions(
+                  selectAllFields(location2, MERGE_SIDES.RIGHT)
+                ),
+              MERGE_SIDES.RIGHT,
               mergeState,
               null,
               !areAllSet(location1, location2),
@@ -134,7 +140,7 @@ const MergeLocations = ({ pageDispatchers }) => {
               <LocationField
                 label="Name"
                 value={mergedLocation.name}
-                align={"center"}
+                align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Name is required.")}
                 fieldName="name"
                 mergeState={mergeState}
@@ -144,7 +150,7 @@ const MergeLocations = ({ pageDispatchers }) => {
               <LocationField
                 label="Type"
                 value={Location.humanNameOfType(mergedLocation.type)}
-                align={"center"}
+                align={ALIGN_OPTIONS.CENTER}
                 action={getInfoButton("Type is required.")}
                 fieldName="type"
                 mergeState={mergeState}
@@ -174,7 +180,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                   dispatchMergeActions(setAMergedField("lat", null, null))
                   dispatchMergeActions(setAMergedField("lng", null, null))
                 })}
-                align={"center"}
+                align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -183,7 +189,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                 label="Status"
                 fieldName="status"
                 value={mergedLocation.status}
-                align={"center"}
+                align={ALIGN_OPTIONS.CENTER}
                 action={getActivationButton(
                   Location.isActive(mergedLocation),
                   () =>
@@ -209,7 +215,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                     approvalSteps={mergedLocation.planningApprovalSteps}
                   />
                 }
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -219,7 +225,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                 value={
                   <ApprovalSteps approvalSteps={mergedLocation.approvalSteps} />
                 }
-                align="center"
+                align={ALIGN_OPTIONS.CENTER}
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -235,7 +241,7 @@ const MergeLocations = ({ pageDispatchers }) => {
                         key={fieldName}
                         label={fieldConfig.label || fieldName}
                         value={JSON.stringify(fieldValue)}
-                        align="center"
+                        align={ALIGN_OPTIONS.CENTER}
                         action={getClearButton(() =>
                           dispatchMergeActions(
                             setAMergedField(
@@ -259,7 +265,7 @@ const MergeLocations = ({ pageDispatchers }) => {
           <LocationColumn
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
-            align={mergeSides[1]}
+            align={ALIGN_OPTIONS.RIGHT}
             label="Location 2"
             locationFormat={locationFormat}
             setLocationFormat={setLocationFormat}

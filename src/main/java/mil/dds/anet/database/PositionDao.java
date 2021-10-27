@@ -551,33 +551,51 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     // Update positionRelationships with given input on winnerPosition
     final Set<String> existingApUuids =
         existingAssociatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
+    // delete common relations of merging positions
+    if (!existingApUuids.isEmpty()) {
+      getDbHandle()
+          .createUpdate("UPDATE \"positionRelationships\" SET deleted = :deleted"
+              + " WHERE (\"positionUuid_a\" IN (<winnerExApUuids>)"
+              + " OR \"positionUuid_b\" IN (<winnerExApUuids>))"
+              + " AND (\"positionUuid_a\" = :loserUuid OR \"positionUuid_b\" = :loserUuid)")
+          .bind("deleted", true).bindList("winnerExApUuids", existingApUuids)
+          .bind("loserUuid", loserUuid).execute();
+    }
+    // transfer loser's relations to winners
+    getDbHandle()
+        .createUpdate("UPDATE \"positionRelationships\""
+            + " SET \"positionUuid_a\" = :winnerUuid, \"updatedAt\" = :updatedAt"
+            + " WHERE \"positionUuid_a\" = :loserUuid")
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+    getDbHandle()
+        .createUpdate("UPDATE \"positionRelationships\""
+            + " SET \"positionUuid_b\" = :winnerUuid, \"updatedAt\" = :updatedAt"
+            + " WHERE \"positionUuid_b\" = :loserUuid")
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
+    // delete unused relations
     final Set<String> winnerApUuids =
-        Utils.isEmptyOrNull(winner.getAssociatedPositions()) ? Collections.emptySet()
+        winner.getAssociatedPositions() == null ? Collections.emptySet()
             : winner.getAssociatedPositions().stream().map(ap -> ap.getUuid())
                 .collect(Collectors.toSet());
-    if (!existingApUuids.equals(winnerApUuids)) {
-      // set winner's old positionRelationships to deleted
+    if (winnerApUuids.isEmpty()) {
       getDbHandle()
           .createUpdate("UPDATE \"positionRelationships\""
               + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
               + " WHERE \"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid")
           .bind("deleted", true).bind("winnerUuid", winnerUuid)
           .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-      if (!winnerApUuids.isEmpty()) {
-        // update loser's positionRelationships
-        getDbHandle()
-            .createUpdate("UPDATE \"positionRelationships\""
-                + " SET \"positionUuid_a\" = :winnerUuid, \"updatedAt\" = :updatedAt"
-                + " WHERE \"positionUuid_a\" = :loserUuid")
-            .bind("deleted", true).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-            .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-        getDbHandle()
-            .createUpdate("UPDATE \"positionRelationships\""
-                + " SET \"positionUuid_b\" = :winnerUuid, \"updatedAt\" = :updatedAt"
-                + " WHERE \"positionUuid_b\" = :loserUuid")
-            .bind("deleted", true).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
-            .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
-      }
+    } else {
+      getDbHandle()
+          .createUpdate("UPDATE \"positionRelationships\""
+              + " SET deleted = :deleted, \"updatedAt\" = :updatedAt"
+              + " WHERE (\"positionUuid_a\" = :winnerUuid OR \"positionUuid_b\" = :winnerUuid)"
+              + " AND \"positionUuid_a\" NOT IN (<winnerList>)"
+              + " AND \"positionUuid_b\" NOT IN (<winnerList>)")
+          .bind("deleted", true).bind("winnerUuid", winnerUuid)
+          .bindList("winnerList", winnerApUuids)
+          .bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now())).execute();
     }
 
     // Update notes

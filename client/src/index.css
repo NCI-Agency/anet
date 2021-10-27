@@ -73,6 +73,10 @@ h4.legend {
   margin-top: -2rem;
 }
 
+.legend small .btn.btn-outline-danger.float-end {
+  margin-top: -1.5rem;
+}
+
 .legend small :not(.btn-group) .btn + .btn {
   margin-left: 1rem;
 }
@@ -892,7 +896,7 @@ table hr.attendee-divider {
     The form row already has padding-top: 7px and padding-bottom: 7px,
     and the form control has margin-bottom: 15px. 15 + x = 18 - (7 + 7); x = -11
   */
-  margin-bottom: -11px;
+  /* margin-bottom: -11px; */
 }
 
 .no-position-warning {
@@ -1127,7 +1131,8 @@ header.searchPagination {
 }
 
 .rich-text-modal {
-  min-width: 650px;
+  width: 650px;
+  max-width: 100%;
 }
 
 @page {
@@ -1215,6 +1220,10 @@ header.searchPagination {
 #fg-position .col-sm-3 > *,
 #fg-prevPositions .col-sm-3 > * {
   margin-left: 10px;
+}
+
+div[id*='fg-entityAssessment'] {
+  margin-bottom: 1rem;
 }
 
 @media screen and (max-width: 768px) {

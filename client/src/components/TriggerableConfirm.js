@@ -81,7 +81,7 @@ const TriggerableConfirm = ({
 TriggerableConfirm.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   title: PropTypes.string,
-  body: PropTypes.string,
+  body: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
   variant: PropTypes.string,

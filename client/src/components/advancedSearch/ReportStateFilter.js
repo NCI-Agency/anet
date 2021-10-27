@@ -61,9 +61,8 @@ const ReportStateFilter = ({
     stateDisplay
   ) : (
     <Form.Group>
-      <Form.Control
+      <Form.Select
         id={queryKey}
-        as="select"
         value={value.state}
         onChange={handleChangeState}
         multiple
@@ -73,7 +72,7 @@ const ReportStateFilter = ({
             {label}
           </option>
         ))}
-      </Form.Control>
+      </Form.Select>
       {onlyCancelled && (
         <div style={{ verticalAlign: "top", paddingLeft: "8px" }}>
           due to{" "}

@@ -3,7 +3,8 @@
   width: 570px;
 }
 
-.merge {
+.merge, .edit-associated-positions-dialog {
+  max-width: 100%;
   width: 90vw;
 }
 
