@@ -261,6 +261,9 @@ $defs:
         type: object
         additionalProperties:
           "$ref": "#/$defs/customField"
+      questionSets:
+        title: subset of questions
+        type: object
     dependentSchemas:
       recurrence:
         oneOf:
