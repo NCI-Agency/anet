@@ -262,6 +262,7 @@ export const ReadonlyField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
+  asA,
   children,
   extraColElem,
   labelColumnWidth,
@@ -300,6 +301,7 @@ ReadonlyField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object,
   label: PropTypes.string,
+  asA: PropTypes.string, // unused, prop is discarded
   children: PropTypes.any,
   extraColElem: PropTypes.object,
   addon: PropTypes.object,

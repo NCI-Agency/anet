@@ -1,93 +1,98 @@
 .report-summary h4.legend {
-	display: none;
+  display: none;
 }
 
-fieldset.workflow-fieldset .workflow-action {
-	position: relative;
-	display: inline-block;
-	padding-right: 18px;
-	margin-top: 3px;
-	vertical-align: top;
-	text-align: center;
+.workflow-fieldset .workflow-action {
+  position: relative;
+  display: inline-block;
+  padding-right: 18px;
+  margin-top: 3px;
+  vertical-align: top;
+  text-align: center;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-pending.default {
+.workflow-fieldset .workflow-action .btn-pending.default {
   background-color: #bdbdaf;
-  color: #fff;
+  color: #000;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-pending.submitted {
+.workflow-fieldset .workflow-action .btn-pending.submitted {
   background-color: #848478;
-  color: #fff;
+  color: #000;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-success.published {
+.workflow-fieldset .workflow-action .btn-success.published {
   background-color: #5cb85c;
-  color: #fff;
+  color: #000;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-success.approved {
+.workflow-fieldset .workflow-action .btn-danger.unpublished {
+  background-color: #fcaf3e;
+  color: #000;
+}
+
+.workflow-fieldset .workflow-action .btn-success.approved {
   background-color: #75eb75;
-  color: #fff;
+  color: #000;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn-danger.rejected {
+.workflow-fieldset .workflow-action .btn-danger.rejected {
   background-color: #c23030;
   color: #fff;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn {
-	border-radius: 30px;
+.workflow-fieldset .workflow-action .btn {
+  border-radius: 30px;
 }
 
-fieldset.workflow-fieldset .workflow-action .btn[disabled] {
+.workflow-fieldset .workflow-action .btn[disabled] {
   opacity: 1;
 }
 
-fieldset.workflow-fieldset .workflow-action button::after {
-	position: relative;
-	font-family: 'Glyphicons Halflings';
-	font-style: normal;
-	font-weight: 400;
-	line-height: 1;
-	-webkit-font-smoothing: antialiased;
-	content: "\e092";
-	color: #777;
-	width: 18px;
-	height: 18px;
-	top: 3px;
-	right: -26px;
+.workflow-fieldset .workflow-action button::after {
+  position: relative;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  content: "\e092";
+  color: #777;
+  width: 18px;
+  height: 18px;
+  top: 3px;
+  right: -26px;
 }
 
-fieldset.workflow-fieldset :last-child button::after {
-	content: "";
+.workflow-fieldset :last-child button::after {
+  content: "";
 }
 
-fieldset.workflow-fieldset.compact{
-	border: 0;
-	border-bottom: 2px solid hsla(0, 0%, 0%, 0.06);
-	margin-bottom: 1rem;
-	padding: 0.25em 0.75em 0.75em 0em;
-	box-shadow: none;
+fieldset.workflow-fieldset.compact {
+  border: 0;
+  border-bottom: 2px solid hsla(0, 0%, 0%, 0.06);
+  margin-bottom: 1rem;
+  padding: 0.25em 0.75em 0.75em 0em;
+  box-shadow: none;
 }
 
 .modal-content .modal-footer .label {
-	font-size: 90% !important;
+  font-size: 90% !important;
 }
 
 .modal-content .modal-footer .approved {
-	background-color: #75eb75;
+  background-color: #75eb75;
 }
 
 .modal-content .modal-footer .pending {
-	background-color: #848478;
+  background-color: #848478;
 }
 
 .modal-content .modal-footer .rejected {
-	background-color: #c23030;
+  background-color: #c23030;
 }
 
 .action-status {
-	text-transform: uppercase;
-	font-weight: bold;
+  text-transform: uppercase;
+  font-weight: bold;
 }

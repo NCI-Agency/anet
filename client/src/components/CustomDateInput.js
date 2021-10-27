@@ -79,7 +79,7 @@ const CustomDateInput = ({
       showActionsBar
       closeOnSelection={!withTime}
       timePickerProps={timePickerProps}
-      popoverProps={{ usePortal: true, placement }}
+      popoverProps={{ usePortal: false, placement }}
       disabled={disabled}
     />
   )
