@@ -1125,7 +1125,7 @@ fields:
         placeholder: the six character code
 
   principal:
-
+    onDemandAssessmentExpirationDays: 108
     person:
       name: Afghan Partner
       countries: [Afghanistan]
@@ -1220,6 +1220,45 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
+        - recurrence: ondemand
+          questions:
+            assessmentDate:
+              type: date
+              label: Screening and vetting date
+              validations:
+                - type: required
+                  params: [You must provide the assessment date]
+            expirationDate:
+              type: date
+              label: Expiration date
+            question1:
+              type: enum
+              label: Screening and vetting level
+              choices:
+                pass1:
+                  label: Pass 1
+                  color: '#c2ffb3'
+                pass2:
+                  label: Pass 2
+                  color: '#c2ffb3'
+                pass3:
+                  label: Pass 3
+                  color: '#c2ffb3'
+                fail1:
+                  label: Fail 1
+                  color: '#ff8279'
+                fail2:
+                  label: Fail 2
+                  color: '#ff8279'
+                fail3:
+                  label: Fail 3
+                  color: '#ff8279'
+            question2:
+              type: special_field
+              label: Screening and vetting comment
+              widget: richTextEditor
+              style:
+                height: 70px
       # number of fields after Avatar in the left column for principals
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 7

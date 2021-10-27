@@ -13,7 +13,9 @@ import Model, {
   CUSTOM_FIELD_TYPE,
   DEFAULT_CUSTOM_FIELDS_PARENT,
   INVISIBLE_CUSTOM_FIELDS_FIELD,
-  SENSITIVE_CUSTOM_FIELDS_PARENT
+  SENSITIVE_CUSTOM_FIELDS_PARENT,
+  ENTITY_ASSESSMENT_PARENT_FIELD,
+  ENTITY_ON_DEMAND_ASSESSMENT_DATE
 } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import RichTextEditor from "components/RichTextEditor"
@@ -164,12 +166,14 @@ const ReadonlyTextField = fieldProps => {
 }
 
 const DateField = fieldProps => {
-  const { name, withTime, ...otherFieldProps } = fieldProps
+  const { name, withTime, maxDate, ...otherFieldProps } = fieldProps
   return (
     <FastField
       name={name}
       component={FieldHelper.SpecialField}
-      widget={<CustomDateInput id={name} withTime={withTime} />}
+      widget={
+        <CustomDateInput id={name} withTime={withTime} maxDate={maxDate} />
+      }
       {...otherFieldProps}
     />
   )
@@ -959,10 +963,18 @@ const CustomField = ({
         return {
           formikProps
         }
+      case CUSTOM_FIELD_TYPE.DATE:
+        return {
+          maxDate:
+            fieldName ===
+            `${ENTITY_ASSESSMENT_PARENT_FIELD}.${ENTITY_ON_DEMAND_ASSESSMENT_DATE}`
+              ? moment().toDate()
+              : undefined
+        }
       default:
         return {}
     }
-  }, [fieldConfig, formikProps, invisibleFields, type])
+  }, [fieldConfig, fieldName, formikProps, invisibleFields, type])
   return FieldComponent ? (
     <FieldComponent
       name={fieldName}
