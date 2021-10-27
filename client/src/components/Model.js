@@ -565,7 +565,8 @@ export default class Model {
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
         const questions = a.questions || {}
-        return [assessmentKey, questions]
+        const questionSets = a.questionSets || {}
+        return [assessmentKey, { questions, questionSets }]
       })
     )
   }

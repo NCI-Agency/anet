@@ -8,6 +8,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
+import QuestionSet from "./QuestionSet"
 
 const InstantAssessmentsContainerField = ({
   entityType,
@@ -23,7 +24,7 @@ const InstantAssessmentsContainerField = ({
       <tbody>
         {entities.map(entity => {
           const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
-            entity.getInstantAssessmentConfig(),
+            entity.getInstantAssessmentConfig()?.questions,
             entity,
             relatedObject
           )
@@ -50,6 +51,18 @@ const InstantAssessmentsContainerField = ({
                       parentFieldName={`${parentFieldName}.${entity.uuid}`}
                       fieldsConfig={entityInstantAssessmentConfig}
                       formikProps={formikProps}
+                    />
+                  )}
+                  {entity.getInstantAssessmentConfig().questionSets && (
+                    <QuestionSet
+                      entity={entity}
+                      relatedObject={relatedObject}
+                      questionSets={
+                        entity.getInstantAssessmentConfig()?.questionSets
+                      }
+                      parentFieldName={`${parentFieldName}.${entity.uuid}.questionSets`}
+                      formikProps={formikProps}
+                      readonly={readonly}
                     />
                   )}
                 </td>
