@@ -515,11 +515,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @InTransaction
-  public boolean hasHistoryConflict(final String uuid, final List<PersonPositionHistory> history,
-      final boolean checkPerson) {
-    final String personPositionClause =
-        checkPerson ? "\"personUuid\" != :personUuid AND \"positionUuid\" = :positionUuid"
-            : "\"personUuid\" = :personUuid AND \"positionUuid\" != :positionUuid";
+  public boolean hasHistoryConflict(final String uuid, final String loserUuid,
+      final List<PersonPositionHistory> history, final boolean checkPerson) {
+    final String personPositionClause = checkPerson
+        ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
+        : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
     for (final PersonPositionHistory pph : history) {
       final Query q;
       final Instant endTime = pph.getEndTime();
@@ -538,7 +538,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
       final Number count =
           (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
               .bind("personUuid", checkPerson ? uuid : histUuid)
-              .bind("positionUuid", checkPerson ? histUuid : uuid).map(new MapMapper(false)).one()
+              .bind("positionUuid", checkPerson ? histUuid : uuid)
+              .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
               .get("count");
 
       if (count.longValue() > 0) {

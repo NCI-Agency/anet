@@ -141,6 +141,7 @@ INSERT INTO positions (uuid, name, type, status, currentPersonUuid, locationUuid
 		(lower(newid()), 'EF 1.1 Advisor D', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 Advisor E', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 Advisor F', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('888d6c4b-deaa-4218-b8fd-abfb7c81a4c6', 'EF 1.1 Advisor G', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 Advisor for Agriculture', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 Old Inactive Advisor', 0, 1, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'EF 1.1 Advisor for Mining', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
