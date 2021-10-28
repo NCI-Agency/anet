@@ -18,12 +18,14 @@ import io.leangen.graphql.metadata.strategy.InputFieldInclusionParams;
 import io.leangen.graphql.metadata.strategy.query.AnnotatedResolverBuilder;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AnnotatedElement;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -61,6 +63,7 @@ public class GraphQlResource {
   private AnetObjectEngine engine;
   private List<Object> resources;
   private MetricRegistry metricRegistry;
+  private Long graphQlRequestTimeoutMs;
 
   private GraphQLSchema graphqlSchema;
   private GraphQLSchema graphqlSchemaWithoutIntrospection;
@@ -93,6 +96,7 @@ public class GraphQlResource {
     this.engine = engine;
     this.resources = resources;
     this.metricRegistry = metricRegistry;
+    this.graphQlRequestTimeoutMs = config.getGraphQlRequestTimeoutMs();
 
     resourceTransformers.add(GraphQlResource.jsonTransformer);
     resourceTransformers.add(new ResourceTransformer("xml", MediaType.APPLICATION_XML) {
@@ -251,25 +255,31 @@ public class GraphQlResource {
         // Prevent adding .instrumentation(new DataLoaderDispatcherInstrumentation())
         // — use our own dispatcher instead
         .doNotAddDefaultInstrumentations().build();
+    final Instant executionEnd = (graphQlRequestTimeoutMs == null) ? null
+        : Instant.now().plusMillis(graphQlRequestTimeoutMs);
     final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
     final Runnable dispatcher = () -> {
       while (!request.isDone()) {
-        // Wait a while, giving other threads the chance to do some work
-        try {
-          Thread.yield();
-          Thread.sleep(50);
-        } catch (InterruptedException ignored) {
-          // just retry
-        }
+        if (executionEnd != null && Instant.now().isAfter(executionEnd)) {
+          request.completeExceptionally(new TimeoutException("GraphQL request took too long"));
+        } else {
+          // Wait a while, giving other threads the chance to do some work
+          try {
+            Thread.yield();
+            Thread.sleep(50);
+          } catch (InterruptedException ignored) {
+            // just retry
+          }
 
-        // Dispatch all our data loaders until the request is done;
-        // we have data loaders at various depths (one dependent on another),
-        // e.g. in {@link Report#loadWorkflow}
-        final CompletableFuture<?>[] dispatchersWithWork = dataLoaderRegistry.getDataLoaders()
-            .stream().filter(dl -> dl.dispatchDepth() > 0)
-            .map(dl -> (CompletableFuture<?>) dl.dispatch()).toArray(CompletableFuture<?>[]::new);
-        if (dispatchersWithWork.length > 0) {
-          CompletableFuture.allOf(dispatchersWithWork).join();
+          // Dispatch all our data loaders until the request is done;
+          // we have data loaders at various depths (one dependent on another),
+          // e.g. in {@link Report#loadWorkflow}
+          final CompletableFuture<?>[] dispatchersWithWork = dataLoaderRegistry.getDataLoaders()
+              .stream().filter(dl -> dl.dispatchDepth() > 0)
+              .map(dl -> (CompletableFuture<?>) dl.dispatch()).toArray(CompletableFuture<?>[]::new);
+          if (dispatchersWithWork.length > 0) {
+            CompletableFuture.allOf(dispatchersWithWork).join();
+          }
         }
       }
     };
@@ -277,7 +287,11 @@ public class GraphQlResource {
     try {
       return request.get();
     } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException("failed to complete graphql request", e);
+      if (e.getCause() != null && e.getCause() instanceof TimeoutException) {
+        throw new WebApplicationException("graphql request took too long", e);
+      } else {
+        throw new WebApplicationException("failed to complete graphql request", e);
+      }
     } finally {
       batchingUtils.updateStats(metricRegistry, dataLoaderRegistry);
       batchingUtils.shutdown();
