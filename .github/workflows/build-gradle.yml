@@ -162,12 +162,6 @@ jobs:
     - name: Set local identifier for BrowserStack
       id: browserstack-local
       run: echo ::set-output name=identifier::github-${GITHUB_RUN_ID}-${DB_DRIVER}
-    - name: Start BrowserStackLocal if needed
-      run: |
-        curl -qso bsl.zip https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
-        unzip -q bsl.zip
-        ./BrowserStackLocal --local-identifier ${{ steps.browserstack-local.outputs.identifier }} --key ${{ secrets.BROWSERSTACK_ACCESS_KEY }} &
-      if: steps.tagName.outputs.tag != ''
     - run: ./gradlew yarn_run_${CLIENT_TESTS}
       env:
         GIT_TAG_NAME: ${{ steps.tagName.outputs.tag }}

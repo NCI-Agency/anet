@@ -5958,7 +5958,7 @@ browserslist@^4.12.0, browserslist@^4.14.5, browserslist@^4.16.6, browserslist@^
     node-releases "^2.0.1"
     picocolors "^1.0.0"
 
-browserstack-local@^1.4.5:
+browserstack-local@1.4.8, browserstack-local@^1.4.5:
   version "1.4.8"
   resolved "https://registry.yarnpkg.com/browserstack-local/-/browserstack-local-1.4.8.tgz#07f74a19b324cf2de69ffe65f9c2baa3a2dd9a0e"
   integrity sha512-s+mc3gTOJwELdLWi4qFVKtGwMbb5JWsR+JxKlMaJkRJxoZ0gg3WREgPxAN0bm6iU5+S4Bi0sz0oxBRZT8BiNsQ==
