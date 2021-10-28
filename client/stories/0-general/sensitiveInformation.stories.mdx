@@ -1,0 +1,26 @@
+import { Meta } from "@storybook/addon-docs"
+
+<Meta title="0. ANET Stories/Sensitive information and Authorization Groups" />
+
+## Sensitive information and Authorization Groups
+
+In general, almost all information in ANET is accessible to all fully authenticated users. However,
+in some places, ANET can record sensitive information. This comes in two different flavors:
+
+1. sensitive information text as part of engagement reports
+1. custom sensitive information fields for e.g. people, as defined in the ANET dictionary
+   (configuration)
+
+For both flavors, access to the sensitive information is first and foremost restricted to people
+holding active positions in the chosen authorization groups. For engagement reports, authors are
+allowed to select these authorization groups themselves. For the custom sensitive information
+fields, the authorization groups that have access are defined in the ANET configuration, by the
+application administrator.
+
+In addition to people in the authorization groups, sensitive information in engagement reports is
+also accessible to the report's author(s). And sensitive information for people or positions is also
+accessible to those people's or position's counterparts.
+
+Administrators define the available authorization groups, and who is in them. These groups should
+have a descriptive name, so report authors know which ones to choose. Also, administrators have
+access to all information.

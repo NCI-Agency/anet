@@ -8,7 +8,7 @@ import { Person } from "models"
 import moment from "moment"
 import React from "react"
 import Settings from "settings"
-import LinguistAssessmentsDoc from "./linguistAssessments.stories.mdx"
+import LinguistAssessmentsDoc from "./1-user/linguistAssessments.stories.mdx"
 
 const translator = {
   attendee: true,
