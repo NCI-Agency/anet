@@ -172,7 +172,7 @@ public class PositionResource {
     final Position existing = dao.getByUuid(pos.getUuid());
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople());
     assertCanUpdatePosition(user, existing);
-    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(),
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
         pos.getPreviousPeople(), false)) {
       throw new WebApplicationException(
           "At least one of the positions in the history is occupied for the specified period.",
@@ -263,9 +263,17 @@ public class PositionResource {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
 
+    ResourceUtils.validateHistoryInput(winnerPosition.getUuid(),
+        winnerPosition.getPreviousPeople());
     assertCanUpdatePosition(user, winnerPosition);
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerPosition.getUuid(),
+        loserUuid, winnerPosition.getPreviousPeople(), false)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
     validatePosition(user, winnerPosition);
 
     int numRows = dao.mergePositions(winnerPosition, loserPosition);

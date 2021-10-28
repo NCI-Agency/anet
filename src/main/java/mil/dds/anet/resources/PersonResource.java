@@ -201,7 +201,7 @@ public class PersonResource {
     assertCanUpdatePerson(user, existing);
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions());
 
-    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(),
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(), null,
         p.getPreviousPositions(), true)) {
       throw new WebApplicationException(
           "At least one of the positions in the history is occupied for the specified period.",
