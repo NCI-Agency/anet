@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import { initInvisibleFields } from "components/CustomFields"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -93,20 +93,22 @@ const PositionEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={position.notes}
-        relatedObject={
-          position.uuid && {
-            relatedObjectType: Position.relatedObjectType,
-            relatedObjectUuid: position.uuid,
-            relatedObject: position
-          }
-        }
-      />
       <PositionForm
         edit
         initialValues={position}
         title={`Position ${position.name}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={position.notes}
+            relatedObject={
+              position.uuid && {
+                relatedObjectType: Position.relatedObjectType,
+                relatedObjectUuid: position.uuid,
+                relatedObject: position
+              }
+            }
+          />
+        }
       />
     </div>
   )

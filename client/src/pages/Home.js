@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -5,56 +6,27 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
-import ConfirmDelete from "components/ConfirmDelete"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import Messages from "components/Messages"
+import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import {
-  PageDispatchersPropType,
-  jumpToTop,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import SavedSearchTable from "components/SavedSearchTable"
 import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
-import _isEmpty from "lodash/isEmpty"
 import { Person, Report } from "models"
 import { superUserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
-import {
-  Button,
-  ControlLabel,
-  FormControl,
-  FormGroup,
-  Grid,
-  Row
-} from "react-bootstrap"
+import React, { useContext } from "react"
+import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
-import utils from "utils"
-
-const GQL_GET_SAVED_SEARCHES = gql`
-  query {
-    savedSearches: mySearches {
-      uuid
-      name
-      objectType
-      query
-    }
-  }
-`
-
-const GQL_DELETE_SAVED_SEARCH = gql`
-  mutation($uuid: String!) {
-    deleteSavedSearch(uuid: $uuid)
-  }
-`
 
 const GQL_GET_REPORT_COUNT = gql`
   query($reportQuery: ReportSearchQueryInput) {
@@ -82,7 +54,7 @@ const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
   const totalCount = data && data.reportList && data.reportList.totalCount
   return (
     <Button
-      bsStyle="link"
+      variant="link"
       onClick={event => onClickDashboard(query, event)}
       className="home-tile"
     >
@@ -124,20 +96,24 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
   const queries = getQueriesForUser(currentUser)
 
   return (
-    <Grid fluid>
+    <Container fluid>
       <Row>
         {queries
           .filter(q => q.query !== null)
           .map((query, index) => (
-            <HomeTile
+            <Col
               key={index}
-              query={query}
-              setSearchQuery={setSearchQuery}
-              pageDispatchers={pageDispatchers}
-            />
+              className="home-tile-col d-flex align-items-stretch p-0"
+            >
+              <HomeTile
+                query={query}
+                setSearchQuery={setSearchQuery}
+                pageDispatchers={pageDispatchers}
+              />
+            </Col>
           ))}
       </Row>
-    </Grid>
+    </Container>
   )
 
   function getQueriesForUser(currentUser) {
@@ -296,117 +272,11 @@ HomeTiles.propTypes = {
   currentUser: PropTypes.instanceOf(Person)
 }
 
-const SavedSearches = ({ setSearchQuery, pageDispatchers }) => {
-  const history = useHistory()
-  const [stateError, setStateError] = useState(null)
-  const [selectedSearch, setSelectedSearch] = useState(null)
-  const { loading, error, data, refetch } = API.useApiQuery(
-    GQL_GET_SAVED_SEARCHES
-  )
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  if (done) {
-    return result
-  }
-
-  let savedSearches = []
-  if (data) {
-    savedSearches = data.savedSearches
-    if (_isEmpty(savedSearches)) {
-      if (selectedSearch) {
-        // Clear selection
-        setSelectedSearch(null)
-      }
-    } else if (!savedSearches.includes(selectedSearch)) {
-      // Select first one
-      setSelectedSearch(savedSearches[0])
-    }
-  }
-
-  return (
-    <>
-      <Messages error={stateError} />
-      <FormGroup controlId="savedSearchSelect">
-        <ControlLabel>Select a saved search</ControlLabel>
-        <FormControl componentClass="select" onChange={onSaveSearchSelect}>
-          {savedSearches &&
-            savedSearches.map(savedSearch => (
-              <option value={savedSearch.uuid} key={savedSearch.uuid}>
-                {savedSearch.name}
-              </option>
-            ))}
-        </FormControl>
-      </FormGroup>
-
-      {selectedSearch && (
-        <div>
-          <div className="pull-right">
-            <Button style={{ marginRight: 12 }} onClick={showSearch}>
-              Show Search
-            </Button>
-            <ConfirmDelete
-              onConfirmDelete={onConfirmDelete}
-              objectType="search"
-              objectDisplay={selectedSearch.name}
-              bsStyle="danger"
-              buttonLabel="Delete Search"
-            />
-          </div>
-          <SavedSearchTable search={selectedSearch} />
-        </div>
-      )}
-    </>
-  )
-
-  function onSaveSearchSelect(event) {
-    const uuid = event && event.target ? event.target.value : event
-    const search = savedSearches.find(el => el.uuid === uuid)
-    setSelectedSearch(search)
-  }
-
-  function showSearch() {
-    if (selectedSearch) {
-      const objType = SEARCH_OBJECT_TYPES[selectedSearch.objectType]
-      const queryParams = utils.parseJsonSafe(selectedSearch.query)
-      deserializeQueryParams(objType, queryParams, deserializeCallback)
-    }
-  }
-
-  function deserializeCallback(objectType, filters, text) {
-    // We update the Redux state
-    setSearchQuery({
-      objectType: objectType,
-      filters: filters,
-      text: text
-    })
-    history.push("/search")
-  }
-
-  function onConfirmDelete() {
-    return API.mutation(GQL_DELETE_SAVED_SEARCH, { uuid: selectedSearch.uuid })
-      .then(data => {
-        refetch()
-      })
-      .catch(error => {
-        setStateError(error)
-        jumpToTop()
-      })
-  }
-}
-
-SavedSearches.propTypes = {
-  setSearchQuery: PropTypes.func.isRequired,
-  pageDispatchers: PageDispatchersPropType
-}
-
 const Home = ({ setSearchQuery, pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
-  const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+  const alertStyle = { marginBottom: "1rem", textAlign: "center", zIndex: "-1" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   useBoilerplate({
@@ -417,7 +287,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
 
   return (
     <div>
-      <div className="pull-right">
+      <div style={{ width: "inherit" }} className="float-end">
         <GuidedTour
           title="Take a guided tour of the home page."
           tour={currentUser.isSuperUser() ? superUserTour : userTour}
@@ -464,12 +334,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
         />
       </Fieldset>
 
-      <Fieldset title="Saved searches">
-        <SavedSearches
-          setSearchQuery={setSearchQuery}
-          pageDispatchers={pageDispatchers}
-        />
-      </Fieldset>
+      <MySubscriptionUpdates />
     </div>
   )
 }

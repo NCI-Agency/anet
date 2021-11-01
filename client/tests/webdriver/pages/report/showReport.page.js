@@ -14,7 +14,7 @@ class ShowReport extends Page {
   get uuid() {
     const title =
       browser
-        .$("//span[@class='title-text'][starts-with(.,'Report #')]")
+        .$("//span[@class='title-text'][contains(.,'Report #')]")
         .getText() || ""
     return title.slice(title.lastIndexOf("#") + 1)
   }
@@ -55,23 +55,20 @@ class ShowReport extends Page {
   }
 
   getAttendeeByName(name) {
-    const row = browser
-      .$$("#reportPeopleContainer tbody > tr")
-      .find(
-        r =>
-          r.$("td.reportPeopleName").isExisting() &&
-          r.$("td.reportPeopleName").getText() === name
-      )
+    const td = browser
+      .$("#reportPeopleContainer")
+      .$(`td.reportPeopleName=${name}`)
 
-    if (!row) {
+    if (!td.isExisting()) {
       return null
     }
 
+    const row = td.$("..")
     // wait for conflict loader to disappear
     row.$("td.conflictButton div.bp3-spinner").waitForExist({ reverse: true })
 
     return {
-      name: row.$("td.reportPeopleName").getText(),
+      name: td.getText(),
       conflictButton: row.$("td.conflictButton > span")
     }
   }

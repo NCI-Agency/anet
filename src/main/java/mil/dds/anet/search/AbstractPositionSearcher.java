@@ -73,6 +73,11 @@ public abstract class AbstractPositionSearcher
       addBatchClause(query);
     }
 
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getPositionDao().getSubscriptionUpdate(null)));
+    }
+
     qb.addInClause("types", "positions.type", query.getType());
 
     if (query.getOrganizationUuid() != null) {
@@ -107,11 +112,11 @@ public abstract class AbstractPositionSearcher
     }
 
     if (query.getHasCounterparts()) {
-      qb.addWhereClause("("
-          + "positions.uuid IN (SELECT \"positionUuid_a\" FROM \"positionRelationships\""
-          + " WHERE \"positionUuid_b\" IS NOT NULL AND deleted = :deleted)"
-          + " OR positions.uuid IN (" + "SELECT \"positionUuid_b\" FROM \"positionRelationships\""
-          + " WHERE \"positionUuid_a\" IS NOT NULL AND deleted = :deleted))");
+      qb.addWhereClause(
+          "(positions.uuid IN (SELECT \"positionUuid_a\" FROM \"positionRelationships\""
+              + " WHERE \"positionUuid_b\" IS NOT NULL AND deleted = :deleted)"
+              + " OR positions.uuid IN (SELECT \"positionUuid_b\" FROM \"positionRelationships\""
+              + " WHERE \"positionUuid_a\" IS NOT NULL AND deleted = :deleted))");
       qb.addSqlArg("deleted", false);
     }
 

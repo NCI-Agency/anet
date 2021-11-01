@@ -45,13 +45,7 @@ const RelatedObjectsTable = ({
         }}
       />
       {relatedObjects.length > 0 ? (
-        <Table
-          striped
-          condensed
-          hover
-          responsive
-          className="related_objects_table"
-        >
+        <Table striped hover responsive className="related_objects_table">
           <thead>
             <tr>
               <th>Linked Object</th>
@@ -79,7 +73,6 @@ const RelatedObjectsTable = ({
                       <td id={"relatedObjectsDelete_" + nro.relatedObjectUuid}>
                         <RemoveButton
                           title="Unlink object"
-                          altText="Unlink object"
                           onClick={() => {
                             const newRelatedObjects = relatedObjects.filter(
                               item =>

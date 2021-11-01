@@ -1,7 +1,7 @@
+import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   AuthorizationGroupOverlayRow,
@@ -12,7 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
   CustomFieldsContainer,
@@ -24,7 +24,6 @@ import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
-  DEFAULT_CUSTOM_FIELDS_PARENT,
   NOTE_TYPE
 } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -49,7 +48,7 @@ import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
-import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
+import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -158,7 +157,8 @@ const ReportForm = ({
   edit,
   title,
   initialValues,
-  showSensitiveInfo: ssi
+  showSensitiveInfo: ssi,
+  notesComponent
 }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
@@ -230,7 +230,7 @@ const ReportForm = ({
   const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
   const showActivePositionWarning =
     currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()
-  const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+  const alertStyle = { marginBottom: "1rem", textAlign: "center", zIndex: "-1" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
   const advisorPositionSingular = Settings.fields.advisor.position.name
@@ -305,12 +305,6 @@ const ReportForm = ({
         }
         const currentOrg =
           currentUser.position && currentUser.position.organization
-        const locationFilters = {
-          activeLocations: {
-            label: "Active locations",
-            queryVars: { status: Model.STATUS.ACTIVE }
-          }
-        }
 
         const reportPeopleFilters = {
           all: {
@@ -409,21 +403,18 @@ const ReportForm = ({
         const action = (
           <div>
             <Button
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={() => onSubmit(values, { resetForm, setSubmitting })}
               disabled={isSubmitting}
             >
               {submitText}
             </Button>
+            {notesComponent}
           </div>
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
-        let relatedObject
-        if (hasAssessments) {
-          relatedObject = Report.getCleanReport(values)
-        }
+        const relatedObject = hasAssessments ? new Report(values) : {}
 
         return (
           <div className="report-form">
@@ -463,7 +454,7 @@ const ReportForm = ({
                   name="intent"
                   label={Settings.fields.report.intent}
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  asA="textarea"
                   placeholder="What is the engagement supposed to achieve?"
                   maxLength={Settings.maxTextFieldLength}
                   onChange={event => {
@@ -506,11 +497,11 @@ const ReportForm = ({
                   }
                 >
                   {isFutureEngagement && (
-                    <HelpBlock>
+                    <FormBS.Text>
                       <span className="text-success">
                         This will create a planned engagement
                       </span>
-                    </HelpBlock>
+                    </FormBS.Text>
                   )}
                 </FastField>
 
@@ -549,7 +540,7 @@ const ReportForm = ({
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={locationFilters}
+                      filterDefs={getLocationFilters()}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
                       valueKey="name"
@@ -581,8 +572,9 @@ const ReportForm = ({
                     component={FieldHelper.SpecialField}
                     label={Settings.fields.report.cancelled}
                     widget={
-                      <Checkbox
-                        inline
+                      <FormBS.Check
+                        type="checkbox"
+                        label="This engagement was cancelled"
                         className="cancelled-checkbox"
                         checked={values.cancelled}
                         onClick={event =>
@@ -595,9 +587,7 @@ const ReportForm = ({
                             true
                           )
                         }
-                      >
-                        This engagement was cancelled
-                      </Checkbox>
+                      />
                     }
                   />
                 )}
@@ -611,16 +601,13 @@ const ReportForm = ({
                       setFieldValue("cancelledReason", event.target.value, true)
                     }}
                     widget={
-                      <FastField
-                        component="select"
-                        className="cancelled-reason-form-group form-control"
-                      >
+                      <FormBS.Select className="cancelled-reason-form-group">
                         {cancelledReasonOptions.map(reason => (
                           <option key={reason.value} value={reason.value}>
                             {reason.label}
                           </option>
                         ))}
-                      </FastField>
+                      </FormBS.Select>
                     }
                   />
                 )}
@@ -836,12 +823,12 @@ const ReportForm = ({
                       name="keyOutcomes"
                       label={Settings.fields.report.keyOutcomes}
                       component={FieldHelper.InputField}
+                      asA="textarea"
                       onChange={event => {
                         setFieldTouched("keyOutcomes", true, false)
                         setFieldValue("keyOutcomes", event.target.value, false)
                         validateFieldDebounced("keyOutcomes")
                       }}
-                      componentClass="textarea"
                       maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
                         countCharsLeft(
@@ -865,27 +852,32 @@ const ReportForm = ({
                 {!isFutureEngagement && (
                   <FastField
                     name="nextSteps"
-                    label={Settings.fields.report.nextSteps}
+                    label={Settings.fields.report.nextSteps.label}
                     component={FieldHelper.InputField}
-                    componentClass="textarea"
+                    asA="textarea"
                     onChange={event => {
                       setFieldTouched("nextSteps", true, false)
                       setFieldValue("nextSteps", event.target.value, false)
                       validateFieldDebounced("nextSteps")
                     }}
-                    maxLength={Settings.maxTextFieldLength}
+                    maxLength={utils.getMaxTextFieldLength(
+                      Settings.fields.report.nextSteps
+                    )}
                     onKeyUp={event =>
                       countCharsLeft(
                         "nextStepsCharsLeft",
-                        Settings.maxTextFieldLength,
+                        utils.getMaxTextFieldLength(
+                          Settings.fields.report.nextSteps
+                        ),
                         event
                       )
                     }
                     extraColElem={
                       <>
                         <span id="nextStepsCharsLeft">
-                          {Settings.maxTextFieldLength -
-                            initialValues.nextSteps.length}
+                          {utils.getMaxTextFieldLength(
+                            Settings.fields.report.nextSteps
+                          ) - initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </>
@@ -903,26 +895,26 @@ const ReportForm = ({
                       setFieldValue("reportText", value, true)
                     }
                   }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      onHandleBlur={() => {
-                        // validation will be done by setFieldValue
-                        setFieldTouched("reportText", true, false)
-                      }}
-                      linkToComp={LinkToPreviewed}
-                    />
-                  }
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("reportText", true, false)
+                  }}
+                  widget={<RichTextEditor className="reportTextField" />}
                 />
 
-                <Button
-                  className="center-block toggle-section-button"
-                  style={{ marginBottom: "1rem" }}
-                  onClick={toggleReportText}
-                  id="toggleSensitiveInfo"
-                >
-                  {showSensitiveInfo ? "Hide" : "Add"} sensitive information
-                </Button>
+                <div style={{ textAlign: "center" }}>
+                  <Button
+                    variant="outline-secondary"
+                    className="center-block toggle-section-button"
+                    style={{
+                      marginBottom: "1rem"
+                    }}
+                    onClick={toggleReportText}
+                    id="toggleSensitiveInfo"
+                  >
+                    {showSensitiveInfo ? "Hide" : "Add"} sensitive information
+                  </Button>
+                </div>
 
                 <Collapse in={showSensitiveInfo}>
                   {(values.reportSensitiveInformation || !edit) && (
@@ -947,19 +939,16 @@ const ReportForm = ({
                             )
                           }
                         }}
+                        onHandleBlur={() => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched(
+                            "reportSensitiveInformation.text",
+                            true,
+                            false
+                          )
+                        }}
                         widget={
-                          <RichTextEditor
-                            className="reportSensitiveInformationField"
-                            onHandleBlur={() => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched(
-                                "reportSensitiveInformation.text",
-                                true,
-                                false
-                              )
-                            }}
-                            linkToComp={LinkToPreviewed}
-                          />
+                          <RichTextEditor className="reportSensitiveInformationField" />
                         }
                       />
                       <FastField
@@ -1070,7 +1059,9 @@ const ReportForm = ({
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   {autoSavedAt && (
@@ -1082,20 +1073,19 @@ const ReportForm = ({
                     </div>
                   )}
                   {canDelete && (
-                    <ConfirmDelete
-                      onConfirmDelete={() => onConfirmDelete(values, resetForm)}
+                    <ConfirmDestructive
+                      onConfirm={() => onConfirmDelete(values, resetForm)}
                       objectType="report"
                       objectDisplay={values.uuid}
-                      bsStyle="warning"
+                      variant="danger"
                       buttonLabel={`Delete this ${getReportType(values)}`}
-                      disabled={isSubmitting}
+                      buttonDisabled={isSubmitting}
                     />
                   )}
                   {/* Skip validation on save! */}
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={() =>
                       onSubmit(values, { resetForm, setSubmitting })
                     }
@@ -1111,6 +1101,19 @@ const ReportForm = ({
       }}
     </Formik>
   )
+
+  function getLocationFilters() {
+    return Settings?.fields?.report?.location?.filter.reduce(
+      (accumulator, filter) => {
+        accumulator[filter] = {
+          label: Location.humanNameOfType(filter),
+          queryVars: { type: filter }
+        }
+        return accumulator
+      },
+      {}
+    )
+  }
 
   function getReportType(values) {
     return values.engagementDate && Report.isFuture(values.engagementDate)
@@ -1217,7 +1220,7 @@ const ReportForm = ({
           autoSaveSettings.current.autoSaveTimeout.add(
             autoSaveSettings.current.autoSaveTimeout
           ) // exponential back-off
-          toast.error(
+          toast.warning(
             `There was an error autosaving your ${getReportType(
               autoSaveSettings.current.values
             )}; we'll try again in ${autoSaveSettings.current.autoSaveTimeout.humanize()}`
@@ -1295,13 +1298,23 @@ const ReportForm = ({
     reportUuid
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
-    const entitiesAssessments = values[asessmentsFieldName]
+    const valuesCopy = _cloneDeep(values)
+    const entitiesAssessments = valuesCopy[asessmentsFieldName]
     return Object.entries(entitiesAssessments)
       .filter(
         ([key, assessment]) =>
           entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
       .map(([key, assessment]) => {
+        const entity = entities.find(e => e.uuid === key)
+        const validQuestions = Object.keys(
+          Model.filterAssessmentConfig(
+            entity.getInstantAssessmentConfig(),
+            entity,
+            new Report(values)
+          )
+        )
+        Model.clearInvalidAssessmentQuestions(assessment, validQuestions)
         assessment.__recurrence = RECURRENCE_TYPE.ONCE
         assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
@@ -1317,7 +1330,7 @@ const ReportForm = ({
             }
           ],
           text: customFieldsJSONString(
-            values,
+            valuesCopy,
             true,
             `${asessmentsFieldName}.${key}`
           )
@@ -1331,13 +1344,7 @@ const ReportForm = ({
   }
 
   function save(values, sendEmail) {
-    const report = Object.without(
-      Report.getCleanReport(values),
-      "cancelled",
-      "reportPeople",
-      "tasks",
-      "customFields" // initial JSON from the db
-    )
+    const report = Report.filterClientSideFields(new Report(values))
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
       // They might have been set before the report has been marked as future.
@@ -1358,13 +1365,10 @@ const ReportForm = ({
     }
     // strip reportPeople fields not in data model
     report.reportPeople = values.reportPeople.map(reportPerson => {
-      const rp = Object.without(
+      const rp = Person.filterClientSideFields(
         reportPerson,
-        "firstName",
-        "lastName",
         "position",
-        "customFields",
-        DEFAULT_CUSTOM_FIELDS_PARENT
+        "customFields"
       )
       rp.author = !!reportPerson.author
       rp.attendee = !!reportPerson.attendee
@@ -1419,7 +1423,8 @@ ReportForm.propTypes = {
   initialValues: PropTypes.instanceOf(Report).isRequired,
   title: PropTypes.string,
   edit: PropTypes.bool,
-  showSensitiveInfo: PropTypes.bool
+  showSensitiveInfo: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 ReportForm.defaultProps = {

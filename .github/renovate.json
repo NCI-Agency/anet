@@ -4,36 +4,49 @@
     "group:test",
     "group:linters"
   ],
-  "lockFileMaintenance": { "enabled": true },
-  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "labels": [
+    "dependencies"
+  ],
   "packageRules": [
     {
-      "packagePatterns": ["*"],
-      "minor": {
-        "groupName": "most non-major dependencies",
-        "groupSlug": "most-minor-patch"
-      }
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "most non-major dependencies",
+      "groupSlug": "most-minor-patch"
     },
     {
-      "packageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
+      "matchPackagePatterns": [
+        "^org.liquibase"
+      ],
+      "groupName": "org.liquibase",
+      "groupSlug": "org.liquibase"
+    },
+    {
+      "matchPackageNames": [
+        "com.microsoft.sqlserver:mssql-jdbc"
+      ],
       "allowedVersions": "/^.*\\.jre8$/"
     },
     {
-      "packageNames": [
-        "autoprefixer",
+      "matchPackageNames": [
         "com.networknt:json-schema-validator",
-        "draft-js",
-        "io.leangen.graphql:spqr",
-        "leaflet",
-        "react-tooltip",
-        "yup"
+        "draft-js"
       ],
-      "packagePatterns": ["^@fullcalendar/"],
       "enabled": false
     }
   ],
+  "postUpdateOptions": [
+    "yarnDedupeHighest"
+  ],
   "vulnerabilityAlerts": {
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   },
   "pipenv": {
     "enabled": true

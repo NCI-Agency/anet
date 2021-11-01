@@ -16,7 +16,7 @@ import {
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
-import { FormGroup } from "react-bootstrap"
+import { Form } from "react-bootstrap"
 import Settings from "settings"
 
 const DATE_FORMAT = "YYYY-MM-DD"
@@ -88,15 +88,15 @@ const DateRangeFilter = ({
       ? betweenOption
       : [betweenOption, ...remainingOptions]
     return (
-      <select
+      <Form.Select
         id={queryKey}
         disabled={onlyBetween}
         value={value.relative}
         onChange={handleChangeRelative}
-        style={{ marginRight: 5, height: "38px" }}
+        style={{ marginRight: 5, width: "13.3rem" }}
       >
         {options}
-      </select>
+      </Form.Select>
     )
   }
   let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
@@ -122,7 +122,7 @@ const DateRangeFilter = ({
   return !asFormField ? (
     dateRangeDisplay
   ) : (
-    <FormGroup>
+    <Form.Group>
       <div
         style={{
           display: "flex",
@@ -137,6 +137,7 @@ const DateRangeFilter = ({
           value.relative === ON) && (
           <CustomDateInput
             showIcon={false}
+            placement="right"
             value={dateStart}
             onChange={handleChangeStart}
           />
@@ -147,12 +148,13 @@ const DateRangeFilter = ({
         {(value.relative === BETWEEN || value.relative === BEFORE) && (
           <CustomDateInput
             showIcon={false}
+            placement="left"
             value={dateEnd}
             onChange={handleChangeEnd}
           />
         )}
       </div>
-    </FormGroup>
+    </Form.Group>
   )
 
   function handleChangeStart(newDate) {

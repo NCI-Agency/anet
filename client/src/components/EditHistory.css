@@ -1,0 +1,36 @@
+.edit-history-dialog {
+  max-width: 100%;
+  width: 570px;
+}
+
+.merge, .edit-associated-positions-dialog {
+  max-width: 100%;
+  width: 90vw;
+}
+
+.date-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 3%;
+}
+
+.date-container > .inner-container {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  flex-basis: 47%;
+}
+
+div[id*="fg-history"], .date-input {
+  flex-basis: 200px;
+  flex-grow: 5;
+  flex-shrink: 5;
+}
+
+.date-text {
+  flex-basis: 40px;
+  flex-grow: 1;
+  flex-shrink: 0;
+}

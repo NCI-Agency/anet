@@ -16,7 +16,7 @@ import mil.dds.anet.views.UuidFetcher;
 public class ReportAction extends AbstractAnetBean {
 
   public enum ActionType {
-    APPROVE, REJECT, SUBMIT, PUBLISH
+    APPROVE, REJECT, SUBMIT, PUBLISH, UNPUBLISH
   }
 
   // annotated below
@@ -30,7 +30,7 @@ public class ReportAction extends AbstractAnetBean {
   ActionType type;
   @GraphQLQuery
   @GraphQLInputField
-  private boolean planned; // only meaningful when type is APPROVE or PUBLISH
+  private boolean planned;
 
   @Override
   @JsonIgnore

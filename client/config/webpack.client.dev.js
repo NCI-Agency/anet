@@ -5,6 +5,7 @@ const common = require("./webpack.common.js")
 const paths = require("./paths")
 
 module.exports = merge.merge(common.clientConfig, {
+  target: "web",
   mode: "development",
   resolve: {
     modules: [paths.appSrc, "node_modules", "platform/web-dev"]
@@ -21,7 +22,7 @@ module.exports = merge.merge(common.clientConfig, {
   devServer: {
     hot: true,
     historyApiFallback: true,
-    contentBase: "public",
+    static: [paths.public],
     port: process.env.DEV_PORT,
     proxy: [
       {
@@ -39,7 +40,6 @@ module.exports = merge.merge(common.clientConfig, {
       publicUrl: "/",
       inject: true,
       template: "public/index.hbs"
-    }),
-    new webpack.HotModuleReplacementPlugin()
+    })
   ]
 })

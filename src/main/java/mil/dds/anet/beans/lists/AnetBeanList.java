@@ -36,12 +36,20 @@ public class AnetBeanList<T> {
 
   public AnetBeanList(Query query, int pageNum, int pageSize, RowMapper<T> mapper) {
     this(pageNum, pageSize, query.map(mapper).list());
-    int resultSize = getList().size();
-    if (resultSize == 0) {
-      setTotalCount(0);
+    final Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
+    if (foundCount != null) {
+      // Total count was found in the query results, use it
+      setTotalCount(foundCount);
     } else {
-      Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
-      setTotalCount(foundCount == null ? resultSize : foundCount);
+      // Get the number of results actually retrieved
+      int resultSize = getList().size();
+      // Check if that is zero
+      if (resultSize == 0) {
+        // We may have a pagination overshoot, so set the size to the last item on the previous page
+        resultSize = pageNum * pageSize;
+      }
+      // Make sure size is always non-negative
+      setTotalCount(Math.max(0, resultSize));
     }
   }
 

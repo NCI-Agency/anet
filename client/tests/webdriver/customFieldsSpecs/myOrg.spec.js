@@ -5,7 +5,9 @@ import MyOrg from "../pages/myOrg.page"
 describe("My Organization page", () => {
   beforeEach("Open the My Organization page", () => {
     Home.openAsAdminUser()
-    const myOrgUrl = Home.myOrgLink.getAttribute("href")
+    Home.linksMenuButton.click()
+    Home.myOrgLink.waitForExist()
+    const myOrgUrl = Home.myOrgLink.parentElement().getAttribute("href")
     MyOrg.openAsAdminUser(myOrgUrl)
   })
 
@@ -16,7 +18,7 @@ describe("My Organization page", () => {
       // database, and in that case we have more reports in the statistics
       MyOrg.engagementDateStatistics.waitForDisplayed()
       const daysWithEvent = MyOrg.engagementDateStatistics.$$(
-        ".fc-event-container"
+        ".fc-event-title-container"
       )
       // There is at least one date with events in the calendar
       expect(daysWithEvent).to.have.length.above(0)

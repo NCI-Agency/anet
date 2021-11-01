@@ -36,6 +36,6 @@ const Template = () => <Wrapper />
 export const Basic = Template.bind({})
 
 export default {
-  title: "ANET/SimpleMultiCheckboxDropdown",
+  title: "ANET Components/SimpleMultiCheckboxDropdown",
   component: Wrapper
 }

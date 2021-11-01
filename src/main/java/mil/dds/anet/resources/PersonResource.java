@@ -5,9 +5,9 @@ import io.leangen.graphql.annotations.GraphQLEnvironment;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import io.leangen.graphql.execution.ResolutionEnvironment;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -23,10 +23,10 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 
 public class PersonResource {
-
   private final PersonDao dao;
   private final AnetConfiguration config;
 
@@ -72,10 +72,13 @@ public class PersonResource {
         Utils.isEmptyHtml(p.getBiography()) ? null : Utils.sanitizeHtml(p.getBiography()));
     Person created = dao.insert(p);
 
-    if (created.getPosition() != null) {
+    if (DaoUtils.getUuid(created.getPosition()) != null) {
       AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created.getUuid(),
-          created.getPosition().getUuid());
+          DaoUtils.getUuid(created.getPosition()));
     }
+
+    DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, created.getUuid(),
+        p.getCustomSensitiveInformation());
 
     AnetAuditLogger.log("Person {} created by {}", created, user);
     return created;
@@ -118,10 +121,7 @@ public class PersonResource {
     p.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     final Person existing = dao.getByUuid(p.getUuid());
-    if (!canCreateOrUpdatePerson(user, existing, false)) {
-      throw new WebApplicationException("You do not have permissions to edit this person",
-          Status.FORBIDDEN);
-    }
+    assertCanUpdatePerson(user, existing);
 
     if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
       validateEmail(p.getEmailAddress());
@@ -130,26 +130,26 @@ public class PersonResource {
     // Swap the position first in order to do the authentication check.
     if (p.getPosition() != null) {
       // Maybe update position?
-      Position existingPos = existing.loadPosition();
-      if (existingPos == null && p.getPosition().getUuid() != null) {
+      final Position existingPos = existing.loadPosition();
+      final String positionUuid = DaoUtils.getUuid(p.getPosition());
+      if (existingPos == null && positionUuid != null) {
         // Update the position for this person.
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
-            p.getPosition().getUuid());
+            positionUuid);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      } else if (existingPos != null
-          && existingPos.getUuid().equals(p.getPosition().getUuid()) == false) {
-        // Update the position for this person.
-        AuthUtils.assertSuperUser(user);
-        AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
-            p.getPosition().getUuid());
-        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
-      } else if (existingPos != null && p.getPosition().getUuid() == null) {
+      } else if (existingPos != null && positionUuid == null) {
         // Remove this person from their position.
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao()
             .removePersonFromPosition(existingPos.getUuid());
         AnetAuditLogger.log("Person {} removed from position by {}", p, user);
+      } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
+        // Update the position for this person.
+        AuthUtils.assertSuperUser(user);
+        AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
+            positionUuid);
+        AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       }
     }
 
@@ -184,17 +184,48 @@ public class PersonResource {
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
     }
+
+    DaoUtils.saveCustomSensitiveInformation(user, PersonDao.TABLE_NAME, p.getUuid(),
+        p.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Person {} updated by {}", p, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
   }
 
+  @GraphQLMutation(name = "updatePersonHistory")
+  public int updatePersonHistory(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "person") Person p) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Person existing = dao.getByUuid(p.getUuid());
+    assertCanUpdatePerson(user, existing);
+    ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions());
+
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(), null,
+        p.getPreviousPositions(), true)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+
+    final int numRows = AnetObjectEngine.getInstance().getPersonDao().updatePersonHistory(p);
+    AnetAuditLogger.log("History updated for person {} by {}", p, user);
+    return numRows;
+  }
+
+  private void assertCanUpdatePerson(final Person user, final Person existing) {
+    if (!canCreateOrUpdatePerson(user, existing, false)) {
+      throw new WebApplicationException("You do not have permissions to edit this person",
+          Status.FORBIDDEN);
+    }
+  }
+
   @GraphQLQuery(name = "personList")
   public AnetBeanList<Person> search(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLEnvironment Set<String> subFields,
+      @GraphQLEnvironment ResolutionEnvironment env,
       @GraphQLArgument(name = "query") PersonSearchQuery query) {
     query.setUser(DaoUtils.getUserFromContext(context));
-    return dao.search(subFields, query);
+    return dao.search(Utils.getSubFields(env), query);
   }
 
   /**
@@ -241,19 +272,19 @@ public class PersonResource {
     }
 
     int merged = dao.mergePeople(winner, loser);
-    AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
+    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winner, user);
 
-    if (loserPosition != null && copyPosition) {
+    if (DaoUtils.getUuid(loserPosition) != null && copyPosition) {
       AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(winner.getUuid(),
-          loserPosition.getUuid());
+          DaoUtils.getUuid(loserPosition));
       AnetAuditLogger.log("Person {} put in position {} as part of merge by {}", winner,
           loserPosition, user);
-    } else if (winner.getPosition() != null) {
+    } else if (DaoUtils.getUuid(winner.getPosition()) != null) {
       // We need to always re-put the winner back into their position
       // because when we removed the loser, and then updated the peoplePositions table
       // it now has a record saying the winner has no position.
       AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(winner.getUuid(),
-          winner.getPosition().getUuid());
+          DaoUtils.getUuid(winner.getPosition()));
     }
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows

@@ -1,3 +1,13 @@
 module.exports = {
-  plugins: [require("autoprefixer"), require("postcss-flexbugs-fixes")]
+  plugins: [
+    require("postcss-custom-properties")({
+      preserve: false, // completely reduce all css vars
+      importFrom: [
+        "src/fullcalendar-vars.css" // look here for the new values
+      ]
+    }),
+    require("postcss-calc"),
+    require("autoprefixer"),
+    require("postcss-flexbugs-fixes")
+  ]
 }

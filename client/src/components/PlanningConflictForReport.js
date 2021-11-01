@@ -1,10 +1,10 @@
-import { Icon, Intent, Spinner } from "@blueprintjs/core"
+import { gql } from "@apollo/client"
+import { Icon, IconSize, Intent, Spinner } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import styled from "@emotion/styled"
 import API from "api"
-import { gql } from "apollo-boost"
 import Report from "models/Report"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -67,7 +67,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
         <Icon
           icon={IconNames.ERROR}
           intent={Intent.DANGER}
-          iconSize={Icon.SIZE_STANDARD}
+          iconSize={IconSize.STANDARD}
         />
       </Tooltip2>
     )
@@ -105,7 +105,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
         <Icon
           icon={IconNames.WARNING_SIGN}
           intent={Intent.WARNING}
-          iconSize={largeIcon ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD}
+          iconSize={largeIcon ? IconSize.LARGE : IconSize.STANDARD}
           style={{ margin: "0 5px" }}
         />
       </Tooltip2>

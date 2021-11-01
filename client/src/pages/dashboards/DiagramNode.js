@@ -16,7 +16,7 @@ import {
   DefaultLinkWidget
 } from "@projectstorm/react-diagrams-defaults"
 import AggregationWidgetContainer, {
-  AGGERGATION_WIDGET_TYPE,
+  AGGREGATION_WIDGET_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
@@ -41,7 +41,7 @@ const ENTITY_GQL_FIELDS = {
 
 const DIAGRAM_AGGREGATION_WIDGET_PER_FIELD_TYPE = {
   [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: {
-    [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: AGGERGATION_WIDGET_TYPE.PIE
+    [SPECIAL_WIDGET_TYPES.LIKERT_SCALE]: AGGREGATION_WIDGET_TYPE.PIE
   }
 }
 

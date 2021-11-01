@@ -3,7 +3,7 @@ import * as cr from "../createReport.page"
 
 class CreateReport extends cr.CreateReport {
   get title() {
-    return browser.$("h2.legend")
+    return browser.$("h4.legend")
   }
 
   get intent() {
@@ -11,7 +11,7 @@ class CreateReport extends cr.CreateReport {
   }
 
   get intentHelpBlock() {
-    return browser.$("#fg-intent .help-block")
+    return browser.$("#fg-intent div.invalid-feedback")
   }
 
   get engagementDate() {

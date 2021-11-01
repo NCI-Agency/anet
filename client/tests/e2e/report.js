@@ -1,4 +1,3 @@
-const _includes = require("lodash/includes")
 const moment = require("moment")
 const test = require("../util/test")
 
@@ -37,7 +36,7 @@ test.serial("Draft and submit a report", async t => {
 
   const $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
-    "general hospit"
+    "ge"
   )
 
   t.is(
@@ -46,7 +45,7 @@ test.serial("Draft and submit a report", async t => {
     "Clicking a location advanced single select widget suggestion populates the input field."
   )
 
-  const $positiveAtmosphereButton = await $("#positiveAtmos")
+  const $positiveAtmosphereButton = await $('label[for="atmosphere_POSITIVE"]')
   await $positiveAtmosphereButton.click()
 
   const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
@@ -56,7 +55,7 @@ test.serial("Draft and submit a report", async t => {
 
   const $attendeesTitle = await t.context.driver.findElement(
     // if future "People who will be involved in this planned engagement"
-    By.xpath('//h2/span[text()="People involved in this engagement"]')
+    By.xpath('//h4/span[text()="People involved in this engagement"]')
   )
   await $attendeesTitle.click()
 
@@ -142,7 +141,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const $tasksTitle = await t.context.driver.findElement(
-    By.xpath('//h2/span[text()="Efforts"]')
+    By.xpath('//h4/span[text()="Efforts"]')
   )
   await $tasksTitle.click()
 
@@ -158,13 +157,12 @@ test.serial("Draft and submit a report", async t => {
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")
   await pageHelpers.writeInForm(
-    ".reportTextField .public-DraftEditor-content",
+    ".reportTextField .editable",
     "engagement details",
-    shortWaitMs // wait for Draftail to save the editor contents
+    shortWaitMs // wait for Slate to save the editor contents
   )
 
-  const editorCssPath =
-    ".reportSensitiveInformationField .public-DraftEditor-content"
+  const editorCssPath = ".reportSensitiveInformationField .editable"
   const $reportSensitiveInformationField = await $(editorCssPath)
   t.false(
     await $reportSensitiveInformationField.isDisplayed(),
@@ -180,7 +178,7 @@ test.serial("Draft and submit a report", async t => {
   await pageHelpers.writeInForm(
     editorCssPath,
     "sensitive info",
-    shortWaitMs // wait for Draftail to save the editor contents
+    shortWaitMs // wait for Slate to save the editor contents
   )
   const $addAuthGroupShortcutButtons = await $$(
     "#meeting-details .shortcut-list button"
@@ -408,7 +406,7 @@ async function approveReport(t, user) {
 test.serial(
   "Verify that validation and other reports/new interactions work",
   async t => {
-    t.plan(29)
+    t.plan(27)
 
     const {
       assertElementText,
@@ -417,7 +415,8 @@ test.serial(
       assertElementNotPresent,
       pageHelpers,
       shortWaitMs,
-      By
+      By,
+      until
     } = t.context
 
     await pageHelpers.goHomeAndThenToReportsPage()
@@ -429,38 +428,33 @@ test.serial(
 
     const $searchBarInput = await $("#searchBarInput")
 
-    async function verifyFieldIsRequired(
-      $fieldGroup,
-      $input,
-      warningClass,
-      fieldName
-    ) {
+    async function verifyFieldIsRequired($input, id, type, fieldName) {
       await $input.click()
       await $input.clear()
       await $searchBarInput.click()
 
-      t.true(
-        _includes(await $fieldGroup.getAttribute("class"), warningClass),
-        `${fieldName} enters invalid state when the user leaves the field without entering anything`
+      await t.context.driver.wait(
+        until.elementLocated(
+          By.css(`${type}[id="${id}"] ~ div[class="invalid-feedback"]`)
+        )
       )
 
       await $input.sendKeys("user input")
       await $input.sendKeys(t.context.Key.TAB) // fire blur event
       t.false(
-        _includes(await $fieldGroup.getAttribute("class"), warningClass),
+        (await t.context.driver.findElements(
+          By.css(`textarea[id="${id}"] ~ div[class="invalid-feedback"]`)
+        ).length) > 0,
         `After typing in ${fieldName} field, warning state goes away`
       )
     }
 
     const $meetingGoalInput = await $("#intent")
-    const $meetingGoalDiv = await t.context.driver.findElement(
-      By.xpath(
-        '//textarea[@id="intent"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " form-group ")]'
-      )
-    )
     // check that parent div.form-group does not have class 'has-error'
     t.false(
-      _includes(await $meetingGoalDiv.getAttribute("class"), "has-error"),
+      (await t.context.driver.findElements(
+        By.css('textarea[id="intent"] ~ div[class="invalid-feedback"]')
+      ).length) > 0,
       "Meeting goal does not start in an invalid state"
     )
     t.is(
@@ -471,9 +465,9 @@ test.serial(
 
     // check that parent div.form-group now has a class 'has-error'
     await verifyFieldIsRequired(
-      $meetingGoalDiv,
       $meetingGoalInput,
-      "has-error",
+      "intent",
+      "textarea",
       "Meeting goal"
     )
 
@@ -552,7 +546,9 @@ test.serial(
       shortWaitMs
     )
 
-    const $positiveAtmosphereButton = await $("#positiveAtmos")
+    const $positiveAtmosphereButton = await $(
+      'label[for="atmosphere_POSITIVE"]'
+    )
     await $positiveAtmosphereButton.click()
 
     const $atmosphereDetails = await $("#atmosphereDetails")
@@ -561,32 +557,32 @@ test.serial(
       "Why was this engagement positive? (optional)"
     )
 
-    const $neutralAtmosphereButton = await $("#neutralAtmos")
+    const $neutralAtmosphereButton = await $('label[for="atmosphere_NEUTRAL"]')
     await $neutralAtmosphereButton.click()
     t.is(
       (await $atmosphereDetails.getAttribute("placeholder")).trim(),
       "Why was this engagement neutral?"
     )
 
-    const $negativeAtmosphereButton = await $("#negativeAtmos")
+    const $negativeAtmosphereButton = await $(
+      'label[for="atmosphere_NEGATIVE"]'
+    )
     await $negativeAtmosphereButton.click()
     t.is(
       (await $atmosphereDetails.getAttribute("placeholder")).trim(),
       "Why was this engagement negative?"
     )
 
-    const $atmosphereDetailsGroup = await t.context.driver.findElement(
-      By.xpath(
-        '//input[@id="atmosphereDetails"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " form-group ")]'
-      )
+    const $atmosphereDetailsInput = await t.context.driver.findElement(
+      By.css('input[id="atmosphereDetails"]')
     )
 
     await $neutralAtmosphereButton.click()
     // check that parent div.form-group now has a class 'has-error'
     await verifyFieldIsRequired(
-      $atmosphereDetailsGroup,
-      $atmosphereDetails,
-      "has-error",
+      $atmosphereDetailsInput,
+      "atmosphereDetails",
+      "input",
       "Neutral atmospherics details"
     )
 
@@ -601,6 +597,9 @@ test.serial(
     )
 
     const $cancelledCheckbox = await $(".cancelled-checkbox")
+    // Move element into view
+    const actions = t.context.driver.actions({ async: true })
+    await actions.move({ origin: $cancelledCheckbox }).perform()
     await $cancelledCheckbox.click()
 
     await assertElementNotPresent(

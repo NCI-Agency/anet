@@ -1,17 +1,20 @@
+import classNames from "classnames"
 import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
+import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
   Button,
   Col,
-  ControlLabel,
+  Form,
   FormControl,
   FormGroup,
-  HelpBlock,
   InputGroup,
+  Row,
   ToggleButton,
   ToggleButtonGroup
 } from "react-bootstrap"
@@ -32,21 +35,25 @@ const getFormGroupValidationState = (field, form) => {
   const { touched, errors } = form
   const fieldTouched = _get(touched, field.name)
   const fieldError = _get(errors, field.name)
-  return (fieldTouched && (fieldError ? "error" : null)) || null
+  return { validationState: fieldTouched && fieldError, fieldError }
 }
 
 const getHelpBlock = (field, form) => {
-  const { touched, errors } = form
-  const fieldTouched = _get(touched, field.name)
-  const fieldError = _get(errors, field.name)
-  return fieldTouched && fieldError && <HelpBlock>{fieldError}</HelpBlock>
+  const { validationState, fieldError } = getFormGroupValidationState(
+    field,
+    form
+  )
+  return (
+    validationState && (
+      <FormControl.Feedback type="invalid">{fieldError}</FormControl.Feedback>
+    )
+  )
 }
 
 const FieldNoLabel = ({ field, form, widgetElem, children }) => {
   const id = getFieldId(field)
-  const validationState = getFormGroupValidationState(field, form)
   return (
-    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
+    <FormGroup id={`fg-${id}`} controlId={id}>
       {widgetElem}
       {getHelpBlock(field, form)}
       {children}
@@ -70,7 +77,9 @@ const Field = ({
   addon,
   vertical,
   isCompact,
-  extraAddon
+  extraAddon,
+  labelColumnWidth,
+  className
 }) => {
   const id = getFieldId(field)
   const widget = useMemo(
@@ -86,23 +95,27 @@ const Field = ({
       ),
     [addon, extraAddon, id, widgetElem]
   )
-  const validationState = getFormGroupValidationState(field, form)
+
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
   }
   // setting label or extraColElem explicitly to null will completely remove these columns!
   const widgetWidth =
-    12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
+    12 -
+    (label === null ? 0 : labelColumnWidth) -
+    (extraColElem === null ? 0 : 3)
   // controlId prop of the FormGroup sets the id of the control element
 
   if (isCompact) {
     return (
       <CompactRow
         label={label}
+        className={className}
         content={
           <>
             {widget}
             {getHelpBlock(field, form)}
+            {extraColElem}
             {children}
           </>
         }
@@ -111,18 +124,18 @@ const Field = ({
   }
 
   return (
-    <FormGroup id={`fg-${id}`} controlId={id} validationState={validationState}>
+    <FormGroup id={`fg-${id}`} controlId={id} className={className}>
       {vertical ? (
         <>
-          <div>{label !== null && <ControlLabel>{label}</ControlLabel>}</div>
+          <div>{label !== null && <Form.Label>{label}</Form.Label>}</div>
           {widget}
           {getHelpBlock(field, form)}
           {children}
         </>
       ) : (
-        <>
+        <Row style={{ marginBottom: "1rem" }}>
           {label !== null && (
-            <Col sm={2} componentClass={ControlLabel}>
+            <Col sm={labelColumnWidth} as={Form.Label}>
               {label}
             </Col>
           )}
@@ -133,9 +146,9 @@ const Field = ({
               {children}
             </div>
           </Col>
-        </>
+          {extraColElem && <Col sm={3} {...extraColElem.props} />}
+        </Row>
       )}
-      {extraColElem && <Col sm={3} {...extraColElem.props} />}
     </FormGroup>
   )
 }
@@ -149,16 +162,20 @@ Field.propTypes = {
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   extraAddon: PropTypes.object,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  labelColumnWidth: PropTypes.number,
+  className: PropTypes.string
 }
 Field.defaultProps = {
-  vertical: false // default direction of label and input = horizontal
+  vertical: false, // default direction of label and input = horizontal
+  labelColumnWidth: 2
 }
 
 export const InputField = ({
   field, // { name, value, onChange, onBlur }
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
+  asA,
   inputType,
   children,
   extraColElem,
@@ -167,6 +184,7 @@ export const InputField = ({
   extraAddon,
   ...otherProps
 }) => {
+  const { validationState } = getFormGroupValidationState(field, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
@@ -174,9 +192,11 @@ export const InputField = ({
         {...Object.without(field, "value")}
         value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
+        as={asA ?? "input"}
+        isInvalid={validationState}
       />
     ),
-    [field, otherProps, inputType]
+    [field, otherProps, inputType, asA, validationState]
   )
   return (
     <Field
@@ -196,6 +216,7 @@ InputField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object,
   label: PropTypes.string,
+  asA: PropTypes.string,
   inputType: PropTypes.string,
   children: PropTypes.any,
   extraColElem: PropTypes.object,
@@ -210,15 +231,17 @@ export const InputFieldNoLabel = ({
   children,
   ...otherProps
 }) => {
+  const { validationState } = getFormGroupValidationState(field, form)
   const widgetElem = useMemo(
     () => (
       <FormControl
         {...Object.without(field, "value")}
         value={utils.isNullOrUndefined(field.value) ? "" : field.value}
         {...otherProps}
+        isInvalid={validationState}
       />
     ),
-    [field, otherProps]
+    [field, otherProps, validationState]
   )
   return (
     <FieldNoLabel
@@ -239,19 +262,22 @@ export const ReadonlyField = ({
   field, // { name, value, onChange, onBlur }
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   label,
+  asA,
   children,
   extraColElem,
+  labelColumnWidth,
   addon,
   vertical,
   humanValue,
   isCompact,
   ...otherProps
 }) => {
+  const { className } = otherProps
   const widgetElem = useMemo(
     () => (
-      <FormControl.Static componentClass="div" {...field} {...otherProps}>
+      <FormControl as="div" plaintext {...field} {...otherProps}>
         {getHumanValue(field, humanValue)}
-      </FormControl.Static>
+      </FormControl>
     ),
     [field, humanValue, otherProps]
   )
@@ -263,9 +289,11 @@ export const ReadonlyField = ({
       widgetElem={widgetElem}
       children={children}
       extraColElem={extraColElem}
+      labelColumnWidth={labelColumnWidth}
       addon={addon}
       vertical={vertical}
       isCompact={isCompact}
+      className={className}
     />
   )
 }
@@ -273,12 +301,14 @@ ReadonlyField.propTypes = {
   field: PropTypes.object,
   form: PropTypes.object,
   label: PropTypes.string,
+  asA: PropTypes.string, // unused, prop is discarded
   children: PropTypes.any,
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
   humanValue: PropTypes.any,
-  isCompact: PropTypes.bool
+  isCompact: PropTypes.bool,
+  labelColumnWidth: PropTypes.number
 }
 
 export const SpecialField = ({
@@ -293,9 +323,14 @@ export const SpecialField = ({
   isCompact,
   ...otherProps
 }) => {
+  const { validationState } = getFormGroupValidationState(field, form)
+  let { className } = widget.props
+  if (validationState) {
+    className = classNames(className, "is-invalid")
+  }
   const widgetElem = useMemo(
-    () => React.cloneElement(widget, { ...field, ...otherProps }),
-    [field, otherProps, widget]
+    () => React.cloneElement(widget, { className, ...field, ...otherProps }),
+    [className, field, otherProps, widget]
   )
   return (
     <Field
@@ -328,7 +363,7 @@ export const customEnumButtons = list => {
   for (const key in list) {
     if (Object.prototype.hasOwnProperty.call(list, key)) {
       buttons.push({
-        id: key,
+        id: list[key].label,
         value: key,
         label: list[key].label,
         color: list[key].color
@@ -348,39 +383,72 @@ const ButtonToggleGroupField = ({
   addon,
   vertical,
   buttons,
+  disabled,
+  enableClear,
   ...otherProps
 }) => {
   const widgetElem = useMemo(
     () => (
-      <ToggleButtonGroup
-        type={type}
-        defaultValue={field.value}
-        {...field}
-        {...otherProps}
-      >
-        {buttons.map((button, index) => {
-          if (!button) {
-            return null
-          }
-          let { label, value, color, style, ...props } = button
-          if (color) {
-            if (
-              field.value === value ||
-              (Array.isArray(field.value) && field.value.includes(value))
-            ) {
-              style = { ...style, backgroundColor: color }
+      <>
+        <ToggleButtonGroup
+          type={type}
+          defaultValue={field.value}
+          {...field}
+          // null out onBlur to prevent errors like: "Formik called `handleBlur`,
+          // but you forgot to pass an `id` or `name` attribute to your input"
+          onBlur={null}
+          {...otherProps}
+        >
+          {buttons.map((button, index) => {
+            if (!button) {
+              return null
             }
-            style = { ...style, borderColor: color, borderWidth: "2px" }
-          }
-          return (
-            <ToggleButton {...props} key={value} value={value} style={style}>
-              {label}
-            </ToggleButton>
-          )
-        })}
-      </ToggleButtonGroup>
+            let { label, value, color, style, ...props } = button
+            const textColor = utils.getContrastYIQ(color)
+            if (color) {
+              if (
+                field.value === value ||
+                (Array.isArray(field.value) && field.value.includes(value))
+              ) {
+                style = { ...style, backgroundColor: color, color: textColor }
+              }
+              style = {
+                ...style,
+                borderColor: color,
+                borderWidth: "2px"
+              }
+            }
+            return (
+              <ToggleButton
+                {...props}
+                disabled={disabled}
+                id={`${field.name}_${value}`}
+                className={
+                  color
+                    ? textColor === "black"
+                      ? "light-colored-toggle-button"
+                      : "dark-colored-toggle-button"
+                    : ""
+                }
+                key={`${field.name}_${value}`}
+                value={value}
+                style={style}
+                variant="outline-secondary"
+              >
+                {label}
+              </ToggleButton>
+            )
+          })}
+        </ToggleButtonGroup>
+        {!_isEmpty(buttons) && enableClear && (
+          <RemoveButton
+            title="Clear choice"
+            onClick={() => form.setFieldValue(field.name, "", false)}
+          />
+        )}
+      </>
     ),
-    [buttons, field, otherProps, type]
+    [buttons, field, form, disabled, enableClear, otherProps, type]
   )
   return (
     <Field
@@ -404,7 +472,9 @@ ButtonToggleGroupField.propTypes = {
   extraColElem: PropTypes.object,
   addon: PropTypes.object,
   vertical: PropTypes.bool,
-  buttons: PropTypes.array
+  buttons: PropTypes.array,
+  disabled: PropTypes.bool,
+  enableClear: PropTypes.bool
 }
 
 export const RadioButtonToggleGroupField = ({
@@ -455,9 +525,7 @@ export const FieldAddon = ({ fieldId, addon }) => {
       element.focus()
     }
   }, [fieldId])
-  return (
-    <InputGroup.Addon onClick={focusElement}>{addonComponent}</InputGroup.Addon>
-  )
+  return <InputGroup onClick={focusElement}>{addonComponent}</InputGroup>
 }
 FieldAddon.propTypes = {
   fieldId: PropTypes.string,
@@ -515,7 +583,7 @@ export const FieldShortcuts = ({
       {objectType.map(shortcuts, (shortcut, idx) => (
         <Button
           key={shortcut.uuid}
-          bsStyle="link"
+          variant="link"
           onClick={() => handleAddItem(shortcut, onChange, curValue)}
         >
           Add{" "}

@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -13,8 +13,10 @@ import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -29,7 +31,7 @@ import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import {
   Button,
-  Checkbox,
+  FormCheck,
   ListGroup,
   ListGroupItem,
   Nav
@@ -50,6 +52,8 @@ const GQL_GET_ORGANIZATION = gql`
       shortName
       longName
       status
+      isSubscribed
+      updatedAt
       identificationCode
       type
       parentOrg {
@@ -57,12 +61,14 @@ const GQL_GET_ORGANIZATION = gql`
         shortName
         longName
         identificationCode
+        type
       }
       childrenOrgs(query: { pageNum: 0, pageSize: 0, status: ACTIVE }) {
         uuid
         shortName
         longName
         identificationCode
+        type
       }
       positions {
         uuid
@@ -133,12 +139,19 @@ const GQL_GET_ORGANIZATION = gql`
 const OrganizationShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const [filterPendingApproval, setFilterPendingApproval] = useState(false)
   const [includeChildrenOrgs, setIncludeChildrenOrgs] = useState(true)
   const { uuid } = useParams()
-  const { loading, error, data } = API.useApiQuery(GQL_GET_ORGANIZATION, {
-    uuid
-  })
+  const { loading, error, data, refetch } = API.useApiQuery(
+    GQL_GET_ORGANIZATION,
+    {
+      uuid
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -157,8 +170,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     )
   }
   const organization = new Organization(data ? data.organization : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
@@ -183,19 +194,35 @@ const OrganizationShow = ({ pageDispatchers }) => {
       : null
   const isMyOrg = myOrg && organization.uuid === myOrg.uuid
   const orgSubNav = (
-    <Nav>
-      <AnchorNavItem to="info">Info</AnchorNavItem>
-      <AnchorNavItem to="supportedPositions">Supported positions</AnchorNavItem>
-      <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
-      {!isPrincipalOrg && (
-        <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
-      )}
-      {organization.isTaskEnabled() && (
-        <AnchorNavItem to="tasks">
-          {pluralize(Settings.fields.task.shortLabel)}
-        </AnchorNavItem>
-      )}
-      <AnchorNavItem to="reports">Reports</AnchorNavItem>
+    <Nav className="flex-column">
+      <span id="style-nav">
+        <Nav.Item>
+          <AnchorNavItem to="info">Info</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="supportedPositions">
+            Supported positions
+          </AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
+        </Nav.Item>
+        {!isPrincipalOrg && (
+          <Nav.Item>
+            <AnchorNavItem to="approvals">Approvals</AnchorNavItem>
+          </Nav.Item>
+        )}
+        {organization.isTaskEnabled() && (
+          <Nav.Item>
+            <AnchorNavItem to="tasks">
+              {pluralize(Settings.fields.task.shortLabel)}
+            </AnchorNavItem>
+          </Nav.Item>
+        )}
+        <Nav.Item>
+          <AnchorNavItem to="reports">Reports</AnchorNavItem>
+        </Nav.Item>
+      </span>
     </Nav>
   )
   const reportQueryParams = {
@@ -236,6 +263,16 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 Edit
               </LinkTo>
             )}
+            <RelatedObjectNotes
+              notes={organization.notes}
+              relatedObject={
+                organization.uuid && {
+                  relatedObjectType: Organization.relatedObjectType,
+                  relatedObjectUuid: organization.uuid,
+                  relatedObject: organization
+                }
+              }
+            />
           </div>
         )
         return (
@@ -251,7 +288,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
             </SubNav>
 
             {currentUser.isSuperUser() && (
-              <div className="pull-right">
+              <div className="float-end">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."
                   tour={orgTour}
@@ -264,20 +301,28 @@ const OrganizationShow = ({ pageDispatchers }) => {
               </div>
             )}
 
-            <RelatedObjectNotes
-              notes={organization.notes}
-              relatedObject={
-                organization.uuid && {
-                  relatedObjectType: Organization.relatedObjectType,
-                  relatedObjectUuid: organization.uuid,
-                  relatedObject: organization
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`Organization ${organization.shortName}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="organizations"
+                        subscribedObjectUuid={organization.uuid}
+                        isSubscribed={organization.isSubscribed}
+                        updatedAt={organization.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    Organization {organization.shortName}
+                  </>
+                }
                 action={action}
               />
               <Fieldset id="info">
@@ -319,7 +364,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         >
                           {organization.parentOrg.shortName}{" "}
                           {organization.parentOrg.longName}{" "}
-                          {organization.parentOrg.identificationCode}
+                          {Organization.toIdentificationCodeString(
+                            organization.parentOrg
+                          )}
                         </LinkToPreviewed>
                       )
                     }
@@ -379,7 +426,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                                 previewId="org-show-child-org"
                               >
                                 {organization.shortName} {organization.longName}{" "}
-                                {organization.identificationCode}
+                                {Organization.toIdentificationCodeString(
+                                  organization
+                                )}
                               </LinkToPreviewed>
                             </ListGroupItem>
                           ))}
@@ -417,23 +466,24 @@ const OrganizationShow = ({ pageDispatchers }) => {
                     <>
                       <Button
                         value="toggle-filter"
-                        className="btn btn-sm"
+                        size="sm"
                         onClick={() =>
                           setFilterPendingApproval(!filterPendingApproval)
                         }
+                        variant="outline-secondary"
                       >
                         {filterPendingApproval
                           ? "Show all reports"
                           : "Show pending approval"}
                       </Button>
-                      <Checkbox
+                      <FormCheck
+                        type="checkbox"
+                        label="include reports from sub-orgs"
                         checked={includeChildrenOrgs}
                         onChange={() =>
                           setIncludeChildrenOrgs(!includeChildrenOrgs)
                         }
-                      >
-                        include reports from sub-orgs
-                      </Checkbox>
+                      />
                     </>
                   }
                 />

@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -6,7 +7,6 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Model from "components/Model"
 import {
@@ -24,7 +24,7 @@ import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useEffect, useMemo, useState } from "react"
-import { Panel, Table } from "react-bootstrap"
+import { Card, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useParams } from "react-router-dom"
 import Settings from "settings"
@@ -256,11 +256,11 @@ const BaseDecisivesDashboardImpl = ({
 
   return (
     <>
-      <Panel>
-        <Panel.Heading>
-          <Panel.Title componentClass="h3">People</Panel.Title>
-        </Panel.Heading>
-        <Panel.Body>
+      <Card>
+        <Card.Header>
+          <Card.Title as="h3">People</Card.Title>
+        </Card.Header>
+        <Card.Body>
           {decisives.map(decisive => (
             <StatsTable
               label={decisive.label}
@@ -279,13 +279,13 @@ const BaseDecisivesDashboardImpl = ({
               )}
             />
           ))}
-        </Panel.Body>
-      </Panel>
-      <Panel>
-        <Panel.Heading>
-          <Panel.Title componentClass="h3">Places</Panel.Title>
-        </Panel.Heading>
-        <Panel.Body>
+        </Card.Body>
+      </Card>
+      <Card>
+        <Card.Header>
+          <Card.Title as="h3">Places</Card.Title>
+        </Card.Header>
+        <Card.Body>
           {decisives.map(decisive => (
             <StatsTable
               label={decisive.label}
@@ -304,14 +304,14 @@ const BaseDecisivesDashboardImpl = ({
               )}
             />
           ))}
-        </Panel.Body>
-      </Panel>
-      <Panel>
-        <Panel.Heading>
-          <Panel.Title componentClass="h3">Processes</Panel.Title>
-        </Panel.Heading>
-        <Panel.Body>{/* <StatsTable data={[]} /> */}</Panel.Body>
-      </Panel>
+        </Card.Body>
+      </Card>
+      <Card>
+        <Card.Header>
+          <Card.Title as="h3">Processes</Card.Title>
+        </Card.Header>
+        <Card.Body>{/* <StatsTable data={[]} /> */}</Card.Body>
+      </Card>
     </>
   )
 

@@ -1,14 +1,14 @@
+import { gql } from "@apollo/client"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
-import { gql } from "apollo-boost"
-import * as FieldHelper from "components/FieldHelper"
+import classNames from "classnames"
 import UltimatePagination from "components/UltimatePagination"
 import _isEmpty from "lodash/isEmpty"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Button, Col, FormControl, InputGroup, Row } from "react-bootstrap"
+import { Button, Col, Form, InputGroup, Row } from "react-bootstrap"
 import { useDebouncedCallback } from "use-debounce"
 import utils from "utils"
 import "./AdvancedSelect.css"
@@ -32,14 +32,14 @@ AdvancedSelectTarget.propTypes = {
 
 const FilterAsNav = ({ items, currentFilter, handleOnClick }) =>
   hasMultipleItems(items) && (
-    <Col md={2} xsHidden smHidden>
+    <Col md={3} className="d-none d-md-block">
       <ul className="advanced-select-filters" style={{ paddingInlineStart: 0 }}>
         {Object.entries(items).map(([filterType, filter]) => (
           <li
             key={filterType}
             className={currentFilter === filterType ? "active" : null}
           >
-            <Button bsStyle="link" onClick={() => handleOnClick(filterType)}>
+            <Button variant="link" onClick={() => handleOnClick(filterType)}>
               {filter.label}
             </Button>
           </li>
@@ -55,7 +55,7 @@ FilterAsNav.propTypes = {
 
 const FilterAsDropdown = ({ items, handleOnChange }) =>
   hasMultipleItems(items) && (
-    <Col style={{ minHeight: "80px" }} mdHidden lgHidden>
+    <Col className="d-xs-block d-md-none">
       <p style={{ padding: "5px 0" }}>
         Filter:
         <select onChange={handleOnChange} style={{ marginLeft: "5px" }}>
@@ -81,6 +81,7 @@ const FETCH_TYPE = {
 
 export const propTypes = {
   fieldName: PropTypes.string.isRequired, // input field name
+  className: PropTypes.string,
   placeholder: PropTypes.string, // input field placeholder
   pageSize: PropTypes.number,
   disabled: PropTypes.bool,
@@ -115,6 +116,7 @@ export const propTypes = {
 
 const AdvancedSelect = ({
   fieldName,
+  className,
   placeholder,
   pageSize,
   disabled,
@@ -139,7 +141,7 @@ const AdvancedSelect = ({
 
   const latestSelectedValueAsString = useRef(selectedValueAsString)
   const latestQueryParams = useRef(queryParams)
-  const latestFilterDefs = useRef(filterDefs)
+  const [latestFilterDefs, setLatestFilterDefs] = useState(filterDefs)
   const overlayContainer = useRef()
   const searchInput = useRef()
   const latestRequest = useRef()
@@ -155,7 +157,7 @@ const AdvancedSelect = ({
   const [fetchType, setFetchType] = useState(FETCH_TYPE.NONE)
   const [doReset, setDoReset] = useState(false)
 
-  const selectedFilter = latestFilterDefs.current[filterType]
+  const selectedFilter = latestFilterDefs[filterType]
   const renderSelectedWithDelete = renderSelected
     ? React.cloneElement(renderSelected, { onDelete: handleRemoveItem })
     : null
@@ -166,15 +168,15 @@ const AdvancedSelect = ({
 
   const fetchResults = useCallback(
     searchTerms => {
-      if (!selectedFilter.list) {
+      if (!selectedFilter?.list) {
         const resourceName = objectType.resourceName
-        const listName = selectedFilter.listName || objectType.listName
+        const listName = selectedFilter?.listName || objectType.listName
         const queryVars = { pageNum, pageSize }
         if (latestQueryParams.current) {
           Object.assign(queryVars, latestQueryParams.current)
         }
-        if (selectedFilter.queryVars) {
-          Object.assign(queryVars, selectedFilter.queryVars)
+        if (selectedFilter?.queryVars) {
+          Object.assign(queryVars, selectedFilter?.queryVars)
         }
         if (searchTerms) {
           Object.assign(queryVars, { text: searchTerms + "*" })
@@ -213,16 +215,13 @@ const AdvancedSelect = ({
       objectType.resourceName,
       pageNum,
       pageSize,
-      selectedFilter.list,
-      selectedFilter.listName,
-      selectedFilter.queryVars
+      selectedFilter?.list,
+      selectedFilter?.listName,
+      selectedFilter?.queryVars
     ]
   )
 
-  const { callback: fetchResultsDebounced } = useDebouncedCallback(
-    fetchResults,
-    400
-  )
+  const fetchResultsDebounced = useDebouncedCallback(fetchResults, 400)
 
   useEffect(() => {
     if (
@@ -238,15 +237,12 @@ const AdvancedSelect = ({
 
   useEffect(() => {
     if (
-      !_isEqualWith(
-        latestFilterDefs.current,
-        filterDefs,
-        utils.treatFunctionsAsEqual
-      )
+      !_isEqualWith(latestFilterDefs, filterDefs, utils.treatFunctionsAsEqual)
     ) {
-      latestFilterDefs.current = filterDefs
+      setFilterType(firstFilter)
+      setLatestFilterDefs(filterDefs)
     }
-  }, [filterDefs])
+  }, [filterDefs, latestFilterDefs, firstFilter])
 
   useEffect(() => {
     if (latestSelectedValueAsString.current !== selectedValueAsString) {
@@ -270,7 +266,7 @@ const AdvancedSelect = ({
         }
       }))
     }
-  }, [filterType, pageNum, pageSize, selectedFilter.list])
+  }, [filterType, pageNum, pageSize, selectedFilter?.list])
 
   useEffect(() => {
     if (fetchType === FETCH_TYPE.NORMAL) {
@@ -297,7 +293,10 @@ const AdvancedSelect = ({
     <>
       {!(disabled && renderSelectedWithDelete) && (
         <>
-          <div id={`${fieldName}-popover`} className="advanced-select-popover">
+          <div
+            id={`${fieldName}-popover`}
+            className={classNames(className, "advanced-select-popover")}
+          >
             <InputGroup>
               <Popover2
                 popoverClassName="bp3-popover2-content-sizing"
@@ -314,7 +313,7 @@ const AdvancedSelect = ({
                       handleOnChange={handleOnChangeSelect}
                     />
 
-                    <Col md={hasMultipleItems(filterDefs) ? 10 : 12}>
+                    <Col md={hasMultipleItems(filterDefs) ? 9 : 12}>
                       <OverlayTable
                         fieldName={fieldName}
                         items={items}
@@ -338,7 +337,7 @@ const AdvancedSelect = ({
                       <UltimatePagination
                         Component="footer"
                         componentClassName="searchPagination"
-                        className="pull-right"
+                        className="float-end"
                         pageNum={pageNum}
                         pageSize={pageSize}
                         totalCount={totalCount}
@@ -358,7 +357,9 @@ const AdvancedSelect = ({
                 placement="bottom"
                 modifiers={{
                   preventOverflow: {
-                    enabled: false
+                    options: {
+                      rootBoundary: "viewport"
+                    }
                   },
                   hide: {
                     enabled: false
@@ -368,22 +369,37 @@ const AdvancedSelect = ({
                   }
                 }}
               >
-                <FormControl
-                  name={fieldName}
-                  value={searchTerms || ""}
-                  placeholder={placeholder}
-                  onChange={changeSearchTerms}
-                  onFocus={event => handleInteraction(true, event)}
-                  inputRef={ref => {
-                    searchInput.current = ref
-                  }}
-                  disabled={disabled}
-                />
+                <InputGroup>
+                  <Form.Control
+                    name={fieldName}
+                    value={searchTerms || ""}
+                    placeholder={placeholder}
+                    onChange={changeSearchTerms}
+                    onFocus={event => handleInteraction(true, event)}
+                    ref={ref => {
+                      searchInput.current = ref
+                    }}
+                    disabled={disabled}
+                  />
+                  {addon && (
+                    <InputGroup.Text
+                      style={{
+                        maxHeight: "38px",
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        textSizeAdjust: "10px"
+                      }}
+                    >
+                      {typeof addon === "string" ? (
+                        <img src={addon} style={{ height: "20px" }} alt="" />
+                      ) : (
+                        addon
+                      )}
+                    </InputGroup.Text>
+                  )}
+                  {extraAddon}
+                </InputGroup>
               </Popover2>
-              {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
-              {addon && (
-                <FieldHelper.FieldAddon fieldId={fieldName} addon={addon} />
-              )}
             </InputGroup>
           </div>
           <AdvancedSelectTarget overlayRef={overlayContainer} />

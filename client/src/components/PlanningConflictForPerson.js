@@ -1,4 +1,5 @@
-import { Button, Callout, Icon, Intent, Spinner } from "@blueprintjs/core"
+import { gql } from "@apollo/client"
+import { Callout, Icon, Intent, Spinner } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   Popover2,
@@ -7,13 +8,13 @@ import {
 } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
-import { gql } from "apollo-boost"
 import Person from "models/Person"
 import Report from "models/Report"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React from "react"
+import { Button } from "react-bootstrap"
 
 const GET_PERSON_WITH_REPORTS = gql`
   query($uuid: String!, $attendedReportsQuery: ReportSearchQueryInput!) {
@@ -106,7 +107,8 @@ const BasePlanningConflictForPerson = ({
         </Callout>
       }
     >
-      <Button icon={IconNames.WARNING_SIGN} intent={Intent.WARNING} minimal>
+      <Button variant="warning" size="sm">
+        <Icon icon={IconNames.WARNING_SIGN} intent={Intent.WARNING} />
         {!iconOnly && (
           <>
             {conflictingReports.length}&nbsp;

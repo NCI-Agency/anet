@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import { JSONPath } from "jsonpath-plus"
 import _forEach from "lodash/forEach"
 import _isEmpty from "lodash/isEmpty"
@@ -18,6 +18,14 @@ import * as yup from "yup"
 // export these separately to avoid circular import problems
 export const REPORT_RELATED_OBJECT_TYPE = "reports"
 export const REPORT_STATE_PUBLISHED = "PUBLISHED"
+
+export const GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS = /* GraphQL */ `
+  customSensitiveInformation {
+    uuid
+    customFieldName
+    customFieldValue
+  }
+`
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   uuid
@@ -120,7 +128,10 @@ export const NOTE_TYPE = {
 }
 
 export const DEFAULT_CUSTOM_FIELDS_PARENT = "formCustomFields"
+export const SENSITIVE_CUSTOM_FIELDS_PARENT = "formSensitiveFields"
 export const INVISIBLE_CUSTOM_FIELDS_FIELD = "invisibleCustomFields"
+export const NOTES_FIELD = "notes"
+export const IS_SUBSCRIBED_FIELD = "isSubscribed"
 
 export const ASSESSMENTS_RELATED_OBJECT_TYPE = {
   REPORT: "report"
@@ -153,14 +164,39 @@ export const CUSTOM_FIELD_TYPE = {
   ARRAY_OF_ANET_OBJECTS: "array_of_anet_objects"
 }
 
+export const CUSTOM_FIELD_TYPE_DEFAULTS = {
+  [CUSTOM_FIELD_TYPE.TEXT]: "",
+  [CUSTOM_FIELD_TYPE.NUMBER]: null,
+  [CUSTOM_FIELD_TYPE.DATE]: null,
+  [CUSTOM_FIELD_TYPE.DATETIME]: null,
+  [CUSTOM_FIELD_TYPE.JSON]: null,
+  [CUSTOM_FIELD_TYPE.ENUM]: "",
+  [CUSTOM_FIELD_TYPE.ENUMSET]: [],
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: [],
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: null,
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: null,
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: []
+}
+
 const CUSTOM_FIELD_TYPE_SCHEMA = {
-  [CUSTOM_FIELD_TYPE.TEXT]: yup.string().nullable().default(""),
-  [CUSTOM_FIELD_TYPE.NUMBER]: yup.number().nullable().default(null).typeError(
-    // eslint-disable-next-line no-template-curly-in-string
-    "${path} must be a ${type} type, but the final value was ${originalValue}"
-  ),
-  [CUSTOM_FIELD_TYPE.DATE]: yupDate.nullable().default(null),
-  [CUSTOM_FIELD_TYPE.DATETIME]: yupDate.nullable().default(null),
+  [CUSTOM_FIELD_TYPE.TEXT]: yup
+    .string()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.TEXT]),
+  [CUSTOM_FIELD_TYPE.NUMBER]: yup
+    .number()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.NUMBER])
+    .typeError(
+      // eslint-disable-next-line no-template-curly-in-string
+      "${path} must be a ${type} type, but the final value was ${originalValue}"
+    ),
+  [CUSTOM_FIELD_TYPE.DATE]: yupDate
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.DATE]),
+  [CUSTOM_FIELD_TYPE.DATETIME]: yupDate
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.DATETIME]),
   [CUSTOM_FIELD_TYPE.JSON]: yup
     .mixed()
     .nullable()
@@ -174,13 +210,33 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
           : this.createError({ message: "Invalid JSON" })
       }
     )
-    .default(null),
-  [CUSTOM_FIELD_TYPE.ENUM]: yup.string().nullable().default(""),
-  [CUSTOM_FIELD_TYPE.ENUMSET]: yup.array().nullable().default([]),
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup.array().nullable().default([]),
-  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup.mixed().nullable().default(null),
-  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: yup.mixed().nullable().default(null),
-  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: yup.array().nullable().default([])
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.JSON]),
+  [CUSTOM_FIELD_TYPE.ENUM]: yup
+    .string()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ENUM]),
+  [CUSTOM_FIELD_TYPE.ENUMSET]: yup
+    .array()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ENUMSET]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]: yup
+    .array()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ARRAY_OF_OBJECTS]),
+  [CUSTOM_FIELD_TYPE.SPECIAL_FIELD]: yup
+    .mixed()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.SPECIAL_FIELD]),
+  [CUSTOM_FIELD_TYPE.ANET_OBJECT]: yup
+    .mixed()
+    .nullable()
+    .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ANET_OBJECT]),
+  [CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]: yup
+    .array()
+    .nullable()
+    .default(
+      CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.ARRAY_OF_ANET_OBJECTS]
+    )
 }
 
 const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
@@ -196,6 +252,20 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
   if (!_isEmpty(validations)) {
     validations.forEach(validation => {
       const { params, type } = validation
+      if (fieldConfig.widget === "richTextEditor" && type === "required") {
+        // Empty html like <p></p> must be invalid if the richTextEditor field is required
+        fieldTypeYupSchema = fieldTypeYupSchema.test(
+          "rte-required",
+          "rte-required-error",
+          function(htmlString) {
+            return utils.isEmptyHtml(htmlString)
+              ? this.createError({
+                message: params?.[0] || ""
+              })
+              : true
+          }
+        )
+      }
       if (!fieldTypeYupSchema[type]) {
         return
       }
@@ -245,6 +315,8 @@ export const createYupObjectShape = (
 }
 
 export const ENTITY_ASSESSMENT_PARENT_FIELD = "entityAssessment"
+export const ENTITY_ON_DEMAND_ASSESSMENT_DATE = "assessmentDate"
+export const ENTITY_ON_DEMAND_EXPIRATION_DATE = "expirationDate"
 
 export const createAssessmentSchema = (
   assessmentConfig,
@@ -254,15 +326,38 @@ export const createAssessmentSchema = (
     assessmentConfig,
     parentFieldName
   )
+
+  /** *********** Additional validation section for specific assessment fields. *************/
+  if (assessmentSchemaShape.fields.expirationDate) {
+    assessmentSchemaShape.fields.expirationDate = assessmentSchemaShape.fields.expirationDate.when(
+      ENTITY_ON_DEMAND_ASSESSMENT_DATE,
+      (assessmentDate, schema) => {
+        if (assessmentDate) {
+          return schema.min(
+            assessmentDate,
+            `${
+              assessmentConfig.expirationDate.label
+            } must be later than ${moment(assessmentDate).format("DD-MM-YYYY")}`
+          )
+        }
+      }
+    )
+  }
+  /******************************************************************************************/
+
   return yup.object().shape({
     [parentFieldName]: assessmentSchemaShape
   })
 }
 
-export const createCustomFieldsSchema = customFieldsConfig =>
+export const createCustomFieldsSchema = (
+  customFieldsConfig,
+  customFieldsParent = DEFAULT_CUSTOM_FIELDS_PARENT
+) =>
   yup.object().shape({
-    [DEFAULT_CUSTOM_FIELDS_PARENT]: createYupObjectShape(
-      customFieldsConfig
+    [customFieldsParent]: createYupObjectShape(
+      customFieldsConfig,
+      customFieldsParent
     ).nullable()
   })
 
@@ -528,6 +623,29 @@ export default class Model {
       )
   }
 
+  /**
+   * Filters ondemand assessments inside the notes object and returns them sorted
+   * with respect to their assessmentDate.
+   * @returns {object}
+   */
+  getOndemandAssessments() {
+    const onDemandNotes = this.notes.filter(
+      a =>
+        a.type === "ASSESSMENT" &&
+        utils.parseJsonSafe(a.text).__recurrence === RECURRENCE_TYPE.ON_DEMAND
+    )
+    // Sort the notes before visualizing them inside of a Card.
+    const sortedOnDemandNotes = onDemandNotes.sort((a, b) => {
+      return (
+        new Date(
+          utils.parseJsonSafe(a.text)[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
+        ) -
+        new Date(utils.parseJsonSafe(b.text)[ENTITY_ON_DEMAND_ASSESSMENT_DATE])
+      )
+    })
+    return sortedOnDemandNotes
+  }
+
   static getInstantAssessmentsDetailsForEntities(
     entities,
     assessmentsParentField,
@@ -624,6 +742,13 @@ export default class Model {
     return filteredAssessmentConfig
   }
 
+  static clearInvalidAssessmentQuestions(assessment, validQuestions) {
+    Object.keys(assessment).forEach(
+      question =>
+        !validQuestions.includes(question) && delete assessment[question]
+    )
+  }
+
   static populateCustomFields(entity) {
     entity[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       entity.customFields
@@ -643,5 +768,51 @@ export default class Model {
         note.type !== NOTE_TYPE.FREE_TEXT &&
         (note.customFields = utils.parseJsonSafe(note.text))
     )
+  }
+
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    NOTES_FIELD,
+    IS_SUBSCRIBED_FIELD,
+    DEFAULT_CUSTOM_FIELDS_PARENT,
+    SENSITIVE_CUSTOM_FIELDS_PARENT
+  ]
+
+  static filterClientSideFields(obj, ...additionalFields) {
+    return Object.without(
+      obj,
+      ...Model.FILTERED_CLIENT_SIDE_FIELDS,
+      ...additionalFields
+    )
+  }
+
+  filterClientSideFields(...additionalFields) {
+    return Model.filterClientSideFields(this, ...additionalFields)
+  }
+
+  static isAuthorized(user, customSensitiveInformationField) {
+    // Admins are always allowed
+    if (user?.isAdmin()) {
+      return true
+    }
+    // Else user has to be in the authorizationGroups
+    const userAuthGroupUuids =
+      user?.position?.authorizationGroups.map(ag => ag.uuid) || []
+    const fieldAuthGroupUuids =
+      customSensitiveInformationField?.authorizationGroupUuids || []
+    return fieldAuthGroupUuids.some(uuid => userAuthGroupUuids.includes(uuid))
+  }
+
+  static getAuthorizedSensitiveFields(
+    isAuthorizedCallback,
+    user,
+    customSensitiveInformation,
+    ...args
+  ) {
+    const authorizedFieldsConfig = {}
+    Object.entries(customSensitiveInformation).forEach(([k, v]) => {
+      isAuthorizedCallback(user, customSensitiveInformation[k], ...args) &&
+        (authorizedFieldsConfig[k] = v)
+    })
+    return authorizedFieldsConfig
   }
 }

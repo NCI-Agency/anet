@@ -1,0 +1,1066 @@
+enum ActionType {
+  APPROVE
+  PUBLISH
+  REJECT
+  SUBMIT
+  UNPUBLISH
+}
+
+type Activity {
+  ip: String
+  request: String
+  time: Instant
+}
+
+type AdminSetting {
+  createdAt: Instant
+  key: String
+  updatedAt: Instant
+  value: String
+}
+
+input AdminSettingInput {
+  createdAt: Instant
+  key: String
+  updatedAt: Instant
+  value: String
+}
+
+type AdvisorReportsEntry {
+  name: String
+  stats: [AdvisorReportsStats]
+  uuid: String
+}
+
+type AdvisorReportsStats {
+  nrEngagementsAttended: Int!
+  nrReportsSubmitted: Int!
+  week: Int!
+}
+
+type AnetBeanList_AuthorizationGroup {
+  list: [AuthorizationGroup]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Location {
+  list: [Location]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Organization {
+  list: [Organization]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Person {
+  list: [Person]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Position {
+  list: [Position]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Report {
+  list: [Report]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Subscription {
+  list: [Subscription]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_SubscriptionUpdate {
+  list: [SubscriptionUpdate]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+type AnetBeanList_Task {
+  list: [Task]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+input AnetEmailInput {
+  comment: String
+  createdAt: Instant
+  toAddresses: [String]
+}
+
+type ApprovalStep {
+  approvers: [Position]
+  createdAt: Instant
+  name: String
+  nextStepUuid: String
+  relatedObjectUuid: String
+  restrictedApproval: Boolean!
+  type: ApprovalStepType
+  updatedAt: Instant
+  uuid: String
+}
+
+input ApprovalStepInput {
+  approvers: [PositionInput]
+  createdAt: Instant
+  name: String
+  nextStepUuid: String
+  relatedObjectUuid: String
+  restrictedApproval: Boolean
+  type: ApprovalStepType
+  updatedAt: Instant
+  uuid: String
+}
+
+enum ApprovalStepType {
+  PLANNING_APPROVAL
+  REPORT_APPROVAL
+}
+
+enum Atmosphere {
+  NEGATIVE
+  NEUTRAL
+  POSITIVE
+}
+
+type AuthorizationGroup {
+  createdAt: Instant
+  description: String
+  name: String
+  positions: [Position]
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+input AuthorizationGroupInput {
+  createdAt: Instant
+  description: String
+  name: String
+  positions: [PositionInput]
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+input AuthorizationGroupSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  positionUuid: String
+  sortBy: AuthorizationGroupSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+}
+
+enum AuthorizationGroupSearchSortBy {
+  CREATED_AT
+  NAME
+  RECENT
+}
+
+type Comment {
+  author: Person
+  createdAt: Instant
+  reportUuid: String
+  text: String
+  updatedAt: Instant
+  uuid: String
+}
+
+input CommentInput {
+  author: PersonInput
+  createdAt: Instant
+  reportUuid: String
+  text: String
+  updatedAt: Instant
+  uuid: String
+}
+
+type CustomSensitiveInformation {
+  createdAt: Instant
+  customFieldName: String
+  customFieldValue: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+  updatedAt: Instant
+  uuid: String
+}
+
+input CustomSensitiveInformationInput {
+  createdAt: Instant
+  customFieldName: String
+  customFieldValue: String
+  relatedObjectType: String
+  relatedObjectUuid: String
+  updatedAt: Instant
+  uuid: String
+}
+
+enum EngagementStatus {
+  CANCELLED
+  FUTURE
+  HAPPENED
+}
+
+scalar Instant
+
+type Location {
+  approvalSteps: [ApprovalStep]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  isSubscribed: Boolean
+  lat: Float
+  lng: Float
+  name: String
+  notes: [Note]
+  planningApprovalSteps: [ApprovalStep]
+  status: Status
+  type: LocationType
+  updatedAt: Instant
+  uuid: String
+}
+
+input LocationInput {
+  approvalSteps: [ApprovalStepInput]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  lat: Float
+  lng: Float
+  name: String
+  planningApprovalSteps: [ApprovalStepInput]
+  status: Status
+  type: LocationType
+  updatedAt: Instant
+  uuid: String
+}
+
+input LocationSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: LocationSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+  type: LocationType
+}
+
+enum LocationSearchSortBy {
+  CREATED_AT
+  NAME
+  RECENT
+}
+
+enum LocationType {
+  ADVISOR_LOCATION
+  GEOGRAPHICAL_AREA
+  PHYSICAL_LOCATION
+  POINT_LOCATION
+  PRINCIPAL_LOCATION
+  VIRTUAL_LOCATION
+}
+
+"""Mutation root"""
+type Mutation {
+  addComment(comment: CommentInput, uuid: String): Comment
+  approveReport(comment: CommentInput, uuid: String): Int!
+  clearCache: String
+  createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
+  createLocation(location: LocationInput): Location
+  createNote(note: NoteInput): Note
+  createOrganization(organization: OrganizationInput): Organization
+  createPerson(person: PersonInput): Person
+  createPosition(position: PositionInput): Position
+  createReport(report: ReportInput): Report
+  createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
+  createSubscription(subscription: SubscriptionInput): Subscription
+  createTask(task: TaskInput): Task
+  deleteNote(uuid: String): Int
+  deleteObjectSubscription(uuid: String): Int
+  deletePersonFromPosition(uuid: String): Int
+  deletePosition(uuid: String): Int
+  deleteReport(uuid: String): Int
+  deleteSavedSearch(uuid: String): Int
+  deleteSubscription(uuid: String): Int
+  emailReport(email: AnetEmailInput, uuid: String): Int
+  emailRollup(advisorOrganizationUuid: String, email: AnetEmailInput, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): Int
+  mergeLocations(loserUuid: String, winnerLocation: LocationInput): Location
+  mergePeople(copyPosition: Boolean = false, loserUuid: String, winnerUuid: String): Int
+  mergePositions(loserUuid: String, winnerPosition: PositionInput): Position
+  publishReport(uuid: String): Int!
+  putPersonInPosition(person: PersonInput, uuid: String): Int!
+  rejectReport(comment: CommentInput, uuid: String): Int!
+  reloadDictionary: String
+  saveAdminSettings(settings: [AdminSettingInput]): Int
+  submitReport(uuid: String): Int!
+  unpublishReport(uuid: String): Int
+  updateAssociatedPosition(position: PositionInput): Int
+  updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
+  updateLocation(location: LocationInput): Int
+  updateNote(note: NoteInput): Note
+  updateOrganization(organization: OrganizationInput): Int
+  updatePerson(person: PersonInput): Int
+  updatePersonHistory(person: PersonInput): Int!
+  updatePosition(position: PositionInput): Int
+  updatePositionHistory(position: PositionInput): Int!
+  updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
+  updateReportAssessments(assessments: [NoteInput], report: ReportInput): Int!
+  updateTask(task: TaskInput): Int
+}
+
+type Note {
+  author: Person
+  createdAt: Instant
+  noteRelatedObjects: [NoteRelatedObject]
+  text: String
+  type: NoteType
+  updatedAt: Instant
+  uuid: String
+}
+
+input NoteInput {
+  author: PersonInput
+  createdAt: Instant
+  noteRelatedObjects: [NoteRelatedObjectInput]
+  text: String
+  type: NoteType
+  updatedAt: Instant
+  uuid: String
+}
+
+type NoteRelatedObject {
+  noteUuid: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+input NoteRelatedObjectInput {
+  noteUuid: String
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+enum NoteType {
+  ASSESSMENT
+  CHANGE_RECORD
+  FREE_TEXT
+  PARTNER_ASSESSMENT
+}
+
+type Organization {
+  approvalSteps: [ApprovalStep]
+  ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  identificationCode: String
+  isSubscribed: Boolean
+  longName: String
+  notes: [Note]
+  parentOrg: Organization
+  planningApprovalSteps: [ApprovalStep]
+  positions(query: PositionSearchQueryInput): [Position]
+  shortName: String
+  status: Status
+  tasks: [Task]
+  type: OrganizationType
+  updatedAt: Instant
+  uuid: String
+}
+
+input OrganizationInput {
+  approvalSteps: [ApprovalStepInput]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  identificationCode: String
+  longName: String
+  parentOrg: OrganizationInput
+  planningApprovalSteps: [ApprovalStepInput]
+  shortName: String
+  status: Status
+  tasks: [TaskInput]
+  type: OrganizationType
+  updatedAt: Instant
+  uuid: String
+}
+
+input OrganizationSearchQueryInput {
+  hasParentOrg: Boolean
+  inMyReports: Boolean
+  orgRecurseStrategy: RecurseStrategy
+  pageNum: Int
+  pageSize: Int
+  parentOrgUuid: [String]
+  sortBy: OrganizationSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+  type: OrganizationType
+}
+
+enum OrganizationSearchSortBy {
+  CREATED_AT
+  NAME
+  TYPE
+}
+
+enum OrganizationType {
+  ADVISOR_ORG
+  PRINCIPAL_ORG
+}
+
+type Person {
+  attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  avatar(size: Int = 256): String
+  biography: String
+  code: String
+  country: String
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  domainUsername: String
+  emailAddress: String
+  endOfTourDate: Instant
+  gender: String
+  isSubscribed: Boolean
+  name: String
+  notes: [Note]
+  pendingVerification: Boolean
+  phoneNumber: String
+  position: Position
+  previousPositions: [PersonPositionHistory]
+  rank: String
+  role: Role
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+input PersonInput {
+  avatar: String
+  biography: String
+  code: String
+  country: String
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  domainUsername: String
+  emailAddress: String
+  endOfTourDate: Instant
+  gender: String
+  name: String
+  pendingVerification: Boolean
+  phoneNumber: String
+  position: PositionInput
+  previousPositions: [PersonPositionHistoryInput]
+  rank: String
+  role: Role
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+type PersonPositionHistory {
+  createdAt: Instant
+  endTime: Instant
+  person: Person
+  position: Position
+  startTime: Instant
+  updatedAt: Instant
+}
+
+input PersonPositionHistoryInput {
+  createdAt: Instant
+  endTime: Instant
+  person: PersonInput
+  position: PositionInput
+  startTime: Instant
+  updatedAt: Instant
+}
+
+input PersonSearchQueryInput {
+  country: String
+  endOfTourDateEnd: Instant
+  endOfTourDateStart: Instant
+  hasBiography: Boolean
+  inMyReports: Boolean
+  locationUuid: String
+  matchPositionName: Boolean
+  orgRecurseStrategy: RecurseStrategy
+  orgUuid: String
+  pageNum: Int
+  pageSize: Int
+  pendingVerification: Boolean
+  rank: String
+  role: Role
+  sortBy: PersonSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+}
+
+enum PersonSearchSortBy {
+  CREATED_AT
+  NAME
+  RANK
+  RECENT
+}
+
+type Position {
+  associatedPositions: [Position]
+  authorizationGroups: [AuthorizationGroup]
+  code: String
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  isApprover: Boolean
+  isSubscribed: Boolean
+  location: Location
+  name: String
+  notes: [Note]
+  organization: Organization
+  person: Person
+  previousPeople: [PersonPositionHistory]
+  responsibleTasks(query: TaskSearchQueryInput): [Task]
+  status: Status
+  type: PositionType
+  updatedAt: Instant
+  uuid: String
+}
+
+input PositionInput {
+  associatedPositions: [PositionInput]
+  code: String
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  location: LocationInput
+  name: String
+  organization: OrganizationInput
+  person: PersonInput
+  previousPeople: [PersonPositionHistoryInput]
+  status: Status
+  type: PositionType
+  updatedAt: Instant
+  uuid: String
+}
+
+input PositionSearchQueryInput {
+  authorizationGroupUuid: String
+  hasCounterparts: Boolean
+  hasPendingAssessments: Boolean
+  inMyReports: Boolean
+  isFilled: Boolean
+  locationUuid: String
+  matchPersonName: Boolean
+  orgRecurseStrategy: RecurseStrategy
+  organizationUuid: String
+  pageNum: Int
+  pageSize: Int
+  sortBy: PositionSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  text: String
+  type: [PositionType]
+}
+
+enum PositionSearchSortBy {
+  CODE
+  CREATED_AT
+  NAME
+}
+
+enum PositionType {
+  ADMINISTRATOR
+  ADVISOR
+  PRINCIPAL
+  SUPER_USER
+}
+
+"""Query root"""
+type Query {
+  adminSettings: [AdminSetting]
+  advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
+  approvalStepInUse(uuid: String): Boolean!
+  authorizationGroup(uuid: String): AuthorizationGroup
+  authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
+  location(uuid: String): Location
+  locationList(query: LocationSearchQueryInput): AnetBeanList_Location
+  me: Person
+  mySearches: [SavedSearch]
+  mySubscriptionUpdates(query: SubscriptionUpdateSearchQueryInput): AnetBeanList_SubscriptionUpdate
+  mySubscriptions(query: SubscriptionSearchQueryInput): AnetBeanList_Subscription
+  organization(uuid: String): Organization
+  organizationList(query: OrganizationSearchQueryInput): AnetBeanList_Organization
+  person(uuid: String): Person
+  personList(query: PersonSearchQueryInput): AnetBeanList_Person
+  position(uuid: String): Position
+  positionList(query: PositionSearchQueryInput): AnetBeanList_Position
+  projectVersion: String
+  report(uuid: String): Report
+  reportList(query: ReportSearchQueryInput): AnetBeanList_Report
+  rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
+  showRollupEmail(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, showText: Boolean = false, startDate: Instant): String
+  task(uuid: String): Task
+  taskList(query: TaskSearchQueryInput): AnetBeanList_Task
+  userActivities: RecentActivities
+}
+
+type RecentActivities {
+  byActivity: [UserActivity]
+  byUser: [UserActivity]
+}
+
+enum RecurseStrategy {
+  CHILDREN
+  NONE
+  PARENTS
+}
+
+union RelatableObject = AuthorizationGroup | Location | Organization | Person | Position | Report | ReportPerson | Task
+
+type Report {
+  advisorOrg: Organization
+  approvalStep: ApprovalStep
+  atmosphere: Atmosphere
+  atmosphereDetails: String
+  attendees: [ReportPerson]
+  authorizationGroups: [AuthorizationGroup]
+  authors: [ReportPerson]
+  cancelledReason: ReportCancelledReason
+  comments: [Comment]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  duration: Int
+  engagementDate: Instant
+  engagementDayOfWeek: Int
+  engagementStatus: [EngagementStatus]
+  exsum: String
+  intent: String
+  isSubscribed: Boolean
+  keyOutcomes: String
+  location: Location
+  nextSteps: String
+  notes: [Note]
+  primaryAdvisor: ReportPerson
+  primaryPrincipal: ReportPerson
+  principalOrg: Organization
+  releasedAt: Instant
+  reportPeople: [ReportPerson]
+  reportSensitiveInformation: ReportSensitiveInformation
+  reportText: String
+  state: ReportState
+  tasks: [Task]
+  updatedAt: Instant
+  uuid: String
+  workflow: [ReportAction]
+}
+
+type ReportAction {
+  createdAt: Instant
+  person: Person
+  planned: Boolean!
+  report: Report
+  step: ApprovalStep
+  type: ActionType
+  updatedAt: Instant
+}
+
+enum ReportCancelledReason {
+  CANCELLED_BY_ADVISOR
+  CANCELLED_BY_PRINCIPAL
+  CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS
+  CANCELLED_DUE_TO_FORCE_PROTECTION
+  CANCELLED_DUE_TO_NETWORK_ISSUES
+  CANCELLED_DUE_TO_ROUTES
+  CANCELLED_DUE_TO_THREAT
+  CANCELLED_DUE_TO_TRANSPORTATION
+  NO_REASON_GIVEN
+}
+
+input ReportInput {
+  advisorOrg: OrganizationInput
+  approvalStep: ApprovalStepInput
+  atmosphere: Atmosphere
+  atmosphereDetails: String
+  authorizationGroups: [AuthorizationGroupInput]
+  cancelledReason: ReportCancelledReason
+  comments: [CommentInput]
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  duration: Int
+  engagementDate: Instant
+  engagementDayOfWeek: Int
+  exsum: String
+  intent: String
+  keyOutcomes: String
+  location: LocationInput
+  nextSteps: String
+  principalOrg: OrganizationInput
+  releasedAt: Instant
+  reportPeople: [ReportPersonInput]
+  reportSensitiveInformation: ReportSensitiveInformationInput
+  reportText: String
+  state: ReportState
+  tasks: [TaskInput]
+  updatedAt: Instant
+  uuid: String
+}
+
+type ReportPerson {
+  attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  attendee: Boolean!
+  author: Boolean!
+  authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
+  avatar(size: Int = 256): String
+  biography: String
+  code: String
+  country: String
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  domainUsername: String
+  emailAddress: String
+  endOfTourDate: Instant
+  gender: String
+  isSubscribed: Boolean
+  name: String
+  notes: [Note]
+  pendingVerification: Boolean
+  phoneNumber: String
+  position: Position
+  previousPositions: [PersonPositionHistory]
+  primary: Boolean!
+  rank: String
+  role: Role
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+input ReportPersonInput {
+  attendee: Boolean!
+  author: Boolean!
+  avatar: String
+  biography: String
+  code: String
+  country: String
+  createdAt: Instant
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  domainUsername: String
+  emailAddress: String
+  endOfTourDate: Instant
+  gender: String
+  name: String
+  pendingVerification: Boolean
+  phoneNumber: String
+  position: PositionInput
+  previousPositions: [PersonPositionHistoryInput]
+  primary: Boolean!
+  rank: String
+  role: Role
+  status: Status
+  updatedAt: Instant
+  uuid: String
+}
+
+input ReportSearchQueryInput {
+  advisorOrgUuid: String
+  atmosphere: Atmosphere
+  attendeePositionUuid: String
+  attendeeUuid: String
+  authorPositionUuid: String
+  authorUuid: String
+  authorizationGroupUuid: [String]
+  cancelledReason: ReportCancelledReason
+  createdAtEnd: Instant
+  createdAtStart: Instant
+  engagementDateEnd: Instant
+  engagementDateStart: Instant
+  engagementDayOfWeek: Int
+  engagementStatus: [EngagementStatus]
+  inMyReports: Boolean
+  includeAdvisorOrgChildren: Boolean
+  includeEngagementDayOfWeek: Boolean
+  includePrincipalOrgChildren: Boolean
+  locationUuid: String
+  orgRecurseStrategy: RecurseStrategy
+  orgUuid: String
+  pageNum: Int
+  pageSize: Int
+  pendingApprovalOf: String
+  principalOrgUuid: String
+  releasedAtEnd: Instant
+  releasedAtStart: Instant
+  sensitiveInfo: Boolean
+  sortBy: ReportSearchSortBy
+  sortOrder: SortOrder
+  state: [ReportState]
+  status: Status
+  subscribed: Boolean
+  taskUuid: String
+  text: String
+  updatedAtEnd: Instant
+  updatedAtStart: Instant
+}
+
+enum ReportSearchSortBy {
+  CREATED_AT
+  ENGAGEMENT_DATE
+  RELEASED_AT
+  UPDATED_AT
+}
+
+type ReportSensitiveInformation {
+  createdAt: Instant
+  text: String
+  updatedAt: Instant
+  uuid: String
+}
+
+input ReportSensitiveInformationInput {
+  createdAt: Instant
+  text: String
+  updatedAt: Instant
+  uuid: String
+}
+
+enum ReportState {
+  APPROVED
+  CANCELLED
+  DRAFT
+  FUTURE
+  PENDING_APPROVAL
+  PUBLISHED
+  REJECTED
+}
+
+enum Role {
+  ADVISOR
+  PRINCIPAL
+}
+
+type RollupGraph {
+  cancelled: Int!
+  org: Organization
+  published: Int!
+}
+
+type SavedSearch {
+  createdAt: Instant
+  name: String
+  objectType: SearchObjectType
+  owner: Person
+  query: String
+  updatedAt: Instant
+  uuid: String
+}
+
+input SavedSearchInput {
+  createdAt: Instant
+  name: String
+  objectType: SearchObjectType
+  owner: PersonInput
+  query: String
+  updatedAt: Instant
+  uuid: String
+}
+
+enum SearchObjectType {
+  LOCATIONS
+  ORGANIZATIONS
+  PEOPLE
+  POSITIONS
+  REPORTS
+  TASKS
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+union SubscribableObject = Location | Organization | Person | Position | Report | ReportPerson | Task
+
+type Subscription {
+  createdAt: Instant
+  subscribedObject: SubscribableObject
+  subscribedObjectType: String
+  subscribedObjectUuid: String
+  subscriber: Position
+  updatedAt: Instant
+  uuid: String
+}
+
+input SubscriptionInput {
+  createdAt: Instant
+  subscribedObjectType: String
+  subscribedObjectUuid: String
+  subscriber: PositionInput
+  updatedAt: Instant
+  uuid: String
+}
+
+input SubscriptionSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: SubscriptionSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+}
+
+enum SubscriptionSearchSortBy {
+  CREATED_AT
+}
+
+type SubscriptionUpdate {
+  createdAt: Instant
+  isNote: Boolean!
+  subscription: Subscription
+  updatedObject: SubscribableObject
+  updatedObjectType: String
+  updatedObjectUuid: String
+}
+
+input SubscriptionUpdateSearchQueryInput {
+  inMyReports: Boolean
+  pageNum: Int
+  pageSize: Int
+  sortBy: SubscriptionUpdateSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  text: String
+}
+
+enum SubscriptionUpdateSearchSortBy {
+  CREATED_AT
+}
+
+type Task {
+  approvalSteps: [ApprovalStep]
+  category: String
+  createdAt: Instant
+  customField: String
+  customFieldEnum1: String
+  customFieldEnum2: String
+  customFieldRef1: Task
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformation]
+  isSubscribed: Boolean
+  longName: String
+  notes: [Note]
+  plannedCompletion: Instant
+  planningApprovalSteps: [ApprovalStep]
+  projectedCompletion: Instant
+  reports(query: ReportSearchQueryInput): [Report]
+  responsiblePositions: [Position]
+  shortName: String
+  status: Status
+  taskedOrganizations: [Organization]
+  updatedAt: Instant
+  uuid: String
+}
+
+input TaskInput {
+  approvalSteps: [ApprovalStepInput]
+  category: String
+  createdAt: Instant
+  customField: String
+  customFieldEnum1: String
+  customFieldEnum2: String
+  customFieldRef1: TaskInput
+  customFields: String
+  customSensitiveInformation: [CustomSensitiveInformationInput]
+  longName: String
+  plannedCompletion: Instant
+  planningApprovalSteps: [ApprovalStepInput]
+  projectedCompletion: Instant
+  responsiblePositions: [PositionInput]
+  shortName: String
+  status: Status
+  taskedOrganizations: [OrganizationInput]
+  updatedAt: Instant
+  uuid: String
+}
+
+input TaskSearchQueryInput {
+  category: String
+  customField: String
+  customFieldRef1Recursively: Boolean
+  customFieldRef1Uuid: [String]
+  hasCustomFieldRef1: Boolean
+  inMyReports: Boolean
+  orgRecurseStrategy: RecurseStrategy
+  pageNum: Int
+  pageSize: Int
+  plannedCompletionEnd: Instant
+  plannedCompletionStart: Instant
+  projectStatus: String
+  projectedCompletionEnd: Instant
+  projectedCompletionStart: Instant
+  responsiblePositionUuid: String
+  sortBy: TaskSearchSortBy
+  sortOrder: SortOrder
+  status: Status
+  subscribed: Boolean
+  taskedOrgUuid: String
+  text: String
+}
+
+enum TaskSearchSortBy {
+  CATEGORY
+  CREATED_AT
+  NAME
+  RECENT
+}
+
+"""Use SPQR's SchemaPrinter to remove this from SDL"""
+scalar UNREPRESENTABLE
+
+type UserActivity {
+  activity: Activity
+  user: Person
+}

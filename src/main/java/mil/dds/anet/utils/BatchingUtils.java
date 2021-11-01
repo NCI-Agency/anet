@@ -10,6 +10,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
@@ -21,6 +22,7 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
@@ -156,6 +158,14 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
+          @Override
+          public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_PLANNING_APPROVAL_STEPS.toString(),
         new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
           @Override
@@ -165,12 +175,14 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
-    dataLoaderRegistry.register(FkDataLoaderKey.RELATED_OBJECT_APPROVAL_STEPS.toString(),
-        new DataLoader<>(new BatchLoader<String, List<ApprovalStep>>() {
+    dataLoaderRegistry.register(
+        FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION.toString(),
+        new DataLoader<>(new BatchLoader<String, List<CustomSensitiveInformation>>() {
           @Override
-          public CompletionStage<List<List<ApprovalStep>>> load(List<String> foreignKeys) {
-            return CompletableFuture.supplyAsync(
-                () -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys), dispatcherService);
+          public CompletionStage<List<List<CustomSensitiveInformation>>> load(
+              List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(() -> engine.getCustomSensitiveInformationDao()
+                .getCustomSensitiveInformation(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.PEOPLE.toString(),
@@ -229,6 +241,15 @@ public final class BatchingUtils {
           public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(
                 () -> engine.getPositionDao().getAssociatedPositionsForPosition(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.POSITION_AUTHORIZATION_GROUPS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<AuthorizationGroup>>() {
+          @Override
+          public CompletionStage<List<List<AuthorizationGroup>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getAuthorizationGroupDao().getAuthorizationGroups(foreignKeys),
                 dispatcherService);
           }
         }, dataLoaderOptions));
@@ -297,6 +318,14 @@ public final class BatchingUtils {
           @Override
           public CompletionStage<List<List<Task>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
+    dataLoaderRegistry.register(IdDataLoaderKey.SUBSCRIPTIONS.toString(),
+        new DataLoader<>(new BatchLoader<String, Subscription>() {
+          @Override
+          public CompletionStage<List<Subscription>> load(List<String> keys) {
+            return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getByIds(keys),
                 dispatcherService);
           }
         }, dataLoaderOptions));

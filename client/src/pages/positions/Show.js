@@ -1,11 +1,13 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssignPersonModal from "components/AssignPersonModal"
-import ConfirmDelete from "components/ConfirmDelete"
+import AssociatedPositions from "components/AssociatedPositions"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import EditHistory from "components/EditHistory"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -17,84 +19,38 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
-import RelatedObjectNotes, {
-  GRAPHQL_NOTES_FIELDS
-} from "components/RelatedObjectNotes"
+import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-import { Position } from "models"
-import moment from "moment"
+import { Location, Position } from "models"
 import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import { Button, Table } from "react-bootstrap"
+import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
+import PreviousPeople from "./PreviousPeople"
 
 const GQL_GET_POSITION = gql`
   query($uuid: String!) {
     position(uuid: $uuid) {
-      uuid
-      name
-      type
-      status
-      code
-      organization {
-        uuid
-        shortName
-        longName
-        identificationCode
-      }
-      person {
-        uuid
-        name
-        rank
-        role
-        avatar(size: 32)
-      }
-      associatedPositions {
-        uuid
-        name
-        type
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
-        }
-        organization {
-          uuid
-          shortName
-        }
-      }
-      previousPeople {
-        startTime
-        endTime
-        person {
-          uuid
-          name
-          rank
-          role
-          avatar(size: 32)
-        }
-      }
-      location {
-        uuid
-        name
-      }
-      customFields
-      ${GRAPHQL_NOTES_FIELDS}
-
+      ${Position.allFieldsQuery}
     }
   }
 `
 const GQL_DELETE_POSITION = gql`
   mutation($uuid: String!) {
     deletePosition(uuid: $uuid)
+  }
+`
+
+const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
+  mutation($position: PositionInput!) {
+    updatePositionHistory(position: $position)
   }
 `
 
@@ -106,6 +62,7 @@ const PositionShow = ({ pageDispatchers }) => {
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
+  const [showEditHistoryModal, setShowEditHistoryModal] = useState(false)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
@@ -163,20 +120,38 @@ const PositionShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={position}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo
-            modelType="Position"
-            model={position}
-            edit
-            button="primary"
-            className="edit-position"
-          >
-            Edit
-          </LinkTo>
+        const action = (
+          <>
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo
+                  modelType="Position"
+                  model={position}
+                  edit
+                  button="primary"
+                  className="edit-position"
+                >
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+            <span className="ms-3">
+              <RelatedObjectNotes
+                notes={position.notes}
+                relatedObject={
+                  position.uuid && {
+                    relatedObjectType: Position.relatedObjectType,
+                    relatedObjectUuid: position.uuid,
+                    relatedObject: position
+                  }
+                }
+              />
+            </span>
+          </>
         )
         return (
           <div>
-            <div className="pull-right">
+            <div className="float-end">
               <GuidedTour
                 title="Take a guided tour of this position's page."
                 tour={positionTour}
@@ -188,19 +163,30 @@ const PositionShow = ({ pageDispatchers }) => {
               />
             </div>
 
-            <RelatedObjectNotes
-              notes={position.notes}
-              relatedObject={
-                position.uuid && {
-                  relatedObjectType: Position.relatedObjectType,
-                  relatedObjectUuid: position.uuid,
-                  relatedObject: position
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Position ${position.name}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="positions"
+                        subscribedObjectUuid={position.uuid}
+                        isSubscribed={position.isSubscribed}
+                        updatedAt={position.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    Position {position.name}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset>
                 <Field
                   name="name"
@@ -251,11 +237,16 @@ const PositionShow = ({ pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     position.location && (
-                      <LinkToPreviewed
-                        modelType="Location"
-                        model={position.location}
-                        previewId="pos-show-loc"
-                      />
+                      <>
+                        <LinkToPreviewed
+                          modelType="Location"
+                          model={position.location}
+                          previewId="pos-show-loc"
+                        />{" "}
+                        <Badge>
+                          {Location.humanNameOfType(position.location.type)}
+                        </Badge>
+                      </>
                     )
                   }
                 />
@@ -274,7 +265,10 @@ const PositionShow = ({ pageDispatchers }) => {
                   position.person &&
                   position.person.uuid &&
                   canEdit && (
-                    <Button onClick={() => setShowAssignPersonModal(true)}>
+                    <Button
+                      onClick={() => setShowAssignPersonModal(true)}
+                      variant="outline-secondary"
+                    >
                       Change assigned person
                     </Button>
                   )
@@ -300,6 +294,7 @@ const PositionShow = ({ pageDispatchers }) => {
                       <p>
                         <Button
                           onClick={() => setShowAssignPersonModal(true)}
+                          variant="outline-secondary"
                           className="change-assigned-person"
                         >
                           Change assigned person
@@ -323,26 +318,16 @@ const PositionShow = ({ pageDispatchers }) => {
                   canEdit && (
                     <Button
                       onClick={() => setShowAssociatedPositionsModal(true)}
+                      variant="outline-secondary"
                     >
                       Change assigned {assignedRole}
                     </Button>
                   )
                 }
               >
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Position</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Position.map(position.associatedPositions, (pos, idx) =>
-                      renderAssociatedPositionRow(pos, idx)
-                    )}
-                  </tbody>
-                </Table>
-
+                <AssociatedPositions
+                  associatedPositions={position.associatedPositions}
+                />
                 {position.associatedPositions.length === 0 && (
                   <em>
                     {position.name} has no associated {assignedRole}
@@ -359,38 +344,29 @@ const PositionShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              <Fieldset title="Previous position holders" id="previous-people">
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Dates</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {position.previousPeople.map((pp, idx) => (
-                      <tr key={idx} id={`previousPerson_${idx}`}>
-                        <td>
-                          <LinkToPreviewed
-                            modelType="Person"
-                            model={pp.person}
-                            previewId="pos-show-prev-person"
-                          />
-                        </td>
-                        <td>
-                          {moment(pp.startTime).format(
-                            Settings.dateFormats.forms.displayShort.date
-                          )}{" "}
-                          - &nbsp;
-                          {pp.endTime &&
-                            moment(pp.endTime).format(
-                              Settings.dateFormats.forms.displayShort.date
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+              <Fieldset
+                title="Previous position holders"
+                id="previous-people"
+                action={
+                  canEdit && (
+                    <EditHistory
+                      mainTitle="Edit person history"
+                      history1={position.previousPeople}
+                      initialHistory={position.previousPeople}
+                      currentlyOccupyingEntity={position.person}
+                      midColTitle="New History"
+                      parentEntityType={position.type}
+                      parentEntityUuid1={position.uuid}
+                      showModal={showEditHistoryModal}
+                      setShowModal={setShowEditHistoryModal}
+                      setHistory={history => {
+                        onSavePreviousPeople(history)
+                      }}
+                    />
+                  )
+                }
+              >
+                <PreviousPeople history={position.previousPeople} />
               </Fieldset>
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
@@ -405,13 +381,13 @@ const PositionShow = ({ pageDispatchers }) => {
             {canDelete && (
               <div className="submit-buttons">
                 <div>
-                  <ConfirmDelete
-                    onConfirmDelete={onConfirmDelete}
+                  <ConfirmDestructive
+                    onConfirm={onConfirmDelete}
                     objectType="position"
                     objectDisplay={"#" + position.uuid}
-                    bsStyle="warning"
+                    variant="danger"
                     buttonLabel="Delete position"
-                    className="pull-right"
+                    buttonClassName="float-end"
                   />
                 </div>
               </div>
@@ -421,33 +397,6 @@ const PositionShow = ({ pageDispatchers }) => {
       }}
     </Formik>
   )
-
-  function renderAssociatedPositionRow(pos, idx) {
-    let personName
-    if (!pos.person) {
-      personName = "Unfilled"
-    } else {
-      personName = (
-        <LinkToPreviewed
-          modelType="Person"
-          model={pos.person}
-          previewId="pos-show-asc-pos-person"
-        />
-      )
-    }
-    return (
-      <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
-        <td>{personName}</td>
-        <td>
-          <LinkToPreviewed
-            modelType="Position"
-            model={pos}
-            previewId="pos-show-asc-pos"
-          />
-        </td>
-      </tr>
-    )
-  }
 
   function hideAssignPersonModal(success) {
     setShowAssignPersonModal(false)
@@ -469,6 +418,17 @@ const PositionShow = ({ pageDispatchers }) => {
       .then(data => {
         history.push("/", { success: "Position deleted" })
       })
+      .catch(error => {
+        setStateError(error)
+        jumpToTop()
+      })
+  }
+
+  function onSavePreviousPeople(history) {
+    const newPosition = position.filterClientSideFields()
+    newPosition.previousPeople = history
+    API.mutation(GQL_UPDATE_PREVIOUS_PEOPLE, { position: newPosition })
+      .then(data => refetch())
       .catch(error => {
         setStateError(error)
         jumpToTop()

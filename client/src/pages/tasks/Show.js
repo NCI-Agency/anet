@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
@@ -11,8 +11,10 @@ import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -24,7 +26,7 @@ import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -37,6 +39,8 @@ const GQL_GET_TASK = gql`
       shortName
       longName
       status
+      isSubscribed
+      updatedAt
       customField
       customFieldEnum1
       customFieldEnum2
@@ -134,6 +138,10 @@ const TaskShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
@@ -169,10 +177,13 @@ const TaskShow = ({ pageDispatchers }) => {
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
   const TaskCustomFieldEnum1 = DictionaryField(Field)
+  const cfe1Button =
+    Settings.fields.task.customFieldEnum1?.enum?.[task.customFieldEnum1]
+  const cfe1Buttons = cfe1Button ? { [task.customFieldEnum1]: cfe1Button } : {}
   const TaskCustomFieldEnum2 = DictionaryField(Field)
-
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
+  const cfe2Button =
+    Settings.fields.task.customFieldEnum2?.enum?.[task.customFieldEnum2]
+  const cfe2Buttons = cfe2Button ? { [task.customFieldEnum2]: cfe2Button } : {}
 
   // Admins can edit tasks or users in positions related to the task
   const canEdit =
@@ -186,27 +197,53 @@ const TaskShow = ({ pageDispatchers }) => {
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
-        const action = canEdit && (
-          <LinkTo modelType="Task" model={task} edit button="primary">
-            Edit
-          </LinkTo>
+        const action = (
+          <>
+            {canEdit && (
+              <span style={{ marginLeft: "1rem" }}>
+                <LinkTo modelType="Task" model={task} edit button="primary">
+                  Edit
+                </LinkTo>
+              </span>
+            )}
+            <span className="ms-3">
+              <RelatedObjectNotes
+                notes={task.notes}
+                relatedObject={
+                  task.uuid && {
+                    relatedObjectType: Task.relatedObjectType,
+                    relatedObjectUuid: task.uuid,
+                    relatedObject: task
+                  }
+                }
+              />
+            </span>
+          </>
         )
         return (
           <div>
-            <RelatedObjectNotes
-              notes={task.notes}
-              relatedObject={
-                task.uuid && {
-                  relatedObjectType: Task.relatedObjectType,
-                  relatedObjectUuid: task.uuid,
-                  relatedObject: task
-                }
-              }
-            />
             <Messages success={stateSuccess} error={stateError} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`${fieldSettings.shortLabel} ${task.shortName}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="tasks"
+                        subscribedObjectUuid={task.uuid}
+                        isSubscribed={task.isSubscribed}
+                        updatedAt={task.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    {fieldSettings.shortLabel} {task.shortName}
+                  </>
+                }
                 action={action}
               />
               <div
@@ -223,10 +260,10 @@ const TaskShow = ({ pageDispatchers }) => {
                     name="shortName"
                     component={FieldHelper.ReadonlyField}
                   />
-                  {/* Override componentClass and style from dictProps */}
+                  {/* Override as and style from dictProps */}
                   <LongNameField
                     dictProps={fieldSettings.longName}
-                    componentClass="div"
+                    as="div"
                     style={{}}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
@@ -312,7 +349,9 @@ const TaskShow = ({ pageDispatchers }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={FieldHelper.ReadonlyField}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={true}
+                      buttons={FieldHelper.customEnumButtons(cfe1Buttons)}
                     />
                   )}
                   {Settings.fields.task.customFieldEnum2 && (
@@ -322,7 +361,9 @@ const TaskShow = ({ pageDispatchers }) => {
                         "enum"
                       )}
                       name="customFieldEnum2"
-                      component={FieldHelper.ReadonlyField}
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={true}
+                      buttons={FieldHelper.customEnumButtons(cfe2Buttons)}
                     />
                   )}
                 </Fieldset>

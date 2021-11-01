@@ -1,10 +1,10 @@
+import { gql } from "@apollo/client"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
@@ -14,8 +14,8 @@ import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
 import MosaicLayout from "components/MosaicLayout"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import ReportCollection, {
@@ -25,14 +25,14 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
-import { SearchQueryPropType, getSearchQuery } from "components/SearchFilters"
+import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useMemo, useState } from "react"
-import { Button, HelpBlock, Modal } from "react-bootstrap"
+import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import { useHistory, useLocation } from "react-router-dom"
@@ -331,13 +331,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       <Fieldset
         title={
           <div style={{ float: "left" }}>
-            <div
-              style={{
-                paddingBottom: 8,
-                display: "flex",
-                alignItems: "center"
-              }}
-            >
+            <div className="rollup-date-range-container">
               <div style={{ marginRight: 5 }}>
                 Rollup
                 {focusedOrg && ` for ${focusedOrg.shortName}`}
@@ -365,15 +359,24 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               />
             </div>
             {focusedOrg ? (
-              <Button onClick={() => setFocusedOrg(null)}>
+              <Button
+                onClick={() => setFocusedOrg(null)}
+                variant="outline-secondary"
+              >
                 All organizations
               </Button>
             ) : (
               <ButtonToggleGroup value={orgType} onChange={setOrgType}>
-                <Button value={Organization.TYPE.ADVISOR_ORG}>
+                <Button
+                  value={Organization.TYPE.ADVISOR_ORG}
+                  variant="outline-secondary"
+                >
                   {pluralize(Settings.fields.advisor.org.name)}
                 </Button>
-                <Button value={Organization.TYPE.PRINCIPAL_ORG}>
+                <Button
+                  value={Organization.TYPE.PRINCIPAL_ORG}
+                  variant="outline-secondary"
+                >
                   {pluralize(Settings.fields.principal.org.name)}
                 </Button>
               </ButtonToggleGroup>
@@ -387,13 +390,14 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={printPreview}
+              variant="outline-secondary"
             >
               Print
             </Button>
             <Button
               id="email-rollup"
               onClick={toggleEmailModal}
-              bsStyle="primary"
+              variant="primary"
             >
               Email rollup
             </Button>
@@ -517,7 +521,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   function renderEmailModal(formikProps) {
     const { isSubmitting, submitForm } = formikProps
     return (
-      <Modal show={showEmailModal} onHide={toggleEmailModal}>
+      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Form>
           <Modal.Header closeButton>
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
@@ -534,19 +538,19 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               validate={email => handleEmailValidation(email)}
               vertical
             >
-              <HelpBlock>
+              <FormText>
                 One or more email addresses, comma separated, e.g.:
                 <br />
                 <em>
                   jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr.
                   X" &lt;x@example.org&gt;
                 </em>
-              </HelpBlock>
+              </FormText>
             </Field>
             <Field
               name="comment"
               component={FieldHelper.InputField}
-              componentClass="textarea"
+              asA="textarea"
               vertical
             />
           </Modal.Body>
@@ -556,13 +560,13 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
               href={previewPlaceholderUrl}
               target="rollup"
               onClick={showPreview}
+              variant="outline-secondary"
             >
               Preview
             </Button>
             <Button
               id="send-rollup-email"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >

@@ -5,6 +5,7 @@ s/^SET \@positionTimestamp = CURRENT_TIMESTAMP;/SELECT ('''' || CURRENT_TIMESTAM
 s/\@positionTimestamp/:positionTimestamp/;
 #
 s/^SET \@reportUuid = lower\(newid\(\)\);/SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \\gset/;
+s/^SET \@reportUuid = (N'[^']*');/SELECT ('''' || $1 || '''') AS reportuuid \\gset/;
 s/\@reportUuid/:reportuuid/;
 #
 s/^SET \@approvalStepUuid = lower\(newid\(\)\);/SELECT ('''' || uuid_generate_v4() || '''') AS approvalStepUuid \\gset/;
@@ -20,7 +21,7 @@ s/^(?=(SET|DECLARE))/-- /;
 # Eliminate the weird "[key]" column naming
 s/\[key\]/key/g;
 # Quote mixed-case column and table names
-s/(?<![":-])\b([a-z]\w+[A-Z]\w+)/"$1"/g;
+s/(?<!['":-])\b([a-z]\w+[A-Z]\w+)/"$1"/g;
 # Turn a couple very specific 1/0 booleans into true/false booleans
 # This one is for "isAuthor" in "reportPeople"
 s/(?<=\Q:reportuuid, \E[10]\Q, \E)([10])/$1 ? 'TRUE' : 'FALSE'/ie;

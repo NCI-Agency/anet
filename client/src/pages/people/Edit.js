@@ -1,8 +1,12 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import { initInvisibleFields } from "components/CustomFields"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
+} from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -49,6 +53,7 @@ const GQL_GET_PERSON = gql`
         }
       }
       customFields
+      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
@@ -82,6 +87,12 @@ const PersonEdit = ({ pageDispatchers }) => {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
+    if (data.person.customSensitiveInformation) {
+      // Add sensitive information fields to formCustomFields
+      data.person[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
+        data.person.customSensitiveInformation
+      )
+    }
   }
   const person = new Person(data ? data.person : {})
   const legendText = person.isPendingVerification()
@@ -93,24 +104,27 @@ const PersonEdit = ({ pageDispatchers }) => {
 
   // mutates the object
   initInvisibleFields(person, Settings.fields.person.customFields)
+  initInvisibleFields(person, Settings.fields.person.customSensitiveInformation)
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={person.notes}
-        relatedObject={
-          person.uuid && {
-            relatedObjectType: Person.relatedObjectType,
-            relatedObjectUuid: person.uuid,
-            relatedObject: person
-          }
-        }
-      />
       <PersonForm
         initialValues={person}
         edit
         title={legendText}
         saveText={saveText}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={person.notes}
+            relatedObject={
+              person.uuid && {
+                relatedObjectType: Person.relatedObjectType,
+                relatedObjectUuid: person.uuid,
+                relatedObject: person
+              }
+            }
+          />
+        }
       />
     </div>
   )

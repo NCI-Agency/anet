@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import mil.dds.anet.beans.Position.PositionType;
 
-public class PositionSearchQuery extends AbstractSearchQuery<PositionSearchSortBy> {
+public class PositionSearchQuery extends SubscribableObjectSearchQuery<PositionSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

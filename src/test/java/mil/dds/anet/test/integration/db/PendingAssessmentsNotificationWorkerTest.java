@@ -200,7 +200,7 @@ public class PendingAssessmentsNotificationWorkerTest {
     }
 
     // From our initial data we should get 6 pending assessments
-    final List<AnetEmail> emails = testPendingAssessmentsNotificationWorker(6);
+    final List<AnetEmail> emails = testPendingAssessmentsNotificationWorker(8);
     // Check the actual emails
     for (final AnetEmail email : emails) {
       assertThat(email.getToAddresses()).hasSize(1);
@@ -232,6 +232,14 @@ public class PendingAssessmentsNotificationWorkerTest {
           // Andrew should assess tasks 1.1.A, 1.2.A and 1.2.B
           assertAssessments(action, Collections.emptySet(),
               ImmutableSet.of("1.1.A", "1.2.A", "1.2.B"));
+          break;
+        case "kevin+malone":
+          // Kevin should assess position Chief of Tests
+          assertAssessments(action, ImmutableSet.of("Chief of Tests"), Collections.emptySet());
+          break;
+        case "creed+bratton":
+          // Creed should assess position Director of Tests
+          assertAssessments(action, ImmutableSet.of("Director of Tests"), Collections.emptySet());
           break;
         default:
           fail("Unknown to address: " + to);

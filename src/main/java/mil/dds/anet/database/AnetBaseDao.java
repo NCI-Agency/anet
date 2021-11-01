@@ -54,4 +54,34 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean, S extends Abstract
     throw new UnsupportedOperationException();
   }
 
+  // Some convenience functions for merging objects
+
+  protected void updateForMerge(String tableName, String fieldName, String winnerUuid,
+      String loserUuid) {
+    final String sqlUpdateFormat =
+        "UPDATE \"%1$s\" SET \"%2$s\" = :winnerUuid WHERE \"%2$s\" = :loserUuid";
+    getDbHandle().createUpdate(String.format(sqlUpdateFormat, tableName, fieldName))
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+  }
+
+  protected void updateM2mForMerge(String tableName, String mainObjectFieldName,
+      String relatedObjectFieldName, String winnerUuid, String loserUuid) {
+    // update m2m objects where we don't already have the same object for the winnerUuid
+    final String sqlUpdateFormat = "UPDATE \"%1$s\" SET \"%3$s\" = :winnerUuid"
+        + " WHERE \"%3$s\" = :loserUuid AND \"%2$s\" NOT IN ("
+        + "SELECT \"%2$s\" FROM \"%1$s\" WHERE \"%3$s\" = :winnerUuid)";
+    getDbHandle()
+        .createUpdate(
+            String.format(sqlUpdateFormat, tableName, mainObjectFieldName, relatedObjectFieldName))
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+
+    // now delete obsolete m2m objects for the loserUuid
+    deleteForMerge(tableName, relatedObjectFieldName, loserUuid);
+  }
+
+  protected int deleteForMerge(String tableName, String fieldName, String loserUuid) {
+    final String sqlDeleteFormat = "DELETE FROM \"%1$s\" WHERE \"%2$s\" = :loserUuid";
+    return getDbHandle().createUpdate(String.format(sqlDeleteFormat, tableName, fieldName))
+        .bind("loserUuid", loserUuid).execute();
+  }
 }

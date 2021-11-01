@@ -18,7 +18,7 @@ class ShowReport extends Page {
   }
 
   get compactViewButton() {
-    return browser.$("button[value='compactView'")
+    return browser.$("button[value='compactView']")
   }
 
   get compactBanner() {
@@ -26,11 +26,11 @@ class ShowReport extends Page {
   }
 
   get compactTitle() {
-    return browser.$("header *[value='title'")
+    return browser.$("header *[value='title']")
   }
 
   get printButton() {
-    return browser.$("button[value='print'")
+    return browser.$("button[value='print']")
   }
 
   get compactReportFields() {
@@ -38,7 +38,7 @@ class ShowReport extends Page {
   }
 
   get detailedViewButton() {
-    return browser.$("button[value='detailedView'")
+    return browser.$("button[value='detailedView']")
   }
 }
 

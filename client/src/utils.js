@@ -1,6 +1,7 @@
-import { Icon } from "@blueprintjs/core"
+import { IconSize } from "@blueprintjs/core"
 import { IconSvgPaths16, IconSvgPaths20 } from "@blueprintjs/icons"
 import * as changeCase from "change-case"
+import * as d3 from "d3"
 import parseAddressList from "email-addresses"
 import _isEmpty from "lodash/isEmpty"
 import pluralize from "pluralize"
@@ -192,6 +193,20 @@ export default {
     return typeof result === "object" ? result || {} : {}
   },
 
+  parseSensitiveFields: function(customSensitiveInformation) {
+    const sensitiveInformationObjects = customSensitiveInformation.map(
+      sensitiveInfo => this.parseJsonSafe(sensitiveInfo.customFieldValue)
+    )
+    const allSensitiveFields = sensitiveInformationObjects.reduce(
+      (accum, key) => {
+        accum = { ...accum, ...key }
+        return accum
+      },
+      {}
+    )
+    return allSensitiveFields
+  },
+
   arrayOfNumbers: function(arr) {
     return (
       arr &&
@@ -210,6 +225,45 @@ export default {
         maxLen <= 0 ? nonDigitsRemoved : nonDigitsRemoved.slice(0, maxLen)
     }
     return safeVal
+  },
+
+  getMaxTextFieldLength: function(field) {
+    return field?.maxTextFieldLength || Settings.maxTextFieldLength
+  },
+
+  pluralizeWord: function(count, word) {
+    return count > 1 ? pluralize.plural(word) : word
+  },
+
+  /**
+   * Used to determine whether the text should be black or white
+   * depending on the specified background color.
+   * @param {string} color Hexadecimal color code or color name
+   * @returns Text color
+   */
+  getContrastYIQ: function(color) {
+    // pick a default
+    const defaultColor = "white"
+    if (!color) {
+      return defaultColor
+    }
+
+    let c = d3.color(color)
+    if (
+      !c &&
+      (color.length === 3 || color.length === 6) &&
+      color.slice(0, 1) !== "#"
+    ) {
+      // Might be hexcode without leading "#", prepend it and try again
+      c = d3.color(`#${color}`)
+    }
+
+    if (!c) {
+      return defaultColor
+    }
+
+    const yiq = (c.r * 299 + c.g * 587 + c.b * 114) / 1000
+    return yiq >= 128 ? "black" : "white"
   }
 }
 
@@ -259,14 +313,14 @@ Promise.prototype.log = function () {
 
 export const renderBlueprintIconAsSvg = (
   iconName,
-  iconSize = Icon.SIZE_STANDARD
+  iconSize = IconSize.STANDARD
 ) => {
   // choose which pixel grid is most appropriate for given icon size
   const pixelGridSize =
-    iconSize >= Icon.SIZE_LARGE ? Icon.SIZE_LARGE : Icon.SIZE_STANDARD
+    iconSize >= IconSize.LARGE ? IconSize.LARGE : IconSize.STANDARD
   const viewBox = `0 0 ${pixelGridSize} ${pixelGridSize}`
   const svgPathsRecord =
-    pixelGridSize === Icon.SIZE_STANDARD ? IconSvgPaths16 : IconSvgPaths20
+    pixelGridSize === IconSize.STANDARD ? IconSvgPaths16 : IconSvgPaths20
   const pathStrings = svgPathsRecord[iconName]
   const paths =
     pathStrings === null

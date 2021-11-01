@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import { initInvisibleFields } from "components/CustomFields"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -25,6 +25,7 @@ const GQL_GET_LOCATION = gql`
       uuid
       name
       status
+      type
       lat
       lng
       planningApprovalSteps {
@@ -91,20 +92,22 @@ const LocationEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={location.notes}
-        relatedObject={
-          location.uuid && {
-            relatedObjectType: Location.relatedObjectType,
-            relatedObjectUuid: location.uuid,
-            relatedObject: location
-          }
-        }
-      />
       <LocationForm
         edit
         initialValues={location}
         title={`Location ${location.name}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={location.notes}
+            relatedObject={
+              location.uuid && {
+                relatedObjectType: Location.relatedObjectType,
+                relatedObjectUuid: location.uuid,
+                relatedObject: location
+              }
+            }
+          />
+        }
       />
     </div>
   )

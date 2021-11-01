@@ -5,7 +5,7 @@ import ShowReport from "../pages/showReport.page"
 describe("Show report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open()
-    ShowReport.openAsAdminUser(MyReports.reportWithAssessmentsUrl)
+    MyReports.selectReport("A test report from Arthur")
   })
   describe("When on the show page of a report with assessments", () => {
     it("We should see a table of tasks instant assessments related to the current report", () => {

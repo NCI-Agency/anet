@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import { initInvisibleFields } from "components/CustomFields"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -127,20 +127,22 @@ const TaskEdit = ({ pageDispatchers }) => {
 
   return (
     <div>
-      <RelatedObjectNotes
-        notes={task.notes}
-        relatedObject={
-          task.uuid && {
-            relatedObjectType: Task.relatedObjectType,
-            relatedObjectUuid: task.uuid,
-            relatedObject: task
-          }
-        }
-      />
       <TaskForm
         edit
         initialValues={task}
         title={`${Settings.fields.task.shortLabel} ${task.shortName}`}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={task.notes}
+            relatedObject={
+              task.uuid && {
+                relatedObjectType: Task.relatedObjectType,
+                relatedObjectUuid: task.uuid,
+                relatedObject: task
+              }
+            }
+          />
+        }
       />
     </div>
   )

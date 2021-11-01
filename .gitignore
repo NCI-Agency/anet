@@ -5,6 +5,7 @@ logs/*
 *.swp
 # ignore personal ide settings folders
 .vscode/
+client/jsconfig.json
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -14,6 +15,9 @@ hs_err_pid*
 
 # Gradle generated files
 bin/
+
+# Local environment variables
+.env
 
 # Local configuration file used for proj. specific settings (sdk paths, etc)
 local.properties

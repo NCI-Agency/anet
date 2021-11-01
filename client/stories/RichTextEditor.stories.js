@@ -3,7 +3,7 @@ import LinkToPreviewed from "../src/components/LinkToPreviewed"
 import RichTextEditor from "../src/components/RichTextEditor"
 
 export default {
-  title: "ANET/RichTextEditor",
+  title: "ANET Components/RichTextEditor",
   component: RichTextEditor
 }
 

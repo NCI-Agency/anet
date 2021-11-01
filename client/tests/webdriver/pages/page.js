@@ -16,13 +16,17 @@ class Page {
     return `${url}${credSep}user=${credentials}&pass=${credentials}`
   }
 
-  _open(pathName, credentials) {
-    browser.url(this._buildUrl(pathName, credentials))
+  waitUntilLoaded() {
     browser.$("div.loader").waitForExist({
       timeout: 30000,
       reverse: true,
       timeoutMsg: "Expected everything to be loaded by now"
     })
+  }
+
+  _open(pathName, credentials) {
+    browser.url(this._buildUrl(pathName, credentials))
+    this.waitUntilLoaded()
   }
 
   open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {

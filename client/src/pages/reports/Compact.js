@@ -1,14 +1,19 @@
+import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
-import AppContext from "components/AppContext"
 import CompactTable, {
+  CompactFooterContent,
+  CompactHeaderContent,
   CompactRow,
   CompactRowContentS,
   CompactRowS,
   CompactSubTitle,
-  CompactTitle
+  CompactTitle,
+  CompactView,
+  FullColumn,
+  InnerTable,
+  PAGE_SIZES
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -22,10 +27,6 @@ import {
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
-import {
-  CompactSecurityBanner,
-  SETTING_KEY_COLOR
-} from "components/SecurityBanner"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
 import _groupBy from "lodash/groupBy"
@@ -33,11 +34,10 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import React, { useState } from "react"
+import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
-import { Link, useHistory, useLocation, useParams } from "react-router-dom"
-import anetLogo from "resources/logo.png"
+import { useHistory, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -219,6 +219,7 @@ const GQL_GET_REPORT = gql`
 const CompactReportView = ({ pageDispatchers }) => {
   const history = useHistory()
   const { uuid } = useParams()
+  const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -260,7 +261,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   // Get initial tasks/attendees instant assessments values
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
-  const draftAttr = report.isDraft() ? "draft" : "not-draft"
+  const backgroundText = report.isDraft() ? "DRAFT" : ""
   return (
     <Formik
       validationSchema={Report.yupSchema}
@@ -274,90 +275,109 @@ const CompactReportView = ({ pageDispatchers }) => {
             returnToDefaultPage={returnToDefaultPage}
             optionalFields={optionalFields}
             setOptionalFields={setOptionalFields}
+            setPageSize={setPageSize}
           />
-          <CompactReportViewS className="compact-view" data-draft={draftAttr}>
-            <CompactReportHeaderContent report={report} />
-            <CompactTable>
-              <CompactTitle label={getReportTitle()} className="reportField" />
-              <CompactSubTitle
-                label={getReportSubTitle()}
-                className="reportField"
-              />
-              <CompactRow
-                label="purpose"
-                content={report.intent}
-                className="reportField"
-              />
-              <CompactRow
-                label={Settings.fields.report.keyOutcomes || "key outcomes"}
-                content={report.keyOutcomes}
-                className="reportField"
-              />
-              {!report.cancelled ? (
-                <CompactRow
-                  label={Settings.fields.report.atmosphere}
-                  content={
-                    <>
-                      {utils.sentenceCase(report.atmosphere)}
-                      {report.atmosphereDetails &&
-                        ` – ${report.atmosphereDetails}`}
-                    </>
-                  }
-                  className="reportField"
-                />
-              ) : null}
-              <CompactRow
-                label={Settings.fields.report.nextSteps}
-                content={report.nextSteps}
-                className="reportField"
-              />
-              <CompactRow
-                label="principals"
-                content={getAttendeesAndAssessments(Person.ROLE.PRINCIPAL)}
-                className="reportField"
-              />
-              <CompactRow
-                label="advisors"
-                content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
-                className="reportField"
-              />
-              <CompactRow
-                label={Settings.fields.task.subLevel.longLabel}
-                content={getTasksAndAssessments()}
-                className="reportField"
-              />
-              {report.cancelled ? (
-                <CompactRow
-                  label="cancelled reason"
-                  content={utils.sentenceCase(report.cancelledReason)}
-                  className="reportField"
-                />
-              ) : null}
-              {optionalFields.workflow.active && report.showWorkflow() ? (
-                <CompactRowReportWorkflow
-                  workflow={report.workflow}
-                  className="reportField"
-                  isCompact
-                />
-              ) : null}
-              {report.reportText ? (
-                <CompactRow
-                  label={Settings.fields.report.reportText}
-                  content={parseHtmlWithLinkTo(report.reportText)}
-                  className="reportField"
-                />
-              ) : null}
-              {Settings.fields.report.customFields ? (
-                <ReadonlyCustomFields
-                  fieldsConfig={Settings.fields.report.customFields}
-                  values={report}
-                  vertical
-                  isCompact
-                />
-              ) : null}
+          <CompactView
+            className="compact-view"
+            pageSize={pageSize}
+            backgroundText={backgroundText}
+          >
+            <CompactHeaderContent />
+            <CompactTable
+              children={
+                <>
+                  <FullColumn>
+                    <CompactTitle
+                      label={getReportTitle()}
+                      className="reportField"
+                    />
+                    <CompactSubTitle
+                      label={getReportSubTitle()}
+                      className="reportField"
+                    />
+                    <CompactRow
+                      label="purpose"
+                      content={report.intent}
+                      className="reportField"
+                    />
+                    <CompactRow
+                      label={
+                        Settings.fields.report.keyOutcomes || "key outcomes"
+                      }
+                      content={report.keyOutcomes}
+                      className="reportField"
+                    />
+                    {!report.cancelled ? (
+                      <CompactRow
+                        label={Settings.fields.report.atmosphere}
+                        content={
+                          <>
+                            {utils.sentenceCase(report.atmosphere)}
+                            {report.atmosphereDetails &&
+                              ` – ${report.atmosphereDetails}`}
+                          </>
+                        }
+                        className="reportField"
+                      />
+                    ) : null}
+                    <CompactRow
+                      label={Settings.fields.report.nextSteps.label}
+                      content={report.nextSteps}
+                      className="reportField"
+                    />
+                    <CompactRow
+                      label="principals"
+                      content={getAttendeesAndAssessments(
+                        Person.ROLE.PRINCIPAL
+                      )}
+                      className="reportField"
+                    />
+                    <CompactRow
+                      label="advisors"
+                      content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
+                      className="reportField"
+                    />
+                    <CompactRow
+                      label={Settings.fields.task.subLevel.longLabel}
+                      content={getTasksAndAssessments()}
+                      className="reportField"
+                    />
+                    {report.cancelled ? (
+                      <CompactRow
+                        label="cancelled reason"
+                        content={utils.sentenceCase(report.cancelledReason)}
+                        className="reportField"
+                      />
+                    ) : null}
+                    {optionalFields.workflow.active && report.showWorkflow() ? (
+                      <CompactRowReportWorkflow
+                        workflow={report.workflow}
+                        className="reportField"
+                        isCompact
+                      />
+                    ) : null}
+                    {report.reportText ? (
+                      <CompactRow
+                        label={Settings.fields.report.reportText}
+                        content={parseHtmlWithLinkTo(report.reportText)}
+                        className="reportField"
+                      />
+                    ) : null}
+                    {Settings.fields.report.customFields ? (
+                      <ReadonlyCustomFields
+                        fieldsConfig={Settings.fields.report.customFields}
+                        values={report}
+                        vertical
+                        isCompact
+                      />
+                    ) : null}
+                  </FullColumn>
+                </>
+              }
+            >
             </CompactTable>
-            <CompactReportFooterContent report={report} />
-          </CompactReportViewS>
+            <CompactFooterContent object={report} />
+          </CompactView>
         </>
       )}
     </Formik>
@@ -422,8 +442,8 @@ const CompactReportView = ({ pageDispatchers }) => {
 
   function getTasksAndAssessments() {
     return (
-      <table>
-        <tbody>
+      <InnerTable>
+        <FullColumn>
           {report.tasks.map(task => {
             const taskInstantAssessmentConfig = Model.filterAssessmentConfig(
               task.getInstantAssessmentConfig(),
@@ -438,8 +458,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                   <LinkToPreviewed modelType={Task.resourceName} model={task} />
                 }
                 content={
-                  <table>
-                    <tbody>
+                  <InnerTable>
+                    <FullColumn>
                       <CompactRow
                         label={Settings.fields.task.topLevel.shortLabel}
                         content={
@@ -463,14 +483,14 @@ const CompactReportView = ({ pageDispatchers }) => {
                             isCompact
                           />
                       )}
-                    </tbody>
-                  </table>
+                    </FullColumn>
+                  </InnerTable>
                 }
               />
             )
           })}
-        </tbody>
-      </table>
+        </FullColumn>
+      </InnerTable>
     )
   }
 
@@ -480,8 +500,8 @@ const CompactReportView = ({ pageDispatchers }) => {
     // to keep track of different organization, if it is same consecutively, don't show for compactness
     let prevDiffOrgName = ""
     return (
-      <table>
-        <tbody>
+      <InnerTable>
+        <FullColumn>
           {attendees.map(attendee => {
             const attendeeInstantAssessmentConfig = Model.filterAssessmentConfig(
               attendee.getInstantAssessmentConfig(),
@@ -513,8 +533,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                 content={
                   optionalFields.assessments.active &&
                   attendeeInstantAssessmentConfig && (
-                    <table>
-                      <tbody>
+                    <InnerTable>
+                      <FullColumn>
                         <ReadonlyCustomFields
                           parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
                           fieldsConfig={attendeeInstantAssessmentConfig}
@@ -522,8 +542,8 @@ const CompactReportView = ({ pageDispatchers }) => {
                           vertical
                           isCompact
                         />
-                      </tbody>
-                    </table>
+                      </FullColumn>
+                    </InnerTable>
                   )
                 }
                 style={`
@@ -538,8 +558,8 @@ const CompactReportView = ({ pageDispatchers }) => {
               />
             )
           })}
-        </tbody>
-      </table>
+        </FullColumn>
+      </InnerTable>
     )
   }
 
@@ -602,84 +622,52 @@ const OPTIONAL_FIELDS_INIT = {
   }
 }
 
-// color-adjust forces browsers to keep color values of the node
-// supported in most major browsers' new versions, but not in IE or some older versions
-const CompactReportViewS = styled.div`
-  position: relative;
-  outline: 2px solid grey;
-  padding: 0 1rem;
-  width: 21cm;
-
-  &[data-draft="draft"]:before {
-    content: "DRAFT";
-    z-index: -1000;
-    position: absolute;
-    font-weight: 100;
-    top: 300px;
-    left: 20%;
-    font-size: 150px;
-    color: rgba(161, 158, 158, 0.3) !important;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact !important;
-    transform: rotateZ(-45deg);
-  }
-  @media print {
-    position: static;
-    padding: 0;
-    outline: none;
-    &[data-draft="draft"]:before {
-      top: 40%;
-      position: fixed;
-    }
-    .banner {
-      display: inline-block !important;
-      -webkit-print-color-adjust: exact;
-      color-adjust: exact !important;
-    }
-    .workflow-action .btn {
-      display: inline-block !important;
-    }
-  }
-`
-
 const CompactReportViewHeader = ({
   onPrintClick,
   returnToDefaultPage,
   noReport,
   optionalFields,
-  setOptionalFields
-}) => {
-  return (
-    <Header>
-      <HeaderTitle value="title">Summary / Print</HeaderTitle>
-      <SimpleMultiCheckboxDropdown
-        label="Optional Fields ⇓"
-        options={optionalFields}
-        setOptions={setOptionalFields}
-      />
-      <Buttons>
-        {!noReport && (
-          <Button
-            value="print"
-            type="button"
-            bsStyle="primary"
-            onClick={onPrintClick}
-          >
-            Print
-          </Button>
-        )}
-        <Button
-          value="detailedView"
-          type="button"
-          bsStyle="primary"
-          onClick={returnToDefaultPage}
+  setOptionalFields,
+  setPageSize
+}) => (
+  <Header>
+    <HeaderTitle value="title">Summary / Print</HeaderTitle>
+    <DropdownButton
+      title="Page Size"
+      variant="outline-secondary"
+      id="pageSizeButton"
+    >
+      {Object.entries(PAGE_SIZES).map(([key, pageSize]) => (
+        <Dropdown.Item
+          key={key}
+          onClick={() => setPageSize(pageSize)}
+          style={{ minWidth: "205px" }}
         >
-          Detailed View
+          {pageSize.name}
+        </Dropdown.Item>
+      ))}
+    </DropdownButton>
+    <SimpleMultiCheckboxDropdown
+      label="Optional Fields ⇓"
+      options={optionalFields}
+      setOptions={setOptionalFields}
+    />
+    <Buttons>
+      {!noReport && (
+        <Button value="print" variant="primary" onClick={onPrintClick}>
+          Print
         </Button>
-      </Buttons>
-    </Header>
-  )
-}
+      )}
+      <Button
+        value="detailedView"
+        variant="primary"
+        onClick={returnToDefaultPage}
+      >
+        Detailed View
+      </Button>
+    </Buttons>
+  </Header>
+)
 
 CompactReportViewHeader.propTypes = {
   onPrintClick: PropTypes.func,
@@ -691,7 +679,8 @@ CompactReportViewHeader.propTypes = {
       active: PropTypes.bool.isRequired
     })
   ).isRequired,
-  setOptionalFields: PropTypes.func
+  setOptionalFields: PropTypes.func,
+  setPageSize: PropTypes.func
 }
 
 CompactReportViewHeader.defaultProps = {
@@ -721,114 +710,6 @@ const Buttons = styled.div`
   button {
     margin-left: 5px;
     margin-right: 5px;
-  }
-`
-
-const CompactReportHeaderContent = ({ report }) => {
-  const location = useLocation()
-  const { appSettings } = useContext(AppContext)
-  return (
-    <HeaderContentS bgc={appSettings[SETTING_KEY_COLOR]}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner />
-      <span style={{ fontSize: "12px" }}>
-        <Link to={location.pathname}>{report.uuid}</Link>
-      </span>
-    </HeaderContentS>
-  )
-}
-
-CompactReportHeaderContent.propTypes = {
-  report: PropTypes.object
-}
-
-const CompactReportFooterContent = () => {
-  const { currentUser, appSettings } = useContext(AppContext)
-  return (
-    <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
-      <img src={anetLogo} alt="logo" width="50" height="12" />
-      <ClassificationBanner />
-      <PrintedByBoxS>
-        <div>
-          printed by <LinkToPreviewed modelType="Person" model={currentUser} />
-        </div>
-        <div>{moment().format(Report.getEngagementDateFormat())}</div>
-      </PrintedByBoxS>
-    </FooterContentS>
-  )
-}
-
-// background color of banner makes reading blue links hard. Force white color
-const HF_COMMON_STYLE = `
-  position: absolute;
-  left: 0mm;
-  display: flex;
-  width: 100%;
-  max-height: 50px;
-  margin: 10px auto;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  -webkit-print-color-adjust: exact !important;
-  color-adjust: exact !important;
-  img {
-    max-width: 50px !important;
-    max-height: 24px !important;
-  }
-  & * {
-    color: white !important;
-  }
-  @media print {
-    position: fixed;
-    max-height: 70px;
-  }
-`
-
-const HeaderContentS = styled.div`
-  ${HF_COMMON_STYLE};
-  top: 0mm;
-  border-bottom: 1px solid black;
-  background-color: ${props => props.bgc} !important;
-`
-
-const FooterContentS = styled.div`
-  ${HF_COMMON_STYLE};
-  bottom: 0mm;
-  border-top: 1px solid black;
-  background-color: ${props => props.bgc} !important;
-`
-
-const PrintedByBoxS = styled.span`
-  align-self: flex-start;
-  width: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  font-size: 10px;
-  & > span {
-    display: inline-block;
-    text-align: right;
-  }
-`
-
-const ClassificationBanner = () => {
-  return (
-    <ClassificationBannerS>
-      <CompactSecurityBanner />
-    </ClassificationBannerS>
-  )
-}
-
-const ClassificationBannerS = styled.div`
-  width: auto;
-  max-width: 67%;
-  text-align: center;
-  display: inline-block;
-  & > .banner {
-    padding: 2px 4px;
   }
 `
 

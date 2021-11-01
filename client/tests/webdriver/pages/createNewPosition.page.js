@@ -10,16 +10,32 @@ class CreatePosition extends Page {
     return browser.$("#name")
   }
 
+  get duplicatesButton() {
+    return browser.$('//button[text()="Possible Duplicates"]')
+  }
+
+  get modalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  get modalCloseButton() {
+    return this.modalContent.$("button.btn-close")
+  }
+
+  get similarPosition() {
+    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  }
+
   get positionNameHelpBlock() {
-    return browser.$("#fg-name .help-block")
+    return browser.$("#fg-name div.invalid-feedback")
   }
 
   get typeAdvisorButton() {
-    return browser.$("#typeAdvisorButton")
+    return browser.$('label[for="type_ADVISOR"]')
   }
 
   get typePrincipalButton() {
-    return browser.$("#typePrincipalButton")
+    return browser.$('label[for="type_PRINCIPAL"]')
   }
 
   get organizationInput() {
@@ -27,12 +43,26 @@ class CreatePosition extends Page {
   }
 
   get organizationHelpBlock() {
-    return browser.$("#fg-organization .help-block")
+    return browser.$("#fg-organization div.invalid-feedback")
   }
 
   get orgAdvancedSelectFirstItem() {
     return browser.$(
       "#organization-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
+  get locationInput() {
+    return browser.$("#location")
+  }
+
+  get locationHelpBlock() {
+    return browser.$("#fg-location div.invalid-feedback")
+  }
+
+  get locAdvancedSelectFirstItem() {
+    return browser.$(
+      "#location-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 

@@ -13,7 +13,7 @@ import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Model from "components/Model"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useMemo, useState } from "react"
+import React, { useCallback, useMemo, useState } from "react"
 import { Button } from "react-bootstrap"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -88,11 +88,29 @@ const widgetPropsPosition = {
   addon: POSITIONS_ICON
 }
 
+const generateLocationFilters = filter => {
+  if (!filter?.typeFilter) {
+    return entityFilters
+  } else {
+    const locationFilters = {}
+    Object.entries(filter.typeFilter.filterValue).forEach((element, index) => {
+      locationFilters[index] = {
+        label: Models.Location.humanNameOfType(element[1]),
+        queryVars: {
+          status: Model.STATUS.ACTIVE,
+          [filter.typeFilter.filterField]: element[1]
+        }
+      }
+    })
+    return locationFilters
+  }
+}
+
 const widgetPropsLocation = {
   objectType: Models.Location,
   overlayRenderRow: LocationOverlayRow,
   overlayColumns: ["Name"],
-  filterDefs: entityFilters,
+  filterDefs: generateLocationFilters,
   queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Location.autocompleteQueryWithNotes,
   addon: LOCATIONS_ICON
@@ -123,7 +141,8 @@ const MultiTypeAdvancedSelectComponent = ({
   objectType,
   entityTypes,
   value,
-  isMultiSelect
+  isMultiSelect,
+  filters
 }) => {
   const [entityType, setEntityType] = useState(
     objectType ||
@@ -133,10 +152,10 @@ const MultiTypeAdvancedSelectComponent = ({
   const [advancedSelectProps, setAdvancedSelectProps] = useState(
     widgetTypeMapping[entityType]
   )
-  function changeEntityType(newEntityType) {
+  const changeEntityType = useCallback(newEntityType => {
     setEntityType(newEntityType)
     setAdvancedSelectProps(widgetTypeMapping[newEntityType])
-  }
+  }, [])
   const searchPlaceholder = useMemo(() => {
     const [key] = Object.entries(ENTITY_TYPES).find(
       ([, et]) => et === entityType
@@ -148,16 +167,30 @@ const MultiTypeAdvancedSelectComponent = ({
     ? AdvancedMultiSelect
     : AdvancedSingleSelect
   const extraSelectProps = isMultiSelect ? {} : { showRemoveButton: false }
+  const filterDefs =
+    typeof advancedSelectProps.filterDefs === "function"
+      ? advancedSelectProps.filterDefs(filters[0]?.[entityType])
+      : advancedSelectProps.filterDefs
+
   return (
     <>
       {entityTypes.length > 1 && (
-        <ButtonToggleGroup value={entityType} onChange={changeEntityType}>
+        <ButtonToggleGroup
+          size="sm"
+          value={entityType}
+          onChange={changeEntityType}
+          style={{ marginBottom: "5px" }}
+        >
           {Object.entries(ENTITY_TYPES)
             .filter(([, et]) => entityTypes.includes(et))
             .map(([key, entityName]) => {
               const entityLabel = SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES[key]]
               return (
-                <Button key={entityName} value={entityName}>
+                <Button
+                  key={entityName}
+                  value={entityName}
+                  variant="outline-secondary"
+                >
                   {entityLabel}
                 </Button>
               )
@@ -174,7 +207,7 @@ const MultiTypeAdvancedSelectComponent = ({
         showEmbedded
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
-        filterDefs={advancedSelectProps.filterDefs}
+        filterDefs={filterDefs}
         onChange={value => onConfirm(value, entityType)}
         objectType={advancedSelectProps.objectType}
         queryParams={advancedSelectProps.queryParams}
@@ -185,19 +218,20 @@ const MultiTypeAdvancedSelectComponent = ({
     </>
   )
 }
-
 MultiTypeAdvancedSelectComponent.propTypes = {
   fieldName: PropTypes.string,
   onConfirm: PropTypes.func,
   objectType: PropTypes.string,
   entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-  isMultiSelect: PropTypes.bool.isRequired
+  isMultiSelect: PropTypes.bool.isRequired,
+  filters: PropTypes.array
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
   fieldName: "entitySelect",
   entityTypes: Object.values(ENTITY_TYPES),
-  isMultiSelect: false
+  isMultiSelect: false,
+  filters: []
 }
 
 export default MultiTypeAdvancedSelectComponent

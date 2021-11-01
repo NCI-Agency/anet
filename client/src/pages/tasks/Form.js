@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
@@ -18,11 +18,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
-import Model, {
-  DEFAULT_CUSTOM_FIELDS_PARENT,
-  GRAPHQL_NOTE_FIELDS,
-  NOTE_TYPE
-} from "components/Model"
+import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
@@ -57,7 +53,7 @@ const GQL_UPDATE_TASK = gql`
   }
 `
 
-const TaskForm = ({ edit, title, initialValues }) => {
+const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -166,13 +162,13 @@ const TaskForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save {fieldSettings.shortLabel}
             </Button>
+            {notesComponent}
           </div>
         )
         return (
@@ -245,6 +241,9 @@ const TaskForm = ({ edit, title, initialValues }) => {
                   dictProps={Settings.fields.task.responsiblePositions}
                   onChange={value => {
                     // validation will be done by setFieldValue
+                    value = value.map(position =>
+                      Position.filterClientSideFields(position)
+                    )
                     setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
                     setFieldValue("responsiblePositions", value)
                   }}
@@ -348,11 +347,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         "enum"
                       )}
                       name="customFieldEnum1"
-                      component={
-                        disabled
-                          ? FieldHelper.ReadonlyField
-                          : FieldHelper.RadioButtonToggleGroupField
-                      }
+                      component={FieldHelper.RadioButtonToggleGroupField}
+                      disabled={disabled}
                       buttons={FieldHelper.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
@@ -365,23 +361,18 @@ const TaskForm = ({ edit, title, initialValues }) => {
                         name="assessment_customFieldEnum1"
                         label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
                         component={FieldHelper.SpecialField}
-                        onChange={value =>
+                        onChange={value => {
                           setFieldValue("assessment_customFieldEnum1", value)
-                        }
-                        widget={
-                          <RichTextEditor
-                            className="textField"
-                            onHandleBlur={() => {
-                              // validation will be done by setFieldValue
-                              setFieldTouched(
-                                "assessment_customFieldEnum1",
-                                true,
-                                false
-                              )
-                            }}
-                            linkToComp={LinkToPreviewed}
-                          />
-                        }
+                        }}
+                        onHandleBlur={() => {
+                          // validation will be done by setFieldValue
+                          setFieldTouched(
+                            "assessment_customFieldEnum1",
+                            true,
+                            false
+                          )
+                        }}
+                        widget={<RichTextEditor className="textField" />}
                       />
                     )}
                   </>
@@ -394,11 +385,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
                       "enum"
                     )}
                     name="customFieldEnum2"
-                    component={
-                      disabled
-                        ? FieldHelper.ReadonlyField
-                        : FieldHelper.RadioButtonToggleGroupField
-                    }
+                    component={FieldHelper.RadioButtonToggleGroupField}
+                    disabled={disabled}
                     buttons={FieldHelper.customEnumButtons(
                       Settings.fields.task.customFieldEnum2.enum
                     )}
@@ -449,13 +437,14 @@ const TaskForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -504,13 +493,7 @@ const TaskForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const task = Object.without(
-      new Task(values),
-      "notes",
-      "assessment_customFieldEnum1",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const task = Task.filterClientSideFields(new Task(values))
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)
     const variables = { task: task }
@@ -549,7 +532,8 @@ const TaskForm = ({ edit, title, initialValues }) => {
 TaskForm.propTypes = {
   initialValues: PropTypes.instanceOf(Task).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 TaskForm.defaultProps = {

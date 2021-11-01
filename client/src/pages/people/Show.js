@@ -1,12 +1,15 @@
+import { gql } from "@apollo/client"
+import { Icon, IconSize } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { ReadonlyCustomFields } from "components/CustomFields"
+import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import EditHistory from "components/EditHistory"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -14,10 +17,16 @@ import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  SENSITIVE_CUSTOM_FIELDS_PARENT
+} from "components/Model"
+import {
+  jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import RelatedObjectNotes, {
@@ -30,9 +39,19 @@ import { Person, Position } from "models"
 import moment from "moment"
 import { personTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
-import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
+import {
+  Button,
+  Col,
+  Container,
+  FormGroup,
+  FormLabel,
+  OverlayTrigger,
+  Row,
+  Table,
+  Tooltip
+} from "react-bootstrap"
 import { connect } from "react-redux"
-import { useLocation, useParams } from "react-router-dom"
+import { useHistory, useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -45,6 +64,8 @@ const GQL_GET_PERSON = gql`
       role
       status
       pendingVerification
+      isSubscribed
+      updatedAt
       emailAddress
       phoneNumber
       domainUsername
@@ -89,19 +110,32 @@ const GQL_GET_PERSON = gql`
         }
       }
       customFields
+      ${GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS}
       ${GRAPHQL_NOTES_FIELDS}
     }
   }
 `
 
+const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
+  mutation($person: PersonInput!) {
+    updatePersonHistory(person: $person)
+  }
+`
+
 const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
+  const history = useHistory()
   const routerLocation = useLocation()
+  const stateSuccess = routerLocation.state && routerLocation.state.success
+  const [stateError, setStateError] = useState(
+    routerLocation.state && routerLocation.state.error
+  )
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
   const [
     showAssociatedPositionsModal,
     setShowAssociatedPositionsModal
   ] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
     uuid
@@ -122,10 +156,14 @@ const PersonShow = ({ pageDispatchers }) => {
     data.person[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.person.customFields
     )
+    if (data.person.customSensitiveInformation) {
+      // Add sensitive information fields to formCustomFields
+      data.person[SENSITIVE_CUSTOM_FIELDS_PARENT] = utils.parseSensitiveFields(
+        data.person.customSensitiveInformation
+      )
+    }
   }
   const person = new Person(data ? data.person : {})
-  const stateSuccess = routerLocation.state && routerLocation.state.success
-  const stateError = routerLocation.state && routerLocation.state.error
   // The position for this person's counterparts
   const position = person.position
   const assignedRole =
@@ -150,36 +188,56 @@ const PersonShow = ({ pageDispatchers }) => {
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
   const canAddAssessment =
-    isAdmin ||
-    currentUser.position.associatedPositions
-      .filter(ap => ap.person)
-      .map(ap => ap.person.uuid)
-      .includes(person.uuid)
+    Position.isAdvisor(position) ||
+    (Position.isPrincipal(position) &&
+      (isAdmin ||
+        currentUser.position.associatedPositions
+          .filter(ap => ap.person)
+          .map(ap => ap.person.uuid)
+          .includes(person.uuid)))
+
+  const action = (
+    <div>
+      <Button value="compactView" variant="primary" onClick={onCompactClick}>
+        Summary / Print
+      </Button>
+      {canEdit && (
+        <LinkTo
+          modelType="Person"
+          model={person}
+          edit
+          button="primary"
+          className="edit-person"
+        >
+          Edit
+        </LinkTo>
+      )}
+      <RelatedObjectNotes
+        notes={person.notes}
+        relatedObject={
+          person.uuid && {
+            relatedObjectType: Person.relatedObjectType,
+            relatedObjectUuid: person.uuid,
+            relatedObject: person
+          }
+        }
+      />
+    </div>
+  )
+  const emailHumanValue = (
+    <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
+  )
+
+  const orderedFields = orderPersonFields()
+  const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
+  const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
+  const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
   return (
     <Formik enableReinitialize initialValues={person}>
-      {({ values }) => {
-        const action = (
-          <div>
-            {canEdit && (
-              <LinkTo
-                modelType="Person"
-                model={person}
-                edit
-                button="primary"
-                className="edit-person"
-              >
-                Edit
-              </LinkTo>
-            )}
-          </div>
-        )
-        const emailHumanValue = (
-          <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-        )
-
+      {() => {
         return (
           <div>
-            <div className="pull-right">
+            <div className="float-end">
               <GuidedTour
                 title="Take a guided tour of this person's page."
                 tour={personTour}
@@ -190,166 +248,100 @@ const PersonShow = ({ pageDispatchers }) => {
                 onEnd={() => (localStorage.hasSeenPersonTour = "true")}
               />
             </div>
-
-            <RelatedObjectNotes
-              notes={person.notes}
-              relatedObject={
-                person.uuid && {
-                  relatedObjectType: Person.relatedObjectType,
-                  relatedObjectUuid: person.uuid,
-                  relatedObject: person
-                }
-              }
-            />
             <Messages error={stateError} success={stateSuccess} />
             <Form className="form-horizontal" method="post">
               <Fieldset
-                title={`${person.rank} ${person.name}`}
+                title={
+                  <>
+                    {
+                      <SubscriptionIcon
+                        subscribedObjectType="people"
+                        subscribedObjectUuid={person.uuid}
+                        isSubscribed={person.isSubscribed}
+                        updatedAt={person.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setStateError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    }{" "}
+                    {person.rank} {person.name}
+                  </>
+                }
                 action={action}
               />
               <Fieldset>
-                <AvatarDisplayComponent
-                  avatar={person.avatar}
-                  height={256}
-                  width={256}
-                />
-                <Field
-                  name="rank"
-                  label={Settings.fields.person.rank}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="role"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Person.humanNameOfRole(values.role)}
-                />
-                {isAdmin && (
-                  <Field
-                    name="domainUsername"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                )}
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Person.humanNameOfStatus(values.status)}
-                />
-                <Field
-                  name="phoneNumber"
-                  label={Settings.fields.person.phoneNumber}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="emailAddress"
-                  label={Settings.fields.person.emailAddress.label}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={emailHumanValue}
-                />
-                <Field
-                  name="country"
-                  label={Settings.fields.person.country}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="code"
-                  label={Settings.fields.person.code}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="gender"
-                  label={Settings.fields.person.gender}
-                  component={FieldHelper.ReadonlyField}
-                />
-                <Field
-                  name="endOfTourDate"
-                  label={Settings.fields.person.endOfTourDate}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    person.endOfTourDate &&
-                    moment(person.endOfTourDate).format(
-                      Settings.dateFormats.forms.displayShort.date
-                    )
-                  }
-                />
-                <Field
-                  name="biography"
-                  className="biography"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(
-                    person.biography,
-                    LinkToPreviewed
-                  )}
-                />
+                <Container fluid>
+                  <Row>
+                    <Col md={6}>
+                      <AvatarDisplayComponent
+                        avatar={person.avatar}
+                        height={256}
+                        width={256}
+                        style={{
+                          maxWidth: "100%",
+                          display: "block",
+                          margin: "0 auto",
+                          marginBottom: "10px"
+                        }}
+                      />
+                      {leftColumUnderAvatar}
+                    </Col>
+                    <Col md={6}>{rightColum}</Col>
+                  </Row>
+                </Container>
               </Fieldset>
+              {canChangePosition && (
+                <AssignPositionModal
+                  showModal={showAssignPositionModal}
+                  person={person}
+                  onCancel={() => hideAssignPositionModal(false)}
+                  onSuccess={() => hideAssignPositionModal(true)}
+                />
+              )}
 
-              <Fieldset title="Position">
+              {hasPosition && (
                 <Fieldset
-                  title="Current Position"
-                  id="current-position"
-                  className={
-                    !position || !position.uuid ? "warning" : undefined
-                  }
+                  title={`Assigned ${assignedRole}`}
                   action={
-                    hasPosition &&
                     canChangePosition && (
-                      <div>
-                        <LinkTo
-                          modelType="Position"
-                          model={position}
-                          edit
-                          button="default"
-                        >
-                          Edit position details
-                        </LinkTo>
-                        <Button
-                          onClick={() => setShowAssignPositionModal(true)}
-                          className="change-assigned-position"
-                        >
-                          Change assigned position
-                        </Button>
-                      </div>
+                      <Button
+                        onClick={() => setShowAssociatedPositionsModal(true)}
+                        variant="outline-secondary"
+                      >
+                        Change assigned {assignedRole}
+                      </Button>
                     )
                   }
                 >
-                  {hasPosition
-                    ? renderPosition(position)
-                    : renderPositionBlankSlate(person)}
+                  {renderCounterparts(position)}
                   {canChangePosition && (
-                    <AssignPositionModal
-                      showModal={showAssignPositionModal}
-                      person={person}
-                      onCancel={() => hideAssignPositionModal(false)}
-                      onSuccess={() => hideAssignPositionModal(true)}
+                    <EditAssociatedPositionsModal
+                      position={position}
+                      showModal={showAssociatedPositionsModal}
+                      onCancel={() => hideAssociatedPositionsModal(false)}
+                      onSuccess={() => hideAssociatedPositionsModal(true)}
                     />
                   )}
                 </Fieldset>
-
-                {hasPosition && (
-                  <Fieldset
-                    title={`Assigned ${assignedRole}`}
-                    action={
-                      canChangePosition && (
-                        <Button
-                          onClick={() => setShowAssociatedPositionsModal(true)}
-                        >
-                          Change assigned {assignedRole}
-                        </Button>
-                      )
-                    }
-                  >
-                    {renderCounterparts(position)}
-                    {canChangePosition && (
-                      <EditAssociatedPositionsModal
-                        position={position}
-                        showModal={showAssociatedPositionsModal}
-                        onCancel={() => hideAssociatedPositionsModal(false)}
-                        onSuccess={() => hideAssociatedPositionsModal(true)}
-                      />
-                    )}
-                  </Fieldset>
-                )}
-              </Fieldset>
-
+              )}
+              {isAdmin && (
+                <EditHistory
+                  mainTitle="Edit position history"
+                  history1={person.previousPositions}
+                  initialHistory={person.previousPositions}
+                  currentlyOccupyingEntity={person.position}
+                  externalButton
+                  historyEntityType="position"
+                  parentEntityType={person.role}
+                  parentEntityUuid1={person.uuid}
+                  showModal={showHistoryModal}
+                  setShowModal={setShowHistoryModal}
+                  setHistory={history => onSavePreviousPositions(history)}
+                />
+              )}
               {person.isAdvisor() && (
                 <Fieldset title="Reports authored" id="reports-authored">
                   <ReportCollection
@@ -361,7 +353,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   />
                 </Fieldset>
               )}
-
               <Fieldset
                 title={`Reports attended by ${person.name}`}
                 id="reports-attended"
@@ -374,56 +365,7 @@ const PersonShow = ({ pageDispatchers }) => {
                   mapId="reports-attended"
                 />
               </Fieldset>
-
-              <Fieldset title="Previous positions" id="previous-positions">
-                {(_isEmpty(person.previousPositions) && (
-                  <em>No positions found</em>
-                )) || (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>Position</th>
-                        <th>Dates</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {person.previousPositions.map((pp, idx) => (
-                        <tr key={idx} id={`previousPosition_${idx}`}>
-                          <td>
-                            <LinkToPreviewed
-                              modelType="Position"
-                              model={pp.position}
-                              previewId="people-show-prev-pos"
-                            />
-                          </td>
-                          <td>
-                            {moment(pp.startTime).format(
-                              Settings.dateFormats.forms.displayShort.date
-                            )}{" "}
-                            - &nbsp;
-                            {pp.endTime &&
-                              moment(pp.endTime).format(
-                                Settings.dateFormats.forms.displayShort.date
-                              )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              </Fieldset>
-
-              {Settings.fields.person.customFields && (
-                <Fieldset title="Person information" id="custom-fields">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.person.customFields}
-                    values={values}
-                    linkToComp={LinkToPreviewed}
-                  />
-                </Fieldset>
-              )}
             </Form>
-
             <AssessmentResultsContainer
               entity={person}
               entityType={Person}
@@ -439,25 +381,253 @@ const PersonShow = ({ pageDispatchers }) => {
     </Formik>
   )
 
-  function renderPosition(position) {
+  function orderPersonFields() {
+    const mappedCustomFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getCustomFieldsOrderedAsObject(),
+      values: person
+    })
+    const mappedSensitiveFields = mapReadonlyCustomFieldsToComps({
+      fieldsConfig: person.getSensitiveFieldsOrderedAsObject(),
+      parentFieldName: SENSITIVE_CUSTOM_FIELDS_PARENT,
+      values: person
+    })
+    const mappedNonCustomFields = mapNonCustomFields()
+    // map fields that have privileged access check to the condition
+    const privilegedAccessedFields = {
+      domainUsername: {
+        accessCond: isAdmin
+      }
+    }
+
+    const extraColElems = {
+      position: getPositionActions(),
+      prevPositions: getPreviousPositionsActions()
+    }
+
     return (
-      <div style={{ textAlign: "center" }}>
-        <h4>
-          <LinkToPreviewed
-            modelType="Position"
-            model={position}
-            className="position-name"
-            previewId="people-show-pos"
-          />{" "}
-          (
-          <LinkToPreviewed
-            modelType="Organization"
-            model={position.organization}
-            previewId="people-show-org"
-          />
-          )
-        </h4>
-      </div>
+      person
+        .getShowPageFieldsOrdered()
+        // first filter if there is privileged accessed fields and its access condition is true
+        .filter(key =>
+          privilegedAccessedFields[key]
+            ? privilegedAccessedFields[key].accessCond
+            : true
+        )
+        // filter out unauthorized sensitive fields
+        .filter(
+          key =>
+            !Object.keys(Person.customSensitiveInformation).includes(key) ||
+            Person.isAuthorized(
+              currentUser,
+              Person.customSensitiveInformation?.[key],
+              position
+            )
+        )
+        // Also filter if somehow there is no field in both maps
+        .filter(
+          key =>
+            mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key]
+        )
+        // then map it to components and keys, keys used for React list rendering
+        .map(key => [
+          mappedNonCustomFields[key] ||
+            mappedCustomFields[key] ||
+            mappedSensitiveFields[key],
+          key
+        ])
+        .map(([el, key]) =>
+          React.cloneElement(el, {
+            key,
+            extraColElem: extraColElems[key] || el.props.extraColElem,
+            labelColumnWidth: 4
+          })
+        )
+    )
+  }
+
+  function mapNonCustomFields() {
+    const classNameExceptions = {
+      biography: "biography"
+    }
+
+    // map fields that have specific human person
+    const humanValuesExceptions = {
+      biography: parseHtmlWithLinkTo(person.biography),
+      emailAddress: emailHumanValue,
+      endOfTourDate:
+        person.endOfTourDate &&
+        moment(person.endOfTourDate).format(
+          Settings.dateFormats.forms.displayShort.date
+        ),
+      position: getPositionHumanValue(),
+      prevPositions: getPrevPositionsHumanValue(),
+      role: Person.humanNameOfRole(person.role),
+      status: Person.humanNameOfStatus(person.status)
+    }
+    return person.getNormalFieldsOrdered().reduce((accum, key) => {
+      accum[key] = (
+        <Field
+          name={key}
+          label={
+            Settings.fields.person[key]?.label || Settings.fields.person[key]
+          }
+          component={FieldHelper.ReadonlyField}
+          humanValue={humanValuesExceptions[key]}
+          className={classNameExceptions[key]}
+        />
+      )
+
+      return accum
+    }, {})
+  }
+
+  function getPositionHumanValue() {
+    return hasPosition ? (
+      <>
+        <LinkToPreviewed
+          modelType="Position"
+          model={position}
+          className="position-name"
+          previewId="people-show-pos"
+        />{" "}
+        (
+        <LinkToPreviewed
+          modelType="Organization"
+          model={position.organization}
+          previewId="people-show-org"
+        />
+        )
+      </>
+    ) : (
+      "<none>"
+    )
+  }
+
+  function getPositionActions() {
+    const editPositionButton =
+      hasPosition && canChangePosition ? (
+        <OverlayTrigger
+          key="edit-position-overlay"
+          placement="top"
+          overlay={<Tooltip id="edit-position-tooltip">Edit position</Tooltip>}
+        >
+          <span>
+            <LinkTo
+              modelType="Position"
+              model={position}
+              edit
+              button="primary"
+              showIcon={false}
+              showAvatar={false}
+            >
+              <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+            </LinkTo>
+          </span>
+        </OverlayTrigger>
+      ) : null
+
+    const changePositionButton =
+      hasPosition && canChangePosition ? (
+        <OverlayTrigger
+          key="change-position-overlay"
+          placement="top"
+          overlay={
+            <Tooltip id="change-position-tooltip">Change Position</Tooltip>
+          }
+        >
+          <Button
+            onClick={() => setShowAssignPositionModal(true)}
+            className="change-assigned-position"
+          >
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.EXCHANGE} />
+          </Button>
+        </OverlayTrigger>
+      ) : null
+
+    // when the person is not in a position, any super user can assign them.
+    const canAssignPosition = currentUser.isSuperUser()
+
+    const assignPositionButton =
+      !hasPosition && canAssignPosition ? (
+        <OverlayTrigger
+          key="assign-position-overlay"
+          placement="top"
+          overlay={
+            <Tooltip id="assign-position-tooltip">Assign a position</Tooltip>
+          }
+        >
+          <Button onClick={() => setShowAssignPositionModal(true)}>
+            <Icon iconSize={IconSize.LARGE} icon={IconNames.INSERT} />
+          </Button>
+        </OverlayTrigger>
+      ) : null
+
+    // if current user has no access for position actions return null so extraColElem will disappear
+    if (!(editPositionButton || changePositionButton || assignPositionButton)) {
+      return null
+    }
+
+    return (
+      <>
+        {editPositionButton}
+        {changePositionButton}
+        {assignPositionButton}
+      </>
+    )
+  }
+
+  function getPreviousPositionsActions() {
+    const editHistoryButton = isAdmin ? (
+      <OverlayTrigger
+        key="edit-history-overlay"
+        placement="top"
+        overlay={<Tooltip id="edit-history-tooltip">Edit history</Tooltip>}
+      >
+        <Button
+          onClick={() => setShowHistoryModal(true)}
+          className="edit-history"
+        >
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+        </Button>
+      </OverlayTrigger>
+    ) : null
+
+    return <>{editHistoryButton}</>
+  }
+
+  function getPrevPositionsHumanValue() {
+    return _isEmpty(person.previousPositions) ? (
+      <em>No positions found</em>
+    ) : (
+      <Table id="previous-positions">
+        <thead>
+          <tr>
+            <th>Position</th>
+            <th>Dates</th>
+          </tr>
+        </thead>
+        <tbody>
+          {person.previousPositions.map((pp, idx) => (
+            <tr key={idx} id={`previousPosition_${idx}`}>
+              <td>
+                <LinkTo modelType="Position" model={pp.position} />
+              </td>
+              <td>
+                {moment(pp.startTime).format(
+                  Settings.dateFormats.forms.displayShort.date
+                )}{" "}
+                - &nbsp;
+                {pp.endTime &&
+                  moment(pp.endTime).format(
+                    Settings.dateFormats.forms.displayShort.date
+                  )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
     )
   }
 
@@ -466,7 +636,7 @@ const PersonShow = ({ pageDispatchers }) => {
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
-        <Col sm={2} componentClass={ControlLabel}>
+        <Col sm={2} as={FormLabel}>
           {assocTitle}
         </Col>
         <Col sm={10}>
@@ -516,35 +686,6 @@ const PersonShow = ({ pageDispatchers }) => {
     )
   }
 
-  function renderPositionBlankSlate(person) {
-    // when the person is not in a position, any super user can assign them.
-    const canChangePosition = currentUser.isSuperUser()
-
-    if (Person.isEqual(currentUser, person)) {
-      return (
-        <em>
-          You are not assigned to a position. Contact your organization's super
-          user to be added.
-        </em>
-      )
-    } else {
-      return (
-        <div style={{ textAlign: "center" }}>
-          <p className="not-assigned-to-position-message">
-            <em>{person.name} is not assigned to a position.</em>
-          </p>
-          {canChangePosition && (
-            <p>
-              <Button onClick={() => setShowAssignPositionModal(true)}>
-                Assign position
-              </Button>
-            </p>
-          )}
-        </div>
-      )
-    }
-  }
-
   function hideAssignPositionModal(success) {
     setShowAssignPositionModal(false)
     if (success) {
@@ -557,6 +698,25 @@ const PersonShow = ({ pageDispatchers }) => {
     if (success) {
       refetch()
     }
+  }
+
+  function onCompactClick() {
+    if (!_isEmpty(person)) {
+      history.push(`${person.uuid}/compact`)
+    }
+  }
+
+  function onSavePreviousPositions(history) {
+    const newPerson = person.filterClientSideFields()
+    newPerson.previousPositions = history
+    API.mutation(GQL_UPDATE_PREVIOUS_POSITIONS, { person: newPerson })
+      .then(data => {
+        refetch()
+      })
+      .catch(error => {
+        setStateError(error)
+        jumpToTop()
+      })
   }
 }
 

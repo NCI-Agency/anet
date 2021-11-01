@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
@@ -148,13 +148,13 @@ const AdvisorList = ({
     <div>
       <UltimatePaginationTopDown
         componentClassName="searchPagination"
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={goToPage}
       >
-        <Table striped condensed hover responsive className="positions_table">
+        <Table striped hover responsive className="positions_table">
           <thead>
             <tr>
               <th colSpan="3" style={borderStyle}>
@@ -236,7 +236,7 @@ const PrincipalList = ({ positions }) => {
     return <em>No {Settings.fields.principal.person.name} to assess</em>
   }
   return (
-    <Table condensed responsive style={{ background: "transparent" }}>
+    <Table responsive style={{ background: "transparent" }}>
       <tbody>
         {Position.map(positions, pos => {
           const nameComponents = []
@@ -274,7 +274,7 @@ const TaskList = ({ tasks }) => {
     return <em>No {Settings.fields.task.shortLabel} to assess</em>
   }
   return (
-    <Table condensed responsive style={{ background: "transparent" }}>
+    <Table responsive style={{ background: "transparent" }}>
       <tbody>
         {Task.map(tasks, task => {
           return (

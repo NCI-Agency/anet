@@ -1,3 +1,4 @@
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import _clone from "lodash/clone"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
@@ -190,6 +191,14 @@ export const likertScaleAndPieAggregation = (fieldName, fieldConfig, data) => {
       likertScaleValues: valuesListAggregation(fieldName, fieldConfig, data),
       pieValues: countPerLevelAggregation(fieldName, fieldConfig, data)
     }
+  }
+}
+
+export const richTextAggregation = (fieldName, fieldConfig, data) => {
+  return {
+    values: data
+      .map(item => Object.get(item, fieldName))
+      .map(htmlString => parseHtmlWithLinkTo(htmlString))
   }
 }
 

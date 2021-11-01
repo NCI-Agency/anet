@@ -29,16 +29,20 @@ class AdvancedSearch {
 
   get addFilterButtonText() {
     return this.advancedSearchPopover.$(
-      "form > div:nth-child(4) > div:first-child"
+      "form > div:nth-child(3) > div:first-child button"
     )
   }
 
   get addFilterButton() {
-    return this.addFilterButtonText.$("button")
+    return this.advancedSearchPopover.$("#addFilterDropdown")
   }
 
   get addFilterPopover() {
-    return this.addFilterButtonText.$(".bp3-popover2-content")
+    return this.advancedSearchPopover.$(".bp3-popover2-content")
+  }
+
+  getSearchFilter(filter) {
+    return this.advancedSearchPopover.$(`//div/a[text()='${filter}']`)
   }
 }
 

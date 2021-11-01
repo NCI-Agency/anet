@@ -25,8 +25,11 @@ const CalendarIcon = inputRef => (
 
 const CustomDateInput = ({
   id,
+  className,
   disabled,
   showIcon,
+  maxDate,
+  placement,
   withTime,
   value,
   onChange,
@@ -41,7 +44,7 @@ const CustomDateInput = ({
     : Settings.dateFormats.forms.input.date
   const inputFormat = dateFormats[0]
   const timePickerProps = !withTime
-    ? {}
+    ? undefined
     : {
       precision: TimePrecision.MINUTE,
       selectAllOnFocus: true
@@ -57,6 +60,7 @@ const CustomDateInput = ({
         onBlur,
         inputRef: ref => (inputRef.current = ref)
       }}
+      className={className}
       rightElement={rightElement}
       value={value && moment(value).toDate()}
       onChange={onChange}
@@ -69,20 +73,24 @@ const CustomDateInput = ({
         return dt.isValid() ? dt.toDate() : false
       }}
       placeholder={inputFormat}
-      maxDate={moment().add(20, "years").endOf("year").toDate()}
+      maxDate={maxDate}
+      minDate={moment().subtract(100, "years").startOf("year").toDate()}
       canClearSelection={false}
       showActionsBar
       closeOnSelection={!withTime}
       timePickerProps={timePickerProps}
-      popoverProps={{ usePortal: false }}
+      popoverProps={{ usePortal: false, placement }}
       disabled={disabled}
     />
   )
 }
 CustomDateInput.propTypes = {
   id: PropTypes.string,
+  className: PropTypes.string,
   disabled: PropTypes.bool,
   showIcon: PropTypes.bool,
+  maxDate: PropTypes.instanceOf(Date),
+  placement: PropTypes.string,
   withTime: PropTypes.bool,
   value: PropTypes.oneOfType([
     PropTypes.string,
@@ -95,6 +103,8 @@ CustomDateInput.propTypes = {
 CustomDateInput.defaultProps = {
   disabled: false,
   showIcon: true,
+  maxDate: moment().add(20, "years").endOf("year").toDate(),
+  placement: "auto",
   withTime: false
 }
 

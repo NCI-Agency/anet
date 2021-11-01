@@ -3,15 +3,36 @@ import CreateNewLocation from "../pages/location/createNewLocation.page"
 import {
   BAD_LAT_LNG_VAL,
   LOCATION_COORDS,
-  LOCATION_NAME
+  LOCATION_NAME,
+  LOCATION_TYPE,
+  SIMILAR_LOCATION
 } from "./locationUtils"
 
+const SHORT_WAIT_MS = 1000
+
 describe("When creating a new Location", () => {
-  it("Should not create a location without name input", () => {
+  it("Should not create a location without name & type input", () => {
     CreateNewLocation.open()
     CreateNewLocation.createButton.click()
     CreateNewLocation.nameRequiredError.waitForExist()
     CreateNewLocation.nameRequiredError.waitForDisplayed()
+    CreateNewLocation.typeRequiredError.waitForExist()
+    CreateNewLocation.typeRequiredError.waitForDisplayed()
+  })
+
+  it("Should display possible duplicates with similar names", () => {
+    CreateNewLocation.nameField.setValue(SIMILAR_LOCATION.name)
+    CreateNewLocation.typeField.selectByIndex(LOCATION_TYPE.index)
+    CreateNewLocation.duplicatesButton.waitForDisplayed()
+    CreateNewLocation.duplicatesButton.click()
+    browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
+    CreateNewLocation.modalContent.waitForDisplayed()
+    const similar = CreateNewLocation.similarLocation.getText()
+    CreateNewLocation.modalCloseButton.waitForDisplayed()
+    CreateNewLocation.modalCloseButton.click()
+    browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
+    CreateNewLocation.modalContent.waitForDisplayed({ reverse: true })
+    expect(similar).to.equal("Kabul Hospital")
   })
 
   it("Should not accept invalid latitude-longitude inputs", () => {
@@ -19,7 +40,7 @@ describe("When creating a new Location", () => {
     CreateNewLocation.latField.setValue(BAD_LAT_LNG_VAL)
     CreateNewLocation.lngField.setValue(BAD_LAT_LNG_VAL)
     // trigger onblur effect
-    browser.keys(["Tab"])
+    CreateNewLocation.nameField.click()
 
     CreateNewLocation.latLngErrorsDisplayed()
   })

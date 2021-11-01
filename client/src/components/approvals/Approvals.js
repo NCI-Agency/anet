@@ -3,7 +3,7 @@ import LinkToPreviewed from "components/LinkToPreviewed"
 import { Location, Organization, Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { Checkbox, Table } from "react-bootstrap"
+import { FormCheck, Table } from "react-bootstrap"
 
 const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
   const approvalSteps = relatedObject.approvalSteps
@@ -18,9 +18,12 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
         {planningApprovalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
             {restrictedApprovalLabel && (
-              <Checkbox inline checked={step.restrictedApproval} readOnly>
-                {restrictedApprovalLabel}
-              </Checkbox>
+              <FormCheck
+                type="checkbox"
+                label={restrictedApprovalLabel}
+                checked={step.restrictedApproval}
+                readOnly
+              />
             )}
             <Table>
               <thead>
@@ -71,9 +74,12 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
         {approvalSteps.map((step, idx) => (
           <Fieldset title={`Step ${idx + 1}: ${step.name}`} key={"step_" + idx}>
             {restrictedApprovalLabel && (
-              <Checkbox inline checked={step.restrictedApproval} readOnly>
-                {restrictedApprovalLabel}
-              </Checkbox>
+              <FormCheck
+                type="checkbox"
+                label={restrictedApprovalLabel}
+                checked={step.restrictedApproval}
+                readOnly
+              />
             )}
             <Table>
               <thead>

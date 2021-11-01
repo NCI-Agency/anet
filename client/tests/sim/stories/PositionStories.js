@@ -1,7 +1,7 @@
 import Model from "components/Model"
 import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
-import { Organization, Person, Position } from "models"
+import { Location, Organization, Person, Position } from "models"
 import { fuzzy, identity, populate, runGQL, specialUser } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
@@ -90,7 +90,7 @@ async function listOrganizations(user) {
   ).data.organizationList.totalCount
   let organizations = null
   if (totalCount > 0) {
-    const random = faker.random.number({ max: totalCount - 1 })
+    const random = faker.datatype.number({ max: totalCount - 1 })
     organizations = (
       await runGQL(user, {
         query: `
@@ -182,7 +182,7 @@ function getPositionType(organizationType) {
  * @param {*} user The user that creates the position
  */
 const _createPosition = async function(user) {
-  const position = Object.without(new Position(), "formCustomFields")
+  const position = Position.filterClientSideFields(new Position())
   const organization = await getRandomObject(
     user,
     "organizations",
@@ -200,7 +200,12 @@ const _createPosition = async function(user) {
       randomObject?.uuid === user.uuid ||
       randomObject?.domainUsername === specialUser.name
   )
-  const location = await getRandomObject(user, "locations")
+  const location = await getRandomObject(user, "locations", {
+    type:
+      organization.type === Organization.TYPE.ADVISOR_ORG
+        ? Location.LOCATION_TYPES.ADVISOR_LOCATION
+        : Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+  })
   const template = {
     name: () => faker.name.jobTitle(),
     code: () => faker.lorem.slug(),
@@ -781,7 +786,7 @@ async function getRandomPosition(user, variables) {
   ).data.positionList.totalCount
   let positions = null
   if (totalCount > 0) {
-    positionsQuery.pageNum = faker.random.number({ max: totalCount - 1 })
+    positionsQuery.pageNum = faker.datatype.number({ max: totalCount - 1 })
     positions = (
       await runGQL(user, {
         query: `

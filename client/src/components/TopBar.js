@@ -1,22 +1,18 @@
 import { resetPages } from "actions"
 import AppContext from "components/AppContext"
-import GeneralBanner from "components/GeneralBanner"
+import GeneralBanner, {
+  GENERAL_BANNER_LEVEL,
+  GENERAL_BANNER_TEXT,
+  GENERAL_BANNER_TITLE,
+  GENERAL_BANNER_VISIBILITIES,
+  GENERAL_BANNER_VISIBILITY
+} from "components/GeneralBanner"
 import Header from "components/Header"
 import NoPositionBanner from "components/NoPositionBanner"
 import SecurityBanner from "components/SecurityBanner"
 import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
-
-const GENERAL_BANNER_LEVEL = "GENERAL_BANNER_LEVEL"
-const GENERAL_BANNER_TEXT = "GENERAL_BANNER_TEXT"
-const GENERAL_BANNER_VISIBILITY = "GENERAL_BANNER_VISIBILITY"
-const GENERAL_BANNER_TITLE = "Announcement"
-const visible = {
-  USERS: 1,
-  SUPER_USERS: 2,
-  USERS_AND_SUPER_USERS: 3
-}
 
 const TopBar = ({
   handleTopbarHeight,
@@ -57,34 +53,21 @@ const TopBar = ({
   }, [height, handleTopbarHeight])
 
   useEffect(() => {
-    let output = false
-    if (
-      visibilitySetting === visible.USERS &&
+    const output =
       currentUser &&
-      !currentUser.isSuperUser()
-    ) {
-      output = true
-    }
-    if (
-      visibilitySetting === visible.SUPER_USERS &&
-      currentUser &&
-      currentUser.isSuperUser()
-    ) {
-      output = true
-    }
-    if (
-      visibilitySetting === visible.USERS_AND_SUPER_USERS &&
-      (currentUser || currentUser.isSuperUser())
-    ) {
-      output = true
-    }
+      ((visibilitySetting === GENERAL_BANNER_VISIBILITIES.USERS_ONLY.value &&
+        !currentUser.isSuperUser()) ||
+        (visibilitySetting ===
+          GENERAL_BANNER_VISIBILITIES.SUPER_USERS_AND_ADMINISTRATORS.value &&
+          currentUser.isSuperUser()) ||
+        visibilitySetting === GENERAL_BANNER_VISIBILITIES.ALL.value)
     if (bannerVisibility !== output) {
       setBannerVisibility(output)
     }
   }, [bannerVisibility, currentUser, visibilitySetting])
 
   return (
-    <div style={{ flex: "0 0 auto", zIndex: 1100 }} ref={topbarDiv}>
+    <div style={{ flex: "0 0 auto", zIndex: 1201 }} ref={topbarDiv}>
       <div id="topbar">
         <GeneralBanner options={bannerOptions} />
         <SecurityBanner />

@@ -28,10 +28,10 @@ const Fieldset = ({ id, title, action, style, isCompact, ...otherProps }) => {
       style={style}
     >
       {(title || action) && (
-        <h2 className="legend">
+        <h4 className="legend">
           <span className="title-text">{title}</span>
-          {action && <small>{action}</small>}
-        </h2>
+          {action && <small className="action-small">{action}</small>}
+        </h4>
       )}
 
       {!_isEmpty(otherProps) && <fieldset style={style} {...otherProps} />}

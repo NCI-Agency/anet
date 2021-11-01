@@ -1,9 +1,15 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import {
+  GENERAL_BANNER_LEVEL,
+  GENERAL_BANNER_LEVELS,
+  GENERAL_BANNER_VISIBILITIES,
+  GENERAL_BANNER_VISIBILITY
+} from "components/GeneralBanner"
 import Messages from "components/Messages"
 import {
   jumpToTop,
@@ -15,10 +21,21 @@ import { Field, Form, Formik } from "formik"
 import moment from "moment"
 import UserActivityTable from "pages/admin/UserActivityTable"
 import React, { useContext, useState } from "react"
-import { Button, Col, Grid, Row } from "react-bootstrap"
+import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
 import uuidv4 from "uuid/v4"
+
+const DROPDOWN_FIELDS = [
+  {
+    name: GENERAL_BANNER_LEVEL,
+    options: GENERAL_BANNER_LEVELS
+  },
+  {
+    name: GENERAL_BANNER_VISIBILITY,
+    options: GENERAL_BANNER_VISIBILITIES
+  }
+]
 
 const GQL_GET_ADMIN_SETTINGS = gql`
   query {
@@ -98,8 +115,7 @@ const AdminIndex = ({ pageDispatchers }) => {
   const userActivitiesActionButton = (
     <Button
       disabled={actionLoading}
-      bsStyle="primary"
-      type="button"
+      variant="primary"
       onClick={loadUserActivities}
     >
       {Array.isArray(recentActivities) || Array.isArray(recentUsers)
@@ -119,8 +135,7 @@ const AdminIndex = ({ pageDispatchers }) => {
           const action = (
             <div>
               <Button
-                bsStyle="primary"
-                type="button"
+                variant="primary"
                 onClick={submitForm}
                 disabled={isSubmitting}
               >
@@ -132,13 +147,39 @@ const AdminIndex = ({ pageDispatchers }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title="Site settings" action={action} />
               <Fieldset>
-                {Object.map(settings, (key, value) => (
-                  <Field
-                    key={key}
-                    name={key}
-                    component={FieldHelper.InputField}
-                  />
-                ))}
+                {Object.map(settings, (key, value) => {
+                  const dropdownField = DROPDOWN_FIELDS.find(
+                    field => field.name === key
+                  )
+                  if (dropdownField) {
+                    return (
+                      <Field
+                        name={key}
+                        key={key}
+                        component={FieldHelper.SpecialField}
+                        widget={
+                          <FormSelect className="form-control">
+                            {Object.values(dropdownField.options).map(
+                              option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              )
+                            )}
+                          </FormSelect>
+                        }
+                      >
+                      </Field>
+                    )
+                  }
+                  return (
+                    <Field
+                      key={key}
+                      name={key}
+                      component={FieldHelper.InputField}
+                    />
+                  )
+                })}
               </Fieldset>
               <div className="submit-buttons">
                 <div />
@@ -149,13 +190,12 @@ const AdminIndex = ({ pageDispatchers }) => {
         }}
       </Formik>
       <Fieldset title="Site actions">
-        <Grid fluid>
+        <Container fluid>
           <Row style={{ paddingBottom: "24px", ...actionRowStyle }}>
             <Col md={2}>
               <Button
                 disabled={actionLoading}
-                bsStyle="primary"
-                type="button"
+                variant="primary"
                 onClick={clearCache}
                 style={{ width: "100%" }}
               >
@@ -168,8 +208,7 @@ const AdminIndex = ({ pageDispatchers }) => {
             <Col md={2}>
               <Button
                 disabled={actionLoading}
-                bsStyle="primary"
-                type="button"
+                variant="primary"
                 onClick={reloadDictionary}
                 style={{ width: "100%" }}
               >
@@ -182,7 +221,7 @@ const AdminIndex = ({ pageDispatchers }) => {
               immediately without restarting the server.
             </Col>
           </Row>
-        </Grid>
+        </Container>
       </Fieldset>
       <Fieldset
         title={getTitleText(recentActivities, "Recent Activities")}
@@ -276,7 +315,7 @@ const AdminIndex = ({ pageDispatchers }) => {
         setRecentUsers(byUser)
         setLastLoaded(moment())
         toast.success(
-          "Recent activities & recent users are loaded succesfully",
+          "Recent activities & recent users are loaded successfully",
           {
             toastId: "success-load-recent"
           }

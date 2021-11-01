@@ -1,7 +1,7 @@
 import Messages from "components/Messages"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, FormGroup, Grid, Modal } from "react-bootstrap"
+import { Button, Container, FormGroup, Modal } from "react-bootstrap"
 
 const OptionListModal = ({
   title,
@@ -14,13 +14,13 @@ const OptionListModal = ({
   const [value, setValue] = useState("")
 
   return (
-    <Modal show={showModal} onHide={onCancel}>
+    <Modal centered show={showModal} onHide={onCancel}>
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <Grid fluid>
+        <Container fluid>
           <Messages error={error} />
           <FormGroup
             onChange={e => {
@@ -30,14 +30,14 @@ const OptionListModal = ({
           >
             {children}
           </FormGroup>
-        </Grid>
+        </Container>
       </Modal.Body>
 
-      <Modal.Footer>
-        <Button className="pull-left" onClick={onCancel}>
+      <Modal.Footer className="justify-content-between">
+        <Button variant="outline-secondary" onClick={onCancel}>
           Cancel
         </Button>
-        <Button className="save-button" onClick={save} bsStyle="primary">
+        <Button className="save-button" onClick={save} variant="primary">
           Save
         </Button>
       </Modal.Footer>

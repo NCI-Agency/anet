@@ -19,6 +19,7 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 
 public class PositionResource {
@@ -76,14 +77,17 @@ public class PositionResource {
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
 
-    final Position position = dao.insert(pos);
+    final Position created = dao.insert(pos);
 
     if (pos.getPersonUuid() != null) {
-      dao.setPersonInPosition(pos.getPersonUuid(), position.getUuid());
+      dao.setPersonInPosition(pos.getPersonUuid(), created.getUuid());
     }
 
-    AnetAuditLogger.log("Position {} created by {}", position, user);
-    return position;
+    DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, created.getUuid(),
+        pos.getCustomSensitiveInformation());
+
+    AnetAuditLogger.log("Position {} created by {}", created, user);
+    return created;
   }
 
   @GraphQLMutation(name = "updateAssociatedPosition")
@@ -126,11 +130,14 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
 
+    DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
+        pos.getCustomSensitiveInformation());
+
     if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
       final Position current = dao.getByUuid(pos.getUuid());
       if (current != null) {
         // Run the diff and see if anything changed and update.
-        if (pos.getPersonUuid() != null) {
+        if (pos.getPerson() != null) {
           if (pos.getPersonUuid() == null) {
             // Intentionally remove the person
             dao.removePersonFromPosition(current.getUuid());
@@ -158,8 +165,27 @@ public class PositionResource {
     return numRows;
   }
 
+  @GraphQLMutation(name = "updatePositionHistory")
+  public int updatePositionHistory(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "position") Position pos) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position existing = dao.getByUuid(pos.getUuid());
+    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople());
+    assertCanUpdatePosition(user, existing);
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
+        pos.getPreviousPeople(), false)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+    final int numRows =
+        AnetObjectEngine.getInstance().getPositionDao().updatePositionPreviousPeople(pos);
+    AnetAuditLogger.log("History updated for position {} by {}", pos, user);
+    return numRows;
+  }
+
   @GraphQLMutation(name = "putPersonInPosition")
-  public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
+  public int putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String positionUuid,
       @GraphQLArgument(name = "person") Person person) {
     final Person user = DaoUtils.getUserFromContext(context);
@@ -169,7 +195,7 @@ public class PositionResource {
     }
     AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
-    int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
+    final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
     return numRows;
   }
@@ -197,6 +223,7 @@ public class PositionResource {
   public CompletableFuture<AnetBeanList<Position>> search(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") PositionSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(context, query);
   }
 
@@ -227,6 +254,59 @@ public class PositionResource {
     // if this position is in an organization, just remove it
     // if this position has any associated positions, just remove them
     return dao.delete(positionUuid);
+  }
+
+  @GraphQLMutation(name = "mergePositions")
+  public Position mergePositions(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "winnerPosition") Position winnerPosition,
+      @GraphQLArgument(name = "loserUuid") String loserUuid) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Position loserPosition = dao.getByUuid(loserUuid);
+
+    ResourceUtils.validateHistoryInput(winnerPosition.getUuid(),
+        winnerPosition.getPreviousPeople());
+    assertCanUpdatePosition(user, winnerPosition);
+    // Check that given two position can be merged
+    arePositionsMergeable(winnerPosition, loserPosition);
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerPosition.getUuid(),
+        loserUuid, winnerPosition.getPreviousPeople(), false)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+    validatePosition(user, winnerPosition);
+
+    int numRows = dao.mergePositions(winnerPosition, loserPosition);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged position relation information.",
+          Status.NOT_FOUND);
+    }
+    AnetAuditLogger.log("Position {} merged into {} by {}", loserPosition, winnerPosition, user);
+    return winnerPosition;
+  }
+
+  private void arePositionsMergeable(Position winnerPos, Position loserPos) {
+    if (loserPos.getUuid().equals(winnerPos.getUuid())) {
+      throw new WebApplicationException("Cannot merge identical positions.", Status.BAD_REQUEST);
+    }
+
+    if (Objects.nonNull(loserPos.getPersonUuid()) && Objects.nonNull(winnerPos.getPersonUuid())) {
+      throw new WebApplicationException("Cannot merge positions when both have assigned person.",
+          Status.BAD_REQUEST);
+    }
+
+    if (!loserPos.getOrganizationUuid().equals(winnerPos.getOrganizationUuid())) {
+      throw new WebApplicationException("Cannot merge positions from different organizations.",
+          Status.BAD_REQUEST);
+    }
+
+    if (Objects.nonNull(loserPos.getPersonUuid()) && Objects.isNull(winnerPos.getPersonUuid())) {
+      throw new WebApplicationException(
+          "If There is a person assigned to one of the combined Positions, "
+              + "This person must be in the position which is merged",
+          Status.BAD_REQUEST);
+    }
   }
 
 }

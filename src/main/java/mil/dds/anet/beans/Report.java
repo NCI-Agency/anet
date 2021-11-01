@@ -24,7 +24,8 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractCustomizableAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Report extends AbstractCustomizableAnetBean implements RelatableObject {
+public class Report extends AbstractCustomizableAnetBean
+    implements RelatableObject, SubscribableObject {
 
   public enum ReportState {
     DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, // -
@@ -593,15 +594,6 @@ public class Report extends AbstractCustomizableAnetBean implements RelatableObj
       }
     }
     return actionTail;
-  }
-
-  public List<ReportAction> getWorkflow() {
-    return workflow;
-  }
-
-  @GraphQLInputField(name = "workflow")
-  public void setWorkflow(List<ReportAction> workflow) {
-    this.workflow = workflow;
   }
 
   private List<ReportAction> createApprovalStepsActions(List<ReportAction> actions,

@@ -192,7 +192,7 @@ const reportTour = (currentUser, history) => {
         ]
         : []),
       {
-        title: Settings.fields.report.nextSteps,
+        title: Settings.fields.report.nextSteps.label,
         content:
           "Here, tell readers about the next concrete steps that you'll be taking to build on the progress made in your engagement. This will be displayed in your report's summary, so include information that will explain to leadership what you are doing next, as a result of your meeting's outcomes.",
         target: "#nextSteps",
@@ -250,41 +250,41 @@ const orgTour = (currentUser, history) => {
       {
         title: "Supported positions",
         content: `This section shows positions in your organization that currently have people assigned to them. The ${advisorPositionSingular} column tells you the name and ${advisorPositionCode} of the position. To update this information, click on the position and select the "Edit" option.`,
-        target: "#supportedPositions h2",
+        target: "#supportedPositions h4",
         placement: "top"
       },
       {
         title: "Vacant positions",
         content:
           "Here you'll find positions that don't have anyone assigned to them. To assign someone to the position, or to mark the position inactive, click on the position.",
-        target: "#vacantPositions h2",
+        target: "#vacantPositions h4",
         placement: "top"
       },
       {
         title: "Engagement planning approval process",
         content:
           'Set up or update the approval process for planning of future engagements authored in your organization by clicking "Edit" on the top of the page. We recommend having more than one approver in each step so that either person can approve the planning of the engagement. When a future engagement has gone through every step in your approval chain, it will automatically be published on ANET. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you\'ll need to set up an approval chain for each sub-organization as well.',
-        target: "#planningApprovals h2",
+        target: "#planningApprovals h4",
         placement: "top"
       },
       {
         title: "Report publication approval process",
         content:
           "Set up or update the approval process for publication of reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
-        target: "#approvals h2",
+        target: "#approvals h4",
         placement: "top"
       },
       {
         title: taskShortLabelPlural,
         content: `The ${Settings.fields.task.longLabel} that your organization is responsible for will be displayed in this section. If you need to make changes, or if ${taskShortLabelPlural} change, you can update that information by clicking on the ${taskShortLabelSingular}.`,
-        target: "#tasks h2",
+        target: "#tasks h4",
         placement: "top"
       },
       {
         title: "Your orginization's reports",
         content:
           "Here, you'll find the complete list of all reports authored by your members of your organization.",
-        target: "#reports h2",
+        target: "#reports h4",
         placement: "top"
       },
       {
@@ -330,20 +330,20 @@ const positionTour = (currentUser, history) => {
       {
         title: "Current assigned person",
         content: `This section shows you who is currently assigned to this position. For ${advisorPositionSingular} positions, you'll see the ${advisorSingular} in this position. For ${principalPositionSingular} positions, you'll see the current ${principalSingular} in that position. You can click the "Change assigned person" button to quickly change who is in this position.`,
-        target: "#assigned-advisor h2",
+        target: "#assigned-advisor h4",
         placement: "top"
       },
       {
         title: `Assigned ${principalSingular} or ${advisorSingular}`,
         content: `If you're looking at a ${advisorPositionSingular} position, you'll see the people this position is responisble for advising. If you're looking at a ${principalPositionSingular} position, you'll see the ${advisorPlural} advising that ${principalPositionSingular} here. You can update this information by clicking the "Change assigned ${advisorSingular}" or "Change assigned ${principalSingular}" button, depending on what type of position you're looking at.`,
-        target: "#assigned-principal h2",
+        target: "#assigned-principal h4",
         placement: "top"
       },
       {
         title: "Previous position holders",
         content:
           "The previous position holders section will show you other people who have previously held this position.",
-        target: "#previous-people h2",
+        target: "#previous-people h4",
         placement: "top"
       },
       {
@@ -370,20 +370,20 @@ const personTour = (currentUser, history) => {
         title: "Current assigned position",
         content:
           "This section tells you which position this person is currently in. If you need to remove them from this position, or assign them to a different position, you can do so from here.",
-        target: "#current-position h2",
+        target: "#current-position",
         placement: "top"
       },
       {
         title: "Authored reports",
         content: `If this person has authored any reports, you'll be able to see them displayed here. If you're looking at an ${principalSingular}'s page, you won't see this section.`,
-        target: "#reports-authored h2",
+        target: "#reports-authored h4",
         placement: "top"
       },
       {
         title: "Engagements attended by this person",
         content:
           "If this person has been mentioned as an attendee of reports, those reports will display here.",
-        target: "#reports-attended h2",
+        target: "#reports-attended h4",
         placement: "top"
       },
       {

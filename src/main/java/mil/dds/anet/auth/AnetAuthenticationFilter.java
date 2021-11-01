@@ -18,6 +18,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.database.PersonDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +28,12 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final AnetObjectEngine engine;
+  private final PersonDao dao;
   private final Timer timerFilter;
   private final Timer timerAuthorize;
 
   public AnetAuthenticationFilter(AnetObjectEngine engine, MetricRegistry metricRegistry) {
-    this.engine = engine;
+    this.dao = engine.getPersonDao();
     this.timerFilter = metricRegistry.timer(MetricRegistry.name(this.getClass(), "filter"));
     this.timerAuthorize = metricRegistry.timer(MetricRegistry.name(this.getClass(), "authorize"));
   }
@@ -42,21 +43,13 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
     final Timer.Context context = timerFilter.time();
     try {
       final SecurityContext secContext = ctx.getSecurityContext();
-      Principal p = secContext.getUserPrincipal();
+      final Principal p = secContext.getUserPrincipal();
       if (p != null) {
-        String domainUsername = p.getName();
-        List<Person> matches = engine.getPersonDao().findByDomainUsername(domainUsername);
-        Person person;
-        if (matches.size() == 0) {
-          // First time this user has ever logged in.
-          person = new Person();
-          person.setDomainUsername(domainUsername);
-          person.setName("");
-          person.setRole(Role.ADVISOR);
-          person.setPendingVerification(true);
-          person = engine.getPersonDao().insert(person);
-        } else {
-          person = matches.get(0);
+        // Call non-synchronized method first
+        Person person = findUser(p);
+        if (person == null) {
+          // Call synchronized method
+          person = findOrCreateUser(p);
         }
 
         final Person user = person;
@@ -87,6 +80,30 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
     } finally {
       context.stop();
     }
+  }
+
+  // Non-synchronized method, safe to run multiple times in parallel
+  private Person findUser(Principal p) {
+    final String domainUsername = p.getName();
+    final List<Person> matches = dao.findByDomainUsername(domainUsername);
+    return (matches.size() == 0) ? null : matches.get(0);
+  }
+
+  // Synchronized method, so we create at most one user in the face of multiple simultaneous
+  // authentication requests
+  private synchronized Person findOrCreateUser(Principal p) {
+    final Person person = findUser(p);
+    if (person != null) {
+      return person;
+    }
+    // First time this user has ever logged in.
+    final Person newPerson = new Person();
+    final String domainUsername = p.getName();
+    newPerson.setDomainUsername(domainUsername);
+    newPerson.setName("");
+    newPerson.setRole(Role.ADVISOR);
+    newPerson.setPendingVerification(true);
+    return dao.insert(newPerson);
   }
 
   @Override

@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import Messages from "components/Messages"
 import {
@@ -106,6 +106,12 @@ const GQL_GET_APP_DATA = gql`
           }
           ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
         }
+        authorizationGroups {
+          uuid
+          name
+          description
+          status
+        }
       }
     }
 
@@ -192,7 +198,7 @@ const App = ({ pageDispatchers, pageProps }) => {
           principalOrganizations: appState.principalOrganizations
         }}
       >
-        <ToastContainer />
+        <ToastContainer theme="colored" />
         <ReactTooltip id="tooltip-top" place="top" className="tooltip-top" />
         <Routing />
       </ResponsiveLayout>

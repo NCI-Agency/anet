@@ -1,6 +1,6 @@
+import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import { initInvisibleFields } from "components/CustomFields"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -138,21 +138,23 @@ const ReportEdit = ({ pageDispatchers }) => {
 
   return (
     <div className="report-edit">
-      <RelatedObjectNotes
-        notes={report.notes}
-        relatedObject={
-          report.uuid && {
-            relatedObjectType: Report.relatedObjectType,
-            relatedObjectUuid: report.uuid,
-            relatedObject: report
-          }
-        }
-      />
       <ReportForm
         edit
         initialValues={reportInitialValues}
         title={`Report #${report.uuid}`}
         showSensitiveInfo={!!report.reportSensitiveInformation?.text}
+        notesComponent={
+          <RelatedObjectNotes
+            notes={report.notes}
+            relatedObject={
+              report.uuid && {
+                relatedObjectType: Report.relatedObjectType,
+                relatedObjectUuid: report.uuid,
+                relatedObject: report
+              }
+            }
+          />
+        }
       />
     </div>
   )

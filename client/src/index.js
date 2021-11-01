@@ -1,4 +1,4 @@
-import { ApolloProvider } from "@apollo/react-hooks"
+import { ApolloProvider } from "@apollo/client"
 import API from "api"
 import "bootstrap/dist/css/bootstrap.css"
 import { jumpToTop } from "components/Page"
@@ -10,6 +10,7 @@ import { Provider } from "react-redux"
 import { BrowserRouter, Route } from "react-router-dom"
 import { persistStore } from "redux-persist"
 import { PersistGate } from "redux-persist/lib/integration/react"
+import "./bootstrapOverrides.css"
 import "./index.css"
 import configureStore from "./store/configureStore"
 

@@ -28,6 +28,7 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
+import mil.dds.anet.database.CustomSensitiveInformationDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.JobHistoryDao;
 import mil.dds.anet.database.LocationDao;
@@ -39,6 +40,8 @@ import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.database.SavedSearchDao;
+import mil.dds.anet.database.SubscriptionDao;
+import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
@@ -65,9 +68,12 @@ public class AnetObjectEngine {
   private final SavedSearchDao savedSearchDao;
   private final EmailDao emailDao;
   private final ReportSensitiveInformationDao reportSensitiveInformationDao;
+  private final CustomSensitiveInformationDao customSensitiveInformationDao;
   private final AuthorizationGroupDao authorizationGroupDao;
   private final NoteDao noteDao;
   private final JobHistoryDao jobHistoryDao;
+  private final SubscriptionDao subscriptionDao;
+  private final SubscriptionUpdateDao subscriptionUpdateDao;
   private final MetricRegistry metricRegistry;
   private ThreadLocal<Map<String, Object>> context;
 
@@ -95,10 +101,13 @@ public class AnetObjectEngine {
     adminDao = injector.getInstance(AdminDao.class);
     savedSearchDao = injector.getInstance(SavedSearchDao.class);
     reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
+    customSensitiveInformationDao = injector.getInstance(CustomSensitiveInformationDao.class);
     emailDao = injector.getInstance(EmailDao.class);
     authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
     noteDao = injector.getInstance(NoteDao.class);
     jobHistoryDao = injector.getInstance(JobHistoryDao.class);
+    subscriptionDao = injector.getInstance(SubscriptionDao.class);
+    subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
     this.metricRegistry = metricRegistry;
     searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
     configuration = config;
@@ -161,6 +170,10 @@ public class AnetObjectEngine {
     return reportSensitiveInformationDao;
   }
 
+  public CustomSensitiveInformationDao getCustomSensitiveInformationDao() {
+    return customSensitiveInformationDao;
+  }
+
   public AuthorizationGroupDao getAuthorizationGroupDao() {
     return authorizationGroupDao;
   }
@@ -171,6 +184,14 @@ public class AnetObjectEngine {
 
   public JobHistoryDao getJobHistoryDao() {
     return jobHistoryDao;
+  }
+
+  public SubscriptionDao getSubscriptionDao() {
+    return subscriptionDao;
+  }
+
+  public SubscriptionUpdateDao getSubscriptionUpdateDao() {
+    return subscriptionUpdateDao;
   }
 
   public EmailDao getEmailDao() {

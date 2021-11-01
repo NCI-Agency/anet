@@ -63,7 +63,7 @@ test.beforeEach(t => {
   } else {
     capabilities.name = t.title.replace(/^beforeEach hook for /, "")
     builder = builder
-      .usingServer("http://hub-cloud.browserstack.com/wd/hub")
+      .usingServer("http://hub.browserstack.com/wd/hub")
       .withCapabilities(capabilities)
   }
   t.context.driver = builder.build()
@@ -297,8 +297,11 @@ test.beforeEach(t => {
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       t.context.waitForLoadingFinished()
       const $advancedSelectSuggestion = await t.context.$(
-        `${popoverSelector} tbody tr:first-child td input`
+        `${popoverSelector} tbody tr:first-child td:first-child input`
       )
+      // Move element into view
+      const actions = t.context.driver.actions({ async: true })
+      await actions.move({ origin: $advancedSelectSuggestion }).perform()
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput
     },
@@ -306,7 +309,7 @@ test.beforeEach(t => {
       const $meetingGoalInput = await t.context.$(inputSelector)
       await $meetingGoalInput.sendKeys(text)
       if (delay) {
-        await t.context.driver.sleep(delay) // wait e.g. for Draftail to save the editor contents
+        await t.context.driver.sleep(delay) // wait e.g. for Slate to save the editor contents
       }
     },
     async assertReportShowStatusText(t, text) {
@@ -316,8 +319,14 @@ test.beforeEach(t => {
         text
       )
     },
+    async clickMenuLinksButton() {
+      const $menuLinksButton = await t.context.$(
+        "#leftNav div:nth-child(3) > a"
+      )
+      await $menuLinksButton.click()
+    },
     async clickMyOrgLink() {
-      const $myOrgLink = await t.context.$("#my-organization")
+      const $myOrgLink = await t.context.$('a[href*="/organizations/"]')
       await t.context.driver.wait(t.context.until.elementIsVisible($myOrgLink))
       await $myOrgLink.click()
       await t.context.waitForLoadingFinished()
@@ -384,7 +393,7 @@ test.afterEach.always(async t => {
           Authorization:
             "Basic " +
             Buffer.from(
-              `${capabilities["browserstack.user"]}:${capabilities["browserstack.key"]}`
+              `${capabilities["bstack:options"].userName}:${capabilities["bstack:options"].accessKey}`
             ).toString("base64")
         },
         body: JSON.stringify({

@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
 import LinkToPreviewed from "components/LinkToPreviewed"
@@ -5,7 +7,7 @@ import { EngagementTrends } from "components/Trends"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Glyphicon, Panel } from "react-bootstrap"
+import { Button, Card } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -13,7 +15,8 @@ const Kanban = ({ columns, allTasks }) => (
   <div
     style={{
       display: "flex",
-      flexDirection: "row"
+      flexDirection: "row",
+      overflowX: "auto"
     }}
   >
     {columns.map(column => {
@@ -51,13 +54,13 @@ const Column = ({ name, tasks }) => {
   }, {})
 
   return (
-    <Panel style={{ flex: "1 1 0%", margin: "4px" }}>
-      <Panel.Heading>
+    <Card style={{ flex: "1 1 0%", margin: "4px" }}>
+      <Card.Header>
         <strong>
           <em>{name} </em>
         </strong>
-      </Panel.Heading>
-      <Panel.Body>
+      </Card.Header>
+      <Card.Body>
         <Pie
           width={70}
           height={70}
@@ -93,13 +96,24 @@ const Column = ({ name, tasks }) => {
         <br />
         <strong>{Settings.fields.task.longLabel}</strong>
         {"  "}
-        <Button bsSize="xs" onClick={() => setOpen(!open)}>
-          <Glyphicon glyph={open ? "triangle-top" : "triangle-bottom"} />
+        <Button
+          size="xs"
+          onClick={() => setOpen(!open)}
+          variant="outline-secondary"
+        >
+          <Icon
+            icon={
+              open
+                ? IconNames.SYMBOL_TRIANGLE_UP
+                : IconNames.SYMBOL_TRIANGLE_DOWN
+            }
+          >
+          </Icon>
         </Button>
         <br />
-        {open && tasks.map(task => <Card task={task} key={task.uuid} />)}
-      </Panel.Body>
-    </Panel>
+        {open && tasks.map(task => <CardView task={task} key={task.uuid} />)}
+      </Card.Body>
+    </Card>
   )
 }
 
@@ -108,12 +122,12 @@ Column.propTypes = {
   tasks: PropTypes.array.isRequired
 }
 
-const Card = ({ task }) => {
+const CardView = ({ task }) => {
   const [open, setOpen] = useState(false)
   const { customFieldEnum1 } = task
   const enumSettings = Settings.fields.task.customFieldEnum1.enum
   return (
-    <Panel
+    <Card
       onClick={() => setOpen(!open)}
       style={{
         backgroundColor:
@@ -144,7 +158,7 @@ const Card = ({ task }) => {
       </div>
 
       {open && (
-        <Panel.Body>
+        <Card.Body>
           <small>
             <table cellPadding="4">
               <tbody>
@@ -183,13 +197,13 @@ const Card = ({ task }) => {
               </tbody>
             </table>
           </small>
-        </Panel.Body>
+        </Card.Body>
       )}
-    </Panel>
+    </Card>
   )
 }
 
-Card.propTypes = {
+CardView.propTypes = {
   task: PropTypes.object.isRequired
 }
 

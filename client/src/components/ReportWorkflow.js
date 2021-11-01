@@ -14,13 +14,14 @@ const ACTION_TYPE_DETAILS = {
   REJECT: { text: "Changes requested", cssClass: "btn-danger rejected" },
   SUBMIT: { text: "Submitted", cssClass: "btn-pending submitted" },
   PUBLISH: { text: "Published", cssClass: "btn-success published" },
+  UNPUBLISH: { text: "Unpublished", cssClass: "btn-danger unpublished" },
   null: { text: "Pending", cssClass: "btn-pending default" }
 }
 
 const ApprovalStepModalStatus = ({ action }) => {
   if (action.type) {
     const actionType = ACTION_TYPE_DETAILS[action.type]
-    const cssClass = "label " + actionType.cssClass
+    const cssClass = "badge " + actionType.cssClass
     return (
       <span className={cssClass}>
         {actionType.text} by{" "}
@@ -40,7 +41,7 @@ const ApprovalStepModalStatus = ({ action }) => {
       </span>
     )
   }
-  return <span className="label pending">Pending</span>
+  return <span className="badge badge-pill pending">Pending</span>
 }
 ApprovalStepModalStatus.propTypes = {
   action: PropTypes.object.isRequired
@@ -60,10 +61,11 @@ const ApprovalStepModal = ({ action }) => {
       <Button
         className={actionTypeCss + " btn-sm"}
         onClick={() => setShowModal(true)}
+        variant="default"
       >
         <span>{step.name}</span>
       </Button>
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal centered show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Approvers for {step.name}</Modal.Title>
         </Modal.Header>
@@ -111,7 +113,11 @@ export const ActionButton = ({ action }) => {
   return step ? (
     <ApprovalStepModal action={action} />
   ) : (
-    <Button className={actionType.cssClass + " btn-sm"} disabled>
+    <Button
+      className={actionType.cssClass + " btn-sm"}
+      variant="outline-secondary"
+      disabled
+    >
       <span>
         <LinkTo modelType="Person" model={action.person} isLink={false} />
       </span>

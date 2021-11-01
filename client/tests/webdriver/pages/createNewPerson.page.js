@@ -7,6 +7,11 @@ const INVISIBLE_CUSTOM_FIELDS = {
   number: "formCustomFields.numberFieldName"
 }
 
+const SENSITIVE_CUSTOM_FIELDS = {
+  birthday: "formSensitiveFields.birthday",
+  politicalPosition: "formSensitiveFields.politicalPosition"
+}
+
 class CreatePerson extends Page {
   get form() {
     return browser.$("form.form-horizontal")
@@ -24,12 +29,28 @@ class CreatePerson extends Page {
     return browser.$("#firstName")
   }
 
+  get duplicatesButton() {
+    return browser.$('//button[text()="Possible Duplicates"]')
+  }
+
+  get modalContent() {
+    return browser.$("div.modal-content")
+  }
+
+  get modalCloseButton() {
+    return this.modalContent.$("button.btn-close")
+  }
+
+  get similarPerson() {
+    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  }
+
   get rolePrincipalButton() {
-    return browser.$("#rolePrincipalButton")
+    return browser.$('label[for="role_PRINCIPAL"]')
   }
 
   get roleAdvisorButton() {
-    return browser.$("#roleAdvisorButton")
+    return browser.$('label[for="role_ADVISOR"]')
   }
 
   get emailAddress() {
@@ -57,7 +78,7 @@ class CreatePerson extends Page {
   }
 
   get biography() {
-    return browser.$(".biography .public-DraftEditor-content")
+    return browser.$(".biography .editable")
   }
 
   get submitButton() {
@@ -82,7 +103,7 @@ class CreatePerson extends Page {
 
   get numberCustomFieldHelpText() {
     return this.numberCustomFieldContainer.$(
-      '//span[contains(text(), "greater than")]'
+      '//div[contains(text(), "greater than")]'
     )
   }
 
@@ -93,11 +114,15 @@ class CreatePerson extends Page {
   }
 
   get greenButton() {
-    return this.customFieldsContainer.$('label[id="GREEN"]')
+    return this.customFieldsContainer.$(
+      'label[for="formCustomFields.colourOptions_GREEN"]'
+    )
   }
 
   get amberButton() {
-    return this.customFieldsContainer.$('label[id="AMBER"]')
+    return this.customFieldsContainer.$(
+      'label[for="formCustomFields.colourOptions_AMBER"]'
+    )
   }
 
   get addArrayObjectButton() {
@@ -112,8 +137,46 @@ class CreatePerson extends Page {
     )
   }
 
+  get sensitiveFieldsContainer() {
+    return browser.$("#sensitive-fields")
+  }
+
+  get birthdaySensitiveFieldContainer() {
+    return this.getSensitiveFieldContainerByName(
+      SENSITIVE_CUSTOM_FIELDS.birthday
+    )
+  }
+
+  get politicalPositionSensitiveFieldContainer() {
+    return this.getSensitiveFieldContainerByName(
+      SENSITIVE_CUSTOM_FIELDS.politicalPosition
+    )
+  }
+
+  get birthday() {
+    return this.sensitiveFieldsContainer.$(
+      'input[id="formSensitiveFields.birthday'
+    )
+  }
+
+  get leftButton() {
+    return this.sensitiveFieldsContainer.$(
+      'label[for="formSensitiveFields.politicalPosition_LEFT"]'
+    )
+  }
+
+  get middleButton() {
+    return this.sensitiveFieldsContainer.$(
+      'label[for="formSensitiveFields.politicalPosition_MIDDLE"]'
+    )
+  }
+
   getCustomFieldContainerByName(name) {
     return this.customFieldsContainer.$(`div[id="fg-${name}"]`)
+  }
+
+  getSensitiveFieldContainerByName(name) {
+    return this.sensitiveFieldsContainer.$(`div[id="fg-${name}"]`)
   }
 
   openAsSuperUser() {

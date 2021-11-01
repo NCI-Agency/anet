@@ -125,6 +125,11 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
       addBatchClause(query);
     }
 
+    if (query.getUser() != null && query.getSubscribed()) {
+      qb.addWhereClause(Searcher.getSubscriptionReferences(query.getUser(), qb.getSqlArgs(),
+          AnetObjectEngine.getInstance().getReportDao().getSubscriptionUpdate(null)));
+    }
+
     // We do not store status in reports as we consider them all ACTIVE. Hence, we want to return
     // no results when querying for INACTIVE reports
     if (query.getStatus() == WithStatus.Status.INACTIVE) {

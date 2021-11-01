@@ -167,7 +167,7 @@ a {
             	</#if>
             </#if>
             <#if report.nextSteps??>
-                <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>
+                <p><strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}</p>
             </#if>
             <#if showReportText >
                 <p><strong>${fields.report.reportText}</strong> ${(report.reportText)!?no_esc}</p>

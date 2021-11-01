@@ -3,8 +3,8 @@ import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
-import { Report, Person, Position } from "models"
-import { fuzzy, runGQL, populate } from "../simutils"
+import { Location, Person, Position, Report } from "models"
+import { fuzzy, populate, runGQL } from "../simutils"
 import { getRandomObject } from "./NoteStories"
 
 const getRandomPerson = async function(user, hasPosition, type, role) {
@@ -35,11 +35,16 @@ const getRandomPerson = async function(user, hasPosition, type, role) {
 
 async function populateReport(report, user, args) {
   const location = await getRandomObject(user, "locations", {
-    status: Model.STATUS.ACTIVE
+    status: Model.STATUS.ACTIVE,
+    type: fuzzy.withProbability(0.75)
+      ? Location.LOCATION_TYPES.PRINCIPAL_LOCATION
+      : fuzzy.withProbability(0.95)
+        ? Location.LOCATION_TYPES.ADVISOR_LOCATION
+        : Location.LOCATION_TYPES.VIRTUAL_LOCATION
   })
   async function getAttendees() {
     const reportPeople = []
-    const nbOfAdvisors = faker.random.number({ min: 1, max: 5 })
+    const nbOfAdvisors = faker.datatype.number({ min: 1, max: 5 })
     let primary = true
     for (let i = 0; i < nbOfAdvisors; i++) {
       const advisor = await getRandomPerson(
@@ -57,10 +62,10 @@ async function populateReport(report, user, args) {
       }
     }
     // Pick random advisor attendee as author
-    const n = faker.random.number({ min: 0, max: reportPeople.length - 1 })
+    const n = faker.datatype.number({ min: 0, max: reportPeople.length - 1 })
     reportPeople[n].author = true
 
-    const nbOfPrincipals = faker.random.number({ min: 1, max: 5 })
+    const nbOfPrincipals = faker.datatype.number({ min: 1, max: 5 })
     primary = true
     for (let i = 0; i < nbOfPrincipals; i++) {
       const principal = await getRandomPerson(
@@ -91,7 +96,7 @@ async function populateReport(report, user, args) {
   const reportPeople = await getAttendees()
   async function getTasks() {
     const reportTasks = []
-    const nbOfTasks = faker.random.number({ min: 1, max: 3 })
+    const nbOfTasks = faker.datatype.number({ min: 1, max: 3 })
 
     for (let i = 0; i < nbOfTasks; i++) {
       reportTasks.push(
@@ -121,7 +126,7 @@ async function populateReport(report, user, args) {
   const template = {
     intent: () => faker.lorem.paragraph(),
     engagementDate: engagementDate.toISOString(),
-    duration: () => faker.random.number({ min: 1, max: 480 }),
+    duration: () => faker.datatype.number({ min: 1, max: 480 }),
     cancelledReason,
     atmosphere: () =>
       faker.random.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
@@ -168,7 +173,7 @@ async function populateReport(report, user, args) {
 }
 
 const createReport = async function(user, grow, args) {
-  const report = Object.without(new Report(), "formCustomFields")
+  const report = Report.filterClientSideFields(new Report())
   if (await populateReport(report, user, args)) {
     console.debug(`Creating report ${report.intent.green}`)
     const { cancelled, ...reportStripped } = report // TODO: we need to do this more generically
@@ -204,7 +209,7 @@ const updateDraftReport = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.random.number({ max: totalCount - 1 })
+  const random = faker.datatype.number({ max: totalCount - 1 })
   const reports = (
     await runGQL(user, {
       query: `
@@ -275,7 +280,7 @@ const submitDraftReport = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.random.number({ max: totalCount - 1 })
+  const random = faker.datatype.number({ max: totalCount - 1 })
   const reports = (
     await runGQL(user, {
       query: `
@@ -328,7 +333,7 @@ const approveReport = async function(user) {
   if (totalCount === 0) {
     return null
   }
-  const random = faker.random.number({ max: totalCount - 1 })
+  const random = faker.datatype.number({ max: totalCount - 1 })
   const reports = (
     await runGQL(user, {
       query: `

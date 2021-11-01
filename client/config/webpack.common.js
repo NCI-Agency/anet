@@ -2,6 +2,7 @@ const merge = require("webpack-merge")
 const CircularDependencyPlugin = require("circular-dependency-plugin")
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
+const ESLintPlugin = require("eslint-webpack-plugin")
 const webpack = require("webpack")
 const paths = require("./paths")
 
@@ -17,22 +18,12 @@ const commonConfig = {
         loader: "ignore-loader"
       },
       {
-        // work-around from https://github.com/graphql/graphiql/issues/617#issuecomment-539034320 ;
-        // TODO: may at some point be removed again
-        test: /\.(ts|ts\.map|js\.map)$/,
-        include: /node_modules\/graphql-language-service-interface/,
-        loader: "ignore-loader"
-      },
-      {
-        test: /\.mjs$/,
+        test: /\.m?js$/,
         include: /node_modules/,
+        resolve: {
+          fullySpecified: false
+        },
         type: "javascript/auto"
-      },
-      {
-        enforce: "pre",
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: ["eslint-loader"]
       },
       {
         test: /\.(m?js|jsx)$/,
@@ -51,7 +42,7 @@ const commonConfig = {
       },
       {
         test: /\.m?js$/,
-        // Based on https://github.com/facebook/create-react-app/pull/3776
+        // Based on https://github.com/facebook/create-react-app/blob/main/packages/react-scripts/config/webpack.config.js
         include: /node_modules/,
         use: [
           "thread-loader",
@@ -59,9 +50,17 @@ const commonConfig = {
             loader: "babel-loader",
             options: {
               babelrc: false,
+              configFile: false,
               compact: false,
-              presets: [require.resolve("babel-preset-react-app/dependencies")],
-              cacheDirectory: true
+              presets: [
+                [
+                  require.resolve("babel-preset-react-app/dependencies"),
+                  { helpers: true }
+                ]
+              ],
+              cacheDirectory: true,
+              // see https://github.com/facebook/create-react-app/issues/6846
+              cacheCompression: false
             }
           }
         ]
@@ -77,14 +76,7 @@ const commonConfig = {
       },
       {
         test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              name: "static/media/[name].[hash:8].[ext]"
-            }
-          }
-        ]
+        type: "asset/resource"
       }
     ]
   }
@@ -113,7 +105,10 @@ module.exports = {
     },
     plugins: [
       new webpack.DefinePlugin({
-        "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+        "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+        // Work-around for https://github.com/palantir/blueprint/issues/3739
+        // and https://github.com/palantir/blueprint/issues/4393
+        "process.env.BLUEPRINT_NAMESPACE": JSON.stringify("bp3")
       }),
       new CircularDependencyPlugin({
         // exclude detection of files based on a RegExp
@@ -129,7 +124,8 @@ module.exports = {
       new ContextReplacementPlugin(/moment[\\/]locale$/, /^\.\/(en)$/),
       new CopyWebpackPlugin({
         patterns: [{ from: "public", globOptions: { ignore: ["index.html"] } }]
-      })
+      }),
+      new ESLintPlugin()
       // new webpack.optimize.CommonsChunkPlugin({
       //     name: "dependencies",
       //     minChunks: ({ resource }) => /node_modules/.test(resource)

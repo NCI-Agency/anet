@@ -1,7 +1,6 @@
 import API from "api"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import * as FieldHelper from "components/FieldHelper"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   GQL_CREATE_NOTE,
@@ -28,7 +27,21 @@ const RelatedObjectNoteModal = ({
 }) => {
   const yupSchema = yup.object().shape({
     type: yup.string().required(),
-    text: yup.string().default("")
+    text: yup
+      .string()
+      .test(
+        "text",
+        "text error",
+        // can't use arrow function here because of binding to 'this'
+        function(text) {
+          return utils.isEmptyHtml(text)
+            ? this.createError({
+              message: "You must provide the text"
+            })
+            : true
+        }
+      )
+      .default("")
   })
   const [error, setError] = useState(null)
   const [relatedObjects, setRelatedObjects] = useState(
@@ -37,7 +50,13 @@ const RelatedObjectNoteModal = ({
   const edit = !!note.uuid
 
   return (
-    <Modal show={showModal} onHide={close}>
+    <Modal
+      centered
+      show={showModal}
+      onHide={close}
+      style={{ zIndex: "1300" }}
+      dialogClassName="rich-text-modal"
+    >
       <Formik
         enableReinitialize
         onSubmit={onSubmit}
@@ -83,16 +102,11 @@ const RelatedObjectNoteModal = ({
                     value={noteText}
                     component={FieldHelper.SpecialField}
                     onChange={value => setFieldValue("text", value)}
-                    widget={
-                      <RichTextEditor
-                        className="textField"
-                        onHandleBlur={() => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched("text", true, false)
-                        }}
-                        linkToComp={LinkToPreviewed}
-                      />
-                    }
+                    onHandleBlur={() => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("text", true, false)
+                    }}
+                    widget={<RichTextEditor />}
                     vertical
                   />
                   <RelatedObjectsTable
@@ -103,23 +117,23 @@ const RelatedObjectNoteModal = ({
                   />
                 </div>
               </Modal.Body>
-              <Modal.Footer>
-                <Button className="pull-left" onClick={close}>
+              <Modal.Footer className="justify-content-between">
+                <Button onClick={close} variant="outline-secondary">
                   Cancel
                 </Button>
                 {_isEmpty(relatedObjects) && onDelete && (
-                  <ConfirmDelete
-                    onConfirmDelete={() => onDelete(note.uuid)}
+                  <ConfirmDestructive
+                    onConfirm={() => onDelete(note.uuid)}
                     objectType="note"
                     objectDisplay={"#" + note.uuid}
-                    bsStyle="warning"
+                    variant="danger"
                     buttonLabel="Delete note"
                   />
                 )}
                 {!_isEmpty(relatedObjects) && (
                   <Button
                     onClick={submitForm}
-                    bsStyle="primary"
+                    variant="primary"
                     disabled={isSubmitting || !isValid}
                   >
                     Save

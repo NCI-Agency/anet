@@ -3965,4 +3965,131 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="delete-null-peoplePositions" author="gjvoosten">
+		<sql>
+			DELETE FROM "peoplePositions"
+			WHERE "positionUuid" IS NULL
+			AND "personUuid" IS NULL;
+		</sql>
+	</changeSet>
+
+	<changeSet id="add-customSensitiveInformation-table" author="gjvoosten">
+		<createTable tableName="customSensitiveInformation">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="customFieldName" type="${long_text_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="customFieldValue" type="${long_text_type}" />
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add-type-to-location" author="bssimsoft">
+		<addColumn tableName="locations">
+			<column name="type" type="varchar(64)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="update-locations-type" author="bssimsoft">
+		<sql>
+			-- Set type to PPA for locations linked with advisor positions
+			UPDATE locations
+			SET type = 'PPA'
+			WHERE type IS NULL
+			AND uuid IN (SELECT DISTINCT(p."locationUuid") FROM positions p WHERE p.type = 0);
+
+			-- Set type to PPP for locations linked with principal positions
+			UPDATE locations
+			SET type = 'PPP'
+			WHERE type IS NULL
+			AND uuid IN (SELECT DISTINCT(p."locationUuid") FROM positions p WHERE p.type = 1);
+
+			-- Set type to PA for locations that have both 'District' and 'Province' in their name
+			UPDATE locations
+			SET type = 'PA'
+			WHERE type IS NULL
+			AND name LIKE '%District%' AND name LIKE '%Province%';
+
+			-- Set type to V for locations without coordinates
+			UPDATE locations
+			SET type = 'V'
+			WHERE type IS NULL
+			AND lat IS NULL AND lng IS NULL;
+
+			-- Set all remaining locations to type PP
+			UPDATE locations
+			SET type = 'PP'
+			WHERE type IS NULL;
+		</sql>
+	</changeSet>
+
+	<changeSet id="set-locations-type-notnull-constraint" author="gjvoosten">
+		<addNotNullConstraint
+			columnDataType="varchar(64)"
+			columnName="type"
+			tableName="locations" />
+	</changeSet>
+
+	<changeSet id="add_subscriptions" author="gjvoosten">
+		<createTable tableName="subscriptions">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="subscriberUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="subscribedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="subscribedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="subscriptions" constraintName="FK_subscriptions_subscriber" baseColumnNames="subscriberUuid"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION" />
+	</changeSet>
+
+	<changeSet id="add-subscriptions-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<addUniqueConstraint
+			tableName="subscriptions" constraintName="UQ_SubscriptionSubScriberSubscribedObject" columnNames="subscriberUuid, subscribedObjectType, subscribedObjectUuid" />
+	</changeSet>
+
+	<changeSet id="add_subscription_updates" author="gjvoosten">
+		<createTable tableName="subscriptionUpdates">
+			<column name="subscriptionUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="updatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="isNote" type="boolean" defaultValue="false" />
+			<column name="createdAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="subscriptionUpdates" constraintName="FK_subscriptionUpdates_subscription" baseColumnNames="subscriptionUuid"
+			referencedTableName="subscriptions" referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION" />
+	</changeSet>
+
 </databaseChangeLog>

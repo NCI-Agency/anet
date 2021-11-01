@@ -10,7 +10,7 @@ const AuthorizationGroupTable = props => {
   )
 
   return (
-    <Table striped condensed hover responsive>
+    <Table striped hover responsive>
       <thead>
         <tr>
           <th>Name</th>

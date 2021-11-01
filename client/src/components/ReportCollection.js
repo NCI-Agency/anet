@@ -9,7 +9,7 @@ import ReportMap from "components/ReportMap"
 import ReportStatistics from "components/ReportStatistics"
 import ReportSummary from "components/ReportSummary"
 import ReportTable from "components/ReportTable"
-import { RECURRENCE_TYPE } from "periodUtils"
+import { RECURRENCE_TYPE, useResponsiveNumberOfPeriods } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
@@ -35,12 +35,14 @@ const ReportCollection = ({
   height,
   marginBottom
 }) => {
+  const [numberOfPeriods, setNumberOfPeriods] = useState(3)
+  const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   const [viewFormat, setViewFormat] = useState(viewFormats[0])
   const showHeader = viewFormats.length > 1 || reportsFilter
   const statisticsRecurrence = [RECURRENCE_TYPE.MONTHLY]
   const idSuffix = mapId || paginationKey || "reports"
   return (
-    <div className="report-collection">
+    <div className="report-collection" ref={contRef}>
       <div>
         {showHeader && (
           <header>
@@ -48,22 +50,32 @@ const ReportCollection = ({
               <ButtonToggleGroup
                 value={viewFormat}
                 onChange={setViewFormat}
-                className="hide-for-print"
+                className="d-print-none"
               >
                 {viewFormats.includes(FORMAT_TABLE) && (
-                  <Button value={FORMAT_TABLE}>Table</Button>
+                  <Button value={FORMAT_TABLE} variant="outline-secondary">
+                    Table
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_SUMMARY) && (
-                  <Button value={FORMAT_SUMMARY}>Summary</Button>
+                  <Button value={FORMAT_SUMMARY} variant="outline-secondary">
+                    Summary
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_CALENDAR) && (
-                  <Button value={FORMAT_CALENDAR}>Calendar</Button>
+                  <Button value={FORMAT_CALENDAR} variant="outline-secondary">
+                    Calendar
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_MAP) && (
-                  <Button value={FORMAT_MAP}>Map</Button>
+                  <Button value={FORMAT_MAP} variant="outline-secondary">
+                    Map
+                  </Button>
                 )}
                 {viewFormats.includes(FORMAT_STATISTICS) && (
-                  <Button value={FORMAT_STATISTICS}>Statistics</Button>
+                  <Button value={FORMAT_STATISTICS} variant="outline-secondary">
+                    Statistics
+                  </Button>
                 )}
               </ButtonToggleGroup>
             )}
@@ -124,7 +136,7 @@ const ReportCollection = ({
                   setTotalCount={setTotalCount}
                   periodsDetails={{
                     recurrence: recurrence,
-                    numberOfPeriods: 3
+                    numberOfPeriods
                   }}
                 />
               ))}

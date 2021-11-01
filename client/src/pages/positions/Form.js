@@ -1,5 +1,7 @@
+import { gql } from "@apollo/client"
+import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { gql } from "apollo-boost"
 import {
   LocationOverlayRow,
   OrganizationOverlayRow
@@ -14,15 +16,16 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, HelpBlock } from "react-bootstrap"
+import { Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -42,11 +45,13 @@ const GQL_UPDATE_POSITION = gql`
     updatePosition(position: $position)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 3
 
-const PositionForm = ({ edit, title, initialValues }) => {
+const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
+  const [showSimilarPositions, setShowSimilarPositions] = useState(false)
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -164,13 +169,13 @@ const PositionForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save Position
             </Button>
+            {notesComponent}
           </div>
         )
         const organizationFilters = {
@@ -179,12 +184,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
             queryVars: {}
           }
         }
-        const locationFilters = {
-          activeLocations: {
-            label: "All locations",
-            queryVars: { status: Model.STATUS.ACTIVE }
-          }
-        }
+
         return (
           <div>
             <NavigationWarning isBlocking={dirty} />
@@ -214,7 +214,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   onChange={value => setFieldValue("status", value)}
                 >
                   {willAutoKickPerson && (
-                    <HelpBlock>
+                    <Form.Text>
                       <span className="text-danger">
                         Setting this position to inactive will automatically
                         remove{" "}
@@ -225,7 +225,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
                         />{" "}
                         from this position.
                       </span>
-                    </HelpBlock>
+                    </Form.Text>
                   )}
                 </FastField>
 
@@ -261,11 +261,29 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.InputField}
                 />
 
-                <FastField
+                <Field
                   name="name"
                   component={FieldHelper.InputField}
                   label={Settings.fields.position.name}
                   placeholder="Name/Description of Position"
+                  extraColElem={
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                      <>
+                        <Button
+                          onClick={() => setShowSimilarPositions(true)}
+                          variant="outline-secondary"
+                        >
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={IconSize.STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
                 />
 
                 {!isPrincipal && (
@@ -279,7 +297,7 @@ const PositionForm = ({ edit, title, initialValues }) => {
               </Fieldset>
 
               <Fieldset title="Additional information">
-                <FastField
+                <Field
                   name="location"
                   label="Location"
                   component={FieldHelper.SpecialField}
@@ -295,10 +313,9 @@ const PositionForm = ({ edit, title, initialValues }) => {
                       value={values.location}
                       overlayColumns={["Name"]}
                       overlayRenderRow={LocationOverlayRow}
-                      filterDefs={locationFilters}
+                      filterDefs={getLocationFilters(values)}
                       objectType={Location}
                       fields={Location.autocompleteQuery}
-                      queryParams={{ status: Model.STATUS.ACTIVE }}
                       valueKey="name"
                       addon={LOCATIONS_ICON}
                     />
@@ -318,15 +335,26 @@ const PositionForm = ({ edit, title, initialValues }) => {
                   />
                 </Fieldset>
               )}
+              {showSimilarPositions && (
+                <SimilarObjectsModal
+                  objectType="Position"
+                  userInput={`${values.name}`}
+                  onCancel={() => {
+                    setShowSimilarPositions(false)
+                  }}
+                >
+                </SimilarObjectsModal>
+              )}
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -340,6 +368,18 @@ const PositionForm = ({ edit, title, initialValues }) => {
       }}
     </Formik>
   )
+
+  function getLocationFilters(values) {
+    return Settings?.fields[
+      values.type === Position.TYPE.ADVISOR ? "advisor" : "principal"
+    ]?.position?.location?.filter.reduce((accummulator, filter) => {
+      accummulator[filter] = {
+        label: Location.humanNameOfType(filter),
+        queryVars: { type: filter }
+      }
+      return accummulator
+    }, {})
+  }
 
   function onCancel() {
     history.goBack()
@@ -374,13 +414,12 @@ const PositionForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const position = Object.without(
-      new Position(values),
-      "notes",
-      "customFields", // initial JSON from the db
-      "responsibleTasks", // Only for querying
-      DEFAULT_CUSTOM_FIELDS_PARENT
+    const position = new Position(values).filterClientSideFields(
+      "previousPeople",
+      "customFields",
+      "responsibleTasks"
     )
+
     if (position.type !== Position.TYPE.PRINCIPAL) {
       position.type = position.permissions || Position.TYPE.ADVISOR
     }
@@ -402,7 +441,8 @@ const PositionForm = ({ edit, title, initialValues }) => {
 PositionForm.propTypes = {
   initialValues: PropTypes.instanceOf(Position).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 PositionForm.defaultProps = {

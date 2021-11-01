@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { ApproverOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
@@ -11,7 +11,7 @@ import { FastField, FieldArray } from "formik"
 import { Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
-import { Button, Checkbox, Modal, Table } from "react-bootstrap"
+import { Button, FormCheck, Modal, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_GET_APPROVAL_STEP_IN_USE = gql`
@@ -21,7 +21,7 @@ const GQL_GET_APPROVAL_STEP_IN_USE = gql`
 `
 
 const ApproverTable = ({ approvers, onDelete }) => (
-  <Table striped condensed hover responsive>
+  <Table striped hover responsive>
     <thead>
       <tr>
         <th>Name</th>
@@ -51,7 +51,6 @@ const ApproverTable = ({ approvers, onDelete }) => (
           <td>
             <RemoveButton
               title="Remove approver"
-              altText="Remove approver"
               onClick={() => onDelete(approver)}
             />
           </td>
@@ -91,14 +90,14 @@ const ApprovalsDefinition = ({
           render={arrayHelpers => (
             <div>
               <Button
-                className="pull-right"
                 onClick={() => addApprovalStep(arrayHelpers, values[fieldName])}
-                bsStyle="primary"
+                variant="secondary"
                 id={`add${fieldName}Button`}
               >
                 {addButtonLabel}
               </Button>
               <Modal
+                centered
                 show={showAddApprovalStepAlert}
                 onHide={hideAddApprovalStepAlert}
               >
@@ -110,11 +109,7 @@ const ApprovalsDefinition = ({
                   approval step that is not completely filled in.
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button
-                    className="pull-right"
-                    onClick={hideAddApprovalStepAlert}
-                    bsStyle="primary"
-                  >
+                  <Button onClick={hideAddApprovalStepAlert} variant="primary">
                     OK
                   </Button>
                 </Modal.Footer>
@@ -131,9 +126,8 @@ const ApprovalsDefinition = ({
                 </Modal.Body>
                 <Modal.Footer>
                   <Button
-                    className="pull-right"
                     onClick={hideRemoveApprovalStepAlert}
-                    bsStyle="primary"
+                    variant="primary"
                   >
                     OK
                   </Button>
@@ -175,7 +169,6 @@ const ApprovalsDefinition = ({
       <Fieldset title={`Step ${index + 1}`} key={index}>
         <RemoveButton
           title="Remove this step"
-          altText="Remove this step"
           onClick={() => removeApprovalStep(arrayHelpers, index, step)}
         />
 
@@ -190,12 +183,11 @@ const ApprovalsDefinition = ({
             component={FieldHelper.SpecialField}
             label=""
             widget={
-              <Checkbox
-                inline
+              <FormCheck
+                type="checkbox"
+                label={restrictedApprovalLabel}
                 checked={values?.[fieldName]?.[index].restrictedApproval}
-              >
-                {restrictedApprovalLabel}
-              </Checkbox>
+              />
             }
           />
         )}
@@ -204,6 +196,9 @@ const ApprovalsDefinition = ({
           label="Add an approver"
           component={FieldHelper.SpecialField}
           onChange={value => {
+            value = value.map(position =>
+              Position.filterClientSideFields(position)
+            ) // remove formCustomFields to prevent errors when sending data to server
             // validation will be done by setFieldValue
             setFieldTouched(`${fieldName}.${index}.approvers`, true, false) // onBlur doesn't work when selecting an option
             setFieldValue(`${fieldName}.${index}.approvers`, value)

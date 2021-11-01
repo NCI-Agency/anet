@@ -1,12 +1,12 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -83,8 +83,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
@@ -104,7 +103,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                 <Field
                   name="description"
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  asA="textarea"
                   maxLength={Settings.maxTextFieldLength}
                   onKeyUp={event =>
                     countCharsLeft(
@@ -169,13 +168,14 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -231,18 +231,10 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const authorizationGroup = Object.without(
-      new AuthorizationGroup(values),
-      "notes"
+    const authorizationGroup = AuthorizationGroup.filterClientSideFields(values)
+    authorizationGroup.positions = values.positions.map(pos =>
+      Position.filterClientSideFields(pos, "previousPeople", "customFields")
     )
-    authorizationGroup.positions = values.positions.map(pos => {
-      const p = Object.without(
-        pos,
-        "customFields",
-        DEFAULT_CUSTOM_FIELDS_PARENT
-      )
-      return p
-    })
     return API.mutation(
       edit ? GQL_UPDATE_AUTHORIZATION_GROUP : GQL_CREATE_AUTHORIZATION_GROUP,
       { authorizationGroup }

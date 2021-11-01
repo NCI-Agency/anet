@@ -12,7 +12,7 @@ import mil.dds.anet.beans.Report.EngagementStatus;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
-public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
+public class ReportSearchQuery extends SubscribableObjectSearchQuery<ReportSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField
@@ -108,6 +108,7 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
   @GraphQLInputField
   private Boolean sensitiveInfo;
   // internal search parameter:
+  @JsonIgnore
   private boolean systemSearch;
 
   public ReportSearchQuery() {
@@ -347,12 +348,10 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
     this.sensitiveInfo = sensitiveInfo;
   }
 
-  @JsonIgnore
   public boolean isSystemSearch() {
     return systemSearch;
   }
 
-  @JsonIgnore
   public void setSystemSearch(boolean systemSearch) {
     this.systemSearch = systemSearch;
   }
@@ -403,7 +402,6 @@ public class ReportSearchQuery extends AbstractSearchQuery<ReportSearchSortBy> {
         && Objects.equals(getAttendeePositionUuid(), other.getAttendeePositionUuid())
         && Objects.equals(getAuthorizationGroupUuid(), other.getAuthorizationGroupUuid())
         && Objects.equals(getSensitiveInfo(), other.getSensitiveInfo())
-        && Objects.equals(getUser(), other.getUser())
         && Objects.equals(isSystemSearch(), other.isSystemSearch());
   }
 

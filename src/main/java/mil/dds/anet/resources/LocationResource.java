@@ -73,8 +73,11 @@ public class LocationResource {
       }
     }
 
-    AnetAuditLogger.log("Location {} created by {}", l, user);
-    return l;
+    DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, created.getUuid(),
+        l.getCustomSensitiveInformation());
+
+    AnetAuditLogger.log("Location {} created by {}", created, user);
+    return created;
   }
 
   @GraphQLMutation(name = "updateLocation")
@@ -96,9 +99,47 @@ public class LocationResource {
         existing.loadApprovalSteps(engine.getContext()).join();
     Utils.updateApprovalSteps(l, l.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
         l.getApprovalSteps(), existingApprovalSteps);
+
+    DaoUtils.saveCustomSensitiveInformation(user, LocationDao.TABLE_NAME, l.getUuid(),
+        l.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Location {} updated by {}", l, user);
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;
+  }
+
+  @GraphQLMutation(name = "mergeLocations")
+  public Location mergeLocations(@GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "loserUuid") String loserUuid,
+      @GraphQLArgument(name = "winnerLocation") Location winnerLocation) {
+    final Person user = DaoUtils.getUserFromContext(context);
+    final Location loserLocation = dao.getByUuid(loserUuid);
+
+    AuthUtils.assertAdministrator(user);
+    // Check that given two locations can be merged
+    areLocationsMergeable(winnerLocation, loserLocation);
+    validateLocation(winnerLocation);
+
+    int numRows = dao.mergeLocations(loserLocation, winnerLocation);
+    if (numRows == 0) {
+      throw new WebApplicationException(
+          "Couldn't process merge operation, error occurred while updating merged location relation information.",
+          Status.NOT_FOUND);
+    }
+    AnetAuditLogger.log("Location {} merged into {} by {}", loserLocation, winnerLocation, user);
+    return winnerLocation;
+  }
+
+  private void validateLocation(Location winnerLocation) {
+    if (winnerLocation.getName() == null || winnerLocation.getName().trim().length() == 0) {
+      throw new WebApplicationException("Location Name must not be null", Status.BAD_REQUEST);
+    }
+  }
+
+  private void areLocationsMergeable(Location winnerLocation, Location loserLocation) {
+    if (loserLocation.getUuid().equals(winnerLocation.getUuid())) {
+      throw new WebApplicationException("Cannot merge identical locations.", Status.BAD_REQUEST);
+    }
   }
 
 }

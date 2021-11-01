@@ -1,3 +1,4 @@
+[![Board Status](https://dev.azure.com/ncia-anet/2aa083a5-af3d-44e1-8c7b-6e9e6b124d91/dea5cef7-9622-4f05-823d-b563717ca3e7/_apis/work/boardbadge/cae09787-9bf7-4800-9bb9-b25c1d2b8c62)](https://dev.azure.com/ncia-anet/2aa083a5-af3d-44e1-8c7b-6e9e6b124d91/_boards/board/t/dea5cef7-9622-4f05-823d-b563717ca3e7/Microsoft.RequirementCategory)
 
 [![Build ANET](https://github.com/NCI-Agency/anet/workflows/Build%20ANET/badge.svg)](https://github.com/NCI-Agency/anet/actions)
 [![Build Status](https://dev.azure.com/advisornetwork/anet/_apis/build/status/NCI-Agency.anet)](https://dev.azure.com/advisornetwork/anet/_build/latest?definitionId=1)
@@ -28,7 +29,7 @@ We recommend reading through the documentation in the following order:
 1. [Working on the backend](./docs/backend-overview.md)
 1. [Working on the frontend](./docs/frontend-overview.md)
 1. See [DOCUMENTATION.md](./docs/DOCUMENTATION.md), [INSTALL.md](./docs/INSTALL.md) and [TROUBLESHOOT.md](./docs/TROUBLESHOOT.md) for additional information.
-1. See [User Workflows](./docs/User_Workflows_and_Documentation.md) for details on user workflows. 
+1. See [our Storybook on Chromatic](https://www.chromatic.com/build?appId=612fa06864063b003a65dead) for detailed documentation.
 
 
 ## Contributing

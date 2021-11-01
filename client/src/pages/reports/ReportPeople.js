@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core"
+import { Icon, IconSize } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
@@ -9,7 +9,7 @@ import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Checkbox, Label, Radio, Table } from "react-bootstrap"
+import { Badge, Form, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
@@ -25,7 +25,7 @@ const ReportPeople = ({
   const showNonAttending = report.reportPeople.some(rp => !rp.attendee)
   return (
     <div id="reportPeopleContainer">
-      <Table condensed responsive>
+      <Table responsive>
         <tbody>
           <tr>
             <th style={{ border: "none" }}>Advisors</th>
@@ -169,7 +169,6 @@ const ReportPeople = ({
             {!isCurrentEditor && (
               <RemoveButton
                 title="Remove person"
-                altText="Remove person"
                 onClick={() => onDelete(person)}
               />
             )}
@@ -221,7 +220,7 @@ const ReportPeople = ({
     const isRemovingSelfAuthor =
       Person.isEqual(currentUser, person) && person.author
     if (isRemovingSelfAuthor) {
-      toast("You cannot remove yourself from authors list", {
+      toast.warning("You cannot remove yourself from authors list", {
         toastId: "removingPrimaryAttendee"
       })
       return false
@@ -236,7 +235,7 @@ const ReportPeople = ({
       !anyAuthorsBesideCurrentPerson && person.author
 
     if (isTheLastAuthorBeingRemoved) {
-      toast("You must provide at least 1 author for a report", {
+      toast.warning("You must provide at least 1 author for a report", {
         toastId: "removingLastAuthor"
       })
       return false
@@ -248,7 +247,7 @@ const ReportPeople = ({
   function passesAttendeeValidationSteps(person) {
     // Prevent removal of primary attendee without making someone else primary
     if (person.attendee && person.primary) {
-      toast("Select a primary first to remove this person", {
+      toast.warning("Select a primary first to remove this person", {
         toastId: "removingPrimaryAttendee"
       })
       return false
@@ -287,14 +286,7 @@ ReportPeople.propTypes = {
 }
 
 const TableContainer = ({ className, children }) => (
-  <Table
-    striped
-    condensed
-    hover
-    responsive
-    className={className}
-    style={{ margin: 0 }}
-  >
+  <Table striped hover responsive className={className} style={{ margin: 0 }}>
     {children}
   </Table>
 )
@@ -390,15 +382,15 @@ function sortReportPeople(reportPeople) {
 }
 
 const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
-  <Radio
+  <Form.Check
+    type="radio"
+    label={<Badge bg="primary">Primary</Badge>}
     name={`primaryAttendee${person.role}`}
     className={`primary${!person.primary ? " inActive" : ""}`}
     checked={person.primary}
     disabled={disabled || !person.attendee}
     onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Label bsStyle="primary">Primary</Label>
-  </Radio>
+  />
 )
 
 PrimaryAttendeeRadioButton.propTypes = {
@@ -412,7 +404,9 @@ const ReportAuthorCheckbox = ({
   isCurrentEditor,
   handleOnChange
 }) => (
-  <Checkbox
+  <Form.Check
+    type="checkbox"
+    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />}
     name={`authorAttendee${person.role}`}
     className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
       !person.author ? " inActive" : ""
@@ -421,9 +415,7 @@ const ReportAuthorCheckbox = ({
     disabled={disabled}
     readOnly={isCurrentEditor}
     onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.EDIT} />
-  </Checkbox>
+  />
 )
 ReportAuthorCheckbox.propTypes = {
   person: PropTypes.object,
@@ -432,15 +424,15 @@ ReportAuthorCheckbox.propTypes = {
   handleOnChange: PropTypes.func
 }
 const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
-  <Checkbox
+  <Form.Check
+    type="checkbox"
+    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />}
     name={`authorAttendee${person.role}`}
     className={`primary${!person.attendee ? " inActive" : ""}`}
     checked={!!person.attendee}
     disabled={disabled}
     onChange={() => !disabled && handleOnChange(person)}
-  >
-    <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.PEOPLE} />
-  </Checkbox>
+  />
 )
 ReportAttendeeCheckbox.propTypes = {
   person: PropTypes.object,

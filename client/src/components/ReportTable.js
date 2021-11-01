@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -128,13 +128,13 @@ const ReportTable = ({
   return (
     <div>
       <UltimatePaginationTopDown
-        className="pull-right"
+        className="float-end"
         pageNum={pageNum}
         pageSize={pageSize}
         totalCount={totalCount}
         goToPage={setPage}
       >
-        <Table striped>
+        <Table striped responsive>
           <thead>
             <tr>
               <th>Authors</th>

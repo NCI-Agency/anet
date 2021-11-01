@@ -3,6 +3,8 @@ organization(uuid:"${orgUuid}") {
   shortName
   longName
   status
+  isSubscribed
+  updatedAt
   identificationCode
   type
   parentOrg {

@@ -22,16 +22,16 @@ class ShowTask extends Page {
 
   get editMonthlyAssessmentButton() {
     return this.monthlyAssessmentsTable.$(
-      'div.panel-primary button[title="Edit assessment"]'
+      'div.card button[title="Edit assessment"]'
     )
   }
 
   get deleteMonthlyAssessmentButton() {
-    return browser.$('div.panel-primary button[title="Delete assessment"]')
+    return browser.$("div.card button.btn.btn-outline-danger.btn-xs")
   }
 
   get deleteConfirmButton() {
-    return browser.$('//button[contains(text(), "I am sure")]')
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   get assessmentModalForm() {
@@ -43,11 +43,13 @@ class ShowTask extends Page {
   }
 
   get shownAssessmentPanel() {
-    return this.monthlyAssessmentsTable.$("td:first-child .panel-primary")
+    return this.monthlyAssessmentsTable.$(
+      "tbody tr:last-child td:first-child .card"
+    )
   }
 
   get shownAssessmentDetails() {
-    return this.shownAssessmentPanel.$$("div.form-control-static")
+    return this.shownAssessmentPanel.$$("div.card-body .form-control-plaintext")
   }
 
   waitForAssessmentModalForm(reverse = false) {
@@ -59,7 +61,9 @@ class ShowTask extends Page {
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
     // NOTE: assuming assessment content, 2 questions
     // first focus on the text editor input
-    this.assessmentModalForm.$(".DraftEditor-editorContainer").click()
+    this.assessmentModalForm.$(".editor-container > .editable").click()
+    // Wait for the editor to be focused
+    browser.pause(300)
     if (prevTextToClear) {
       // remove previous text by deleting characters one by one
       const chars = [...prevTextToClear]
@@ -67,11 +71,13 @@ class ShowTask extends Page {
       // maybe we clicked at the beginning of the text, Backspace doesn't clear
       browser.keys(chars.map(char => "Delete"))
     }
+    // Wait for the previous value to be deleted
+    browser.pause(300)
     browser.keys(valuesArr[0])
 
     const button = this.assessmentModalForm
-      .$(".form-group .btn-group")
-      .$(`label[id="${valuesArr[1]}"]`)
+      .$(".btn-group")
+      .$(`label[for="entityAssessment.status_${valuesArr[1]}"]`)
     // wait for a bit, clicks and do double click, sometimes it does not go through
     browser.pause(300)
     button.click({ x: 10, y: 10 })

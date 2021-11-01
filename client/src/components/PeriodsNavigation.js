@@ -4,18 +4,23 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Button } from "react-bootstrap"
 
-const PeriodsNavigation = ({ offset, onChange }) => (
+const PeriodsNavigation = ({
+  offset,
+  onChange,
+  disabledLeft,
+  disabledRight
+}) => (
   <div style={{ display: "flex", justifyContent: "space-between" }}>
     <Button
-      bsStyle="default"
-      type="button"
+      variant="outline-secondary"
+      disabled={disabledLeft}
       onClick={() => onChange(offset + 1)}
     >
       <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} /> previous period
     </Button>
     <Button
-      bsStyle="default"
-      type="button"
+      variant="outline-secondary"
+      disabled={disabledRight}
       onClick={() => onChange(offset - 1)}
     >
       next period <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
@@ -24,10 +29,14 @@ const PeriodsNavigation = ({ offset, onChange }) => (
 )
 PeriodsNavigation.propTypes = {
   offset: PropTypes.number,
-  onChange: PropTypes.func.isRequired
+  onChange: PropTypes.func.isRequired,
+  disabledLeft: PropTypes.bool,
+  disabledRight: PropTypes.bool
 }
 PeriodsNavigation.defaultProps = {
-  offset: 0
+  offset: 0,
+  disabledLeft: false,
+  disabledRight: false
 }
 
 export default PeriodsNavigation

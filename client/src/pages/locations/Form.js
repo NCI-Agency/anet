@@ -1,5 +1,7 @@
+import { gql } from "@apollo/client"
+import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import ApprovalsDefinition from "components/approvals/ApprovalsDefinition"
 import {
@@ -8,21 +10,22 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Form, Formik } from "formik"
 import { convertLatLngToMGRS, parseCoordinate } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, FormSelect } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import Settings from "settings"
-import GeoLocation from "./GeoLocation"
 
 const GQL_CREATE_LOCATION = gql`
   mutation($location: LocationInput!) {
@@ -36,11 +39,26 @@ const GQL_UPDATE_LOCATION = gql`
     updateLocation(location: $location)
   }
 `
+const MIN_CHARS_FOR_DUPLICATES = 3
 
-const LocationForm = ({ edit, title, initialValues }) => {
+// Location types to be shown to admins in the new location page.
+const LOCATION_TYPES_ADMIN = [
+  Location.LOCATION_TYPES.ADVISOR_LOCATION,
+  Location.LOCATION_TYPES.PRINCIPAL_LOCATION,
+  Location.LOCATION_TYPES.POINT_LOCATION,
+  Location.LOCATION_TYPES.GEOGRAPHICAL_AREA,
+  Location.LOCATION_TYPES.VIRTUAL_LOCATION
+]
+
+// Location types to be shown to super users in the new location page.
+const LOCATION_TYPES_SUPER_USER =
+  Settings?.fields?.location?.superUserTypeOptions
+
+const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
+  const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
     (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
   const statusButtons = [
@@ -107,10 +125,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
           name: _escape(values.name) || "", // escape HTML in location name!
           draggable: true,
           autoPan: true,
-          onMove: (event, map) => {
-            const latLng = map.wrapLatLng(event.target.getLatLng())
-            updateCoordinateFields(values, latLng)
-          }
+          onMove: (event, map) =>
+            updateCoordinateFields(map.wrapLatLng(event.target.getLatLng()))
         }
         if (Location.hasCoordinates(values)) {
           Object.assign(marker, {
@@ -122,13 +138,13 @@ const LocationForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save Location
             </Button>
+            {notesComponent}
           </div>
         )
 
@@ -149,6 +165,24 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   name="name"
                   component={FieldHelper.InputField}
                   disabled={!canEditName}
+                  extraColElem={
+                    !edit && values.name.length >= MIN_CHARS_FOR_DUPLICATES ? (
+                      <>
+                        <Button
+                          onClick={() => setShowSimilarLocations(true)}
+                          variant="outline-secondary"
+                        >
+                          <Icon
+                            icon={IconNames.WARNING_SIGN}
+                            intent={Intent.WARNING}
+                            iconSize={IconSize.STANDARD}
+                            style={{ margin: "0 6px" }}
+                          />
+                          Possible Duplicates
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
                 />
 
                 <FastField
@@ -156,6 +190,30 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   component={FieldHelper.RadioButtonToggleGroupField}
                   buttons={statusButtons}
                   onChange={value => setFieldValue("status", value)}
+                />
+
+                <FastField
+                  name="type"
+                  component={FieldHelper.SpecialField}
+                  disabled={!canEditName}
+                  onChange={event => {
+                    // validation will be done by setFieldValue
+                    setFieldValue("type", event.target.value, true)
+                  }}
+                  widget={
+                    <FormSelect className="location-type-form-group form-control">
+                      <option value="">
+                        {!canEditName
+                          ? Location.humanNameOfType(values.type)
+                          : "Please select a location type"}
+                      </option>
+                      {getDropdownOptionsForUser(currentUser).map(type => (
+                        <option key={type} value={type}>
+                          {Location.humanNameOfType(type)}
+                        </option>
+                      ))}
+                    </FormSelect>
+                  }
                 />
 
                 <GeoLocation
@@ -170,10 +228,9 @@ const LocationForm = ({ edit, title, initialValues }) => {
               <h3>Drag the marker below to set the location</h3>
               <Leaflet
                 markers={[marker]}
-                onMapClick={(event, map) => {
-                  const latLng = map.wrapLatLng(event.latlng)
-                  updateCoordinateFields(values, latLng)
-                }}
+                onMapClick={(event, map) =>
+                  updateCoordinateFields(map.wrapLatLng(event.latlng))
+                }
               />
 
               <ApprovalsDefinition
@@ -208,15 +265,28 @@ const LocationForm = ({ edit, title, initialValues }) => {
                   />
                 </Fieldset>
               )}
+
+              {showSimilarLocations && (
+                <SimilarObjectsModal
+                  objectType="Location"
+                  userInput={`${values.name}`}
+                  onCancel={() => {
+                    setShowSimilarLocations(false)
+                  }}
+                >
+                </SimilarObjectsModal>
+              )}
+
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 <div>
                   <Button
                     id="formBottomSubmit"
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={submitForm}
                     disabled={isSubmitting}
                   >
@@ -228,19 +298,36 @@ const LocationForm = ({ edit, title, initialValues }) => {
           </div>
         )
 
-        function updateCoordinateFields(values, latLng) {
+        function updateCoordinateFields(latLng) {
           const parsedLat = parseCoordinate(latLng.lat)
           const parsedLng = parseCoordinate(latLng.lng)
-          setValues({
-            ...values,
-            lat: parsedLat,
-            lng: parsedLng,
-            displayedCoordinate: convertLatLngToMGRS(parsedLat, parsedLng)
-          })
+          setFieldValue("lat", parsedLat)
+          setFieldValue("lng", parsedLng)
+          setFieldValue(
+            "displayedCoordinate",
+            convertLatLngToMGRS(parsedLat, parsedLng)
+          )
         }
       }}
     </Formik>
   )
+
+  /**
+   * Depending on the position type of the logged in user, return corresponding
+   * location type list shown at create a new location page.
+   * @param {Object} user current user logged in to the system.
+   * @returns Object[]
+   */
+  function getDropdownOptionsForUser(user) {
+    switch (user.position.type) {
+      case Position.TYPE.ADMINISTRATOR:
+        return LOCATION_TYPES_ADMIN
+      case Position.TYPE.SUPER_USER:
+        return LOCATION_TYPES_SUPER_USER
+      default:
+        return []
+    }
+  }
 
   function onCancel() {
     history.goBack()
@@ -275,13 +362,7 @@ const LocationForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values) {
-    const location = Object.without(
-      new Location(values),
-      "notes",
-      "displayedCoordinate",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
-    )
+    const location = new Location(values).filterClientSideFields("customFields")
     location.customFields = customFieldsJSONString(values)
     return API.mutation(edit ? GQL_UPDATE_LOCATION : GQL_CREATE_LOCATION, {
       location
@@ -292,7 +373,8 @@ const LocationForm = ({ edit, title, initialValues }) => {
 LocationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Location).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 LocationForm.defaultProps = {

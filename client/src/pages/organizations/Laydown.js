@@ -36,9 +36,9 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div>
-            <h2 className="legend">
+            <h4 className="legend">
               <span className="title-text">Organization Diagram</span>
-            </h2>
+            </h4>
           </div>
           <div style={{ backgroundColor: "white" }}>
             <ContainerDimensions>
@@ -86,7 +86,7 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
         action={
           <div>
             {numInactivePos > 0 && (
-              <Button onClick={toggleShowInactive}>
+              <Button onClick={toggleShowInactive} variant="outline-secondary">
                 {(showInactivePositions ? "Hide " : "Show ") +
                   numInactivePos +
                   " inactive position(s)"}
@@ -117,7 +117,7 @@ const OrganizationLaydown = ({ organization, linkToComp: LinkToComp }) => {
       posPersonHeader = Settings.fields.principal.person.name
     }
     return (
-      <Table>
+      <Table responsive>
         <thead>
           <tr>
             <th>{posNameHeader}</th>

@@ -13,14 +13,24 @@ class EditReport extends Page {
     )
   }
 
+  get unpublishButton() {
+    return browser.$('//button[text()="Unpublish report"]')
+  }
+
+  get confirmModal() {
+    return browser.$("div.triggerable-confirm-bootstrap-modal")
+  }
+
   get alertSuccess() {
     return browser.$(".alert-success")
   }
 
   confirmDeleteButton(uuid) {
-    return browser.$(
-      `//div[@class="modal-footer"]//button[text()="Yes, I am sure that I want to delete report ${uuid}"]`
-    )
+    return browser.$('//button[text()="Yes, I am sure"]')
+  }
+
+  confirmUnpublishButton(uuid) {
+    return browser.$('//button[text()="Yes, I am sure"]')
   }
 
   deleteReport(uuid) {
@@ -31,6 +41,17 @@ class EditReport extends Page {
     this.confirmDeleteButton(uuid).waitForClickable()
     browser.pause(300) // wait for modal animation to finish
     this.confirmDeleteButton(uuid).click()
+    this.waitForAlertSuccessToLoad()
+  }
+
+  unpublishReport(uuid) {
+    this.unpublishButton.click()
+    browser.pause(300) // wait for modal animation to finish
+    this.confirmUnpublishButton(uuid).waitForExist()
+    this.confirmUnpublishButton(uuid).waitForDisplayed()
+    this.confirmUnpublishButton(uuid).waitForClickable()
+    browser.pause(300) // wait for modal animation to finish
+    this.confirmUnpublishButton(uuid).click()
     this.waitForAlertSuccessToLoad()
   }
 

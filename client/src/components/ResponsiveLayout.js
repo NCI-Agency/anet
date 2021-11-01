@@ -1,4 +1,4 @@
-import Nav from "components/Nav"
+import Navigation from "components/Nav"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import TopBar from "components/TopBar"
 import PropTypes from "prop-types"
@@ -21,20 +21,7 @@ const contentContainer = {
   minHeight: 0,
   overflow: "hidden"
 }
-const mainViewportContainer = {
-  flex: "1 1 auto",
-  width: "100%",
-  overflowY: "auto",
-  overflowX: "hidden",
-  paddingTop: 15,
-  paddingLeft: 18,
-  paddingRight: 18
-}
-const notesViewportContainer = {
-  paddingTop: 18,
-  maxWidth: "35%",
-  overflowY: "auto"
-}
+
 const sidebarContainer = {
   position: "relative",
   flex: "0 0 auto",
@@ -77,7 +64,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
     return () => unlistenHistory()
   }, [history])
 
-  const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
+  const sidebarClass = floatingMenu ? "nav-overlay" : "d-none d-sm-block"
 
   return (
     <ResponsiveLayoutContext.Provider
@@ -108,22 +95,13 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
               className={`main-sidebar ${sidebarClass}`}
             >
               <div style={sidebar}>
-                <Nav {...sidebarData} />
+                <Navigation {...sidebarData} />
               </div>
             </div>
           )}
-          <Element
-            style={mainViewportContainer}
-            name="mainViewport"
-            id="main-viewport"
-          >
+          <Element name="mainViewport" id="main-viewport">
             {children}
           </Element>
-          <Element
-            style={notesViewportContainer}
-            name="notesView"
-            id="notes-view"
-          />
         </div>
       </div>
     </ResponsiveLayoutContext.Provider>

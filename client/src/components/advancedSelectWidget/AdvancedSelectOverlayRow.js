@@ -1,6 +1,8 @@
 import LinkTo from "components/LinkTo"
+import { Location } from "models"
 import moment from "moment"
 import React from "react"
+import { Badge } from "react-bootstrap"
 import Settings from "settings"
 
 export const AuthorizationGroupOverlayRow = item => (
@@ -14,6 +16,9 @@ export const LocationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
       <LinkTo modelType="Location" model={item} isLink={false} />
+      <span style={{ paddingLeft: "1rem" }}>
+        <Badge bg="secondary">{Location.humanNameOfType(item.type)}</Badge>
+      </span>
     </td>
   </React.Fragment>
 )

@@ -6,6 +6,7 @@ describe("Home page", () => {
   describe("When checking the navigation items", () => {
     it("Should see a link to my counterparts page when the user is an advisor", () => {
       Home.open()
+      Home.linksMenuButton.click()
       Home.myCounterpartsLink.waitForDisplayed()
     })
   })

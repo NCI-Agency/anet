@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import {
   DEFAULT_PAGE_PROPS,
   DEFAULT_SEARCH_PROPS,
@@ -5,10 +6,9 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
-import ConfirmDelete from "components/ConfirmDelete"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
@@ -23,6 +23,7 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
+  SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
@@ -31,6 +32,7 @@ import RelatedObjectNotes, {
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
 import { deserializeQueryParams } from "components/SearchFilters"
+import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
 import _isEmpty from "lodash/isEmpty"
@@ -40,8 +42,7 @@ import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
-import Confirm from "react-confirm-bootstrap"
+import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -65,6 +66,8 @@ const GQL_GET_REPORT = gql`
       cancelledReason
       releasedAt
       state
+      isSubscribed
+      updatedAt
       location {
         uuid
         name
@@ -230,6 +233,11 @@ const GQL_DELETE_REPORT = gql`
     deleteReport(uuid: $uuid)
   }
 `
+const GQL_UNPUBLISH_REPORT = gql`
+  mutation($uuid: String!) {
+    unpublishReport(uuid: $uuid)
+  }
+`
 const GQL_EMAIL_REPORT = gql`
   mutation($uuid: String!, $email: AnetEmailInput!) {
     emailReport(uuid: $uuid, email: $email)
@@ -237,16 +245,12 @@ const GQL_EMAIL_REPORT = gql`
 `
 const GQL_SUBMIT_REPORT = gql`
   mutation($uuid: String!) {
-    submitReport(uuid: $uuid) {
-      uuid
-    }
+    submitReport(uuid: $uuid)
   }
 `
 const GQL_PUBLISH_REPORT = gql`
   mutation($uuid: String!) {
-    publishReport(uuid: $uuid) {
-      uuid
-    }
+    publishReport(uuid: $uuid)
   }
 `
 const GQL_ADD_REPORT_COMMENT = gql`
@@ -258,16 +262,12 @@ const GQL_ADD_REPORT_COMMENT = gql`
 `
 const GQL_REJECT_REPORT = gql`
   mutation($uuid: String!, $comment: CommentInput!) {
-    rejectReport(uuid: $uuid, comment: $comment) {
-      uuid
-    }
+    rejectReport(uuid: $uuid, comment: $comment)
   }
 `
 const GQL_APPROVE_REPORT = gql`
   mutation($uuid: String!, $comment: CommentInput!) {
-    approveReport(uuid: $uuid, comment: $comment) {
-      uuid
-    }
+    approveReport(uuid: $uuid, comment: $comment)
   }
 `
 
@@ -336,8 +336,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       Position.isEqual(member, currentUser.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
-  // Approved reports for not future engagements may be published by an admin user
-  const canPublish = !report.isFuture() && report.isApproved() && isAdmin
+  // Approved reports may be published by an admin user
+  const canPublish = report.isApproved() && isAdmin
   // Warn admins when they try to approve their own report
   const warnApproveOwnReport = canApprove && isAuthor
 
@@ -362,11 +362,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   // Get initial tasks/people instant assessments values
   const hasAssessments = report.engagementDate && !report.isFuture()
-  let relatedObject
   if (hasAssessments) {
     report = Object.assign(report, report.getTasksEngagementAssessments())
     report = Object.assign(report, report.getAttendeesEngagementAssessments())
-    relatedObject = Report.getCleanReport(report)
   }
 
   return (
@@ -380,12 +378,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         const action = (
           <div>
             {canEmail && (
-              <Button onClick={toggleEmailModal}>Email report</Button>
+              <Button onClick={toggleEmailModal} variant="outline-secondary">
+                Email report
+              </Button>
             )}
             <Button
               value="compactView"
-              type="button"
-              bsStyle="primary"
+              variant="primary"
               onClick={onCompactClick}
             >
               Summary / Print
@@ -396,13 +395,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               </LinkTo>
             )}
             {canSubmit && renderSubmitButton(!isValid)}
-          </div>
-        )
-
-        return (
-          <div className="report-show">
-            {renderEmailModal(values, setFieldValue)}
-
             <RelatedObjectNotes
               notes={report.notes}
               relatedObject={
@@ -413,6 +405,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 }
               }
             />
+          </div>
+        )
+
+        return (
+          <div className="report-show">
+            {renderEmailModal(values, setFieldValue)}
+
             <Messages success={saveSuccess} error={saveError} />
 
             {report.isPublished() && (
@@ -479,18 +478,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             {report.isApproved() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">This {reportType} is APPROVED.</h4>
-                {!report.isFuture() && (
-                  <p>
-                    This report has been approved and will be automatically
-                    published to the ANET community in{" "}
-                    {moment(report.getReportApprovedAt())
-                      .add(
-                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
-                        "hours"
-                      )
-                      .toNow(true)}
-                  </p>
-                )}
+                <p>
+                  This report has been approved and will be automatically
+                  published to the ANET community in{" "}
+                  {moment(report.getReportApprovedAt())
+                    .add(
+                      Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                      "hours"
+                    )
+                    .toNow(true)}
+                </p>
                 {canPublish && (
                   <p>
                     You can also {renderPublishButton(!isValid)} it immediately.
@@ -500,14 +497,35 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             )}
 
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Report #${uuid}`} action={action} />
+              <Fieldset
+                title={
+                  <>
+                    {(report.isPublished() || report.isCancelled()) && (
+                      <SubscriptionIcon
+                        subscribedObjectType="reports"
+                        subscribedObjectUuid={report.uuid}
+                        isSubscribed={report.isSubscribed}
+                        updatedAt={report.updatedAt}
+                        refetch={refetch}
+                        setError={error => {
+                          setSaveError(error)
+                          jumpToTop()
+                        }}
+                        persistent
+                      />
+                    )}{" "}
+                    Report #{report.uuid}
+                  </>
+                }
+                action={action}
+              />
               <Fieldset className="show-report-overview">
                 <Field
                   name="intent"
                   label="Summary"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <div id="intent" className="form-control-static">
+                    <div id="intent" className="form-control-plaintext">
                       <p>
                         <strong>{Settings.fields.report.intent}:</strong>{" "}
                         {report.intent}
@@ -525,7 +543,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         </p>
                       )}
                       <p>
-                        <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
+                        <strong>
+                          {Settings.fields.report.nextSteps.label}:
+                        </strong>{" "}
                         {report.nextSteps}
                       </p>
                     </div>
@@ -693,7 +713,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <InstantAssessmentsContainerField
                       entityType={Person}
                       entities={values.reportPeople?.filter(rp => rp.attendee)}
-                      relatedObject={relatedObject}
+                      relatedObject={report}
                       parentFieldName={
                         Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
                       }
@@ -711,7 +731,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                     <InstantAssessmentsContainerField
                       entityType={Task}
                       entities={values.tasks}
-                      relatedObject={relatedObject}
+                      relatedObject={report}
                       parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
                       formikProps={{
                         values
@@ -767,7 +787,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                         )}
                       >
                         {" "}
-                        {createdAt.fromNow()}:{" "}
+                        {createdAt.format(
+                          Settings.dateFormats.forms.displayShort.withTime
+                        )}
+                        :{" "}
                       </span>
                       "{comment.text}"
                     </p>
@@ -780,14 +803,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   name="newComment"
                   label="Add a comment"
                   component={FieldHelper.InputField}
-                  componentClass="textarea"
+                  asA="textarea"
                   placeholder="Type a comment here"
                   className="add-new-comment"
                 />
                 <div className="right-button">
                   <Button
-                    bsStyle="primary"
-                    type="button"
+                    variant="primary"
                     onClick={() =>
                       submitComment(values.newComment, setFieldValue)
                     }
@@ -813,14 +835,28 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
             {currentUser.isAdmin() && (
               <div className="submit-buttons">
+                {report.isPublished() &&
+                  Settings.fields.report.canUnpublishReports && (
+                    <div>
+                      <ConfirmDestructive
+                        onConfirm={onConfirmUnpublish}
+                        objectType="report"
+                        operation="unpublish"
+                        objectDisplay={"#" + uuid}
+                        variant="warning"
+                        buttonLabel={`Unpublish ${reportType}`}
+                        buttonClassName="float-start"
+                      />
+                    </div>
+                )}
                 <div>
-                  <ConfirmDelete
-                    onConfirmDelete={onConfirmDelete}
+                  <ConfirmDestructive
+                    onConfirm={onConfirmDelete}
                     objectType="report"
                     objectDisplay={"#" + uuid}
-                    bsStyle="warning"
+                    variant="danger"
                     buttonLabel={`Delete ${reportType}`}
-                    className="pull-right"
+                    buttonClassName="float-end"
                   />
                 </div>
               </div>
@@ -832,7 +868,11 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   )
 
   function renderNoPositionAssignedText() {
-    const alertStyle = { top: 132, marginBottom: "1rem", textAlign: "center" }
+    const alertStyle = {
+      marginBottom: "1rem",
+      textAlign: "center",
+      zIndex: "-1"
+    }
     const supportEmail = Settings.SUPPORT_EMAIL_ADDR
     const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
     const advisorPositionSingular = Settings.fields.advisor.position.name
@@ -864,6 +904,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       )
     }
   }
+  function onConfirmUnpublish() {
+    API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
+      .then(data => {
+        history.push("/", {
+          success: `${reportTypeUpperFirst} unpublished`
+        })
+      })
+      .catch(error => {
+        setSaveSuccess(null)
+        setSaveError(error)
+        jumpToTop()
+      })
+  }
 
   function onConfirmDelete() {
     API.mutation(GQL_DELETE_REPORT, { uuid })
@@ -892,7 +945,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="approvalComment"
           label="Approval comment"
           component={FieldHelper.InputField}
-          componentClass="textarea"
+          asA="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -919,7 +972,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           name="requestChangesComment"
           label="Request changes comment"
           component={FieldHelper.InputField}
-          componentClass="textarea"
+          asA="textarea"
           placeholder="Type a comment here; required when requesting changes"
         />
 
@@ -932,7 +985,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function renderEmailModal(values, setFieldValue) {
     return (
-      <Modal show={showEmailModal} onHide={toggleEmailModal}>
+      <Modal centered show={showEmailModal} onHide={toggleEmailModal}>
         <Modal.Header closeButton>
           <Modal.Title>Email {reportTypeUpperFirst}</Modal.Title>
         </Modal.Header>
@@ -944,27 +997,27 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
             validate={email => handleEmailValidation(email)}
             vertical
           >
-            <HelpBlock>
+            <FormText>
               One or more email addresses, comma separated, e.g.:
               <br />
               <em>
                 jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X"
                 &lt;x@example.org&gt;
               </em>
-            </HelpBlock>
+            </FormText>
           </Field>
 
           <Field
             name="comment"
             component={FieldHelper.InputField}
-            componentClass="textarea"
+            asA="textarea"
             vertical
           />
         </Modal.Body>
 
         <Modal.Footer>
           <Button
-            bsStyle="primary"
+            variant="primary"
             onClick={() => emailReport(values, setFieldValue)}
           >
             Send Email
@@ -1145,23 +1198,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         : []
     )
     return _isEmpty(warnings) ? (
-      <Button bsStyle="warning" onClick={confirmHandler}>
+      <Button variant="warning" onClick={confirmHandler}>
         {label}
       </Button>
     ) : (
-      <Confirm
+      <TriggerableConfirm
         onConfirm={confirmHandler}
         title="Request changes?"
         body={renderValidationWarnings(warnings, "rejecting")}
         confirmText="Request changes anyway"
         cancelText="Cancel change request"
-        dialogClassName="react-confirm-bootstrap-modal"
-        confirmBSStyle="primary"
-      >
-        <Button bsStyle="warning" onClick={confirmHandler}>
-          {label}
-        </Button>
-      </Confirm>
+        variant="warning"
+        buttonLabel={label}
+      />
     )
   }
 
@@ -1237,9 +1286,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     )
     return _isEmpty(warnings) ? (
       <Button
-        type="button"
-        bsStyle="primary"
-        bsSize={size}
+        variant="primary"
+        size={size}
         className={className}
         onClick={confirmHandler}
         disabled={disabled}
@@ -1248,26 +1296,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
         {label}
       </Button>
     ) : (
-      <Confirm
+      <TriggerableConfirm
         onConfirm={confirmHandler}
         title={title}
         body={renderValidationWarnings(warnings, submitType)}
         confirmText={confirmText}
         cancelText={cancelText}
-        dialogClassName="react-confirm-bootstrap-modal"
-        confirmBSStyle="primary"
-      >
-        <Button
-          type="button"
-          bsStyle="primary"
-          bsSize={size}
-          className={className}
-          disabled={disabled}
-          id={id}
-        >
-          {label}
-        </Button>
-      </Confirm>
+        variant="primary"
+        buttonLabel={label}
+        buttonSize={size}
+        buttonClassName={className}
+        buttonDisabled={disabled}
+        buttonId={id}
+      />
     )
   }
 
@@ -1290,7 +1331,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       : `The following errors must be fixed before ${submitType} this ${reportType}:`
     const style = report.isFuture() ? "info" : "danger"
     return (
-      <Alert bsStyle={style}>
+      <Alert variant={style}>
         {warning}
         <ul>
           {validationErrors.map((error, idx) => (
@@ -1306,7 +1347,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       return null
     }
     return (
-      <Alert bsStyle="warning">
+      <Alert variant="warning">
         The following warnings should be addressed before {submitType} this{" "}
         {reportType}:
         <ul>

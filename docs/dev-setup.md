@@ -127,6 +127,15 @@ Override the default gradle settings if you want to run your tests on a differen
 1. Start a test SMTP server (in a Docker container) in your local development environment: `./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer`
 1. Run the server side tests with a clean build: `./gradlew -PtestEnv cleanTest test`
 
+Note that the server-side tests use the [GraphQL Java Generator](https://github.com/graphql-java-generator/graphql-gradle-plugin-project) to generate Java test classes from the GraphQL schema. If you have changed the schema, you need to update it before you can run the tests (especially if you want to test your schema changes). Since the schema is derived from the GraphQL service endpoint, you need to take the following steps for updating it:
+1. Start the server: `./gradlew run`
+1. Generate the schema: `./gradlew yarn_run_generate-graphql-schema`
+1. Check the generated schema, e.g.: `git diff src/test/resources/anet.graphql`
+
+If you have updated the generated schema and need to update the generated Java classes, you can run:
+1. `./gradlew generateClientCode` to re-generate the Java sources
+1. `./gradlew compileTestJava` to re-generate the Java sources *and* compile them into Java class files
+
 ### Client-side tests
 #### How the client-side tests work
 Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
@@ -227,8 +236,8 @@ All of the frontend code is in the `client/` directory.
 ### Initial Setup
 1. You can run all client-side scripts via Yarn through Gradle. Otherwise, make sure you have the proper nodejs and yarn in your path; example:
     ```
-    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.10
-    export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v12.14.1-linux-x64
+    export YARN_HOME=<anet_root_path>/.gradle/yarn/yarn-v1.22.15
+    export NODEJS_HOME=<anet_root_path>/.gradle/nodejs/node-v14.18.1-linux-x64
     export PATH="$YARN_HOME/bin:$NODEJS_HOME/bin:$PATH"
     cd client/
     ```

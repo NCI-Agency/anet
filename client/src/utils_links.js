@@ -23,6 +23,15 @@ const ENTITY_URL_TYPES = {
   [PAGE_URLS.LOCATIONS]: ENTITY_TYPES.LOCATIONS,
   [PAGE_URLS.TASKS]: ENTITY_TYPES.TASKS
 }
+// Entity type --> Entity URL
+const ENTITY_TYPE_URLS = {
+  [ENTITY_TYPES.REPORTS]: PAGE_URLS.REPORTS,
+  [ENTITY_TYPES.PEOPLE]: PAGE_URLS.PEOPLE,
+  [ENTITY_TYPES.ORGANIZATIONS]: PAGE_URLS.ORGANIZATIONS,
+  [ENTITY_TYPES.POSITIONS]: PAGE_URLS.POSITIONS,
+  [ENTITY_TYPES.LOCATIONS]: PAGE_URLS.LOCATIONS,
+  [ENTITY_TYPES.TASKS]: PAGE_URLS.TASKS
+}
 
 export function getEntityInfoFromUrl(url) {
   const splittedUrl = url.split(/[\\/]/)
@@ -38,4 +47,14 @@ export function getEntityInfoFromUrl(url) {
   }
 
   return null
+}
+
+export function getUrlFromEntityInfo(node) {
+  const { href, entityType, entityUuid } = node
+  if (href) {
+    return href
+  }
+  const baseUrl = window.location.origin
+  const type = ENTITY_TYPE_URLS[entityType]
+  return `${baseUrl}${type}/${entityUuid}`
 }

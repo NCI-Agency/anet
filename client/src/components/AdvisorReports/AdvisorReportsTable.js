@@ -1,10 +1,10 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvisorReportsRow from "components/AdvisorReports/AdvisorReportsRow"
 import AdvisorReportsTableHead from "components/AdvisorReports/AdvisorReportsTableHead"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import PropTypes from "prop-types"
@@ -55,7 +55,7 @@ const AdvisorReportsTable = ({ pageDispatchers, columnGroups, orgUuid }) => {
   ))
 
   return (
-    <Table striped bordered condensed hover responsive>
+    <Table striped bordered hover responsive>
       <caption>
         Shows reports submitted and engagements attended per week for each{" "}
         {Settings.fields.advisor.person.name} in the organization

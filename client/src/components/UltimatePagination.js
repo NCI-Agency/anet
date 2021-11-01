@@ -1,6 +1,6 @@
 import PropTypes from "prop-types"
 import React from "react"
-import Pagination from "react-bootstrap/lib/Pagination"
+import { Pagination } from "react-bootstrap"
 import { createUltimatePagination, ITEM_TYPES } from "react-ultimate-pagination"
 
 const paginationLinkPropTypes = {
@@ -9,7 +9,7 @@ const paginationLinkPropTypes = {
 }
 
 const PageLink = ({ value, isActive, onClick }) => (
-  <Pagination.Item active={isActive} onClick={onClick}>
+  <Pagination.Item active={isActive} activeLabel="" onClick={onClick}>
     {value}
   </Pagination.Item>
 )
@@ -63,7 +63,12 @@ const UltimatePagination = ({
   totalCount,
   goToPage
 }) => {
-  const numPages = pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
+  // We may have a pagination overshoot, so set the number of pages
+  // to the maximum of the requested page and the total number of pages
+  const numPages = Math.max(
+    pageNum + 1,
+    pageSize <= 0 ? 1 : Math.ceil(totalCount / pageSize)
+  )
   if (numPages < 2) {
     return null
   }

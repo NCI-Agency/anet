@@ -3,7 +3,7 @@ import _map from "lodash/map"
 import { Report } from "models"
 import PropTypes from "prop-types"
 import React from "react"
-import { FormGroup } from "react-bootstrap"
+import { Form } from "react-bootstrap"
 
 const CANCELLATION_REASON_LABELS = {
   [Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: "Advisor",
@@ -60,46 +60,37 @@ const ReportStateFilter = ({
   return !asFormField ? (
     stateDisplay
   ) : (
-    <FormGroup>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row"
-        }}
+    <Form.Group>
+      <Form.Select
+        id={queryKey}
+        value={value.state}
+        onChange={handleChangeState}
+        multiple
       >
-        <select
-          id={queryKey}
-          value={value.state}
-          onChange={handleChangeState}
-          multiple
-        >
-          {Object.entries(Report.STATE_LABELS).map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
-            </option>
-          ))}
-        </select>
-        {onlyCancelled && (
-          <div style={{ verticalAlign: "top", paddingLeft: "8px" }}>
-            due to{" "}
-            <select
-              id={queryKey}
-              value={value.cancelledReason}
-              onChange={handleChangeCancelledReason}
-            >
-              <option value="">Everything</option>
-              {Object.entries(CANCELLATION_REASON_LABELS).map(
-                ([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-        )}
-      </div>
-    </FormGroup>
+        {Object.entries(Report.STATE_LABELS).map(([key, label]) => (
+          <option key={key} value={key}>
+            {label}
+          </option>
+        ))}
+      </Form.Select>
+      {onlyCancelled && (
+        <div style={{ verticalAlign: "top", paddingLeft: "8px" }}>
+          due to{" "}
+          <Form.Select
+            id={queryKey}
+            value={value.cancelledReason}
+            onChange={handleChangeCancelledReason}
+          >
+            <option value="">Everything</option>
+            {Object.entries(CANCELLATION_REASON_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </Form.Select>
+        </div>
+      )}
+    </Form.Group>
   )
 
   function handleChangeState(event) {

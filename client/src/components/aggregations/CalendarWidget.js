@@ -1,7 +1,5 @@
-import "@fullcalendar/core/main.css"
+import FullCalendar from "@fullcalendar/react" // needs to be imported first, before plugins
 import dayGridPlugin from "@fullcalendar/daygrid"
-import "@fullcalendar/daygrid/main.css"
-import FullCalendar from "@fullcalendar/react"
 import {
   aggregationWidgetDefaultProps,
   aggregationWidgetPropTypes,
@@ -11,6 +9,7 @@ import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { useHistory } from "react-router-dom"
+import "../Calendar.css"
 
 const DATE_FORMAT = "YYYY-MM-DD"
 
@@ -22,7 +21,7 @@ const CalendarWidget = ({
   hasPrevNext
 }) => {
   const calendarComponentRef = useRef(null)
-  const events = GET_CALENDAR_EVENTS_FROM[valueType](values)
+  const events = GET_CALENDAR_EVENTS_FROM[valueType]?.(values)
   const history = useHistory()
   if (_isEmpty(events)) {
     return whenUnspecified
@@ -30,14 +29,14 @@ const CalendarWidget = ({
   return (
     <FullCalendar
       plugins={[dayGridPlugin]}
-      header={{
+      headerToolbar={{
         left: hasPrevNext ? "prev,next" : "",
         center: "title",
         right: ""
       }}
-      defaultView="dayGridMonth"
-      defaultDate={period.start.format(DATE_FORMAT)}
-      allDayDefault
+      initialView="dayGridMonth"
+      initialDate={period.start.format(DATE_FORMAT)}
+      defaultAllDay
       eventTimeFormat={{
         hour: "2-digit",
         minute: "2-digit",
@@ -62,7 +61,6 @@ const CalendarWidget = ({
         info.jsEvent.preventDefault()
       }}
       eventOverlap
-      eventLimit
     />
   )
 }

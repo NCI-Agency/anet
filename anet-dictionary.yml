@@ -23,6 +23,13 @@ dateFormats:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
 
+menuOptions:
+  menuLinksDropdownTitle: My Work
+
+printOptions:
+  sensitiveInformationText: Sensitive Information
+  sensitiveInformationTooltipText: Releasability Information
+
 reportWorkflow:
   nbOfHoursQuarantineApproved: 24
   nbOfHoursApprovalTimeout: 48
@@ -40,7 +47,7 @@ fields:
     longName:
       label: Objective / Effort description
       placeholder: Enter an objective / effort description, example ....
-      componentClass: textarea
+      asA: textarea
       style:
         height: 400px
     topLevel:
@@ -52,7 +59,7 @@ fields:
       longName:
         label: Description of this Objective
         placeholder: Enter a description for this Objective, example ....
-        componentClass: textarea
+        asA: textarea
         style:
           height: 400px
       assessments:
@@ -78,7 +85,7 @@ fields:
       longName:
         label: Effort description
         placeholder: Enter an effort description, example ....
-        componentClass: textarea
+        asA: textarea
         style:
           height: 400px
       assessments:
@@ -141,6 +148,18 @@ fields:
         RED:
           label: Red
           color: '#ff8279'
+    customFieldEnum2:
+      label: Project future
+      enum:
+        BLUE:
+          label: Blue
+          color: '#0000ff'
+        WHITE:
+          label: White
+          color: '#ffffff'
+        BLACK:
+          label: Black
+          color: '#000000'
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization...
@@ -192,18 +211,23 @@ fields:
             label: Questions
             helpText: JSON that defines the assessment (you need to know what you are doing)
             placeholder: Fill in valid JSON
-            componentClass: textarea
+            asA: textarea
             style:
               height: 200px
 
   report:
+    canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics
     atmosphereDetails: Atmospherics details
     cancelled: ''
-    nextSteps: Next steps
+    nextSteps:
+      label: Next steps
+      maxTextFieldLength: 1000
     keyOutcomes: Key outcomes
     reportText: Key details
+    location:
+      filter: [POINT_LOCATION, VIRTUAL_LOCATION]
     customFields:
       relatedReport:
         type: anet_object
@@ -235,7 +259,7 @@ fields:
       trainingEvent:
         type: enum
         label: Training event
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         choices:
           YES:
             label: "Yes"
@@ -250,31 +274,31 @@ fields:
           - type: integer
           - type: min
             params: [1]
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
       levelTrained:
         type: special_field
         widget: likertScale
         label: Level trained
         helpText: Basic / Intermediate / Advanced
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
         levels:
-          - color: lightGray
+          - color: yellow
             endValue: 3
             label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
-          - color: lightGray
+          - color: orange
             endValue: 7
             label: intermediate
-          - color: lightGray
+          - color: blue
             endValue: 10
             label: advanced advanced advanced advanced
       trainingDate:
         type: date
         label: Training date
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
       systemProcess:
         type: enum
         label: System / process
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
         choices:
           YES:
             label: System
@@ -287,7 +311,7 @@ fields:
         validations:
           - type: required
             params: [You must provide the text field]
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
       itemsAgreed:
         type: array_of_objects
         label: Items Agreed To
@@ -305,7 +329,7 @@ fields:
           dueDate:
             type: date
             label: Due date
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
+        visibleWhen: $[?(@ && @.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
       assetsUsed:
         type: array_of_objects
         label: Assets used to assist
@@ -321,12 +345,14 @@ fields:
             type: number
             typeError: Qty must be a number
             label: Qty
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
+        visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
 
   person:
     firstName: First name
     lastName: Last name
     domainUsername: Domain username
+    position: Current Position
+    prevPositions: Previous Positions
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
@@ -396,7 +422,30 @@ fields:
         app6Modifier: K
     gender: Gender
     endOfTourDate: End of tour
+    biography: Biography
     customFields:
+      placeOfBirth:
+        type: anet_object
+        label: Place of birth
+        helpText: Here you can link to the person's place of birth
+        types:
+          - Location
+        filters:
+          - Location:
+              typeFilter:
+                filterField: type
+                filterValue: [GEOGRAPHICAL_AREA]
+      placeOfResidence:
+        type: anet_object
+        label: Place of residence
+        helpText: Here you can link to the person's place of residence
+        types:
+          - Location
+        filters:
+          - Location:
+              typeFilter:
+                filterField: type
+                filterValue: [GEOGRAPHICAL_AREA]
       multipleButtons:
         type: enumset
         label: Choose one or more of the options
@@ -432,10 +481,10 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        asA: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -448,7 +497,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -473,9 +522,31 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
+    customSensitiveInformation:
+      birthday:
+        type: date
+        label: Date of birth
+        authorizationGroupUuids: ['39a78d51-c351-452c-9206-4305ec8dd76d', 'c21e7321-7ec5-4837-8805-a302f9575754']
+        tooltipText: This field contains sensitive information!
+      politicalPosition:
+        type: enum
+        label: Position on the political spectrum
+        authorizationGroupUuids: ['1050c9e3-e679-4c60-8bdc-5139fbc1c10b']
+        tooltipText: This field contains sensitive information!
+        choices:
+          LEFT:
+            label: Left
+            color: 'salmon'
+          MIDDLE:
+            label: Middle
+            color: 'gold'
+          RIGHT:
+            label: Right
+            color: 'skyblue'
 
   location:
+    superUserTypeOptions: [POINT_LOCATION]
     format: LAT_LON
     customFields:
       multipleButtons:
@@ -513,10 +584,10 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        asA: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -529,7 +600,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -554,7 +625,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   position:
     name: 'Position Name'
@@ -594,10 +665,10 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        asA: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -610,7 +681,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -635,7 +706,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   organization:
     shortName: Name
@@ -676,10 +747,10 @@ fields:
         label: Textarea field
         placeholder: Placeholder text for textarea field
         helpText: Help text for textarea field
-        componentClass: textarea
+        asA: textarea
         style:
           height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
+        visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
       numberFieldName:
         type: number
         typeError: Number field must be a number
@@ -692,7 +763,7 @@ fields:
             params: [5]
           - type: max
             params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
+        visibleWhen: $[?(@ && (@.colourOptions === 'GREEN' || @.colourOptions === 'RED'))]
       nlt:
         type: date
         label: Not later than date
@@ -717,7 +788,7 @@ fields:
             type: date
             label: Object date
             helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
+            visibleWhen: $[?(@ && @.colourOptions === 'GREEN')]
 
   advisor:
 
@@ -726,13 +797,322 @@ fields:
       countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
                   Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
                   Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
-
+      # number of fields after Avatar in the left column for advisors
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 6
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - phoneNumber
+        - country
+        - colourOptions
+        - textareaFieldName
+        - code
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
+      assessments:
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            linguistRole:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              helpText: "What was the linguist's role?"
+              label: "Linguist Role"
+              choices:
+                translator:
+                  label: Translator
+                interpreter:
+                  label: Interpreter
+            translatorGotAdequateTime:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
+              type: enum
+              helpText: "Did you provide the translator with adequate time to finish the translation?"
+              label: Provided adequate time (Translator)
+              choices:
+                yes:
+                  label: "Yes"
+                no:
+                  label: "No"
+            translatorMetDeadline:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
+              type: enum
+              helpText: "Did the translator meet the deadline?"
+              label: Met the deadline (Translator)
+              choices:
+                yes:
+                  label: "Yes"
+                no:
+                  label: "No"
+            translatorSubjectVocabularyScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
+              type: enum
+              helpText: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+              label: Subject vocabulary (Translator)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            translatorSubjectComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator" && @.translatorSubjectVocabularyScore === "B")]
+              type: special_field
+              helpText: "Comment on bad translator subject vocabulary"
+              label: Vocabulary comments (Translator)
+              widget: richTextEditor
+              style:
+                height: 100px
+            translatorOverallScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
+              type: enum
+              label: "Overall evaluation (Translator)"
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            translatorOverallComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator" && @.translatorOverallScore === "B")]
+              type: special_field
+              helpText: "Comment on bad overall translator evaluation"
+              label: Overall comments (Translator)
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterHadPreMeeting:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "Did you hold a pre-meeting with the interpreter?"
+              label: Pre-meeting (Interpreter)
+              choices:
+                yes:
+                  label: "Yes"
+                no:
+                  label: "No"
+            interpreterProvidedWithNecessarySubjectMaterial:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
+              label: Subject material provided (Interpreter)
+              choices:
+                yes:
+                  label: "Yes"
+                no:
+                  label: "No"
+            interpreterSubjectVocabularyScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+              label: Subject vocabulary (Interpreter)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            interpreterSubjectVocabularyComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterSubjectVocabularyScore === "B")]
+              type: special_field
+              helpText: "Comment on bad interpreter subject vocabulary"
+              label: Vocabulary comments (Interpreter)
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterSubjectUnderstandingScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
+              label: Subject understanding (Interpreter)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            interpreterSubjectUnderstandingComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterSubjectUnderstandingScore === "B")]
+              type: special_field
+              helpText: "Comment on bad interpreter subject understanding"
+              label: Subject understanding comments (Interpreter)
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterWorkEthicScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "How was the interpreter’s work ethic?"
+              label: Work ethic (Interpreter)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            interpreterWorkEthicComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterWorkEthicScore === "B")]
+              type: special_field
+              helpText: "Comment on bad interpreter work ethic"
+              label: Work ethic comments (Interpreter)
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterPostureScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
+              label: Posture (Interpreter)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            interpreterPostureComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterPostureScore === "B")]
+              type: special_field
+              helpText: "Comment on bad interpreter posture"
+              label: Posture comments (Interpreter)
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterRoleScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
+              label: Role score (Interpreter)
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            interpreterRoleComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterRoleScore === "B")]
+              type: special_field
+              helpText: "Comment on bad interpreter role"
+              label: Role comment (Interpreter)
+              widget: richTextEditor
+              style:
+                height: 100px
+            interpreterInterpretationOverallScore:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              type: enum
+              label: "Overall evaluation (Interpreter)"
+              choices:
+                "EX":
+                  label: Excellent
+                  color: '#03f8fc'
+                "VG":
+                  label: Very Good
+                  color: '#00fc03'
+                "G":
+                  label: Good
+                  color: '#84fc03'
+                "S":
+                  label: Satisfactory
+                  color: '#e3fc03'
+                "B":
+                  label: Bad
+                  color: '#fc5a03'
+            interpreterInterpretationOverallComment:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterInterpretationOverallScore === "B")]
+              type: special_field
+              helpText: "Comment on bad overall interpreter evaluation"
+              label: Overall evaluation comment (Interpreter)
+              widget: richTextEditor
+              style:
+                height: 100px
     position:
       name: NATO Billet
       type: ANET User
       code:
         label: CE Post Number
         placeholder: the CE post number for this position
+      location:
+        filter: [POINT_LOCATION]
 
     org:
       name: Advisor Organization
@@ -745,7 +1125,7 @@ fields:
         placeholder: the six character code
 
   principal:
-
+    onDemandAssessmentExpirationDays: 108
     person:
       name: Afghan Partner
       countries: [Afghanistan]
@@ -790,7 +1170,7 @@ fields:
                   color: '#c2ffb3'
                 "2":
                   label: two
-                  color: '#ff8279'
+                  color: '#ffe396'
                 "3":
                   label: three
                   color: '#ff8279'
@@ -840,13 +1220,81 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
-
+        - recurrence: ondemand
+          questions:
+            assessmentDate:
+              type: date
+              label: Screening and vetting date
+              validations:
+                - type: required
+                  params: [You must provide the assessment date]
+            expirationDate:
+              type: date
+              label: Expiration date
+            question1:
+              type: enum
+              label: Screening and vetting level
+              choices:
+                pass1:
+                  label: Pass 1
+                  color: '#c2ffb3'
+                pass2:
+                  label: Pass 2
+                  color: '#c2ffb3'
+                pass3:
+                  label: Pass 3
+                  color: '#c2ffb3'
+                fail1:
+                  label: Fail 1
+                  color: '#ff8279'
+                fail2:
+                  label: Fail 2
+                  color: '#ff8279'
+                fail3:
+                  label: Fail 3
+                  color: '#ff8279'
+            question2:
+              type: special_field
+              label: Screening and vetting comment
+              widget: richTextEditor
+              style:
+                height: 70px
+      # number of fields after Avatar in the left column for principals
+      # adjust this number if two columns are not balanced on the Person Page
+      numberOfFieldsInLeftColumn: 7
+      # select and order person fields (including custom fields)
+      showPageOrderedFields:
+        - position
+        - prevPositions
+        - phoneNumber
+        - country
+        - birthday
+        - placeOfBirth
+        - placeOfResidence
+        - colourOptions
+        - textareaFieldName
+        - domainUsername
+        - emailAddress
+        - multipleButtons
+        - inputFieldName
+        - code
+        - politicalPosition
+        - rank
+        - numberFieldName
+        - nlt
+        - nlt_dt
+        - gender
+        - endOfTourDate
+        - biography
+        - arrayFieldName
     position:
       name: Afghan Tashkil
       type: Afghan Partner
       code:
         label: Tashkil
         placeholder: the Afghan taskhil ID for this position
+      location:
+        filter: [POINT_LOCATION]
 
     org:
       name: Afghan Government Organization

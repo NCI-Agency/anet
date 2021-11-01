@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
@@ -12,7 +12,7 @@ import { FastField, Form, Formik } from "formik"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import { Button, Col, Container, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
@@ -24,7 +24,7 @@ const GQL_UPDATE_ASSOCIATED_POSITION = gql`
 `
 
 const AssociatedPositionsTable = ({ associatedPositions, onDelete }) => (
-  <Table striped condensed hover responsive>
+  <Table striped hover responsive>
     <thead>
       <tr>
         <th>Name</th>
@@ -109,14 +109,14 @@ const EditAssociatedPositionsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm }) => (
-        <Modal show={showModal} onHide={() => close(setFieldValue)}>
+        <Modal centered show={showModal} onHide={() => close(setFieldValue)}>
           <Modal.Header closeButton>
             <Modal.Title>Modify assigned {assignedRole}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Messages error={error} />
             <Form className="form-horizontal" method="post">
-              <Grid fluid>
+              <Container fluid>
                 <Row>
                   <Col md={12}>
                     <FastField
@@ -152,14 +152,17 @@ const EditAssociatedPositionsModal = ({
                     />
                   </Col>
                 </Row>
-              </Grid>
+              </Container>
             </Form>
           </Modal.Body>
-          <Modal.Footer>
-            <Button className="pull-left" onClick={() => close(setFieldValue)}>
+          <Modal.Footer className="justify-content-between">
+            <Button
+              onClick={() => close(setFieldValue)}
+              variant="outline-secondary"
+            >
               Cancel
             </Button>
-            <Button onClick={submitForm} bsStyle="primary">
+            <Button onClick={submitForm} variant="primary">
               Save
             </Button>
           </Modal.Footer>
@@ -185,14 +188,11 @@ const EditAssociatedPositionsModal = ({
   }
 
   function save(values, form) {
-    const newPosition = Object.without(
-      new Position(values),
-      "notes",
-      "responsibleTasks" // Only for querying
+    const newPosition = new Position(values).filterClientSideFields(
+      "previousPeople",
+      "person",
+      "responsibleTasks"
     )
-    newPosition.associatedPositions = values.associatedPositions
-    delete newPosition.previousPeople
-    delete newPosition.person // prevent any changes to person.
     return API.mutation(GQL_UPDATE_ASSOCIATED_POSITION, {
       position: newPosition
     })

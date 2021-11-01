@@ -1,0 +1,47 @@
+.editor-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.toolbar {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.editable {
+  min-height: 10rem;
+  max-height: 50rem;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.editor-toggle-button-container {
+  flex-grow: 1;
+  flex-shrink: 1;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.editor-toggle-button-container:first-child {
+  border-left: none;
+}
+
+.editor-toggle-button {
+  width: 100%;
+  border: none;
+  background-color: white;
+  padding: 6px 12px;
+}
+
+.editor-toggle-button:hover {
+  background-color: #e6e6e6;
+}
+
+.editor-toggle-button.active{
+  background-color: #ccc;
+}
+
+.editor-link-chooser {
+  z-index: 1300;
+}

@@ -14,6 +14,9 @@
 	/* Make sure it is on top of the advanced search popup */
 	z-index: 1070 !important;
 }
+.bp3-transition-container {
+	z-index: 30000 !important;
+}
 
 /* Make bp3 timepicker in-line
 .bp3-timepicker {

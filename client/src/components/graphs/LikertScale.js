@@ -1,9 +1,9 @@
 import { TRAFFIC_LIGHTS_LEVELS } from "components/graphs/utils"
+import SvgText from "components/SvgText"
 import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useRef } from "react"
-import Text from "react-svg-text"
 import useDimensions from "react-use-dimensions"
 import utils from "utils"
 
@@ -30,7 +30,7 @@ const LikertScale = ({
     .scaleLinear()
     .domain([0, 10])
     .range([MARGIN_LEFT, containerWidth - MARGIN_RIGHT])
-  const x = utils.isNumeric(value) ? scale(value) : MARGIN_LEFT / 2
+  let x = utils.isNumeric(value) ? scale(value) : MARGIN_LEFT / 2
 
   const calculateNewX = useCallback(
     eventX => {
@@ -81,6 +81,7 @@ const LikertScale = ({
   }, [scale])
 
   let activeColor = null
+  let activeTextColor = null
   let valuesStats = null
   const numberValues = utils.arrayOfNumbers(values)
   if (numberValues !== undefined && _isEmpty(numberValues)) {
@@ -92,9 +93,13 @@ const LikertScale = ({
       max: Math.max(...numberValues),
       avg: numberValues.reduce((a, b) => a + b, 0) / numberValues.length
     }
-    valuesStats.avgColor = levels.find(
-      level => level.endValue > valuesStats.avg
+    x = scale(valuesStats.avg)
+    valuesStats.avgColor = levels.find((level, index) =>
+      index === levels.length - 1
+        ? level.endValue >= valuesStats.avg
+        : level.endValue > valuesStats.avg
     )?.color
+    valuesStats.avgTextColor = utils.getContrastYIQ(valuesStats.avgColor)
   }
   return (
     <svg
@@ -111,21 +116,27 @@ const LikertScale = ({
       {levels.map((level, index) => {
         const startX = scale(index === 0 ? 0 : levels[index - 1].endValue)
         const endX = scale(level.endValue)
-        const active = x <= endX && (x > startX || index === 0)
+        const active = x <= endX && (index === 0 ? x >= startX : x > startX)
         const fillColor = d3.color(level.color)
-        active && (activeColor = d3.hsl(level.color))
+        const textColor = utils.getContrastYIQ(level.color)
+        if (active) {
+          activeColor = d3.hsl(level.color)
+          activeTextColor = utils.getContrastYIQ(activeColor)
+        }
         fillColor.opacity = active ? 0.4 : 0.15
         return (
           <React.Fragment key={`level-${index}`}>
             <rect
-              style={{ fill: fillColor, stroke: "gray", strokeWidth: 1 }}
+              fill={fillColor}
+              stroke="gray"
+              strokeWidth={1}
               y={0}
               x={startX}
               height={Math.max(0, containerHeight - 11)}
               width={Math.max(0, endX - startX)}
             />
-            <Text
-              fill={active ? "black" : "gray"}
+            <SvgText
+              fill={active ? textColor : "gray"}
               fontWeight={active ? "bold" : "normal"}
               x={startX + 2}
               y={2}
@@ -134,7 +145,7 @@ const LikertScale = ({
               verticalAnchor="start"
             >
               {level.label}
-            </Text>
+            </SvgText>
           </React.Fragment>
         )
       })}
@@ -145,11 +156,9 @@ const LikertScale = ({
         >
           <path
             d="M -10,-10 L 10,10 M 10,-10 L -10,10"
-            style={{
-              stroke: "black",
-              fill: "black",
-              strokeWidth: 2
-            }}
+            stroke="black"
+            fill="black"
+            strokeWidth={2}
           />
         </g>
       ))}
@@ -161,21 +170,24 @@ const LikertScale = ({
             y1={-15}
             x2={scale(valuesStats.min)}
             y2={15}
-            style={{ stroke: "black", strokeWidth: 3 }}
+            stroke="black"
+            strokeWidth={3}
           />
           <line
             x1={scale(valuesStats.max)}
             y1={-15}
             x2={scale(valuesStats.max)}
             y2={15}
-            style={{ stroke: "black", strokeWidth: 3 }}
+            stroke="black"
+            strokeWidth={3}
           />
           <line
             x1={scale(valuesStats.min)}
             y1={0}
             x2={scale(valuesStats.max)}
             y2={0}
-            style={{ stroke: "black", strokeWidth: 3 }}
+            stroke="black"
+            strokeWidth={3}
           />
         </g>
       )}
@@ -185,10 +197,9 @@ const LikertScale = ({
           <circle
             cx={scale(valuesStats.avg)}
             r={10}
-            style={{
-              stroke: valuesStats.avgColor,
-              strokeWidth: 7
-            }}
+            stroke={valuesStats.avgColor}
+            strokeWidth={7}
+            fill={valuesStats.avgTextColor}
           />
           <text
             x={scale(valuesStats.avg) - 22}
@@ -205,15 +216,15 @@ const LikertScale = ({
         <g ref={cursorRef}>
           <polygon
             points="0,0 13,13 13,30 -13,30 -13,13"
+            stroke="gray"
+            fill={activeColor}
+            strokeWidth={1}
             style={{
-              stroke: "gray",
-              fill: "" + activeColor,
-              strokeWidth: 1,
               cursor: editable ? "pointer" : null
             }}
           />
           <text
-            fill={activeColor?.l < 0.5 ? "white" : "black"}
+            fill={activeTextColor}
             fontWeight="bold"
             x={-11}
             y={25}

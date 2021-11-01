@@ -28,27 +28,40 @@ public class AnetDevAuthenticator implements Authenticator<BasicCredentials, Per
       throws AuthenticationException {
     final Timer.Context context = timerAuthenticate.time();
     try {
-      List<Person> p = dao.findByDomainUsername(credentials.getUsername());
-      if (p.size() > 0) {
-        Person person = p.get(0);
-        return Optional.of(person);
-      }
-
-      if (credentials.getUsername().equals(credentials.getPassword())) {
+      // Call non-synchronized method first
+      final String domainUsername = credentials.getUsername();
+      Person person = findUser(domainUsername);
+      if (person == null && domainUsername.equals(credentials.getPassword())) {
         // Special development mechanism to perform a 'first login'.
-        Person newUser = new Person();
-        newUser.setName("");
-        newUser.setRole(Role.ADVISOR);
-        newUser.setDomainUsername(credentials.getUsername());
-        newUser.setPendingVerification(true);
-        newUser = dao.insert(newUser);
-
-        return Optional.of(newUser);
+        // Call synchronized method
+        person = findOrCreateUser(domainUsername);
       }
-      return Optional.empty();
+      return person == null ? Optional.empty() : Optional.of(person);
     } finally {
       context.stop();
     }
+  }
+
+  // Non-synchronized method, safe to run multiple times in parallel
+  private Person findUser(String domainUsername) {
+    final List<Person> matches = dao.findByDomainUsername(domainUsername);
+    return (matches.size() == 0) ? null : matches.get(0);
+  }
+
+  // Synchronized method, so we create at most one user in the face of multiple simultaneous
+  // authentication requests
+  private synchronized Person findOrCreateUser(String domainUsername) {
+    final Person person = findUser(domainUsername);
+    if (person != null) {
+      return person;
+    }
+    // First time this user has ever logged in.
+    final Person newPerson = new Person();
+    newPerson.setDomainUsername(domainUsername);
+    newPerson.setName("");
+    newPerson.setRole(Role.ADVISOR);
+    newPerson.setPendingVerification(true);
+    return dao.insert(newPerson);
   }
 
 }

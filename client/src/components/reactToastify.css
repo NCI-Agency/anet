@@ -1,19 +1,20 @@
-/* Style overrides for react-toastify, to use our own alert colors */
-
-.Toastify__toast--success, .Toastify__close-button--success {
-	/* same as bootstrap alert-success */
-	color: #3c763d;
-	background-color: #dff0d8;
-}
-.Toastify__progress-bar--success {
-	background-color: #3c763d;
+/*Override react-toast colors with bootstrap 5 colors*/
+/*Success colors*/
+.Toastify__toast-theme--colored.Toastify__toast--success {
+  background-color: #198754;
 }
 
-.Toastify__toast--error, .Toastify__close-button--error {
-	/* same as bootstrap alert-warning */
-	color: #8a6d3b;
-	background-color: #fcf8e3;
+/*Warning colors*/
+.Toastify__toast-theme--colored.Toastify__toast--warning {
+  background-color: #ffc107;
 }
-.Toastify__progress-bar--error {
-	background-color: #8a6d3b;
+
+/*Error colors*/
+.Toastify__toast-theme--colored.Toastify__toast--error {
+  background-color: #dc3545;
+}
+
+/*Info colors*/
+.Toastify__toast-theme--colored.Toastify__toast--info {
+  background-color: #325ed7;
 }

@@ -83,6 +83,10 @@ public class OrganizationResource {
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
+
+    DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
+        org.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Organization {} created by {}", created, user);
     return created;
   }
@@ -108,6 +112,10 @@ public class OrganizationResource {
     final Organization existing = dao.getByUuid(org.getUuid());
     final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(org, existing) : 1;
     doSuperUserUpdates(org, existing);
+
+    DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, org.getUuid(),
+        org.getCustomSensitiveInformation());
+
     AnetAuditLogger.log("Organization {} updated by {}", org, user);
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
@@ -146,8 +154,9 @@ public class OrganizationResource {
   }
 
   @GraphQLQuery(name = "organizationList")
-  public AnetBeanList<Organization> search(
+  public AnetBeanList<Organization> search(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "query") OrganizationSearchQuery query) {
+    query.setUser(DaoUtils.getUserFromContext(context));
     return dao.search(query);
   }
 

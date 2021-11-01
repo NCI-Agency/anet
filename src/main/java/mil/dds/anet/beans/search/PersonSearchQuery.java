@@ -5,7 +5,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
 import mil.dds.anet.beans.Person.Role;
 
-public class PersonSearchQuery extends AbstractSearchQuery<PersonSearchSortBy> {
+public class PersonSearchQuery extends SubscribableObjectSearchQuery<PersonSearchSortBy> {
 
   @GraphQLQuery
   @GraphQLInputField

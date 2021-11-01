@@ -256,7 +256,7 @@ ${sender.name} sent you a report from ANET:
               </#if>
             </#if>
             <p>
-              <strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}
+              <strong>${fields.report.nextSteps.label}:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>
@@ -357,7 +357,7 @@ ${sender.name} sent you a report from ANET:
       <span class="title-text">People involved in this engagement</span>
     </h2>
     <fieldset>
-      <table class="borderless table table-condensed">
+      <table class="borderless table">
         <thead>
           <tr>
             <th style="text-align: center;">

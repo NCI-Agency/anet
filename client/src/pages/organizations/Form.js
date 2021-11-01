@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
@@ -16,7 +16,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
@@ -46,7 +46,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const OrganizationForm = ({ edit, title, initialValues }) => {
+const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
   const history = useHistory()
   const [error, setError] = useState(null)
@@ -115,13 +115,13 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
           <div>
             <Button
               key="submit"
-              bsStyle="primary"
-              type="button"
+              variant="primary"
               onClick={submitForm}
               disabled={isSubmitting}
             >
               Save Organization
             </Button>
+            {notesComponent}
           </div>
         )
         const tasksFilters = {
@@ -196,7 +196,9 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
                           >
                             {values.parentOrg.shortName}{" "}
                             {values.parentOrg.longName}{" "}
-                            {values.parentOrg.identificationCode}
+                            {Organization.toIdentificationCodeString(
+                              values.parentOrg
+                            )}
                           </LinkToPreviewed>
                         )
                       }
@@ -375,14 +377,15 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
 
               <div className="submit-buttons">
                 <div>
-                  <Button onClick={onCancel}>Cancel</Button>
+                  <Button onClick={onCancel} variant="outline-secondary">
+                    Cancel
+                  </Button>
                 </div>
                 {(isAdmin || !isPrincipalOrg) && (
                   <div>
                     <Button
                       id="formBottomSubmit"
-                      bsStyle="primary"
-                      type="button"
+                      variant="primary"
                       onClick={submitForm}
                       disabled={isSubmitting}
                     >
@@ -431,14 +434,8 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
   }
 
   function save(values, form) {
-    const organization = Object.without(
-      new Organization(values),
-      "notes",
-      "childrenOrgs",
-      "positions",
-      "tasks",
-      "customFields", // initial JSON from the db
-      DEFAULT_CUSTOM_FIELDS_PARENT
+    const organization = Organization.filterClientSideFields(
+      new Organization(values)
     )
     // strip tasks fields not in data model
     organization.tasks = values.tasks.map(t => utils.getReference(t))
@@ -454,7 +451,8 @@ const OrganizationForm = ({ edit, title, initialValues }) => {
 OrganizationForm.propTypes = {
   initialValues: PropTypes.instanceOf(Organization).isRequired,
   title: PropTypes.string,
-  edit: PropTypes.bool
+  edit: PropTypes.bool,
+  notesComponent: PropTypes.node
 }
 
 OrganizationForm.defaultProps = {

@@ -1,7 +1,8 @@
 import API from "api"
 import {
   CustomFieldsContainer,
-  customFieldsJSONString
+  customFieldsJSONString,
+  SPECIAL_WIDGET_TYPES
 } from "components/CustomFields"
 import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
@@ -31,6 +32,9 @@ const AssessmentModal = ({
   onCancel
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
+  const hasRichTextEditor = Object.values(assessmentConfig).find(
+    question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
+  )
   const edit = !!note.uuid
   const initialValues = useMemo(
     () =>
@@ -41,7 +45,13 @@ const AssessmentModal = ({
   )
   return (
     <>
-      <Modal show={showModal} onHide={closeModal}>
+      <Modal
+        centered
+        show={showModal}
+        onHide={closeModal}
+        dialogClassName={hasRichTextEditor && "rich-text-modal"}
+        style={{ zIndex: "1250" }}
+      >
         <Formik
           enableReinitialize
           onSubmit={onAssessmentSubmit}
@@ -86,13 +96,13 @@ const AssessmentModal = ({
                     />
                   </div>
                 </Modal.Body>
-                <Modal.Footer>
-                  <Button className="pull-left" onClick={closeModal}>
+                <Modal.Footer className="justify-content-between">
+                  <Button onClick={closeModal} variant="outline-secondary">
                     Cancel
                   </Button>
                   <Button
                     onClick={submitForm}
-                    bsStyle="primary"
+                    variant="primary"
                     disabled={isSubmitting}
                   >
                     Save

@@ -5,6 +5,7 @@ import com.google.common.collect.ObjectArrays;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -34,29 +35,32 @@ import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
+public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQuery> {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   // Must always retrieve these e.g. for ORDER BY
-  public static String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
-  public static String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
+  public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
+  public static final String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
       "biography", "country", "gender", "endOfTourDate", "domainUsername", "pendingVerification",
       "code", "updatedAt", "customFields"};
   // "avatar" has its own batcher
-  public static String[] avatarFields = {"uuid", "avatar"};
+  public static final String[] avatarFields = {"uuid", "avatar"};
   public static final String[] allFields =
       ObjectArrays.concat(minimalFields, additionalFields, String.class);
-  public static String TABLE_NAME = "people";
-  public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
-  public static String PERSON_AVATAR_FIELDS =
+  public static final String TABLE_NAME = "people";
+  public static final String PERSON_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, allFields, true);
+  public static final String PERSON_AVATAR_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, avatarFields, true);
-  public static String PERSON_FIELDS_NOAS =
+  public static final String PERSON_FIELDS_NOAS =
       DaoUtils.buildFieldAliases(TABLE_NAME, allFields, false);
 
   private static final String EHCACHE_CONFIG = "/ehcache-config.xml";
@@ -363,8 +367,10 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
         + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
     // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
+    final String winnerUuid = winner.getUuid();
+    final String loserUuid = loser.getUuid();
     getDbHandle().createUpdate(String.format(sqlUpd, DaoUtils.isMsSql() ? "|" : "OR"))
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
     // 2. delete the loser so we don't have duplicates
     final String sqlDel = "WITH dups AS ( SELECT"
         + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
@@ -376,51 +382,34 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
         + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
     // MS SQL and PostgreSQL have slightly different DELETE syntax
     getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
 
     // update report people, should now be unique
-    getDbHandle().createUpdate(
-        "UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
 
     // update approvals this person might have done
-    getDbHandle().createUpdate(
-        "UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("reportActions", "personUuid", winnerUuid, loserUuid);
 
-    // comment author update
-    getDbHandle()
-        .createUpdate(
-            "UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // update comment authors
+    updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
 
     // update position history
-    getDbHandle().createUpdate(
-        "UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
 
     // update note authors
-    getDbHandle()
-        .createUpdate(
-            "UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
 
-    // update note related objects where we don't already have the same note for the winnerUuid
-    getDbHandle().createUpdate(
-        "UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
-            + " AND \"noteUuid\" NOT IN ("
-            + "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
-            + ")")
-        .bind("winnerUuid", winner.getUuid()).bind("loserUuid", loser.getUuid()).execute();
+    // update notes
+    updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
 
-    // now delete obsolete note related objects
-    getDbHandle()
-        .createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
-        .bind("loserUuid", loser.getUuid()).execute();
+    // Update customSensitiveInformation for winner
+    DaoUtils.saveCustomSensitiveInformation(null, PersonDao.TABLE_NAME, winnerUuid,
+        winner.getCustomSensitiveInformation());
+    // Delete customSensitiveInformation for loser
+    deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
-    // delete the person!
-    final int nr = getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
-        .bind("loserUuid", loser.getUuid()).execute();
+    // finally, delete the person!
+    final int nr = deleteForMerge("people", "uuid", loserUuid);
     // E.g. positions may have been updated, so evict from the cache
     evictFromCache(winner);
     evictFromCache(loser);
@@ -454,6 +443,11 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     }
   }
 
+  @Override
+  public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
+    return getCommonSubscriptionUpdate(obj, TABLE_NAME, "people.uuid");
+  }
+
   public String clearCache() {
     if (domainUsersCache != null) {
       domainUsersCache.removeAll();
@@ -466,4 +460,74 @@ public class PersonDao extends AnetBaseDao<Person, PersonSearchQuery> {
     return AnetConstants.USERCACHE_EMPTY_MESSAGE;
   }
 
+  @InTransaction
+  public int updatePersonHistory(Person p) {
+    final String personUuid = p.getUuid();
+    // Delete old history
+    final int numRows = getDbHandle()
+        .execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
+    // Add new history
+    for (final PersonPositionHistory history : p.getPreviousPositions()) {
+      updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
+          history.getEndTime());
+    }
+    return numRows;
+  }
+
+  @InTransaction
+  public boolean hasHistoryConflict(final String uuid, final String loserUuid,
+      final List<PersonPositionHistory> history, final boolean checkPerson) {
+    final String personPositionClause = checkPerson
+        ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
+        : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
+    for (final PersonPositionHistory pph : history) {
+      final Query q;
+      final Instant endTime = pph.getEndTime();
+      if (endTime == null) {
+        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
+            + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
+            + ") AND " + personPositionClause);
+      } else {
+        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
+            + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
+            + " OR (\"endedAt\" IS NOT NULL AND"
+            + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
+            + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+      }
+      final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+      final Number count =
+          (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+              .bind("personUuid", checkPerson ? uuid : histUuid)
+              .bind("positionUuid", checkPerson ? histUuid : uuid)
+              .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
+              .get("count");
+
+      if (count.longValue() > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @InTransaction
+  protected void updatePeoplePositions(final String positionUuid, final String personUuid,
+      final Instant startTime, final Instant endTime) {
+    if (endTime == null) {
+      // we have to make an exception here, as MSSQL has problems inserting a null datetime
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
+    } else {
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    }
+  }
 }

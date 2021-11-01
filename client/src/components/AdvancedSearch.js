@@ -1,6 +1,6 @@
-import { Classes, Menu, MenuItem } from "@blueprintjs/core"
 import { Popover2, Popover2InteractionKind } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
+import styled from "@emotion/styled"
 import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import RemoveButton from "components/RemoveButton"
@@ -17,9 +17,10 @@ import React, { useState } from "react"
 import {
   Button,
   Col,
-  ControlLabel,
-  FormControl,
-  FormGroup
+  Dropdown,
+  FormGroup,
+  FormLabel,
+  Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory } from "react-router-dom"
@@ -73,20 +74,18 @@ const AdvancedSearch = ({
     existingKeys.length < Object.keys(filterDefs).length
 
   const advancedSearchMenuContent = (
-    <Menu
-      className={Classes.POPOVER_DISMISS}
-      style={{ maxHeight: "400px", overflowY: "auto" }}
-    >
+    <Dropdown style={{ maxHeight: "400px", overflowY: "auto" }}>
       {Object.keys(filterDefs).map(filterKey => (
-        <MenuItem
+        <Dropdown.Item
           disabled={existingKeys.includes(filterKey)}
           key={filterKey}
           onClick={() => addFilter(filterKey)}
-          text={filterKey}
-          shouldDismissPopover={false}
-        />
+          // shouldDismissPopover={false}
+        >
+          {filterKey}
+        </Dropdown.Item>
       ))}
-    </Menu>
+    </Dropdown>
   )
 
   const possibleFilterTypes = Object.keys(ALL_FILTERS).filter(type =>
@@ -98,26 +97,15 @@ const AdvancedSearch = ({
       {() => (
         <div className="advanced-search form-horizontal">
           <Form onSubmit={onSubmit}>
-            <FormGroup>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  flexWrap: "nowrap",
-                  padding: "10px"
-                }}
-              >
+            <FormGroup style={{ marginBottom: "15px" }}>
+              <ButtonGroupContainerS>
                 <ButtonToggleGroup
                   value={objectType}
                   onChange={changeObjectType}
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flexWrap: "nowrap"
-                  }}
                 >
                   {possibleFilterTypes.map(type => (
                     <Button
+                      variant="outline-secondary"
                       key={type}
                       value={type}
                       disabled={possibleFilterTypes.length < 2}
@@ -132,22 +120,21 @@ const AdvancedSearch = ({
                     visibility:
                       possibleFilterTypes.length > 1 && objectType
                         ? "visible"
-                        : "hidden"
+                        : "hidden",
+                    marginLeft: "1rem"
                   }}
                 >
-                  <RemoveButton
-                    title="Clear type"
-                    altText="Clear type"
-                    onClick={clearObjectType}
-                    buttonStyle="link"
-                  />
+                  <RemoveButton title="Clear type" onClick={clearObjectType} />
                 </div>
-              </div>
+              </ButtonGroupContainerS>
             </FormGroup>
 
-            <FormControl defaultValue={text} className="hidden" />
+            {/* <FormControl defaultValue={text} className="hidden" /> */}
 
-            <div className="advanced-search-content">
+            <div
+              className="advanced-search-content"
+              style={{ paddingLeft: "15px" }}
+            >
               {filters.map(
                 filter =>
                   filterDefs[filter.key] && (
@@ -205,7 +192,7 @@ const AdvancedSearch = ({
                       }
                     }}
                   >
-                    <Button bsStyle="link" id="addFilterDropdown">
+                    <Button variant="link" id="addFilterDropdown">
                       + Add {filters.length > 0 && "another"} filter
                     </Button>
                   </Popover2>
@@ -219,18 +206,15 @@ const AdvancedSearch = ({
                 }}
               >
                 <Button
-                  className={Classes.POPOVER_DISMISS}
-                  intent="danger"
+                  variant="outline-secondary"
                   onClick={onCancel}
                   style={{ marginLeft: 20 }}
                 >
                   Cancel
                 </Button>
                 <Button
-                  bsStyle="primary"
-                  className={Classes.POPOVER_DISMISS}
+                  variant="primary"
                   type="submit"
-                  intent="success"
                   onClick={onSubmit}
                   style={{ marginLeft: 20 }}
                 >
@@ -343,28 +327,28 @@ const SearchFilter = ({
   const { queryKey } = element.props || undefined
 
   return (
-    <FormGroup controlId={queryKey}>
-      <Col sm={3} lg={2} componentClass={ControlLabel}>
-        {label}
-      </Col>
-      <Col sm={8} lg={9}>
-        <div>
-          <ChildComponent
-            value={filter.value || ""}
-            onChange={onChange}
-            orgFilterQueryParams={orgFilterQueryParams}
-            {...element.props}
+    <FormGroup controlId={queryKey} className="form-group">
+      <Row>
+        <Col xs={12} sm={3} lg={2} className="label-align">
+          <FormLabel>{label}</FormLabel>
+        </Col>
+        <Col xs={10} sm={8} lg={9}>
+          <div>
+            <ChildComponent
+              value={filter.value || ""}
+              onChange={onChange}
+              orgFilterQueryParams={orgFilterQueryParams}
+              {...element.props}
+            />
+          </div>
+        </Col>
+        <Col xs={2} sm={1} lg={1}>
+          <RemoveButton
+            title="Remove this filter"
+            onClick={() => onRemove(filter)}
           />
-        </div>
-      </Col>
-      <Col sm={1} lg={1}>
-        <RemoveButton
-          title="Remove this filter"
-          altText="Remove this filter"
-          onClick={() => onRemove(filter)}
-          buttonStyle="link"
-        />
-      </Col>
+        </Col>
+      </Row>
     </FormGroup>
   )
 
@@ -387,3 +371,24 @@ SearchFilter.propTypes = {
     props: PropTypes.object
   })
 }
+
+const ButtonGroupContainerS = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  & > .btn-group {
+    display: flex;
+    flex-direction: row;
+  }
+
+  @media (max-width: 768px) {
+    & > .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      & > * {
+        flex: 1 1 auto;
+      }
+    }
+  }
+`
