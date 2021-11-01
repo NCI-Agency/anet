@@ -5,11 +5,12 @@ class Home extends Page {
     return browser.$("#topbar")
   }
 
-  get ie11BannerText() {
-    const ieBanner = browser.$("#ieBanner")
-    ieBanner.waitForExist()
-    ieBanner.waitForDisplayed()
-    return browser.$("#ieBanner > div:nth-child(2)").getText()
+  get ieBanner() {
+    return browser.$("#ieBanner")
+  }
+
+  get ieBannerText() {
+    return this.ieBanner.$("div:nth-child(2)").getText()
   }
 
   get securityBanner() {

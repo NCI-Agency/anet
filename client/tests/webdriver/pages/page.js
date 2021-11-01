@@ -29,6 +29,13 @@ class Page {
     this.waitUntilLoaded()
   }
 
+  openWithoutWaiting(
+    pathName = "/",
+    credentials = Page.DEFAULT_CREDENTIALS.user
+  ) {
+    browser.url(this._buildUrl(pathName, credentials))
+  }
+
   open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
     this._open(pathName, credentials)
   }
