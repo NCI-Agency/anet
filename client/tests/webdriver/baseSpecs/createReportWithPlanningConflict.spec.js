@@ -34,6 +34,7 @@ describe("When creating a Report with conflicts", () => {
 
   it("Should create first draft report without any conflicts", () => {
     CreateReport.open()
+    browser.pause(500) // wait for the page transition and rendering of custom fields
     CreateReport.fillForm(report01)
 
     expect(CreateReport.intent.getValue()).to.equal(report01.intent)
@@ -66,6 +67,7 @@ describe("When creating a Report with conflicts", () => {
 
   it("Should create second draft report with conflicts", () => {
     CreateReport.open()
+    browser.pause(500) // wait for the page transition and rendering of custom fields
     CreateReport.fillForm(report02)
 
     expect(CreateReport.intent.getValue()).to.equal(report02.intent)

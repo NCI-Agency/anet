@@ -62,6 +62,7 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validLeft.fullName
     )
     MergePositions.firstItemFromAdvancedSelect.click()
+    browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
@@ -124,6 +125,7 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validRight.fullName
     )
     MergePositions.firstItemFromAdvancedSelect.click()
+    browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validRight.fullName,
@@ -157,6 +159,7 @@ describe("Merge positions page", () => {
   })
   it("Should be able to select all fields from left position", () => {
     MergePositions.getUseAllButton("left").click()
+    browser.pause(500) // wait for the rendering of custom fields
 
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
@@ -193,6 +196,7 @@ describe("Merge positions page", () => {
   })
   it("Should be able to select all fields from right position", () => {
     MergePositions.getUseAllButton("right").click()
+    browser.pause(500) // wait for the rendering of custom fields
 
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validRight.fullName,
@@ -260,6 +264,7 @@ describe("Merge positions page", () => {
   })
   it("Should display correct values on the left column", () => {
     MergePositions.getUseAllButton("left").click()
+    browser.pause(500) // wait for the rendering of custom fields
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
       "mid",
