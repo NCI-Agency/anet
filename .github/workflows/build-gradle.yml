@@ -4,6 +4,8 @@ on:
   push:
     branches:
     - '**'
+    tags:
+    - '**'
   pull_request:
     branches:
     - candidate
@@ -157,7 +159,7 @@ jobs:
     - run: |
         ./gradlew -PtestEnv run &
         sleep 15
-    - uses: olegtarasov/get-tag@v2
+    - uses: olegtarasov/get-tag@v2.1.1
       id: tagName
     - name: Set local identifier for BrowserStack
       id: browserstack-local
