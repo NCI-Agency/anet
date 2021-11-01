@@ -58,6 +58,19 @@ class Page {
     const index = 1 + Math.floor(Math.random() * (options.length - 1))
     return options[index].getValue()
   }
+
+  deleteText(text = "") {
+    // Clumsy way to clear text…
+    browser.keys(["End"].concat(Array(text.length).fill("Backspace")))
+  }
+
+  deleteInput(inputField) {
+    // Clumsy way to clear input…
+    if (inputField && inputField.isDisplayed()) {
+      inputField.click()
+      this.deleteText(inputField.getValue())
+    }
+  }
 }
 
 export default Page
