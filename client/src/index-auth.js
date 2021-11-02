@@ -22,7 +22,7 @@ import { initOptions, keycloak } from "keycloak"
     }
   } catch (error) {
     console.info("Error occurred during Keycloak client initialization")
-    console.err(error)
+    console.error(error)
     return
   }
 
