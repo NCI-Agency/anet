@@ -151,6 +151,8 @@ const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
   }
 `
 
+const AUTOSAVE_TIMEOUT = process.env.ANET_TEST_MODE === "true" ? 300 : 30
+
 const ReportForm = ({
   pageDispatchers,
   edit,
@@ -169,7 +171,7 @@ const ReportForm = ({
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
   // some autosave settings
-  const defaultTimeout = moment.duration(30, "seconds")
+  const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
     autoSaveTimeout: defaultTimeout.clone(),
     timeoutId: null,

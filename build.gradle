@@ -219,6 +219,7 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir("$buildDir/resources/main/assets/client")
 	outputs.cacheIf { true }
+	environment = [ "ANET_TEST_MODE": isTestEnv ? "true" : "false" ]
 	args = ['run', 'build']
 }
 
