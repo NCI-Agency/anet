@@ -24,11 +24,14 @@ const InstantAssessmentsContainerField = ({
       <tbody>
         {entities.map(entity => {
           const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
-            entity.getInstantAssessmentConfig()?.questions,
+            entity.getInstantAssessmentConfig(),
             entity,
             relatedObject
           )
-          if (_isEmpty(entityInstantAssessmentConfig)) {
+          if (
+            _isEmpty(entityInstantAssessmentConfig.questions) &&
+            _isEmpty(entityInstantAssessmentConfig.questionSets)
+          ) {
             return null
           }
           return (
@@ -40,26 +43,25 @@ const InstantAssessmentsContainerField = ({
               </tr>
               <tr>
                 <td>
-                  {readonly ? (
-                    <ReadonlyCustomFields
-                      parentFieldName={`${parentFieldName}.${entity.uuid}`}
-                      fieldsConfig={entityInstantAssessmentConfig}
-                      values={values}
-                    />
-                  ) : (
-                    <CustomFieldsContainer
-                      parentFieldName={`${parentFieldName}.${entity.uuid}`}
-                      fieldsConfig={entityInstantAssessmentConfig}
-                      formikProps={formikProps}
-                    />
-                  )}
-                  {entity.getInstantAssessmentConfig().questionSets && (
+                  {!_isEmpty(entityInstantAssessmentConfig.questions) &&
+                    (readonly ? (
+                      <ReadonlyCustomFields
+                        parentFieldName={`${parentFieldName}.${entity.uuid}`}
+                        fieldsConfig={entityInstantAssessmentConfig.questions}
+                        values={values}
+                      />
+                    ) : (
+                      <CustomFieldsContainer
+                        parentFieldName={`${parentFieldName}.${entity.uuid}`}
+                        fieldsConfig={entityInstantAssessmentConfig.questions}
+                        formikProps={formikProps}
+                      />
+                    ))}
+                  {!_isEmpty(entityInstantAssessmentConfig.questionSets) && (
                     <QuestionSet
                       entity={entity}
                       relatedObject={relatedObject}
-                      questionSets={
-                        entity.getInstantAssessmentConfig()?.questionSets
-                      }
+                      questionSets={entityInstantAssessmentConfig.questionSets}
                       parentFieldName={`${parentFieldName}.${entity.uuid}.questionSets`}
                       formikProps={formikProps}
                       readonly={readonly}

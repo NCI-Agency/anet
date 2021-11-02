@@ -16,16 +16,11 @@ const QuestionSet = ({
   readonly
 }) => {
   const { values } = formikProps
-  const filteredSets = Model.filterAssessmentConfig(
-    questionSets,
-    entity,
-    relatedObject
-  )
   return (
     <>
-      {Object.keys(filteredSets).map(set => {
+      {Object.keys(questionSets).map(set => {
         const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
-          questionSets[set]?.questions,
+          questionSets[set],
           entity,
           relatedObject
         )
@@ -34,21 +29,21 @@ const QuestionSet = ({
             {readonly ? (
               <ReadonlyCustomFields
                 parentFieldName={`${parentFieldName}.${set}`}
-                fieldsConfig={entityInstantAssessmentConfig}
+                fieldsConfig={entityInstantAssessmentConfig.questions}
                 values={values}
               />
             ) : (
               <CustomFieldsContainer
                 formikProps={formikProps}
-                fieldsConfig={entityInstantAssessmentConfig}
+                fieldsConfig={entityInstantAssessmentConfig.questions}
                 parentFieldName={`${parentFieldName}.${set}`}
               />
             )}
-            {questionSets[set].questionSets && (
+            {entityInstantAssessmentConfig.questionSets && (
               <QuestionSet
                 entity={entity}
                 relatedObject={relatedObject}
-                questionSets={questionSets[set].questionSets}
+                questionSets={entityInstantAssessmentConfig.questionSets}
                 parentFieldName={`${parentFieldName}.${set}`}
                 formikProps={formikProps}
                 readonly={readonly}

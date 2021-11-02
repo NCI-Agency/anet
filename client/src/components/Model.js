@@ -728,16 +728,27 @@ export default class Model {
 
   static filterAssessmentConfig(assessmentConfig, subject, relatedObject) {
     const testValue = { subject, relatedObject }
-    const filteredAssessmentConfig = {}
-    if (!_isEmpty(assessmentConfig)) {
-      Object.entries(assessmentConfig)
+    const filteredAssessmentConfig = { questions: {}, questionSets: {} }
+    if (!_isEmpty(assessmentConfig?.questions)) {
+      Object.entries(assessmentConfig.questions)
         .filter(
           ([key, question]) =>
             !question.test ||
             !_isEmpty(JSONPath({ path: question.test, json: testValue }))
         )
         .forEach(([key, question]) => {
-          filteredAssessmentConfig[key] = question
+          filteredAssessmentConfig.questions[key] = question
+        })
+    }
+    if (!_isEmpty(assessmentConfig?.questionSets)) {
+      Object.entries(assessmentConfig.questionSets)
+        .filter(
+          ([key, questionSet]) =>
+            !questionSet.test ||
+            !_isEmpty(JSONPath({ path: questionSet.test, json: testValue }))
+        )
+        .forEach(([key, questionSet]) => {
+          filteredAssessmentConfig.questionSets[key] = questionSet
         })
     }
     return filteredAssessmentConfig
