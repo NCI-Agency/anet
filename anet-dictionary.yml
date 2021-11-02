@@ -879,6 +879,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorSubjectComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.translatorSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad translator subject vocabulary"
                   label: Vocabulary comments (Translator)
@@ -905,6 +906,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorOverallComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.translatorOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall translator evaluation"
                   label: Overall comments (Translator)
@@ -954,6 +956,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectVocabularyComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject vocabulary"
                   label: Vocabulary comments (Interpreter)
@@ -981,6 +984,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectUnderstandingComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterSubjectUnderstandingScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject understanding"
                   label: Subject understanding comments (Interpreter)
@@ -1008,6 +1012,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterWorkEthicComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterWorkEthicScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter work ethic"
                   label: Work ethic comments (Interpreter)
@@ -1035,6 +1040,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterPostureComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterPostureScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter posture"
                   label: Posture comments (Interpreter)
@@ -1062,6 +1068,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterRoleComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterRoleScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter role"
                   label: Role comment (Interpreter)
@@ -1088,6 +1095,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterInterpretationOverallComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterInterpretationOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall interpreter evaluation"
                   label: Overall evaluation comment (Interpreter)
