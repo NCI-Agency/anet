@@ -59,6 +59,17 @@ class Page {
     this._open(pathName, uniqueName)
   }
 
+  get alertSuccess() {
+    return browser.$(".alert-success")
+  }
+
+  waitForAlertSuccessToLoad() {
+    if (!this.alertSuccess.isDisplayed()) {
+      this.alertSuccess.waitForExist()
+      this.alertSuccess.waitForDisplayed()
+    }
+  }
+
   getRandomOption(select) {
     const options = select.$$("option")
     // Ignore the first option, it is always the empty one
