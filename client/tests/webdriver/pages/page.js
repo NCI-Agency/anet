@@ -70,6 +70,17 @@ class Page {
     }
   }
 
+  get alertWarning() {
+    return browser.$(".alert-warning")
+  }
+
+  waitForAlertWarningToLoad() {
+    if (!this.alertWarning.isDisplayed()) {
+      this.alertWarning.waitForExist()
+      this.alertWarning.waitForDisplayed()
+    }
+  }
+
   getRandomOption(select) {
     const options = select.$$("option")
     // Ignore the first option, it is always the empty one

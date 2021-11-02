@@ -31,6 +31,7 @@ export function createOnboardingNewPerson(
   CreatePerson.endOfTourDate.setValue(personDetails.endOfTourDate)
 
   CreatePerson.submitForm()
+  Home.waitForAlertWarningToLoad()
   Home.onboardingPopover.waitForExist()
   Home.onboardingPopover.waitForDisplayed()
 }

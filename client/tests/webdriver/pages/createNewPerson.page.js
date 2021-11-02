@@ -12,7 +12,7 @@ const SENSITIVE_CUSTOM_FIELDS = {
   politicalPosition: "formSensitiveFields.politicalPosition"
 }
 
-class CreatePerson extends Page {
+export class CreatePerson extends Page {
   get form() {
     return browser.$("form.form-horizontal")
   }
