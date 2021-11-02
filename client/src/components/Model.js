@@ -754,10 +754,32 @@ export default class Model {
     return filteredAssessmentConfig
   }
 
-  static clearInvalidAssessmentQuestions(assessment, validQuestions) {
-    Object.keys(assessment).forEach(
+  static clearInvalidAssessmentQuestions(assessment, entity, relatedObject) {
+    const nonQuestionFields = [
+      "__recurrence",
+      "__relatedObjectType",
+      "invisibleCustomFields",
+      "questionSets"
+    ]
+    const topLevelQuestions = Object.keys(assessment).filter(
+      field => !nonQuestionFields.includes(field)
+    )
+    const topLevelQuestionSets = Object.keys(assessment?.questionSets || {})
+    const filtered = Model.filterAssessmentConfig(
+      entity.getInstantAssessmentConfig(),
+      entity,
+      relatedObject
+    )
+    // Clear invalid questions
+    topLevelQuestions.forEach(
       question =>
-        !validQuestions.includes(question) && delete assessment[question]
+        !filtered?.questions?.[question] && delete assessment[question]
+    )
+    // Clear invalid questionSets
+    topLevelQuestionSets.forEach(
+      questionSet =>
+        !filtered?.questionSets?.[questionSet] &&
+        delete assessment.questionSets[questionSet]
     )
   }
 

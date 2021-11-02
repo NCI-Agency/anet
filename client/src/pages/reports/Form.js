@@ -1304,6 +1304,12 @@ const ReportForm = ({
           entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
       )
       .map(([key, assessment]) => {
+        const entity = entities.find(e => e.uuid === key)
+        Model.clearInvalidAssessmentQuestions(
+          assessment,
+          entity,
+          new Report(values)
+        )
         assessment.__recurrence = RECURRENCE_TYPE.ONCE
         assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
