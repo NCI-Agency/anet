@@ -596,7 +596,7 @@ test.serial(
       "People fieldset should have correct title for an uncancelled enagement"
     )
 
-    const $cancelledCheckbox = await $(".cancelled-checkbox")
+    const $cancelledCheckbox = await $(".cancelled-checkbox input")
     // Move element into view
     const actions = t.context.driver.actions({ async: true })
     await actions.move({ origin: $cancelledCheckbox }).perform()
