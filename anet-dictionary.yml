@@ -822,6 +822,21 @@ fields:
         - biography
         - arrayFieldName
       assessments:
+        - recurrence: quarterly
+          questions:
+            test1:
+              type: enum
+              label: Test question 1
+              choices:
+                "1":
+                  label: one
+                  color: '#c2ffb3'
+                "2":
+                  label: two
+                  color: '#ffe396'
+                "3":
+                  label: three
+                  color: '#ff8279'
         - recurrence: once
           relatedObjectType: report
           questions:
@@ -843,7 +858,7 @@ fields:
                 translatorGotAdequateTime:
                   type: enum
                   helpText: "Did you provide the translator with adequate time to finish the translation?"
-                  label: Provided adequate time (Translator)
+                  label: Provided adequate time
                   choices:
                     yes:
                       label: "Yes"
@@ -852,7 +867,7 @@ fields:
                 translatorMetDeadline:
                   type: enum
                   helpText: "Did the translator meet the deadline?"
-                  label: Met the deadline (Translator)
+                  label: Met the deadline
                   choices:
                     yes:
                       label: "Yes"
@@ -861,7 +876,7 @@ fields:
                 translatorSubjectVocabularyScore:
                   type: enum
                   helpText: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
-                  label: Subject vocabulary (Translator)
+                  label: Subject vocabulary
                   choices:
                     "EX":
                       label: Excellent
@@ -882,13 +897,13 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.translatorSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad translator subject vocabulary"
-                  label: Vocabulary comments (Translator)
+                  label: Vocabulary comments
                   widget: richTextEditor
                   style:
                     height: 100px
                 translatorOverallScore:
                   type: enum
-                  label: "Overall evaluation (Translator)"
+                  label: Overall evaluation
                   choices:
                     "EX":
                       label: Excellent
@@ -909,7 +924,7 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.translatorOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall translator evaluation"
-                  label: Overall comments (Translator)
+                  label: Overall comments
                   widget: richTextEditor
                   style:
                     height: 100px
@@ -920,7 +935,7 @@ fields:
                 interpreterHadPreMeeting:
                   type: enum
                   helpText: "Did you hold a pre-meeting with the interpreter?"
-                  label: Pre-meeting (Interpreter)
+                  label: Pre-meeting
                   choices:
                     yes:
                       label: "Yes"
@@ -929,7 +944,7 @@ fields:
                 interpreterProvidedWithNecessarySubjectMaterial:
                   type: enum
                   helpText: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
-                  label: Subject material provided (Interpreter)
+                  label: Subject material provided
                   choices:
                     yes:
                       label: "Yes"
@@ -938,7 +953,7 @@ fields:
                 interpreterSubjectVocabularyScore:
                   type: enum
                   helpText: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
-                  label: Subject vocabulary (Interpreter)
+                  label: Subject vocabulary
                   choices:
                     "EX":
                       label: Excellent
@@ -959,14 +974,14 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject vocabulary"
-                  label: Vocabulary comments (Interpreter)
+                  label: Vocabulary comments
                   widget: richTextEditor
                   style:
                     height: 100px
                 interpreterSubjectUnderstandingScore:
                   type: enum
                   helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
-                  label: Subject understanding (Interpreter)
+                  label: Subject understanding
                   choices:
                     "EX":
                       label: Excellent
@@ -987,14 +1002,14 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterSubjectUnderstandingScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject understanding"
-                  label: Subject understanding comments (Interpreter)
+                  label: Subject understanding comments
                   widget: richTextEditor
                   style:
                     height: 100px
                 interpreterWorkEthicScore:
                   type: enum
                   helpText: "How was the interpreter’s work ethic?"
-                  label: Work ethic (Interpreter)
+                  label: Work ethic
                   choices:
                     "EX":
                       label: Excellent
@@ -1015,14 +1030,14 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterWorkEthicScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter work ethic"
-                  label: Work ethic comments (Interpreter)
+                  label: Work ethic comments
                   widget: richTextEditor
                   style:
                     height: 100px
                 interpreterPostureScore:
                   type: enum
                   helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
-                  label: Posture (Interpreter)
+                  label: Posture
                   choices:
                     "EX":
                       label: Excellent
@@ -1043,14 +1058,14 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterPostureScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter posture"
-                  label: Posture comments (Interpreter)
+                  label: Posture comments
                   widget: richTextEditor
                   style:
                     height: 100px
                 interpreterRoleScore:
                   type: enum
                   helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
-                  label: Role score (Interpreter)
+                  label: Role score
                   choices:
                     "EX":
                       label: Excellent
@@ -1071,13 +1086,13 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterRoleScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter role"
-                  label: Role comment (Interpreter)
+                  label: Role comment
                   widget: richTextEditor
                   style:
                     height: 100px
                 interpreterInterpretationOverallScore:
                   type: enum
-                  label: "Overall evaluation (Interpreter)"
+                  label: Overall evaluation
                   choices:
                     "EX":
                       label: Excellent
@@ -1098,7 +1113,7 @@ fields:
                   test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterInterpretationOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall interpreter evaluation"
-                  label: Overall evaluation comment (Interpreter)
+                  label: Overall evaluation comment
                   widget: richTextEditor
                   style:
                     height: 100px
