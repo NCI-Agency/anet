@@ -231,7 +231,7 @@ describe("Merge positions page", () => {
       EXAMPLE_POSITIONS.validRight.location
     )
   })
-  it("Sould be able to select from both left and right side.", () => {
+  it("Should be able to select from both left and right side.", () => {
     MergePositions.getSelectButton("left", "Name").click()
     MergePositions.waitForColumnToChange(
       EXAMPLE_POSITIONS.validLeft.fullName,
