@@ -100,8 +100,8 @@ dependencies {
 	implementation 'com.networknt:json-schema-validator:1.0.47'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:5.0.0'
-	implementation 'org.apache.poi:poi-ooxml:5.0.0'
+	implementation 'org.apache.poi:poi:5.1.0'
+	implementation 'org.apache.poi:poi-ooxml:5.1.0'
 
 	// For Java 9+
 	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
