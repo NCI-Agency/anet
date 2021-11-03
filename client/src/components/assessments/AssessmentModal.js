@@ -17,6 +17,7 @@ import { formatPeriodBoundary } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
+import QuestionSet from "./QuestionSet"
 
 const AssessmentModal = ({
   showModal,
@@ -28,7 +29,8 @@ const AssessmentModal = ({
   recurrence,
   title,
   onSuccess,
-  onCancel
+  onCancel,
+  entity
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
   const hasRichTextEditor = Object.values(assessmentConfig).find(
@@ -81,17 +83,33 @@ const AssessmentModal = ({
                     }}
                   >
                     <Messages error={assessmentError} />
-                    <CustomFieldsContainer
-                      fieldsConfig={assessmentConfig}
-                      parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
-                      formikProps={{
-                        setFieldTouched,
-                        setFieldValue,
-                        values,
-                        validateForm
-                      }}
-                      vertical
-                    />
+                    {!_isEmpty(assessmentConfig.questions) && (
+                      <CustomFieldsContainer
+                        fieldsConfig={assessmentConfig.questions}
+                        parentFieldName={ENTITY_ASSESSMENT_PARENT_FIELD}
+                        formikProps={{
+                          setFieldTouched,
+                          setFieldValue,
+                          values,
+                          validateForm
+                        }}
+                        vertical
+                      />
+                    )}
+                    {!_isEmpty(assessmentConfig.questionSets) && (
+                      <QuestionSet
+                        entity={entity}
+                        questionSets={assessmentConfig.questionSets}
+                        parentFieldName={`${ENTITY_ASSESSMENT_PARENT_FIELD}.questionSets`}
+                        formikProps={{
+                          setFieldTouched,
+                          setFieldValue,
+                          values,
+                          validateForm
+                        }}
+                        readonly={false}
+                      />
+                    )}
                   </div>
                 </Modal.Body>
                 <Modal.Footer className="justify-content-between">
@@ -170,7 +188,8 @@ AssessmentModal.propTypes = {
   recurrence: PropTypes.string.isRequired,
   title: PropTypes.string,
   onSuccess: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired
+  onCancel: PropTypes.func.isRequired,
+  entity: PropTypes.object.isRequired
 }
 AssessmentModal.defaultProps = {
   showModal: false,

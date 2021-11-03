@@ -1128,55 +1128,58 @@ fields:
       countries: [Afghanistan]
       assessments:
         - recurrence: quarterly
-          questions:
-            test1:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 1
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ffe396'
-                "3":
-                  label: three
-                  color: '#ff8279'
-            test2:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 2
-              choices:
-                "3":
-                  label: three
-                  color: '#ff8279'
-                "4":
-                  label: four
-                  color: '#ffe396'
-                "5":
-                  label: five
-                  color: '#c2ffb3'
-            test3:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 3
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ffe396'
-                "3":
-                  label: three
-                  color: '#ff8279'
-            text:
-              type: special_field
-              label: Text
-              widget: richTextEditor
-              style:
-                height: 100px
+          questionSets:
+            set1:
+              label: Question Set
+              questions:
+                test1:
+                  test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+                  type: enum
+                  label: Test question 1
+                  choices:
+                    "1":
+                      label: one
+                      color: '#c2ffb3'
+                    "2":
+                      label: two
+                      color: '#ffe396'
+                    "3":
+                      label: three
+                      color: '#ff8279'
+                test2:
+                  test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+                  type: enum
+                  label: Test question 2
+                  choices:
+                    "3":
+                      label: three
+                      color: '#ff8279'
+                    "4":
+                      label: four
+                      color: '#ffe396'
+                    "5":
+                      label: five
+                      color: '#c2ffb3'
+                test3:
+                  test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+                  type: enum
+                  label: Test question 3
+                  choices:
+                    "1":
+                      label: one
+                      color: '#c2ffb3'
+                    "2":
+                      label: two
+                      color: '#ffe396'
+                    "3":
+                      label: three
+                      color: '#ff8279'
+                text:
+                  type: special_field
+                  label: Text
+                  widget: richTextEditor
+                  style:
+                    height: 100px
         - recurrence: once
           relatedObjectType: report
           questions:
@@ -1217,45 +1220,45 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
-        - recurrence: ondemand
-          questions:
-            assessmentDate:
-              type: date
-              label: Screening and vetting date
-              validations:
-                - type: required
-                  params: [You must provide the assessment date]
-            expirationDate:
-              type: date
-              label: Expiration date
-            question1:
-              type: enum
-              label: Screening and vetting level
-              choices:
-                pass1:
-                  label: Pass 1
-                  color: '#c2ffb3'
-                pass2:
-                  label: Pass 2
-                  color: '#c2ffb3'
-                pass3:
-                  label: Pass 3
-                  color: '#c2ffb3'
-                fail1:
-                  label: Fail 1
-                  color: '#ff8279'
-                fail2:
-                  label: Fail 2
-                  color: '#ff8279'
-                fail3:
-                  label: Fail 3
-                  color: '#ff8279'
-            question2:
-              type: special_field
-              label: Screening and vetting comment
-              widget: richTextEditor
-              style:
-                height: 70px
+        # - recurrence: ondemand
+        #   questions:
+        #     assessmentDate:
+        #       type: date
+        #       label: Screening and vetting date
+        #       validations:
+        #         - type: required
+        #           params: [You must provide the assessment date]
+        #     expirationDate:
+        #       type: date
+        #       label: Expiration date
+        #     question1:
+        #       type: enum
+        #       label: Screening and vetting level
+        #       choices:
+        #         pass1:
+        #           label: Pass 1
+        #           color: '#c2ffb3'
+        #         pass2:
+        #           label: Pass 2
+        #           color: '#c2ffb3'
+        #         pass3:
+        #           label: Pass 3
+        #           color: '#c2ffb3'
+        #         fail1:
+        #           label: Fail 1
+        #           color: '#ff8279'
+        #         fail2:
+        #           label: Fail 2
+        #           color: '#ff8279'
+        #         fail3:
+        #           label: Fail 3
+        #           color: '#ff8279'
+        #     question2:
+        #       type: special_field
+        #       label: Screening and vetting comment
+        #       widget: richTextEditor
+        #       style:
+        #         height: 70px
       # number of fields after Avatar in the left column for principals
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 7

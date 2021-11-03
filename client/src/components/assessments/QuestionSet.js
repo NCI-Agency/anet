@@ -2,6 +2,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
+import _isEmpty from "lodash/isEmpty"
 import {
   CustomFieldsContainer,
   ReadonlyCustomFields
@@ -26,20 +27,21 @@ const QuestionSet = ({
         )
         return (
           <Fieldset title={questionSets[set]?.label} key={`questionSet-${set}`}>
-            {readonly ? (
-              <ReadonlyCustomFields
-                parentFieldName={`${parentFieldName}.${set}`}
-                fieldsConfig={entityInstantAssessmentConfig.questions}
-                values={values}
-              />
-            ) : (
-              <CustomFieldsContainer
-                formikProps={formikProps}
-                fieldsConfig={entityInstantAssessmentConfig.questions}
-                parentFieldName={`${parentFieldName}.${set}`}
-              />
-            )}
-            {entityInstantAssessmentConfig.questionSets && (
+            {!_isEmpty(entityInstantAssessmentConfig.questions) &&
+              (readonly ? (
+                <ReadonlyCustomFields
+                  parentFieldName={`${parentFieldName}.${set}`}
+                  fieldsConfig={entityInstantAssessmentConfig.questions}
+                  values={values}
+                />
+              ) : (
+                <CustomFieldsContainer
+                  formikProps={formikProps}
+                  fieldsConfig={entityInstantAssessmentConfig.questions}
+                  parentFieldName={`${parentFieldName}.${set}`}
+                />
+              ))}
+            {!_isEmpty(entityInstantAssessmentConfig.questionSets) && (
               <QuestionSet
                 entity={entity}
                 relatedObject={relatedObject}
