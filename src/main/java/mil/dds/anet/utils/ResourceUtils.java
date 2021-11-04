@@ -12,7 +12,7 @@ public class ResourceUtils {
 
   public static void validateHistoryInput(final String uuid,
       final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
-      final boolean hasRelation, final String relationUuid) {
+      final String relationUuid) {
     // Check if uuid is null
     if (uuid == null) {
       throw new WebApplicationException("Uuid cannot be null.", Status.BAD_REQUEST);
@@ -27,20 +27,22 @@ public class ResourceUtils {
 
       if (pph.getEndTime() == null) {
         // Check if end time is null more than once
-        if (seenNullEndTime || !hasRelation) {
+        if (seenNullEndTime) {
           throw new WebApplicationException(
               "There cannot be more than one history entry without an end time.",
               Status.BAD_REQUEST);
         }
-        if (checkPerson) {
-          if (!pph.getPosition().getUuid().equals(relationUuid)) {
-            throw new WebApplicationException("History must be compatible with person's relation.",
-                Status.BAD_REQUEST);
-          }
+        if (relationUuid == null) {
+          throw new WebApplicationException("History entry must have an end time.",
+              Status.BAD_REQUEST);
         } else {
-          if (!pph.getPerson().getUuid().equals(relationUuid)) {
-            throw new WebApplicationException(
-                "History must be compatible with positions's relation.", Status.BAD_REQUEST);
+          final String uuidToCheck =
+              DaoUtils.getUuid(checkPerson ? pph.getPosition() : pph.getPerson());
+          final String message =
+              checkPerson ? "Last history entry must be identical to person's current position."
+                  : "Last history entry must be identical to position's current person.";
+          if (!relationUuid.equals(uuidToCheck)) {
+            throw new WebApplicationException(message, Status.BAD_REQUEST);
           }
         }
         seenNullEndTime = true;
@@ -52,10 +54,11 @@ public class ResourceUtils {
         }
       }
     }
-    // if has relation and there is no entry in pph
-    if (hasRelation && !seenNullEndTime) {
-      throw new WebApplicationException(
-          "There cannot be more than one history entry without an end time.", Status.BAD_REQUEST);
+
+    // If has relation and there is no last entry in history
+    if (relationUuid != null && !seenNullEndTime) {
+      throw new WebApplicationException("There should be a history entry without an end time.",
+          Status.BAD_REQUEST);
     }
 
     // Check for conflicts

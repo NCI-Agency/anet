@@ -25,27 +25,26 @@ public class ResourceUtilsTest {
   public void testValidateHistoryInput() {
     final Object[][] testData = new Object[][] {
         // Each item has:
-        // { isValid, checkPerson, hasRelation, relationUuid, uuid, start time, end time, … }
+        // { isValid, checkPerson, relationUuid, uuid, start time, end time, … }
         // - null uuid
-        {false, true, false, null, null, "personel", "posUuid", "2004-02-27T00:00:00.000Z",
+        {false, true, null, null, "personel", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-28T00:00:00.000Z"},
         // - null startTime
-        {false, true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", null,
-            "2004-02-28T00:00:00.000Z"},
+        {false, true, "relPosUuid", "uuid", "uuid", "relPosUuid", null, "2004-02-28T00:00:00.000Z"},
         // - two null endTime's
-        {false, true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
-            null, "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
+        {false, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z", null,
+            "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
         // - endTime before startTime
-        {false, true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {false, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-26T23:59:59.999Z"},
         // - overlap
-        {false, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {false, true, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T02:00:00.000Z", "uuid", "posUuid", "2004-02-27T01:00:00.000Z",
             "2004-02-27T03:00:00.000Z"},
-        {false, true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z",
-            null, "persUuid", "posUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z"},
+        {false, true, "relPosUuid", "uuid", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null,
+            "persUuid", "posUuid", "2004-02-27T01:00:00.000Z", "2004-02-27T03:00:00.000Z"},
         // - very long history with overlap
-        {false, true, true, "relPosUuid", "uuid", "persUuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {false, true, "relPosUuid", "uuid", "persUuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
@@ -58,22 +57,21 @@ public class ResourceUtilsTest {
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.001Z", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
         // - no history at all
-        {true, true, false, null, "uuid"},
+        {true, true, null, "uuid"},
         // - valid history
-        {true, true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z",
-            null},
-        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {true, true, "relPosUuid", "uuid", "uuid", "relPosUuid", "2004-02-27T00:00:00.000Z", null},
+        {true, true, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z"},
-        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {true, true, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T01:00:00.000Z"},
-        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {true, true, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z"},
-        {true, true, false, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {true, true, null, "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T01:00:00.000Z", "uuid", "posUuid", "2004-02-27T01:00:00.000Z",
             "2004-02-27T02:00:00.000Z"},
         // - very long history
-        {true, true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
+        {true, true, "relPosUuid", "uuid", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-27T00:00:00.000Z", "uuid", "posUuid", "2004-02-27T00:00:00.000Z",
@@ -92,7 +90,6 @@ public class ResourceUtilsTest {
       int i = 0;
       final boolean isValid = (boolean) testItem[i++];
       final boolean checkPerson = (boolean) testItem[i++];
-      final boolean hasRelation = (boolean) testItem[i++];
       final String relationUuid = (String) testItem[i++];
       final String uuid = (String) testItem[i++];
       final List<PersonPositionHistory> hist = new ArrayList<>();
@@ -111,7 +108,7 @@ public class ResourceUtilsTest {
       }
       logger.debug("checking {}", Arrays.toString(testItem));
       try {
-        ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, hasRelation, relationUuid);
+        ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, relationUuid);
         if (!isValid) {
           fail("Expected a WebApplicationException");
         }

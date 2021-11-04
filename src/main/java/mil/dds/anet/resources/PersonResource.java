@@ -202,7 +202,7 @@ public class PersonResource {
 
     final String existingPositionUuid = DaoUtils.getUuid(p.getPosition());
     ResourceUtils.validateHistoryInput(p.getUuid(), p.getPreviousPositions(), true,
-        existingPositionUuid != null, existingPositionUuid);
+        existingPositionUuid);
 
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(p.getUuid(), null,
         p.getPreviousPositions(), true)) {
@@ -268,7 +268,7 @@ public class PersonResource {
 
     final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
     ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
-        winnerPositionUuid != null, winnerPositionUuid);
+        winnerPositionUuid);
 
     int numRows = dao.mergePeople(winner, loser);
     if (numRows == 0) {

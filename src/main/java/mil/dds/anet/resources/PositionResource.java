@@ -174,7 +174,7 @@ public class PositionResource {
 
     final String existingPersonUuid = DaoUtils.getUuid(existing.getPerson());
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
-        existingPersonUuid != null, existingPersonUuid);
+        existingPersonUuid);
 
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
         pos.getPreviousPeople(), false)) {
@@ -270,7 +270,7 @@ public class PositionResource {
 
     final String winnerPersonUuid = DaoUtils.getUuid(winnerPosition.getPerson());
     ResourceUtils.validateHistoryInput(winnerPosition.getUuid(), winnerPosition.getPreviousPeople(),
-        false, winnerPersonUuid != null, winnerPersonUuid);
+        false, winnerPersonUuid);
 
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);
