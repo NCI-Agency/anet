@@ -57,7 +57,7 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.entries(instantAssessmentConfig.questions || {}).map(
+      {Object.entries(instantAssessmentConfig?.questions || {}).map(
         ([key, config], index) => (
           <InstantAssessmentsRow
             key={key}
@@ -70,7 +70,7 @@ const EntityAssessmentResults = ({
           />
         )
       )}
-      {Object.entries(instantAssessmentConfig.questionSets || {}).map(
+      {Object.entries(instantAssessmentConfig?.questionSets || {}).map(
         ([questionSet, config]) => (
           <QuestionSetRow
             idSuffix={`${idSuffix}-${questionSet}`}
