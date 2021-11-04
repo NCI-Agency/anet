@@ -24,8 +24,8 @@ public class ResourceUtilsTest {
   @Test
   public void testValidateHistoryInput() {
     final Object[][] testData = new Object[][] {
-        // Each item has: { isValid,checkPerson,hasRelation,relationUuid, uuid, start time, end
-        // time, … }
+        // Each item has:
+        // { isValid, checkPerson, hasRelation, relationUuid, uuid, start time, end time, … }
         // - null uuid
         {false, true, false, null, null, "personel", "posUuid", "2004-02-27T00:00:00.000Z",
             "2004-02-28T00:00:00.000Z"},
@@ -111,7 +111,7 @@ public class ResourceUtilsTest {
       }
       logger.debug("checking {}", Arrays.toString(testItem));
       try {
-        ResourceUtils.validateHistoryInput(uuid, hist, hasRelation, checkPerson, relationUuid);
+        ResourceUtils.validateHistoryInput(uuid, hist, checkPerson, hasRelation, relationUuid);
         if (!isValid) {
           fail("Expected a WebApplicationException");
         }

@@ -170,19 +170,20 @@ public class PositionResource {
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position existing = dao.getByUuid(pos.getUuid());
-    Person person = existing.getPerson();
-    final boolean hasPerson = !(person == null);
-    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), hasPerson, false,
-        hasPerson ? person.getUuid() : null);
     assertCanUpdatePosition(user, existing);
+
+    final String existingPersonUuid = DaoUtils.getUuid(existing.getPerson());
+    ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
+        existingPersonUuid != null, existingPersonUuid);
+
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
         pos.getPreviousPeople(), false)) {
       throw new WebApplicationException(
           "At least one of the positions in the history is occupied for the specified period.",
           Status.CONFLICT);
     }
-    final int numRows =
-        AnetObjectEngine.getInstance().getPositionDao().updatePositionPreviousPeople(pos);
+
+    final int numRows = AnetObjectEngine.getInstance().getPositionDao().updatePositionHistory(pos);
     AnetAuditLogger.log("History updated for position {} by {}", pos, user);
     return numRows;
   }
@@ -265,11 +266,12 @@ public class PositionResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
-    final Person person = winnerPosition.getPerson();
-    final boolean hasPerson = !(person == null);
-    ResourceUtils.validateHistoryInput(winnerPosition.getUuid(), winnerPosition.getPreviousPeople(),
-        hasPerson, false, hasPerson ? person.getUuid() : null);
     assertCanUpdatePosition(user, winnerPosition);
+
+    final String winnerPersonUuid = DaoUtils.getUuid(winnerPosition.getPerson());
+    ResourceUtils.validateHistoryInput(winnerPosition.getUuid(), winnerPosition.getPreviousPeople(),
+        false, winnerPersonUuid != null, winnerPersonUuid);
+
     // Check that given two position can be merged
     arePositionsMergeable(winnerPosition, loserPosition);
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerPosition.getUuid(),

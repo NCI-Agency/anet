@@ -11,8 +11,8 @@ public class ResourceUtils {
       "At least one of the positions in the history is occupied for the specified period.";
 
   public static void validateHistoryInput(final String uuid,
-      final List<PersonPositionHistory> previousPositions, final boolean hasRelation,
-      final boolean checkPerson, final String relationUuid) {
+      final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
+      final boolean hasRelation, final String relationUuid) {
     // Check if uuid is null
     if (uuid == null) {
       throw new WebApplicationException("Uuid cannot be null.", Status.BAD_REQUEST);
