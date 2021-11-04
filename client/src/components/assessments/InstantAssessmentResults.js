@@ -104,7 +104,7 @@ export const QuestionSetRow = ({
                       <AggregationWidgetContainer
                         key={question}
                         fieldConfig={questionConfig}
-                        fieldName={`questionSets.${questionSetKey}.${question}`}
+                        fieldName={`questionSets.${questionSetKey}.questions.${question}`}
                         data={periodsData[index]}
                         widget={aggregationWidget}
                         widgetId={`${idSuffix}-${question}`}
@@ -112,6 +112,23 @@ export const QuestionSetRow = ({
                     )
                   }
                 )}
+                {!_isEmpty(questionSetConfig.questionSets) &&
+                  Object.entries(questionSetConfig.questionSets || {}).map(
+                    ([questionSet, config]) => (
+                      <table key={questionSet}>
+                        <tbody>
+                          <QuestionSetRow
+                            idSuffix={`${idSuffix}-${questionSet}`}
+                            key={questionSet}
+                            questionSetConfig={config}
+                            questionSetKey={`${questionSetKey}.questionSets.${questionSet}`}
+                            periods={periods}
+                            periodsData={periodsData}
+                          />
+                        </tbody>
+                      </table>
+                    )
+                  )}
               </div>
             )}
           </td>

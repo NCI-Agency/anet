@@ -30,7 +30,7 @@ const QuestionSet = ({
             {!_isEmpty(entityInstantAssessmentConfig.questions) &&
               (readonly ? (
                 <ReadonlyCustomFields
-                  parentFieldName={`${parentFieldName}.${set}`}
+                  parentFieldName={`${parentFieldName}.${set}.questions`}
                   fieldsConfig={entityInstantAssessmentConfig.questions}
                   values={values}
                 />
@@ -38,7 +38,7 @@ const QuestionSet = ({
                 <CustomFieldsContainer
                   formikProps={formikProps}
                   fieldsConfig={entityInstantAssessmentConfig.questions}
-                  parentFieldName={`${parentFieldName}.${set}`}
+                  parentFieldName={`${parentFieldName}.${set}.questions`}
                 />
               ))}
             {!_isEmpty(entityInstantAssessmentConfig.questionSets) && (
@@ -46,7 +46,7 @@ const QuestionSet = ({
                 entity={entity}
                 relatedObject={relatedObject}
                 questionSets={entityInstantAssessmentConfig.questionSets}
-                parentFieldName={`${parentFieldName}.${set}`}
+                parentFieldName={`${parentFieldName}.${set}.questionSets`}
                 formikProps={formikProps}
                 readonly={readonly}
               />
