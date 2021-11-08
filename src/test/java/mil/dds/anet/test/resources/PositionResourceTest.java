@@ -45,12 +45,12 @@ public class PositionResourceTest extends AbstractResourceTest {
   private static final String _ORGANIZATION_FIELDS = "uuid shortName";
   private static final String _PERSON_FIELDS = "uuid name role";
   private static final String _POSITION_FIELDS = "uuid name code type status customFields";
-  private static final String ORGANIZATION_FIELDS =
+  public static final String ORGANIZATION_FIELDS =
       String.format("{ %1$s positions { %2$s organization { uuid } location { uuid } } }",
           _ORGANIZATION_FIELDS, _POSITION_FIELDS);
-  private static final String PERSON_FIELDS =
+  public static final String PERSON_FIELDS =
       String.format("{ %1$s position { %2$s } }", _PERSON_FIELDS, _POSITION_FIELDS);
-  protected static final String FIELDS = String.format(
+  public static final String FIELDS = String.format(
       "{ %1$s person { %2$s } organization { %3$s } associatedPositions { uuid }"
           + " previousPeople { createdAt startTime endTime position { uuid }"
           + " person { uuid name rank role } } }",
@@ -685,66 +685,4 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(positionUpdated.getPreviousPeople().size() == 2);
   }
 
-  @Test
-  public void mergePositionsTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // Create a new position and designate the person upfront
-    final PersonInput testPersonInput = PersonInput.builder().withName("MergePositionsTest Person")
-        .withRole(Role.PRINCIPAL).withStatus(Status.ACTIVE).build();
-
-    final Person testPerson = adminMutationExecutor.createPerson(PERSON_FIELDS, testPersonInput);
-    assertThat(testPerson).isNotNull();
-    assertThat(testPerson.getUuid()).isNotNull();
-
-    final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder()
-        .withText("Ministry").withType(OrganizationType.PRINCIPAL_ORG).build();
-    final AnetBeanList_Organization orgs =
-        adminQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
-
-    final PositionInput firstPositionInput = PositionInput.builder()
-        .withName("MergePositionsTest First Position").withType(PositionType.PRINCIPAL)
-        .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-        .withPerson(getPersonInput(testPerson)).build();
-
-    final Position firstPosition = adminMutationExecutor.createPosition(FIELDS, firstPositionInput);
-    assertThat(firstPosition).isNotNull();
-    assertThat(firstPosition.getUuid()).isNotNull();
-
-    final PositionInput secondPositionInput = PositionInput.builder()
-        .withName("MergePositionsTest Second Position").withType(PositionType.PRINCIPAL)
-        .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-        .build();
-
-    final Position secondPosition =
-        adminMutationExecutor.createPosition(FIELDS, secondPositionInput);
-    assertThat(secondPosition).isNotNull();
-    assertThat(secondPosition.getUuid()).isNotNull();
-
-    final PersonPositionHistoryInput hist =
-        PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
-            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
-            .withPerson(getPersonInput(testPerson)).withPosition(getPositionInput(secondPosition))
-            .build();
-
-    final List<PersonPositionHistoryInput> historyList = new ArrayList<>();
-    historyList.add(hist);
-    final PositionInput mergedPositionInput = getPositionInput(firstPosition);
-    mergedPositionInput.setPreviousPeople(historyList);
-    mergedPositionInput.setPerson(getPersonInput(testPerson));
-    mergedPositionInput.setStatus(secondPosition.getStatus());
-    mergedPositionInput.setType(secondPosition.getType());
-
-    final Position mergedPosition =
-        adminMutationExecutor.mergePositions(FIELDS, secondPosition.getUuid(), mergedPositionInput);
-    assertThat(mergedPosition).isNotNull();
-    assertThat(mergedPosition.getUuid()).isNotNull();
-
-    // Assert that loser is gone.
-    try {
-      adminQueryExecutor.position(FIELDS, secondPosition.getUuid());
-      fail("Expected NotFoundException");
-    } catch (NotFoundException expectedException) {
-    }
-  }
 }
