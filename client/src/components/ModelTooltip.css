@@ -4,14 +4,16 @@
   z-index: 1600;
 }
 
+.preview-content-scroll {
+  max-height: 800px !important;
+  max-width: 600px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
 .linkto-model-preview-portal > .bp3-overlay > .bp3-popover2-transition-container {
-  border: 2px solid black;
-  box-shadow: 4px 4px 4px rgba(0,0,0,.5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, .5);
   border-radius: 5px;
-  max-width: 600px;
-  max-height: 800px;
-  overflow-x: hidden;
-  overflow-y: auto;
   text-align: left;
 }
 

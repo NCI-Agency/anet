@@ -104,7 +104,7 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
     <Formik enableReinitialize initialValues={organization}>
       {() => {
         return (
-          <div className={className}>
+          <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Organization ${organization.shortName}`} />
               <Fieldset id={`info-${previewId}`}>

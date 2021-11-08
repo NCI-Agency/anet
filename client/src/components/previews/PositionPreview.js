@@ -95,7 +95,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
     <Formik enableReinitialize initialValues={position}>
       {() => {
         return (
-          <div className={className}>
+          <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
               <Fieldset title={`Position ${position.name}`} />
               <Fieldset>

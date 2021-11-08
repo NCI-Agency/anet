@@ -129,7 +129,11 @@ const ReportPreview = ({ className, uuid, previewId }) => {
     >
       {({ values }) => {
         return (
-          <div className={`report-preview ${className || ""}`}>
+          <div
+            className={`report-preview preview-content-scroll ${
+              className || ""
+            }`}
+          >
             {report.isPublished() && (
               <Fieldset style={{ textAlign: "center" }}>
                 <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>

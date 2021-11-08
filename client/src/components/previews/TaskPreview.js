@@ -146,7 +146,7 @@ const TaskPreview = ({ className, uuid, previewId }) => {
     <Formik enableReinitialize initialValues={task}>
       {() => {
         return (
-          <div className={className}>
+          <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
               <Fieldset
                 title={`${fieldSettings.shortLabel} ${task.shortName}`}

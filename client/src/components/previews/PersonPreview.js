@@ -115,7 +115,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
         )
 
         return (
-          <div className={className}>
+          <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
               <Fieldset title={`${person.rank} ${person.name}`} />
               <Fieldset>
