@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources.merge;
 
 import static mil.dds.anet.test.resources.PersonResourceTest.FIELDS;
+import static mil.dds.anet.test.resources.PersonResourceTest.PERSON_FIELDS_ONLY_HISTORY;
 import static mil.dds.anet.test.resources.PersonResourceTest.POSITION_FIELDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -12,11 +13,15 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
+import mil.dds.anet.test.client.PersonPositionHistory;
 import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
@@ -149,11 +154,106 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(winnerPos.getPerson().getUuid()).isEqualTo(winner.getUuid());
   }
 
-  // TODO: Test the following conditions:
-  // - You selected the same person twice
-  // - Winner not found
-  // - Loser not found
-  // - You can only merge people of the same role
-  // - At least one of the positions in the history is occupied for the specified period.
+  @Test
+  public void testMergeNoHistory()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Create a person
+    final PersonInput loserInput =
+        PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
+    final Person loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
+    assertThat(loser).isNotNull();
+    assertThat(loser.getUuid()).isNotNull();
+
+    final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
+        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
+        // set HTML of biography
+        .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
+        // set JSON of customFields
+        .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput()).withGender("Female")
+        .withCountry("Canada").withCode("1234568")
+        .withEndOfTourDate(
+            ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getServerNativeZoneId()).toInstant())
+        .build();
+
+    Person winner = adminMutationExecutor.createPerson(FIELDS, winnerInput);
+    assertThat(winner).isNotNull();
+    assertThat(winner.getUuid()).isNotNull();
+    winnerInput.setUuid(winner.getUuid());
+    final Integer nrUpdated = adminMutationExecutor.mergePeople("", loser.getUuid(), winnerInput);
+    assertThat(nrUpdated).isEqualTo(1);
+
+    // Assert that loser is gone.
+    try {
+      adminQueryExecutor.person(FIELDS, loser.getUuid());
+      fail("Expected NotFoundException");
+    } catch (NotFoundException expectedException) {
+    }
+
+    // Assert that the winner has no position and no history
+    winner = adminQueryExecutor.person(FIELDS, winner.getUuid());
+    assertThat(winner.getPosition()).isNull();
+    assertThat(winner.getPreviousPositions()).isNullOrEmpty();
+  }
+
+  @Test
+  public void testMergeSame()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    try {
+      adminMutationExecutor.mergePeople("", admin.getUuid(), getPersonInput(admin));
+      fail("Expected a WebApplicationException");
+    } catch (WebApplicationException expectedException) {
+    }
+  }
+
+  @Test
+  public void testMergeUnknownWinner()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    try {
+      final PersonInput winner = getPersonInput(admin);
+      winner.setUuid(UUID.randomUUID().toString());
+      adminMutationExecutor.mergePeople("", admin.getUuid(), winner);
+      fail("Expected a WebApplicationException");
+    } catch (WebApplicationException expectedException) {
+    }
+  }
+
+  @Test
+  public void testMergeUnknownLoser()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    try {
+      adminMutationExecutor.mergePeople("", UUID.randomUUID().toString(), getPersonInput(admin));
+      fail("Expected a WebApplicationException");
+    } catch (WebApplicationException expectedException) {
+    }
+  }
+
+  @Test
+  public void testMergeDifferentRoles()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    try {
+      adminMutationExecutor.mergePeople("", admin.getUuid(),
+          getPersonInput(getChristopfTopferness()));
+      fail("Expected a WebApplicationException");
+    } catch (WebApplicationException expectedException) {
+    }
+  }
+
+  @Test
+  public void testMergeOccupiedPosition()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    try {
+      final Person occupiedPerson =
+          adminQueryExecutor.person(PERSON_FIELDS_ONLY_HISTORY, getElizabethElizawell().getUuid());
+      final Optional<PersonPositionHistory> opt = occupiedPerson.getPreviousPositions().stream()
+          .filter(pph -> pph.getEndTime() == null).findAny();
+      final PersonInput winner = getPersonInput(getRegularUser());
+      winner.setPreviousPositions(
+          getPersonPositionHistoryInput(occupiedPerson.getPreviousPositions()));
+      winner.setPosition(opt.isPresent() ? getPositionInput(opt.get().getPosition()) : null);
+      adminMutationExecutor.mergePeople("", admin.getUuid(), winner);
+      fail("Expected a WebApplicationException");
+    } catch (WebApplicationException expectedException) {
+    }
+  }
 
 }
