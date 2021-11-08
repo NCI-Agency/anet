@@ -270,6 +270,13 @@ public class PersonResource {
     ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
         winnerPositionUuid);
 
+    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerUuid, loserUuid,
+        winner.getPreviousPositions(), true)) {
+      throw new WebApplicationException(
+          "At least one of the positions in the history is occupied for the specified period.",
+          Status.CONFLICT);
+    }
+
     int numRows = dao.mergePeople(winner, loser);
     if (numRows == 0) {
       throw new WebApplicationException(
