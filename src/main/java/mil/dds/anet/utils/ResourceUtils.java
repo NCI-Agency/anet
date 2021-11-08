@@ -7,9 +7,6 @@ import mil.dds.anet.beans.PersonPositionHistory;
 
 public class ResourceUtils {
 
-  private static final String TIME_CONFLICT_ERROR_TEXT =
-      "At least one of the positions in the history is occupied for the specified period.";
-
   public static void validateHistoryInput(final String uuid,
       final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
       final String relationUuid) {
@@ -67,7 +64,7 @@ public class ResourceUtils {
       final PersonPositionHistory pph = previousPositions.get(i);
       for (int j = i + 1; j < historySize; j++) {
         if (overlap(pph, previousPositions.get(j))) {
-          throw new WebApplicationException(TIME_CONFLICT_ERROR_TEXT, Status.CONFLICT);
+          throw new WebApplicationException("History entries should not overlap.", Status.CONFLICT);
         }
       }
     }

@@ -277,7 +277,7 @@ public class PositionResource {
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerPosition.getUuid(),
         loserUuid, winnerPosition.getPreviousPeople(), false)) {
       throw new WebApplicationException(
-          "At least one of the positions in the history is occupied for the specified period.",
+          "At least one of the people in the history is occupied for the specified period.",
           Status.CONFLICT);
     }
     validatePosition(user, winnerPosition);
