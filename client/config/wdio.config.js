@@ -1,7 +1,3 @@
-const os = require("os")
-
-const nullDevice = os.platform() === "win32" ? "NUL" : "/dev/null"
-
 const config = {
   //
   // ====================
@@ -65,13 +61,7 @@ const config = {
         // Note: it is important to have a big window height as otherwise
         // while scrolling some form fields might go under the header and
         // therefore we would get failing tests related to these fields.
-        args: [
-          "--headless",
-          "--disable-gpu",
-          "--window-size=1600,1200",
-          // make sure we get the login form when we should and not a cached page:
-          `--disk-cache-dir=${nullDevice}`
-        ]
+        args: ["--headless", "--disable-gpu", "--window-size=1600,1200"]
       }
       // If outputDir is provided WebdriverIO can capture driver session logs
       // it is possible to configure which logTypes to include/exclude.

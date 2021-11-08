@@ -1,6 +1,5 @@
 const path = require("path")
 const { URL } = require("url")
-const os = require("os")
 const test = require("ava")
 const webdriver = require("selenium-webdriver")
 const { By, until, Key } = webdriver
@@ -11,17 +10,12 @@ const chalk = require("chalk")
 const fetch = require("cross-fetch")
 
 let capabilities
-const nullDevice = os.platform() === "win32" ? "NUL" : "/dev/null"
 const testEnv =
   (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   // This gives us access to send Chrome commands.
   require("chromedriver")
   capabilities = webdriver.Capabilities.chrome()
-  // make sure we get the login form when we should and not a cached page:
-  capabilities.set("goog:chromeOptions", {
-    args: [`--disk-cache-dir=${nullDevice}`]
-  })
 } else {
   // Set capabilities for BrowserStack
   require("./keep-alive.js")
