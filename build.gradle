@@ -82,7 +82,7 @@ dependencies {
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre11'
 	implementation 'org.postgresql:postgresql:42.3.1' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.5'
+	implementation 'org.liquibase:liquibase-core:4.6.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.7'
@@ -108,8 +108,8 @@ dependencies {
 	implementation 'com.qindesign:snowy-json:0.16.0'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:5.0.0'
-	implementation 'org.apache.poi:poi-ooxml:5.0.0'
+	implementation 'org.apache.poi:poi:5.1.0'
+	implementation 'org.apache.poi:poi-ooxml:5.1.0'
 
 	// For Java 9+
 	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
