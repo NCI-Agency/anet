@@ -4,6 +4,15 @@
   z-index: 1600;
 }
 
+.preview-sticky-title {
+  position: sticky !important;
+  background-color: rgba(224, 232, 237, 255);
+  top: 0;
+  margin-bottom: 10px;
+  padding: 10px 0 10px;
+  z-index: 1650;
+}
+
 .preview-content-scroll {
   max-height: 800px !important;
   max-width: 600px !important;

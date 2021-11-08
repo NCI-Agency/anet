@@ -117,7 +117,9 @@ const PersonPreview = ({ className, uuid, previewId }) => {
         return (
           <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`${person.rank} ${person.name}`} />
+              <div className="preview-sticky-title">
+                <h4>{`${person.rank} ${person.name}`}</h4>
+              </div>
               <Fieldset>
                 <AvatarDisplayComponent
                   avatar={person.avatar}

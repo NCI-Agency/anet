@@ -97,7 +97,9 @@ const PositionPreview = ({ className, uuid, previewId }) => {
         return (
           <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Position ${position.name}`} />
+              <div className="preview-sticky-title">
+                <h4>{`Position ${position.name}`}</h4>
+              </div>
               <Fieldset>
                 <Field
                   name="name"

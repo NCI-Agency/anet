@@ -148,9 +148,9 @@ const TaskPreview = ({ className, uuid, previewId }) => {
         return (
           <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={`${fieldSettings.shortLabel} ${task.shortName}`}
-              />
+              <div className="preview-sticky-title">
+                <h4>{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
+              </div>
               <div
                 style={{
                   display: "flex",

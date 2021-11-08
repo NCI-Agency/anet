@@ -54,7 +54,9 @@ const LocationShow = ({ className, uuid, previewId }) => {
         return (
           <div className={`${className} preview-content-scroll`}>
             <Form className="form-horizontal" method="post">
-              <Fieldset title={`Location ${location.name}`} />
+              <div className="preview-sticky-title">
+                <h4>{`Location ${location.name}`}</h4>
+              </div>
               <Fieldset>
                 <Field name="name" component={FieldHelper.ReadonlyField} />
 
