@@ -1,3 +1,4 @@
+const util = require("util")
 const config = require("./wdio.config.js").config
 
 /*
@@ -12,19 +13,18 @@ config.exclude = []
 
 const capabilities = config.capabilities[0]
 delete capabilities["goog:chromeOptions"]
-
 capabilities.browserName = "IE"
-capabilities.browser_version = "11.0"
-capabilities.build = require("git-describe").gitDescribeSync(".", {
-  match: "[0-9]*"
-}).semverString
+capabilities.browserVersion = "11.0"
 
-capabilities.build = require("util").format(
-  capabilities.build,
-  capabilities.os,
-  capabilities.os_version,
+const bstackOptions = capabilities["bstack:options"]
+bstackOptions.resolution = "1024x768"
+bstackOptions.buildName = util.format(
+  require("git-describe").gitDescribeSync(".", { match: "[0-9]*" })
+    .semverString,
+  bstackOptions.os,
+  bstackOptions.osVersion,
   capabilities.browserName,
-  capabilities.browser_version
+  capabilities.browserVersion
 )
 
 exports.config = config

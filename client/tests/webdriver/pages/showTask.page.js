@@ -65,14 +65,10 @@ class ShowTask extends Page {
     // Wait for the editor to be focused
     browser.pause(300)
     if (prevTextToClear) {
-      // remove previous text by deleting characters one by one
-      const chars = [...prevTextToClear]
-      browser.keys(chars.map(char => "Backspace"))
-      // maybe we clicked at the beginning of the text, Backspace doesn't clear
-      browser.keys(chars.map(char => "Delete"))
+      this.deleteText(prevTextToClear)
+      // Wait for the previous value to be deleted
+      browser.pause(300)
     }
-    // Wait for the previous value to be deleted
-    browser.pause(300)
     browser.keys(valuesArr[0])
 
     const button = this.assessmentModalForm

@@ -12,7 +12,7 @@ const SENSITIVE_CUSTOM_FIELDS = {
   politicalPosition: "formSensitiveFields.politicalPosition"
 }
 
-class CreatePerson extends Page {
+export class CreatePerson extends Page {
   get form() {
     return browser.$("form.form-horizontal")
   }
@@ -185,13 +185,6 @@ class CreatePerson extends Page {
 
   openAsAdmin() {
     super.openAsAdminUser(PAGE_URL)
-  }
-
-  waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
-    }
   }
 
   submitForm() {

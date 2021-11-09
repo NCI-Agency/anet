@@ -23,6 +23,7 @@ describe("Merge locations page", () => {
     MergeLocations.leftLocationField.setValue(EXAMPLE_LOCATIONS.left.search)
     MergeLocations.waitForAdvancedSelectLoading(EXAMPLE_LOCATIONS.left.fullName)
     MergeLocations.firstItemFromAdvancedSelect.click()
+    browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "left")
 
     expect(MergeLocations.getColumnLocationName("left").getText()).to.eq(
@@ -34,6 +35,7 @@ describe("Merge locations page", () => {
       EXAMPLE_LOCATIONS.right.fullName
     )
     MergeLocations.firstItemFromAdvancedSelect.click()
+    browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.right.name, "right")
 
     expect(MergeLocations.getColumnLocationName("right").getText()).to.eq(
@@ -43,6 +45,7 @@ describe("Merge locations page", () => {
 
   it("Should be able to select all fields from left location", () => {
     MergeLocations.getUseAllButton("left").click()
+    browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "mid")
 
     expect(MergeLocations.getColumnLocationName("mid").getText()).to.eq(
@@ -52,6 +55,7 @@ describe("Merge locations page", () => {
 
   it("Should be able to select all fields from right location", () => {
     MergeLocations.getUseAllButton("right").click()
+    browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.right.name, "mid")
 
     expect(MergeLocations.getColumnLocationName("mid").getText()).to.eq(
@@ -61,6 +65,7 @@ describe("Merge locations page", () => {
 
   it("Should be able to merge both locations when winner is left location", () => {
     MergeLocations.getUseAllButton("left").click()
+    browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "mid")
 
     MergeLocations.mergeLocationsButton.click()

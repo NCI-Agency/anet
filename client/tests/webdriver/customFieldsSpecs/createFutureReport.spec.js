@@ -146,11 +146,7 @@ describe("Create report form page", () => {
       CreateFutureReport.attendeesFieldLabel.waitForDisplayed()
 
       // Set engagement date to tomorrow
-      CreateFutureReport.engagementDate.click()
-      // Clumsy way to clear input first…
-      browser.keys(
-        ["End"].concat(Array(ENGAGEMENT_DATE_FORMAT.length).fill("Backspace"))
-      )
+      CreateFutureReport.deleteInput(CreateFutureReport.engagementDate)
       CreateFutureReport.engagementDate.setValue(
         moment().add(1, "days").format(ENGAGEMENT_DATE_FORMAT)
       )

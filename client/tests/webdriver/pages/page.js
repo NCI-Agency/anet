@@ -29,6 +29,13 @@ class Page {
     this.waitUntilLoaded()
   }
 
+  openWithoutWaiting(
+    pathName = "/",
+    credentials = Page.DEFAULT_CREDENTIALS.user
+  ) {
+    browser.url(this._buildUrl(pathName, credentials))
+  }
+
   open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
     this._open(pathName, credentials)
   }
@@ -52,11 +59,46 @@ class Page {
     this._open(pathName, uniqueName)
   }
 
+  get alertSuccess() {
+    return browser.$(".alert-success")
+  }
+
+  waitForAlertSuccessToLoad() {
+    if (!this.alertSuccess.isDisplayed()) {
+      this.alertSuccess.waitForExist()
+      this.alertSuccess.waitForDisplayed()
+    }
+  }
+
+  get alertWarning() {
+    return browser.$(".alert-warning")
+  }
+
+  waitForAlertWarningToLoad() {
+    if (!this.alertWarning.isDisplayed()) {
+      this.alertWarning.waitForExist()
+      this.alertWarning.waitForDisplayed()
+    }
+  }
+
   getRandomOption(select) {
     const options = select.$$("option")
     // Ignore the first option, it is always the empty one
     const index = 1 + Math.floor(Math.random() * (options.length - 1))
     return options[index].getValue()
+  }
+
+  deleteText(text = "") {
+    // Clumsy way to clear text…
+    browser.keys(["End"].concat(Array(text.length).fill("Backspace")))
+  }
+
+  deleteInput(inputField) {
+    // Clumsy way to clear input…
+    if (inputField && inputField.isDisplayed()) {
+      inputField.click()
+      this.deleteText(inputField.getValue())
+    }
   }
 }
 

@@ -79,6 +79,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous invalid data when toggling field's visibility", () => {
+      CreateReport.deleteInput(CreateReport.numberTrainedField)
       CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
       CreateReport.numberTrainedErrorText.waitForExist()
       // Actually see the validation warning
@@ -101,6 +102,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should validate visible field", () => {
+      CreateReport.deleteInput(CreateReport.numberTrainedField)
       CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
       CreateReport.numberTrainedErrorText.waitForExist()
       expect(CreateReport.numberTrainedErrorText.getText()).to.include(
@@ -146,6 +148,7 @@ describe("When working with custom fields for different anet objects", () => {
       // turn on train option to make numberField visible
       trainButton.click()
       CreateReport.numberTrainedFormGroup.waitForExist()
+      CreateReport.deleteInput(CreateReport.numberTrainedField)
       CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
 
       CreateReport.submitForm()
@@ -165,6 +168,7 @@ describe("When working with custom fields for different anet objects", () => {
         TRAIN_ENGAGEMENT_BUTTON
       )
       // give valid input before making invisible
+      CreateReport.deleteInput(CreateReport.numberTrainedField)
       CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
       // goes invisible
       trainButton.click()
@@ -225,6 +229,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous invalid data when toggling field's visibility", () => {
+      CreateReport.deleteInput(CreateReport.numberCustomField)
       CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
       // Actually see the validation warning
       CreatePerson.numberCustomFieldHelpText.waitForExist()
@@ -241,6 +246,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should validate visible field", () => {
+      CreateReport.deleteInput(CreateReport.numberCustomField)
       CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
       CreatePerson.numberCustomFieldHelpText.waitForExist()
       expect(CreatePerson.numberCustomFieldHelpText.getText()).to.include(
