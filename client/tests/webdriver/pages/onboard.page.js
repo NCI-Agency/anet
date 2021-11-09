@@ -1,8 +1,12 @@
-import Page from "./page"
+import { CreatePerson } from "./createNewPerson.page"
 
-class Onboard extends Page {
+class Onboard extends CreatePerson {
   get welcomeText() {
     return browser.$(".onboarding-new h1")
+  }
+
+  get onboardingPopover() {
+    return browser.$(".hopscotch-bubble-container")
   }
 
   get createYourAccountBtn() {
@@ -10,8 +14,10 @@ class Onboard extends Page {
   }
 
   waitForWelcomeMessage(value) {
-    this.welcomeText.waitForExist()
-    this.welcomeText.waitForDisplayed()
+    if (!this.welcomeText.isDisplayed()) {
+      this.welcomeText.waitForExist()
+      this.welcomeText.waitForDisplayed()
+    }
     return browser.waitUntil(
       () => {
         return this.welcomeText.getText() === value

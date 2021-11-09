@@ -187,6 +187,8 @@ describe("In new report page", () => {
         tasks: ["1.2.A"]
       }
       CreateReport.fillForm(report)
+      browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
+      CreateReport.tasksAssessments.scrollIntoView()
       const taskAssessmentRows = CreateReport.taskAssessmentRows
       expect(taskAssessmentRows).to.have.length(2)
       for (let i = 0; i < 2; i += 2) {
@@ -215,6 +217,8 @@ describe("In new report page", () => {
         ]
       }
       CreateReport.fillForm(report)
+      browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
+      CreateReport.attendeesAssessments.scrollIntoView()
       const attendeeAssessmentRows = CreateReport.attendeeAssessmentRows
       expect(attendeeAssessmentRows).to.have.length(6)
       for (let i = 0; i < 6; i += 2) {
@@ -242,6 +246,8 @@ describe("In new report page", () => {
     })
     it("Should have an additional question for positive atmosphere", () => {
       CreateReport.positiveAtmosphere.click()
+      browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
+      CreateReport.attendeesAssessments.scrollIntoView()
       const attendeeAssessmentRows = CreateReport.attendeeAssessmentRows
       expect(attendeeAssessmentRows).to.have.length(6)
       for (let i = 0; i < 6; i += 2) {

@@ -86,13 +86,6 @@ class CreatePosition extends Page {
     super.openAsAdminUser(PAGE_URL)
   }
 
-  waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
-    }
-  }
-
   waitForOrgAdvancedSelectToChange(value) {
     this.orgAdvancedSelectFirstItem.waitForExist()
     return browser.waitUntil(

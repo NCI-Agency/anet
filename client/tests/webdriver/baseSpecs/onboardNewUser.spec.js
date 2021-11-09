@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import CreatePerson from "../pages/createNewPerson.page"
+import moment from "moment"
 import OnboardPage from "../pages/onboard.page"
 
 const ONBOARD_USER = {
@@ -8,8 +8,20 @@ const ONBOARD_USER = {
   emailAddress: "bonny@nato.int"
 }
 
+// Only required fields in onboarding/edit page
+const personDetails = {
+  lastName: "BONNSDOTTIR",
+  firstName: "Bonnie",
+  emailAddress: "bonny@cmil.mil",
+  rank: "CIV",
+  gender: "FEMALE",
+  country: "Albania",
+  endOfTourDate: moment().add(1, "days").format("DD-MM-YYYY")
+}
+
 describe("Onboard new user login", () => {
-  it('Should show onboard welcome"', () => {
+  it("Should show onboard welcome", () => {
+    // give unique name to avoid collision when running tests (without resetting DB)
     OnboardPage.openAsOnboardUser()
     const welcomeText = "Welcome to ANET"
     OnboardPage.waitForWelcomeMessage(welcomeText)
@@ -19,7 +31,10 @@ describe("Onboard new user login", () => {
   })
 
   it("Should click on create your account", () => {
+    OnboardPage.createYourAccountBtn.scrollIntoView()
     OnboardPage.createYourAccountBtn.click()
+    browser.pause(500) // wait for the page transition and rendering of custom fields
+
     // Check that these are properly copied from the authentication server
     CreatePerson.lastName.waitForDisplayed()
     CreatePerson.lastName.waitForExist()
@@ -35,15 +50,15 @@ describe("Onboard new user login", () => {
   })
 
   it("Should not save if endOfTourDate is not in the future", () => {
-    CreatePerson.endOfTourDate.waitForExist()
-    CreatePerson.endOfTourDate.click()
+    OnboardPage.endOfTourDate.waitForExist()
+    OnboardPage.endOfTourDate.click()
 
-    CreatePerson.endOfTourToday.waitForDisplayed()
-    CreatePerson.endOfTourToday.waitForExist()
+    OnboardPage.endOfTourToday.waitForDisplayed()
+    OnboardPage.endOfTourToday.waitForExist()
     // select a date
-    CreatePerson.endOfTourToday.click()
-    CreatePerson.lastName.click()
-    const errorMessage = CreatePerson.endOfTourDate
+    OnboardPage.endOfTourToday.click()
+    OnboardPage.lastName.click()
+    const errorMessage = OnboardPage.endOfTourDate
       .$("..")
       .$("..")
       .$("..")
@@ -54,6 +69,22 @@ describe("Onboard new user login", () => {
     expect(errorMessage.getText()).to.equal(
       "The End of tour date must be in the future"
     )
+  })
+
+  it("Should save if all fields properly filled", () => {
+    OnboardPage.lastName.setValue(personDetails.lastName)
+    OnboardPage.firstName.setValue(personDetails.firstName)
+    OnboardPage.emailAddress.setValue(personDetails.emailAddress)
+    OnboardPage.rank.selectByAttribute("value", personDetails.rank)
+    OnboardPage.gender.selectByAttribute("value", personDetails.gender)
+    OnboardPage.country.selectByAttribute("value", personDetails.country)
+    OnboardPage.endOfTourDate.setValue(personDetails.endOfTourDate)
+    browser.pause(500) // wait for the error message to disappear
+    OnboardPage.submitForm()
+
+    OnboardPage.waitForAlertWarningToLoad()
+    OnboardPage.onboardingPopover.waitForExist()
+    OnboardPage.onboardingPopover.waitForDisplayed()
     // No Logout link, so just call logout directly
     browser.url("/api/logout")
   })

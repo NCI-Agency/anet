@@ -179,9 +179,8 @@ await t.context.waitForever()
 In rare circumstances, when using Chrome, the tests will hang on the `data:,` URL. I don't know why this is. If you re-run the test, you should not see the issue a second time.
 
 #### Client-side testing remotely
-To run the tests remotely, two things are needed:
-1. a [username and access key](https://www.browserstack.com/accounts/settings) for BrowserStack
-1. a [Local Testing connection](https://www.browserstack.com/local-testing#command-line) to BrowserStack
+To run the tests remotely, you need
+a [username and access key](https://www.browserstack.com/accounts/settings) for BrowserStack.
 
 Look up your settings and put them in `client/config/default.json`:
 ```json
@@ -196,14 +195,10 @@ If you want step-by-step screenshots from your tests (_Visual Logs_ on BrowserSt
 ```
 to your `default.json`.
 
-Then [download](https://www.browserstack.com/local-testing/releases) the appropriate `BrowserStackLocal`, unpack it.
+Note that both the E2E and the wdio tests will automatically start (and stop) BrowserStackLocal during the tests.
 
 When all is set up, run the remote tests:
-1. Run `BrowserStackLocal` with your key:
-    ```
-    $ ./BrowserStackLocal --key mYbRoWsErStAcKkEy
-   ```
-1. Configure scripts with `TEST_ENV` envrironment variable for remote testing:
+1. Configure scripts with `TEST_ENV` environment variable for remote testing:
     ```
     $ export TEST_ENV=remote
     ```

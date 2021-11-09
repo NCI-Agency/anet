@@ -40,7 +40,7 @@ describe("My tasks page", () => {
       // table has a header and 5 task rows
       expect(myOrgAssignedTasksItems).to.have.length(6)
     })
-    it("Should see a table of the tasks being the reposnibility of the current user", () => {
+    it("Should see a table of the tasks being the responsibility of the current user", () => {
       MyTasks.myResponsibleTasks.waitForDisplayed()
       const myResponsibleTasksItems = MyTasks.myResponsibleTasks.$$("tr")
       expect(myResponsibleTasksItems).to.have.length(0)

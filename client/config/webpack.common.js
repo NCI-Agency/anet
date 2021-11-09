@@ -106,6 +106,9 @@ module.exports = {
     plugins: [
       new webpack.DefinePlugin({
         "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+        "process.env.ANET_TEST_MODE": JSON.stringify(
+          process.env.ANET_TEST_MODE
+        ),
         // Work-around for https://github.com/palantir/blueprint/issues/3739
         // and https://github.com/palantir/blueprint/issues/4393
         "process.env.BLUEPRINT_NAMESPACE": JSON.stringify("bp3")
