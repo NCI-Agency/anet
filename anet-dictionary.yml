@@ -870,6 +870,7 @@ fields:
           questionSets:
             translator:
               label: Translator Questions
+              description: Set of questions to assess the linguist in translator role
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
               questions:
                 translatorGotAdequateTime:
@@ -947,6 +948,7 @@ fields:
                     height: 100px
             interpreter:
               label: Interpreter Questions
+              description: Set of questions to assess the linguist in interpreter role
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
               questions:
                 interpreterHadPreMeeting:

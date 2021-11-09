@@ -1,12 +1,12 @@
-import PropTypes from "prop-types"
-import React from "react"
-import Fieldset from "components/Fieldset"
-import Model from "components/Model"
-import _isEmpty from "lodash/isEmpty"
 import {
   CustomFieldsContainer,
   ReadonlyCustomFields
 } from "components/CustomFields"
+import Fieldset from "components/Fieldset"
+import Model from "components/Model"
+import _isEmpty from "lodash/isEmpty"
+import PropTypes from "prop-types"
+import React from "react"
 
 const QuestionSet = ({
   entity,
@@ -26,7 +26,11 @@ const QuestionSet = ({
           relatedObject
         )
         return (
-          <Fieldset title={questionSets[set]?.label} key={`questionSet-${set}`}>
+          <Fieldset
+            title={questionSets[set]?.label}
+            description={!readonly && questionSets[set]?.description}
+            key={`questionSet-${set}`}
+          >
             {!_isEmpty(entityInstantAssessmentConfig.questions) &&
               (readonly ? (
                 <ReadonlyCustomFields
