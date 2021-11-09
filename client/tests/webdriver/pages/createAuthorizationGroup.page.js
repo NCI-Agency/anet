@@ -56,13 +56,6 @@ class CreateAuthorizationGroup extends Page {
     super.openAsAdminUser(PAGE_URL)
   }
 
-  waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
-    }
-  }
-
   waitForPositionsAdvancedSelectToChange(value) {
     this.positionsAdvancedSelectFirstItem.waitForExist()
     return browser.waitUntil(

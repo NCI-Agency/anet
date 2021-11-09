@@ -290,21 +290,13 @@ fields:
         - prevPositions
         - domainUsername
         - emailAddress
-        - multipleButtons
-        - inputFieldName
         - phoneNumber
         - country
-        - colourOptions
-        - textareaFieldName
         - code
         - rank
-        - numberFieldName
-        - nlt
-        - nlt_dt
         - gender
         - endOfTourDate
         - biography
-        - arrayFieldName
     position:
       name: NATO Billet
       type: ANET User
@@ -431,22 +423,14 @@ fields:
         - phoneNumber
         - country
         - birthday
-        - colourOptions
-        - textareaFieldName
         - domainUsername
         - emailAddress
-        - multipleButtons
-        - inputFieldName
         - code
         - politicalPosition
         - rank
-        - numberFieldName
-        - nlt
-        - nlt_dt
         - gender
         - endOfTourDate
         - biography
-        - arrayFieldName
     position:
       name: Afghan Tashkil
       type: Afghan Partner

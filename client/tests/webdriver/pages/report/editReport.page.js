@@ -21,10 +21,6 @@ class EditReport extends Page {
     return browser.$("div.triggerable-confirm-bootstrap-modal")
   }
 
-  get alertSuccess() {
-    return browser.$(".alert-success")
-  }
-
   confirmDeleteButton(uuid) {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
@@ -64,13 +60,6 @@ class EditReport extends Page {
     if (!this.submitButton.isDisplayed()) {
       this.submitButton.waitForExist()
       this.submitButton.waitForDisplayed()
-    }
-  }
-
-  waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
     }
   }
 }

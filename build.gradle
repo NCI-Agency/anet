@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.1"
-	id "com.diffplug.spotless" version "5.17.0"
+	id "com.diffplug.spotless" version "5.17.1"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17.3"
 }
 
@@ -76,8 +76,8 @@ dependencies {
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre8'
-	implementation 'org.postgresql:postgresql:42.3.0' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.3.5'
+	implementation 'org.postgresql:postgresql:42.3.1' // If using postgresql
+	implementation 'org.liquibase:liquibase-core:4.6.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.7'
@@ -100,8 +100,8 @@ dependencies {
 	implementation 'com.networknt:json-schema-validator:1.0.47'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:5.0.0'
-	implementation 'org.apache.poi:poi-ooxml:5.0.0'
+	implementation 'org.apache.poi:poi:5.1.0'
+	implementation 'org.apache.poi:poi-ooxml:5.1.0'
 
 	// For Java 9+
 	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
@@ -219,6 +219,7 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir("$buildDir/resources/main/assets/client")
 	outputs.cacheIf { true }
+	environment = [ "ANET_TEST_MODE": isTestEnv ? "true" : "false" ]
 	args = ['run', 'build']
 }
 

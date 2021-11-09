@@ -31,6 +31,7 @@ describe("Create report form page", () => {
   describe("When creating a report", () => {
     it("Should be able to load the form", () => {
       CreateReport.open()
+      browser.pause(500) // wait for the page transition and rendering of custom fields
       CreateReport.form.waitForExist()
       CreateReport.form.waitForDisplayed()
     })
@@ -277,10 +278,12 @@ describe("Create report form page", () => {
         REPORT_VALUE
       )
       // Delete selected value
+      CreateReport.testReferenceFieldValue.scrollIntoView()
       CreateReport.testReferenceFieldValue.$("button").click()
 
       CreateReport.testMultiReferenceFieldLabel.waitForExist()
       CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
+      CreateReport.testMultiReferenceFieldLabel.scrollIntoView()
       // Default input type is People
       expect(
         CreateReport.testMultiReferenceField.getAttribute("placeholder")
@@ -300,9 +303,11 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldValueRow(4).getText()
       ).to.include(POSITION_VALUE_3)
       // Delete selected values
-      CreateReport.testMultiReferenceFieldValueRows.forEach(r =>
-        r.$("button").click()
-      )
+      CreateReport.testMultiReferenceFieldValueRows.forEach(r => {
+        const button = r.$("button")
+        button.scrollIntoView()
+        button.click()
+      })
     })
 
     it("Should be able to save a report without any ANET object references", () => {

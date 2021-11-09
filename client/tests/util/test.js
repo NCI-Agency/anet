@@ -43,6 +43,52 @@ function debugLog(...args) {
   }
 }
 
+let bsLocal
+
+test.before(async t => {
+  if (testEnv !== "local") {
+    const browserstack = require("browserstack-local")
+    bsLocal = new browserstack.Local()
+    const bsOptions = capabilities["bstack:options"]
+    const bsLocalArgs = {
+      force: true,
+      forceLocal: true,
+      onlyAutomate: true,
+      key: bsOptions.accessKey,
+      localIdentifier: bsOptions.localIdentifier
+    }
+    console.log("Starting BrowserStackLocal")
+    await new Promise((resolve, reject) => {
+      bsLocal.start(bsLocalArgs, error => {
+        if (error) {
+          console.error("Failed to start BrowserStackLocal:", error)
+          reject(error)
+        } else {
+          console.log("Started BrowserStackLocal")
+          resolve(bsLocal)
+        }
+      })
+    })
+  }
+})
+
+test.after.always(async t => {
+  if (bsLocal) {
+    console.log("Stopping BrowserStackLocal")
+    await new Promise((resolve, reject) => {
+      bsLocal.stop(error => {
+        if (error) {
+          console.error("Failed to stop BrowserStackLocal:", error)
+          reject(error)
+        } else {
+          console.log("Stopped BrowserStackLocal")
+          resolve(bsLocal)
+        }
+      })
+    })
+  }
+})
+
 // We use the before hook to put helpers on t.context and set up test scaffolding.
 test.beforeEach(t => {
   let builder = new webdriver.Builder()
