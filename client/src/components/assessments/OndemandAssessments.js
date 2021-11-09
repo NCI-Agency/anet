@@ -8,9 +8,9 @@ import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Model, {
-  NOTE_TYPE,
   ENTITY_ON_DEMAND_ASSESSMENT_DATE,
-  ENTITY_ON_DEMAND_EXPIRATION_DATE
+  ENTITY_ON_DEMAND_EXPIRATION_DATE,
+  NOTE_TYPE
 } from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
@@ -22,6 +22,7 @@ import { Badge, Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
+import QuestionSet from "./QuestionSet"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -61,7 +62,9 @@ const OnDemandAssessments = ({
     assessmentConfig,
     entity
   )
-  filteredAssessmentConfig[ENTITY_ON_DEMAND_EXPIRATION_DATE].helpText = `
+  filteredAssessmentConfig.questions[
+    ENTITY_ON_DEMAND_EXPIRATION_DATE
+  ].helpText = `
     If this field is left empty, the assessment will be valid for 
     ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
   `
@@ -227,14 +230,26 @@ const OnDemandAssessments = ({
                 >
                   {() => {
                     return (
-                      <ReadonlyCustomFields
-                        parentFieldName={parentFieldName}
-                        fieldsConfig={assessmentConfig}
-                        values={{
-                          [parentFieldName]: assessmentFieldsObject
-                        }}
-                        vertical
-                      />
+                      <>
+                        <ReadonlyCustomFields
+                          parentFieldName={parentFieldName}
+                          fieldsConfig={filteredAssessmentConfig.questions}
+                          values={{
+                            [parentFieldName]: assessmentFieldsObject
+                          }}
+                          vertical
+                        />
+                        <QuestionSet
+                          parentFieldName={`${parentFieldName}.questionSets`}
+                          questionSets={filteredAssessmentConfig?.questionSets}
+                          formikProps={{
+                            values: {
+                              [parentFieldName]: assessmentFieldsObject
+                            }
+                          }}
+                          readonly={true}
+                        />
+                      </>
                     )
                   }}
                 </Formik>
@@ -258,7 +273,8 @@ const OnDemandAssessments = ({
     }
   }, [
     entity,
-    assessmentConfig,
+    filteredAssessmentConfig.questions,
+    filteredAssessmentConfig.questionSets,
     onUpdateAssessment,
     canAddAssessment,
     numberOfPeriods
@@ -361,6 +377,7 @@ const OnDemandAssessments = ({
                 : ""
           }}
           assessment={editModeObject.questionnaireResults}
+          entity={entity}
           title={`Assessment for ${entity.toString()}`}
           assessmentYupSchema={assessmentYupSchema}
           recurrence={recurrence}
