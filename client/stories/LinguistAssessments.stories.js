@@ -1,6 +1,7 @@
-import AggregationWidgetContainer, {
-  getAggregationWidget
-} from "components/aggregations/AggregationWidgetContainer"
+import {
+  InstantAssessmentsRow,
+  QuestionSetRow
+} from "components/assessments/InstantAssessmentResults"
 import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
 import Fieldset from "components/Fieldset"
 import { Form, Formik } from "formik"
@@ -31,33 +32,91 @@ const translator = {
   uuid: "7242dcad-62a8-4adf-8ec2-c6460ff0a89d"
 }
 
-const questionConfig = Settings.fields.advisor.person.assessments.find(
+const instantAssessmentConfig = Settings.fields.advisor.person.assessments.find(
   assessment => assessment.recurrence === "once"
-).questions
+)
+const assessmentConfig = {
+  questions: instantAssessmentConfig.questions,
+  questionSets: instantAssessmentConfig.questionSets
+}
+
+const PERIODS = [
+  { start: moment().startOf("month"), end: moment().endOf("month") }
+]
 
 const translatorPerson = new Person(translator)
 
 const ASSESSMENT_RESULTS = [
-  {
-    linguistRole: "translator",
-    translatorGotAdequateTime: "yes",
-    translatorMetDeadline: "yes",
-    translatorSubjectVocabularyScore: "B",
-    translatorSubjectComment:
-      "Translator doesn't know the meanings of some mission specific words",
-    translatorOverallScore: "VG"
-  },
-  {
-    linguistRole: "interpreter",
-    interpreterHadPreMeeting: "yes",
-    interpreterProvidedWithNecessarySubjectMaterial: "yes",
-    interpreterSubjectVocabularyScore: "EX",
-    interpreterSubjectUnderstandingScore: "VG",
-    interpreterWorkEthicScore: "EX",
-    interpreterPostureScore: "EX",
-    interpreterRoleScore: "VG",
-    interpreterInterpretationOverallScore: "EX"
-  }
+  [
+    {
+      linguistRole: "translator",
+      questionSets: {
+        translator: {
+          questions: {
+            translatorGotAdequateTime: "yes",
+            translatorMetDeadline: "yes",
+            translatorSubjectVocabularyScore: "B",
+            translatorSubjectComment:
+              "Translator doesn't know the meanings of some <i>mission specific</i> words",
+            translatorOverallScore: "VG"
+          }
+        }
+      },
+      __recurrence: "once",
+      __relatedObjectType: "report"
+    },
+    {
+      linguistRole: "translator",
+      questionSets: {
+        translator: {
+          questions: {
+            translatorGotAdequateTime: "no",
+            translatorMetDeadline: "yes",
+            translatorSubjectVocabularyScore: "EX",
+            translatorOverallScore: "EX"
+          }
+        }
+      },
+      __recurrence: "once",
+      __relatedObjectType: "report"
+    },
+    {
+      linguistRole: "translator",
+      questionSets: {
+        translator: {
+          questions: {
+            translatorGotAdequateTime: "yes",
+            translatorMetDeadline: "no",
+            translatorSubjectVocabularyScore: "S",
+            translatorOverallScore: "B",
+            translatorOverallComment:
+              "He <b>couldn't</b> translate most of the sentences"
+          }
+        }
+      },
+      __recurrence: "once",
+      __relatedObjectType: "report"
+    },
+    {
+      linguistRole: "interpreter",
+      questionSets: {
+        interpreter: {
+          questions: {
+            interpreterHadPreMeeting: "yes",
+            interpreterProvidedWithNecessarySubjectMaterial: "yes",
+            interpreterSubjectVocabularyScore: "EX",
+            interpreterSubjectUnderstandingScore: "VG",
+            interpreterWorkEthicScore: "EX",
+            interpreterPostureScore: "G",
+            interpreterRoleScore: "VG",
+            interpreterInterpretationOverallScore: "VG"
+          }
+        }
+      },
+      __recurrence: "once",
+      __relatedObjectType: "report"
+    }
+  ]
 ]
 
 export default {
@@ -112,22 +171,37 @@ const AssessmentForm = (args, context) => {
 }
 
 const AssessmentResults = () => {
-  return Object.keys(questionConfig).map(question => {
-    const aggregationWidget = getAggregationWidget(questionConfig[question])
-    return (
-      <div key={question}>
-        <AggregationWidgetContainer
-          data={ASSESSMENT_RESULTS}
-          fieldConfig={questionConfig[question]}
-          fieldName={question}
-          period={{ start: moment(), end: moment() }}
-          vertical={true}
-          widget={aggregationWidget}
-          widgetId="widgetId"
-        />
-      </div>
-    )
-  })
+  return (
+    <table>
+      <tbody>
+        {Object.entries(assessmentConfig.questions || {}).map(
+          ([key, config], index) => (
+            <InstantAssessmentsRow
+              key={key}
+              idSuffix={`${key}-assessment`}
+              questionKey={key}
+              questionConfig={config}
+              periods={PERIODS}
+              periodsData={ASSESSMENT_RESULTS}
+              isFirstRow={index === 0}
+            />
+          )
+        )}
+        {Object.entries(assessmentConfig?.questionSets || {}).map(
+          ([questionSet, config]) => (
+            <QuestionSetRow
+              idSuffix={`assessment-${questionSet}`}
+              key={questionSet}
+              questionSetConfig={config}
+              questionSetKey={questionSet}
+              periods={PERIODS}
+              periodsData={ASSESSMENT_RESULTS}
+            />
+          )
+        )}
+      </tbody>
+    </table>
+  )
 }
 
 export const AssessmentFormExample = AssessmentForm.bind({})
