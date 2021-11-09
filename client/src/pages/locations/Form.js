@@ -12,6 +12,7 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GeoLocation from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -262,6 +263,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                       values,
                       validateForm
                     }}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

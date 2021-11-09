@@ -372,7 +372,12 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                             false
                           )
                         }}
-                        widget={<RichTextEditor className="textField" />}
+                        widget={
+                          <RichTextEditor
+                            className="textField"
+                            linkToComp={LinkToPreviewed}
+                          />
+                        }
                       />
                     )}
                   </>

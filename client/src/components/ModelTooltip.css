@@ -1,7 +1,7 @@
 /* set tooltips container style */
 /* make it above header*/
 .bp3-portal {
-  z-index: 1101;
+  z-index: 1600;
 }
 
 .linkto-model-preview-portal > .bp3-overlay > .bp3-popover2-transition-container {
@@ -12,4 +12,9 @@
   max-height: 800px;
   overflow-x: hidden;
   overflow-y: auto;
+  text-align: left;
+}
+
+.model-preview .form-horizontal .form-label {
+  text-align: left;
 }

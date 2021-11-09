@@ -1,6 +1,6 @@
 import styled from "@emotion/styled"
 import AppContext from "components/AppContext"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import Settings, { Version } from "settings"
@@ -44,15 +44,14 @@ const SecurityBanner = () => {
             style={{ display: "flex", alignItems: "center", margin: "0 1rem" }}
           >
             {appSettings[SETTING_KEY_TEXT]} || {currentUser.name}{" "}
-            <LinkToPreviewed
+            <LinkTo
               modelType="Person"
               model={currentUser}
               style={aCss}
               showIcon={false}
-              previewId="security-banner"
             >
               (edit)
-            </LinkToPreviewed>
+            </LinkTo>
           </div>
           <VersionBox>Version : {Version}</VersionBox>
         </>

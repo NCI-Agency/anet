@@ -609,7 +609,12 @@ const PersonForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("biography", true, false)
                   }}
-                  widget={<RichTextEditor className="biography" />}
+                  widget={
+                    <RichTextEditor
+                      className="biography"
+                      linkToComp={LinkToPreviewed}
+                    />
+                  }
                 />
               </Fieldset>
 
@@ -639,6 +644,7 @@ const PersonForm = ({
                       values,
                       validateForm
                     }}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

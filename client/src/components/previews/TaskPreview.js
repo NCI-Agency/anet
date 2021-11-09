@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -168,7 +168,7 @@ const TaskPreview = ({ className, uuid, previewId }) => {
                   {/* Override componentClass and style from dictProps */}
                   <LongNameField
                     dictProps={fieldSettings.longName}
-                    componentClass="div"
+                    as="div"
                     style={{}}
                     name="longName"
                     component={FieldHelper.ReadonlyField}

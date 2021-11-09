@@ -1,15 +1,13 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
 import { Location } from "models"
-import GeoLocation, {
-  GEO_LOCATION_DISPLAY_TYPE
-} from "pages/locations/GeoLocation"
 import PropTypes from "prop-types"
 import React from "react"
 

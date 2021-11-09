@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { ReadonlyCustomFields } from "components/CustomFields"
@@ -14,7 +14,7 @@ import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
+import { Col, Form as FormBS, Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -287,8 +287,8 @@ const PersonPreview = ({ className, uuid, previewId }) => {
     const assocTitle =
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
-      <FormGroup controlId="counterparts">
-        <Col sm={1} componentClass={ControlLabel}>
+      <FormBS.Group controlId="counterparts">
+        <Col sm={1} as={Form.Text}>
           {assocTitle}
         </Col>
         <Col sm={9}>
@@ -325,7 +325,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
             <em>{position.name} has no counterparts assigned</em>
           )}
         </Col>
-      </FormGroup>
+      </FormBS.Group>
     )
   }
   function renderPositionBlankSlate(person) {

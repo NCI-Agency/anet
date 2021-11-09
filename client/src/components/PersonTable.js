@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import LinkTo from "components/LinkTo"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -131,16 +131,19 @@ const BasePersonTable = ({
             {people.map(person => (
               <tr key={person.uuid}>
                 <td>
-                  <LinkTo modelType="Person" model={person} />
+                  <LinkToPreviewed modelType="Person" model={person} />
                 </td>
                 <td>
-                  <LinkTo modelType="Position" model={person.position} />
+                  <LinkToPreviewed
+                    modelType="Position"
+                    model={person.position}
+                  />
                   {person.position && person.position.code
                     ? `, ${person.position.code}`
                     : ""}
                 </td>
                 <td>
-                  <LinkTo
+                  <LinkToPreviewed
                     modelType="Location"
                     model={person.position && person.position.location}
                     whenUnspecified=""
@@ -148,7 +151,7 @@ const BasePersonTable = ({
                 </td>
                 <td>
                   {person.position && person.position.organization && (
-                    <LinkTo
+                    <LinkToPreviewed
                       modelType="Organization"
                       model={person.position.organization}
                     />

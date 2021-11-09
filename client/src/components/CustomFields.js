@@ -1161,7 +1161,7 @@ export const ReadonlyCustomFields = ({
 ReadonlyCustomFields.propTypes = {
   fieldsConfig: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
-  linkToComp: PropTypes.func.isRequired,
+  linkToComp: PropTypes.func,
   values: PropTypes.object.isRequired,
   vertical: PropTypes.bool,
   isCompact: PropTypes.bool,

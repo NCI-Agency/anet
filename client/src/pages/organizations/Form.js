@@ -371,6 +371,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       values,
                       validateForm
                     }}
+                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

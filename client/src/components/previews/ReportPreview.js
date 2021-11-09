@@ -1,5 +1,5 @@
+import { gql } from "@apollo/client"
 import API from "api"
-import { gql } from "apollo-boost"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -195,7 +195,9 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                         </p>
                       )}
                       <p>
-                        <strong>{Settings.fields.report.nextSteps}:</strong>{" "}
+                        <strong>
+                          {Settings.fields.report.nextSteps.label}:
+                        </strong>{" "}
                         {report.nextSteps}
                       </p>
                     </div>

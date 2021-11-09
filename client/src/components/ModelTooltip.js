@@ -5,7 +5,11 @@ import "./ModelTooltip.css"
 
 const ModelTooltip = ({ tooltipContent, children, ...tooltipProps }) => {
   return (
-    <Tooltip2 content={tooltipContent} {...tooltipProps}>
+    <Tooltip2
+      style={{ overflow: "auto" }}
+      content={tooltipContent}
+      {...tooltipProps}
+    >
       {children}
     </Tooltip2>
   )

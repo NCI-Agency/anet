@@ -362,8 +362,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           model={organization.parentOrg}
                           previewId="org-show-org"
                         >
-                          {organization.parentOrg.shortName}{" "}
-                          {organization.parentOrg.longName}{" "}
                           {Organization.toIdentificationCodeString(
                             organization.parentOrg
                           )}
@@ -425,7 +423,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                                 model={organization}
                                 previewId="org-show-child-org"
                               >
-                                {organization.shortName} {organization.longName}{" "}
                                 {Organization.toIdentificationCodeString(
                                   organization
                                 )}

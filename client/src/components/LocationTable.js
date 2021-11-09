@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import LinkTo from "components/LinkTo"
+import LinkToPreview from "components/LinkToPreviewed"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -121,7 +121,7 @@ const BaseLocationTable = ({
             {locations.map(loc => (
               <tr key={loc.uuid}>
                 <td>
-                  <LinkTo modelType="Location" model={loc} />
+                  <LinkToPreview modelType="Location" model={loc} />
                 </td>
                 <td>{Location.humanNameOfType(loc.type)}</td>
               </tr>

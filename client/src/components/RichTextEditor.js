@@ -20,7 +20,13 @@ import {
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
 
-const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
+const RichTextEditor = ({
+  value,
+  onChange,
+  onHandleBlur,
+  className,
+  linkToComp
+}) => {
   const [showLinksModal, setShowLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
@@ -32,7 +38,10 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
     return deserialize(document.body)
   })
 
-  const renderElement = useCallback(props => <Element {...props} />, [])
+  const renderElement = useCallback(
+    props => <Element linkToComp={linkToComp} {...props} />,
+    [linkToComp]
+  )
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
   return (
@@ -67,7 +76,8 @@ RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
+  linkToComp: PropTypes.func
 }
 
 const withHtml = editor => {
@@ -213,7 +223,7 @@ const deserialize = element => {
   }
 }
 
-const Element = ({ attributes, children, element }) => {
+const Element = ({ attributes, children, element, linkToComp }) => {
   const selected = useSelected()
   const focused = useFocused()
   switch (element.type) {
@@ -244,11 +254,12 @@ const Element = ({ attributes, children, element }) => {
           }}
         >
           {element.href ? (
-            <LinkAnet url={element.href} />
+            <LinkAnet url={element.href} linkToComp={linkToComp} />
           ) : (
             <LinkAnetEntity
               type={element.entityType}
               uuid={element.entityUuid}
+              linkToComp={linkToComp}
             />
           )}
           {children}
@@ -262,7 +273,8 @@ const Element = ({ attributes, children, element }) => {
 Element.propTypes = {
   attributes: PropTypes.object.isRequired,
   children: PropTypes.node,
-  element: PropTypes.object
+  element: PropTypes.object,
+  linkToComp: PropTypes.func
 }
 
 const Leaf = ({ attributes, children, leaf }) => {

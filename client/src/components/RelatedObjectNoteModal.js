@@ -1,6 +1,7 @@
 import API from "api"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import * as FieldHelper from "components/FieldHelper"
+import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   GQL_CREATE_NOTE,
@@ -106,7 +107,7 @@ const RelatedObjectNoteModal = ({
                       // validation will be done by setFieldValue
                       setFieldTouched("text", true, false)
                     }}
-                    widget={<RichTextEditor />}
+                    widget={<RichTextEditor linkToComp={LinkToPreviewed} />}
                     vertical
                   />
                   <RelatedObjectsTable

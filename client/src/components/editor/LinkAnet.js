@@ -41,10 +41,8 @@ const LinkAnet = ({ entityKey, contentState, url, linkToComp }) => {
 LinkAnet.propTypes = {
   entityKey: PropTypes.string,
   contentState: PropTypes.object,
-  onEdit: PropTypes.func,
-  onRemove: PropTypes.func,
-  children: PropTypes.any,
-  url: PropTypes.string
+  url: PropTypes.string,
+  linkToComp: PropTypes.func
 }
 
 export default LinkAnet

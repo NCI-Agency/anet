@@ -165,7 +165,7 @@ const RelatedObjectNotes = ({
                 isJson && note.text ? utils.parseJsonSafe(note.text) : {}
               const noteText = isJson
                 ? jsonFields.text
-                : parseHtmlWithLinkTo(note.text)
+                : parseHtmlWithLinkTo(note.text, LinkToPreviewed)
               return (
                 <Card
                   key={note.uuid}

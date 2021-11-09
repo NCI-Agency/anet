@@ -899,7 +899,12 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("reportText", true, false)
                   }}
-                  widget={<RichTextEditor className="reportTextField" />}
+                  widget={
+                    <RichTextEditor
+                      className="reportTextField"
+                      linkToComp={LinkToPreviewed}
+                    />
+                  }
                 />
 
                 <div style={{ textAlign: "center" }}>
@@ -948,7 +953,10 @@ const ReportForm = ({
                           )
                         }}
                         widget={
-                          <RichTextEditor className="reportSensitiveInformationField" />
+                          <RichTextEditor
+                            className="reportSensitiveInformationField"
+                            linkToComp={LinkToPreviewed}
+                          />
                         }
                       />
                       <FastField
