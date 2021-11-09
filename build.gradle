@@ -143,16 +143,20 @@ configurations.all {
 
 test {
 	useJUnitPlatform()
+	jacoco {
+		destinationFile = file("$buildDir/jacoco/test-${run.environment['DB_DRIVER']}.exec")
+	}
 }
 
 jacoco {
-	toolVersion = "0.8.6"
+	toolVersion = "0.8.7"
 }
 
 jacocoTestReport {
+	executionData.setFrom project.fileTree(dir: "$buildDir", include: "jacoco/test-*.exec")
 	reports {
 		xml.required = true
-		html.required = false
+		html.required = true
 	}
 }
 
