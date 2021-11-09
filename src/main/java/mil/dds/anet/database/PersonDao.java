@@ -504,33 +504,35 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @InTransaction
   public boolean hasHistoryConflict(final String uuid, final String loserUuid,
       final List<PersonPositionHistory> history, final boolean checkPerson) {
-    final String personPositionClause = checkPerson
-        ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
-        : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
-    for (final PersonPositionHistory pph : history) {
-      final Query q;
-      final Instant endTime = pph.getEndTime();
-      if (endTime == null) {
-        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
-            + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
-            + ") AND " + personPositionClause);
-      } else {
-        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
-            + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
-            + " OR (\"endedAt\" IS NOT NULL AND"
-            + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
-            + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
-      }
-      final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
-      final Number count =
-          (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
-              .bind("personUuid", checkPerson ? uuid : histUuid)
-              .bind("positionUuid", checkPerson ? histUuid : uuid)
-              .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
-              .get("count");
+    if (!Utils.isEmptyOrNull(history)) {
+      final String personPositionClause = checkPerson
+          ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
+          : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
+      for (final PersonPositionHistory pph : history) {
+        final Query q;
+        final Instant endTime = pph.getEndTime();
+        if (endTime == null) {
+          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
+              + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
+              + ") AND " + personPositionClause);
+        } else {
+          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
+              + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
+              + " OR (\"endedAt\" IS NOT NULL AND"
+              + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
+              + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+        }
+        final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+        final Number count =
+            (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+                .bind("personUuid", checkPerson ? uuid : histUuid)
+                .bind("positionUuid", checkPerson ? histUuid : uuid)
+                .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
+                .get("count");
 
-      if (count.longValue() > 0) {
-        return true;
+        if (count.longValue() > 0) {
+          return true;
+        }
       }
     }
     return false;

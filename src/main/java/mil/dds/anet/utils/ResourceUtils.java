@@ -15,6 +15,13 @@ public class ResourceUtils {
       throw new WebApplicationException("Uuid cannot be null.", Status.BAD_REQUEST);
     }
 
+    if (Utils.isEmptyOrNull(previousPositions)) {
+      if (relationUuid != null) {
+        throw new WebApplicationException("History should not be empty.", Status.BAD_REQUEST);
+      }
+      return;
+    }
+
     boolean seenNullEndTime = false;
     for (final PersonPositionHistory pph : previousPositions) {
       // Check if start time is null
@@ -73,18 +80,12 @@ public class ResourceUtils {
   private static boolean overlap(final PersonPositionHistory pph1,
       final PersonPositionHistory pph2) {
     if (pph1.getEndTime() == null) {
-      return overlapNullEndTime(pph1, pph2);
+      return pph2.getEndTime().isAfter(pph1.getStartTime());
     }
     if (pph2.getEndTime() == null) {
-      return overlapNullEndTime(pph2, pph1);
+      return pph1.getEndTime().isAfter(pph2.getStartTime());
     }
     return pph2.getStartTime().isBefore(pph1.getEndTime())
         && pph2.getEndTime().isAfter(pph1.getStartTime());
-  }
-
-  private static boolean overlapNullEndTime(final PersonPositionHistory pph1,
-      final PersonPositionHistory pph2) {
-    return pph1.getEndTime() == null
-        && (pph2.getEndTime() == null || pph2.getEndTime().isAfter(pph1.getStartTime()));
   }
 }
