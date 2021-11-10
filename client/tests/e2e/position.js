@@ -1,6 +1,6 @@
 const test = require("../util/test")
 
-test("Move someone in and out of a position", async t => {
+test.serial("Move someone in and out of a position", async t => {
   t.plan(11)
 
   const {
@@ -178,7 +178,7 @@ test("Move someone in and out of a position", async t => {
   )
 })
 
-test("Update permissions while changing positions", async t => {
+test.serial("Update permissions while changing positions", async t => {
   t.plan(4)
 
   const {
