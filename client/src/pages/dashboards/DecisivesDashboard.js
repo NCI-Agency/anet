@@ -7,7 +7,7 @@ import {
   setSearchQuery
 } from "actions"
 import API from "api"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -269,13 +269,13 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.positionStats}
               prevContentData={prevReportStats.positionStats}
               itemLabel={item => (
-                <LinkToPreviewed
+                <LinkTo
                   modelType="Position"
                   model={item}
                   previewId="dec-dash-pos"
                 >
                   {item.name}
-                </LinkToPreviewed>
+                </LinkTo>
               )}
             />
           ))}
@@ -294,13 +294,13 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.locationStats}
               prevContentData={prevReportStats.locationStats}
               itemLabel={item => (
-                <LinkToPreviewed
+                <LinkTo
                   modelType="Location"
                   model={item}
                   previewId="dec-dash-loc"
                 >
                   {item.name}
-                </LinkToPreviewed>
+                </LinkTo>
               )}
             />
           ))}

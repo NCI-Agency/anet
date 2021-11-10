@@ -33,12 +33,7 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 
-const OrganizationTasks = ({
-  pageDispatchers,
-  queryParams,
-  organization,
-  linkToComp: LinkToComp
-}) => {
+const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
   const { currentUser } = useContext(AppContext)
   const [pageNum, setPageNum] = useState(0)
   const taskQuery = Object.assign({}, queryParams, { pageNum })
@@ -107,13 +102,13 @@ const OrganizationTasks = ({
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkToComp
+                  <LinkTo
                     modelType="Task"
                     model={task}
                     previewId="org-tasks-task"
                   >
                     {task.shortName}
-                  </LinkToComp>
+                  </LinkTo>
                 </td>
                 <td>{task.longName}</td>
               </tr>
@@ -128,8 +123,7 @@ const OrganizationTasks = ({
 OrganizationTasks.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   organization: PropTypes.object.isRequired,
-  queryParams: PropTypes.object,
-  linkToComp: PropTypes.func.isRequired
+  queryParams: PropTypes.object
 }
 
 export default connect(null, mapPageDispatchersToProps)(OrganizationTasks)

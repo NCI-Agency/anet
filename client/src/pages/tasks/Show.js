@@ -7,7 +7,6 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import {
@@ -281,7 +280,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       task.taskedOrganizations && (
                         <>
                           {task.taskedOrganizations.map(org => (
-                            <LinkToPreviewed
+                            <LinkTo
                               modelType="Organization"
                               model={org}
                               key={`${org.uuid}`}
@@ -299,14 +298,14 @@ const TaskShow = ({ pageDispatchers }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         task.customFieldRef1 && (
-                          <LinkToPreviewed
+                          <LinkTo
                             modelType="Task"
                             model={task.customFieldRef1}
                             previewId="task-show-parent-task"
                           >
                             {task.customFieldRef1.shortName}{" "}
                             {task.customFieldRef1.longName}
-                          </LinkToPreviewed>
+                          </LinkTo>
                         )
                       }
                     />
@@ -382,10 +381,7 @@ const TaskShow = ({ pageDispatchers }) => {
             />
 
             <Fieldset title="Responsible positions">
-              <PositionTable
-                positions={task.responsiblePositions}
-                linkToComp={LinkToPreviewed}
-              />
+              <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
 
             <Approvals

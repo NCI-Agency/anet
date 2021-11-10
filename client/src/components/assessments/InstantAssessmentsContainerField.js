@@ -2,7 +2,7 @@ import {
   CustomFieldsContainer,
   ReadonlyCustomFields
 } from "components/CustomFields"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
@@ -34,7 +34,7 @@ const InstantAssessmentsContainerField = ({
             <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
               <tr>
                 <td>
-                  <LinkToPreviewed
+                  <LinkTo
                     modelType={entityType.resourceName}
                     model={entity}
                     previewId="inst-assess-entity"
@@ -48,14 +48,12 @@ const InstantAssessmentsContainerField = ({
                       parentFieldName={`${parentFieldName}.${entity.uuid}`}
                       fieldsConfig={entityInstantAssessmentConfig}
                       values={values}
-                      linkToComp={LinkToPreviewed}
                     />
                   ) : (
                     <CustomFieldsContainer
                       parentFieldName={`${parentFieldName}.${entity.uuid}`}
                       fieldsConfig={entityInstantAssessmentConfig}
                       formikProps={formikProps}
-                      linkToComp={LinkToPreviewed}
                     />
                   )}
                 </td>

@@ -18,7 +18,7 @@ import CompactTable, {
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -399,7 +399,7 @@ const CompactReportView = ({ pageDispatchers }) => {
     return (
       <>
         Engagement of{" "}
-        <LinkToPreviewed
+        <LinkTo
           modelType="Person"
           model={Report.getPrimaryAttendee(
             report.attendees,
@@ -407,7 +407,7 @@ const CompactReportView = ({ pageDispatchers }) => {
           )}
         />{" "}
         by{" "}
-        <LinkToPreviewed
+        <LinkTo
           modelType="Person"
           model={Report.getPrimaryAttendee(
             report.attendees,
@@ -421,7 +421,7 @@ const CompactReportView = ({ pageDispatchers }) => {
         )}{" "}
         at{" "}
         {report.location && (
-          <LinkToPreviewed modelType="Location" model={report.location} />
+          <LinkTo modelType="Location" model={report.location} />
         )}
       </>
     )
@@ -454,9 +454,7 @@ const CompactReportView = ({ pageDispatchers }) => {
             return (
               <CompactRow
                 key={task.uuid}
-                label={
-                  <LinkToPreviewed modelType={Task.resourceName} model={task} />
-                }
+                label={<LinkTo modelType={Task.resourceName} model={task} />}
                 content={
                   <InnerTable>
                     <FullColumn>
@@ -464,12 +462,12 @@ const CompactReportView = ({ pageDispatchers }) => {
                         label={Settings.fields.task.topLevel.shortLabel}
                         content={
                           task.customFieldRef1 && (
-                            <LinkToPreviewed
+                            <LinkTo
                               modelType="Task"
                               model={task.customFieldRef1}
                             >
                               {task.customFieldRef1.shortName}
-                            </LinkToPreviewed>
+                            </LinkTo>
                           )
                         }
                       />
@@ -518,9 +516,9 @@ const CompactReportView = ({ pageDispatchers }) => {
                 key={attendee.uuid}
                 label={
                   <>
-                    <LinkToPreviewed modelType="Person" model={attendee} />
+                    <LinkTo modelType="Person" model={attendee} />
                     {(renderOrgName || !attendee.position?.organization) && (
-                      <LinkToPreviewed
+                      <LinkTo
                         modelType="Organization"
                         model={
                           attendee.position && attendee.position.organization

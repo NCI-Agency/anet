@@ -15,7 +15,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
@@ -486,14 +485,14 @@ const PersonShow = ({ pageDispatchers }) => {
   function getPositionHumanValue() {
     return hasPosition ? (
       <>
-        <LinkToPreviewed
+        <LinkTo
           modelType="Position"
           model={position}
           className="position-name"
           previewId="people-show-pos"
         />{" "}
         (
-        <LinkToPreviewed
+        <LinkTo
           modelType="Organization"
           model={position.organization}
           previewId="people-show-org"
@@ -653,7 +652,7 @@ const PersonShow = ({ pageDispatchers }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkToPreviewed
+                      <LinkTo
                         modelType="Person"
                         model={assocPos.person}
                         previewId="people-show-asc-person"
@@ -661,14 +660,14 @@ const PersonShow = ({ pageDispatchers }) => {
                     )}
                   </td>
                   <td>
-                    <LinkToPreviewed
+                    <LinkTo
                       modelType="Position"
                       model={assocPos}
                       previewId="people-show-asc-pos"
                     />
                   </td>
                   <td>
-                    <LinkToPreviewed
+                    <LinkTo
                       modelType="Organization"
                       model={assocPos.organization}
                       previewId="people-show-asc-org"

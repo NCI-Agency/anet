@@ -307,11 +307,11 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                     : "People attended in this engagement"
                 }
               >
-                <ReportPeople report={report} linkToComp={LinkTo} disabled />
+                <ReportPeople report={report} disabled />
               </Fieldset>
               {report.reportText && (
                 <Fieldset title={Settings.fields.report.reportText}>
-                  {parseHtmlWithLinkTo(report.reportText, LinkTo)}
+                  {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
@@ -319,7 +319,6 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   tasks={report.tasks}
                   showParent
                   noTasksMessage={`No ${tasksLabel} selected`}
-                  linkToComp={LinkTo}
                 />
               </Fieldset>
             </Form>

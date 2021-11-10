@@ -4,7 +4,6 @@ import {
   customFieldsJSONString,
   SPECIAL_WIDGET_TYPES
 } from "components/CustomFields"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   ENTITY_ASSESSMENT_PARENT_FIELD,
@@ -91,7 +90,6 @@ const AssessmentModal = ({
                         values,
                         validateForm
                       }}
-                      linkToComp={LinkToPreviewed}
                       vertical
                     />
                   </div>

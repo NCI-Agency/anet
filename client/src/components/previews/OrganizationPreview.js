@@ -208,10 +208,7 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                 )}
               </Fieldset>
 
-              <OrganizationLaydown
-                organization={organization}
-                linkToComp={LinkTo}
-              />
+              <OrganizationLaydown organization={organization} />
               {organization.isTaskEnabled() && (
                 <OrganizationTasks
                   organization={organization}
@@ -220,7 +217,6 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
                     pageSize: 10,
                     taskedOrgUuid: organization.uuid
                   }}
-                  linkToComp={LinkTo}
                 />
               )}
             </Form>

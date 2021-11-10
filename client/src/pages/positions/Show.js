@@ -12,7 +12,6 @@ import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
@@ -218,7 +217,7 @@ const PositionShow = ({ pageDispatchers }) => {
                     component={FieldHelper.ReadonlyField}
                     humanValue={
                       position.organization && (
-                        <LinkToPreviewed
+                        <LinkTo
                           modelType="Organization"
                           model={position.organization}
                           previewId="pos-show-org"
@@ -226,7 +225,7 @@ const PositionShow = ({ pageDispatchers }) => {
                           {position.organization.shortName}{" "}
                           {position.organization.longName}{" "}
                           {position.organization.identificationCode}
-                        </LinkToPreviewed>
+                        </LinkTo>
                       )
                     }
                   />
@@ -238,7 +237,7 @@ const PositionShow = ({ pageDispatchers }) => {
                   humanValue={
                     position.location && (
                       <>
-                        <LinkToPreviewed
+                        <LinkTo
                           modelType="Location"
                           model={position.location}
                           previewId="pos-show-loc"
@@ -277,7 +276,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkToPreviewed
+                      <LinkTo
                         modelType="Person"
                         model={position.person}
                         previewId="pos-show-person"

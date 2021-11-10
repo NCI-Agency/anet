@@ -2,7 +2,7 @@ import "components/assessments/AssessmentResultsTable.css"
 import { InstantAssessmentsRow } from "components/assessments/InstantAssessmentResults"
 import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import _isEmpty from "lodash/isEmpty"
@@ -51,7 +51,7 @@ const EntityAssessmentResults = ({
     <>
       <tr>
         <td colSpan={periods.length} className="entity-title-row">
-          <LinkToPreviewed
+          <LinkTo
             modelType={entityType.resourceName}
             model={entity}
             previewId="assess-table-entity"

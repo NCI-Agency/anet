@@ -1,7 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
@@ -250,7 +249,7 @@ const ReportSummaryRow = ({ report }) => {
       </Row>
       <Row>
         <Col md={12}>
-          <LinkToPreviewed
+          <LinkTo
             modelType="Person"
             model={report.primaryAdvisor}
             previewId="rep-sum-person"
@@ -258,7 +257,7 @@ const ReportSummaryRow = ({ report }) => {
           <span>
             {" "}
             (
-            <LinkToPreviewed
+            <LinkTo
               modelType="Organization"
               model={report.advisorOrg}
               previewId="rep-sum-adv-org"
@@ -266,7 +265,7 @@ const ReportSummaryRow = ({ report }) => {
             )
           </span>
           <span className="people-separator">&#x25B6;</span>
-          <LinkToPreviewed
+          <LinkTo
             modelType="Person"
             model={report.primaryPrincipal}
             previewId="rep-sum-prim-pri-org"
@@ -274,7 +273,7 @@ const ReportSummaryRow = ({ report }) => {
           <span>
             {" "}
             (
-            <LinkToPreviewed
+            <LinkTo
               modelType="Organization"
               model={report.principalOrg}
               previewId="rep-sum-pri-org"
@@ -288,7 +287,7 @@ const ReportSummaryRow = ({ report }) => {
           <Col md={12}>
             <span>
               <strong>Location: </strong>
-              <LinkToPreviewed
+              <LinkTo
                 modelType="Location"
                 model={report.location}
                 previewId="rep-sum-loc"

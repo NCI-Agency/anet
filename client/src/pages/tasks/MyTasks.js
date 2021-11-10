@@ -1,7 +1,7 @@
 import { DEFAULT_PAGE_PROPS } from "actions"
 import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
@@ -43,7 +43,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
   const myOrgAssignedTasksTitle = (
     <>
       {pluralize(taskShortLabel)} assigned to{" "}
-      <LinkToPreviewed
+      <LinkTo
         modelType="Organization"
         model={currentUser.position?.organization}
         previewId="my-tasks-org"

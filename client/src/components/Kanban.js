@@ -2,7 +2,6 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import { EngagementTrends } from "components/Trends"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -137,9 +136,9 @@ const CardView = ({ task }) => {
       }}
     >
       <div>
-        <LinkToPreviewed modelType="Task" model={task} previewId="kanban-task">
+        <LinkTo modelType="Task" model={task} previewId="kanban-task">
           <strong>{task.shortName}</strong>
-        </LinkToPreviewed>
+        </LinkTo>
         <br />
         <EngagementTrends
           newValue={task.lastMonthReports.length}

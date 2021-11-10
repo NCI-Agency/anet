@@ -14,7 +14,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -218,7 +218,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                       <span className="text-danger">
                         Setting this position to inactive will automatically
                         remove{" "}
-                        <LinkToPreviewed
+                        <LinkTo
                           modelType="Person"
                           model={values.person}
                           previewId="pos-form-person"
@@ -332,7 +332,6 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                       values,
                       validateForm
                     }}
-                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

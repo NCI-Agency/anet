@@ -1,4 +1,3 @@
-import LinkToPreviewed from "components/LinkToPreviewed"
 import LocationTable from "components/LocationTable"
 import PersonTable from "components/PersonTable"
 import PositionTable from "components/PositionTable"
@@ -28,10 +27,7 @@ const SimilarObjectsModal = ({ objectType, userInput, onCancel }) => {
         <Modal.Title>Possible Duplicates</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <TableComponent
-          queryParams={queryParams}
-          linkToComp={objectType === "Position" ? LinkToPreviewed : undefined}
-        />
+        <TableComponent queryParams={queryParams} />
       </Modal.Body>
       <Modal.Footer className="justify-content-between">
         <Button onClick={onCancel} variant="outline-secondary">

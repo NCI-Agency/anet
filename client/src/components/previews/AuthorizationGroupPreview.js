@@ -2,7 +2,6 @@ import { gql } from "@apollo/client"
 import API from "api"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import PositionTable from "components/PositionTable"
 import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
@@ -77,7 +76,6 @@ const AuthorizationGroupPreview = ({ className, uuid, previewId }) => {
                     pageSize: 10,
                     authorizationGroupUuid: uuid
                   }}
-                  linkToComp={LinkTo}
                 />
               </Fieldset>
             </Form>

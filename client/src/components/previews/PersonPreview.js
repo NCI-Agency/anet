@@ -198,7 +198,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   name="biography"
                   className="biography"
                   component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography, LinkTo)}
+                  humanValue={parseHtmlWithLinkTo(person.biography)}
                 />
               </Fieldset>
               <Fieldset title="Position">
@@ -225,7 +225,6 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.person.customFields}
                     values={values}
-                    linkToComp={LinkTo}
                   />
                 </Fieldset>
               )}

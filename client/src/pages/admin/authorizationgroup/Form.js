@@ -4,7 +4,6 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -148,7 +147,6 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
                         <PositionTable
                           positions={values.positions}
                           showDelete
-                          linkToComp={LinkToPreviewed}
                         />
                       }
                       overlayColumns={[

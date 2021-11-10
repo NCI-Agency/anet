@@ -5,20 +5,20 @@ import React from "react"
 import { getEntityInfoFromUrl } from "utils_links"
 
 // Enhanced HTML so that links will be converted to link components
-export function parseHtmlWithLinkTo(html, linkToComp) {
+export function parseHtmlWithLinkTo(html) {
   if (!html) {
     return null
   }
   return parse(html, {
     replace: domNode => {
       if (domNode.attribs && domNode.attribs.href) {
-        return <LinkAnet url={domNode.attribs.href} linkToComp={linkToComp} />
+        return <LinkAnet url={domNode.attribs.href} />
       }
     }
   })
 }
 
-const LinkAnet = ({ entityKey, contentState, url, linkToComp }) => {
+const LinkAnet = ({ entityKey, contentState, url }) => {
   const urlLink =
     url || (contentState && contentState.getEntity(entityKey).getData().url)
 
@@ -29,7 +29,6 @@ const LinkAnet = ({ entityKey, contentState, url, linkToComp }) => {
       <LinkAnetEntity
         type={isAnetEntityLink.type}
         uuid={isAnetEntityLink.uuid}
-        linkToComp={linkToComp}
       />
     )
   } else {
@@ -41,8 +40,7 @@ const LinkAnet = ({ entityKey, contentState, url, linkToComp }) => {
 LinkAnet.propTypes = {
   entityKey: PropTypes.string,
   contentState: PropTypes.object,
-  url: PropTypes.string,
-  linkToComp: PropTypes.func
+  url: PropTypes.string
 }
 
 export default LinkAnet

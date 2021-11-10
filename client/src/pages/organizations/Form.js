@@ -14,7 +14,7 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -189,7 +189,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       label={Settings.fields.organization.parentOrg}
                       humanValue={
                         values.parentOrg && (
-                          <LinkToPreviewed
+                          <LinkTo
                             modelType="Organization"
                             model={values.parentOrg}
                             previewId="org-form-org"
@@ -199,7 +199,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                             {Organization.toIdentificationCodeString(
                               values.parentOrg
                             )}
-                          </LinkToPreviewed>
+                          </LinkTo>
                         )
                       }
                     />
@@ -318,10 +318,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       className="tasks-selector"
                     >
                       {!isAdmin ? (
-                        <NoPaginationTaskTable
-                          tasks={values.tasks}
-                          linkToComp={LinkToPreviewed}
-                        />
+                        <NoPaginationTaskTable tasks={values.tasks} />
                       ) : (
                         <FastField
                           name="tasks"
@@ -343,7 +340,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                                 <NoPaginationTaskTable
                                   tasks={values.tasks}
                                   showDelete
-                                  linkToComp={LinkToPreviewed}
                                 />
                               }
                               overlayColumns={["Name"]}
@@ -371,7 +367,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       values,
                       validateForm
                     }}
-                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

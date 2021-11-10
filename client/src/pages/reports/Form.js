@@ -20,7 +20,6 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, {
   ASSESSMENTS_RELATED_OBJECT_TYPE,
@@ -687,7 +686,6 @@ const ReportForm = ({
                             setFieldValue("reportPeople", value, true)
                           }
                           showDelete
-                          linkToComp={LinkToPreviewed}
                         />
                       }
                       overlayColumns={[
@@ -758,7 +756,6 @@ const ReportForm = ({
                             showDelete
                             showDescription
                             noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
-                            linkToComp={LinkToPreviewed}
                           />
                         }
                         overlayColumns={[
@@ -805,7 +802,6 @@ const ReportForm = ({
                       values,
                       validateForm
                     }}
-                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}
@@ -901,12 +897,7 @@ const ReportForm = ({
                     // validation will be done by setFieldValue
                     setFieldTouched("reportText", true, false)
                   }}
-                  widget={
-                    <RichTextEditor
-                      className="reportTextField"
-                      linkToComp={LinkToPreviewed}
-                    />
-                  }
+                  widget={<RichTextEditor className="reportTextField" />}
                 />
 
                 <div style={{ textAlign: "center" }}>
@@ -955,10 +946,7 @@ const ReportForm = ({
                           )
                         }}
                         widget={
-                          <RichTextEditor
-                            className="reportSensitiveInformationField"
-                            linkToComp={LinkToPreviewed}
-                          />
+                          <RichTextEditor className="reportSensitiveInformationField" />
                         }
                       />
                       <FastField

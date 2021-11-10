@@ -1,3 +1,4 @@
+import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
 import { Task } from "models"
@@ -14,8 +15,7 @@ const NoPaginationTaskTable = ({
   showDelete,
   showDescription,
   onDelete,
-  noTasksMessage,
-  linkToComp: LinkToComp
+  noTasksMessage
 }) => {
   const tasksExist = _get(tasks, "length", 0) > 0
 
@@ -40,31 +40,31 @@ const NoPaginationTaskTable = ({
               return (
                 <tr key={task.uuid}>
                   <td className="taskName">
-                    <LinkToComp
+                    <LinkTo
                       modelType="Task"
                       model={task}
                       previewId="no-pag-task"
                     >
                       {task.shortName}
-                    </LinkToComp>
+                    </LinkTo>
                   </td>
                   {showParent && (
                     <td className="parentTaskName">
                       {task.customFieldRef1 && (
-                        <LinkToComp
+                        <LinkTo
                           modelType="Task"
                           model={task.customFieldRef1}
                           previewId="no-pag-pTask"
                         >
                           {task.customFieldRef1.shortName}
-                        </LinkToComp>
+                        </LinkTo>
                       )}
                     </td>
                   )}
                   {showOrganization && (
                     <td className="taskOrg">
                       {task.taskedOrganizations.map(org => (
-                        <LinkToComp
+                        <LinkTo
                           modelType="Organization"
                           model={org}
                           key={`${task.uuid}-${org.uuid}`}
@@ -106,8 +106,7 @@ NoPaginationTaskTable.propTypes = {
   onDelete: PropTypes.func,
   showOrganization: PropTypes.bool,
   showDescription: PropTypes.bool,
-  noTasksMessage: PropTypes.string,
-  linkToComp: PropTypes.func.isRequired
+  noTasksMessage: PropTypes.string
 }
 
 NoPaginationTaskTable.defaultProps = {

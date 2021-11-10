@@ -1,5 +1,5 @@
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model, { MODEL_TO_OBJECT_TYPE } from "components/Model"
 import RemoveButton from "components/RemoveButton"
 import PropTypes from "prop-types"
@@ -56,7 +56,7 @@ const RelatedObjectsTable = ({
             {relatedObjects.map(nro => (
               <tr key={nro.relatedObjectUuid}>
                 <td>
-                  <LinkToPreviewed
+                  <LinkTo
                     modelType={nro.relatedObjectType}
                     model={{
                       uuid: nro.relatedObjectUuid,

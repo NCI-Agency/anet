@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -127,13 +127,13 @@ const BaseOrganizationTable = ({
               return (
                 <tr key={org.uuid}>
                   <td>
-                    <LinkToPreviewed
+                    <LinkTo
                       modelType="Organization"
                       model={org}
                       previewId="org-table-org"
                     >
                       {nameComponents.join(" - ")}
-                    </LinkToPreviewed>
+                    </LinkTo>
                   </td>
                   {Settings.fields.advisor.org.identificationCode && (
                     <td>{org.identificationCode}</td>

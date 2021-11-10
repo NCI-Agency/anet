@@ -9,7 +9,7 @@ import {
 import API from "api"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import LocationTable from "components/LocationTable"
 import Messages from "components/Messages"
 import { AnchorNavItem } from "components/Nav"
@@ -259,7 +259,7 @@ const Organizations = ({
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 <td>
-                  <LinkToPreviewed
+                  <LinkTo
                     modelType="Organization"
                     model={org}
                     previewId="search-org"
@@ -421,7 +421,6 @@ const Positions = ({
       totalCount={totalCount}
       goToPage={setPage}
       id="positions-search-results"
-      linkToComp={LinkToPreviewed}
     />
   )
 

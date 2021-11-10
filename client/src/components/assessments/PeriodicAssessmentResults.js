@@ -5,7 +5,7 @@ import API from "api"
 import AssessmentModal from "components/assessments/AssessmentModal"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Model, { NOTE_TYPE } from "components/Model"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -55,7 +55,7 @@ const PeriodicAssessment = ({
               </i>{" "}
             </Row>
             <Row>
-              <LinkToPreviewed
+              <LinkTo
                 modelType="Person"
                 model={note.author}
                 previewId="per-assess-person"
@@ -124,7 +124,6 @@ const PeriodicAssessment = ({
                   parentFieldName={parentFieldName}
                   fieldsConfig={assessmentConfig}
                   values={values}
-                  linkToComp={LinkToPreviewed}
                   vertical
                 />
               )

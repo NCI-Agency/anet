@@ -6,7 +6,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
   INVISIBLE_CUSTOM_FIELDS_FIELD,
@@ -165,7 +165,7 @@ const RelatedObjectNotes = ({
                 isJson && note.text ? utils.parseJsonSafe(note.text) : {}
               const noteText = isJson
                 ? jsonFields.text
-                : parseHtmlWithLinkTo(note.text, LinkToPreviewed)
+                : parseHtmlWithLinkTo(note.text)
               return (
                 <Card
                   key={note.uuid}
@@ -181,7 +181,7 @@ const RelatedObjectNotes = ({
                           </small>
                         </Row>
                         <Row>
-                          <LinkToPreviewed
+                          <LinkTo
                             modelType="Person"
                             model={note.author}
                             previewId="rel-obj-person"

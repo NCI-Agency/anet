@@ -5,7 +5,6 @@ import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import {
   mapPageDispatchersToProps,
@@ -120,7 +119,6 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
                     pageSize: 10,
                     authorizationGroupUuid: uuid
                   }}
-                  linkToComp={LinkToPreviewed}
                 />
               </Fieldset>
 

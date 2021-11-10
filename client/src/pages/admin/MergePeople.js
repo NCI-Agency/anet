@@ -4,7 +4,7 @@ import API from "api"
 import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
-import LinkToPreviewed from "components/LinkToPreviewed"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import {
   jumpToTop,
@@ -307,7 +307,7 @@ const MergePeople = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
-              <LinkToPreviewed
+              <LinkTo
                 modelType="Position"
                 model={person.position}
                 previewId="merge-people-pos"
@@ -321,7 +321,7 @@ const MergePeople = ({ pageDispatchers }) => {
           component={FieldHelper.ReadonlyField}
           humanValue={
             person.position && (
-              <LinkToPreviewed
+              <LinkTo
                 modelType="Organization"
                 model={person.position.organization}
                 previewId="merge-people-org"

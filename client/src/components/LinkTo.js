@@ -1,13 +1,19 @@
+import { PopoverInteractionKind } from "@blueprintjs/core"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
+import ModelPreview from "components/previews/ModelPreview"
+import ModelTooltip from "components/ModelTooltip"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useContext } from "react"
 import { Link } from "react-router-dom"
 
+const TOP_LEVEL = 0
+const LinkToContext = React.createContext({ level: TOP_LEVEL })
+
 const LinkTo = ({
-  as,
+  as: LinkToComponent,
   children,
   edit,
   button,
@@ -22,6 +28,7 @@ const LinkTo = ({
   style,
   ...componentProps
 }) => {
+  const { level } = useContext(LinkToContext)
   if (componentProps.previewId) {
     // Previewed version consumes the previewId, so remove from this one
     delete componentProps.previewId
@@ -87,8 +94,7 @@ const LinkTo = ({
     to = model
   }
 
-  const LinkToComponent = as
-  return (
+  const LinkComponent = (
     <LinkToComponent to={to} style={style} {...componentProps}>
       <>
         {iconComponent}
@@ -96,6 +102,32 @@ const LinkTo = ({
         {children || modelInstance.toString()}
       </>
     </LinkToComponent>
+  )
+  if (!button && level === TOP_LEVEL) {
+    // Show popover when hovering over link
+    return (
+      <LinkToContext.Provider value={{ level: level + 1 }}>
+        <ModelTooltip
+          tooltipContent={
+            <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
+          }
+          popoverClassName="bp3-dark"
+          hoverCloseDelay={400}
+          hoverOpenDelay={500}
+          portalClassName="linkto-model-preview-portal"
+          interactionKind={PopoverInteractionKind.HOVER}
+          boundary="viewport"
+        >
+          {LinkComponent}
+        </ModelTooltip>
+      </LinkToContext.Provider>
+    )
+  }
+  // Show regular link
+  return (
+    <LinkToContext.Provider value={{ level: level + 1 }}>
+      {LinkComponent}
+    </LinkToContext.Provider>
   )
 }
 

@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -56,8 +57,7 @@ const PositionTable = props => {
 
 PositionTable.propTypes = {
   // query variables for positions, when query & pagination wanted:
-  queryParams: PropTypes.object,
-  linkToComp: PropTypes.func.isRequired
+  queryParams: PropTypes.object
 }
 
 const PaginatedPositions = ({
@@ -111,8 +111,7 @@ const BasePositionTable = ({
   pageSize,
   pageNum,
   totalCount,
-  goToPage,
-  linkToComp: LinkToComp
+  goToPage
 }) => {
   if (_get(positions, "length", 0) === 0) {
     return <em>No positions found</em>
@@ -147,16 +146,16 @@ const BasePositionTable = ({
               return (
                 <tr key={pos.uuid}>
                   <td>
-                    <LinkToComp
+                    <LinkTo
                       modelType="Position"
                       model={pos}
                       previewId="pos-table-pos"
                     >
                       {nameComponents.join(" - ")}
-                    </LinkToComp>
+                    </LinkTo>
                   </td>
                   <td>
-                    <LinkToComp
+                    <LinkTo
                       modelType="Location"
                       model={pos.location}
                       previewId="pos-table-loc"
@@ -164,7 +163,7 @@ const BasePositionTable = ({
                   </td>
                   <td>
                     {pos.organization && (
-                      <LinkToComp
+                      <LinkTo
                         modelType="Organization"
                         model={pos.organization}
                         previewId="pos-table-org"
@@ -173,7 +172,7 @@ const BasePositionTable = ({
                   </td>
                   <td>
                     {pos.person && (
-                      <LinkToComp
+                      <LinkTo
                         modelType="Person"
                         model={pos.person}
                         previewId="pos-table-person"
@@ -209,8 +208,7 @@ BasePositionTable.propTypes = {
   totalCount: PropTypes.number,
   pageNum: PropTypes.number,
   pageSize: PropTypes.number,
-  goToPage: PropTypes.func,
-  linkToComp: PropTypes.func.isRequired
+  goToPage: PropTypes.func
 }
 
 export default connect(null, mapPageDispatchersToProps)(PositionTable)

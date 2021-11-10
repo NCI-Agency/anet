@@ -267,10 +267,7 @@ const TaskPreview = ({ className, uuid, previewId }) => {
             </Form>
 
             <Fieldset title="Responsible positions">
-              <PositionTable
-                positions={task.responsiblePositions}
-                linkToComp={LinkTo}
-              />
+              <PositionTable positions={task.responsiblePositions} />
             </Fieldset>
           </div>
         )

@@ -16,7 +16,6 @@ import {
 } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
@@ -255,7 +254,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                         <PositionTable
                           positions={values.responsiblePositions}
                           showDelete
-                          linkToComp={LinkToPreviewed}
                         />
                       }
                       overlayColumns={[
@@ -372,12 +370,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                             false
                           )
                         }}
-                        widget={
-                          <RichTextEditor
-                            className="textField"
-                            linkToComp={LinkToPreviewed}
-                          />
-                        }
+                        widget={<RichTextEditor className="textField" />}
                       />
                     )}
                   </>
@@ -413,7 +406,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                       values,
                       validateForm
                     }}
-                    linkToComp={LinkToPreviewed}
                   />
                 </Fieldset>
               )}

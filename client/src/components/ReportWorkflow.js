@@ -1,6 +1,5 @@
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -74,13 +73,13 @@ const ApprovalStepModal = ({ action }) => {
             {(noApprovers && "This step has no approvers!") ||
               step.approvers.map(position => (
                 <li key={position.uuid}>
-                  <LinkToPreviewed
+                  <LinkTo
                     modelType="Position"
                     model={position}
                     previewId="rep-wf-pos"
                   />{" "}
                   -{" "}
-                  <LinkToPreviewed
+                  <LinkTo
                     modelType="Person"
                     model={position.person}
                     previewId="rep-wf-person"
@@ -134,7 +133,7 @@ const ActionDetails = ({ action }) => {
       <div>
         <span>
           By{" "}
-          <LinkToPreviewed
+          <LinkTo
             modelType="Person"
             model={action.person}
             whenUnspecified="system"

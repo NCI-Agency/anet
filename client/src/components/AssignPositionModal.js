@@ -4,7 +4,6 @@ import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSele
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
-import LinkToPreviewed from "components/LinkToPreviewed"
 import Messages from "components/Messages"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -103,7 +102,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkToPreviewed
+          <LinkTo
             modelType="Person"
             model={position.person}
             onClick={onCancel}

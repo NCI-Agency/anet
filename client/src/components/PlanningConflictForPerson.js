@@ -8,6 +8,7 @@ import {
 } from "@blueprintjs/popover2"
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css"
 import API from "api"
+import LinkTo from "components/LinkTo"
 import Person from "models/Person"
 import Report from "models/Report"
 import moment from "moment"
@@ -33,12 +34,7 @@ const GET_PERSON_WITH_REPORTS = gql`
   }
 `
 
-const BasePlanningConflictForPerson = ({
-  person,
-  report,
-  iconOnly,
-  linkToComp: LinkToComp
-}) => {
+const BasePlanningConflictForPerson = ({ person, report, iconOnly }) => {
   const { loading, error, data } = API.useApiQuery(GET_PERSON_WITH_REPORTS, {
     uuid: person.uuid,
     attendedReportsQuery: {
@@ -94,7 +90,7 @@ const BasePlanningConflictForPerson = ({
           intent={Intent.WARNING}
         >
           {conflictingReports.map(report => (
-            <LinkToComp
+            <LinkTo
               key={report.uuid}
               modelType="Report"
               model={report}
@@ -102,7 +98,7 @@ const BasePlanningConflictForPerson = ({
               previewId="conf-person-rep"
             >
               {Report.getFormattedEngagementDate(report)}&nbsp;({report.state})
-            </LinkToComp>
+            </LinkTo>
           ))}
         </Callout>
       }
@@ -122,17 +118,11 @@ const BasePlanningConflictForPerson = ({
 
 BasePlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person).isRequired,
-  linkToComp: PropTypes.func.isRequired,
   report: PropTypes.instanceOf(Report).isRequired,
   iconOnly: PropTypes.bool
 }
 
-const PlanningConflictForPerson = ({
-  person,
-  report,
-  iconOnly,
-  linkToComp
-}) => {
+const PlanningConflictForPerson = ({ person, report, iconOnly }) => {
   if (!person?.uuid || !report?.engagementDate) {
     return null
   }
@@ -141,14 +131,12 @@ const PlanningConflictForPerson = ({
       person={person}
       report={report}
       iconOnly={iconOnly}
-      linkToComp={linkToComp}
     />
   )
 }
 
 PlanningConflictForPerson.propTypes = {
   person: PropTypes.instanceOf(Person),
-  linkToComp: PropTypes.func.isRequired,
   report: PropTypes.instanceOf(Report),
   iconOnly: PropTypes.bool
 }
