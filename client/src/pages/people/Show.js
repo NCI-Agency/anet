@@ -489,15 +489,9 @@ const PersonShow = ({ pageDispatchers }) => {
           modelType="Position"
           model={position}
           className="position-name"
-          previewId="people-show-pos"
         />{" "}
         (
-        <LinkTo
-          modelType="Organization"
-          model={position.organization}
-          previewId="people-show-org"
-        />
-        )
+        <LinkTo modelType="Organization" model={position.organization} />)
       </>
     ) : (
       "<none>"
@@ -652,25 +646,16 @@ const PersonShow = ({ pageDispatchers }) => {
                 <tr key={assocPos.uuid}>
                   <td>
                     {assocPos.person && (
-                      <LinkTo
-                        modelType="Person"
-                        model={assocPos.person}
-                        previewId="people-show-asc-person"
-                      />
+                      <LinkTo modelType="Person" model={assocPos.person} />
                     )}
                   </td>
                   <td>
-                    <LinkTo
-                      modelType="Position"
-                      model={assocPos}
-                      previewId="people-show-asc-pos"
-                    />
+                    <LinkTo modelType="Position" model={assocPos} />
                   </td>
                   <td>
                     <LinkTo
                       modelType="Organization"
                       model={assocPos.organization}
-                      previewId="people-show-asc-org"
                     />
                   </td>
                 </tr>

@@ -37,16 +37,10 @@ const ApproverTable = ({ approvers, onDelete }) => (
               modelType="Person"
               model={approver.person}
               target="_blank"
-              previewId="appr-def-person"
             />
           </td>
           <td>
-            <LinkTo
-              modelType="Position"
-              model={approver}
-              target="_blank"
-              previewId="appr-def-pos"
-            />
+            <LinkTo modelType="Position" model={approver} target="_blank" />
           </td>
           <td>
             <RemoveButton

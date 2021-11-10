@@ -62,7 +62,6 @@ const RelatedObjectsTable = ({
                       uuid: nro.relatedObjectUuid,
                       ...nro.relatedObject
                     }}
-                    previewId="rel-obj"
                   />
                 </td>
                 {showDelete &&

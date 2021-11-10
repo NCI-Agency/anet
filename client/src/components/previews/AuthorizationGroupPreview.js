@@ -37,7 +37,7 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
   }
 `
 
-const AuthorizationGroupPreview = ({ className, uuid, previewId }) => {
+const AuthorizationGroupPreview = ({ className, uuid }) => {
   const { data, error } = API.useApiQuery(GQL_GET_AUTHORIZATION_GROUP, { uuid })
 
   if (!data) {
@@ -88,7 +88,6 @@ const AuthorizationGroupPreview = ({ className, uuid, previewId }) => {
 
 AuthorizationGroupPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 

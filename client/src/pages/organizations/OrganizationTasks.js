@@ -102,11 +102,7 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo
-                    modelType="Task"
-                    model={task}
-                    previewId="org-tasks-task"
-                  >
+                  <LinkTo modelType="Task" model={task}>
                     {task.shortName}
                   </LinkTo>
                 </td>

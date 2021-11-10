@@ -269,11 +269,7 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.positionStats}
               prevContentData={prevReportStats.positionStats}
               itemLabel={item => (
-                <LinkTo
-                  modelType="Position"
-                  model={item}
-                  previewId="dec-dash-pos"
-                >
+                <LinkTo modelType="Position" model={item}>
                   {item.name}
                 </LinkTo>
               )}
@@ -294,11 +290,7 @@ const BaseDecisivesDashboardImpl = ({
               contentData={reportStats.locationStats}
               prevContentData={prevReportStats.locationStats}
               itemLabel={item => (
-                <LinkTo
-                  modelType="Location"
-                  model={item}
-                  previewId="dec-dash-loc"
-                >
+                <LinkTo modelType="Location" model={item}>
                   {item.name}
                 </LinkTo>
               )}

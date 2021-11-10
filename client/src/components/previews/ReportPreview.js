@@ -92,7 +92,7 @@ const GQL_GET_REPORT = gql`
   }
 `
 
-const ReportPreview = ({ className, uuid, previewId }) => {
+const ReportPreview = ({ className, uuid }) => {
   const { data, error } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
   })
@@ -178,10 +178,7 @@ const ReportPreview = ({ className, uuid, previewId }) => {
                   label="Summary"
                   component={FieldHelper.SpecialField}
                   widget={
-                    <div
-                      id={`${previewId}-intent`}
-                      className="form-control-static"
-                    >
+                    <div id={"intent"} className="form-control-static">
                       <p>
                         <strong>{Settings.fields.report.intent}:</strong>{" "}
                         {report.intent}
@@ -331,7 +328,6 @@ const ReportPreview = ({ className, uuid, previewId }) => {
 
 ReportPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 

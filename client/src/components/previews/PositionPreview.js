@@ -68,7 +68,7 @@ const GQL_GET_POSITION = gql`
   }
 `
 
-const PositionPreview = ({ className, uuid, previewId }) => {
+const PositionPreview = ({ className, uuid }) => {
   const { data, error } = API.useApiQuery(GQL_GET_POSITION, {
     uuid
   })
@@ -155,7 +155,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
 
               <Fieldset
                 title="Current assigned person"
-                id={`assigned-advisor-${previewId}`}
+                id={"assigned-advisor"}
                 className={
                   !position.person || !position.person.uuid
                     ? "warning"
@@ -181,7 +181,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
 
               <Fieldset
                 title={`Assigned ${assignedRole}`}
-                id={`assigned-principal-${previewId}`}
+                id={"assigned-principal"}
               >
                 <Table>
                   <thead>
@@ -206,7 +206,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
 
               <Fieldset
                 title="Previous position holders"
-                id={`previous-people-${previewId}`}
+                id={"previous-people"}
               >
                 <Table>
                   <thead>
@@ -217,7 +217,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
                   </thead>
                   <tbody>
                     {position.previousPeople.map((pp, idx) => (
-                      <tr key={idx} id={`previousPerson_${idx}_${previewId}`}>
+                      <tr key={idx} id={`previousPerson_${idx}`}>
                         <td>
                           <LinkTo modelType="Person" model={pp.person} />
                         </td>
@@ -251,7 +251,7 @@ const PositionPreview = ({ className, uuid, previewId }) => {
       personName = <LinkTo modelType="Person" model={pos.person} />
     }
     return (
-      <tr key={pos.uuid} id={`associatedPosition_${idx}_${previewId}`}>
+      <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
         <td>{personName}</td>
         <td>
           <LinkTo modelType="Position" model={pos} />
@@ -263,7 +263,6 @@ const PositionPreview = ({ className, uuid, previewId }) => {
 
 PositionPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 

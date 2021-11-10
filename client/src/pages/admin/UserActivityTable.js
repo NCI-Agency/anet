@@ -47,11 +47,7 @@ const UserActivityTable = ({ text, values }) => {
                   )}
                 </td>
                 <td className="nobr">
-                  <LinkTo
-                    modelType="Person"
-                    model={ua.user}
-                    previewId="user-act-person"
-                  />
+                  <LinkTo modelType="Person" model={ua.user} />
                 </td>
                 <td>{ua.activity.ip}</td>
                 <td>{ua.activity.request}</td>

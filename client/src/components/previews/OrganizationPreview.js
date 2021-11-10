@@ -69,7 +69,7 @@ const GQL_GET_ORGANIZATION = gql`
   }
 `
 
-const OrganizationPreview = ({ className, uuid, previewId }) => {
+const OrganizationPreview = ({ className, uuid }) => {
   const { data, error } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })
@@ -109,7 +109,7 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
               <div className="preview-sticky-title">
                 <h4>{`Organization ${organization.shortName}`}</h4>
               </div>
-              <Fieldset id={`info-${previewId}`}>
+              <Fieldset id={"info"}>
                 <Field
                   name="status"
                   component={FieldHelper.ReadonlyField}
@@ -229,7 +229,6 @@ const OrganizationPreview = ({ className, uuid, previewId }) => {
 
 OrganizationPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 

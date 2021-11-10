@@ -249,36 +249,16 @@ const ReportSummaryRow = ({ report }) => {
       </Row>
       <Row>
         <Col md={12}>
-          <LinkTo
-            modelType="Person"
-            model={report.primaryAdvisor}
-            previewId="rep-sum-person"
-          />
+          <LinkTo modelType="Person" model={report.primaryAdvisor} />
           <span>
             {" "}
-            (
-            <LinkTo
-              modelType="Organization"
-              model={report.advisorOrg}
-              previewId="rep-sum-adv-org"
-            />
-            )
+            (<LinkTo modelType="Organization" model={report.advisorOrg} />)
           </span>
           <span className="people-separator">&#x25B6;</span>
-          <LinkTo
-            modelType="Person"
-            model={report.primaryPrincipal}
-            previewId="rep-sum-prim-pri-org"
-          />
+          <LinkTo modelType="Person" model={report.primaryPrincipal} />
           <span>
             {" "}
-            (
-            <LinkTo
-              modelType="Organization"
-              model={report.principalOrg}
-              previewId="rep-sum-pri-org"
-            />
-            )
+            (<LinkTo modelType="Organization" model={report.principalOrg} />)
           </span>
         </Col>
       </Row>
@@ -287,11 +267,7 @@ const ReportSummaryRow = ({ report }) => {
           <Col md={12}>
             <span>
               <strong>Location: </strong>
-              <LinkTo
-                modelType="Location"
-                model={report.location}
-                previewId="rep-sum-loc"
-              />
+              <LinkTo modelType="Location" model={report.location} />
               {"  "}
               <Badge bg="secondary">
                 {Location.humanNameOfType(report.location.type)}

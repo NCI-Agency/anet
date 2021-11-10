@@ -359,7 +359,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                         <LinkTo
                           modelType="Organization"
                           model={organization.parentOrg}
-                          previewId="org-show-org"
                         >
                           {Organization.toIdentificationCodeString(
                             organization.parentOrg
@@ -383,15 +382,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
                               <LinkTo
                                 modelType="Person"
                                 model={position.person}
-                                previewId="org-show-person"
                               />
                             ) : (
                               <i>
-                                <LinkTo
-                                  modelType="Position"
-                                  model={position}
-                                  previewId="org-show-pos"
-                                />
+                                <LinkTo modelType="Position" model={position} />
                                 - (Unfilled)
                               </i>
                             )}
@@ -420,7 +414,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                               <LinkTo
                                 modelType="Organization"
                                 model={organization}
-                                previewId="org-show-child-org"
                               >
                                 {Organization.toIdentificationCodeString(
                                   organization

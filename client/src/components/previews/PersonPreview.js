@@ -75,7 +75,7 @@ const GQL_GET_PERSON = gql`
   }
 `
 
-const PersonPreview = ({ className, uuid, previewId }) => {
+const PersonPreview = ({ className, uuid }) => {
   const { currentUser } = useContext(AppContext)
 
   const { data, error } = API.useApiQuery(GQL_GET_PERSON, {
@@ -204,7 +204,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
               <Fieldset title="Position">
                 <Fieldset
                   title="Current Position"
-                  id={`current-position-${previewId}`}
+                  id={"current-position"}
                   className={
                     !position || !position.uuid ? "warning" : undefined
                   }
@@ -228,10 +228,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                   />
                 </Fieldset>
               )}
-              <Fieldset
-                title="Previous positions"
-                id={`previous-positions-${previewId}`}
-              >
+              <Fieldset title="Previous positions" id={"previous-positions"}>
                 {(_isEmpty(person.previousPositions) && (
                   <em>No positions found</em>
                 )) || (
@@ -244,10 +241,7 @@ const PersonPreview = ({ className, uuid, previewId }) => {
                     </thead>
                     <tbody>
                       {person.previousPositions.map((pp, idx) => (
-                        <tr
-                          key={idx}
-                          id={`previousPosition_${idx}-${previewId}`}
-                        >
+                        <tr key={idx} id={`previousPosition_${idx}`}>
                           <td>
                             <LinkTo modelType="Position" model={pp.position} />
                           </td>
@@ -359,7 +353,6 @@ const PersonPreview = ({ className, uuid, previewId }) => {
 
 PersonPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 

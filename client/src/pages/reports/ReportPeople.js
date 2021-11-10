@@ -119,20 +119,11 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
           />
         </td>
         <td className="reportPeopleName">
-          <LinkTo
-            modelType="Person"
-            model={person}
-            showIcon={false}
-            previewId="rep-people-person"
-          />
+          <LinkTo modelType="Person" model={person} showIcon={false} />
         </td>
         <td>
           {person.position && person.position.uuid && (
-            <LinkTo
-              modelType="Position"
-              model={person.position}
-              previewId="rep-people-pos"
-            />
+            <LinkTo modelType="Position" model={person.position} />
           )}
           {person.position && person.position.code
             ? `, ${person.position.code}`
@@ -143,7 +134,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             modelType="Location"
             model={person.position && person.position.location}
             whenUnspecified=""
-            previewId="rep-people-loc"
           />
         </td>
         <td>
@@ -151,7 +141,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             modelType="Organization"
             model={person.position && person.position.organization}
             whenUnspecified=""
-            previewId="rep-people-org"
           />
         </td>
         {showDelete && (

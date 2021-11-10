@@ -111,11 +111,7 @@ const BaseTaskTable = ({
               return (
                 <tr key={task.uuid}>
                   <td>
-                    <LinkTo
-                      modelType="Task"
-                      model={task}
-                      previewId="task-table-task"
-                    >
+                    <LinkTo modelType="Task" model={task}>
                       {task.shortName} {task.longName}
                     </LinkTo>
                   </td>

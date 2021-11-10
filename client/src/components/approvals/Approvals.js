@@ -41,21 +41,13 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo
-                          modelType="Person"
-                          model={position.person}
-                          previewId="plan-appr-person"
-                        />
+                        <LinkTo modelType="Person" model={position.person} />
                       </td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo
-                        modelType="Position"
-                        model={position}
-                        previewId="plan-appr-pos"
-                      />
+                      <LinkTo modelType="Position" model={position} />
                     </td>
                   </tr>
                 ))}
@@ -97,21 +89,13 @@ const Approvals = ({ restrictedApprovalLabel, relatedObject }) => {
                   >
                     {position.person && position.person.uuid ? (
                       <td>
-                        <LinkTo
-                          modelType="Person"
-                          model={position.person}
-                          previewId="appr-person"
-                        />
+                        <LinkTo modelType="Person" model={position.person} />
                       </td>
                     ) : (
                       <td className="text-danger">Unfilled</td>
                     )}
                     <td>
-                      <LinkTo
-                        modelType="Position"
-                        model={position}
-                        previewId="appr-pos"
-                      />
+                      <LinkTo modelType="Position" model={position} />
                     </td>
                   </tr>
                 ))}

@@ -158,7 +158,6 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
             model={anetObject}
             showAvatar={false}
             showIcon={false}
-            previewId="dia-node-obj"
           />
           <>
             {instantAssessmentConfig &&

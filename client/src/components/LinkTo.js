@@ -29,10 +29,6 @@ const LinkTo = ({
   ...componentProps
 }) => {
   const { level } = useContext(LinkToContext)
-  if (componentProps.previewId) {
-    // Previewed version consumes the previewId, so remove from this one
-    delete componentProps.previewId
-  }
   if (button) {
     componentProps.className = [
       className,

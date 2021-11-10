@@ -150,7 +150,7 @@ const OrganizationLaydown = ({ organization }) => {
       key += "." + other.uuid
       otherNameCol = (
         <td>
-          <LinkTo modelType="Position" model={other} previewId="org-lay-pos">
+          <LinkTo modelType="Position" model={other}>
             {positionWithStatus(other)}
           </LinkTo>
         </td>
@@ -158,11 +158,7 @@ const OrganizationLaydown = ({ organization }) => {
 
       otherPersonCol = other.person ? (
         <td>
-          <LinkTo
-            modelType="Person"
-            model={other.person}
-            previewId="org-lay-person"
-          >
+          <LinkTo modelType="Person" model={other.person}>
             {personWithStatus(other.person)}
           </LinkTo>
         </td>
@@ -174,22 +170,14 @@ const OrganizationLaydown = ({ organization }) => {
     if (otherIndex === 0) {
       positionNameCol = (
         <td>
-          <LinkTo
-            modelType="Position"
-            model={position}
-            previewId="org-lay-pos-0"
-          >
+          <LinkTo modelType="Position" model={position}>
             {positionWithStatus(position)}
           </LinkTo>
         </td>
       )
       positionPersonCol = position?.person?.uuid ? (
         <td>
-          <LinkTo
-            modelType="Person"
-            model={position.person}
-            previewId="org-lay-person-0"
-          >
+          <LinkTo modelType="Person" model={position.person}>
             {personWithStatus(position.person)}
           </LinkTo>
         </td>

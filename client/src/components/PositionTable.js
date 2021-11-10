@@ -146,37 +146,24 @@ const BasePositionTable = ({
               return (
                 <tr key={pos.uuid}>
                   <td>
-                    <LinkTo
-                      modelType="Position"
-                      model={pos}
-                      previewId="pos-table-pos"
-                    >
+                    <LinkTo modelType="Position" model={pos}>
                       {nameComponents.join(" - ")}
                     </LinkTo>
                   </td>
                   <td>
-                    <LinkTo
-                      modelType="Location"
-                      model={pos.location}
-                      previewId="pos-table-loc"
-                    />
+                    <LinkTo modelType="Location" model={pos.location} />
                   </td>
                   <td>
                     {pos.organization && (
                       <LinkTo
                         modelType="Organization"
                         model={pos.organization}
-                        previewId="pos-table-org"
                       />
                     )}
                   </td>
                   <td>
                     {pos.person && (
-                      <LinkTo
-                        modelType="Person"
-                        model={pos.person}
-                        previewId="pos-table-person"
-                      />
+                      <LinkTo modelType="Person" model={pos.person} />
                     )}
                   </td>
                   <td>{utils.sentenceCase(pos.status)}</td>

@@ -23,7 +23,7 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-const LocationPreview = ({ className, uuid, previewId }) => {
+const LocationPreview = ({ className, uuid }) => {
   const { data, error } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
@@ -79,7 +79,7 @@ const LocationPreview = ({ className, uuid, previewId }) => {
                 />
               </Fieldset>
 
-              <Leaflet markers={[marker]} mapId={`${uuid}-${previewId}`} />
+              <Leaflet markers={[marker]} mapId={`${uuid}`} />
             </Form>
           </div>
         )
@@ -90,7 +90,6 @@ const LocationPreview = ({ className, uuid, previewId }) => {
 
 LocationPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 

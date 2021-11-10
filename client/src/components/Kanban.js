@@ -136,7 +136,7 @@ const CardView = ({ task }) => {
       }}
     >
       <div>
-        <LinkTo modelType="Task" model={task} previewId="kanban-task">
+        <LinkTo modelType="Task" model={task}>
           <strong>{task.shortName}</strong>
         </LinkTo>
         <br />

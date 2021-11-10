@@ -259,11 +259,7 @@ const Organizations = ({
             {Organization.map(organizations, org => (
               <tr key={org.uuid}>
                 <td>
-                  <LinkTo
-                    modelType="Organization"
-                    model={org}
-                    previewId="search-org"
-                  />
+                  <LinkTo modelType="Organization" model={org} />
                 </td>
                 <td>{org.longName}</td>
                 <td>{org.identificationCode}</td>

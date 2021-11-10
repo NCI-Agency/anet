@@ -34,11 +34,7 @@ const InstantAssessmentsContainerField = ({
             <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
               <tr>
                 <td>
-                  <LinkTo
-                    modelType={entityType.resourceName}
-                    model={entity}
-                    previewId="inst-assess-entity"
-                  />
+                  <LinkTo modelType={entityType.resourceName} model={entity} />
                 </td>
               </tr>
               <tr>

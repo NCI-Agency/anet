@@ -181,11 +181,7 @@ const RelatedObjectNotes = ({
                           </small>
                         </Row>
                         <Row>
-                          <LinkTo
-                            modelType="Person"
-                            model={note.author}
-                            previewId="rel-obj-person"
-                          />
+                          <LinkTo modelType="Person" model={note.author} />
                         </Row>
                       </Col>
                       <Col xs={4} className="text-end">

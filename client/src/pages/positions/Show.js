@@ -220,7 +220,6 @@ const PositionShow = ({ pageDispatchers }) => {
                         <LinkTo
                           modelType="Organization"
                           model={position.organization}
-                          previewId="pos-show-org"
                         >
                           {position.organization.shortName}{" "}
                           {position.organization.longName}{" "}
@@ -240,7 +239,6 @@ const PositionShow = ({ pageDispatchers }) => {
                         <LinkTo
                           modelType="Location"
                           model={position.location}
-                          previewId="pos-show-loc"
                         />{" "}
                         <Badge>
                           {Location.humanNameOfType(position.location.type)}
@@ -276,11 +274,7 @@ const PositionShow = ({ pageDispatchers }) => {
                 {position.person && position.person.uuid ? (
                   <div>
                     <h4 className="assigned-person-name">
-                      <LinkTo
-                        modelType="Person"
-                        model={position.person}
-                        previewId="pos-show-person"
-                      />
+                      <LinkTo modelType="Person" model={position.person} />
                     </h4>
                     <p />
                   </div>

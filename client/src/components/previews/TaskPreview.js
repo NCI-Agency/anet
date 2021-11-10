@@ -113,7 +113,7 @@ const GQL_GET_TASK = gql`
   }
 `
 
-const TaskPreview = ({ className, uuid, previewId }) => {
+const TaskPreview = ({ className, uuid }) => {
   const { data, error } = API.useApiQuery(GQL_GET_TASK, {
     uuid
   })
@@ -278,7 +278,6 @@ const TaskPreview = ({ className, uuid, previewId }) => {
 
 TaskPreview.propTypes = {
   className: PropTypes.string,
-  previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 
