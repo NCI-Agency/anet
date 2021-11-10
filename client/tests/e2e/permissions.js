@@ -84,7 +84,7 @@ validateUserCannotEditOtherUser(
   "ANET Administrator"
 )
 
-test("checking regular user permissions", async t => {
+test.serial("checking regular user permissions", async t => {
   t.plan(3)
 
   const { pageHelpers, $, assertElementNotPresent, shortWaitMs } = t.context
@@ -127,7 +127,7 @@ validateUserCannotEditOtherUser(
   "ANET Administrator"
 )
 
-test("checking admin permissions", async t => {
+test.serial("checking admin permissions", async t => {
   t.plan(11)
 
   await t.context.get("/", "arthur")
