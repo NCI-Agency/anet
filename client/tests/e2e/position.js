@@ -487,4 +487,6 @@ test("Update permissions while changing positions", async t => {
     testUsers[testUserMapper.super_user_1].positionName,
     "ANET User"
   )
+
+  await t.context.logout()
 })
