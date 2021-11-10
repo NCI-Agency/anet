@@ -14,6 +14,7 @@ test("Move someone in and out of a position", async t => {
     longWaitMs
   } = t.context
 
+  // Login as rebecca (super_user).
   await t.context.get("/", "rebecca")
 
   await t.context.pageHelpers.clickMenuLinksButton()
@@ -237,7 +238,7 @@ test("Update permissions while changing positions", async t => {
 
   // Helper function to navigate to the organization home page.
   async function navigateOrganization(orgName) {
-    // Click on "Advisor Locations" dropdown menu.
+    // Click on "Advisor Organizations" dropdown menu.
     const advisorOrganizations = await t.context.driver.findElement(
       By.linkText("Advisor Organizations")
     )
@@ -282,7 +283,7 @@ test("Update permissions while changing positions", async t => {
     await assertElementText(t, $infoText, permission)
   }
 
-  // Login as rebecca (super_user).
+  // Login as arthur (admin).
   await t.context.get("/", "arthur")
 
   // ***********************************************
