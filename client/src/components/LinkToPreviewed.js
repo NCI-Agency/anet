@@ -1,7 +1,7 @@
 import { PopoverInteractionKind } from "@blueprintjs/core"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
-import ModelPreview from "components/ModelPreview"
+import ModelPreview from "components/previews/ModelPreview"
 import ModelTooltip from "components/ModelTooltip"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"

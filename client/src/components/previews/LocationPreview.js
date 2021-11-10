@@ -23,7 +23,7 @@ const GQL_GET_LOCATION = gql`
   }
 `
 
-const LocationShow = ({ className, uuid, previewId }) => {
+const LocationPreview = ({ className, uuid, previewId }) => {
   const { data, error } = API.useApiQuery(GQL_GET_LOCATION, {
     uuid
   })
@@ -88,10 +88,10 @@ const LocationShow = ({ className, uuid, previewId }) => {
   )
 }
 
-LocationShow.propTypes = {
+LocationPreview.propTypes = {
   className: PropTypes.string,
   previewId: PropTypes.string,
   uuid: PropTypes.string
 }
 
-export default LocationShow
+export default LocationPreview

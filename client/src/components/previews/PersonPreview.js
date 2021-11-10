@@ -363,4 +363,5 @@ PersonPreview.propTypes = {
   previewId: PropTypes.string,
   uuid: PropTypes.string
 }
+
 export default PersonPreview
