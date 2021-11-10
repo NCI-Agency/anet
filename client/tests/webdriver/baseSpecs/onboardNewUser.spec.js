@@ -10,9 +10,6 @@ const ONBOARD_USER = {
 
 // Only required fields in onboarding/edit page
 const personDetails = {
-  lastName: "BONNSDOTTIR",
-  firstName: "Bonnie",
-  emailAddress: "bonny@cmil.mil",
   rank: "CIV",
   gender: "FEMALE",
   country: "Albania",
@@ -21,7 +18,6 @@ const personDetails = {
 
 describe("Onboard new user login", () => {
   it("Should show onboard welcome", () => {
-    // give unique name to avoid collision when running tests (without resetting DB)
     OnboardPage.openAsOnboardUser()
     const welcomeText = "Welcome to ANET"
     OnboardPage.waitForWelcomeMessage(welcomeText)
@@ -36,15 +32,15 @@ describe("Onboard new user login", () => {
     browser.pause(500) // wait for the page transition and rendering of custom fields
 
     // Check that these are properly copied from the authentication server
-    CreatePerson.lastName.waitForDisplayed()
-    CreatePerson.lastName.waitForExist()
-    expect(CreatePerson.lastName.getValue()).to.equal(ONBOARD_USER.lastName)
-    CreatePerson.firstName.waitForDisplayed()
-    CreatePerson.firstName.waitForExist()
-    expect(CreatePerson.firstName.getValue()).to.equal(ONBOARD_USER.firstName)
-    CreatePerson.emailAddress.waitForDisplayed()
-    CreatePerson.emailAddress.waitForExist()
-    expect(CreatePerson.emailAddress.getValue()).to.equal(
+    OnboardPage.lastName.waitForDisplayed()
+    OnboardPage.lastName.waitForExist()
+    expect(OnboardPage.lastName.getValue()).to.equal(ONBOARD_USER.lastName)
+    OnboardPage.firstName.waitForDisplayed()
+    OnboardPage.firstName.waitForExist()
+    expect(OnboardPage.firstName.getValue()).to.equal(ONBOARD_USER.firstName)
+    OnboardPage.emailAddress.waitForDisplayed()
+    OnboardPage.emailAddress.waitForExist()
+    expect(OnboardPage.emailAddress.getValue()).to.equal(
       ONBOARD_USER.emailAddress
     )
   })
@@ -72,13 +68,11 @@ describe("Onboard new user login", () => {
   })
 
   it("Should save if all fields properly filled", () => {
-    OnboardPage.lastName.setValue(personDetails.lastName)
-    OnboardPage.firstName.setValue(personDetails.firstName)
-    OnboardPage.emailAddress.setValue(personDetails.emailAddress)
     OnboardPage.rank.selectByAttribute("value", personDetails.rank)
     OnboardPage.gender.selectByAttribute("value", personDetails.gender)
     OnboardPage.country.selectByAttribute("value", personDetails.country)
     OnboardPage.endOfTourDate.setValue(personDetails.endOfTourDate)
+    OnboardPage.lastName.click()
     browser.pause(500) // wait for the error message to disappear
     OnboardPage.submitForm()
 

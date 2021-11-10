@@ -188,6 +188,7 @@ export class CreatePerson extends Page {
   }
 
   submitForm() {
+    this.submitButton.scrollIntoView()
     this.submitButton.click()
   }
 }
