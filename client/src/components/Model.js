@@ -322,8 +322,8 @@ export const createAssessmentSchema = (
   assessmentConfig,
   parentFieldName = ENTITY_ASSESSMENT_PARENT_FIELD
 ) => {
-  const assessmentSchemaShape = createYupObjectShape(
-    assessmentConfig,
+  let assessmentSchemaShape = createYupObjectShape(
+    assessmentConfig.questions,
     parentFieldName
   )
 
@@ -344,6 +344,23 @@ export const createAssessmentSchema = (
     )
   }
   /******************************************************************************************/
+
+  if (!_isEmpty(assessmentConfig.questionSets)) {
+    const questionSetsSchema = {}
+    Object.entries(assessmentConfig.questionSets).forEach(([k, v]) => {
+      if (v?.questions) {
+        const qsParentFieldName = `${parentFieldName}.questionSets.${k}.questions`
+        questionSetsSchema[k] = yup.object().shape({
+          questions: createYupObjectShape(v.questions, qsParentFieldName)
+        })
+      }
+    })
+    assessmentSchemaShape = assessmentSchemaShape.concat(
+      yup.object().shape({
+        questionSets: yup.object().shape(questionSetsSchema)
+      })
+    )
+  }
 
   return yup.object().shape({
     [parentFieldName]: assessmentSchemaShape
