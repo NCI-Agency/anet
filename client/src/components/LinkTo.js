@@ -1,8 +1,8 @@
 import { PopoverInteractionKind } from "@blueprintjs/core"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { OBJECT_TYPE_TO_MODEL } from "components/Model"
-import ModelPreview from "components/previews/ModelPreview"
 import ModelTooltip from "components/ModelTooltip"
+import ModelPreview from "components/previews/ModelPreview"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -71,10 +71,25 @@ const LinkTo = ({
 
   if (!isLink) {
     return (
-      <span style={style}>
-        {avatarComponent}
-        {modelInstance.toString()}
-      </span>
+      <LinkToContext.Provider value={{ level: level + 1 }}>
+        <ModelTooltip
+          tooltipContent={
+            <ModelPreview modelType={modelType} uuid={modelInstance.uuid} />
+          }
+          popoverClassName="bp3-dark"
+          hoverCloseDelay={400}
+          hoverOpenDelay={500}
+          portalClassName="linkto-model-preview-portal"
+          interactionKind={PopoverInteractionKind.HOVER}
+          boundary="viewport"
+        >
+          <span style={style}>
+            {avatarComponent}
+            {modelInstance.toString()}
+            {children}
+          </span>
+        </ModelTooltip>
+      </LinkToContext.Provider>
     )
   }
 

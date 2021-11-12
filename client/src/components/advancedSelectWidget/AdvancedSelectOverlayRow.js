@@ -15,7 +15,9 @@ export const AuthorizationGroupOverlayRow = item => (
 export const LocationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo modelType="Location" model={item} isLink={false} />
+      <span style={{ display: "inline-block" }}>
+        <LinkTo modelType="Location" model={item} isLink={false} />
+      </span>
       <span style={{ paddingLeft: "1rem" }}>
         <Badge bg="secondary">{Location.humanNameOfType(item.type)}</Badge>
       </span>
@@ -27,7 +29,9 @@ export const OrganizationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="orgShortName">
       <span>
-        {item.shortName} - {item.longName} {item.identificationCode}
+        <LinkTo modelType="Organization" model={item} isLink={false}>
+          {` - ${item.longName} ${item.identificationCode}`}
+        </LinkTo>
       </span>
     </td>
   </React.Fragment>
@@ -37,7 +41,9 @@ export const TaskSimpleOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
       <span>
-        {item.shortName} - {item.longName}
+        <LinkTo modelType="Task" model={item} isLink={false}>
+          {` - ${item.longName}`}
+        </LinkTo>
       </span>
     </td>
   </React.Fragment>
@@ -46,15 +52,11 @@ export const TaskSimpleOverlayRow = item => (
 export const TaskDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
-      <LinkTo modelType="Task" model={item} isLink={false}>
-        {item.shortName}
-      </LinkTo>
+      <LinkTo modelType="Task" model={item} isLink={false} />
     </td>
     <td className="parentTaskName">
       {item.customFieldRef1 && (
-        <LinkTo modelType="Task" model={item.customFieldRef1} isLink={false}>
-          {item.customFieldRef1.shortName}
-        </LinkTo>
+        <LinkTo modelType="Task" model={item.customFieldRef1} isLink={false} />
       )}
     </td>
   </React.Fragment>
