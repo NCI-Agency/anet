@@ -19,7 +19,7 @@ sourceCompatibility = 1.8
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.0.25"
-String logbackVersion = "1.2.6"
+String logbackVersion = "1.2.7"
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
