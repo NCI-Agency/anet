@@ -142,7 +142,8 @@ const MultiTypeAdvancedSelectComponent = ({
   entityTypes,
   value,
   isMultiSelect,
-  filters
+  filters,
+  className
 }) => {
   const [entityType, setEntityType] = useState(
     objectType ||
@@ -213,6 +214,7 @@ const MultiTypeAdvancedSelectComponent = ({
         queryParams={advancedSelectProps.queryParams}
         fields={advancedSelectProps.fields}
         addon={advancedSelectProps.addon}
+        className={className}
         {...extraSelectProps}
       />
     </>
@@ -225,7 +227,8 @@ MultiTypeAdvancedSelectComponent.propTypes = {
   entityTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   isMultiSelect: PropTypes.bool.isRequired,
-  filters: PropTypes.array
+  filters: PropTypes.array,
+  className: PropTypes.string
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
   fieldName: "entitySelect",
