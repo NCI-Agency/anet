@@ -36,12 +36,13 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+  private static final ObjectMapper jsonMapper = new ObjectMapper();
+
   private boolean testMode;
   private boolean developmentMode;
   private boolean redirectToHttps = false;
-
-  private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
+  private Long graphQlRequestTimeoutMs;
 
   private final Object versionLock = new Object();
 
@@ -113,6 +114,14 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   public void setRedirectToHttps(boolean redirectToHttps) {
     this.redirectToHttps = redirectToHttps;
+  }
+
+  public Long getGraphQlRequestTimeoutMs() {
+    return graphQlRequestTimeoutMs;
+  }
+
+  public void setGraphQlRequestTimeoutMs(Long graphQlRequestTimeoutMs) {
+    this.graphQlRequestTimeoutMs = graphQlRequestTimeoutMs;
   }
 
   @JsonProperty("views")
