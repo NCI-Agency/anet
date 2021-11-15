@@ -354,6 +354,17 @@ export const createAssessmentSchema = (
           questions: createYupObjectShape(v.questions, qsParentFieldName)
         })
       }
+      if (v?.questionSets) {
+        const innerSetSchema = {}
+        Object.entries(v.questionSets).forEach(([ik, iv]) => {
+          innerSetSchema[ik] = createAssessmentSchema(iv, "questions")
+        })
+        questionSetsSchema[k] = questionSetsSchema[k].concat(
+          yup
+            .object()
+            .shape({ questionSets: yup.object().shape(innerSetSchema) })
+        )
+      }
     })
     assessmentSchemaShape = assessmentSchemaShape.concat(
       yup.object().shape({
