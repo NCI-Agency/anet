@@ -33,9 +33,9 @@ const AssessmentModal = ({
   entity
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
-  const hasRichTextEditor = Object.values(assessmentConfig).find(
-    question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR
-  )
+  const hasRichTextEditor = Object.values(
+    assessmentConfig.questions || {}
+  ).find(question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR)
   const edit = !!note.uuid
   const initialValues = useMemo(
     () =>
