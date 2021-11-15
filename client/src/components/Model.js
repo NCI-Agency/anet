@@ -336,7 +336,7 @@ export const createAssessmentSchema = (
           return schema.min(
             assessmentDate,
             `${
-              assessmentConfig.expirationDate.label
+              assessmentConfig.questions.expirationDate.label
             } must be later than ${moment(assessmentDate).format("DD-MM-YYYY")}`
           )
         }

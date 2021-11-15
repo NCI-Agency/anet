@@ -53,19 +53,19 @@ const OnDemandAssessments = ({
   })
   // 'assessmentConfig' has question set for ondemand assessments defined in the dictionary
   // and 'assessmentYupSchema' used for this question set.
-  const {
-    assessmentConfig,
-    assessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails(recurrence)
+  const { assessmentConfig, assessmentYupSchema } = useMemo(
+    () => entity.getPeriodicAssessmentDetails(recurrence),
+    [entity, recurrence]
+  )
 
-  const filteredAssessmentConfig = Model.filterAssessmentConfig(
-    assessmentConfig,
-    entity
+  const filteredAssessmentConfig = useMemo(
+    () => Model.filterAssessmentConfig(assessmentConfig, entity),
+    [assessmentConfig, entity]
   )
   filteredAssessmentConfig.questions[
     ENTITY_ON_DEMAND_EXPIRATION_DATE
   ].helpText = `
-    If this field is left empty, the assessment will be valid for 
+    If this field is left empty, the assessment will be valid for
     ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
   `
 
@@ -272,9 +272,8 @@ const OnDemandAssessments = ({
         })
     }
   }, [
+    filteredAssessmentConfig,
     entity,
-    filteredAssessmentConfig.questions,
-    filteredAssessmentConfig.questionSets,
     onUpdateAssessment,
     canAddAssessment,
     numberOfPeriods
