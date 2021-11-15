@@ -2,19 +2,16 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
-import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Col, Form as FormBS, Table } from "react-bootstrap"
+import { Col, Form, Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -108,164 +105,190 @@ const PersonPreview = ({ className, uuid }) => {
   const hasPosition = position && position.uuid
 
   return (
-    <Formik enableReinitialize initialValues={person}>
-      {({ values }) => {
-        const emailHumanValue = (
-          <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
-        )
+    <div className={`${className} preview-content-scroll`}>
+      <div className="preview-sticky-title">
+        <h4>{`${person.rank} ${person.name}`}</h4>
+      </div>
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "15px 10px 15px 10px",
+          borderRadius: "4px"
+        }}
+      >
+        <div className="d-flex">
+          <Col>
+            <AvatarDisplayComponent
+              avatar={person.avatar}
+              className="large-person-avatar"
+              height={256}
+              width={256}
+              style={{
+                maxWidth: "70%"
+              }}
+            />
+            <FieldHelper.ReadonlyField
+              name="rank"
+              label={Settings.fields.person.rank}
+              field={{ id: "", value: person.rank }}
+              form={{ touched: "false" }}
+            />
+            <FieldHelper.ReadonlyField
+              name="role"
+              humanValue={Person.humanNameOfRole(person.role)}
+              label="Role"
+              field={{ id: "", value: person.role }}
+              form={{ touched: "false" }}
+            />
+            {isAdmin && (
+              <FieldHelper.ReadonlyField
+                name="domainUsername"
+                label="Domain username"
+                field={{ id: "", value: person.domainUsername }}
+                form={{ touched: "false" }}
+              />
+            )}
+            <FieldHelper.ReadonlyField
+              name="status"
+              label="Status"
+              humanValue={Person.humanNameOfStatus(person.status)}
+              field={{ id: "", value: person.status }}
+              form={{ touched: "false" }}
+            />
+          </Col>
+          <Col>
+            <FieldHelper.ReadonlyField
+              name="phoneNumber"
+              label={Settings.fields.person.phoneNumber}
+              field={{ id: "", value: person.phoneNumber }}
+              form={{ touched: "false" }}
+            />
+            <FieldHelper.ReadonlyField
+              name="emailAddress"
+              label={Settings.fields.person.emailAddress.label}
+              // humanValue={emailHumanValue}
+              field={{ id: "", value: person.emailAddress }}
+              form={{ touched: "false" }}
+            />
+            <FieldHelper.ReadonlyField
+              name="country"
+              label={Settings.fields.person.country}
+              field={{ id: "", value: person.country }}
+              form={{ touched: "false" }}
+            />
+            <FieldHelper.ReadonlyField
+              name="code"
+              label={Settings.fields.person.code}
+              field={{ id: "", value: person.code }}
+              form={{ touched: "false" }}
+            />
+            <FieldHelper.ReadonlyField
+              name="gender"
+              label={Settings.fields.person.gender}
+              field={{ id: "", value: person.gender }}
+              form={{ touched: "false" }}
+            />
+            <FieldHelper.ReadonlyField
+              name="endOfTourDate"
+              label={Settings.fields.person.endOfTourDate}
+              humanValue={
+                person.endOfTourDate &&
+                moment(person.endOfTourDate).format(
+                  Settings.dateFormats.forms.displayShort.date
+                )
+              }
+              field={{ id: "", value: 0 }}
+              form={{ touched: "false" }}
+            />
+          </Col>
+        </div>
+        <FieldHelper.ReadonlyField
+          name="biography"
+          label="Bio"
+          humanValue={parseHtmlWithLinkTo(person.biography)}
+          field={{ id: "", value: 0 }}
+          form={{ touched: "false" }}
+          vertical
+        />
+      </div>
+      <br />
+      <h4>Position</h4>
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "15px 10px 15px 10px",
+          borderRadius: "4px",
+          marginTop: "1rem"
+        }}
+      >
+        <div
+          title="Current Position"
+          id={"current-position"}
+          className={!position || !position.uuid ? "warning" : undefined}
+        >
+          {hasPosition
+            ? renderPosition(position)
+            : renderPositionBlankSlate(person)}
+        </div>
 
-        return (
-          <div className={`${className} preview-content-scroll`}>
-            <Form className="form-horizontal" method="post">
-              <div className="preview-sticky-title">
-                <h4>{`${person.rank} ${person.name}`}</h4>
-              </div>
-              <Fieldset>
-                <div className="d-flex">
-                  <Col>
-                    <AvatarDisplayComponent
-                      avatar={person.avatar}
-                      className="large-person-avatar"
-                      height={256}
-                      width={256}
-                      style={{
-                        maxWidth: "75%"
-                      }}
-                    />
-                    <Field
-                      name="rank"
-                      label={Settings.fields.person.rank}
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="role"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={Person.humanNameOfRole(values.role)}
-                    />
-                    {isAdmin && (
-                      <Field
-                        name="domainUsername"
-                        component={FieldHelper.ReadonlyField}
-                      />
-                    )}
-                    <Field
-                      name="status"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={Person.humanNameOfStatus(values.status)}
-                    />
-                  </Col>
-                  <Col>
-                    <Field
-                      name="phoneNumber"
-                      label={Settings.fields.person.phoneNumber}
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="emailAddress"
-                      label={Settings.fields.person.emailAddress.label}
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={emailHumanValue}
-                    />
-                    <Field
-                      name="country"
-                      label={Settings.fields.person.country}
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="code"
-                      label={Settings.fields.person.code}
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="gender"
-                      label={Settings.fields.person.gender}
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="endOfTourDate"
-                      label={Settings.fields.person.endOfTourDate}
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        person.endOfTourDate &&
-                        moment(person.endOfTourDate).format(
-                          Settings.dateFormats.forms.displayShort.date
-                        )
-                      }
-                    />
-                  </Col>
-                </div>
-                <Field
-                  name="biography"
-                  className="biography"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={parseHtmlWithLinkTo(person.biography)}
-                />
-              </Fieldset>
-              <Fieldset title="Position">
-                <Fieldset
-                  title="Current Position"
-                  id={"current-position"}
-                  className={
-                    !position || !position.uuid ? "warning" : undefined
-                  }
-                >
-                  {hasPosition
-                    ? renderPosition(position)
-                    : renderPositionBlankSlate(person)}
-                </Fieldset>
-
-                {hasPosition && (
-                  <Fieldset title={`Assigned ${assignedRole}`}>
-                    {renderCounterparts(position)}
-                  </Fieldset>
-                )}
-              </Fieldset>
-              {Settings.fields.person.customFields && (
-                <Fieldset title="Person information" id="custom-fields">
-                  <ReadonlyCustomFields
-                    fieldsConfig={Settings.fields.person.customFields}
-                    values={values}
-                  />
-                </Fieldset>
-              )}
-              <Fieldset title="Previous positions" id={"previous-positions"}>
-                {(_isEmpty(person.previousPositions) && (
-                  <em>No positions found</em>
-                )) || (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>Position</th>
-                        <th>Dates</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {person.previousPositions.map((pp, idx) => (
-                        <tr key={idx} id={`previousPosition_${idx}`}>
-                          <td>
-                            <LinkTo modelType="Position" model={pp.position} />
-                          </td>
-                          <td>
-                            {moment(pp.startTime).format(
-                              Settings.dateFormats.forms.displayShort.date
-                            )}{" "}
-                            - &nbsp;
-                            {pp.endTime &&
-                              moment(pp.endTime).format(
-                                Settings.dateFormats.forms.displayShort.date
-                              )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              </Fieldset>
-            </Form>
+        {hasPosition && (
+          <div title={`Assigned ${assignedRole}`}>
+            {renderCounterparts(position)}
           </div>
-        )
-      }}
-    </Formik>
+        )}
+      </div>
+      <br />
+      {/* <h4>Person information</h4>
+      {Settings.fields.person.customFields && (
+        <div id="custom-fields">
+          <ReadonlyCustomFields
+            fieldsConfig={Settings.fields.person.customFields}
+            values={{}}
+          />
+        </div>
+      )} */}
+      <h4>Previous positions</h4>
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "15px 10px 15px 10px",
+          borderRadius: "4px",
+          marginTop: "1rem"
+        }}
+      >
+        {(_isEmpty(person.previousPositions) && (
+          <em>No positions found</em>
+        )) || (
+          <Table>
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Dates</th>
+              </tr>
+            </thead>
+            <tbody>
+              {person.previousPositions.map((pp, idx) => (
+                <tr key={idx} id={`previousPosition_${idx}`}>
+                  <td>
+                    <LinkTo modelType="Position" model={pp.position} />
+                  </td>
+                  <td>
+                    {moment(pp.startTime).format(
+                      Settings.dateFormats.forms.displayShort.date
+                    )}{" "}
+                    - &nbsp;
+                    {pp.endTime &&
+                      moment(pp.endTime).format(
+                        Settings.dateFormats.forms.displayShort.date
+                      )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </div>
+    </div>
   )
 
   function renderPosition(position) {
@@ -288,7 +311,7 @@ const PersonPreview = ({ className, uuid }) => {
     const assocTitle =
       position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
-      <FormBS.Group controlId="counterparts">
+      <Form.Group controlId="counterparts">
         <Col sm={1} as={Form.Text}>
           {assocTitle}
         </Col>
@@ -326,7 +349,7 @@ const PersonPreview = ({ className, uuid }) => {
             <em>{position.name} has no counterparts assigned</em>
           )}
         </Col>
-      </FormBS.Group>
+      </Form.Group>
     )
   }
   function renderPositionBlankSlate(person) {
