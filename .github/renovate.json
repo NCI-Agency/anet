@@ -24,7 +24,6 @@
     },
     {
       "matchPackageNames": [
-        "com.networknt:json-schema-validator",
         "draft-js"
       ],
       "enabled": false
