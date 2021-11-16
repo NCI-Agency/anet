@@ -15,12 +15,6 @@
     {
       "matchPackageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
       "allowedVersions": "/^.*\\.jre8$/"
-    },
-    {
-      "matchPackageNames": [
-        "draft-js"
-      ],
-      "enabled": false
     }
   ],
   "postUpdateOptions": ["yarnDedupeHighest"],
