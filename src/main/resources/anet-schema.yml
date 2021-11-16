@@ -124,7 +124,7 @@ $defs:
           widget:
             type: string
             enum: [pie, iqrBoxPlot, likertScale, default]
-        dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
+        dependentSchemas:
           widget:
             oneOf:
             - properties:
@@ -172,7 +172,7 @@ $defs:
       tooltipText:
         type: string
 
-    dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
+    dependentSchemas:
       type:
         oneOf:
         - properties:
@@ -214,7 +214,7 @@ $defs:
               type: string
               enum: [likertScale, richTextEditor, default]
           required: [widget]
-          dependencies: # should be dependentSchemas but the validator does not recognize it (yet)
+          dependentSchemas:
             widget:
               oneOf:
               - properties:
@@ -261,7 +261,7 @@ $defs:
         type: object
         additionalProperties:
           "$ref": "#/$defs/customField"
-    dependencies:
+    dependentSchemas:
       recurrence:
         oneOf:
         - properties:
