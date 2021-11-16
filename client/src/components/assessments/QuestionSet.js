@@ -14,7 +14,8 @@ const QuestionSet = ({
   questionSets,
   parentFieldName,
   formikProps,
-  readonly
+  readonly,
+  vertical
 }) => {
   const { values } = formikProps
   return (
@@ -30,6 +31,7 @@ const QuestionSet = ({
             title={questionSets[set]?.label}
             description={!readonly && questionSets[set]?.description}
             key={`questionSet-${set}`}
+            style={{ paddingRight: "0", marginBottom: "0" }}
           >
             {!_isEmpty(entityInstantAssessmentConfig.questions) &&
               (readonly ? (
@@ -37,12 +39,14 @@ const QuestionSet = ({
                   parentFieldName={`${parentFieldName}.${set}.questions`}
                   fieldsConfig={entityInstantAssessmentConfig.questions}
                   values={values}
+                  vertical={vertical}
                 />
               ) : (
                 <CustomFieldsContainer
                   formikProps={formikProps}
                   fieldsConfig={entityInstantAssessmentConfig.questions}
                   parentFieldName={`${parentFieldName}.${set}.questions`}
+                  vertical={vertical}
                 />
               ))}
             {!_isEmpty(entityInstantAssessmentConfig.questionSets) && (
@@ -53,6 +57,7 @@ const QuestionSet = ({
                 parentFieldName={`${parentFieldName}.${set}.questionSets`}
                 formikProps={formikProps}
                 readonly={readonly}
+                vertical={vertical}
               />
             )}
           </Fieldset>
@@ -68,7 +73,8 @@ QuestionSet.propTypes = {
   questionSets: PropTypes.object,
   parentFieldName: PropTypes.string,
   formikProps: PropTypes.object,
-  readonly: PropTypes.bool
+  readonly: PropTypes.bool,
+  vertical: PropTypes.bool
 }
 
 export default QuestionSet

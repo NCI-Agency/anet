@@ -248,6 +248,7 @@ const OnDemandAssessments = ({
                             }
                           }}
                           readonly={true}
+                          vertical
                         />
                       </>
                     )

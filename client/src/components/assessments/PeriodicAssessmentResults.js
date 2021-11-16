@@ -131,6 +131,7 @@ const PeriodicAssessment = ({
                     parentFieldName={`${parentFieldName}.questionSets`}
                     formikProps={{ values }}
                     readonly={true}
+                    vertical
                   />
                 </>
               )

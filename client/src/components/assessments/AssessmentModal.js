@@ -33,9 +33,11 @@ const AssessmentModal = ({
   entity
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
+  const hasQuestionSets = !_isEmpty(assessmentConfig.questionSets)
   const hasRichTextEditor = Object.values(
     assessmentConfig.questions || {}
   ).find(question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR)
+  const wideModal = hasQuestionSets || hasRichTextEditor
   const edit = !!note.uuid
   const initialValues = useMemo(
     () =>
@@ -50,7 +52,7 @@ const AssessmentModal = ({
         centered
         show={showModal}
         onHide={closeModal}
-        dialogClassName={hasRichTextEditor && "rich-text-modal"}
+        dialogClassName={wideModal && "wide-assessment-modal"}
         style={{ zIndex: "1250" }}
       >
         <Formik
@@ -108,6 +110,7 @@ const AssessmentModal = ({
                           validateForm
                         }}
                         readonly={false}
+                        vertical
                       />
                     )}
                   </div>
