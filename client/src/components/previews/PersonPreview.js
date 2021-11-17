@@ -3,7 +3,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
-import * as FieldHelper from "components/FieldHelper"
+import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
@@ -11,7 +11,7 @@ import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Col, Form, Table } from "react-bootstrap"
+import { Col, Form, Row, Table } from "react-bootstrap"
 import Settings from "settings"
 import utils from "utils"
 
@@ -109,118 +109,84 @@ const PersonPreview = ({ className, uuid }) => {
       <div className="preview-sticky-title">
         <h4>{`${person.rank} ${person.name}`}</h4>
       </div>
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "15px 10px 15px 10px",
-          borderRadius: "4px"
-        }}
-      >
-        <div className="d-flex">
+      <div className="preview-section">
+        <Row>
           <Col>
-            <AvatarDisplayComponent
-              avatar={person.avatar}
-              className="large-person-avatar"
-              height={256}
-              width={256}
-              style={{
-                maxWidth: "70%"
-              }}
-            />
-            <FieldHelper.ReadonlyField
-              name="rank"
+            <div className="preview-avatar-container">
+              <AvatarDisplayComponent
+                avatar={person.avatar}
+                className="medium-person-avatar"
+              />
+            </div>
+
+            <PreviewField
               label={Settings.fields.person.rank}
-              field={{ id: "", value: person.rank }}
-              form={{ touched: "false" }}
+              value={person.rank}
             />
-            <FieldHelper.ReadonlyField
-              name="role"
-              humanValue={Person.humanNameOfRole(person.role)}
+
+            <PreviewField
               label="Role"
-              field={{ id: "", value: person.role }}
-              form={{ touched: "false" }}
+              value={Person.humanNameOfRole(person.role)}
             />
+
             {isAdmin && (
-              <FieldHelper.ReadonlyField
-                name="domainUsername"
-                label="Domain username"
-                field={{ id: "", value: person.domainUsername }}
-                form={{ touched: "false" }}
+              <PreviewField
+                label={Settings.fields.person.domainUsername}
+                value={person.domainUsername}
               />
             )}
-            <FieldHelper.ReadonlyField
-              name="status"
+
+            <PreviewField
               label="Status"
-              humanValue={Person.humanNameOfStatus(person.status)}
-              field={{ id: "", value: person.status }}
-              form={{ touched: "false" }}
+              value={Person.humanNameOfStatus(person.status)}
             />
           </Col>
           <Col>
-            <FieldHelper.ReadonlyField
-              name="phoneNumber"
+            <PreviewField
               label={Settings.fields.person.phoneNumber}
-              field={{ id: "", value: person.phoneNumber }}
-              form={{ touched: "false" }}
+              value={person.phoneNumber}
             />
-            <FieldHelper.ReadonlyField
-              name="emailAddress"
+
+            <PreviewField
               label={Settings.fields.person.emailAddress.label}
-              // humanValue={emailHumanValue}
-              field={{ id: "", value: person.emailAddress }}
-              form={{ touched: "false" }}
+              value={person.emailAddress}
             />
-            <FieldHelper.ReadonlyField
-              name="country"
+
+            <PreviewField
               label={Settings.fields.person.country}
-              field={{ id: "", value: person.country }}
-              form={{ touched: "false" }}
+              value={person.country}
             />
-            <FieldHelper.ReadonlyField
-              name="code"
+
+            <PreviewField
               label={Settings.fields.person.code}
-              field={{ id: "", value: person.code }}
-              form={{ touched: "false" }}
+              value={person.code}
             />
-            <FieldHelper.ReadonlyField
-              name="gender"
+
+            <PreviewField
               label={Settings.fields.person.gender}
-              field={{ id: "", value: person.gender }}
-              form={{ touched: "false" }}
+              value={person.gender}
             />
-            <FieldHelper.ReadonlyField
-              name="endOfTourDate"
+
+            <PreviewField
               label={Settings.fields.person.endOfTourDate}
-              humanValue={
+              value={
                 person.endOfTourDate &&
                 moment(person.endOfTourDate).format(
                   Settings.dateFormats.forms.displayShort.date
                 )
               }
-              field={{ id: "", value: 0 }}
-              form={{ touched: "false" }}
             />
           </Col>
+        </Row>
+
+        <div className="preview-field-label">Biography</div>
+        <div className="preview-field-value">
+          {parseHtmlWithLinkTo(person.biography)}
         </div>
-        <FieldHelper.ReadonlyField
-          name="biography"
-          label="Bio"
-          humanValue={parseHtmlWithLinkTo(person.biography)}
-          field={{ id: "", value: 0 }}
-          form={{ touched: "false" }}
-          vertical
-        />
       </div>
       <br />
       <h4>Position</h4>
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "15px 10px 15px 10px",
-          borderRadius: "4px",
-          marginTop: "1rem"
-        }}
-      >
+      <div className="preview-section">
         <div
           title="Current Position"
           id={"current-position"}
@@ -238,24 +204,8 @@ const PersonPreview = ({ className, uuid }) => {
         )}
       </div>
       <br />
-      {/* <h4>Person information</h4>
-      {Settings.fields.person.customFields && (
-        <div id="custom-fields">
-          <ReadonlyCustomFields
-            fieldsConfig={Settings.fields.person.customFields}
-            values={{}}
-          />
-        </div>
-      )} */}
       <h4>Previous positions</h4>
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "15px 10px 15px 10px",
-          borderRadius: "4px",
-          marginTop: "1rem"
-        }}
-      >
+      <div className="preview-section">
         {(_isEmpty(person.previousPositions) && (
           <em>No positions found</em>
         )) || (

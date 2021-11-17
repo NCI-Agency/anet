@@ -1,10 +1,8 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
+import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
-import { Field, Form, Formik } from "formik"
 import { Organization, Position } from "models"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
@@ -12,7 +10,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
-import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_ORGANIZATION = gql`
   query($uuid: String) {
@@ -84,8 +81,6 @@ const OrganizationPreview = ({ className, uuid }) => {
   const organization = new Organization(
     data.organization ? data.organization : {}
   )
-  const IdentificationCodeFieldWithLabel = DictionaryField(Field)
-  const LongNameWithLabel = DictionaryField(Field)
 
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const orgSettings = isPrincipalOrg
@@ -101,129 +96,102 @@ const OrganizationPreview = ({ className, uuid }) => {
   )
 
   return (
-    <Formik enableReinitialize initialValues={organization}>
-      {() => {
-        return (
-          <div className={`${className} preview-content-scroll`}>
-            <Form className="form-horizontal" method="post">
-              <div className="preview-sticky-title">
-                <h4>{`Organization ${organization.shortName}`}</h4>
-              </div>
-              <Fieldset id={"info"}>
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfStatus}
-                />
+    <div className={`${className} preview-content-scroll`}>
+      <div className="preview-sticky-title">
+        <h4>{`Organization ${organization.shortName}`}</h4>
+      </div>
+      <div className="preview-section">
+        <PreviewField
+          label="Status"
+          value={Organization.humanNameOfStatus(organization.status)}
+        />
 
-                <Field
-                  name="type"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={Organization.humanNameOfType}
-                />
+        <PreviewField
+          label="Type"
+          value={Organization.humanNameOfType(organization.type)}
+        />
 
-                <LongNameWithLabel
-                  dictProps={orgSettings.longName}
-                  name="longName"
-                  component={FieldHelper.ReadonlyField}
-                />
+        <PreviewField
+          label={orgSettings.longName.label}
+          value={organization.longName}
+        />
 
-                <IdentificationCodeFieldWithLabel
-                  dictProps={orgSettings.identificationCode}
-                  name="identificationCode"
-                  component={FieldHelper.ReadonlyField}
-                />
+        <PreviewField
+          label={orgSettings.identificationCode.label}
+          value={organization.identificationCode}
+        />
 
-                {organization?.parentOrg?.uuid && (
-                  <Field
-                    name="parentOrg"
-                    component={FieldHelper.ReadonlyField}
-                    label={Settings.fields.organization.parentOrg}
-                    humanValue={
-                      <LinkTo
-                        modelType="Organization"
-                        model={organization.parentOrg}
-                      >
-                        {organization.parentOrg.shortName}{" "}
-                        {organization.parentOrg.longName}{" "}
-                        {organization.parentOrg.identificationCode}
-                      </LinkTo>
-                    }
-                  />
+        {organization?.parentOrg?.uuid && (
+          <PreviewField
+            label={Settings.fields.organization.parentOrg}
+            value={
+              <LinkTo modelType="Organization" model={organization.parentOrg}>
+                {organization.parentOrg.shortName}{" "}
+                {organization.parentOrg.longName}{" "}
+                {organization.parentOrg.identificationCode}
+              </LinkTo>
+            }
+          />
+        )}
+
+        {organization.isAdvisorOrg() && (
+          <PreviewField
+            label="Super users"
+            value={
+              <React.Fragment>
+                {superUsers.map(position => (
+                  <p key={position.uuid}>
+                    {position.person ? (
+                      <LinkTo modelType="Person" model={position.person} />
+                    ) : (
+                      <i>
+                        <LinkTo modelType="Position" model={position} />-
+                        (Unfilled)
+                      </i>
+                    )}
+                  </p>
+                ))}
+                {superUsers.length === 0 && (
+                  <p>
+                    <i>No super users</i>
+                  </p>
                 )}
+              </React.Fragment>
+            }
+          />
+        )}
 
-                {organization.isAdvisorOrg() && (
-                  <Field
-                    name="superUsers"
-                    component={FieldHelper.ReadonlyField}
-                    label="Super users"
-                    humanValue={
-                      <>
-                        {superUsers.map(position => (
-                          <p key={position.uuid}>
-                            {position.person ? (
-                              <LinkTo
-                                modelType="Person"
-                                model={position.person}
-                              />
-                            ) : (
-                              <i>
-                                <LinkTo modelType="Position" model={position} />
-                                - (Unfilled)
-                              </i>
-                            )}
-                          </p>
-                        ))}
-                        {superUsers.length === 0 && (
-                          <p>
-                            <i>No super users</i>
-                          </p>
-                        )}
-                      </>
-                    }
-                  />
-                )}
+        {organization?.childrenOrgs?.length > 0 && (
+          <PreviewField
+            label="Sub organizations"
+            value={
+              <ListGroup>
+                {organization.childrenOrgs.map(organization => (
+                  <ListGroupItem key={organization.uuid}>
+                    <LinkTo modelType="Organization" model={organization}>
+                      {organization.shortName} {organization.longName}{" "}
+                      {organization.identificationCode}
+                    </LinkTo>
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
+            }
+          />
+        )}
+      </div>
 
-                {organization?.childrenOrgs?.length > 0 && (
-                  <Field
-                    name="childrenOrgs"
-                    component={FieldHelper.ReadonlyField}
-                    label="Sub organizations"
-                    humanValue={
-                      <ListGroup>
-                        {organization.childrenOrgs.map(organization => (
-                          <ListGroupItem key={organization.uuid}>
-                            <LinkTo
-                              modelType="Organization"
-                              model={organization}
-                            >
-                              {organization.shortName} {organization.longName}{" "}
-                              {organization.identificationCode}
-                            </LinkTo>
-                          </ListGroupItem>
-                        ))}
-                      </ListGroup>
-                    }
-                  />
-                )}
-              </Fieldset>
-
-              <OrganizationLaydown organization={organization} />
-              {organization.isTaskEnabled() && (
-                <OrganizationTasks
-                  organization={organization}
-                  queryParams={{
-                    status: Model.STATUS.ACTIVE,
-                    pageSize: 10,
-                    taskedOrgUuid: organization.uuid
-                  }}
-                />
-              )}
-            </Form>
-          </div>
-        )
-      }}
-    </Formik>
+      <OrganizationLaydown organization={organization} />
+      {organization.isTaskEnabled() && (
+        <OrganizationTasks
+          organization={organization}
+          queryParams={{
+            status: Model.STATUS.ACTIVE,
+            pageSize: 10,
+            taskedOrgUuid: organization.uuid
+          }}
+        />
+      )}
+    </div>
   )
 }
 

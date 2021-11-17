@@ -1,17 +1,14 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
+import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PositionTable from "components/PositionTable"
-import { Field, Form, Formik } from "formik"
 import { Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import Settings from "settings"
-import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
   query($uuid: String!) {
@@ -133,146 +130,88 @@ const TaskPreview = ({ className, uuid }) => {
   data.subTasks && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
 
   const fieldSettings = task.fieldSettings()
-  const ShortNameField = DictionaryField(Field)
-  const LongNameField = DictionaryField(Field)
-  const TaskCustomFieldRef1 = DictionaryField(Field)
-  const TaskCustomField = DictionaryField(Field)
-  const PlannedCompletionField = DictionaryField(Field)
-  const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
 
   return (
-    <Formik enableReinitialize initialValues={task}>
-      {() => {
-        return (
-          <div className={`${className} preview-content-scroll`}>
-            <Form className="form-horizontal" method="post">
-              <div className="preview-sticky-title">
-                <h4>{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  flexWrap: "nowrap",
-                  padding: "10px"
-                }}
-              >
-                <Fieldset style={{ flex: "1 1 0" }}>
-                  <ShortNameField
-                    dictProps={fieldSettings.shortName}
-                    name="shortName"
-                    component={FieldHelper.ReadonlyField}
+    <div className={`${className} preview-content-scroll`}>
+      <div className="preview-sticky-title">
+        <h4>{`${fieldSettings.shortLabel} ${task.shortName}`}</h4>
+      </div>
+      <div className="preview-section">
+        <PreviewField
+          label={fieldSettings.shortName.label}
+          value={task.shortName}
+        />
+        <PreviewField
+          label={fieldSettings.longName.label}
+          value={task.longName}
+        />
+        <PreviewField
+          label="Status"
+          value={Task.humanNameOfStatus(task.status)}
+        />
+        <PreviewField
+          label={Settings.fields.task.taskedOrganizations.label}
+          value={
+            task.taskedOrganizations && (
+              <>
+                {task.taskedOrganizations.map(org => (
+                  <LinkTo
+                    modelType="Organization"
+                    model={org}
+                    key={`${org.uuid}`}
                   />
-                  {/* Override componentClass and style from dictProps */}
-                  <LongNameField
-                    dictProps={fieldSettings.longName}
-                    as="div"
-                    style={{}}
-                    name="longName"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                  <Field
-                    name="status"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={Task.humanNameOfStatus}
-                  />
-                  <Field
-                    name="taskedOrganizations"
-                    label={Settings.fields.task.taskedOrganizations.label}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      task.taskedOrganizations && (
-                        <>
-                          {task.taskedOrganizations.map(org => (
-                            <LinkTo
-                              modelType="Organization"
-                              model={org}
-                              key={`${org.uuid}`}
-                            />
-                          ))}
-                        </>
-                      )
-                    }
-                  />
-                  {Settings.fields.task.customFieldRef1 && (
-                    <TaskCustomFieldRef1
-                      dictProps={Settings.fields.task.customFieldRef1}
-                      name="customFieldRef1"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        task.customFieldRef1 && (
-                          <LinkTo modelType="Task" model={task.customFieldRef1}>
-                            {task.customFieldRef1.shortName}{" "}
-                            {task.customFieldRef1.longName}
-                          </LinkTo>
-                        )
-                      }
-                    />
-                  )}
-                  <TaskCustomField
-                    dictProps={Settings.fields.task.customField}
-                    name="customField"
-                    component={FieldHelper.ReadonlyField}
-                  />
-                  {Settings.fields.task.plannedCompletion && (
-                    <PlannedCompletionField
-                      dictProps={Settings.fields.task.plannedCompletion}
-                      name="plannedCompletion"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        task.plannedCompletion &&
-                        moment(task.plannedCompletion).format(
-                          Settings.dateFormats.forms.displayShort.date
-                        )
-                      }
-                    />
-                  )}
-                  {Settings.fields.task.projectedCompletion && (
-                    <ProjectedCompletionField
-                      dictProps={Settings.fields.task.projectedCompletion}
-                      name="projectedCompletion"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        task.projectedCompletion &&
-                        moment(task.projectedCompletion).format(
-                          Settings.dateFormats.forms.displayShort.date
-                        )
-                      }
-                    />
-                  )}
-                  {Settings.fields.task.customFieldEnum1 && (
-                    <TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
-                      )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                  )}
-                  {Settings.fields.task.customFieldEnum2 && (
-                    <TaskCustomFieldEnum2
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum2,
-                        "enum"
-                      )}
-                      name="customFieldEnum2"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                  )}
-                </Fieldset>
-              </div>
-            </Form>
+                ))}
+              </>
+            )
+          }
+        />
 
-            <Fieldset title="Responsible positions">
-              <PositionTable positions={task.responsiblePositions} />
-            </Fieldset>
-          </div>
-        )
-      }}
-    </Formik>
+        {Settings.fields.task.customFieldRef1 && (
+          <PreviewField
+            label={Settings.fields.task.customFieldRef1.label}
+            value={
+              task.customFieldRef1 && (
+                <LinkTo modelType="Task" model={task.customFieldRef1}>
+                  {task.customFieldRef1.shortName}{" "}
+                  {task.customFieldRef1.longName}
+                </LinkTo>
+              )
+            }
+          />
+        )}
+
+        {Settings.fields.task.plannedCompletion && (
+          <PreviewField
+            label={Settings.fields.task.plannedCompletion.label}
+            value={
+              task.plannedCompletion &&
+              moment(task.plannedCompletion).format(
+                Settings.dateFormats.forms.displayShort.date
+              )
+            }
+          />
+        )}
+
+        {Settings.fields.task.customFieldEnum1 && (
+          <PreviewField
+            label={Settings.fields.task.customFieldEnum1.label}
+            value={task.customFieldEnum1}
+          />
+        )}
+
+        {Settings.fields.task.customFieldEnum2 && (
+          <PreviewField
+            label={Settings.fields.task.customFieldEnum2.label}
+            value={task.customFieldEnum2}
+          />
+        )}
+      </div>
+
+      <h4>Responsible positions</h4>
+      <div className="preview-section">
+        <PositionTable positions={task.responsiblePositions} />
+      </div>
+    </div>
   )
 }
 

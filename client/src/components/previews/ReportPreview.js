@@ -1,12 +1,10 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
-import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
+import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
-import { Field, Form, Formik } from "formik"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
@@ -121,208 +119,177 @@ const ReportPreview = ({ className, uuid }) => {
   }
 
   return (
-    <Formik
-      enableReinitialize
-      validationSchema={Report.yupSchema}
-      validateOnMount
-      initialValues={report}
-    >
-      {({ values }) => {
-        return (
-          <div
-            className={`report-preview preview-content-scroll ${
-              className || ""
-            }`}
-          >
-            {report.isPublished() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>
-              </Fieldset>
-            )}
+    <div className={`report-preview preview-content-scroll ${className || ""}`}>
+      {report.isPublished() && (
+        <div className="preview-section text-center">
+          <h4 className="text-danger">This {reportType} is PUBLISHED.</h4>
+        </div>
+      )}
 
-            {report.isRejected() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This {reportType} has CHANGES REQUESTED.
-                </h4>
-              </Fieldset>
-            )}
+      {report.isRejected() && (
+        <div className="preview-section text-center">
+          <h4 className="text-danger">
+            This {reportType} has CHANGES REQUESTED.
+          </h4>
+        </div>
+      )}
 
-            {report.isDraft() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This is a DRAFT {reportType} and hasn't been submitted.
-                </h4>
-              </Fieldset>
-            )}
+      {report.isDraft() && (
+        <div className="preview-section text-center">
+          <h4 className="text-danger">
+            This is a DRAFT {reportType} and hasn't been submitted.
+          </h4>
+        </div>
+      )}
 
-            {report.isPending() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">
-                  This {reportType} is PENDING approvals.
-                </h4>
-              </Fieldset>
-            )}
+      {report.isPending() && (
+        <div className="preview-section text-center">
+          <h4 className="text-danger">
+            This {reportType} is PENDING approvals.
+          </h4>
+        </div>
+      )}
 
-            {report.isApproved() && (
-              <Fieldset style={{ textAlign: "center" }}>
-                <h4 className="text-danger">This {reportType} is APPROVED.</h4>
-              </Fieldset>
-            )}
+      {report.isApproved() && (
+        <div className="preview-section text-center">
+          <h4 className="text-danger">This {reportType} is APPROVED.</h4>
+        </div>
+      )}
 
-            <Form className="form-horizontal">
-              <Fieldset title={`Report #${uuid}`} />
-              <Fieldset className="show-report-overview">
-                <Field
-                  name="intent"
-                  label="Summary"
-                  component={FieldHelper.SpecialField}
-                  widget={
-                    <div id={"intent"} className="form-control-static">
-                      <p>
-                        <strong>{Settings.fields.report.intent}:</strong>{" "}
-                        {report.intent}
-                      </p>
-                      {report.keyOutcomes && (
-                        <p>
-                          <span>
-                            <strong>
-                              {Settings.fields.report.keyOutcomes ||
-                                "Key outcomes"}
-                              :
-                            </strong>{" "}
-                            {report.keyOutcomes}&nbsp;
-                          </span>
-                        </p>
-                      )}
-                      <p>
-                        <strong>
-                          {Settings.fields.report.nextSteps.label}:
-                        </strong>{" "}
-                        {report.nextSteps}
-                      </p>
-                    </div>
-                  }
-                />
-
-                <Field
-                  name="engagementDate"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <>
-                      {report.engagementDate &&
-                        moment(report.engagementDate).format(
-                          Report.getEngagementDateFormat()
-                        )}
-                      <PlanningConflictForReport report={report} largeIcon />
-                    </>
-                  }
-                />
-
-                {Settings.engagementsIncludeTimeAndDuration &&
-                  report.duration && (
-                    <Field
-                      name="duration"
-                      label="Duration (minutes)"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                )}
-
-                <Field
-                  name="location"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    report.location && (
-                      <LinkTo modelType="Location" model={report.location} />
-                    )
-                  }
-                />
-
-                {report.cancelled && (
-                  <Field
-                    name="cancelledReason"
-                    label="Cancelled Reason"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={utils.sentenceCase(report.cancelledReason)}
-                  />
-                )}
-
-                {!report.cancelled && (
-                  <Field
-                    name="atmosphere"
-                    label={Settings.fields.report.atmosphere}
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <>
-                        {utils.sentenceCase(report.atmosphere)}
-                        {report.atmosphereDetails &&
-                          ` – ${report.atmosphereDetails}`}
-                      </>
-                    }
-                  />
-                )}
-
-                <Field
-                  name="authors"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={report.authors?.map((a, index) => (
-                    <React.Fragment key={a.uuid}>
-                      <LinkTo modelType="Person" model={a} />
-                      {index !== report.authors.length - 1 ? ", " : ""}
-                    </React.Fragment>
-                  ))}
-                />
-
-                <Field
-                  name="advisorOrg"
-                  label={Settings.fields.advisor.org.name}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo
-                      modelType="Organization"
-                      model={report.advisorOrg}
-                    />
-                  }
-                />
-
-                <Field
-                  name="principalOrg"
-                  label={Settings.fields.principal.org.name}
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={
-                    <LinkTo
-                      modelType="Organization"
-                      model={report.principalOrg}
-                    />
-                  }
-                />
-              </Fieldset>
-              <Fieldset
-                title={
-                  report.isFuture()
-                    ? "People who will attend to this planned engagement"
-                    : "People attended in this engagement"
-                }
-              >
-                <ReportPeople report={report} disabled />
-              </Fieldset>
-              {report.reportText && (
-                <Fieldset title={Settings.fields.report.reportText}>
-                  {parseHtmlWithLinkTo(report.reportText)}
-                </Fieldset>
+      <h4>Report {uuid}</h4>
+      <div className="preview-section">
+        <PreviewField
+          extraColForValue={true}
+          label="Summary"
+          value={
+            <div id={"intent"} className="form-control-static">
+              <p>
+                <strong>{Settings.fields.report.intent}:</strong>{" "}
+                {report.intent}
+              </p>
+              {report.keyOutcomes && (
+                <p>
+                  <span>
+                    <strong>
+                      {Settings.fields.report.keyOutcomes || "Key outcomes"}:
+                    </strong>{" "}
+                    {report.keyOutcomes}&nbsp;
+                  </span>
+                </p>
               )}
-              <Fieldset title={Settings.fields.task.subLevel.longLabel}>
-                <NoPaginationTaskTable
-                  tasks={report.tasks}
-                  showParent
-                  noTasksMessage={`No ${tasksLabel} selected`}
-                />
-              </Fieldset>
-            </Form>
+              <p>
+                <strong>{Settings.fields.report.nextSteps.label}:</strong>{" "}
+                {report.nextSteps}
+              </p>
+            </div>
+          }
+        />
+
+        <PreviewField
+          extraColForValue={true}
+          label="Engagement date"
+          value={
+            <React.Fragment>
+              <>
+                {report.engagementDate &&
+                  moment(report.engagementDate).format(
+                    Report.getEngagementDateFormat()
+                  )}
+                <PlanningConflictForReport report={report} largeIcon />
+              </>
+            </React.Fragment>
+          }
+        />
+
+        {Settings.engagementsIncludeTimeAndDuration && report.duration && (
+          <PreviewField
+            extraColForValue={true}
+            label="Duration (minutes)"
+            value={report.duration}
+          />
+        )}
+
+        <PreviewField
+          extraColForValue={true}
+          label="Location"
+          value={
+            report.location && (
+              <LinkTo modelType="Location" model={report.location} />
+            )
+          }
+        />
+
+        {report.cancelled && (
+          <PreviewField
+            extraColForValue={true}
+            label="Cancelled Reason"
+            value={utils.sentenceCase(report.cancelledReason)}
+          />
+        )}
+
+        {!report.cancelled && (
+          <PreviewField
+            extraColForValue={true}
+            label={Settings.fields.report.atmosphere}
+            value={
+              <React.Fragment>
+                {utils.sentenceCase(report.atmosphere)}
+                {report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
+              </React.Fragment>
+            }
+          />
+        )}
+
+        <PreviewField
+          extraColForValue={true}
+          label="Authors"
+          value={report.authors?.map((a, index) => (
+            <React.Fragment key={a.uuid}>
+              <LinkTo modelType="Person" model={a} />
+              {index !== report.authors.length - 1 ? ", " : ""}
+            </React.Fragment>
+          ))}
+        />
+
+        <PreviewField
+          extraColForValue={true}
+          label={Settings.fields.advisor.org.name}
+          value={<LinkTo modelType="Organization" model={report.advisorOrg} />}
+        />
+
+        <PreviewField
+          extraColForValue={true}
+          label={Settings.fields.principal.org.name}
+          value={
+            <LinkTo modelType="Organization" model={report.principalOrg} />
+          }
+        />
+      </div>
+      <h4>
+        {report.isFuture()
+          ? "People who will attend to this planned engagement"
+          : "People attended in this engagement"}
+      </h4>
+      <div className="preview-section">
+        <ReportPeople report={report} disabled />
+      </div>
+      {report.reportText && (
+        <React.Fragment>
+          <h4>{Settings.fields.report.reportText}</h4>
+          <div className="preview-section">
+            {parseHtmlWithLinkTo(report.reportText)}
           </div>
-        )
-      }}
-    </Formik>
+        </React.Fragment>
+      )}
+      <h4>{Settings.fields.task.subLevel.longLabel}</h4>
+      <div className="preview-section">
+        <NoPaginationTaskTable
+          tasks={report.tasks}
+          showParent
+          noTasksMessage={`No ${tasksLabel} selected`}
+        />
+      </div>
+    </div>
   )
 }
 

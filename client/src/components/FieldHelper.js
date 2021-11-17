@@ -607,3 +607,39 @@ FieldShortcuts.propTypes = {
   handleAddItem: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired
 }
+
+/**
+ * @prop {string} label
+ * @returns
+ */
+export const PreviewField = ({ label, value, extraColForValue }) => {
+  if (extraColForValue) {
+    return (
+      <React.Fragment>
+        <Row>
+          <Col xs={3}>
+            <div className="preview-field-label">{label}</div>
+          </Col>
+          <Col>
+            <div className="preview-field-value">{value}</div>
+          </Col>
+        </Row>
+      </React.Fragment>
+    )
+  } else {
+    return (
+      <React.Fragment>
+        <div className="preview-field-label">{label}</div>
+        <div className="preview-field-value">{value}</div>
+      </React.Fragment>
+    )
+  }
+}
+PreviewField.propTypes = {
+  label: PropTypes.string.isRequired,
+  extraColForValue: PropTypes.bool,
+  value: PropTypes.any
+}
+PreviewField.defaultProps = {
+  extraColForValue: false
+}
