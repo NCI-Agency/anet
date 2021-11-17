@@ -22,6 +22,10 @@ developmentMode: true
 # You will need to add an HTTP/80 adapter
 redirectToHttps: false
 
+# Execution time limit for GraphQL requests in milliseconds
+# If you comment it out, there is *no* limit!
+graphQlRequestTimeoutMs: 5000
+
 assets:
   cacheControlHeader: max-age=259200, public
   mimeTypes:

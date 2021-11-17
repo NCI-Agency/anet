@@ -314,7 +314,9 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   }
   const fieldsetStyle = {
     height: "100%",
-    overflow: "auto"
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column"
   }
   const mosaicLayoutStyle = {
     display: "flex",
