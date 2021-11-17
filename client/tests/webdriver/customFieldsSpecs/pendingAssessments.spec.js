@@ -36,14 +36,18 @@ describe("In my counterparts page", () => {
       expect(
         AssessmentsSection.getModalAssessmentQuestion("test1").isExisting()
       ).to.be.true
-      expect(
-        AssessmentsSection.getModalAssessmentQuestion("test2").isExisting()
-      ).to.be.true
-      expect(
-        AssessmentsSection.getModalAssessmentQuestion("test3").isExisting()
-      ).to.be.true
       expect(AssessmentsSection.getModalAssessmentQuestion("text").isExisting())
         .to.be.true
+      expect(
+        AssessmentsSection.getModalAssessmentQuestion(
+          "questionSets.topLevelQs.questions.test2"
+        ).isExisting()
+      ).to.be.true
+      expect(
+        AssessmentsSection.getModalAssessmentQuestion(
+          "questionSets.topLevelQs.questionSets.bottomLevelQs.questions.test3"
+        ).isExisting()
+      ).to.be.true
       /* eslint-enable no-unused-expressions */
       const cancelButton = AssessmentsSection.modalCancelButton
       cancelButton.waitForDisplayed()
@@ -76,14 +80,18 @@ describe("In my counterparts page", () => {
       expect(
         AssessmentsSection.getModalAssessmentQuestion("test1").isExisting()
       ).to.be.false
-      expect(
-        AssessmentsSection.getModalAssessmentQuestion("test2").isExisting()
-      ).to.be.false
-      expect(
-        AssessmentsSection.getModalAssessmentQuestion("test3").isExisting()
-      ).to.be.false
       expect(AssessmentsSection.getModalAssessmentQuestion("text").isExisting())
         .to.be.true
+      expect(
+        AssessmentsSection.getModalAssessmentQuestion(
+          "questionSets.topLevelQs.questions.test2"
+        ).isExisting()
+      ).to.be.false
+      expect(
+        AssessmentsSection.getModalAssessmentQuestion(
+          "questionSets.topLevelQs.questionSets.bottomLevelQs.questions.test3"
+        ).isExisting()
+      ).to.be.false
       /* eslint-enable no-unused-expressions */
       const cancelButton = AssessmentsSection.modalCancelButton
       cancelButton.waitForDisplayed()
