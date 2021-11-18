@@ -1308,7 +1308,8 @@ const ReportForm = ({
         Model.clearInvalidAssessmentQuestions(
           assessment,
           entity,
-          new Report(values)
+          new Report(values),
+          entity.getInstantAssessmentConfig()
         )
         assessment.__recurrence = RECURRENCE_TYPE.ONCE
         assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT

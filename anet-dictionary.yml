@@ -911,7 +911,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorSubjectComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.translatorSubjectVocabularyScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad translator subject vocabulary"
                   label: Vocabulary comments
@@ -938,7 +938,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorOverallComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.translatorOverallScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.questions.translatorOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall translator evaluation"
                   label: Overall comments
@@ -948,31 +948,6 @@ fields:
             interpreter:
               label: Interpreter Questions
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              questionSets:
-                interpreterA:
-                  label: Interpreter A
-                  questions:
-                    questionA:
-                      type: enum
-                      helpText: "Help text A"
-                      label: Question A
-                      choices:
-                        yes:
-                          label: "Yes"
-                        no:
-                          label: "No"
-                interPreterB:
-                  label: Interpreter B
-                  questions:
-                    questionB:
-                      type: enum
-                      helpText: "Help text B"
-                      label: Question B
-                      choices:
-                        yes:
-                          label: "Yes"
-                        no:
-                          label: "No"
               questions:
                 interpreterHadPreMeeting:
                   type: enum
@@ -1013,7 +988,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectVocabularyComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterSubjectVocabularyScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject vocabulary"
                   label: Vocabulary comments
@@ -1041,7 +1016,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectUnderstandingComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterSubjectUnderstandingScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject understanding"
                   label: Subject understanding comments
@@ -1069,7 +1044,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterWorkEthicComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterWorkEthicScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter work ethic"
                   label: Work ethic comments
@@ -1097,7 +1072,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterPostureComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterPostureScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterPostureScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter posture"
                   label: Posture comments
@@ -1125,7 +1100,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterRoleComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterRoleScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterRoleScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter role"
                   label: Role comment
@@ -1152,7 +1127,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterInterpretationOverallComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.interpreterInterpretationOverallScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall interpreter evaluation"
                   label: Overall evaluation comment

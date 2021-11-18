@@ -754,33 +754,80 @@ export default class Model {
     return filteredAssessmentConfig
   }
 
-  static clearInvalidAssessmentQuestions(assessment, entity, relatedObject) {
-    const nonQuestionFields = [
-      "__recurrence",
-      "__relatedObjectType",
-      "invisibleCustomFields",
-      "questionSets"
-    ]
-    const topLevelQuestions = Object.keys(assessment).filter(
-      field => !nonQuestionFields.includes(field)
-    )
-    const topLevelQuestionSets = Object.keys(assessment?.questionSets || {})
+  static clearInvalidAssessmentQuestions(
+    assessment,
+    entity,
+    relatedObject,
+    assessmentConfig,
+    parentField
+  ) {
+    // Valid questions and questionSets for the current level
     const filtered = Model.filterAssessmentConfig(
-      entity.getInstantAssessmentConfig(),
+      assessmentConfig,
       entity,
       relatedObject
     )
-    // Clear invalid questions
-    topLevelQuestions.forEach(
-      question =>
-        !filtered?.questions?.[question] && delete assessment[question]
+    // Values of questions and questionSets for the current level
+    const currentLevelAssessment = parentField
+      ? utils.readNestedObjectWithStringPath(assessment, parentField)
+      : assessment
+    if (!parentField) {
+      // Assessment questions are not in the questions object in the top level.
+      // Only way to get the questions on the top level is to filter out other fields
+      const nonQuestionFields = [
+        "__recurrence",
+        "__relatedObjectType",
+        "invisibleCustomFields",
+        "questionSets"
+      ]
+      const topLevelQuestions = Object.keys(currentLevelAssessment).filter(
+        field => !nonQuestionFields.includes(field)
+      )
+      // Clear invalid questions on the top level
+      topLevelQuestions.forEach(
+        question =>
+          !filtered?.questions?.[question] &&
+          delete currentLevelAssessment[question]
+      )
+    } else {
+      // In the deeper levels questions are inside the questions object
+      const currentLevelQuestions = Object.keys(
+        currentLevelAssessment.questions || {}
+      )
+      // Clear invalid questions on the current level
+      currentLevelQuestions.forEach(
+        question =>
+          !filtered.questions[question] &&
+          delete currentLevelAssessment.questions[question]
+      )
+    }
+    const currentLevelQuestionSets = Object.keys(
+      currentLevelAssessment.questionSets || {}
     )
-    // Clear invalid questionSets
-    topLevelQuestionSets.forEach(
+    // Clear questionSets on the current level
+    currentLevelQuestionSets.forEach(
       questionSet =>
         !filtered?.questionSets?.[questionSet] &&
-        delete assessment.questionSets[questionSet]
+        delete currentLevelAssessment.questionSets[questionSet]
     )
+    // If there are any valid questionSet left, clear invalid questions and questionSets in these questionSets
+    !_isEmpty(currentLevelAssessment.questionSets) &&
+      Object.entries(currentLevelAssessment.questionSets).forEach(
+        ([questionSet, config]) => {
+          // As filterAssessmentConfig only filters one level, we need to pass the current level's assessment config
+          const currFiltered = utils.readNestedObjectWithStringPath(
+            filtered,
+            `questionSets.${questionSet}`
+          )
+          Model.clearInvalidAssessmentQuestions(
+            assessment,
+            entity,
+            relatedObject,
+            currFiltered,
+            `${parentField ? `${parentField}.` : ""}questionSets.${questionSet}`
+          )
+        }
+      )
   }
 
   static populateCustomFields(entity) {
