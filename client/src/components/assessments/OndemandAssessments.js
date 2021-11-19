@@ -14,6 +14,7 @@ import Model, {
 } from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
@@ -231,25 +232,31 @@ const OnDemandAssessments = ({
                   {() => {
                     return (
                       <>
-                        <ReadonlyCustomFields
-                          parentFieldName={parentFieldName}
-                          fieldsConfig={filteredAssessmentConfig.questions}
-                          values={{
-                            [parentFieldName]: assessmentFieldsObject
-                          }}
-                          vertical
-                        />
-                        <QuestionSet
-                          parentFieldName={`${parentFieldName}.questionSets`}
-                          questionSets={filteredAssessmentConfig?.questionSets}
-                          formikProps={{
-                            values: {
+                        {!_isEmpty(filteredAssessmentConfig.questions) && (
+                          <ReadonlyCustomFields
+                            parentFieldName={parentFieldName}
+                            fieldsConfig={filteredAssessmentConfig.questions}
+                            values={{
                               [parentFieldName]: assessmentFieldsObject
+                            }}
+                            vertical
+                          />
+                        )}
+                        {!_isEmpty(filteredAssessmentConfig.questionSets) && (
+                          <QuestionSet
+                            parentFieldName={`${parentFieldName}.questionSets`}
+                            questionSets={
+                              filteredAssessmentConfig?.questionSets
                             }
-                          }}
-                          readonly={true}
-                          vertical
-                        />
+                            formikProps={{
+                              values: {
+                                [parentFieldName]: assessmentFieldsObject
+                              }
+                            }}
+                            readonly={true}
+                            vertical
+                          />
+                        )}
                       </>
                     )
                   }}

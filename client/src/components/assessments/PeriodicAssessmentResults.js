@@ -119,20 +119,24 @@ const PeriodicAssessment = ({
             {({ values }) => {
               return (
                 <>
-                  <ReadonlyCustomFields
-                    parentFieldName={parentFieldName}
-                    fieldsConfig={assessmentConfig.questions}
-                    values={values}
-                    vertical
-                  />
-                  <QuestionSet
-                    entity={entity}
-                    questionSets={assessmentConfig.questionSets}
-                    parentFieldName={`${parentFieldName}.questionSets`}
-                    formikProps={{ values }}
-                    readonly={true}
-                    vertical
-                  />
+                  {!_isEmpty(assessmentConfig.questions) && (
+                    <ReadonlyCustomFields
+                      parentFieldName={parentFieldName}
+                      fieldsConfig={assessmentConfig.questions}
+                      values={values}
+                      vertical
+                    />
+                  )}
+                  {!_isEmpty(assessmentConfig.questionSets) && (
+                    <QuestionSet
+                      entity={entity}
+                      questionSets={assessmentConfig.questionSets}
+                      parentFieldName={`${parentFieldName}.questionSets`}
+                      formikProps={{ values }}
+                      readonly={true}
+                      vertical
+                    />
+                  )}
                 </>
               )
             }}
