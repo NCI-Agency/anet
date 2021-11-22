@@ -439,7 +439,7 @@ const PersonShow = ({ pageDispatchers }) => {
         .map(([el, key]) =>
           React.cloneElement(el, {
             key,
-            extraColElem: extraColElems[key] || el.props.extraColElem,
+            extraColElem: extraColElems[key] || el.props.extraColElem || null,
             labelColumnWidth: 4
           })
         )

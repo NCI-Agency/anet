@@ -75,6 +75,7 @@ $defs:
     properties:
       test:
         type: string
+        title: optional test condition for showing this field
       type:
         title: value type field
         type: string
@@ -241,6 +242,35 @@ $defs:
                           type: string
                 required: [levels]
 
+# definition for questions
+  questions:
+    title: questions to respond when assessing
+    type: object
+    additionalProperties:
+      "$ref": "#/$defs/customField"
+
+# definition for questionSets
+  questionSets:
+    title: subset of questions
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+          title: label for this question set
+        description:
+          type: string
+          title: description for this question set that will be shown as help text
+        test:
+          type: string
+          title: optional test condition for showing this question set
+        questions:
+          "$ref": "#/$defs/questions"
+        questionSets:
+          "$ref": "#/$defs/questionSets"
+
 # definition for assessment configuration
   assessmentDef:
     type: object
@@ -257,10 +287,9 @@ $defs:
         enum: [report, null]
         default: null
       questions:
-        title: questions to respond when assessing
-        type: object
-        additionalProperties:
-          "$ref": "#/$defs/customField"
+        "$ref": "#/$defs/questions"
+      questionSets:
+        "$ref": "#/$defs/questionSets"
     dependentSchemas:
       recurrence:
         oneOf:

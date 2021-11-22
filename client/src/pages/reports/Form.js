@@ -1305,14 +1305,12 @@ const ReportForm = ({
       )
       .map(([key, assessment]) => {
         const entity = entities.find(e => e.uuid === key)
-        const validQuestions = Object.keys(
-          Model.filterAssessmentConfig(
-            entity.getInstantAssessmentConfig(),
-            entity,
-            new Report(values)
-          )
+        Model.clearInvalidAssessmentQuestions(
+          assessment,
+          entity,
+          new Report(values),
+          entity.getInstantAssessmentConfig()
         )
-        Model.clearInvalidAssessmentQuestions(assessment, validQuestions)
         assessment.__recurrence = RECURRENCE_TYPE.ONCE
         assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {

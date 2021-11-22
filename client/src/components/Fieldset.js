@@ -4,7 +4,15 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Element } from "react-scroll"
 
-const Fieldset = ({ id, title, action, style, isCompact, ...otherProps }) => {
+const Fieldset = ({
+  id,
+  title,
+  action,
+  description,
+  style,
+  isCompact,
+  ...otherProps
+}) => {
   if (isCompact) {
     return (
       <CompactRow
@@ -33,7 +41,7 @@ const Fieldset = ({ id, title, action, style, isCompact, ...otherProps }) => {
           {action && <small className="action-small">{action}</small>}
         </h4>
       )}
-
+      {description && <div className="form-text">{description}</div>}
       {!_isEmpty(otherProps) && <fieldset style={style} {...otherProps} />}
     </Element>
   )
@@ -42,6 +50,7 @@ Fieldset.propTypes = {
   id: PropTypes.string,
   title: PropTypes.node,
   action: PropTypes.node,
+  description: PropTypes.node,
   style: PropTypes.object,
   isCompact: PropTypes.bool
 }

@@ -1131,7 +1131,7 @@ header.searchPagination {
   opacity: 1;
 }
 
-.rich-text-modal {
+.rich-text-modal, .wide-assessment-modal {
   width: 650px;
   max-width: 100%;
 }

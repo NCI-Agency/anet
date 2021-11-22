@@ -322,8 +322,8 @@ export const createAssessmentSchema = (
   assessmentConfig,
   parentFieldName = ENTITY_ASSESSMENT_PARENT_FIELD
 ) => {
-  const assessmentSchemaShape = createYupObjectShape(
-    assessmentConfig,
+  let assessmentSchemaShape = createYupObjectShape(
+    assessmentConfig.questions,
     parentFieldName
   )
 
@@ -336,7 +336,7 @@ export const createAssessmentSchema = (
           return schema.min(
             assessmentDate,
             `${
-              assessmentConfig.expirationDate.label
+              assessmentConfig.questions.expirationDate.label
             } must be later than ${moment(assessmentDate).format("DD-MM-YYYY")}`
           )
         }
@@ -344,6 +344,34 @@ export const createAssessmentSchema = (
     )
   }
   /******************************************************************************************/
+
+  if (!_isEmpty(assessmentConfig.questionSets)) {
+    const questionSetsSchema = {}
+    Object.entries(assessmentConfig.questionSets).forEach(([k, v]) => {
+      if (v?.questions) {
+        const qsParentFieldName = `${parentFieldName}.questionSets.${k}.questions`
+        questionSetsSchema[k] = yup.object().shape({
+          questions: createYupObjectShape(v.questions, qsParentFieldName)
+        })
+      }
+      if (v?.questionSets) {
+        const innerSetSchema = {}
+        Object.entries(v.questionSets).forEach(([ik, iv]) => {
+          innerSetSchema[ik] = createAssessmentSchema(iv, "questions")
+        })
+        questionSetsSchema[k] = questionSetsSchema[k].concat(
+          yup
+            .object()
+            .shape({ questionSets: yup.object().shape(innerSetSchema) })
+        )
+      }
+    })
+    assessmentSchemaShape = assessmentSchemaShape.concat(
+      yup.object().shape({
+        questionSets: yup.object().shape(questionSetsSchema)
+      })
+    )
+  }
 
   return yup.object().shape({
     [parentFieldName]: assessmentSchemaShape
@@ -565,7 +593,8 @@ export default class Model {
           ? `${a.relatedObjectType}_${recurrence}`
           : recurrence
         const questions = a.questions || {}
-        return [assessmentKey, questions]
+        const questionSets = a.questionSets || {}
+        return [assessmentKey, { questions, questionSets }]
       })
     )
   }
@@ -727,26 +756,106 @@ export default class Model {
 
   static filterAssessmentConfig(assessmentConfig, subject, relatedObject) {
     const testValue = { subject, relatedObject }
-    const filteredAssessmentConfig = {}
-    if (!_isEmpty(assessmentConfig)) {
-      Object.entries(assessmentConfig)
+    const filteredAssessmentConfig = { questions: {}, questionSets: {} }
+    if (!_isEmpty(assessmentConfig?.questions)) {
+      Object.entries(assessmentConfig.questions)
         .filter(
           ([key, question]) =>
             !question.test ||
             !_isEmpty(JSONPath({ path: question.test, json: testValue }))
         )
         .forEach(([key, question]) => {
-          filteredAssessmentConfig[key] = question
+          filteredAssessmentConfig.questions[key] = question
+        })
+    }
+    if (!_isEmpty(assessmentConfig?.questionSets)) {
+      Object.entries(assessmentConfig.questionSets)
+        .filter(
+          ([key, questionSet]) =>
+            !questionSet.test ||
+            !_isEmpty(JSONPath({ path: questionSet.test, json: testValue }))
+        )
+        .forEach(([key, questionSet]) => {
+          filteredAssessmentConfig.questionSets[key] = questionSet
         })
     }
     return filteredAssessmentConfig
   }
 
-  static clearInvalidAssessmentQuestions(assessment, validQuestions) {
-    Object.keys(assessment).forEach(
-      question =>
-        !validQuestions.includes(question) && delete assessment[question]
+  static clearInvalidAssessmentQuestions(
+    assessment,
+    entity,
+    relatedObject,
+    assessmentConfig,
+    parentField
+  ) {
+    // Valid questions and questionSets for the current level
+    const filtered = Model.filterAssessmentConfig(
+      assessmentConfig,
+      entity,
+      relatedObject
     )
+    // Values of questions and questionSets for the current level
+    const currentLevelAssessment = parentField
+      ? utils.readNestedObjectWithStringPath(assessment, parentField)
+      : assessment
+    if (!parentField) {
+      // Assessment questions are not in the questions object in the top level.
+      // Only way to get the questions on the top level is to filter out other fields
+      const nonQuestionFields = [
+        "__recurrence",
+        "__relatedObjectType",
+        "invisibleCustomFields",
+        "questionSets"
+      ]
+      const topLevelQuestions = Object.keys(currentLevelAssessment).filter(
+        field => !nonQuestionFields.includes(field)
+      )
+      // Clear invalid questions on the top level
+      topLevelQuestions.forEach(
+        question =>
+          !filtered?.questions?.[question] &&
+          delete currentLevelAssessment[question]
+      )
+    } else {
+      // In the deeper levels questions are inside the questions object
+      const currentLevelQuestions = Object.keys(
+        currentLevelAssessment.questions || {}
+      )
+      // Clear invalid questions on the current level
+      currentLevelQuestions.forEach(
+        question =>
+          !filtered.questions[question] &&
+          delete currentLevelAssessment.questions[question]
+      )
+    }
+    const currentLevelQuestionSets = Object.keys(
+      currentLevelAssessment.questionSets || {}
+    )
+    // Clear questionSets on the current level
+    currentLevelQuestionSets.forEach(
+      questionSet =>
+        !filtered?.questionSets?.[questionSet] &&
+        delete currentLevelAssessment.questionSets[questionSet]
+    )
+    // If there are any valid questionSet left, clear invalid questions and questionSets in these questionSets
+    !_isEmpty(currentLevelAssessment.questionSets) &&
+      Object.entries(currentLevelAssessment.questionSets).forEach(
+        ([questionSet, config]) => {
+          // As filterAssessmentConfig only filters one level, we need to pass the current level's assessment config
+          const currFiltered = utils.readNestedObjectWithStringPath(
+            filtered,
+            `questionSets.${questionSet}`
+          )
+          Model.clearInvalidAssessmentQuestions(
+            assessment,
+            entity,
+            relatedObject,
+            currFiltered,
+            `${parentField ? `${parentField}.` : ""}questionSets.${questionSet}`
+          )
+        }
+      )
   }
 
   static populateCustomFields(entity) {
