@@ -152,7 +152,7 @@ const MergePeople = ({ pageDispatchers }) => {
             </div>
           )}
           {areAllSet(person1, person2, mergedPerson) && (
-            <>
+            <fieldset>
               <PersonField
                 label="Avatar"
                 value={
@@ -413,7 +413,7 @@ const MergePeople = ({ pageDispatchers }) => {
                     )
                   }
                 )}
-            </>
+            </fieldset>
           )}
         </Col>
         <Col md={4} id="right-merge-per-col">
@@ -525,7 +525,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
         />
       </Form.Group>
       {areAllSet(person) && (
-        <>
+        <fieldset>
           <PersonField
             label="Avatar"
             fieldName="avatar"
@@ -860,7 +860,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 )
               }
             )}
-        </>
+        </fieldset>
       )}
     </PersonCol>
   )
