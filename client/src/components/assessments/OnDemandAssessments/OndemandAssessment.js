@@ -3,12 +3,12 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AssessmentModal from "components/assessments/AssessmentModal"
+import ValidationBar from "components/assessments/OnDemandAssessments/ValidationBar"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Model, {
-  ENTITY_ON_DEMAND_ASSESSMENT_DATE,
   ENTITY_ON_DEMAND_EXPIRATION_DATE,
   NOTE_TYPE
 } from "components/Model"
@@ -19,11 +19,12 @@ import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import { Badge, Button, Card, Col, Row, Table } from "react-bootstrap"
+import { Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
-import QuestionSet from "./QuestionSet"
+import QuestionSet from "../QuestionSet"
+import "./Ondemand.css"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -31,7 +32,7 @@ const GQL_DELETE_NOTE = gql`
   }
 `
 
-const OnDemandAssessments = ({
+const OnDemandAssessment = ({
   entity,
   entityType,
   style,
@@ -63,12 +64,15 @@ const OnDemandAssessments = ({
     () => Model.filterAssessmentConfig(assessmentConfig, entity),
     [assessmentConfig, entity]
   )
-  filteredAssessmentConfig.questions[
-    ENTITY_ON_DEMAND_EXPIRATION_DATE
-  ].helpText = `
-    If this field is left empty, the assessment will be valid for
-    ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
-  `
+
+  if (filteredAssessmentConfig.questions[ENTITY_ON_DEMAND_EXPIRATION_DATE]) {
+    filteredAssessmentConfig.questions[
+      ENTITY_ON_DEMAND_EXPIRATION_DATE
+    ].helpText = `
+      If this field is left empty, the assessment will be valid for
+      ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
+    `
+  }
 
   // Cards array updated before loading the page & after every save of ondemand assessment.
   const assessmentCards = useMemo(() => {
@@ -77,94 +81,17 @@ const OnDemandAssessments = ({
     sortedOnDemandNotes.forEach((note, index) => {
       const parentFieldName = `assessment-${note.uuid}`
       const assessmentFieldsObject = utils.parseJsonSafe(note.text)
-      // Fill the 'expirationDate' field if it is empty
-      if (!assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]) {
-        assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE] = moment(
-          assessmentFieldsObject[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
-        )
-          .add(
-            Settings.fields.principal.onDemandAssessmentExpirationDays,
-            "days"
-          )
-          .toDate()
-          .toISOString()
-      }
+
       cards.push(
-        <>
-          <div
-            style={
-              moment(
-                assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
-              ).isBefore(moment())
-                ? index === sortedOnDemandNotes.length - 1
-                  ? {
-                    color: "red",
-                    paddingBottom: "3px",
-                    margin: "0 -1rem 1rem 0",
-                    borderBottom: "2px solid lightgrey"
-                  }
-                  : {
-                    color: "grey",
-                    paddingBottom: "3px",
-                    margin: "0 -1rem 1rem 0",
-                    borderBottom: "2px solid lightgrey"
-                  }
-                : index !== sortedOnDemandNotes.length - 1
-                  ? {
-                    color: "grey",
-                    paddingBottom: "3px",
-                    margin: "0 -1rem 1rem 0",
-                    borderBottom: "2px solid lightgrey"
-                  }
-                  : {
-                    color: "green",
-                    paddingBottom: "2px",
-                    marginBottom: "1rem",
-                    borderBottom: "2px solid lightgrey"
-                  }
+        <React.Fragment>
+          <ValidationBar
+            assessmentExpires={
+              !!Settings.fields.principal.onDemandAssessmentExpirationDays
             }
-          >
-            <b>
-              {/* Only the last object in the sortedOnDemandNotes can be valid.
-                  If the expiration date of the last object is older than NOW,
-                  it is also expired. */}
-              {moment(
-                assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
-              ).isBefore(moment()) ? (
-                  "Expired"
-                ) : index !== sortedOnDemandNotes.length - 1 ? (
-                  "No longer valid"
-                ) : (
-                  <>
-                    Valid until{" "}
-                    {moment(
-                      assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
-                    ).format("DD MMMM YYYY")}{" "}
-                    <Badge bg="secondary" style={{ paddingBottom: "3px" }}>
-                      {/* true flag in the diff function returns the precise days
-                          between two dates, e.g., '1,4556545' days. 'ceil' function
-                          from Math library is used to round it to the nearest greatest
-                          integer so that user sees an integer as the number of days left */}
-                      {Math.ceil(
-                        moment(
-                          assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
-                        ).diff(moment(), "days", true)
-                      )}{" "}
-                      of{" "}
-                      {moment(
-                        assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]
-                      ).diff(
-                        moment(
-                          assessmentFieldsObject[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
-                        ),
-                        "days"
-                      )}{" "}
-                      days left
-                    </Badge>
-                  </>
-                )}
-            </b>
-          </div>
+            index={index}
+            assessmentFieldsObject={assessmentFieldsObject}
+            sortedOnDemandNotes={sortedOnDemandNotes}
+          />
           <Card key={index}>
             <Card.Header>
               <Row>
@@ -264,7 +191,7 @@ const OnDemandAssessments = ({
               </div>
             </Card.Body>
           </Card>
-        </>
+        </React.Fragment>
       )
     })
     return cards
@@ -416,7 +343,7 @@ const OnDemandAssessments = ({
     )
   }
 }
-OnDemandAssessments.propTypes = {
+OnDemandAssessment.propTypes = {
   style: PropTypes.object,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
@@ -425,4 +352,4 @@ OnDemandAssessments.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-export default OnDemandAssessments
+export default OnDemandAssessment

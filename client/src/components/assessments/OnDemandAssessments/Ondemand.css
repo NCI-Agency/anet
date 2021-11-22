@@ -1,0 +1,23 @@
+.ondemand-grey-validation-text {
+  color: grey;
+  padding-bottom: 3px;
+  margin: 0 -1rem 1rem 0;
+  border-bottom: 2px solid lightgrey;
+  font-weight: bold;
+}
+
+.ondemand-green-validation-text {
+  color: green;
+  padding-bottom: 2px;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid lightgrey;
+  font-weight: bold;
+}
+
+.ondemand-red-validation-text {
+  color: red;
+  padding-bottom: 3px;
+  margin: 0 -1rem 1rem 0;
+  border-bottom: 2px solid lightgrey;
+  font-weight: bold;
+}
