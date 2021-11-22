@@ -291,7 +291,7 @@ $defs:
                 type: date
               expirationDate:
                 type: date
-              required: [assessmentDate, expirationDate]
+              required: [assessmentDate]
 
 # definition for custom sensitive information
   customSensitiveInformation:
