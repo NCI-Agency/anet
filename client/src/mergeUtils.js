@@ -247,33 +247,53 @@ export function unassignedPerson(position1, position2, mergedPosition) {
 }
 
 export function mergedPersonIsValid(mergedPerson) {
-  let msg
+  const msg = []
   if (!mergedPerson.role) {
-    msg = "Merged person must have a role"
-  } else if (!mergedPerson.status) {
-    msg = "Merged person must have a status"
-  } else if (!mergedPerson.rank) {
-    msg = `Merged person must have a ${Settings.fields.person.rank}`
-  } else if (!mergedPerson.gender) {
-    msg = `Merged person must have a ${Settings.fields.person.gender}`
-  } else if (!mergedPerson.country) {
-    msg = `Merged person must have a ${Settings.fields.person.country}`
-  } else if (mergedPerson.role === Person.ROLE.ADVISOR) {
+    msg.push("Role")
+  }
+  if (!mergedPerson.status) {
+    msg.push("Status")
+  }
+  if (!mergedPerson.rank) {
+    msg.push(Settings.fields.person.rank)
+  }
+  if (!mergedPerson.gender) {
+    msg.push(Settings.fields.person.gender)
+  }
+  if (!mergedPerson.country) {
+    msg.push(Settings.fields.person.country)
+  }
+  if (mergedPerson.role === Person.ROLE.ADVISOR) {
     if (!mergedPerson.emailAddress) {
-      msg = `${
-        Settings.fields.person.emailAddress.label
-      } is required for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)}`
-    } else if (!mergedPerson.endOfTourDate) {
-      msg = `${
-        Settings.fields.person.endOfTourDate
-      } is required for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)}`
+      msg.push(
+        `${
+          Settings.fields.person.emailAddress.label
+        } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
+      )
+    }
+    if (!mergedPerson.endOfTourDate) {
+      msg.push(
+        `${Settings.fields.person.endOfTourDate} for ${Person.humanNameOfRole(
+          Person.ROLE.ADVISOR
+        )} role`
+      )
     }
   }
-  if (msg) {
-    toast(msg)
-    return false
-  } else {
+  if (_isEmpty(msg)) {
     return true
+  } else {
+    const msgContainer = (
+      <div>
+        <div>It is required to fill the following fields:</div>
+        <ul>
+          {msg.map((m, index) => (
+            <li key={index}>{m}</li>
+          ))}
+        </ul>
+      </div>
+    )
+    toast.warning(msgContainer)
+    return false
   }
 }
 
