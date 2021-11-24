@@ -327,7 +327,7 @@ fields:
         - recurrence: quarterly
           questions:
             test1:
-              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enum
               label: Test question 1
               choices:
@@ -340,40 +340,59 @@ fields:
                 "3":
                   label: three
                   color: '#ff8279'
-            test2:
-              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 2
-              choices:
-                "3":
-                  label: three
-                  color: '#ff8279'
-                "4":
-                  label: four
-                  color: '#ffe396'
-                "5":
-                  label: five
-                  color: '#c2ffb3'
-            test3:
-              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 3
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ff8279'
-                "3":
-                  label: three
-                  color: '#ff8279'
+              validations:
+                - type: required
+                  params: [You must provide Test question 1]
             text:
               type: special_field
               label: Text
               widget: richTextEditor
               style:
                 height: 100px
+              validations:
+                - type: required
+                  params: [You must provide Text]
+          questionSets:
+            topLevelQs:
+              label: Top Level Question Set
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+              questions:
+                test2:
+                  type: enum
+                  label: Test question 2
+                  choices:
+                    "3":
+                      label: three
+                      color: '#ff8279'
+                    "4":
+                      label: four
+                      color: '#ffe396'
+                    "5":
+                      label: five
+                      color: '#c2ffb3'
+                  validations:
+                    - type: required
+                      params: [You must provide Test question 2]
+              questionSets:
+                bottomLevelQs:
+                  label: Bottom Level Question Set
+                  questions:
+                    test3:
+                      type: enum
+                      label: Test question 3
+                      choices:
+                        "1":
+                          label: one
+                          color: '#c2ffb3'
+                        "2":
+                          label: two
+                          color: '#ffe396'
+                        "3":
+                          label: three
+                          color: '#ff8279'
+                      validations:
+                        - type: required
+                          params: [You must provide Test question 3]
         - recurrence: once
           relatedObjectType: report
           questions:

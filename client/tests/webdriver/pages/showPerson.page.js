@@ -108,6 +108,18 @@ class ShowPerson extends Page {
     return browser.$('div[name="formSensitiveFields.birthday"]')
   }
 
+  get invalidFeedback() {
+    return browser.$$('//div[@class="invalid-feedback"]')
+  }
+
+  get topLevelQuestionSetTitle() {
+    return browser.$('//h4/span[contains(text(),"Top Level Question Set")]')
+  }
+
+  get bottomLevelQuestionSetTitle() {
+    return browser.$('//h4/span[contains(text(),"Bottom Level Question Set")]')
+  }
+
   pickACompactField(field) {
     browser.$(`#${field}`).click()
   }
@@ -127,11 +139,14 @@ class ShowPerson extends Page {
   }
 
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
+    // Second value in the valuesArr is the text editor value
+    const buttonGroupValues = valuesArr.filter((value, index) => index !== 1)
+    const textInputValue = valuesArr[1]
     this.assessmentModalForm
       .$$(".modal-content .btn-group")
       .forEach((btnGroup, index) => {
         const button = btnGroup.$(
-          `label[for$=".test${index + 1}_${valuesArr[index]}"]`
+          `label[for$=".test${index + 1}_${buttonGroupValues[index]}"]`
         )
         // wait for a bit, clicks and do double click, sometimes it does not go through
         browser.pause(300)
@@ -150,7 +165,7 @@ class ShowPerson extends Page {
       browser.pause(300)
     }
     // fourth value is the text field
-    browser.keys(valuesArr[3])
+    browser.keys(textInputValue)
     browser.pause(300)
   }
 
@@ -183,6 +198,10 @@ class ShowPerson extends Page {
       reverse: true,
       timeout: 20000
     })
+  }
+
+  getValidationErrorMessages() {
+    return this.invalidFeedback.map(errorDiv => errorDiv.getText())
   }
 }
 

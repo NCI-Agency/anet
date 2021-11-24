@@ -20,6 +20,7 @@ import React, { useState } from "react"
 import { Button, Card, Col, Row } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
+import QuestionSet from "./QuestionSet"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -83,6 +84,7 @@ const PeriodicAssessment = ({
                     onUpdateAssessment()
                   }}
                   onCancel={() => setShowAssessmentModalKey(null)}
+                  entity={entity}
                 />
                 <span style={{ marginLeft: "5px" }}>
                   <ConfirmDestructive
@@ -116,12 +118,26 @@ const PeriodicAssessment = ({
           >
             {({ values }) => {
               return (
-                <ReadonlyCustomFields
-                  parentFieldName={parentFieldName}
-                  fieldsConfig={assessmentConfig}
-                  values={values}
-                  vertical
-                />
+                <>
+                  {!_isEmpty(assessmentConfig.questions) && (
+                    <ReadonlyCustomFields
+                      parentFieldName={parentFieldName}
+                      fieldsConfig={assessmentConfig.questions}
+                      values={values}
+                      vertical
+                    />
+                  )}
+                  {!_isEmpty(assessmentConfig.questionSets) && (
+                    <QuestionSet
+                      entity={entity}
+                      questionSets={assessmentConfig.questionSets}
+                      parentFieldName={`${parentFieldName}.questionSets`}
+                      formikProps={{ values }}
+                      readonly={true}
+                      vertical
+                    />
+                  )}
+                </>
               )
             }}
           </Formik>
@@ -263,6 +279,7 @@ export const PeriodicAssessmentsRows = ({
                         onUpdateAssessment()
                       }}
                       onCancel={() => setShowAssessmentModalKey(null)}
+                      entity={entity}
                     />
                   </>
                 )}

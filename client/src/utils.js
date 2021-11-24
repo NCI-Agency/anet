@@ -264,6 +264,10 @@ export default {
 
     const yiq = (c.r * 299 + c.g * 587 + c.b * 114) / 1000
     return yiq >= 128 ? "black" : "white"
+  },
+
+  readNestedObjectWithStringPath: function(obj, path) {
+    return path.split(".").reduce((value, el) => value[el], obj)
   }
 }
 

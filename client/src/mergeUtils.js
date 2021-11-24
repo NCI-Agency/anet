@@ -6,15 +6,17 @@ import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   MODEL_TO_OBJECT_TYPE
 } from "components/Model"
+import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _escape from "lodash/escape"
 import _isEmpty from "lodash/isEmpty"
 import _set from "lodash/set"
 import { Location } from "models"
+import Person from "models/Person"
 import React, { useCallback, useReducer } from "react"
 import { Button } from "react-bootstrap"
 import { toast } from "react-toastify"
-import RemoveButton from "./components/RemoveButton"
+import Settings from "settings"
 
 export const MERGE_SIDES = {
   LEFT: "left",
@@ -181,7 +183,7 @@ const OBJECT_TYPE_TO_VALIDATOR = {
   [MODEL_TO_OBJECT_TYPE.AuthorizationGroup]: null,
   [MODEL_TO_OBJECT_TYPE.Location]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Organization]: null,
-  [MODEL_TO_OBJECT_TYPE.Person]: null,
+  [MODEL_TO_OBJECT_TYPE.Person]: validForGeneral,
   [MODEL_TO_OBJECT_TYPE.Position]: validPositions,
   [MODEL_TO_OBJECT_TYPE.Report]: null,
   [MODEL_TO_OBJECT_TYPE.Task]: null
@@ -240,6 +242,57 @@ export function unassignedPerson(position1, position2, mergedPosition) {
     toast.warning(msg)
     return true
   } else {
+    return false
+  }
+}
+
+export function mergedPersonIsValid(mergedPerson) {
+  const msg = []
+  if (!mergedPerson.role) {
+    msg.push("Role")
+  }
+  if (!mergedPerson.status) {
+    msg.push("Status")
+  }
+  if (!mergedPerson.rank) {
+    msg.push(Settings.fields.person.rank)
+  }
+  if (!mergedPerson.gender) {
+    msg.push(Settings.fields.person.gender)
+  }
+  if (!mergedPerson.country) {
+    msg.push(Settings.fields.person.country)
+  }
+  if (mergedPerson.role === Person.ROLE.ADVISOR) {
+    if (!mergedPerson.emailAddress) {
+      msg.push(
+        `${
+          Settings.fields.person.emailAddress.label
+        } for ${Person.humanNameOfRole(Person.ROLE.ADVISOR)} role`
+      )
+    }
+    if (!mergedPerson.endOfTourDate) {
+      msg.push(
+        `${Settings.fields.person.endOfTourDate} for ${Person.humanNameOfRole(
+          Person.ROLE.ADVISOR
+        )} role`
+      )
+    }
+  }
+  if (_isEmpty(msg)) {
+    return true
+  } else {
+    const msgContainer = (
+      <div>
+        <div>It is required to fill the following fields:</div>
+        <ul>
+          {msg.map((m, index) => (
+            <li key={index}>{m}</li>
+          ))}
+        </ul>
+      </div>
+    )
+    toast.warning(msgContainer)
     return false
   }
 }

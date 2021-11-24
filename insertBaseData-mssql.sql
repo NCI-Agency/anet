@@ -79,6 +79,8 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 		(lower(newid()), 'CHRISVILLE, Chris', 0, 1, 'chrisville+chris@example.com', '+1-412-7324', 'Maj', 'Chris is another test person we have in the database', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'KYLESON, Kyle', 0, 1, 'kyleson+kyle@example.com', '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'BEMERGED, Myposwill', 0, 1, 'bemerged+myposwill@example.com', '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('3cb2076c-5317-47fe-86ad-76f298993917', 'MERGED, Duplicate Winner', 0, 1, 'merged+winner@example.com', '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'MERGED, Duplicate Loser', 0, 1, 'merged+loser@example.com', '+1-876-5432', 'CTR', 'Loser is a test person who will be merged', NULL, NULL, 'Afghanistan', 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Super Users
 		(lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(lower(newid()), 'HENDERSON, Henry', 0, 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -538,6 +540,10 @@ INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organi
 	VALUES (N'25fe500c-3503-4ba8-a9a4-09b29b50c1f1', 'Merge One', 'MOD-M1-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
 	VALUES (N'e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
+	VALUES (N'885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
+	VALUES (N'4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
@@ -595,6 +601,15 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	((SELECT uuid FROM positions WHERE name='EF 1.1 Advisor C'), (SELECT uuid from positions WHERE name ='Merge One'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
 	((SELECT uuid FROM positions WHERE name='EF 1.1 Advisor C'), (SELECT uuid from positions WHERE name ='Merge Two'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
 	((SELECT uuid FROM positions WHERE name='EF 1.1 Advisor D'), (SELECT uuid from positions WHERE name ='Merge Two'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+
+-- Put Winner Duplicate in a Tashkil
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'Chief of Merge People Test 1'), (SELECT uuid from people where emailAddress = 'merged+winner@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'merged+winner@example.com') WHERE name = 'Chief of Merge People Test 1';
+-- Put Loser Duplicate in a Tashkil
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'Chief of Merge People Test 2'), (SELECT uuid from people where emailAddress = 'merged+loser@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'merged+loser@example.com') WHERE name = 'Chief of Merge People Test 2';
 
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'MoD Headquarters Kabul') WHERE name = 'Cost Adder - MoD';
@@ -1015,6 +1030,23 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'positions', p.uuid
 	FROM positions p
 	WHERE p.uuid = 'e87f0f60-ad13-4c1c-96f7-672c595b81c7';
+
+-- Add notes to the people that will be merged
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Merge one person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'people', p.uuid
+	FROM people p
+	WHERE p.uuid = '3cb2076c-5317-47fe-86ad-76f298993917';
+
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Merge two person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'people', p.uuid
+	FROM people p
+	WHERE p.uuid = 'c725aef3-cdd1-4baf-ac72-f28219b234e9';
 
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ERINSON, Erin');
 SET @noteUuid = lower(newid());
