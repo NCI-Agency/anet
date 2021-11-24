@@ -1,23 +1,28 @@
 package mil.dds.anet.database;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
+import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -118,8 +123,11 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
-    return new ForeignKeyFetcher<Note>().load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES,
-        relatedObjectUuid);
+    final Person user = DaoUtils.getUserFromContext(context);
+    return new ForeignKeyFetcher<Note>()
+        .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
+        .thenApply(notes -> notes.stream().filter(note -> hasAssessmentAuthorization(user, note))
+            .collect(Collectors.toList()));
   }
 
   static class NotesBatcher extends ForeignKeyBatcher<Note> {
@@ -220,6 +228,86 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public List<Note> getNotesByType(NoteType type) {
     return getDbHandle().createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
         .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
+  }
+
+  @InTransaction
+  public boolean hasAssessmentAuthorization(final Person user, final Note note) {
+    // Admins always have access
+    // Note that a `null` user means this is called through a merge function, by an admin
+    // Only notes of assessment type are restricted
+    if (user == null || AuthUtils.isAdmin(user) || !note.getType().equals(NoteType.ASSESSMENT)) {
+      return true;
+    }
+
+    // Check whether the user is the author
+    if (user.getUuid().equals(note.getAuthorUuid())) {
+      return true;
+    }
+
+    // Check against the dictionary whether the user is authorized
+    final List<String> authorizationGroupUuids = getAuthorizationGroupUuids(note);
+    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
+      // No authorization groups defined for this field
+      return true;
+    }
+
+    // Check against authorization groups
+    final Query query = getDbHandle()
+        .createQuery("/* checkAssessmentAuthorization */ SELECT COUNT(*) AS count"
+            + " FROM \"authorizationGroupPositions\" agp"
+            + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\""
+            + " WHERE agp.\"authorizationGroupUuid\" IN ( <authorizationGroupUuids> )"
+            + " AND p.\"currentPersonUuid\" = :userUuid")
+        .bindList("authorizationGroupUuids", authorizationGroupUuids)
+        .bind("userUuid", DaoUtils.getUuid(user));
+    final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
+    return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<String> getAuthorizationGroupUuids(final Note note) {
+    // Check which fields to use for searching dictionary
+    String keyPath = "fields.task.topLevel.assessments";
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final List<NoteRelatedObject> noteRelatedObjects =
+        note.loadNoteRelatedObjects(engine.getContext()).join();
+    if (!Utils.isEmptyOrNull(noteRelatedObjects)) {
+      final NoteRelatedObject user = noteRelatedObjects.stream()
+          .filter(r -> r.getRelatedObjectType().equals(PersonDao.TABLE_NAME)).findFirst()
+          .orElse(null);
+      // Update the keyPath if the related object is a user
+      if (user != null) {
+        final Position currentPosition =
+            engine.getPositionDao().getCurrentPositionForPerson(user.getRelatedObjectUuid());
+        if (currentPosition != null) {
+          final String positionType = currentPosition.getType().name().toLowerCase(Locale.ROOT);
+          keyPath = String.format("fields.%1$s.person.assessments", positionType);
+        }
+      }
+      try {
+        final Map<String, String> noteTextMap =
+            new ObjectMapper().readValue(note.getText(), HashMap.class);
+        // Get the recurrence state and use it as some sort of key
+        final String recurrence = noteTextMap.get("__recurrence");
+        final List<Object> assessments =
+            (List<Object>) AnetObjectEngine.getConfiguration().getDictionaryEntry(keyPath);
+        if (assessments != null) {
+          for (Object assessment : assessments) {
+            String dictionaryAssessment =
+                new ObjectMapper().writer().writeValueAsString(assessment);
+            Map<String, Object> response =
+                new ObjectMapper().readValue(dictionaryAssessment, HashMap.class);
+            // Recurrence is once as default therefore no need to check for null
+            if (response.get("recurrence").toString().equals(recurrence)) {
+              return (List<String>) response.get("authorizationGroupUuids");
+            }
+          }
+        }
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+    }
+    return null;
   }
 
   private void updateSubscriptions(int numRows, Note obj) {

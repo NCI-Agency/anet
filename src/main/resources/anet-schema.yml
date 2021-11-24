@@ -281,6 +281,13 @@ $defs:
         type: string
         enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually, ondemand]
         default: once
+      authorizationGroupUuids:
+        type: array
+        uniqueItems: true
+        minItems: 1
+        items:
+          type: string
+          description: The list of authorizationGroup uuid's that have access to this assessment
       relatedObjectType:
         title: object type context in which the assessment will be made
         type: string
