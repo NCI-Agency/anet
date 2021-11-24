@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
     for (final File f : fileList) {
       if (f.isFile()) {
         try (final FileInputStream input = new FileInputStream(f)) {
-          String raw = IOUtils.toString(input);
+          String raw = IOUtils.toString(input, StandardCharsets.UTF_8);
           final Map<String, Object> query = new HashMap<String, Object>();
           for (final Map.Entry<String, Object> entry : variables.entrySet()) {
             raw = raw.replace("${" + entry.getKey() + "}", entry.getValue().toString());

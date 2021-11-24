@@ -21,9 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Person;
 import mil.dds.anet.test.client.AnetBeanList_Position;
@@ -64,11 +62,11 @@ public class PersonResourceTest extends AbstractResourceTest {
       "uuid name status role emailAddress phoneNumber rank biography country avatar code"
           + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt"
           + " customFields";
-  private static final String PERSON_FIELDS_ONLY_HISTORY =
+  public static final String PERSON_FIELDS_ONLY_HISTORY =
       "{ uuid previousPositions { startTime endTime position { uuid } } }";
-  private static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
+  public static final String POSITION_FIELDS = String.format("{ %s person { %s } %s }",
       _POSITION_FIELDS, _PERSON_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
-  protected static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
+  public static final String FIELDS = String.format("{ %s position { %s } %s }", _PERSON_FIELDS,
       _POSITION_FIELDS, _CUSTOM_SENSITIVE_INFORMATION_FIELDS);
 
   // 200 x 200 avatar
@@ -312,83 +310,6 @@ public class PersonResourceTest extends AbstractResourceTest {
     query = PersonSearchQueryInput.builder().withHasBiography(false).build();
     searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
-  }
-
-  @Test
-  public void mergePeopleTest()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // Create a person
-    PersonInput loserInput =
-        PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
-    Person loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
-    assertThat(loser).isNotNull();
-    assertThat(loser.getUuid()).isNotNull();
-
-    // Create a Position
-    final PositionInput testInput =
-        PositionInput.builder().withName("A Test Position created by mergePeopleTest")
-            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE).build();
-
-    // Assign to an AO
-    final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
-        TestData.createAdvisorOrganizationInput(true));
-    testInput.setOrganization(getOrganizationInput(ao));
-    testInput.setLocation(getLocationInput(getGeneralHospital()));
-
-    final Position created = adminMutationExecutor.createPosition(POSITION_FIELDS, testInput);
-    assertThat(created).isNotNull();
-    assertThat(created.getUuid()).isNotNull();
-    assertThat(created.getName()).isEqualTo(testInput.getName());
-
-    // Assign the loser into the position
-    Integer nrUpdated =
-        adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
-    assertThat(nrUpdated).isEqualTo(1);
-
-    // Create a second person
-    final PersonInput winnerInput =
-        PersonInput.builder().withRole(Role.ADVISOR).withName("Winner for Merging").build();
-    final Person winner = adminMutationExecutor.createPerson(FIELDS, winnerInput);
-    assertThat(winner).isNotNull();
-    assertThat(winner.getUuid()).isNotNull();
-
-    nrUpdated = adminMutationExecutor.mergePeople("", false, loser.getUuid(), winner.getUuid());
-    assertThat(nrUpdated).isEqualTo(1);
-
-    // Assert that loser is gone.
-    try {
-      adminQueryExecutor.person(FIELDS, loser.getUuid());
-      fail("Expected NotFoundException");
-    } catch (NotFoundException expectedException) {
-    }
-
-    // Assert that the position is empty.
-    Position winnerPos = adminQueryExecutor.position(POSITION_FIELDS, created.getUuid());
-    assertThat(winnerPos.getPerson()).isNull();
-
-    // Re-create loser and put into the position.
-    loserInput = PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
-    loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
-    assertThat(loser).isNotNull();
-    assertThat(loser.getUuid()).isNotNull();
-
-    nrUpdated =
-        adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
-    assertThat(nrUpdated).isEqualTo(1);
-
-    nrUpdated = adminMutationExecutor.mergePeople("", true, loser.getUuid(), winner.getUuid());
-    assertThat(nrUpdated).isEqualTo(1);
-
-    // Assert that loser is gone.
-    try {
-      adminQueryExecutor.person(FIELDS, loser.getUuid());
-      fail("Expected NotFoundException");
-    } catch (NotFoundException expectedException) {
-    }
-
-    // Assert that the winner is in the position.
-    winnerPos = adminQueryExecutor.position(POSITION_FIELDS, created.getUuid());
-    assertThat(winnerPos.getPerson().getUuid()).isEqualTo(winner.getUuid());
   }
 
   @Test

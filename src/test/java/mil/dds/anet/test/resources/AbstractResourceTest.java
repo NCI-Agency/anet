@@ -35,6 +35,8 @@ import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationInput;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
+import mil.dds.anet.test.client.PersonPositionHistory;
+import mil.dds.anet.test.client.PersonPositionHistoryInput;
 import mil.dds.anet.test.client.PersonSearchQueryInput;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
@@ -331,6 +333,17 @@ public abstract class AbstractResourceTest {
 
   protected static List<PositionInput> getPositionsInput(final List<Position> positions) {
     return positions.stream().map(p -> getPositionInput(p)).collect(Collectors.toList());
+  }
+
+  protected static PersonPositionHistoryInput getPersonPositionHistoryInput(
+      final PersonPositionHistory pph) {
+    return getInput(pph, PersonPositionHistoryInput.class);
+  }
+
+  protected static List<PersonPositionHistoryInput> getPersonPositionHistoryInput(
+      final List<PersonPositionHistory> history) {
+    return history.stream().map(pph -> getPersonPositionHistoryInput(pph))
+        .collect(Collectors.toList());
   }
 
   protected static TaskInput getTaskInput(final Task task) {

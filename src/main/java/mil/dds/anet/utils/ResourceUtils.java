@@ -7,14 +7,19 @@ import mil.dds.anet.beans.PersonPositionHistory;
 
 public class ResourceUtils {
 
-  private static final String TIME_CONFLICT_ERROR_TEXT =
-      "At least one of the positions in the history is occupied for the specified period.";
-
   public static void validateHistoryInput(final String uuid,
-      final List<PersonPositionHistory> previousPositions) {
+      final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
+      final String relationUuid) {
     // Check if uuid is null
     if (uuid == null) {
       throw new WebApplicationException("Uuid cannot be null.", Status.BAD_REQUEST);
+    }
+
+    if (Utils.isEmptyOrNull(previousPositions)) {
+      if (relationUuid != null) {
+        throw new WebApplicationException("History should not be empty.", Status.BAD_REQUEST);
+      }
+      return;
     }
 
     boolean seenNullEndTime = false;
@@ -31,6 +36,19 @@ public class ResourceUtils {
               "There cannot be more than one history entry without an end time.",
               Status.BAD_REQUEST);
         }
+        if (relationUuid == null) {
+          throw new WebApplicationException("History entry must have an end time.",
+              Status.BAD_REQUEST);
+        } else {
+          final String uuidToCheck =
+              DaoUtils.getUuid(checkPerson ? pph.getPosition() : pph.getPerson());
+          final String message =
+              checkPerson ? "Last history entry must be identical to person's current position."
+                  : "Last history entry must be identical to position's current person.";
+          if (!relationUuid.equals(uuidToCheck)) {
+            throw new WebApplicationException(message, Status.BAD_REQUEST);
+          }
+        }
         seenNullEndTime = true;
       } else {
         // Check if end time is before start time
@@ -41,13 +59,19 @@ public class ResourceUtils {
       }
     }
 
+    // If has relation and there is no last entry in history
+    if (relationUuid != null && !seenNullEndTime) {
+      throw new WebApplicationException("There should be a history entry without an end time.",
+          Status.BAD_REQUEST);
+    }
+
     // Check for conflicts
     final int historySize = previousPositions.size();
     for (int i = 0; i < historySize; i++) {
       final PersonPositionHistory pph = previousPositions.get(i);
       for (int j = i + 1; j < historySize; j++) {
         if (overlap(pph, previousPositions.get(j))) {
-          throw new WebApplicationException(TIME_CONFLICT_ERROR_TEXT, Status.CONFLICT);
+          throw new WebApplicationException("History entries should not overlap.", Status.CONFLICT);
         }
       }
     }
@@ -56,18 +80,12 @@ public class ResourceUtils {
   private static boolean overlap(final PersonPositionHistory pph1,
       final PersonPositionHistory pph2) {
     if (pph1.getEndTime() == null) {
-      return overlapNullEndTime(pph1, pph2);
+      return pph2.getEndTime().isAfter(pph1.getStartTime());
     }
     if (pph2.getEndTime() == null) {
-      return overlapNullEndTime(pph2, pph1);
+      return pph1.getEndTime().isAfter(pph2.getStartTime());
     }
     return pph2.getStartTime().isBefore(pph1.getEndTime())
         && pph2.getEndTime().isAfter(pph1.getStartTime());
-  }
-
-  private static boolean overlapNullEndTime(final PersonPositionHistory pph1,
-      final PersonPositionHistory pph2) {
-    return pph1.getEndTime() == null
-        && (pph2.getEndTime() == null || pph2.getEndTime().isAfter(pph1.getStartTime()));
   }
 }
