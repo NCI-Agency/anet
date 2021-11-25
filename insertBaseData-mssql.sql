@@ -1096,7 +1096,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	FROM reports r
 	WHERE r.text LIKE 'Today%';
 
--- Add measurement assessments to tasks related to reports
+-- Add instant assessments to tasks related to reports
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
   VALUES (@noteUuid, @authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -1111,7 +1111,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
-  VALUES (@noteUuid, @authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","description":"<p><strong>level 1</strong></p><p>easily achieved</p><p><strong>level 3</strong></p><p>easily achieved</p>","frenchFlag":7.670554793177809,"levels":["lvl1","lvl3"]}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  VALUES (@noteUuid, @authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
   SELECT @noteUuid, 'reports', r.uuid
   FROM reports r

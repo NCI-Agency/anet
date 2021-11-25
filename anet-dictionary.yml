@@ -130,6 +130,33 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the top 3 issues]
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            question1:
+              type: special_field
+              widget: likertScale
+              label: Instant assessment Question 1
+              helpText: Please provide assessment for something important
+              levels:
+                - color: red
+                  endValue: 2
+                  label: test
+                - color: "#FFBF00"
+                  endValue: 8
+                  label: mid
+                - color: green
+                  endValue: 10
+                  label: high
+              aggregation:
+                widget: likertScale
+            question2:
+              type: number
+              label: Instant assessment Question 2
+            question3:
+              type: number
+              label: Instant assessment Question 3
+
     customFieldRef1:
       label: Parent task
       placeholder: Start typing to search for a higher level task
