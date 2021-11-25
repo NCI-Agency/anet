@@ -842,11 +842,9 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
-INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
 SET @reportUuid = lower(newid());
 INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
@@ -858,11 +856,9 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
-INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;

@@ -6,8 +6,8 @@ engagementsIncludeTimeAndDuration: true
 
 dateFormats:
   email:
-    date: d MMMM yyyy
-    withTime: d MMMM yyyy @ HH:mm
+    date: d MMMM yyyy Z
+    withTime: d MMMM yyyy @ HH:mm Z
   excel: d MMMM yyyy
   forms:
     input:
@@ -21,6 +21,9 @@ dateFormats:
     displayLong:
       date: dddd, D MMMM YYYY
       withTime: dddd, D MMMM YYYY @ HH:mm
+
+menuOptions:
+  menuLinksDropdownTitle: My Work
 
 printOptions:
   sensitiveInformationText: Sensitive Information
@@ -64,7 +67,7 @@ fields:
             issues:
               type: special_field
               label: Top 3 issues
-              placeholder:  Enter the top 3 issues
+              placeholder: Enter the top 3 issues
               widget: richTextEditor
               style:
                 height: 300px
@@ -90,7 +93,7 @@ fields:
             issues:
               type: special_field
               label: Top 3 issues
-              placeholder:  Enter the top 3 issues
+              placeholder: Enter the top 3 issues
               widget: richTextEditor
               style:
                 height: 300px
@@ -119,13 +122,40 @@ fields:
             issues:
               type: special_field
               label: Top 3 issues
-              placeholder:  Enter the top 3 issues
+              placeholder: Enter the top 3 issues
               widget: richTextEditor
               style:
                 height: 300px
               validations:
                 - type: required
                   params: [You must provide the top 3 issues]
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            question1:
+              type: special_field
+              widget: likertScale
+              label: Instant assessment Question 1
+              helpText: Please provide assessment for something important
+              levels:
+                - color: red
+                  endValue: 2
+                  label: test
+                - color: "#FFBF00"
+                  endValue: 8
+                  label: mid
+                - color: green
+                  endValue: 10
+                  label: high
+              aggregation:
+                widget: likertScale
+            question2:
+              type: number
+              label: Instant assessment Question 2
+            question3:
+              type: number
+              label: Instant assessment Question 3
+
     customFieldRef1:
       label: Parent task
       placeholder: Start typing to search for a higher level task
@@ -168,9 +198,9 @@ fields:
   person:
     firstName: First name
     lastName: Last name
+    domainUsername: Domain username
     position: Current Position
     prevPositions: Previous Positions
-    domainUsername: Domain username
     emailAddress:
       label: Email
       placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
@@ -239,8 +269,8 @@ fields:
         description: the rank of OF-9
         app6Modifier: K
     gender: Gender
-    biography: Biography
     endOfTourDate: End of tour
+    biography: Biography
     customSensitiveInformation:
       birthday:
         type: date
@@ -283,7 +313,7 @@ fields:
                   Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
       # number of fields after Avatar in the left column for advisors
       # adjust this number if two columns are not balanced on the Person Page
-      numberOfFieldsInLeftColumn: 7
+      numberOfFieldsInLeftColumn: 6
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
@@ -408,7 +438,7 @@ fields:
                   label: high
                   color: '#ff8279'
             question2:
-              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^P/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^P/i))]
               type: enumset
               label: Attendee from P org
               choices:
@@ -416,7 +446,7 @@ fields:
                   label: P
                   color: '#ff0000'
             question3:
-              test: $.subject.position.organization.[?(@property == "identificationCode" && @.match(/^Z/i))]
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
               type: enumset
               label: Attendee from Z org
               choices:
@@ -424,7 +454,7 @@ fields:
                   label: Z
                   color: '#00ff00'
             question4:
-              test: $.relatedObject.[?(@property == "atmosphere" && @ == "POSITIVE")]
+              test: $.relatedObject[?(@property === "atmosphere" && @ === "POSITIVE")]
               type: enumset
               label: Report had POSITIVE atmosphere
               choices:
@@ -434,7 +464,7 @@ fields:
 
       # number of fields after Avatar in the left column for principals
       # adjust this number if two columns are not balanced on the Person Page
-      numberOfFieldsInLeftColumn: 6
+      numberOfFieldsInLeftColumn: 7
       # select and order person fields (including custom fields)
       showPageOrderedFields:
         - position
@@ -521,7 +551,7 @@ imagery:
 automaticallyInactivateUsers:
   emailRemindersDaysPrior: [15, 30, 45]
   ignoredDomainNames: []
-  checkIntervalInSecs: 86400  # 60 * 60 * 24
+  checkIntervalInSecs: 86400 # 60 * 60 * 24
 
 dashboards:
   - label: dashboard0
