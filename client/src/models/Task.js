@@ -182,11 +182,6 @@ export default class Task extends Model {
     return this.fieldSettings().assessments || []
   }
 
-  instanceAssessmentsConfig() {
-    // The given task instance might have a specific assessments config
-    return utils.parseJsonSafe(this.customFields).assessments || []
-  }
-
   static FILTERED_CLIENT_SIDE_FIELDS = ["assessment_customFieldEnum1"]
 
   static filterClientSideFields(obj, ...additionalFields) {

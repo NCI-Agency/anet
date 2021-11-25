@@ -600,22 +600,13 @@ export default class Model {
   }
 
   generalAssessmentsConfig() {
-    // assessments configuration defined for more than one instance
-    return []
-  }
-
-  instanceAssessmentsConfig() {
-    // assessments configuration defined for one specific instance
+    // default assessments configuration
     return []
   }
 
   getAssessmentsConfig() {
-    const general = this.generalAssessmentsConfig()
-    const instance = this.instanceAssessmentsConfig()
     return Object.assign(
-      Model.parseAssessmentsConfig(general),
-      // instance config can override
-      Model.parseAssessmentsConfig(instance)
+      Model.parseAssessmentsConfig(this.generalAssessmentsConfig())
     )
   }
 
