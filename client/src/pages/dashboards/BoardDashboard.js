@@ -102,6 +102,7 @@ const BoardDashboard = ({
   diagramNote,
   readonly,
   relatedObject,
+  relatedObjectType,
   diagramHeight,
   setDiagramHeight,
   onUpdate
@@ -304,7 +305,8 @@ const BoardDashboard = ({
                   model,
                   relatedObject?.uuid,
                   diagramNote?.uuid,
-                  onUpdate
+                  onUpdate,
+                  relatedObjectType
                 )
               }
             >
@@ -371,20 +373,37 @@ BoardDashboard.propTypes = {
   diagramNote: PropTypes.object,
   readonly: PropTypes.bool,
   relatedObject: PropTypes.object,
+  relatedObjectType: PropTypes.string,
   diagramHeight: PropTypes.number,
   setDiagramHeight: PropTypes.func,
   onUpdate: PropTypes.func
 }
 
-const onSaveDiagram = (diagramData, relatedObjectUuid, noteUuid, onSuccess) => {
-  return saveDiagram(diagramData, relatedObjectUuid, noteUuid)
+const onSaveDiagram = (
+  diagramData,
+  relatedObjectUuid,
+  noteUuid,
+  onSuccess,
+  relatedObjectType
+) => {
+  return saveDiagram(
+    diagramData,
+    relatedObjectUuid,
+    relatedObjectType,
+    noteUuid
+  )
     .then(response => {
       onSuccess()
     })
     .catch(error => console.log("error: ", error))
 }
 
-const saveDiagram = (diagramData, relatedObjectUuid, noteUuid) => {
+const saveDiagram = (
+  diagramData,
+  relatedObjectUuid,
+  relatedObjectType,
+  noteUuid
+) => {
   const serializedData = JSON.stringify(diagramData.serialize())
   const updatedNote = {
     uuid: noteUuid,
@@ -392,7 +411,7 @@ const saveDiagram = (diagramData, relatedObjectUuid, noteUuid) => {
     text: serializedData,
     noteRelatedObjects: [
       {
-        relatedObjectType: "people",
+        relatedObjectType: relatedObjectType,
         relatedObjectUuid: relatedObjectUuid
       }
     ]

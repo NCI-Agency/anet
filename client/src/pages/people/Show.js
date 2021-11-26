@@ -382,6 +382,7 @@ const PersonShow = ({ pageDispatchers }) => {
             <DiagramsContainer
               diagrams={diagrams}
               relatedObject={person}
+              entityType={Person}
               onDiagramUpdate={() => {
                 refetch()
               }}

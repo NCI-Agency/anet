@@ -5,7 +5,12 @@ import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
 import "./Diagrams.css"
 
-const DiagramsContainer = ({ diagrams, relatedObject, onDiagramUpdate }) => {
+const DiagramsContainer = ({
+  diagrams,
+  relatedObject,
+  entityType,
+  onDiagramUpdate
+}) => {
   const [showModal, setShowModal] = useState(false)
   const [selectedDiagram, setSelectedDiagram] = useState(null)
 
@@ -44,6 +49,7 @@ const DiagramsContainer = ({ diagrams, relatedObject, onDiagramUpdate }) => {
               diagramNote={selectedDiagram}
               readonly={false}
               relatedObject={relatedObject}
+              relatedObjectType={entityType.relatedObjectType}
               onUpdate={() => {
                 onDiagramUpdate()
                 setShowModal(false)
@@ -59,6 +65,7 @@ const DiagramsContainer = ({ diagrams, relatedObject, onDiagramUpdate }) => {
 DiagramsContainer.propTypes = {
   diagrams: PropTypes.array,
   relatedObject: PropTypes.object,
+  entityType: PropTypes.func,
   onDiagramUpdate: PropTypes.func
 }
 
