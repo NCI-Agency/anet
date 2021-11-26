@@ -8,6 +8,7 @@ import AssessmentResultsContainer from "components/assessments/AssessmentResults
 import AssignPositionModal from "components/AssignPositionModal"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
+import DiagramsContainer from "components/Diagrams"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -19,6 +20,7 @@ import Messages from "components/Messages"
 import {
   DEFAULT_CUSTOM_FIELDS_PARENT,
   GRAPHQL_CUSTOM_SENSITIVE_INFORMATION_FIELDS,
+  NOTE_TYPE,
   SENSITIVE_CUSTOM_FIELDS_PARENT
 } from "components/Model"
 import {
@@ -232,6 +234,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+  const diagrams = person.notes.filter(note => note.type === NOTE_TYPE.DIAGRAM)
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -373,6 +376,13 @@ const PersonShow = ({ pageDispatchers }) => {
               canAddAssessment={canAddAssessment}
               onUpdateAssessment={() => {
                 loadAppData()
+                refetch()
+              }}
+            />
+            <DiagramsContainer
+              diagrams={diagrams}
+              relatedObject={person}
+              onDiagramUpdate={() => {
                 refetch()
               }}
             />

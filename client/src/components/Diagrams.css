@@ -1,0 +1,11 @@
+.process-diagram {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.diagram-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}

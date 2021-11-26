@@ -1,7 +1,26 @@
+.diagram-editor {
+	flex-grow: 1;
+	display: flex;
+}
+
+.diagram-control-panel {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	margin-right: 1rem;
+}
+
 .diagram-container {
-	width: 100%;
+	flex-grow: 1;
 	height: 100%;
 	background: white;
+	display: flex;
+}
+
+.canvas-widget {
+	height: 100%;
+	width: 100%;
+	min-height: 100%;
 }
 
 .custom-node {

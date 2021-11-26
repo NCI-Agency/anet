@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
@@ -13,27 +14,17 @@ import {
   PortModelAlignment
 } from "@projectstorm/react-diagrams-core"
 import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
-import {
-  DagreEngine,
-  PathFindingLinkFactory
-} from "@projectstorm/react-diagrams-routing"
-import { DEFAULT_PAGE_PROPS } from "actions"
+import { PathFindingLinkFactory } from "@projectstorm/react-diagrams-routing"
+import API from "api"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
+import ConfirmDestructive from "components/ConfirmDestructive"
 import LinkTo from "components/LinkTo"
-import {
-  mapPageDispatchersToProps,
-  PageDispatchersPropType,
-  useBoilerplate
-} from "components/Page"
+import { GQL_CREATE_NOTE, GQL_UPDATE_NOTE, NOTE_TYPE } from "components/Model"
 import FileSaver from "file-saver"
 import * as Models from "models"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Badge, Button, Card, Modal } from "react-bootstrap"
-import { connect } from "react-redux"
-import { useParams } from "react-router-dom"
-import DOWNLOAD_ICON from "resources/download.png"
-import Settings from "settings"
 import utils from "utils"
 import "./BoardDashboard.css"
 import {
@@ -43,6 +34,12 @@ import {
   DiagramPortModel,
   SimplePortFactory
 } from "./DiagramNode"
+
+const GQL_DELETE_NOTE = gql`
+  mutation($uuid: String!) {
+    deleteNote(uuid: $uuid)
+  }
+`
 
 const createEngine = options => {
   const engine = new DiagramEngine({})
@@ -68,7 +65,7 @@ const createEngine = options => {
 }
 
 const PrototypeNode = ({ name, model, onClick }) => (
-  <Badge style={{ margin: 10, background: "white", color: "#106ba3" }}>
+  <Badge bg="secondary" style={{ marginBottom: "5px" }}>
     <div
       draggable
       onClick={onClick}
@@ -101,30 +98,24 @@ PrototypeNode.propTypes = {
   onClick: PropTypes.func
 }
 
-const BoardDashboard = ({ pageDispatchers }) => {
+const BoardDashboard = ({
+  diagramNote,
+  readonly,
+  relatedObject,
+  diagramHeight,
+  setDiagramHeight,
+  onUpdate
+}) => {
   // Make sure we have a navigation menu
-  useBoilerplate({
-    pageProps: DEFAULT_PAGE_PROPS,
-    pageDispatchers
-  })
-  const { dashboard } = useParams()
-  const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
+
   const [dropEvent, setDropEvent] = useState(null)
   const engineRef = useRef(createEngine())
   const [model, setModel] = useState(null)
-  const [edit, setEdit] = useState(false)
   const [selectingEntity, setSelectingEntity] = useState(false)
   const [editedNode, setEditedNode] = useState(null)
-  const dagreEngineRef = useRef(
-    new DagreEngine({
-      graph: {
-        rankdir: "RL",
-        ranker: "longest-path",
-        marginx: 25,
-        marginy: 25
-      },
-      includeLinks: true
-    })
+  const diagramModel = useMemo(
+    () => (diagramNote ? utils.parseJsonSafe(diagramNote.text) : null),
+    [diagramNote]
   )
 
   useEffect(() => {
@@ -167,21 +158,17 @@ const BoardDashboard = ({ pageDispatchers }) => {
   }, [editedNode, model])
 
   useEffect(() => {
-    model && model.setLocked(!edit)
-  }, [model, edit])
+    model && model.setLocked(readonly)
+  }, [model, readonly])
 
   useEffect(() => {
-    async function fetchData() {
-      await fetch(dashboardSettings.data)
-        .then(response => response.json())
-        .then(data => {
-          const model = new DiagramModel()
-          model.deserializeModel(data, engineRef.current)
-          setModel(model)
-        })
+    if (diagramModel) {
+      const model = new DiagramModel()
+      model.deserializeModel(diagramModel, engineRef.current)
+      setModel(model)
+      engineRef.current.setModel(model)
     }
-    fetchData()
-  }, [dashboardSettings.data])
+  }, [diagramModel])
 
   useEffect(() => {
     if (dropEvent) {
@@ -198,76 +185,44 @@ const BoardDashboard = ({ pageDispatchers }) => {
   }, [model, dropEvent])
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        height: "100%"
-      }}
-    >
-      <div
-        style={{
-          position: "relative",
-          flexGrow: 1
-        }}
-        onDrop={event => {
-          event.persist()
-          const data = utils.parseJsonSafe(
-            event.dataTransfer.getData("storm-diagram-node")
-          )
-          const point = engineRef.current.getRelativeMousePoint(event)
-          setDropEvent({ data, point })
-        }}
-        onDragOver={event => {
-          event.preventDefault()
-        }}
-      >
-        {engineRef.current.getModel() && (
-          <CanvasWidget
-            engine={engineRef.current}
-            className="diagram-container"
-          />
-        )}
-      </div>
-      <div>
-        <Card>
-          <Button variant="primary" onClick={() => setEdit(!edit)}>
-            {edit ? <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} /> : "Edit"}
-          </Button>
-
-          {edit && (
-            <>
-              <Button
-                onClick={() => engineRef.current.zoomToFit()}
-                variant="outline-secondary"
-              >
-                <Icon icon={IconNames.ZOOM_TO_FIT} />
-              </Button>
-              <Button
-                onClick={() => {
-                  dagreEngineRef.current.redistribute(model)
-                  engineRef.current.repaintCanvas()
-                }}
-                variant="outline-secondary"
-              >
-                <Icon icon={IconNames.LAYOUT_AUTO} />
-              </Button>
-              <Button
-                onClick={() => {
-                  const blob = new Blob([JSON.stringify(model.serialize())], {
-                    type: "application/json;charset=utf-8"
-                  })
-                  FileSaver.saveAs(blob, "BoardDashboard.json")
-                }}
-                variant="outline-secondary"
-              >
-                <img src={DOWNLOAD_ICON} height={16} alt="Export json" />
-              </Button>
-            </>
+    <div className="diagram-editor">
+      <div className="diagram-control-panel">
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {readonly && (
+            <Button
+              onClick={() => setDiagramHeight(diagramHeight + 50)}
+              variant="outline-secondary"
+            >
+              <Icon icon={IconNames.EXPAND_ALL} />
+            </Button>
           )}
-        </Card>
-
-        {edit && (
+          {readonly && (
+            <Button
+              onClick={() => setDiagramHeight(diagramHeight - 50)}
+              variant="outline-secondary"
+            >
+              <Icon icon={IconNames.COLLAPSE_ALL} />
+            </Button>
+          )}
+          <Button
+            onClick={() => engineRef.current.zoomToFit()}
+            variant="outline-secondary"
+          >
+            <Icon icon={IconNames.ZOOM_TO_FIT} />
+          </Button>
+          <Button
+            onClick={() => {
+              const blob = new Blob([JSON.stringify(model.serialize())], {
+                type: "application/json;charset=utf-8"
+              })
+              FileSaver.saveAs(blob, "BoardDashboard.json")
+            }}
+            variant="outline-secondary"
+          >
+            <Icon icon={IconNames.IMPORT} />
+          </Button>
+        </div>
+        {!readonly && (
           <>
             <Card variant="primary">
               <Card.Header>Node palette</Card.Header>
@@ -341,13 +296,122 @@ const BoardDashboard = ({ pageDispatchers }) => {
             </Card>
           </>
         )}
+        {!readonly && (
+          <>
+            <Button
+              onClick={() =>
+                onSaveDiagram(
+                  model,
+                  relatedObject?.uuid,
+                  diagramNote?.uuid,
+                  onUpdate
+                )
+              }
+            >
+              Save
+            </Button>
+            {diagramNote?.uuid && (
+              <ConfirmDestructive
+                variant="danger"
+                objectType="diagram"
+                objectDisplay={diagramNote.uuid}
+                onConfirm={() => onDeleteDiagram(diagramNote.uuid, onUpdate)}
+              >
+                <Icon icon={IconNames.TRASH} />
+              </ConfirmDestructive>
+            )}
+          </>
+        )}
+        <Modal
+          centered
+          show={selectingEntity}
+          onHide={() => setSelectingEntity(false)}
+          style={{ zIndex: "1400" }}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Edit diagram node</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <MultiTypeAdvancedSelectComponent
+              onConfirm={(value, objectType) => {
+                editedNode.options.anetObject = value
+                editedNode.options.anetObjectType = objectType
+                setSelectingEntity(false)
+              }}
+              objectType={editedNode?.options.anetObjectType}
+            />
+          </Modal.Body>
+        </Modal>
+      </div>
+      <div
+        className="diagram-container"
+        onDrop={event => {
+          if (!readonly) {
+            event.persist()
+            const data = utils.parseJsonSafe(
+              event.dataTransfer.getData("storm-diagram-node")
+            )
+            const point = engineRef.current.getRelativeMousePoint(event)
+            setDropEvent({ data, point })
+          }
+        }}
+        onDragOver={event => {
+          event.preventDefault()
+        }}
+      >
+        {engineRef.current.getModel() && (
+          <CanvasWidget engine={engineRef.current} className="canvas-widget" />
+        )}
       </div>
     </div>
   )
 }
 
 BoardDashboard.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  diagramNote: PropTypes.object,
+  readonly: PropTypes.bool,
+  relatedObject: PropTypes.object,
+  diagramHeight: PropTypes.number,
+  setDiagramHeight: PropTypes.func,
+  onUpdate: PropTypes.func
 }
 
-export default connect(null, mapPageDispatchersToProps)(BoardDashboard)
+const onSaveDiagram = (diagramData, relatedObjectUuid, noteUuid, onSuccess) => {
+  return saveDiagram(diagramData, relatedObjectUuid, noteUuid)
+    .then(response => {
+      onSuccess()
+    })
+    .catch(error => console.log("error: ", error))
+}
+
+const saveDiagram = (diagramData, relatedObjectUuid, noteUuid) => {
+  const serializedData = JSON.stringify(diagramData.serialize())
+  const updatedNote = {
+    uuid: noteUuid,
+    type: NOTE_TYPE.DIAGRAM,
+    text: serializedData,
+    noteRelatedObjects: [
+      {
+        relatedObjectType: "people",
+        relatedObjectUuid: relatedObjectUuid
+      }
+    ]
+  }
+  return API.mutation(noteUuid ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
+    note: updatedNote
+  })
+}
+
+const onDeleteDiagram = (uuid, onSuccess) => {
+  return deleteDiagram(uuid)
+    .then(response => {
+      onSuccess()
+    })
+    .catch(error => console.log("delete error: ", error))
+}
+
+const deleteDiagram = uuid => {
+  return API.mutation(GQL_DELETE_NOTE, { uuid })
+}
+
+export default BoardDashboard
