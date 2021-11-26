@@ -371,6 +371,7 @@ enum NoteType {
   CHANGE_RECORD
   FREE_TEXT
   PARTNER_ASSESSMENT
+  DIAGRAM
 }
 
 type Organization {
