@@ -105,7 +105,8 @@ const BoardDashboard = ({
   relatedObjectType,
   diagramHeight,
   setDiagramHeight,
-  onUpdate
+  onUpdate,
+  setError
 }) => {
   // Make sure we have a navigation menu
 
@@ -306,7 +307,8 @@ const BoardDashboard = ({
                   relatedObject?.uuid,
                   diagramNote?.uuid,
                   onUpdate,
-                  relatedObjectType
+                  relatedObjectType,
+                  setError
                 )
               }
             >
@@ -317,7 +319,9 @@ const BoardDashboard = ({
                 variant="danger"
                 objectType="diagram"
                 objectDisplay={diagramNote.uuid}
-                onConfirm={() => onDeleteDiagram(diagramNote.uuid, onUpdate)}
+                onConfirm={() =>
+                  onDeleteDiagram(diagramNote.uuid, onUpdate, setError)
+                }
               >
                 <Icon icon={IconNames.TRASH} />
               </ConfirmDestructive>
@@ -376,7 +380,8 @@ BoardDashboard.propTypes = {
   relatedObjectType: PropTypes.string,
   diagramHeight: PropTypes.number,
   setDiagramHeight: PropTypes.func,
-  onUpdate: PropTypes.func
+  onUpdate: PropTypes.func,
+  setError: PropTypes.func
 }
 
 const onSaveDiagram = (
@@ -384,7 +389,8 @@ const onSaveDiagram = (
   relatedObjectUuid,
   noteUuid,
   onSuccess,
-  relatedObjectType
+  relatedObjectType,
+  setError
 ) => {
   return saveDiagram(
     diagramData,
@@ -395,7 +401,7 @@ const onSaveDiagram = (
     .then(response => {
       onSuccess()
     })
-    .catch(error => console.log("error: ", error))
+    .catch(error => setError(error))
 }
 
 const saveDiagram = (
@@ -421,12 +427,12 @@ const saveDiagram = (
   })
 }
 
-const onDeleteDiagram = (uuid, onSuccess) => {
+const onDeleteDiagram = (uuid, onSuccess, setError) => {
   return deleteDiagram(uuid)
     .then(response => {
       onSuccess()
     })
-    .catch(error => console.log("delete error: ", error))
+    .catch(error => setError(error))
 }
 
 const deleteDiagram = uuid => {

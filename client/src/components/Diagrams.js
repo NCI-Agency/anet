@@ -1,4 +1,5 @@
 import Fieldset from "components/Fieldset"
+import Messages from "components/Messages"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -13,6 +14,7 @@ const DiagramsContainer = ({
 }) => {
   const [showModal, setShowModal] = useState(false)
   const [selectedDiagram, setSelectedDiagram] = useState(null)
+  const [error, setError] = useState(null)
 
   return (
     <Fieldset title="Diagrams" id="diagrams">
@@ -44,6 +46,7 @@ const DiagramsContainer = ({
       >
         <Modal.Header closeButton>Diagram Modal</Modal.Header>
         <Modal.Body>
+          <Messages error={error} />
           <div className="process-diagram" style={{ height: "600px" }}>
             <BoardDashboard
               diagramNote={selectedDiagram}
@@ -54,6 +57,7 @@ const DiagramsContainer = ({
                 onDiagramUpdate()
                 setShowModal(false)
               }}
+              setError={setError}
             />
           </div>
         </Modal.Body>
