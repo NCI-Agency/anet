@@ -4,12 +4,16 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DiagramsContainer from "components/Diagrams"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  NOTE_TYPE
+} from "components/Model"
 import { AnchorNavItem } from "components/Nav"
 import {
   jumpToTop,
@@ -233,6 +237,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
   if (includeChildrenOrgs) {
     reportQueryParams.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
   }
+  const diagrams = organization.notes.filter(
+    note => note.type === NOTE_TYPE.DIAGRAM
+  )
 
   return (
     <Formik enableReinitialize initialValues={organization}>
@@ -481,6 +488,14 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   />
                 </Fieldset>
               )}
+              <DiagramsContainer
+                diagrams={diagrams}
+                relatedObject={organization}
+                entityType={Organization}
+                onDiagramUpdate={() => {
+                  refetch()
+                }}
+              />
             </Form>
           </div>
         )
