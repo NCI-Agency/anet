@@ -13,18 +13,18 @@ describe("Show task page", () => {
   describe("When on the show page of a task with assessments", () => {
     it("We should see a table of assessments related to the current task", () => {
       ShowTask.assessmentResultsMonthly.waitForDisplayed()
-      const frenchFlagAssessmentMonthly = ShowTask.assessmentResultsMonthly.$(
-        "[id*=frenchFlag-assessment]"
+      const question1AssessmentMonthly = ShowTask.assessmentResultsMonthly.$(
+        "[id*=question1-assessment]"
       )
       // eslint-disable-next-line no-unused-expressions
-      expect(frenchFlagAssessmentMonthly.isExisting()).to.be.true
+      expect(question1AssessmentMonthly.isExisting()).to.be.true
 
       ShowTask.assessmentResultsWeekly.waitForDisplayed()
-      const frenchFlagAssessmentWeekly = ShowTask.assessmentResultsWeekly.$(
-        "[id*=levels-assessment]"
+      const question1AssessmentWeekly = ShowTask.assessmentResultsWeekly.$(
+        "[id*=question1-assessment]"
       )
       // eslint-disable-next-line no-unused-expressions
-      expect(frenchFlagAssessmentWeekly.isExisting()).to.be.true
+      expect(question1AssessmentWeekly.isExisting()).to.be.true
     })
   })
 })

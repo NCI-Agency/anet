@@ -130,6 +130,33 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the top 3 issues]
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            question1:
+              type: special_field
+              widget: likertScale
+              label: Instant assessment Question 1
+              helpText: Please provide assessment for something important
+              levels:
+                - color: red
+                  endValue: 2
+                  label: test
+                - color: "#FFBF00"
+                  endValue: 8
+                  label: mid
+                - color: green
+                  endValue: 10
+                  label: high
+              aggregation:
+                widget: likertScale
+            question2:
+              type: number
+              label: Instant assessment Question 2
+            question3:
+              type: number
+              label: Instant assessment Question 3
+
     customFieldRef1:
       label: Parent task
       placeholder: Start typing to search for a higher level task
@@ -166,54 +193,6 @@ fields:
     responsiblePositions:
       label: Responsible positions
       placeholder: Search for a position...
-    customFields:
-      assessments:
-        type: array_of_objects
-        label: Assessments definition
-        helpText: Here you can add as many assessments as needed
-        addButtonLabel: Add an assessment
-        objectLabel: Assessment
-        objectFields:
-          recurrence:
-            type: enum
-            label: Recurrence
-            helpText: Select a recurrence for this periodic assessment
-            choices:
-              once:
-                label: once
-              daily:
-                label: daily
-              weekly:
-                label: weekly
-              biweekly:
-                label: biweekly
-              semimonthly:
-                label: semimonthly
-              monthly:
-                label: monthly
-              quarterly:
-                label: quarterly
-              semiannualy:
-                label: semiannually
-              annually:
-                label: annually
-          relatedObjectType:
-            type: enum
-            label: Related object type
-            helpText: object type context in which the assessment will be made
-            choices:
-              report:
-                label: Report
-              null:
-                label: None
-          questions:
-            type: json
-            label: Questions
-            helpText: JSON that defines the assessment (you need to know what you are doing)
-            placeholder: Fill in valid JSON
-            asA: textarea
-            style:
-              height: 200px
 
   report:
     canUnpublishReports: true

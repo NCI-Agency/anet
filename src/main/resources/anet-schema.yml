@@ -121,23 +121,10 @@ $defs:
         properties:
           aggregationType:
             type: string
-            enum: [countPerValue, numbersList, valuesList]
+            enum: [countPerDate, countPerValue, countReportsByTask, likertScaleAndPieAgg, numbersList, objectsList, richText, valuesList]
           widget:
             type: string
-            enum: [pie, iqrBoxPlot, likertScale, default]
-        dependentSchemas:
-          widget:
-            oneOf:
-            - properties:
-                widget:
-                  enum: [pie, likertScale, default]
-            - properties:
-                widget:
-                  enum: [iqrBoxPlot]
-                aggregationType:
-                  type: string
-                  enum: [sum, avg, min, max]
-              required: [aggregationType]
+            enum: [default, calendar, iqrBoxPlot, likertScale, likertScaleAndPie, pie, reportsByTask, reportsMap, richText]
       # TODO: The following properties should not be here as these are only dependency fields.
       # When we have proper handling of `unevaluatedProperties` this section can be removed.
       choices:
