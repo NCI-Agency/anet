@@ -20,7 +20,7 @@ const ValidationBar = ({
       assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE] = moment(
         assessmentFieldsObject[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
       )
-        .add(Settings.fields.principal.onDemandAssessmentExpirationDays, "days")
+        .add(Settings.onDemandAssessmentExpirationDays, "days")
         .toDate()
         .toISOString()
     }

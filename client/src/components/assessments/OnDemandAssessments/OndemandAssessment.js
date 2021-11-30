@@ -70,7 +70,7 @@ const OnDemandAssessment = ({
       ENTITY_ON_DEMAND_EXPIRATION_DATE
     ].helpText = `
       If this field is left empty, the assessment will be valid for
-      ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
+      ${Settings.onDemandAssessmentExpirationDays} days.
     `
   }
 
@@ -85,9 +85,7 @@ const OnDemandAssessment = ({
       cards.push(
         <React.Fragment>
           <ValidationBar
-            assessmentExpires={
-              !!Settings.fields.principal.onDemandAssessmentExpirationDays
-            }
+            assessmentExpires={!!Settings.onDemandAssessmentExpirationDays}
             index={index}
             assessmentFieldsObject={assessmentFieldsObject}
             sortedOnDemandNotes={sortedOnDemandNotes}
