@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { PreviewField } from "components/FieldHelper"
 import Leaflet from "components/Leaflet"
 import _escape from "lodash/escape"
 import { Location } from "models"
@@ -50,18 +51,17 @@ const LocationPreview = ({ className, uuid }) => {
         <h4>{`Location ${location.name}`}</h4>
       </div>
       <div className="preview-section">
-        <div className="preview-field-label">Name</div>
-        <div className="preview-field-value">{location.name}</div>
+        <PreviewField label="Name" value={location.name} />
 
-        <div className="preview-field-label">Status</div>
-        <div className="preview-field-value">
-          {Location.humanNameOfStatus(location.status)}
-        </div>
+        <PreviewField
+          label="Status"
+          value={Location.humanNameOfStatus(location.status)}
+        />
 
-        <div className="preview-field-label">Type</div>
-        <div className="preview-field-value">
-          {Location.humanNameOfType(location.type)}
-        </div>
+        <PreviewField
+          label="Type"
+          value={Location.humanNameOfType(location.type)}
+        />
       </div>
 
       <Leaflet markers={[marker]} mapId={`${uuid}`} />
