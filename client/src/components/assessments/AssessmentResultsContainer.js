@@ -1,5 +1,5 @@
 import AssessmentResultsTable from "components/assessments/AssessmentResultsTable"
-import OnDemandAssessments from "components/assessments/OndemandAssessments"
+import OnDemandAssessment from "components/assessments/OnDemandAssessments/OndemandAssessment"
 import Model from "components/Model"
 import {
   PERIOD_FACTORIES,
@@ -42,7 +42,7 @@ const AssessmentResultsContainer = ({
           />
         ) : (
           assessmentsType === RECURRENCE_TYPE.ON_DEMAND && (
-            <OnDemandAssessments
+            <OnDemandAssessment
               key={assessmentsType}
               style={{ flex: "0 0 100%" }}
               entity={entity}

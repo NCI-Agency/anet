@@ -36,6 +36,8 @@ reportWorkflow:
 
 maxTextFieldLength: 250
 
+onDemandAssessmentExpirationDays: 108
+
 fields:
 
   task:
@@ -1136,7 +1138,6 @@ fields:
         placeholder: the six character code
 
   principal:
-    onDemandAssessmentExpirationDays: 108
     person:
       name: Afghan Partner
       countries: [Afghanistan]
