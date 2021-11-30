@@ -36,6 +36,8 @@ reportWorkflow:
 
 maxTextFieldLength: 250
 
+onDemandAssessmentExpirationDays: 108
+
 fields:
 
   task:
@@ -481,6 +483,7 @@ fields:
         type: date
         label: Not later than date
         helpText: Help text for date field
+        deprecated: true
       nlt_dt:
         type: datetime
         label: Not later than datetime
@@ -1135,7 +1138,6 @@ fields:
         placeholder: the six character code
 
   principal:
-    onDemandAssessmentExpirationDays: 108
     person:
       name: Afghan Partner
       countries: [Afghanistan]

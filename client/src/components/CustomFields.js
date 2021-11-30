@@ -846,13 +846,28 @@ export function getInvisibleFields(
   return curInvisibleFields
 }
 
+const filterDeprecatedFields = fieldsConfig => {
+  const deprecatedFields = Object.entries(fieldsConfig).reduce(
+    (accum, [fieldName, fieldConfig]) => {
+      fieldConfig.deprecated && accum.push(fieldName)
+      return accum
+    },
+    []
+  )
+  const deprecatedFieldsFiltered = Object.without(
+    fieldsConfig,
+    ...deprecatedFields
+  )
+  return deprecatedFieldsFiltered
+}
+
 export const CustomFieldsContainer = props => {
   const {
     parentFieldName,
     formikProps: { values, setFieldValue },
     fieldsConfig
   } = props
-
+  const deprecatedFieldsFiltered = filterDeprecatedFields(fieldsConfig)
   const invisibleFields = useMemo(
     () => getInvisibleFields(fieldsConfig, parentFieldName, values),
     [fieldsConfig, parentFieldName, values]
@@ -867,7 +882,11 @@ export const CustomFieldsContainer = props => {
 
   return (
     <>
-      <CustomFields invisibleFields={invisibleFields} {...props} />
+      <CustomFields
+        invisibleFields={invisibleFields}
+        {...props}
+        fieldsConfig={deprecatedFieldsFiltered}
+      />
     </>
   )
 }

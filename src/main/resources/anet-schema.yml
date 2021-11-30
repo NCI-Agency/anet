@@ -106,6 +106,7 @@ $defs:
               type: string
             filterValue:
               type: [array, string, number, boolean]
+      deprecated: boolean
       validations:
         type: array
         items:
@@ -291,7 +292,7 @@ $defs:
                 type: date
               expirationDate:
                 type: date
-              required: [assessmentDate, expirationDate]
+              required: [assessmentDate]
 
 # definition for custom sensitive information
   customSensitiveInformation:
@@ -448,6 +449,12 @@ properties:
     minimum: 0
     title: The maximum number of characters allowed in selected text fields
     description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
+
+  onDemandAssessmentExpirationDays:
+    type: integer
+    minimum: 1
+    title: The number of days before an on-demand assessment expires
+    description: Used in the UI to determine which on-demand assessments have expired
 
   fields:
     type: object
@@ -778,9 +785,6 @@ properties:
         additionalProperties: false
         required: [person, position, org]
         properties:
-          onDemandAssessmentExpirationDays:
-            type: number
-            additionalProperties: false
           person:
             type: object
             additionalProperties: false
