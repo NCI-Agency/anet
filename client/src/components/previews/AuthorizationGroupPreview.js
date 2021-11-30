@@ -1,9 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import * as FieldHelper from "components/FieldHelper"
-import Fieldset from "components/Fieldset"
+import { PreviewField } from "components/FieldHelper"
 import PositionTable from "components/PositionTable"
-import { Field, Form, Formik } from "formik"
 import { AuthorizationGroup } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -52,37 +50,25 @@ const AuthorizationGroupPreview = ({ className, uuid }) => {
   )
 
   return (
-    <Formik enableReinitialize initialValues={authorizationGroup}>
-      {() => {
-        return (
-          <div className={className}>
-            <Form className="form-horizontal" method="post">
-              <Fieldset
-                title={`Authorization Group ${authorizationGroup.name}`}
-              />
-              <Fieldset>
-                <Field name="name" component={FieldHelper.ReadonlyField} />
+    <div className={`${className} preview-content-scroll`}>
+      <div className="preview-sticky-title">
+        <h4>{`Authorization Group ${authorizationGroup.name}`}</h4>
+      </div>
+      <div className="preview-section">
+        <PreviewField label="Name" value={authorizationGroup.name} />
 
-                <Field
-                  name="status"
-                  component={FieldHelper.ReadonlyField}
-                  humanValue={AuthorizationGroup.humanNameOfStatus}
-                />
-              </Fieldset>
+        <PreviewField
+          label="Status"
+          value={AuthorizationGroup.humanNameOfStatus(
+            authorizationGroup.status
+          )}
+        />
 
-              <Fieldset title="Positions">
-                <PositionTable
-                  queryParams={{
-                    pageSize: 10,
-                    authorizationGroupUuid: uuid
-                  }}
-                />
-              </Fieldset>
-            </Form>
-          </div>
-        )
-      }}
-    </Formik>
+        <div className="preview-section">
+          <PositionTable positions={authorizationGroup.positions} />
+        </div>
+      </div>
+    </div>
   )
 }
 
