@@ -7,8 +7,12 @@ import Settings from "settings"
 
 export const AuthorizationGroupOverlayRow = item => (
   <React.Fragment key={item.uuid}>
-    <td>{item.name}</td>
-    <td>{item.description}</td>
+    <td>
+      <LinkTo modelType="AuthorizationGroup" model={item} isLink={false} />
+    </td>
+    <td>
+      {item.description}
+    </td>
   </React.Fragment>
 )
 
