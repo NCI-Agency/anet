@@ -6,7 +6,7 @@ import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
-import _isEmpty from "lodash/isEmpty"
+import PreviousPositions from "components/PreviousPositions"
 import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -206,37 +206,7 @@ const PersonPreview = ({ className, uuid }) => {
       <br />
       <h4>Previous positions</h4>
       <div className="preview-section">
-        {(_isEmpty(person.previousPositions) && (
-          <em>No positions found</em>
-        )) || (
-          <Table>
-            <thead>
-              <tr>
-                <th>Position</th>
-                <th>Dates</th>
-              </tr>
-            </thead>
-            <tbody>
-              {person.previousPositions.map((pp, idx) => (
-                <tr key={idx} id={`previousPosition_${idx}`}>
-                  <td>
-                    <LinkTo modelType="Position" model={pp.position} />
-                  </td>
-                  <td>
-                    {moment(pp.startTime).format(
-                      Settings.dateFormats.forms.displayShort.date
-                    )}{" "}
-                    - &nbsp;
-                    {pp.endTime &&
-                      moment(pp.endTime).format(
-                        Settings.dateFormats.forms.displayShort.date
-                      )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
+        <PreviousPositions history={person.previousPositions} />
       </div>
     </div>
   )
