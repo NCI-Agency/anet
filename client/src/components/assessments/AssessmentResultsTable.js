@@ -1,5 +1,8 @@
 import "components/assessments/AssessmentResultsTable.css"
-import { InstantAssessmentsRow } from "components/assessments/InstantAssessmentResults"
+import {
+  InstantAssessmentsRow,
+  QuestionSetRow
+} from "components/assessments/InstantAssessmentResults"
 import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -54,7 +57,7 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.entries(instantAssessmentConfig || {}).map(
+      {Object.entries(instantAssessmentConfig?.questions || {}).map(
         ([key, config], index) => (
           <InstantAssessmentsRow
             key={key}
@@ -64,6 +67,18 @@ const EntityAssessmentResults = ({
             periods={periods}
             periodsData={dataPerPeriod}
             isFirstRow={index === 0}
+          />
+        )
+      )}
+      {Object.entries(instantAssessmentConfig?.questionSets || {}).map(
+        ([questionSet, config]) => (
+          <QuestionSetRow
+            idSuffix={`${idSuffix}-${questionSet}`}
+            key={questionSet}
+            questionSetConfig={config}
+            questionSetKey={questionSet}
+            periods={periods}
+            periodsData={dataPerPeriod}
           />
         )
       )}

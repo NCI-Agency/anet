@@ -68,7 +68,7 @@ fields:
             issues:
               type: special_field
               label: Top 3 issues
-              placeholder:  Enter the top 3 issues
+              placeholder: Enter the top 3 issues
               widget: richTextEditor
               style:
                 height: 300px
@@ -94,7 +94,7 @@ fields:
             issues:
               type: special_field
               label: Top 3 issues
-              placeholder:  Enter the top 3 issues
+              placeholder: Enter the top 3 issues
               widget: richTextEditor
               style:
                 height: 300px
@@ -123,13 +123,40 @@ fields:
             issues:
               type: special_field
               label: Top 3 issues
-              placeholder:  Enter the top 3 issues
+              placeholder: Enter the top 3 issues
               widget: richTextEditor
               style:
                 height: 300px
               validations:
                 - type: required
                   params: [You must provide the top 3 issues]
+        - recurrence: once
+          relatedObjectType: report
+          questions:
+            question1:
+              type: special_field
+              widget: likertScale
+              label: Instant assessment Question 1
+              helpText: Please provide assessment for something important
+              levels:
+                - color: red
+                  endValue: 2
+                  label: test
+                - color: "#FFBF00"
+                  endValue: 8
+                  label: mid
+                - color: green
+                  endValue: 10
+                  label: high
+              aggregation:
+                widget: likertScale
+            question2:
+              type: number
+              label: Instant assessment Question 2
+            question3:
+              type: number
+              label: Instant assessment Question 3
+
     customFieldRef1:
       label: Parent task
       placeholder: Start typing to search for a higher level task
@@ -166,54 +193,6 @@ fields:
     responsiblePositions:
       label: Responsible positions
       placeholder: Search for a position...
-    customFields:
-      assessments:
-        type: array_of_objects
-        label: Assessments definition
-        helpText: Here you can add as many assessments as needed
-        addButtonLabel: Add an assessment
-        objectLabel: Assessment
-        objectFields:
-          recurrence:
-            type: enum
-            label: Recurrence
-            helpText: Select a recurrence for this periodic assessment
-            choices:
-              once:
-                label: once
-              daily:
-                label: daily
-              weekly:
-                label: weekly
-              biweekly:
-                label: biweekly
-              semimonthly:
-                label: semimonthly
-              monthly:
-                label: monthly
-              quarterly:
-                label: quarterly
-              semiannualy:
-                label: semiannually
-              annually:
-                label: annually
-          relatedObjectType:
-            type: enum
-            label: Related object type
-            helpText: object type context in which the assessment will be made
-            choices:
-              report:
-                label: Report
-              null:
-                label: None
-          questions:
-            type: json
-            label: Questions
-            helpText: JSON that defines the assessment (you need to know what you are doing)
-            placeholder: Fill in valid JSON
-            asA: textarea
-            style:
-              height: 200px
 
   report:
     canUnpublishReports: true
@@ -307,7 +286,7 @@ fields:
       echelons:
         type: text
         label: Issue echelon to fix
-        placeholder:  Enter the issue echelon to fix
+        placeholder: Enter the issue echelon to fix
         validations:
           - type: required
             params: [You must provide the text field]
@@ -822,6 +801,38 @@ fields:
         - biography
         - arrayFieldName
       assessments:
+        - recurrence: quarterly
+          questions:
+            test1:
+              type: enum
+              label: Test question 1
+              choices:
+                "1":
+                  label: one
+                  color: '#c2ffb3'
+                "2":
+                  label: two
+                  color: '#ffe396'
+                "3":
+                  label: three
+                  color: '#ff8279'
+          questionSets:
+            set1:
+              label: Set 1
+              questions:
+                test1:
+                  type: enum
+                  label: Set 1 question 1
+                  choices:
+                    "1":
+                      label: one
+                      color: '#c2ffb3'
+                    "2":
+                      label: two
+                      color: '#ffe396'
+                    "3":
+                      label: three
+                      color: '#ff8279'
         - recurrence: once
           relatedObjectType: report
           questions:
@@ -835,276 +846,275 @@ fields:
                   label: Translator
                 interpreter:
                   label: Interpreter
-            translatorGotAdequateTime:
+          questionSets:
+            translator:
+              label: Translator Questions
+              description: Set of questions to assess the linguist in translator role
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
-              type: enum
-              helpText: "Did you provide the translator with adequate time to finish the translation?"
-              label: Provided adequate time (Translator)
-              choices:
-                yes:
-                  label: "Yes"
-                no:
-                  label: "No"
-            translatorMetDeadline:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
-              type: enum
-              helpText: "Did the translator meet the deadline?"
-              label: Met the deadline (Translator)
-              choices:
-                yes:
-                  label: "Yes"
-                no:
-                  label: "No"
-            translatorSubjectVocabularyScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
-              type: enum
-              helpText: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
-              label: Subject vocabulary (Translator)
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            translatorSubjectComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator" && @.translatorSubjectVocabularyScore === "B")]
-              type: special_field
-              helpText: "Comment on bad translator subject vocabulary"
-              label: Vocabulary comments (Translator)
-              widget: richTextEditor
-              style:
-                height: 100px
-            translatorOverallScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
-              type: enum
-              label: "Overall evaluation (Translator)"
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            translatorOverallComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator" && @.translatorOverallScore === "B")]
-              type: special_field
-              helpText: "Comment on bad overall translator evaluation"
-              label: Overall comments (Translator)
-              widget: richTextEditor
-              style:
-                height: 100px
-            interpreterHadPreMeeting:
+              questions:
+                translatorGotAdequateTime:
+                  type: enum
+                  helpText: "Did you provide the translator with adequate time to finish the translation?"
+                  label: Provided adequate time
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                translatorMetDeadline:
+                  type: enum
+                  helpText: "Did the translator meet the deadline?"
+                  label: Met the deadline
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                translatorSubjectVocabularyScore:
+                  type: enum
+                  helpText: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+                  label: Subject vocabulary
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                translatorSubjectComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad translator subject vocabulary"
+                  label: Vocabulary comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                translatorOverallScore:
+                  type: enum
+                  label: Overall evaluation
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                translatorOverallComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.questions.translatorOverallScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad overall translator evaluation"
+                  label: Overall comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+            interpreter:
+              label: Interpreter Questions
+              description: Set of questions to assess the linguist in interpreter role
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "Did you hold a pre-meeting with the interpreter?"
-              label: Pre-meeting (Interpreter)
-              choices:
-                yes:
-                  label: "Yes"
-                no:
-                  label: "No"
-            interpreterProvidedWithNecessarySubjectMaterial:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
-              label: Subject material provided (Interpreter)
-              choices:
-                yes:
-                  label: "Yes"
-                no:
-                  label: "No"
-            interpreterSubjectVocabularyScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
-              label: Subject vocabulary (Interpreter)
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            interpreterSubjectVocabularyComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterSubjectVocabularyScore === "B")]
-              type: special_field
-              helpText: "Comment on bad interpreter subject vocabulary"
-              label: Vocabulary comments (Interpreter)
-              widget: richTextEditor
-              style:
-                height: 100px
-            interpreterSubjectUnderstandingScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
-              label: Subject understanding (Interpreter)
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            interpreterSubjectUnderstandingComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterSubjectUnderstandingScore === "B")]
-              type: special_field
-              helpText: "Comment on bad interpreter subject understanding"
-              label: Subject understanding comments (Interpreter)
-              widget: richTextEditor
-              style:
-                height: 100px
-            interpreterWorkEthicScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "How was the interpreter’s work ethic?"
-              label: Work ethic (Interpreter)
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            interpreterWorkEthicComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterWorkEthicScore === "B")]
-              type: special_field
-              helpText: "Comment on bad interpreter work ethic"
-              label: Work ethic comments (Interpreter)
-              widget: richTextEditor
-              style:
-                height: 100px
-            interpreterPostureScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
-              label: Posture (Interpreter)
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            interpreterPostureComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterPostureScore === "B")]
-              type: special_field
-              helpText: "Comment on bad interpreter posture"
-              label: Posture comments (Interpreter)
-              widget: richTextEditor
-              style:
-                height: 100px
-            interpreterRoleScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
-              label: Role score (Interpreter)
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            interpreterRoleComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterRoleScore === "B")]
-              type: special_field
-              helpText: "Comment on bad interpreter role"
-              label: Role comment (Interpreter)
-              widget: richTextEditor
-              style:
-                height: 100px
-            interpreterInterpretationOverallScore:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
-              type: enum
-              label: "Overall evaluation (Interpreter)"
-              choices:
-                "EX":
-                  label: Excellent
-                  color: '#03f8fc'
-                "VG":
-                  label: Very Good
-                  color: '#00fc03'
-                "G":
-                  label: Good
-                  color: '#84fc03'
-                "S":
-                  label: Satisfactory
-                  color: '#e3fc03'
-                "B":
-                  label: Bad
-                  color: '#fc5a03'
-            interpreterInterpretationOverallComment:
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter" && @.interpreterInterpretationOverallScore === "B")]
-              type: special_field
-              helpText: "Comment on bad overall interpreter evaluation"
-              label: Overall evaluation comment (Interpreter)
-              widget: richTextEditor
-              style:
-                height: 100px
+              questions:
+                interpreterHadPreMeeting:
+                  type: enum
+                  helpText: "Did you hold a pre-meeting with the interpreter?"
+                  label: Pre-meeting
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                interpreterProvidedWithNecessarySubjectMaterial:
+                  type: enum
+                  helpText: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
+                  label: Subject material provided
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                interpreterSubjectVocabularyScore:
+                  type: enum
+                  helpText: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+                  label: Subject vocabulary
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterSubjectVocabularyComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter subject vocabulary"
+                  label: Vocabulary comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterSubjectUnderstandingScore:
+                  type: enum
+                  helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
+                  label: Subject understanding
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterSubjectUnderstandingComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter subject understanding"
+                  label: Subject understanding comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterWorkEthicScore:
+                  type: enum
+                  helpText: "How was the interpreter’s work ethic?"
+                  label: Work ethic
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterWorkEthicComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter work ethic"
+                  label: Work ethic comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterPostureScore:
+                  type: enum
+                  helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
+                  label: Posture
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterPostureComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterPostureScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter posture"
+                  label: Posture comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterRoleScore:
+                  type: enum
+                  helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
+                  label: Role score
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterRoleComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterRoleScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter role"
+                  label: Role comment
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterInterpretationOverallScore:
+                  type: enum
+                  label: Overall evaluation
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterInterpretationOverallComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad overall interpreter evaluation"
+                  label: Overall evaluation comment
+                  widget: richTextEditor
+                  style:
+                    height: 100px
     position:
       name: NATO Billet
       type: ANET User
@@ -1146,40 +1156,59 @@ fields:
                 "3":
                   label: three
                   color: '#ff8279'
-            test2:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 2
-              choices:
-                "3":
-                  label: three
-                  color: '#ff8279'
-                "4":
-                  label: four
-                  color: '#ffe396'
-                "5":
-                  label: five
-                  color: '#c2ffb3'
-            test3:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 3
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ffe396'
-                "3":
-                  label: three
-                  color: '#ff8279'
+              validations:
+                - type: required
+                  params: [You must provide Test question 1]
             text:
               type: special_field
               label: Text
               widget: richTextEditor
               style:
                 height: 100px
+              validations:
+                - type: required
+                  params: [You must provide Text]
+          questionSets:
+            topLevelQs:
+              label: Top Level Question Set
+              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
+              questions:
+                test2:
+                  type: enum
+                  label: Test question 2
+                  choices:
+                    "3":
+                      label: three
+                      color: '#ff8279'
+                    "4":
+                      label: four
+                      color: '#ffe396'
+                    "5":
+                      label: five
+                      color: '#c2ffb3'
+                  validations:
+                    - type: required
+                      params: [You must provide Test question 2]
+              questionSets:
+                bottomLevelQs:
+                  label: Bottom Level Question Set
+                  questions:
+                    test3:
+                      type: enum
+                      label: Test question 3
+                      choices:
+                        "1":
+                          label: one
+                          color: '#c2ffb3'
+                        "2":
+                          label: two
+                          color: '#ffe396'
+                        "3":
+                          label: three
+                          color: '#ff8279'
+                      validations:
+                        - type: required
+                          params: [You must provide Test question 3]
         - recurrence: once
           relatedObjectType: report
           questions:
@@ -1358,7 +1387,7 @@ imagery:
 automaticallyInactivateUsers:
   emailRemindersDaysPrior: [15, 30, 45]
   ignoredDomainNames: []
-  checkIntervalInSecs: 86400  # 60 * 60 * 24
+  checkIntervalInSecs: 86400 # 60 * 60 * 24
 
 dashboards:
   - label: dashboard0

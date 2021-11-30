@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -351,6 +352,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   @InTransaction
   public int mergePeople(Person winner, Person loser) {
+    final String winnerUuid = winner.getUuid();
+    final String loserUuid = loser.getUuid();
+
+    // Update the winner's fields
+    update(winner);
+
     // For reports where both winner and loser are in the reportPeople:
     // 1. set winner's isPrimary, isAttendee and is isAuthor flags to the logical OR of both
     final String sqlUpd = "WITH dups AS ( SELECT"
@@ -367,8 +374,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
         + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
     // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
-    final String winnerUuid = winner.getUuid();
-    final String loserUuid = loser.getUuid();
     getDbHandle().createUpdate(String.format(sqlUpd, DaoUtils.isMsSql() ? "|" : "OR"))
         .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
     // 2. delete the loser so we don't have duplicates
@@ -384,22 +389,39 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
         .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
 
-    // update report people, should now be unique
+    // Update report people, should now be unique
     updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
 
-    // update approvals this person might have done
+    // Update approvals this person might have done
     updateForMerge("reportActions", "personUuid", winnerUuid, loserUuid);
 
-    // update comment authors
+    // Update comment authors
     updateForMerge("comments", "authorUuid", winnerUuid, loserUuid);
 
-    // update position history
-    updateForMerge("peoplePositions", "personUuid", winnerUuid, loserUuid);
+    // Remove winner and loser from (old) position
+    final LocalDateTime now = DaoUtils.asLocalDateTime(Instant.now());
+    getDbHandle()
+        .createUpdate("/* personMergePositionRemovePerson.update */ UPDATE positions "
+            + "SET \"currentPersonUuid\" = NULL, \"updatedAt\" = :updatedAt "
+            + "WHERE \"currentPersonUuid\" IN ( :winnerUuid, :loserUuid )")
+        .bind("updatedAt", now).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .execute();
+    // Set winner in (new) position
+    getDbHandle()
+        .createUpdate("/* personMergePositionAddPerson.update */ UPDATE positions "
+            + "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
+            + "WHERE uuid = :positionUuid")
+        .bind("personUuid", winnerUuid).bind("updatedAt", now)
+        .bind("positionUuid", DaoUtils.getUuid(winner.getPosition())).execute();
+    // Remove loser from position history
+    deleteForMerge("peoplePositions", "personUuid", loserUuid);
+    // Update position history with given input on winner
+    updatePersonHistory(winner);
 
-    // update note authors
+    // Update note authors
     updateForMerge("notes", "authorUuid", winnerUuid, loserUuid);
 
-    // update notes
+    // Update notes
     updateM2mForMerge("noteRelatedObjects", "noteUuid", "relatedObjectUuid", winnerUuid, loserUuid);
 
     // Update customSensitiveInformation for winner
@@ -408,8 +430,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     // Delete customSensitiveInformation for loser
     deleteForMerge("customSensitiveInformation", "relatedObjectUuid", loserUuid);
 
-    // finally, delete the person!
+    // Finally, delete loser
     final int nr = deleteForMerge("people", "uuid", loserUuid);
+
     // E.g. positions may have been updated, so evict from the cache
     evictFromCache(winner);
     evictFromCache(loser);
@@ -466,10 +489,14 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     // Delete old history
     final int numRows = getDbHandle()
         .execute("DELETE FROM \"peoplePositions\"  WHERE \"personUuid\" = ?", personUuid);
-    // Add new history
-    for (final PersonPositionHistory history : p.getPreviousPositions()) {
-      updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
-          history.getEndTime());
+    if (Utils.isEmptyOrNull(p.getPreviousPositions())) {
+      updatePeoplePositions(DaoUtils.getUuid(p.getPosition()), personUuid, Instant.now(), null);
+    } else {
+      // Store the history as given
+      for (final PersonPositionHistory history : p.getPreviousPositions()) {
+        updatePeoplePositions(history.getPositionUuid(), personUuid, history.getStartTime(),
+            history.getEndTime());
+      }
     }
     return numRows;
   }
@@ -477,33 +504,35 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @InTransaction
   public boolean hasHistoryConflict(final String uuid, final String loserUuid,
       final List<PersonPositionHistory> history, final boolean checkPerson) {
-    final String personPositionClause = checkPerson
-        ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
-        : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
-    for (final PersonPositionHistory pph : history) {
-      final Query q;
-      final Instant endTime = pph.getEndTime();
-      if (endTime == null) {
-        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
-            + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
-            + ") AND " + personPositionClause);
-      } else {
-        q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
-            + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
-            + " OR (\"endedAt\" IS NOT NULL AND"
-            + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
-            + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
-      }
-      final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
-      final Number count =
-          (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
-              .bind("personUuid", checkPerson ? uuid : histUuid)
-              .bind("positionUuid", checkPerson ? histUuid : uuid)
-              .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
-              .get("count");
+    if (!Utils.isEmptyOrNull(history)) {
+      final String personPositionClause = checkPerson
+          ? "\"personUuid\" NOT IN ( :personUuid, :loserUuid ) AND \"positionUuid\" = :positionUuid"
+          : "\"personUuid\" = :personUuid AND \"positionUuid\" NOT IN ( :positionUuid, :loserUuid )";
+      for (final PersonPositionHistory pph : history) {
+        final Query q;
+        final Instant endTime = pph.getEndTime();
+        if (endTime == null) {
+          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\"  WHERE ("
+              + " \"endedAt\" IS NULL OR (\"endedAt\" IS NOT NULL AND \"endedAt\" >= :startTime)"
+              + ") AND " + personPositionClause);
+        } else {
+          q = getDbHandle().createQuery("SELECT COUNT(*) AS count FROM \"peoplePositions\" WHERE ("
+              + "(\"endedAt\" IS NULL AND \"createdAt\" <= :endTime)"
+              + " OR (\"endedAt\" IS NOT NULL AND"
+              + " \"createdAt\" <= :endTime AND \"endedAt\" >= :startTime)) AND "
+              + personPositionClause).bind("endTime", DaoUtils.asLocalDateTime(endTime));
+        }
+        final String histUuid = checkPerson ? pph.getPositionUuid() : pph.getPersonUuid();
+        final Number count =
+            (Number) q.bind("startTime", DaoUtils.asLocalDateTime(pph.getStartTime()))
+                .bind("personUuid", checkPerson ? uuid : histUuid)
+                .bind("positionUuid", checkPerson ? histUuid : uuid)
+                .bind("loserUuid", Utils.orIfNull(loserUuid, "")).map(new MapMapper(false)).one()
+                .get("count");
 
-      if (count.longValue() > 0) {
-        return true;
+        if (count.longValue() > 0) {
+          return true;
+        }
       }
     }
     return false;

@@ -387,6 +387,11 @@ const ButtonToggleGroupField = ({
   enableClear,
   ...otherProps
 }) => {
+  let { className } = otherProps
+  const { validationState } = getFormGroupValidationState(field, form)
+  if (validationState) {
+    className = classNames(className, "is-invalid")
+  }
   const widgetElem = useMemo(
     () => (
       <>
@@ -398,6 +403,7 @@ const ButtonToggleGroupField = ({
           // but you forgot to pass an `id` or `name` attribute to your input"
           onBlur={null}
           {...otherProps}
+          className={className}
         >
           {buttons.map((button, index) => {
             if (!button) {
@@ -443,12 +449,12 @@ const ButtonToggleGroupField = ({
         {!_isEmpty(buttons) && enableClear && (
           <RemoveButton
             title="Clear choice"
-            onClick={() => form.setFieldValue(field.name, "", false)}
+            onClick={() => form.setFieldValue(field.name, "", true)}
           />
         )}
       </>
     ),
-    [buttons, field, form, disabled, enableClear, otherProps, type]
+    [buttons, field, form, disabled, enableClear, otherProps, type, className]
   )
   return (
     <Field

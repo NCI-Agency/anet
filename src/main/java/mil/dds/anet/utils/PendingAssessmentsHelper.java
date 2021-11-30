@@ -2,7 +2,6 @@ package mil.dds.anet.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.ImmutableList;
 import java.lang.invoke.MethodHandles;
 import java.time.DayOfWeek;
@@ -225,9 +224,7 @@ public class PendingAssessmentsHelper {
   public static final String PRINCIPAL_PERSON_ASSESSMENTS = "fields.principal.person.assessments";
   public static final String TASK_SUB_LEVEL_ASSESSMENTS = "fields.task.subLevel.assessments";
   public static final String TASK_TOP_LEVEL_ASSESSMENTS = "fields.task.topLevel.assessments";
-  // JSON fields in task.customFields we use
-  public static final String TASK_ASSESSMENTS = "assessments";
-  public static final String TASK_RECURRENCE = "recurrence";
+  public static final String ASSESSMENT_RECURRENCE = "recurrence";
   // JSON fields in note.text we use
   public static final String NOTE_RECURRENCE = "__recurrence";
   public static final String NOTE_PERIOD_START = "__periodStart";
@@ -252,9 +249,9 @@ public class PendingAssessmentsHelper {
     }
 
     // Look up periodic assessment definitions for people in the dictionary
-    final Set<Recurrence> globalPositionAssessmentRecurrence =
-        getGlobalAssessmentRecurrence(recurrenceSet, PRINCIPAL_PERSON_ASSESSMENTS);
-    logger.trace("globalPositionAssessmentRecurrence={}", globalPositionAssessmentRecurrence);
+    final Set<Recurrence> positionAssessmentRecurrence =
+        getAssessmentRecurrence(recurrenceSet, PRINCIPAL_PERSON_ASSESSMENTS);
+    logger.trace("positionAssessmentRecurrence={}", positionAssessmentRecurrence);
 
     // Look up periodic assessment definitions for all tasks
     final Map<Task, Set<Recurrence>> taskAssessmentRecurrence = new HashMap<>();
@@ -264,7 +261,7 @@ public class PendingAssessmentsHelper {
 
     // Prepare maps of positions and tasks linked to active advisor positions
     final Map<Position, ObjectsToAssess> objectsToAssessByPosition = new HashMap<>();
-    return preparePositionAssessmentMap(context, globalPositionAssessmentRecurrence,
+    return preparePositionAssessmentMap(context, positionAssessmentRecurrence,
         objectsToAssessByPosition).thenCompose(allPositionsToAssess -> {
           logger.trace("the following positions need to be checked for missing assessments: {}",
               allPositionsToAssess);
@@ -325,22 +322,22 @@ public class PendingAssessmentsHelper {
     return date != null && (lastRun == null || date.isAfter(lastRun) && !date.isAfter(now));
   }
 
-  private Set<Recurrence> getGlobalAssessmentRecurrence(final Set<Recurrence> recurrenceSet,
+  private Set<Recurrence> getAssessmentRecurrence(final Set<Recurrence> recurrenceSet,
       final String keyPath) {
-    final Set<Recurrence> globalPersonAssessmentRecurrence = new HashSet<>();
+    final Set<Recurrence> assessmentRecurrence = new HashSet<>();
     @SuppressWarnings("unchecked")
-    final List<Map<String, Object>> personAssessmentDefinitions =
+    final List<Map<String, Object>> assessmentDefinitions =
         (List<Map<String, Object>>) config.getDictionaryEntry(keyPath);
-    if (personAssessmentDefinitions != null) {
-      personAssessmentDefinitions.stream().forEach(pad -> {
+    if (assessmentDefinitions != null) {
+      assessmentDefinitions.stream().forEach(pad -> {
         final Recurrence recurrence =
-            Recurrence.valueOfRecurrence((String) pad.get(TASK_RECURRENCE));
+            Recurrence.valueOfRecurrence((String) pad.get(ASSESSMENT_RECURRENCE));
         if (shouldAddRecurrence(recurrenceSet, recurrence)) {
-          globalPersonAssessmentRecurrence.add(recurrence);
+          assessmentRecurrence.add(recurrence);
         }
       });
     }
-    return globalPersonAssessmentRecurrence;
+    return assessmentRecurrence;
   }
 
   private boolean shouldAddRecurrence(final Set<Recurrence> recurrenceSet,
@@ -351,60 +348,29 @@ public class PendingAssessmentsHelper {
   private void addTaskDefinitions(final Set<Recurrence> recurrenceSet,
       final Map<Task, Set<Recurrence>> taskAssessmentRecurrence, boolean topLevel) {
     // Look up periodic assessment definitions for all tasks in the dictionary
-    final Set<Recurrence> globalTaskAssessmentRecurrence = getGlobalAssessmentRecurrence(
-        recurrenceSet, topLevel ? TASK_TOP_LEVEL_ASSESSMENTS : TASK_SUB_LEVEL_ASSESSMENTS);
+    final Set<Recurrence> assessmentRecurrence = getAssessmentRecurrence(recurrenceSet,
+        topLevel ? TASK_TOP_LEVEL_ASSESSMENTS : TASK_SUB_LEVEL_ASSESSMENTS);
 
-    // Look up periodic assessment definitions for each tasks in customFields
-    final List<Task> tasks = getActiveTasks(topLevel);
-    tasks.stream().forEach(t -> {
-      if (!globalTaskAssessmentRecurrence.isEmpty()) {
-        // Add all global recurrence definitions for this task
-        taskAssessmentRecurrence.computeIfAbsent(t,
-            task -> new HashSet<>(globalTaskAssessmentRecurrence));
-      }
-      try {
-        final JsonNode taskCustomFields = Utils.parseJsonSafe(t.getCustomFields());
-        if (taskCustomFields != null) {
-          final JsonNode taskAssessmentsDefinition = taskCustomFields.get(TASK_ASSESSMENTS);
-          if (taskAssessmentsDefinition != null && taskAssessmentsDefinition.isArray()) {
-            final ArrayNode arrayNode = (ArrayNode) taskAssessmentsDefinition;
-            for (int i = 0; i < arrayNode.size(); i++) {
-              final JsonNode recurrenceDefinition = arrayNode.get(i).get(TASK_RECURRENCE);
-              if (recurrenceDefinition != null) {
-                final Recurrence recurrence =
-                    Recurrence.valueOfRecurrence(recurrenceDefinition.asText());
-                if (shouldAddRecurrence(recurrenceSet, recurrence)) {
-                  // Add task-specific recurrence definition
-                  taskAssessmentRecurrence.compute(t, (task, currentValue) -> {
-                    if (currentValue == null) {
-                      return new HashSet<>(Collections.singleton(recurrence));
-                    } else {
-                      currentValue.add(recurrence);
-                      return currentValue;
-                    }
-                  });
-                }
-              }
-            }
-          }
-        }
-      } catch (JsonProcessingException ignored) {
-        // Invalid JSON, log and skip it
-        logger.error("Task {} has invalid JSON in customFields: {}", t, t.getCustomFields());
-      }
-    });
+    if (!assessmentRecurrence.isEmpty()) {
+      // Look up periodic assessment definitions for each active task
+      final List<Task> tasks = getActiveTasks(topLevel);
+      tasks.stream().forEach(t -> {
+        // Add all recurrence definitions for this task
+        taskAssessmentRecurrence.computeIfAbsent(t, task -> new HashSet<>(assessmentRecurrence));
+      });
+    }
   }
 
   private CompletableFuture<Map<Position, Set<Recurrence>>> preparePositionAssessmentMap(
-      final Map<String, Object> context, final Set<Recurrence> globalPositionAssessmentRecurrence,
+      final Map<String, Object> context, final Set<Recurrence> positionAssessmentRecurrence,
       final Map<Position, ObjectsToAssess> objectsToAssessByPosition) {
     final Map<Position, Set<Recurrence>> allPositionsToAssess = new HashMap<>();
     final CompletableFuture<?>[] allFutures = getActiveAdvisorPositions(true).stream()
-        .map(p -> getPositionsToAssess(context, p, globalPositionAssessmentRecurrence)
+        .map(p -> getPositionsToAssess(context, p, positionAssessmentRecurrence)
             .thenApply(positionsToAssess -> {
               if (!positionsToAssess.isEmpty()) {
                 positionsToAssess.stream().forEach(pta -> allPositionsToAssess.put(pta,
-                    new HashSet<>(globalPositionAssessmentRecurrence)));
+                    new HashSet<>(positionAssessmentRecurrence)));
                 objectsToAssessByPosition.put(p, new ObjectsToAssess(positionsToAssess, null));
               }
               return null;
@@ -473,8 +439,8 @@ public class PendingAssessmentsHelper {
   }
 
   private CompletableFuture<Set<Position>> getPositionsToAssess(final Map<String, Object> context,
-      final Position position, final Set<Recurrence> globalPersonAssessmentRecurrence) {
-    if (position == null || globalPersonAssessmentRecurrence.isEmpty()) {
+      final Position position, final Set<Recurrence> personAssessmentRecurrence) {
+    if (position == null || personAssessmentRecurrence.isEmpty()) {
       return CompletableFuture.completedFuture(Collections.emptySet());
     } else {
       return position.loadAssociatedPositions(context).thenApply(ap -> ap.stream()

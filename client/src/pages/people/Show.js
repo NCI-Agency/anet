@@ -28,6 +28,7 @@ import {
   SubscriptionIcon,
   useBoilerplate
 } from "components/Page"
+import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
@@ -231,6 +232,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
   const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
   const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+
   return (
     <Formik enableReinitialize initialValues={person}>
       {() => {
@@ -439,7 +441,7 @@ const PersonShow = ({ pageDispatchers }) => {
         .map(([el, key]) =>
           React.cloneElement(el, {
             key,
-            extraColElem: extraColElems[key] || el.props.extraColElem,
+            extraColElem: extraColElems[key] || el.props.extraColElem || null,
             labelColumnWidth: 4
           })
         )
@@ -591,37 +593,7 @@ const PersonShow = ({ pageDispatchers }) => {
   }
 
   function getPrevPositionsHumanValue() {
-    return _isEmpty(person.previousPositions) ? (
-      <em>No positions found</em>
-    ) : (
-      <Table id="previous-positions">
-        <thead>
-          <tr>
-            <th>Position</th>
-            <th>Dates</th>
-          </tr>
-        </thead>
-        <tbody>
-          {person.previousPositions.map((pp, idx) => (
-            <tr key={idx} id={`previousPosition_${idx}`}>
-              <td>
-                <LinkTo modelType="Position" model={pp.position} />
-              </td>
-              <td>
-                {moment(pp.startTime).format(
-                  Settings.dateFormats.forms.displayShort.date
-                )}{" "}
-                - &nbsp;
-                {pp.endTime &&
-                  moment(pp.endTime).format(
-                    Settings.dateFormats.forms.displayShort.date
-                  )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    )
+    return <PreviousPositions history={person.previousPositions} />
   }
 
   function renderCounterparts(position) {

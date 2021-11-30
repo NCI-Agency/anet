@@ -14,6 +14,7 @@ import Model, {
 } from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
@@ -22,6 +23,7 @@ import { Badge, Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
+import QuestionSet from "./QuestionSet"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -52,18 +54,21 @@ const OnDemandAssessments = ({
   })
   // 'assessmentConfig' has question set for ondemand assessments defined in the dictionary
   // and 'assessmentYupSchema' used for this question set.
-  const {
-    assessmentConfig,
-    assessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails(recurrence)
-
-  const filteredAssessmentConfig = Model.filterAssessmentConfig(
-    assessmentConfig,
-    entity
+  const { assessmentConfig, assessmentYupSchema } = useMemo(
+    () => entity.getPeriodicAssessmentDetails(recurrence),
+    [entity, recurrence]
   )
-  filteredAssessmentConfig[
+
+  const filteredAssessmentConfig = useMemo(
+    () => Model.filterAssessmentConfig(assessmentConfig, entity),
+    [assessmentConfig, entity]
+  )
+  filteredAssessmentConfig.questions[
     ENTITY_ON_DEMAND_EXPIRATION_DATE
-  ].helpText = ` If this field is left empty, the assessment will be valid for ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.`
+  ].helpText = `
+    If this field is left empty, the assessment will be valid for
+    ${Settings.fields.principal.onDemandAssessmentExpirationDays} days.
+  `
 
   // Cards array updated before loading the page & after every save of ondemand assessment.
   const assessmentCards = useMemo(() => {
@@ -226,14 +231,33 @@ const OnDemandAssessments = ({
                 >
                   {() => {
                     return (
-                      <ReadonlyCustomFields
-                        parentFieldName={parentFieldName}
-                        fieldsConfig={assessmentConfig}
-                        values={{
-                          [parentFieldName]: assessmentFieldsObject
-                        }}
-                        vertical
-                      />
+                      <>
+                        {!_isEmpty(filteredAssessmentConfig.questions) && (
+                          <ReadonlyCustomFields
+                            parentFieldName={parentFieldName}
+                            fieldsConfig={filteredAssessmentConfig.questions}
+                            values={{
+                              [parentFieldName]: assessmentFieldsObject
+                            }}
+                            vertical
+                          />
+                        )}
+                        {!_isEmpty(filteredAssessmentConfig.questionSets) && (
+                          <QuestionSet
+                            parentFieldName={`${parentFieldName}.questionSets`}
+                            questionSets={
+                              filteredAssessmentConfig?.questionSets
+                            }
+                            formikProps={{
+                              values: {
+                                [parentFieldName]: assessmentFieldsObject
+                              }
+                            }}
+                            readonly={true}
+                            vertical
+                          />
+                        )}
+                      </>
                     )
                   }}
                 </Formik>
@@ -256,8 +280,8 @@ const OnDemandAssessments = ({
         })
     }
   }, [
+    filteredAssessmentConfig,
     entity,
-    assessmentConfig,
     onUpdateAssessment,
     canAddAssessment,
     numberOfPeriods
@@ -360,6 +384,7 @@ const OnDemandAssessments = ({
                 : ""
           }}
           assessment={editModeObject.questionnaireResults}
+          entity={entity}
           title={`Assessment for ${entity.toString()}`}
           assessmentYupSchema={assessmentYupSchema}
           recurrence={recurrence}

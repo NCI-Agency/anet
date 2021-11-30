@@ -534,21 +534,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     // Update the winner's fields
     update(winner);
 
-    // Update position history with given input on winnerPosition
+    // Remove loser from position history
     deleteForMerge("peoplePositions", "positionUuid", loserUuid);
-    deleteForMerge("peoplePositions", "positionUuid", winnerUuid);
-    if (Utils.isEmptyOrNull(winner.getPreviousPeople())) {
-      AnetObjectEngine.getInstance().getPersonDao().updatePeoplePositions(winnerUuid,
-          winner.getPersonUuid(), Instant.now(), null);
-    } else {
-      // Store the history as given
-      for (final PersonPositionHistory pph : winner.getPreviousPeople()) {
-        AnetObjectEngine.getInstance().getPersonDao().updatePeoplePositions(winnerUuid,
-            pph.getPersonUuid(), pph.getStartTime(), pph.getEndTime());
-      }
-    }
+    // Update position history with given input on winner
+    updatePositionHistory(winner);
 
-    // Update positionRelationships with given input on winnerPosition
+    // Update positionRelationships with given input on winner
     final Set<String> existingApUuids =
         existingAssociatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
     // delete common relations of merging positions
@@ -629,15 +620,20 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @InTransaction
-  public int updatePositionPreviousPeople(Position pos) {
+  public int updatePositionHistory(Position pos) {
+    final PersonDao personDao = AnetObjectEngine.getInstance().getPersonDao();
     final String posUuid = pos.getUuid();
     // Delete old history
     final int numRows = getDbHandle()
         .execute("DELETE FROM \"peoplePositions\"  WHERE \"positionUuid\" = ?", posUuid);
-    // Add new history
-    for (final PersonPositionHistory history : pos.getPreviousPeople()) {
-      AnetObjectEngine.getInstance().getPersonDao().updatePeoplePositions(posUuid,
-          history.getPersonUuid(), history.getStartTime(), history.getEndTime());
+    if (Utils.isEmptyOrNull(pos.getPreviousPeople())) {
+      personDao.updatePeoplePositions(posUuid, pos.getPersonUuid(), Instant.now(), null);
+    } else {
+      // Add new history
+      for (final PersonPositionHistory history : pos.getPreviousPeople()) {
+        personDao.updatePeoplePositions(posUuid, history.getPersonUuid(), history.getStartTime(),
+            history.getEndTime());
+      }
     }
     return numRows;
   }

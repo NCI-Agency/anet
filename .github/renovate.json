@@ -20,24 +20,10 @@
       "groupSlug": "most-minor-patch"
     },
     {
-      "matchPackagePatterns": [
-        "^org.liquibase"
-      ],
-      "groupName": "org.liquibase",
-      "groupSlug": "org.liquibase"
-    },
-    {
       "matchPackageNames": [
         "com.microsoft.sqlserver:mssql-jdbc"
       ],
       "allowedVersions": "/^.*\\.jre8$/"
-    },
-    {
-      "matchPackageNames": [
-        "com.networknt:json-schema-validator",
-        "draft-js"
-      ],
-      "enabled": false
     }
   ],
   "postUpdateOptions": [

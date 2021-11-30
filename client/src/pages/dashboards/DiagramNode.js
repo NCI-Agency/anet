@@ -161,7 +161,7 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
           />
           <>
             {instantAssessmentConfig &&
-              Object.entries(instantAssessmentConfig || {}).map(
+              Object.entries(instantAssessmentConfig.questions || {}).map(
                 ([questionKey, questionConfig]) => {
                   const aggregationWidget = getAggregationWidget(
                     questionConfig,

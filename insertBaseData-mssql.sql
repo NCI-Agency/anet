@@ -96,6 +96,10 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES (lower(newid()), 'KYLESON, Kyle', 0, 1, 'kyleson+kyle@example.com', '+1-412-7324', 'CIV', 'Kyle is another test person we have in the database', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'BEMERGED, Myposwill', 0, 1, 'bemerged+myposwill@example.com', '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
+	VALUES ('3cb2076c-5317-47fe-86ad-76f298993917', 'MERGED, Duplicate Winner', 0, 1, 'merged+winner@example.com', '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
+	VALUES ('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'MERGED, Duplicate Loser', 0, 1, 'merged+loser@example.com', '+1-876-5432', 'CTR', 'Loser is a test person who will be merged', 'Afghanistan', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Super Users
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -421,16 +425,10 @@ INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, cu
 		(N'1b5eb36b-456c-46b7-ae9e-1c89e9075292', '1.1.B', 'Milestone the Second in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
 		(N'7fdef880-1bf3-4e56-8476-79166324023f', '1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fdf107e7-a88a-4dc4-b744-748e9aaffabc'),
 		(N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', 'EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
-		(N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a');
-
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid, customFields)
-  VALUES
-    (N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessments":[{"questions":{ "question1": { "type": "special_field", "widget": "likertScale", "label": "Test Question 1", "helpText": "Please provide assessment for something important", "levels": [ { "color": "red", "endValue": 2, "label": "test" }, { "color": "#FFBF00", "endValue": 8, "label": "mid" }, { "color": "green", "endValue": 10, "label": "high" } ], "aggregation": { "widget": "likertScale" } }, "question2": { "type": "number", "label": "Test Question 2", "aggregation": { "widget": "numberAggregation" } }, "question3": { "type": "number", "label": "Test Question 3", "aggregation": { "widget": "numberAggregation" } } },"relatedObjectType":"report"}] }'),
-    (N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessments":[{"questions":{ "frenchFlag": { "type": "special_field", "widget": "likertScale", "label": "French Flag assessment", "helpText": "Please tell us which is the best color in the French flag", "levels": [ { "color": "blue", "endValue": 3.3, "label": "blue" }, { "color": "white", "endValue": 6.6, "label": "white" }, { "color": "red", "endValue": 10, "label": "red" } ] }, "levels": { "type": "enumset", "label": "Achieved levels", "choices": { "lvl1": { "label": "Level 1" },  "lvl2": { "label": "Level 2" }, "lvl3": { "label": "Level 3" } } }, "description": { "type": "special_field", "label": "Detail levels", "widget": "richTextEditor" } },"relatedObjectType":"report"}] }'),
-    (N'6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0', '{ "assessments":[{"questions":{ "question1": { "type": "special_field", "widget": "likertScale", "label": "Monthly assessment Question 1", "helpText": "Please provide assessment for something important", "levels": [ { "color": "red", "endValue": 2, "label": "test" }, { "color": "#FFBF00", "endValue": 8, "label": "mid" }, { "color": "green", "endValue": 10, "label": "high" } ], "aggregation": { "widget": "likertScale" } }, "question2": { "type": "number", "label": "Monthly assessment Question 2", "aggregation": { "widget": "numberAggregation" } }, "question3": { "type": "number", "label": "Monthly assessment Question 3", "aggregation": { "widget": "numberAggregation" } } },"recurrence":"quarterly"},{"questions":{ "question1": { "type": "special_field", "widget": "likertScale", "label": "Weekly assessment Question 1", "helpText": "Please provide assessment for something important", "levels": [ { "color": "red", "endValue": 2, "label": "test" }, { "color": "#FFBF00", "endValue": 8, "label": "mid" }, { "color": "green", "endValue": 10, "label": "high" } ], "aggregation": { "widget": "likertScale" } }, "question2": { "type": "number", "label": "Weekly assessment Question 2", "aggregation": { "widget": "numberAggregation" } }, "question3": { "type": "number", "label": "Weekly assessment Question 3", "aggregation": { "widget": "numberAggregation" } } },"recurrence":"daily"},{"questions":{ "question1": { "type": "special_field", "widget": "likertScale", "label": "Instant assessment Question 1", "helpText": "Please provide assessment for something important", "levels": [ { "color": "red", "endValue": 2, "label": "test" }, { "color": "#FFBF00", "endValue": 8, "label": "mid" }, { "color": "green", "endValue": 10, "label": "high" } ], "aggregation": { "widget": "likertScale" } }, "question2": { "type": "number", "label": "Instant assessment Question 2", "aggregation": { "widget": "numberAggregation" } }, "question3": { "type": "number", "label": "Instant assessment Question 3", "aggregation": { "widget": "numberAggregation" } } },"relatedObjectType":"report"}] }');
-
-INSERT INTO tasks (uuid, shortName, longName, category, createdAt, updatedAt, customFieldRef1Uuid)
-	VALUES
+		(N'ac466253-1456-4fc8-9b14-a3643746e5a6', 'EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
+		(N'953e0b0b-25e6-44b6-bc77-ef98251d046a', '1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+		(N'9d3da7f4-8266-47af-b518-995f587250c9', '1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
+		(N'6bbb1be9-4655-48d7-83f2-bc474781544a', '1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'fe6b6b2f-d2a1-4ce1-9aa7-05361812a4d0'),
 		(N'076793eb-9950-4ea6-bbd5-2d8b8827828c', '1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
 		(N'30bc5708-c12d-4a21-916c-5acd7f6f11da', '1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
 		(N'df920c99-10ea-44e8-940f-cb1d1cbd22da', '1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'ac466253-1456-4fc8-9b14-a3643746e5a6'),
@@ -567,6 +565,10 @@ INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organi
 	VALUES (N'25fe500c-3503-4ba8-a9a4-09b29b50c1f1', 'Merge One', 'MOD-M1-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
 	VALUES (N'e87f0f60-ad13-4c1c-96f7-672c595b81c7', 'Merge Two', 'MOD-M2-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Defense'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
+	VALUES (N'885dd6bf-4647-4ef7-9bc4-4dd2826064bb', 'Chief of Merge People Test 1', 'MOI-MPT1-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (uuid, name, code, type, status, currentPersonUuid, organizationUuid, createdAt, updatedAt)
+	VALUES (N'4dc40a27-19ae-4e03-a4f3-55b2c768725f', 'Chief of Merge People Test 2', 'MOI-MPT2-HQ-00001', 1, 0, NULL, (SELECT uuid FROM organizations WHERE longName LIKE 'Ministry of Interior'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Put Steve into a Tashkil and associate with the EF 1.1 Advisor A Billet
 INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
@@ -624,6 +626,15 @@ INSERT INTO positionRelationships (positionUuid_a, positionUuid_b, createdAt, up
 	((SELECT uuid FROM positions WHERE name='EF 1.1 Advisor C'), (SELECT uuid from positions WHERE name ='Merge One'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
 	((SELECT uuid FROM positions WHERE name='EF 1.1 Advisor C'), (SELECT uuid from positions WHERE name ='Merge Two'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0),
 	((SELECT uuid FROM positions WHERE name='EF 1.1 Advisor D'), (SELECT uuid from positions WHERE name ='Merge Two'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0);
+
+-- Put Winner Duplicate in a Tashkil
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'Chief of Merge People Test 1'), (SELECT uuid from people where emailAddress = 'merged+winner@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'merged+winner@example.com') WHERE name = 'Chief of Merge People Test 1';
+-- Put Loser Duplicate in a Tashkil
+INSERT INTO peoplePositions (positionUuid, personUuid, createdAt)
+	VALUES ((SELECT uuid from positions where name = 'Chief of Merge People Test 2'), (SELECT uuid from people where emailAddress = 'merged+loser@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAddress = 'merged+loser@example.com') WHERE name = 'Chief of Merge People Test 2';
 
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'Kabul Police Academy') WHERE name = 'Chief of Police';
 UPDATE positions SET locationUuid = (SELECT uuid from LOCATIONS where name = 'MoD Headquarters Kabul') WHERE name = 'Cost Adder - MoD';
@@ -831,11 +842,9 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
-INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
 SET @reportUuid = lower(newid());
 INSERT INTO reports (uuid, createdAt, updatedAt, locationUuid, intent, text, nextSteps, keyOutcomes, state, engagementDate, atmosphere, advisorOrganizationUuid, principalOrganizationUuid)
@@ -847,11 +856,9 @@ INSERT INTO reportPeople (personUuid, reportUuid, isPrimary, isAuthor)
 INSERT INTO reportPeople (personUuid, reportUuid, isPrimary)
 	VALUES ((SELECT uuid FROM people where emailAddress='hunter+shardul@example.com'), @reportUuid, 1);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-	VALUES ((SELECT uuid from tasks where shortName = '1.1.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
 INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.A'), @reportUuid);
-INSERT INTO reportTasks (taskUuid, reportUuid)
-  VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
+	VALUES ((SELECT uuid from tasks where shortName = '1.2.B'), @reportUuid);
 
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET releasedAt = reports.createdAt WHERE state = 2 OR state = 4;
@@ -1045,6 +1052,23 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	FROM positions p
 	WHERE p.uuid = 'e87f0f60-ad13-4c1c-96f7-672c595b81c7';
 
+-- Add notes to the people that will be merged
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Merge one person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'people', p.uuid
+	FROM people p
+	WHERE p.uuid = '3cb2076c-5317-47fe-86ad-76f298993917';
+
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Merge two person note', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'people', p.uuid
+	FROM people p
+	WHERE p.uuid = 'c725aef3-cdd1-4baf-ac72-f28219b234e9';
+
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ERINSON, Erin');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
@@ -1062,7 +1086,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	FROM reports r
 	WHERE r.text LIKE 'Today%';
 
--- Add measurement assessments to tasks related to reports
+-- Add instant assessments to tasks related to reports
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
   VALUES (@noteUuid, @authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -1077,7 +1101,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
-  VALUES (@noteUuid, @authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","description":"<p><strong>level 1</strong></p><p>easily achieved</p><p><strong>level 3</strong></p><p>easily achieved</p>","frenchFlag":7.670554793177809,"levels":["lvl1","lvl3"]}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  VALUES (@noteUuid, @authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
   SELECT @noteUuid, 'reports', r.uuid
   FROM reports r

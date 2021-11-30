@@ -5,9 +5,9 @@ import ShowPerson from "../pages/showPerson.page"
 
 const PERSON_SEARCH_STRING = "Steve"
 const ADVISOR1_CREDENTIALS = "elizabeth"
-const ADVISOR_1_PERSON_CREATE_DETAILS = ["1", "3", "1", "advisor 1 create"]
-const ADVISOR_1_PERSON_EDIT_DETAILS = ["2", "4", "2", "advisor 1 edit"]
-const ADMIN_PERSON_EDIT_DETAILS = ["3", "5", "3", "admin edit"]
+const ADVISOR_1_PERSON_CREATE_DETAILS = ["1", "advisor 1 create", "3", "1"]
+const ADVISOR_1_PERSON_EDIT_DETAILS = ["2", "advisor 1 edit", "4", "2"]
+const ADMIN_PERSON_EDIT_DETAILS = ["3", "admin edit", "5", "3"]
 
 const VALUE_TO_TEXT_FOR_PERSON = {
   1: "one",
@@ -16,6 +16,13 @@ const VALUE_TO_TEXT_FOR_PERSON = {
   4: "four",
   5: "five"
 }
+
+const ERROR_MESSAGES = [
+  "You must provide Test question 1",
+  "You must provide Text",
+  "You must provide Test question 2",
+  "You must provide Test question 3"
+]
 
 describe("For the periodic person assessments", () => {
   describe("As an advisor who has a counterpart who needs to be assessed", () => {
@@ -28,13 +35,22 @@ describe("For the periodic person assessments", () => {
       Search.linkOfPersonFound(PERSON_SEARCH_STRING).click()
     })
 
-    it("Should allow advisor to successfully add an assessment", () => {
+    it("Should display nested question sets", () => {
       ShowPerson.assessmentsTable.waitForExist()
       ShowPerson.assessmentsTable.waitForDisplayed()
 
       ShowPerson.addPeriodicAssessmentButton.click()
       ShowPerson.waitForAssessmentModalForm()
+      ShowPerson.topLevelQuestionSetTitle.waitForDisplayed()
+      ShowPerson.bottomLevelQuestionSetTitle.waitForDisplayed()
+    })
 
+    it("Should display validation error messages on every level", () => {
+      ShowPerson.saveAssessmentButton.click()
+      expect(ShowPerson.getValidationErrorMessages()).to.eql(ERROR_MESSAGES)
+    })
+
+    it("Should allow advisor to successfully add an assessment", () => {
       // NOTE: assuming assessment question content here, may change in future
       ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
       ShowPerson.saveAssessmentAndWaitForModalClose(
@@ -61,7 +77,7 @@ describe("For the periodic person assessments", () => {
 
       ShowPerson.fillAssessmentQuestion(
         ADVISOR_1_PERSON_EDIT_DETAILS,
-        ADVISOR_1_PERSON_CREATE_DETAILS[3]
+        ADVISOR_1_PERSON_CREATE_DETAILS[1]
       )
       ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[0]]
@@ -104,7 +120,7 @@ describe("For the periodic person assessments", () => {
 
       ShowPerson.fillAssessmentQuestion(
         ADMIN_PERSON_EDIT_DETAILS,
-        ADVISOR_1_PERSON_EDIT_DETAILS[3]
+        ADVISOR_1_PERSON_EDIT_DETAILS[1]
       )
       ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[0]]
