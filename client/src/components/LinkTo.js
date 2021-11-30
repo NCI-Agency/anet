@@ -146,7 +146,6 @@ LinkTo.propTypes = {
   as: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
   children: PropTypes.node,
   className: PropTypes.string,
-
   showIcon: PropTypes.bool,
   showAvatar: PropTypes.bool,
   isLink: PropTypes.bool,

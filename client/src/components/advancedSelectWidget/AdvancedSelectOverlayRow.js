@@ -10,9 +10,7 @@ export const AuthorizationGroupOverlayRow = item => (
     <td>
       <LinkTo modelType="AuthorizationGroup" model={item} isLink={false} />
     </td>
-    <td>
-      {item.description}
-    </td>
+    <td>{item.description}</td>
   </React.Fragment>
 )
 
