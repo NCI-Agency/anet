@@ -94,9 +94,19 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
     ) {
       const errorMessage = (
         <>
-          <b>{`${person.rank} ${person.name}`}</b> is currently assigned to the{" "}
-          <b>{person.position.name}</b> position. By selecting them, the{" "}
-          <b>{person.position.name}</b> position will be left unfilled
+          <b>
+            <LinkTo modelType="Person" model={person} isLink={false} />
+          </b>{" "}
+          is currently assigned to the{" "}
+          <b>
+            <LinkTo
+              modelType="Position"
+              model={person.position}
+              isLink={false}
+            />
+          </b>{" "}
+          position. By selecting them, their current position will be left
+          unfilled
           {person.position.type !== Position.TYPE.ADVISOR &&
           person.position.type !== Position.TYPE.PRINCIPAL ? (
             <>

@@ -102,17 +102,19 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       const errorMessage = (
         <>
           This position is currently held by{" "}
-          <LinkTo
-            modelType="Person"
-            model={position.person}
-            onClick={onCancel}
-          />
+          <b>
+            <LinkTo modelType="Person" model={position.person} isLink={false} />
+          </b>
           . By selecting this position, they will be removed.
           {person.position.type !== position.type ? (
             <>
               {" "}
-              Permissions of the <b>{position.name}</b> position will be
-              converted from <b>{Position.convertType(position.type)}</b> to{" "}
+              Permissions of the{" "}
+              <b>
+                <LinkTo modelType="Position" model={position} isLink={false} />
+              </b>{" "}
+              position will be converted from{" "}
+              <b>{Position.convertType(position.type)}</b> to{" "}
               <b>{Position.convertType(person.position.type)}</b>.
               {person.position.type !== Position.TYPE.ADVISOR && (
                 <>
@@ -181,7 +183,7 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
       newError = { message: errorMessage }
     }
     setError(newError)
-  }, [position, person, removeUser, onCancel])
+  }, [position, person, removeUser])
 
   const newPosition = position ? new Position(position) : new Position()
 
