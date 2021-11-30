@@ -136,7 +136,9 @@ describe("Creating and editing custom sensitive information", () => {
       })
     })
     it("Should be able to create a new person with sensitive information", () => {
+      CreatePerson.deleteInput(CreatePerson.birthday)
       CreatePerson.birthday.setValue("08-06-1963")
+      CreatePerson.lastName.click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
       expect(ShowPerson.birthday.getText()).to.equal("8 June 1963")
@@ -145,9 +147,9 @@ describe("Creating and editing custom sensitive information", () => {
       ShowPerson.editButton.click()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
-      CreatePerson.birthday.setValue(
-        "\uE003".repeat(CreatePerson.birthday.getValue().length) + "01-01-1956"
-      )
+      CreatePerson.deleteInput(CreatePerson.birthday)
+      CreatePerson.birthday.setValue("01-01-1956")
+      CreatePerson.lastName.click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
       expect(ShowPerson.birthday.getText()).to.equal("1 January 1956")
@@ -164,7 +166,9 @@ describe("Creating and editing custom sensitive information", () => {
       CreatePerson.gender.selectByAttribute("value", NEW_PERSON_FIELDS_2.gender)
     })
     it("Should be able to create a new person with sensitive information", () => {
+      CreatePerson.deleteInput(CreatePerson.birthday)
       CreatePerson.birthday.setValue("01-01-1956")
+      CreatePerson.lastName.click()
       CreatePerson.middleButton.click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
@@ -175,9 +179,9 @@ describe("Creating and editing custom sensitive information", () => {
       ShowPerson.editButton.click()
       CreatePerson.form.waitForExist()
       CreatePerson.form.waitForDisplayed()
-      CreatePerson.birthday.setValue(
-        "\uE003".repeat(CreatePerson.birthday.getValue().length) + "08-06-1963"
-      )
+      CreatePerson.deleteInput(CreatePerson.birthday)
+      CreatePerson.birthday.setValue("08-06-1963")
+      CreatePerson.lastName.click()
       CreatePerson.leftButton.click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()

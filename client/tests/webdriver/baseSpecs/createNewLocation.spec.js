@@ -46,12 +46,12 @@ describe("When creating a new Location", () => {
   })
 
   it("Should have a location with correct MGRS in popover", () => {
-    CreateNewLocation.latField.setValue(
-      "\uE003".repeat(BAD_LAT_LNG_VAL.length) + LOCATION_COORDS.lat
-    )
-    CreateNewLocation.lngField.setValue(
-      "\uE003".repeat(BAD_LAT_LNG_VAL.length) + LOCATION_COORDS.lng
-    )
+    CreateNewLocation.deleteInput(CreateNewLocation.latField)
+    CreateNewLocation.latField.setValue(LOCATION_COORDS.lat)
+    CreateNewLocation.deleteInput(CreateNewLocation.lngField)
+    CreateNewLocation.lngField.setValue(LOCATION_COORDS.lng)
+    // trigger onblur effect
+    CreateNewLocation.nameField.click()
     CreateNewLocation.allFormatsPopover.click()
     CreateNewLocation.allFormatsPopoverLat.waitForExist()
     CreateNewLocation.allFormatsPopoverMGRS.waitForExist()
