@@ -83,7 +83,7 @@ const LinkTo = ({
           interactionKind={PopoverInteractionKind.HOVER}
           boundary="viewport"
         >
-          <span style={style}>
+          <span style={{ cursor: "help", ...style }}>
             {avatarComponent}
             {modelInstance.toString()}
             {children}
