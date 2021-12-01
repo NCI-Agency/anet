@@ -178,8 +178,8 @@ export default class Task extends Model {
     return `${this.shortName}`
   }
 
-  generalAssessmentsConfig() {
-    return this.fieldSettings().assessments || []
+  getAssessmentsConfig() {
+    return this.fieldSettings().assessments || {}
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = ["assessment_customFieldEnum1"]

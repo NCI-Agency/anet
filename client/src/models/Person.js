@@ -482,14 +482,14 @@ export default class Person extends Model {
     )
   }
 
-  generalAssessmentsConfig() {
+  getAssessmentsConfig() {
     let config
     if (this.isAdvisor()) {
       config = Person.advisorAssessmentConfig
     } else if (this.isPrincipal()) {
       config = Person.principalAssessmentConfig
     }
-    return config || []
+    return config || {}
   }
 
   static FILTERED_CLIENT_SIDE_FIELDS = ["firstName", "lastName"]

@@ -119,6 +119,8 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
   const ModelClass = anetObjectType && Models[anetObjectType]
   const modelInstance = anetObject && ModelClass && new ModelClass(anetObject)
   const now = moment()
+  // TODO: in principle, there can be more than one assessment definition for each recurrence,
+  // so we should distinguish them here by key when we add that to the database.
   const period = PERIOD_FACTORIES[RECURRENCE_TYPE.MONTHLY](now, 0)
   const instantAssessmentConfig =
     anetObject && anetObject.getInstantAssessmentConfig()
