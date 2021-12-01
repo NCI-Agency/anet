@@ -1,3 +1,4 @@
+import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import PropTypes from "prop-types"
 import React from "react"
@@ -19,7 +20,9 @@ const AuthorizationGroupTable = ({
     <tbody>
       {authorizationGroups.map((ag, agIndex) => (
         <tr key={ag.uuid}>
-          <td>{ag.name}</td>
+          <td>
+            <LinkTo model={ag} modelType="AuthorizationGroup" isLink={false} />
+          </td>
           <td>{ag.description}</td>
           {showDelete && (
             <td>

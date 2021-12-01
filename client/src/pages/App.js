@@ -7,6 +7,7 @@ import {
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
+import "components/previews/RegisterPreviewComponents"
 import ResponsiveLayout from "components/ResponsiveLayout"
 import { useConnectionInfo } from "connectionUtils"
 import { Organization, Person } from "models"

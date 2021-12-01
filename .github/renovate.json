@@ -4,22 +4,35 @@
     "group:test",
     "group:linters"
   ],
-  "lockFileMaintenance": { "enabled": true },
-  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "labels": [
+    "dependencies"
+  ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "most non-major dependencies",
       "groupSlug": "most-minor-patch"
     },
     {
-      "matchPackageNames": ["com.microsoft.sqlserver:mssql-jdbc"],
+      "matchPackageNames": [
+        "com.microsoft.sqlserver:mssql-jdbc"
+      ],
       "allowedVersions": "/^.*\\.jre8$/"
     }
   ],
-  "postUpdateOptions": ["yarnDedupeHighest"],
+  "postUpdateOptions": [
+    "yarnDedupeHighest"
+  ],
   "vulnerabilityAlerts": {
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   },
   "pipenv": {
     "enabled": true

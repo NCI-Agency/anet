@@ -193,6 +193,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                             modelType="Organization"
                             model={values.parentOrg}
                           >
+                            {values.parentOrg.shortName}{" "}
+                            {values.parentOrg.longName}{" "}
                             {Organization.toIdentificationCodeString(
                               values.parentOrg
                             )}

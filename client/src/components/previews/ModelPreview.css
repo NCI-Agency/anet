@@ -1,0 +1,27 @@
+.preview-section {
+  background-color: white;
+  padding: 15px 25px 15px 25px;
+  border-radius: 4px;
+  min-width: 400px;
+  margin-bottom: 15px;
+}
+
+.preview-field-label {
+  font-weight: bold;
+  padding-bottom: 7px;
+}
+
+.preview-field-value {
+  color: black;
+  padding-bottom: 20px;
+}
+
+.preview-avatar-container {
+  text-align: center;
+}
+
+.medium-person-avatar {
+  width: 75%;
+  margin-bottom: 15px;
+  text-align: center;
+}
