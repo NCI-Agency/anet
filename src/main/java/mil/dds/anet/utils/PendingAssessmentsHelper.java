@@ -326,10 +326,12 @@ public class PendingAssessmentsHelper {
       final String keyPath) {
     final Set<Recurrence> assessmentRecurrence = new HashSet<>();
     @SuppressWarnings("unchecked")
-    final List<Map<String, Object>> assessmentDefinitions =
-        (List<Map<String, Object>>) config.getDictionaryEntry(keyPath);
+    final Map<String, Map<String, Object>> assessmentDefinitions =
+        (Map<String, Map<String, Object>>) config.getDictionaryEntry(keyPath);
     if (assessmentDefinitions != null) {
-      assessmentDefinitions.stream().forEach(pad -> {
+      assessmentDefinitions.values().stream().forEach(pad -> {
+        // TODO: in principle, there can be more than one assessment definition for each recurrence,
+        // so we should distinguish them here by key when we add that to the database.
         final Recurrence recurrence =
             Recurrence.valueOfRecurrence((String) pad.get(ASSESSMENT_RECURRENCE));
         if (shouldAddRecurrence(recurrenceSet, recurrence)) {
