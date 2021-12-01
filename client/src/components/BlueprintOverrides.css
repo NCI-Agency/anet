@@ -44,6 +44,18 @@
 	display: none;
 }
 
+.bp3-dark a {
+	color: rgb(0, 113, 188);
+}
+
+.bp3-dark a.btn {
+	color: unset;
+}
+
+.bp3-dark a.btn:hover {
+	color: white;
+}
+
 @media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none) {
 	/* IE10+ specific styles go here */
 	button.bp3-button > span.bp3-icon {

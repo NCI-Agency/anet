@@ -1,4 +1,4 @@
-import OnDemandAssessments from "components/assessments/OndemandAssessments"
+import OnDemandAssessment from "components/assessments/OnDemandAssessments/OndemandAssessment"
 import { Person } from "models"
 import moment from "moment"
 import { useResponsiveNumberOfPeriods } from "periodUtils"
@@ -172,7 +172,7 @@ export const VettingAndScreening = () => {
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   return (
     <div ref={contRef}>
-      <OnDemandAssessments
+      <OnDemandAssessment
         key="ondemand"
         style={{ flex: "0 0 100%" }}
         entity={person}

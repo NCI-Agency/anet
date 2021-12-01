@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { getEntityInfoFromUrl } from "utils_links"
 
-// Enhanced HTML so that links will be converted to LinkTo components
+// Enhanced HTML so that links will be converted to link components
 export function parseHtmlWithLinkTo(html) {
   if (!html) {
     return null
@@ -18,14 +18,7 @@ export function parseHtmlWithLinkTo(html) {
   })
 }
 
-const LinkAnet = ({
-  entityKey,
-  contentState,
-  children,
-  onEdit,
-  onRemove,
-  url
-}) => {
+const LinkAnet = ({ entityKey, contentState, url }) => {
   const urlLink =
     url || (contentState && contentState.getEntity(entityKey).getData().url)
 
@@ -47,9 +40,6 @@ const LinkAnet = ({
 LinkAnet.propTypes = {
   entityKey: PropTypes.string,
   contentState: PropTypes.object,
-  onEdit: PropTypes.func,
-  onRemove: PropTypes.func,
-  children: PropTypes.any,
   url: PropTypes.string
 }
 

@@ -25,7 +25,7 @@ import DictionaryField from "HOC/DictionaryField"
 import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Button, Form as FormBS } from "react-bootstrap"
 import { useHistory } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -214,14 +214,14 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
                   onChange={value => setFieldValue("status", value)}
                 >
                   {willAutoKickPerson && (
-                    <Form.Text>
+                    <FormBS.Text>
                       <span className="text-danger">
                         Setting this position to inactive will automatically
                         remove{" "}
                         <LinkTo modelType="Person" model={values.person} /> from
                         this position.
                       </span>
-                    </Form.Text>
+                    </FormBS.Text>
                   )}
                 </FastField>
 

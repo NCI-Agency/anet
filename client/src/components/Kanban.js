@@ -183,7 +183,7 @@ const CardView = ({ task }) => {
                   <td>tasked organizations:</td>
                   <td>
                     {" "}
-                    {this.props.task.taskedOrganizations.map(org => (
+                    {task.taskedOrganizations.map(org => (
                       <LinkTo
                         modelType="Organization"
                         model={org}

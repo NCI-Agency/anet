@@ -3,7 +3,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.1"
 	id "com.diffplug.spotless" version "6.0.0"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.17.3"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18"
 	id "org.beryx.runtime" version "1.12.7"
 	id "nebula.ospackage" version "9.0.0"
 }
@@ -123,7 +123,7 @@ dependencies {
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.17.3'
+	testImplementation 'com.graphql-java-generator:graphql-java-runtime:1.18'
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:16.0.1'
 
@@ -137,8 +137,8 @@ dependencies {
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4-rule:2.0.9'
 
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
 	// Avoid "ERROR StatusLogger Log4j2 could not find a logging implementation.
 	// Please add log4j-core to the classpath. Using SimpleLogger to log to the console..."

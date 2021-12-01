@@ -175,16 +175,15 @@ const OrganizationLaydown = ({ organization }) => {
           </LinkTo>
         </td>
       )
-      positionPersonCol =
-        position.person && position.person.uuid ? (
-          <td>
-            <LinkTo modelType="Person" model={position.person}>
-              {personWithStatus(position.person)}
-            </LinkTo>
-          </td>
-        ) : (
-          <td className="text-danger">Unfilled</td>
-        )
+      positionPersonCol = position?.person?.uuid ? (
+        <td>
+          <LinkTo modelType="Person" model={position.person}>
+            {personWithStatus(position.person)}
+          </LinkTo>
+        </td>
+      ) : (
+        <td className="text-danger">Unfilled</td>
+      )
     }
 
     otherPersonCol = otherPersonCol || <td />

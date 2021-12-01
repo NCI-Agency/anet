@@ -38,9 +38,9 @@ describe("My Organization page", () => {
       expect(engagementStatusLegend).to.have.length(4)
 
       MyOrg.tasks.waitForDisplayed()
-      // There are 4 tasks on the x-axis
+      // There are 3 tasks on the x-axis
       const tasks = MyOrg.tasks.$("svg g").$$(".bars-group")
-      expect(tasks).to.have.length(4)
+      expect(tasks).to.have.length(3)
       let countTasksBars = 0
       tasks.forEach(bar => {
         if (+bar.$("rect").getAttribute("height") > 0) {

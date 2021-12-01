@@ -90,10 +90,8 @@ describe("Create new Person form page", () => {
       expect(errorMessage.getText()).to.equal("Email must be a valid email")
 
       // perform submit form to prevent warning dialog
-      CreatePerson.emailAddress.setValue(
-        "\uE003".repeat(CreatePerson.emailAddress.getValue().length) +
-          "test@example.com"
-      )
+      CreatePerson.deleteInput(CreatePerson.emailAddress)
+      CreatePerson.emailAddress.setValue("test@example.com")
       CreatePerson.lastName.click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
@@ -182,10 +180,8 @@ describe("Create new Person form page", () => {
       CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
       CreatePerson.roleAdvisorButton.waitForExist()
       CreatePerson.roleAdvisorButton.click()
-      CreatePerson.emailAddress.setValue(
-        "\uE003".repeat(CreatePerson.emailAddress.getValue().length) +
-          VALID_PERSON_ADVISOR.emailAddress
-      )
+      CreatePerson.deleteInput(CreatePerson.emailAddress)
+      CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
       CreatePerson.lastName.click()
       const errorMessage = browser.$(
         "input#emailAddress + div.invalid-feedback"
@@ -206,9 +202,9 @@ describe("Create new Person form page", () => {
       )
       const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
 
-      CreatePerson.endOfTourDate.setValue(
-        "\uE003".repeat(CreatePerson.endOfTourDate.getValue().length) + tomorrow
-      )
+      CreatePerson.deleteInput(CreatePerson.endOfTourDate)
+      CreatePerson.endOfTourDate.setValue(tomorrow)
+      CreatePerson.lastName.click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = CreatePerson.alertSuccess.getText()

@@ -36,7 +36,9 @@ class MergePositions extends Page {
   }
 
   get firstItemFromAdvancedSelect() {
-    return browser.$("table > tbody > tr:first-child > td:nth-child(2) > span")
+    return browser.$(
+      ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
+    )
   }
 
   get editAssociatedPositionsButton() {

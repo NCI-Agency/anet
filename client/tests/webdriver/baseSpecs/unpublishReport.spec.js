@@ -8,9 +8,11 @@ describe("When unpublishing a report", () => {
     MyReports.open()
     MyReports.selectReport("A test report to be unpublished from Arthur")
   })
-  it("Should unpublish the report successfully", () => {
-    const unpublishedReportUuid = ShowReport.uuid
-    EditReport.unpublishReport(unpublishedReportUuid)
-    expect(EditReport.alertSuccess.getText()).to.equal("Report unpublished")
+  describe("When on the show page of a report", () => {
+    it("Should unpublish the report successfully", () => {
+      const unpublishedReportUuid = ShowReport.uuid
+      EditReport.unpublishReport(unpublishedReportUuid)
+      expect(EditReport.alertSuccess.getText()).to.equal("Report unpublished")
+    })
   })
 })

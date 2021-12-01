@@ -1,7 +1,5 @@
 import { expect } from "chai"
-import { v4 as uuidv4 } from "uuid"
 import CreatePerson from "../pages/createNewPerson.page"
-import CreateTask from "../pages/createNewTask.page"
 import CreateReport from "../pages/createReport.page"
 
 const INVALID_NUMBER_INPUT = "-10"
@@ -12,10 +10,6 @@ const REQUIRED_PERSON_FIELDS = {
   lastname: "customPerson",
   rank: "CIV",
   gender: "MALE"
-}
-
-const REQUIRED_TASK_FIELDS = {
-  shortName: "customTask"
 }
 
 describe("When working with custom fields for different anet objects", () => {
@@ -268,46 +262,6 @@ describe("When working with custom fields for different anet objects", () => {
 
     it("Should logout", () => {
       CreatePerson.logout()
-    })
-  })
-  // ------------------------------ TASK CUSTOM FIELDS -----------------------------------------
-  describe("For task's custom fields", () => {
-    it("Should be able load a new task form and fill normal required fields", () => {
-      CreateTask.openAsAdmin()
-      CreateTask.form.waitForExist()
-      CreateTask.form.waitForDisplayed()
-      // Fill other required fields so that we can test custom field validation
-      CreateTask.shortName.setValue(
-        `${REQUIRED_TASK_FIELDS.shortName} ${uuidv4()}`
-      )
-    })
-
-    it("Should be able to see assessment fields", () => {
-      CreateTask.addAssessmentButton.click()
-      CreateTask.assessmentFields.forEach(field => {
-        field.waitForExist()
-      })
-    })
-
-    it("Should warn invalid json for questions", () => {
-      CreateTask.questionsField.setValue("invalidJsonTest")
-      // normally there is already a help block, we need the other warning text
-      CreateTask.questionsFieldWarningText.waitForExist()
-    })
-
-    it("Should not warn valid json for questions", () => {
-      CreateTask.questionsField.setValue("{}")
-      // only the warning help text should be removed with valid json
-      CreateTask.questionsFieldWarningText.waitForExist({ reverse: true })
-    })
-
-    it("Should be able to submit valid task", () => {
-      CreateTask.submitForm()
-      CreateTask.waitForAlertSuccessToLoad()
-    })
-
-    it("Should logout", () => {
-      CreateTask.logout()
     })
   })
 })
