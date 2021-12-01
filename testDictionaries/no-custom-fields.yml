@@ -62,7 +62,8 @@ fields:
         style:
           height: 400px
       assessments:
-        - recurrence: semiannually
+        topTaskSemiannually:
+          recurrence: semiannually
           questions:
             issues:
               type: special_field
@@ -88,7 +89,8 @@ fields:
         style:
           height: 400px
       assessments:
-        - recurrence: monthly
+        subTaskMonthly:
+          recurrence: monthly
           questions:
             issues:
               type: special_field
@@ -117,7 +119,8 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the assessment status]
-        - recurrence: weekly
+        subTaskWeekly:
+          recurrence: weekly
           questions:
             issues:
               type: special_field
@@ -129,7 +132,8 @@ fields:
               validations:
                 - type: required
                   params: [You must provide the top 3 issues]
-        - recurrence: once
+        subTaskOnceReport:
+          recurrence: once
           relatedObjectType: report
           questions:
             question1:
@@ -352,7 +356,8 @@ fields:
       name: Afghan Partner
       countries: [Afghanistan]
       assessments:
-        - recurrence: quarterly
+        principalQuarterly:
+          recurrence: quarterly
           questions:
             test1:
               test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
@@ -421,7 +426,8 @@ fields:
                       validations:
                         - type: required
                           params: [You must provide Test question 3]
-        - recurrence: once
+        principalOnceReport:
+          recurrence: once
           relatedObjectType: report
           questions:
             question1:
