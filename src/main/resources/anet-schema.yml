@@ -494,8 +494,8 @@ properties:
               longName:
                 "$ref": "#/properties/fields/properties/task/properties/longName"
               assessments:
-                type: array
-                items:
+                type: object
+                additionalProperties:
                   "$ref": "#/$defs/assessmentDef"
           subLevel:
             "$ref": "#/properties/fields/properties/task/properties/topLevel"
@@ -732,8 +732,8 @@ properties:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced
               assessments:
-                type: array
-                items:
+                type: object
+                additionalProperties:
                   "$ref": "#/$defs/assessmentDef"
           position:
             type: object
@@ -814,8 +814,8 @@ properties:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced
               assessments:
-                type: array
-                items:
+                type: object
+                additionalProperties:
                   "$ref": "#/$defs/assessmentDef"
 
           position:

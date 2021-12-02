@@ -22,7 +22,11 @@ const AssessmentResultsContainer = ({
   if (!entity) {
     return null
   }
-  const assessmentsTypes = Object.keys(entity.getAssessmentsConfig())
+  // TODO: in principle, there can be more than one assessment definition for each recurrence,
+  // so we should distinguish them here by key when we add that to the database.
+  const assessmentsTypes = Object.values(entity.getAssessmentsConfig()).map(
+    ac => ac.recurrence
+  )
   return (
     <div ref={contRef}>
       {assessmentsTypes.map(assessmentsType =>

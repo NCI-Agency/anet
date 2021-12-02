@@ -230,11 +230,14 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
 
   private Map<String, Object> getAssessmentConfig(final AnetConfiguration configuration) {
     @SuppressWarnings("unchecked")
-    final List<Map<String, Object>> assessmentsConfig =
-        (List<Map<String, Object>>) configuration.getDictionaryEntry(PRINCIPAL_PERSON_ASSESSMENTS);
+    final Map<String, Map<String, Object>> assessmentsConfig =
+        (Map<String, Map<String, Object>>) configuration
+            .getDictionaryEntry(PRINCIPAL_PERSON_ASSESSMENTS);
     if (assessmentsConfig != null) {
-      for (final Map<String, Object> assessmentConfig : assessmentsConfig) {
+      for (final Map<String, Object> assessmentConfig : assessmentsConfig.values()) {
         // Find the first recurring assessment definition
+        // Note: in principle, there can be more than one "once" definition, but this code is
+        // obsolete anyway, so this case will never happen.
         final String recurrence = getAssessmentRecurrence(assessmentConfig);
         if (!"once".equals(recurrence)) {
           logger.info("Will change partner assessments to {} periodic assessments", recurrence);
