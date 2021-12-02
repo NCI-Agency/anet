@@ -10,7 +10,7 @@ $defs:
   describedValue:
     type: object
     additionalProperties: true
-    required: [value,description]
+    required: [value, description]
     properties:
       value:
         type: string
@@ -185,7 +185,7 @@ $defs:
               type: object
               additionalProperties:
                 "$ref": "#/$defs/customField"
-          required: [addButtonLabel,objectLabel,objectFields]
+          required: [addButtonLabel, objectLabel, objectFields]
         - properties:
             type:
               enum: [anet_object, array_of_anet_objects]
@@ -195,7 +195,7 @@ $defs:
               items:
                 type: string
                 enum: [Location, Organization, Person, Position, Report, Task]
-            required: [types]
+          required: [types]
         - properties:
             type:
               enum: [special_field]
@@ -264,6 +264,7 @@ $defs:
   assessmentDef:
     type: object
     additionalProperties: false
+    required: [recurrence]
     properties:
       recurrence:
         title: recurrence of an assessment
@@ -273,8 +274,12 @@ $defs:
       relatedObjectType:
         title: object type context in which the assessment will be made
         type: string
-        enum: [report, null]
-        default: null
+        enum: [report]
+      onDemandAssessmentExpirationDays:
+        type: integer
+        minimum: 1
+        title: The number of days before an on-demand assessment expires
+        description: Used in the UI to determine which on-demand assessments have expired
       questions:
         "$ref": "#/$defs/questions"
       questionSets:
@@ -284,15 +289,20 @@ $defs:
         oneOf:
         - properties:
             recurrence:
-              enum: [once, daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually]
+              enum: [daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually]
+        - properties:
+            recurrence:
+              enum: [once]
+          required: [relatedObjectType]
         - properties:
             recurrence:
               enum: [ondemand]
             questions:
-              assessmentDate:
-                type: date
-              expirationDate:
-                type: date
+              properties:
+                allOf:
+                - "$ref": "#/$defs/questions"
+                - assessmentDate: "#/$defs/customField"
+                - expirationDate: "#/$defs/customField"
               required: [assessmentDate]
 
 # definition for custom sensitive information
@@ -451,12 +461,6 @@ properties:
     title: The maximum number of characters allowed in selected text fields
     description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
 
-  onDemandAssessmentExpirationDays:
-    type: integer
-    minimum: 1
-    title: The number of days before an on-demand assessment expires
-    description: Used in the UI to determine which on-demand assessments have expired
-
   fields:
     type: object
     additionalProperties: false
@@ -523,7 +527,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,reportText]
+        required: [intent, atmosphere, atmosphereDetails, cancelled, nextSteps, reportText]
         properties:
           canUnpublishReports:
             type: boolean
@@ -719,8 +723,7 @@ properties:
                 items:
                   type: string
                   title: The list of possible countries
-                  description: Used in the UI where a country can be selected for
-                    a person inside an advisor organization.
+                  description: Used in the UI where a country can be selected for a person inside an advisor organization.
               showPageOrderedFields:
                 type: array
                 uniqueItems: true
@@ -735,6 +738,7 @@ properties:
                 type: object
                 additionalProperties:
                   "$ref": "#/$defs/assessmentDef"
+
           position:
             type: object
             additionalProperties: false

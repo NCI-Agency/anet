@@ -36,8 +36,6 @@ reportWorkflow:
 
 maxTextFieldLength: 250
 
-onDemandAssessmentExpirationDays: 108
-
 fields:
 
   task:
@@ -1261,6 +1259,7 @@ fields:
                   color: '#0000ff'
         principalOndemandScreeningAndVetting:
           recurrence: ondemand
+          onDemandAssessmentExpirationDays: 108
           questions:
             assessmentDate:
               type: date
