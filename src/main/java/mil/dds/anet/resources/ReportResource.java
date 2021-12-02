@@ -60,6 +60,7 @@ import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -909,34 +910,31 @@ public class ReportResource {
       @GraphQLArgument(name = "report") Report r,
       @GraphQLArgument(name = "assessments") List<Note> assessments) {
     final Person user = DaoUtils.getUserFromContext(context);
+    final NoteDao noteDao = engine.getNoteDao();
 
-    for (int i = 0; i < assessments.size(); i++) {
-      final Note n = assessments.get(i);
-      n.setAuthorUuid(DaoUtils.getUuid(user));
-    }
     final List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
     final List<Note> existingAssessments = existingNotes.stream()
         .filter(n -> n.getType().equals(NoteType.ASSESSMENT)).collect(Collectors.toList());
-    Utils.addRemoveElementsByUuid(existingAssessments, assessments,
-        newAssessment -> engine.getNoteDao().insert(newAssessment),
-        oldAssessmentUuid -> engine.getNoteDao().delete(oldAssessmentUuid));
-    for (int i = 0; i < assessments.size(); i++) {
-      final Note curr = assessments.get(i);
-      final Note existingAssessment = Utils.getByUuid(existingAssessments, curr.getUuid());
-      if (existingAssessment != null) {
-        // Check for updates to assessment
-        updateAssessment(curr, existingAssessment);
-      }
-    }
+    Utils.updateElementsByUuid(existingAssessments, assessments,
+        // Create new assessments:
+        newAssessment -> {
+          ResourceUtils.checkBasicAssessmentPermission(newAssessment);
+          newAssessment.setAuthorUuid(DaoUtils.getUuid(user));
+          noteDao.insert(newAssessment);
+        },
+        // Delete old assessments:
+        oldAssessmentUuid -> noteDao.delete(oldAssessmentUuid),
+        // Update existing assessments:
+        updatedAssessment -> {
+          ResourceUtils.checkBasicAssessmentPermission(updatedAssessment);
+          final Note existingAssessment =
+              Utils.getByUuid(existingAssessments, updatedAssessment.getUuid());
+          if (!updatedAssessment.getText().equals(existingAssessment.getText())) {
+            updatedAssessment.setAuthorUuid(DaoUtils.getUuid(user));
+            noteDao.update(updatedAssessment);
+          }
+        });
     return assessments.size();
-  }
-
-  private void updateAssessment(Note newAssessment, Note oldAssessment) {
-    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-    final NoteDao noteDao = engine.getNoteDao();
-    if (!newAssessment.getText().equals(oldAssessment.getText())) {
-      noteDao.update(newAssessment);
-    }
   }
 
   private void addConfigToContext(Map<String, Object> context) {

@@ -43,7 +43,7 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class NoteResourceTest extends AbstractResourceTest {
 
-  protected static final String NOTE_FIELDS = "{ uuid type text author { uuid }"
+  protected static final String NOTE_FIELDS = "{ uuid type assessmentKey text author { uuid }"
       + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }";
   private static final String _NOTES_FIELDS = String.format("notes %1$s", NOTE_FIELDS);
   private static final String POSITION_FIELDS = String.format(
@@ -219,6 +219,7 @@ public class NoteResourceTest extends AbstractResourceTest {
     final NoteRelatedObjectInput testNroTaskInput = NoteRelatedObjectInput.builder()
         .withRelatedObjectType(TaskDao.TABLE_NAME).withRelatedObjectUuid(task.getUuid()).build();
     final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.ASSESSMENT)
+        .withAssessmentKey("testDeleteDanglingReportTaskAssessment")
         .withText("{\"text\":"
             + "\"a report test task assessment created by testDeleteDanglingReportTaskAssessment\"}")
         .withNoteRelatedObjects(Lists.newArrayList(testNroReportInput, testNroTaskInput)).build();
@@ -292,6 +293,7 @@ public class NoteResourceTest extends AbstractResourceTest {
         NoteRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
             .withRelatedObjectUuid(attendee.getUuid()).build();
     final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.ASSESSMENT)
+        .withAssessmentKey("testDeleteDanglingReportAttendeeAssessment")
         .withText("{\"text\":"
             + "\"a report test attendee assessment created by testDeleteDanglingReportAttendeeAssessment\"}")
         .withNoteRelatedObjects(Lists.newArrayList(testNroReportInput, testNroTaskInput)).build();

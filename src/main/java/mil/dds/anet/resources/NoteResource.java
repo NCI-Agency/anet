@@ -26,6 +26,7 @@ import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.ResourceUtils;
 import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,9 @@ public class NoteResource {
   @GraphQLMutation(name = "createNote")
   public Note createNote(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "note") Note n) {
+    if (n.getType() == NoteType.ASSESSMENT) {
+      ResourceUtils.checkBasicAssessmentPermission(n);
+    }
     checkAndFixText(n);
     checkNoteRelatedObjects(n);
     final Person user = DaoUtils.getUserFromContext(context);
@@ -107,7 +111,9 @@ public class NoteResource {
           Status.FORBIDDEN);
     }
 
-    // Assessments have special restrictions
+    ResourceUtils.checkBasicAssessmentPermission(note);
+
+    // Assessment updates have special restrictions
     Set<String> responsibleTasksUuids = null;
     Set<String> associatedPositionsUuids = null;
     for (final NoteRelatedObject nro : note.loadNoteRelatedObjects(engine.getContext()).join()) {

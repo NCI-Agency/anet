@@ -3,6 +3,8 @@ package mil.dds.anet.utils;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.PersonPositionHistory;
 
 public class ResourceUtils {
@@ -87,5 +89,15 @@ public class ResourceUtils {
     }
     return pph2.getStartTime().isBefore(pph1.getEndTime())
         && pph2.getEndTime().isAfter(pph1.getStartTime());
+  }
+
+  public static void checkBasicAssessmentPermission(final Note note) {
+    if (note.getType() != NoteType.ASSESSMENT) {
+      throw new WebApplicationException("Note must be of assessment type", Status.FORBIDDEN);
+    }
+    if (Utils.isEmptyOrNull(note.getAssessmentKey())) {
+      throw new WebApplicationException("Assessment key must be specified for assessment type note",
+          Status.FORBIDDEN);
+    }
   }
 }
