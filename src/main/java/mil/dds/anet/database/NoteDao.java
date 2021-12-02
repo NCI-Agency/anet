@@ -61,9 +61,10 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   @Override
   public Note insertInternal(Note n) {
-    getDbHandle().createUpdate(
-        "/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", type, text, \"createdAt\", \"updatedAt\") "
-            + "VALUES (:uuid, :authorUuid, :type, :text, :createdAt, :updatedAt)")
+    getDbHandle()
+        .createUpdate("/* insertNote */ INSERT INTO notes"
+            + " (uuid, \"authorUuid\", type, \"assessmentKey\", text, \"createdAt\", \"updatedAt\")"
+            + " VALUES (:uuid, :authorUuid, :type, :assessmentKey, :text, :createdAt, :updatedAt)")
         .bindBean(n).bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
         .bind("authorUuid", n.getAuthorUuid()).bind("type", DaoUtils.getEnumId(n.getType()))
@@ -85,6 +86,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public int updateInternal(Note n) {
     deleteNoteRelatedObjects(DaoUtils.getUuid(n)); // seems the easiest thing to do
     insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+    // We don't update the type and assessmentKey!
     return getDbHandle()
         .createUpdate("/* updateNote */ UPDATE notes "
             + "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
@@ -92,6 +94,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   @InTransaction
+  @Deprecated
   public int updateNoteTypeAndText(Note n) {
     return getDbHandle()
         .createUpdate(

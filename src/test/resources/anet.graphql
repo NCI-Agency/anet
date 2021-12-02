@@ -334,6 +334,7 @@ type Mutation {
 }
 
 type Note {
+  assessmentKey: String
   author: Person
   createdAt: Instant
   noteRelatedObjects: [NoteRelatedObject]
@@ -344,6 +345,7 @@ type Note {
 }
 
 input NoteInput {
+  assessmentKey: String
   author: PersonInput
   createdAt: Instant
   noteRelatedObjects: [NoteRelatedObjectInput]
