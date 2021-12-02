@@ -32,6 +32,7 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */ `
   createdAt
   updatedAt
   type
+  assessmentKey
   text
   author {
     uuid
@@ -435,6 +436,8 @@ export default class Model {
   static notePropType = PropTypes.shape({
     uuid: PropTypes.string,
     createdAt: PropTypes.number,
+    type: PropTypes.string,
+    assessmentKey: PropTypes.string,
     text: PropTypes.string,
     author: PropTypes.shape({
       uuid: PropTypes.string,
