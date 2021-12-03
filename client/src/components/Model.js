@@ -605,12 +605,10 @@ export default class Model {
     )
   }
 
-  getPeriodicAssessmentDetails(recurrence = RECURRENCE_TYPE.MONTHLY) {
+  getPeriodicAssessmentDetails(assessmentKey) {
     // TODO: in principle, there can be more than one assessment definition for each recurrence,
     // so we should distinguish them here by key when we add that to the database.
-    const assessmentConfig = Object.values(this.getAssessmentsConfig()).find(
-      ac => ac.recurrence === recurrence
-    )
+    const assessmentConfig = this.getAssessmentsConfig()?.[assessmentKey] || {}
     return {
       assessmentConfig: assessmentConfig,
       assessmentYupSchema:

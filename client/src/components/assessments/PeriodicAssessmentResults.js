@@ -170,6 +170,7 @@ PeriodicAssessment.propTypes = {
 }
 
 export const PeriodicAssessmentsRows = ({
+  assessmentKey,
   entity,
   entityType,
   periodsConfig,
@@ -185,7 +186,7 @@ export const PeriodicAssessmentsRows = ({
   const {
     assessmentConfig,
     assessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails(recurrence)
+  } = entity.getPeriodicAssessmentDetails(assessmentKey)
   const filteredAssessmentConfig = Model.filterAssessmentConfig(
     assessmentConfig,
     entity
@@ -294,6 +295,7 @@ export const PeriodicAssessmentsRows = ({
   )
 }
 PeriodicAssessmentsRows.propTypes = {
+  assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   periodsConfig: AssessmentPeriodsConfigPropType.isRequired,

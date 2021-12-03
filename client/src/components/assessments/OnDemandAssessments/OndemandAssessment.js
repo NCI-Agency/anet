@@ -33,6 +33,7 @@ const GQL_DELETE_NOTE = gql`
 `
 
 const OnDemandAssessment = ({
+  assessmentKey,
   entity,
   entityType,
   style,
@@ -55,8 +56,8 @@ const OnDemandAssessment = ({
   // 'assessmentConfig' has question set for ondemand assessments defined in the dictionary
   // and 'assessmentYupSchema' used for this question set.
   const { assessmentConfig, assessmentYupSchema } = useMemo(
-    () => entity.getPeriodicAssessmentDetails(recurrence),
-    [entity, recurrence]
+    () => entity.getPeriodicAssessmentDetails(assessmentKey),
+    [entity, assessmentKey]
   )
   const addAssessmentLabel = `Add ${
     assessmentConfig.label || "a new assessment"
@@ -352,6 +353,7 @@ const OnDemandAssessment = ({
 }
 OnDemandAssessment.propTypes = {
   style: PropTypes.object,
+  assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   periodsDetails: PeriodsDetailsPropType.isRequired,

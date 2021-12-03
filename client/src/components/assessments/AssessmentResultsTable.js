@@ -34,6 +34,7 @@ import { Table } from "react-bootstrap"
  */
 
 const EntityAssessmentResults = ({
+  assessmentKey,
   idSuffix,
   entity,
   entityType,
@@ -83,6 +84,7 @@ const EntityAssessmentResults = ({
         )
       )}
       <PeriodicAssessmentsRows
+        assessmentKey={assessmentKey}
         entity={entity}
         entityType={entityType}
         periodsConfig={periodsConfig}
@@ -93,6 +95,7 @@ const EntityAssessmentResults = ({
   )
 }
 EntityAssessmentResults.propTypes = {
+  assessmentKey: PropTypes.string.isRequired,
   idSuffix: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
@@ -102,6 +105,7 @@ EntityAssessmentResults.propTypes = {
 }
 
 const AssessmentResultsTable = ({
+  assessmentKey,
   entity,
   entityType,
   subEntities,
@@ -128,7 +132,9 @@ const AssessmentResultsTable = ({
   const subEntitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessmentConfig())
     .filter(mc => !_isEmpty(mc))
-  const { assessmentConfig } = entity.getPeriodicAssessmentDetails(recurrence)
+  const { assessmentConfig } = entity.getPeriodicAssessmentDetails(
+    assessmentKey
+  )
   const filteredAssessmentConfig = Model.filterAssessmentConfig(
     assessmentConfig,
     entity
@@ -160,6 +166,7 @@ const AssessmentResultsTable = ({
                   {subEntities?.map(subEntity => (
                     <EntityAssessmentResults
                       key={`subassessment-${subEntity.uuid}`}
+                      assessmentKey={assessmentKey}
                       idSuffix={`subassessment-${subEntity.uuid}`}
                       entity={subEntity}
                       entityType={entityType}
@@ -170,6 +177,7 @@ const AssessmentResultsTable = ({
                   ))}
                 </>
                 <EntityAssessmentResults
+                  assessmentKey={assessmentKey}
                   idSuffix={`assessment-${entity.uuid}`}
                   entity={entity}
                   entityType={entityType}
@@ -187,6 +195,7 @@ const AssessmentResultsTable = ({
 }
 AssessmentResultsTable.propTypes = {
   style: PropTypes.object,
+  assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
