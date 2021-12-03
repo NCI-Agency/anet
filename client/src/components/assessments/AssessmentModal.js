@@ -22,6 +22,7 @@ import QuestionSet from "./QuestionSet"
 const AssessmentModal = ({
   showModal,
   note,
+  assessmentKey,
   assessment,
   assessmentYupSchema,
   assessmentConfig,
@@ -34,6 +35,7 @@ const AssessmentModal = ({
 }) => {
   const [assessmentError, setAssessmentError] = useState(null)
   const hasQuestionSets = !_isEmpty(assessmentConfig.questionSets)
+  const dictionaryPath = entity.getAssessmentDictionaryPath()
   const hasRichTextEditor = Object.values(
     assessmentConfig.questions || {}
   ).find(question => question.widget === SPECIAL_WIDGET_TYPES.RICH_TEXT_EDITOR)
@@ -163,6 +165,7 @@ const AssessmentModal = ({
       uuid: note.uuid,
       author: note.author,
       type: note.type,
+      assessmentKey: `${dictionaryPath}.${assessmentKey}`,
       noteRelatedObjects
     }
     // values contains the assessment fields
@@ -184,6 +187,7 @@ const AssessmentModal = ({
 AssessmentModal.propTypes = {
   showModal: PropTypes.bool,
   note: Model.notePropType,
+  assessmentKey: PropTypes.string.isRequired,
   assessment: PropTypes.object,
   assessmentYupSchema: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,

@@ -29,6 +29,7 @@ const GQL_DELETE_NOTE = gql`
 `
 
 const PeriodicAssessment = ({
+  assessmentKey,
   assessment,
   assessmentYupSchema,
   assessmentConfig,
@@ -73,6 +74,7 @@ const PeriodicAssessment = ({
                 <AssessmentModal
                   showModal={showAssessmentModalKey === note.uuid}
                   note={note}
+                  assessmentKey={assessmentKey}
                   assessment={assessment}
                   assessmentYupSchema={assessmentYupSchema}
                   assessmentConfig={assessmentConfig}
@@ -158,6 +160,7 @@ const PeriodicAssessment = ({
   }
 }
 PeriodicAssessment.propTypes = {
+  assessmentKey: PropTypes.string.isRequired,
   assessment: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   assessmentYupSchema: PropTypes.object.isRequired,
@@ -224,6 +227,7 @@ export const PeriodicAssessmentsRows = ({
                   <div key={note.uuid}>
                     <PeriodicAssessment
                       note={note}
+                      assessmentKey={assessmentKey}
                       assessment={assessment}
                       assessmentYupSchema={assessmentYupSchema}
                       assessmentConfig={filteredAssessmentConfig}
@@ -262,6 +266,7 @@ export const PeriodicAssessmentsRows = ({
                     </Button>
                     <AssessmentModal
                       showModal={showAssessmentModalKey === modalKey}
+                      assessmentKey={assessmentKey}
                       note={{
                         type: NOTE_TYPE.ASSESSMENT,
                         noteRelatedObjects: [

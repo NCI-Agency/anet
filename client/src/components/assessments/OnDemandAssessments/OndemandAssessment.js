@@ -305,6 +305,7 @@ const OnDemandAssessment = ({
             The above conditions should be satisfied at the same time. */}
         <AssessmentModal
           showModal={showModal}
+          assessmentKey={assessmentKey}
           note={{
             type: NOTE_TYPE.ASSESSMENT,
             noteRelatedObjects: [

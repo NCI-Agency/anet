@@ -31,6 +31,10 @@ export default class Person extends Model {
 
   static nameDelimiter = ","
 
+  static advisorAssessmentDictionaryPath = "fields.advisor.person.assessments"
+  static principalAssessmentDictionaryPath =
+    "fields.principal.person.assessments"
+
   static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
 
   static principalAssessmentConfig =
@@ -492,6 +496,12 @@ export default class Person extends Model {
           return accum
         }, {})
     )
+  }
+
+  getAssessmentDictionaryPath() {
+    return this.isAdvisor()
+      ? Person.advisorAssessmentDictionaryPath
+      : Person.principalAssessmentDictionaryPath
   }
 
   getAssessmentsConfig() {
