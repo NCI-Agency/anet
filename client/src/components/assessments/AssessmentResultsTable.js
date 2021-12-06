@@ -45,7 +45,7 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const instantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const instantAssessments = entity.getInstantAssessments()
   const { periods } = periodsConfig
   const dataPerPeriod = []
   periods.forEach(period =>
@@ -58,8 +58,8 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.entries(instantAssessmentConfig?.questions || {}).map(
-        ([key, config], index) => (
+      {instantAssessments.map(([ak, ac]) =>
+        Object.entries(ac?.questions || {}).map(([key, config], index) => (
           <InstantAssessmentsRow
             key={key}
             idSuffix={`${key}-${idSuffix}`}
@@ -69,10 +69,11 @@ const EntityAssessmentResults = ({
             periodsData={dataPerPeriod}
             isFirstRow={index === 0}
           />
-        )
+        ))
       )}
-      {Object.entries(instantAssessmentConfig?.questionSets || {}).map(
-        ([questionSet, config]) => (
+
+      {instantAssessments.map(([ak, ac]) =>
+        Object.entries(ac?.questionSets || {}).map(([questionSet, config]) => (
           <QuestionSetRow
             idSuffix={`${idSuffix}-${questionSet}`}
             key={questionSet}
@@ -81,7 +82,7 @@ const EntityAssessmentResults = ({
             periods={periods}
             periodsData={dataPerPeriod}
           />
-        )
+        ))
       )}
       <PeriodicAssessmentsRows
         assessmentKey={assessmentKey}
