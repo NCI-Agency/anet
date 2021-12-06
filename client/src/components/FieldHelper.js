@@ -409,7 +409,15 @@ const ButtonToggleGroupField = ({
             if (!button) {
               return null
             }
-            let { label, value, color, style, ...props } = button
+            let {
+              label,
+              value,
+              color,
+              style,
+              title,
+              disabled: buttonDisabled,
+              ...props
+            } = button
             const textColor = utils.getContrastYIQ(color)
             if (color) {
               if (
@@ -424,11 +432,20 @@ const ButtonToggleGroupField = ({
                 borderWidth: "2px"
               }
             }
-            return (
+            if (buttonDisabled) {
+              style = {
+                ...style,
+                pointerEvents: "none"
+              }
+            }
+            const key = `${field.name}_${value}`
+            const toggleButton = (
               <ToggleButton
+                disabled={disabled || buttonDisabled}
+                title={title}
                 {...props}
-                disabled={disabled}
-                id={`${field.name}_${value}`}
+                id={key}
+                key={key}
                 className={
                   color
                     ? textColor === "black"
@@ -436,13 +453,19 @@ const ButtonToggleGroupField = ({
                       : "dark-colored-toggle-button"
                     : ""
                 }
-                key={`${field.name}_${value}`}
                 value={value}
                 style={style}
                 variant="outline-secondary"
               >
                 {label}
               </ToggleButton>
+            )
+            return buttonDisabled ? (
+              <span id={`${key}_tooltip`} key={`${key}_tooltip`} title={title}>
+                {toggleButton}
+              </span>
+            ) : (
+              toggleButton
             )
           })}
         </ToggleButtonGroup>
