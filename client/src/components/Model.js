@@ -593,16 +593,20 @@ export default class Model {
     return {}
   }
 
-  getInstantAssessmentConfig(
+  getInstantAssessments(
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
-    return Object.values(this.getAssessmentsConfig()).find(
-      ac =>
+    return Object.entries(this.getAssessmentsConfig()).filter(
+      ([ak, ac]) =>
         ac.relatedObjectType === relatedObjectType &&
         ac.recurrence === RECURRENCE_TYPE.ONCE
     )
+  }
+
+  getInstantAssessmentConfig(assessmentKey) {
+    // TODO: in principle, there can be more than one assessment definition for each recurrence,
+    // so we should distinguish them here by key when we add that to the database.
+    return this.getAssessmentsConfig()?.[assessmentKey] || {}
   }
 
   getPeriodicAssessmentDetails(assessmentKey) {

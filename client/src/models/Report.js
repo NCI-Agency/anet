@@ -480,7 +480,8 @@ export default class Report extends Model {
           .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
           .map(ro => ro.relatedObjectUuid),
         assessmentUuid: n.uuid,
-        assessment: utils.parseJsonSafe(n.text)
+        assessment: utils.parseJsonSafe(n.text),
+        assessmentKey: n.assessmentKey
       }))
       .filter(n => !_isEmpty(n.entityUuids))
     // When updating the instant assessments, we need for each entity the uuid of the
@@ -490,8 +491,11 @@ export default class Report extends Model {
     const entitiesAssessments = {}
     notesToAssessments.forEach(m => {
       m.entityUuids.forEach(entityUuid => {
+        const splittedKey = m.assessmentKey.split(".")
+        const parsedKey = splittedKey.pop()
         entitiesAssessmentsUuids[entityUuid] = m.assessmentUuid
-        entitiesAssessments[entityUuid] = m.assessment
+        entitiesAssessments[entityUuid] = entitiesAssessments[entityUuid] || {}
+        entitiesAssessments[entityUuid][parsedKey] = m.assessment
       })
     })
     return {

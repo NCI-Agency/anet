@@ -1323,46 +1323,58 @@ const ReportForm = ({
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
     const valuesCopy = _cloneDeep(values)
-    const entitiesAssessments = valuesCopy[asessmentsFieldName]
-    return Object.entries(entitiesAssessments)
-      .filter(
-        ([key, assessment]) =>
-          entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
-      )
-      .map(([key, assessment]) => {
-        const entity = entities.find(e => e.uuid === key)
+    const assessmentNotes = []
+    const entitiesAssessments = Object.entries(
+      valuesCopy[asessmentsFieldName]
+    ).filter(([entityUuid, instantAssessments]) => {
+      Object.entries(instantAssessments).forEach(([ak, assessmentValues]) => {
+        if (isEmptyAssessment(assessmentValues)) {
+          delete instantAssessments[ak]
+        }
+      })
+      return entitiesUuids.includes(entityUuid)
+    })
+    entitiesAssessments.forEach(([entityUuid, instantAssessment]) => {
+      Object.entries(instantAssessment).forEach(([ak, assessmentValues]) => {
+        const entity = entities.find(e => e.uuid === entityUuid)
+        const dictionaryPath = entity.getAssessmentDictionaryPath()
         Model.clearInvalidAssessmentQuestions(
-          assessment,
+          assessmentValues,
           entity,
           new Report(values),
-          entity.getInstantAssessmentConfig()
+          entity.getInstantAssessmentConfig(ak)
         )
-        assessment.__recurrence = RECURRENCE_TYPE.ONCE
-        assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+        assessmentValues.__recurrence = RECURRENCE_TYPE.ONCE
+        assessmentValues.__relatedObjectType =
+          ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
               relatedObjectType: entityType.relatedObjectType,
-              relatedObjectUuid: key
+              relatedObjectUuid: entityUuid
             },
             {
               relatedObjectType: Report.relatedObjectType,
               relatedObjectUuid: reportUuid
             }
           ],
+          assessmentKey: `${dictionaryPath}.${ak}`,
           text: customFieldsJSONString(
             valuesCopy,
             true,
-            `${asessmentsFieldName}.${key}`
+            `${asessmentsFieldName}.${entityUuid}.${ak}`
           )
         }
-        const initialAssessmentUuid = values[assessmentsUuidsFieldName][key]
+        const initialAssessmentUuid =
+          values[assessmentsUuidsFieldName]?.[entityUuid]?.[ak]
         if (initialAssessmentUuid) {
           noteObj.uuid = initialAssessmentUuid
         }
-        return noteObj
+        assessmentNotes.push(noteObj)
       })
+    })
+    return assessmentNotes
   }
 
   function save(values, sendEmail) {
