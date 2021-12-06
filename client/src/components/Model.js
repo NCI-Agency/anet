@@ -616,7 +616,7 @@ export default class Model {
     }
   }
 
-  getPeriodAssessments(recurrence, period) {
+  getPeriodAssessments(assessmentKey, period) {
     // TODO: in principle, there can be more than one assessment definition for each recurrence,
     // so we should distinguish them here by key when we add that to the database.
     return this.notes
@@ -629,7 +629,8 @@ export default class Model {
       .map(note => ({ note: note, assessment: utils.parseJsonSafe(note.text) }))
       .filter(
         obj =>
-          obj.assessment.__recurrence === recurrence &&
+          obj.note.assessmentKey ===
+            `${this.getAssessmentDictionaryPath()}.${assessmentKey}` &&
           dateBelongsToPeriod(obj.assessment.__periodStart, period)
       )
   }
@@ -718,21 +719,23 @@ export default class Model {
   static hasPendingAssessments(entity) {
     // TODO: in principle, there can be more than one assessment definition for each recurrence,
     // so we should distinguish them here by key when we add that to the database.
-    const recurTypes = Object.values(entity.getAssessmentsConfig()).map(
-      ac => ac.recurrence
+    const entityAssessments = Object.entries(entity.getAssessmentsConfig())
+    const periodicAssessments = entityAssessments.filter(
+      ([ak, ac]) => PERIOD_FACTORIES[ac.recurrence]
     )
-    const periodicRecurTypes = recurTypes.filter(type => PERIOD_FACTORIES[type])
-    if (_isEmpty(periodicRecurTypes)) {
+    if (_isEmpty(periodicAssessments)) {
       // no periodic, no pending
       return false
     }
-
     // "for loop" to break early
-    for (let i = 0; i < periodicRecurTypes.length; i++) {
+    for (let i = 0; i < periodicAssessments.length; i++) {
       // offset 1 so that the period is the previous (not current) period
-      const prevPeriod = PERIOD_FACTORIES[periodicRecurTypes[i]](moment(), 1)
+      const prevPeriod = PERIOD_FACTORIES[periodicAssessments[i][1].recurrence](
+        moment(),
+        1
+      )
       const prevPeriodAssessments = entity.getPeriodAssessments(
-        periodicRecurTypes[i],
+        periodicAssessments[i][0],
         prevPeriod
       )
       // if there is no assessment in the last period, we have pending assessment

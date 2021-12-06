@@ -201,7 +201,7 @@ export const PeriodicAssessmentsRows = ({
   const periodsAssessments = []
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
-    const periodAssessments = entity.getPeriodAssessments(recurrence, period)
+    const periodAssessments = entity.getPeriodAssessments(assessmentKey, period)
 
     periodsAssessments.push(periodAssessments)
     // Only allow adding new assessments for a period if the user has the rights
