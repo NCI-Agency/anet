@@ -5,7 +5,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
@@ -22,8 +21,6 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
-import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class CustomSensitiveInformationDao

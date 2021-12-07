@@ -1,6 +1,5 @@
 package mil.dds.anet.test.integration.db;
 
-import static mil.dds.anet.utils.PendingAssessmentsHelper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -27,6 +26,8 @@ import mil.dds.anet.test.integration.utils.FakeSmtpServer;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.PendingAssessmentsNotificationWorker;
+import mil.dds.anet.utils.PendingAssessmentsHelper.AssessmentDates;
+import mil.dds.anet.utils.PendingAssessmentsHelper.Recurrence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
