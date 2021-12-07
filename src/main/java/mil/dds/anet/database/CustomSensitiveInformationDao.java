@@ -230,16 +230,7 @@ public class CustomSensitiveInformationDao
     }
 
     // Check against authorization groups
-    final Query query = getDbHandle()
-        .createQuery("/* checkCustomSensitiveInformationAuthorization */ SELECT COUNT(*) AS count"
-            + " FROM \"authorizationGroupPositions\" agp"
-            + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\""
-            + " WHERE agp.\"authorizationGroupUuid\" IN ( <authorizationGroupUuids> )"
-            + " AND p.\"currentPersonUuid\" = :userUuid")
-        .bindList("authorizationGroupUuids", authorizationGroupUuids)
-        .bind("userUuid", DaoUtils.getUuid(user));
-    final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
-    return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
+    return DaoUtils.isUserInAuthorizationGroup(getDbHandle(), user, authorizationGroupUuids);
   }
 
   private List<String> getAuthorizationGroupUuids(final String tableName, final String fieldName) {

@@ -23,49 +23,9 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.TestData;
-import mil.dds.anet.test.client.AdvisorReportsEntry;
-import mil.dds.anet.test.client.AnetBeanList_Location;
-import mil.dds.anet.test.client.AnetBeanList_Organization;
-import mil.dds.anet.test.client.AnetBeanList_Person;
-import mil.dds.anet.test.client.AnetBeanList_Report;
-import mil.dds.anet.test.client.AnetBeanList_Task;
-import mil.dds.anet.test.client.ApprovalStep;
-import mil.dds.anet.test.client.ApprovalStepInput;
-import mil.dds.anet.test.client.ApprovalStepType;
-import mil.dds.anet.test.client.Atmosphere;
-import mil.dds.anet.test.client.Comment;
-import mil.dds.anet.test.client.Location;
-import mil.dds.anet.test.client.LocationSearchQueryInput;
-import mil.dds.anet.test.client.LocationSearchSortBy;
-import mil.dds.anet.test.client.Organization;
-import mil.dds.anet.test.client.OrganizationInput;
-import mil.dds.anet.test.client.OrganizationSearchQueryInput;
-import mil.dds.anet.test.client.OrganizationType;
-import mil.dds.anet.test.client.Person;
-import mil.dds.anet.test.client.PersonInput;
-import mil.dds.anet.test.client.PersonSearchQueryInput;
-import mil.dds.anet.test.client.PersonSearchSortBy;
-import mil.dds.anet.test.client.Position;
-import mil.dds.anet.test.client.PositionInput;
-import mil.dds.anet.test.client.PositionType;
-import mil.dds.anet.test.client.Report;
-import mil.dds.anet.test.client.ReportAction;
-import mil.dds.anet.test.client.ReportCancelledReason;
-import mil.dds.anet.test.client.ReportInput;
-import mil.dds.anet.test.client.ReportPerson;
-import mil.dds.anet.test.client.ReportPersonInput;
-import mil.dds.anet.test.client.ReportSearchQueryInput;
-import mil.dds.anet.test.client.ReportSearchSortBy;
-import mil.dds.anet.test.client.ReportSensitiveInformationInput;
-import mil.dds.anet.test.client.ReportState;
-import mil.dds.anet.test.client.Role;
-import mil.dds.anet.test.client.RollupGraph;
-import mil.dds.anet.test.client.SortOrder;
-import mil.dds.anet.test.client.Status;
-import mil.dds.anet.test.client.Task;
-import mil.dds.anet.test.client.TaskSearchQueryInput;
-import mil.dds.anet.test.client.TaskSearchSortBy;
+import mil.dds.anet.test.client.*;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.test.integration.utils.TestApp;
@@ -102,14 +62,17 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
       String.format("{ %1$s customFieldRef1 { %1$s } }", _TASK_FIELDS);
+  private static final String _NOTE_FIELDS = "uuid type assessmentKey text author { uuid }"
+      + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } ";
+  private static final String NOTE_FIELDS = String.format("{ %1$s }", _NOTE_FIELDS);
   protected static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s principalOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
-          + " comments %6$s authorizationGroups { uuid name }"
+          + " comments %6$s notes %7$s authorizationGroups { uuid name }"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
           + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
-      COMMENT_FIELDS);
+      COMMENT_FIELDS, NOTE_FIELDS);
 
   @Test
   public void createReport()
@@ -263,6 +226,54 @@ public class ReportResourceTest extends AbstractResourceTest {
     // check that JSON of customFields is sanitized after create
     assertThat(created.getCustomFields())
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+
+    // Attach note to test report
+    final NoteRelatedObjectInput testNroInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(ReportDao.TABLE_NAME)
+            .withRelatedObjectUuid(created.getUuid()).build();
+    final NoteInput testNoteInput =
+        NoteInput.builder().withType(NoteType.ASSESSMENT).withText("{\"test\":null}")
+            .withAssessmentKey("fields.advisor.person.assessments.advisorOnceReportLinguist")
+            .withNoteRelatedObjects(Collections.singletonList(testNroInput)).build();
+    final Note createdNote = authorMutationExecutor.createNote(NOTE_FIELDS, testNoteInput);
+    assertThat(createdNote).isNotNull();
+    assertThat(createdNote.getUuid()).isNotNull();
+
+    // Author can read the assessment
+    final Report updatedReport = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(updatedReport.getNotes()).hasSize(1);
+    final Note reportNote = updatedReport.getNotes().get(0);
+    assertThat(reportNote.getText()).isEqualTo(testNoteInput.getText());
+    assertThat(reportNote.getNoteRelatedObjects()).hasSize(1);
+
+    // Admin can read the assessment
+    final Report adminReport = adminQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(adminReport.getNotes()).hasSize(1);
+
+    // Not the author but in the authorization group defined in the dictionary so can read the
+    // assessment
+    final Report erinReport =
+        getQueryExecutor(getRegularUser().getDomainUsername()).report(FIELDS, created.getUuid());
+    assertThat(erinReport.getNotes()).hasSize(1);
+
+    // Not in the authorization group therefore cannot read the assessment
+    Report jackReport =
+        getQueryExecutor(getJackJackson().getDomainUsername()).report(FIELDS, created.getUuid());
+    assertThat(jackReport.getNotes()).hasSize(0);
+
+    final NoteInput noteWithoutAuthInput =
+        NoteInput.builder().withType(NoteType.ASSESSMENT).withText("{\"test\":null}")
+            .withAssessmentKey("fields.advisor.person.assessments.advisorQuarterly")
+            .withNoteRelatedObjects(Collections.singletonList(testNroInput)).build();
+    final Note noteWithoutAuth =
+        authorMutationExecutor.createNote(NOTE_FIELDS, noteWithoutAuthInput);
+    assertThat(noteWithoutAuth).isNotNull();
+    assertThat(noteWithoutAuth.getUuid()).isNotNull();
+
+    // No authorization groups are defined in the dictionary therefore Jack can fetch the assessment
+    jackReport =
+        getQueryExecutor(getJackJackson().getDomainUsername()).report(FIELDS, created.getUuid());
+    assertThat(jackReport.getNotes()).hasSize(1);
 
     // Have another regular user try to submit the report
     try {

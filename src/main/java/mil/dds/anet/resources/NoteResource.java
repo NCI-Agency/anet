@@ -133,6 +133,10 @@ public class NoteResource {
         }
       }
     }
+
+    if (dao.isUserInAuthorizationGroup(user, note)) {
+      return;
+    }
     throw new WebApplicationException("You do not have permissions to edit this assessment",
         Status.FORBIDDEN);
   }

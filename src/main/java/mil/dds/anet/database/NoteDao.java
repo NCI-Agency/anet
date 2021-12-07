@@ -8,16 +8,18 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
-import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.*;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -121,8 +123,11 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
-    return new ForeignKeyFetcher<Note>().load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES,
-        relatedObjectUuid);
+    final Person user = DaoUtils.getUserFromContext(context);
+    return new ForeignKeyFetcher<Note>()
+        .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
+        .thenApply(notes -> notes.stream().filter(note -> hasAssessmentAuthorization(user, note))
+            .collect(Collectors.toList()));
   }
 
   static class NotesBatcher extends ForeignKeyBatcher<Note> {
@@ -223,6 +228,37 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public List<Note> getNotesByType(NoteType type) {
     return getDbHandle().createQuery("/* getNotesByType*/ SELECT * FROM notes WHERE type = :type")
         .bind("type", DaoUtils.getEnumId(type)).map(new NoteMapper()).list();
+  }
+
+  @InTransaction
+  public boolean hasAssessmentAuthorization(final Person user, final Note note) {
+    // Admins always have access
+    // Note that a `null` user means this is called through a merge function, by an admin
+    // Only notes of assessment type are restricted
+    if (user == null || AuthUtils.isAdmin(user) || !note.getType().equals(NoteType.ASSESSMENT)) {
+      return true;
+    }
+
+    // Check whether the user is the author
+    if (user.getUuid().equals(note.getAuthorUuid())) {
+      return true;
+    }
+
+    ResourceUtils.checkBasicAssessmentPermission(note);
+    // Check against authorization groups
+    return isUserInAuthorizationGroup(user, note);
+  }
+
+  public boolean isUserInAuthorizationGroup(final Person user, final Note note) {
+    // Check against the dictionary whether the user is authorized
+    @SuppressWarnings("unchecked")
+    final List<String> authorizationGroupUuids = (List<String>) AnetObjectEngine.getConfiguration()
+        .getDictionaryEntry(note.getAssessmentKey() + ".authorizationGroupUuids");
+    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
+      // No authorization groups defined for this field
+      return true;
+    }
+    return DaoUtils.isUserInAuthorizationGroup(getDbHandle(), user, authorizationGroupUuids);
   }
 
   private void updateSubscriptions(int numRows, Note obj) {
