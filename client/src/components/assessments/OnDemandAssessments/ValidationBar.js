@@ -6,21 +6,20 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { Badge } from "react-bootstrap"
-import Settings from "settings"
 
 const ValidationBar = ({
-  assessmentExpires,
+  assessmentExpirationDays,
   index,
   assessmentFieldsObject,
   sortedOnDemandNotes
 }) => {
-  if (assessmentExpires) {
+  if (assessmentExpirationDays) {
     // Fill the 'expirationDate' field if it is empty
     if (!assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE]) {
       assessmentFieldsObject[ENTITY_ON_DEMAND_EXPIRATION_DATE] = moment(
         assessmentFieldsObject[ENTITY_ON_DEMAND_ASSESSMENT_DATE]
       )
-        .add(Settings.onDemandAssessmentExpirationDays, "days")
+        .add(assessmentExpirationDays, "days")
         .toDate()
         .toISOString()
     }
@@ -91,7 +90,7 @@ const ValidationBar = ({
   }
 }
 ValidationBar.propTypes = {
-  assessmentExpires: PropTypes.bool.isRequired,
+  assessmentExpirationDays: PropTypes.number,
   index: PropTypes.number.isRequired,
   assessmentFieldsObject: PropTypes.object.isRequired,
   sortedOnDemandNotes: PropTypes.array.isRequired

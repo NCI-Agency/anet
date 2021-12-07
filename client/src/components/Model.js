@@ -745,7 +745,11 @@ export default class Model {
 
   static filterAssessmentConfig(assessmentConfig, subject, relatedObject) {
     const testValue = { subject, relatedObject }
-    const filteredAssessmentConfig = { questions: {}, questionSets: {} }
+    const filteredAssessmentConfig = {
+      ...assessmentConfig,
+      questions: {},
+      questionSets: {}
+    }
     if (!_isEmpty(assessmentConfig?.questions)) {
       Object.entries(assessmentConfig.questions)
         .filter(
