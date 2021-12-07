@@ -5,6 +5,7 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class NoteResource {
   public Note updateNote(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "note") Note n) {
     final Person user = DaoUtils.getUserFromContext(context);
-    checkPermission(n, user);
+    checkPermission(n, user, DaoUtils.getAuthorizationGroupUuids(user));
     checkAndFixText(n);
     checkNoteRelatedObjects(n);
     final int numRows = dao.update(n);
@@ -85,7 +86,7 @@ public class NoteResource {
       throw new WebApplicationException("Note not found", Status.NOT_FOUND);
     }
     final Person user = DaoUtils.getUserFromContext(context);
-    checkPermission(n, user);
+    checkPermission(n, user, DaoUtils.getAuthorizationGroupUuids(user));
     final int numRows = dao.delete(noteUuid);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process note delete", Status.NOT_FOUND);
@@ -96,7 +97,8 @@ public class NoteResource {
     return numRows;
   }
 
-  private void checkPermission(final Note note, final Person user) {
+  private void checkPermission(final Note note, final Person user,
+      final Set<String> authorizationGroupUuids) {
     if (AuthUtils.isAdmin(user)) {
       // Admin can edit any note
       return;
@@ -134,9 +136,10 @@ public class NoteResource {
       }
     }
 
-    if (dao.isUserInAuthorizationGroup(user, note)) {
+    if (DaoUtils.isUserInAuthorizationGroup(authorizationGroupUuids, note)) {
       return;
     }
+
     throw new WebApplicationException("You do not have permissions to edit this assessment",
         Status.FORBIDDEN);
   }
@@ -147,11 +150,15 @@ public class NoteResource {
       // Already loaded
       return responsibleTasksUuids;
     }
+    final Position position = DaoUtils.getPosition(user);
+    if (position == null) {
+      return Collections.emptySet();
+    }
     // Load
     final TaskSearchQuery tsq = new TaskSearchQuery();
     tsq.setStatus(Task.Status.ACTIVE);
     final List<Task> responsibleTasks =
-        user.loadPosition().loadResponsibleTasks(engine.getContext(), tsq).join();
+        position.loadResponsibleTasks(engine.getContext(), tsq).join();
     return responsibleTasks.stream().map(rp -> rp.getUuid()).collect(Collectors.toSet());
   }
 
@@ -161,9 +168,13 @@ public class NoteResource {
       // Already loaded
       return associatedPositionsUuids;
     }
+    final Position position = DaoUtils.getPosition(user);
+    if (position == null) {
+      return Collections.emptySet();
+    }
     // Load
     final List<Position> associatedPositions =
-        user.loadPosition().loadAssociatedPositions(engine.getContext()).join();
+        position.loadAssociatedPositions(engine.getContext()).join();
     return associatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
   }
 

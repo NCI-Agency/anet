@@ -4,16 +4,20 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
@@ -21,7 +25,6 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.ResourceUtils;
-import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,10 +130,20 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public CompletableFuture<List<Note>> getNotesForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    return new ForeignKeyFetcher<Note>()
-        .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
-        .thenApply(notes -> notes.stream().filter(note -> hasAssessmentAuthorization(user, note))
-            .collect(Collectors.toList()));
+    final Position position = DaoUtils.getPosition(user);
+    final CompletableFuture<List<AuthorizationGroup>> authorizationGroupsFuture =
+        (user == null || position == null)
+            ? CompletableFuture.completedFuture(Collections.emptyList())
+            : position.loadAuthorizationGroups(context);
+    return authorizationGroupsFuture.thenCompose(authorizationGroups -> {
+      final Set<String> authorizationGroupUuids =
+          authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
+      return new ForeignKeyFetcher<Note>()
+          .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
+          .thenApply(notes -> notes.stream()
+              .filter(note -> hasAssessmentAuthorization(user, authorizationGroupUuids, note))
+              .collect(Collectors.toList()));
+    });
   }
 
   static class NotesBatcher extends ForeignKeyBatcher<Note> {
@@ -234,7 +247,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   @InTransaction
-  public boolean hasAssessmentAuthorization(final Person user, final Note note) {
+  public boolean hasAssessmentAuthorization(final Person user,
+      final Set<String> authorizationGroupUuids, final Note note) {
     // Admins always have access
     // Note that a `null` user means this is called through a merge function, by an admin
     // Only notes of assessment type are restricted
@@ -249,19 +263,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
     ResourceUtils.checkBasicAssessmentPermission(note);
     // Check against authorization groups
-    return isUserInAuthorizationGroup(user, note);
-  }
-
-  public boolean isUserInAuthorizationGroup(final Person user, final Note note) {
-    // Check against the dictionary whether the user is authorized
-    @SuppressWarnings("unchecked")
-    final List<String> authorizationGroupUuids = (List<String>) AnetObjectEngine.getConfiguration()
-        .getDictionaryEntry(note.getAssessmentKey() + ".authorizationGroupUuids");
-    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
-      // No authorization groups defined for this field
-      return true;
-    }
-    return DaoUtils.isUserInAuthorizationGroup(getDbHandle(), user, authorizationGroupUuids);
+    return DaoUtils.isUserInAuthorizationGroup(authorizationGroupUuids, note);
   }
 
   private void updateSubscriptions(int numRows, Note obj) {

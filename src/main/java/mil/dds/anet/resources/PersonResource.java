@@ -105,7 +105,7 @@ public class PersonResource {
           create
               ? AnetObjectEngine.getInstance().getPositionDao()
                   .getByUuid(DaoUtils.getUuid(subject.getPosition()))
-              : subject.loadPosition();
+              : DaoUtils.getPosition(subject);
       if (subjectPos == null) {
         // Super Users can edit position-less people.
         return true;
@@ -130,7 +130,7 @@ public class PersonResource {
     // Swap the position first in order to do the authentication check.
     if (p.getPosition() != null) {
       // Maybe update position?
-      final Position existingPos = existing.loadPosition();
+      final Position existingPos = DaoUtils.getPosition(existing);
       final String positionUuid = DaoUtils.getUuid(p.getPosition());
       if (existingPos == null && positionUuid != null) {
         // Update the position for this person.
@@ -165,7 +165,7 @@ public class PersonResource {
 
     // Automatically remove people from a position if they are inactive.
     if (Person.Status.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
-      Position existingPos = existing.loadPosition();
+      Position existingPos = DaoUtils.getPosition(existing);
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
         if (!user.getUuid().equals(p.getUuid())) {

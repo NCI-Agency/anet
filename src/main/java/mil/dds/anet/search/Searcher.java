@@ -48,7 +48,7 @@ public abstract class Searcher implements ISearcher {
     final String sql =
         "EXISTS ( SELECT uuid FROM subscriptions WHERE \"subscriberUuid\" = :subscriberUuid "
             + "AND ( " + Joiner.on(" OR ").join(stmts) + " ) )";
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     args.put("subscriberUuid", DaoUtils.getUuid(position));
     return sql;
   }

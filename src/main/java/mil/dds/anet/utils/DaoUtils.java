@@ -6,18 +6,21 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.CustomSensitiveInformation;
+import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.views.AbstractAnetBean;
-import org.jdbi.v3.core.Handle;
-import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.statement.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,28 +122,52 @@ public class DaoUtils {
   }
 
   public static Person getUserFromContext(Map<String, Object> context) {
+    if (context == null) {
+      // Called from e.g. merge
+      return null;
+    }
     return (Person) context.get("user");
+  }
+
+  public static Position getPosition(final Person user) {
+    return user == null ? null : user.loadPosition();
   }
 
   public static void saveCustomSensitiveInformation(final Person user, final String tableName,
       final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
     AnetObjectEngine.getInstance().getCustomSensitiveInformationDao()
-        .insertOrUpdateCustomSensitiveInformation(user, tableName, uuid,
-            customSensitiveInformation);
+        .insertOrUpdateCustomSensitiveInformation(user, getAuthorizationGroupUuids(user), tableName,
+            uuid, customSensitiveInformation);
   }
 
-  public static boolean isUserInAuthorizationGroup(final Handle handle, final Person user,
-      final List<String> authorizationGroupUuids) {
-    final Query query = handle
-        .createQuery("/* checkUserIdInAuthorizationGroupIds */ SELECT COUNT(*) AS count"
-            + " FROM \"authorizationGroupPositions\" agp"
-            + " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\""
-            + " WHERE agp.\"authorizationGroupUuid\" IN ( <authorizationGroupUuids> )"
-            + " AND p.\"currentPersonUuid\" = :userUuid")
-        .bindList("authorizationGroupUuids", authorizationGroupUuids)
-        .bind("userUuid", getUuid(user));
-    final Optional<Map<String, Object>> result = query.map(new MapMapper(false)).findFirst();
-    return result.isPresent() && ((Number) result.get().get("count")).intValue() > 0;
+  public static Set<String> getAuthorizationGroupUuids(final Person user) {
+    final Position position = getPosition(user);
+    if (user == null || position == null) {
+      return Collections.emptySet();
+    }
+    final List<AuthorizationGroup> authorizationGroups =
+        position.loadAuthorizationGroups(AnetObjectEngine.getInstance().getContext()).join();
+    return authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
+  }
+
+  public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
+      final Note note) {
+    // Check against the dictionary whether the user is authorized
+    @SuppressWarnings("unchecked")
+    final List<String> authorizationGroupUuids = (List<String>) AnetObjectEngine.getConfiguration()
+        .getDictionaryEntry(note.getAssessmentKey() + ".authorizationGroupUuids");
+    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
+      // No authorization groups defined for this field
+      return true;
+    }
+    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
+  }
+
+  public static boolean isInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
+      final List<String> checkAuthorizationGroupUuids) {
+    final Set<String> checkAuthGroupUuids = new HashSet<>(checkAuthorizationGroupUuids);
+    checkAuthGroupUuids.retainAll(userAuthorizationGroupUuids);
+    return !checkAuthGroupUuids.isEmpty();
   }
 
   public static ZoneId getServerNativeZoneId() {

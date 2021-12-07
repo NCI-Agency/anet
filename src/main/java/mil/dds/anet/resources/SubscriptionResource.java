@@ -34,7 +34,7 @@ public class SubscriptionResource {
   public Subscription createSubscription(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "subscription") Subscription s) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     checkSubscriber(position);
     s.setSubscriberUuid(DaoUtils.getUuid(position));
     try {
@@ -85,7 +85,7 @@ public class SubscriptionResource {
   }
 
   private void checkPermission(Subscription s, Person user) {
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     if (!s.getSubscriberUuid().equals(DaoUtils.getUuid(position)) && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException("Only the subscriber or an admin can do this",
           Status.FORBIDDEN);

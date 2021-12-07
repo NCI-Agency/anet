@@ -3,11 +3,14 @@ package mil.dds.anet.database;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.CustomSensitiveInformation;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
@@ -83,12 +86,21 @@ public class CustomSensitiveInformationDao
   public CompletableFuture<List<CustomSensitiveInformation>> getCustomSensitiveInformationForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    return new ForeignKeyFetcher<CustomSensitiveInformation>()
-        .load(context, FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION,
-            relatedObjectUuid)
-        .thenApply(csiList -> csiList.stream()
-            .filter(csi -> hasCustomSensitiveInformationAuthorization(user, csi))
-            .collect(Collectors.toList()));
+    final Position position = DaoUtils.getPosition(user);
+    final CompletableFuture<List<AuthorizationGroup>> authorizationGroupsFuture =
+        (user == null || position == null)
+            ? CompletableFuture.completedFuture(Collections.emptyList())
+            : position.loadAuthorizationGroups(context);
+    return authorizationGroupsFuture.thenCompose(authorizationGroups -> {
+      final Set<String> authorizationGroupUuids =
+          authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
+      return new ForeignKeyFetcher<CustomSensitiveInformation>()
+          .load(context, FkDataLoaderKey.RELATED_OBJECT_CUSTOM_SENSITIVE_INFORMATION,
+              relatedObjectUuid)
+          .thenApply(csiList -> csiList.stream().filter(
+              csi -> hasCustomSensitiveInformationAuthorization(user, authorizationGroupUuids, csi))
+              .collect(Collectors.toList()));
+    });
   }
 
   static class SensitiveInformationBatcher extends ForeignKeyBatcher<CustomSensitiveInformation> {
@@ -110,7 +122,8 @@ public class CustomSensitiveInformationDao
   }
 
   public void insertOrUpdateCustomSensitiveInformation(final Person user,
-      final String relatedObjectType, final String relatedObjectUuid,
+      final Set<String> userAuthorizationGroupUuids, final String relatedObjectType,
+      final String relatedObjectUuid,
       final List<CustomSensitiveInformation> customSensitiveInformation) {
     if (!Utils.isEmptyOrNull(customSensitiveInformation)) {
       for (final CustomSensitiveInformation csi : customSensitiveInformation) {
@@ -121,9 +134,11 @@ public class CustomSensitiveInformationDao
           csi.setRelatedObjectType(relatedObjectType);
           csi.setRelatedObjectUuid(relatedObjectUuid);
           if (DaoUtils.getUuid(csi) == null) {
-            checkAndInsert(user, relatedObjectType, relatedObjectUuid, csi);
+            checkAndInsert(user, userAuthorizationGroupUuids, relatedObjectType, relatedObjectUuid,
+                csi);
           } else {
-            checkAndUpdate(user, relatedObjectType, relatedObjectUuid, csi);
+            checkAndUpdate(user, userAuthorizationGroupUuids, relatedObjectType, relatedObjectUuid,
+                csi);
           }
         } catch (JsonProcessingException e) {
           // Audit and ignore
@@ -136,9 +151,10 @@ public class CustomSensitiveInformationDao
   }
 
   @SuppressWarnings("lgtm[java/unused-parameter]") // match the signature of checkAndUpdate
-  private void checkAndInsert(final Person user, final String relatedObjectType,
-      final String relatedObjectUuid, final CustomSensitiveInformation csi) {
-    if (!hasCustomSensitiveInformationAuthorization(user, csi)) {
+  private void checkAndInsert(final Person user, final Set<String> userAuthorizationGroupUuids,
+      final String relatedObjectType, final String relatedObjectUuid,
+      final CustomSensitiveInformation csi) {
+    if (!hasCustomSensitiveInformationAuthorization(user, userAuthorizationGroupUuids, csi)) {
       // Audit and ignore
       AnetAuditLogger.log("Person {} tried to insert CustomSensitiveInformation {}"
           + " which they don't have access to, refused", user, csi);
@@ -149,8 +165,9 @@ public class CustomSensitiveInformationDao
     }
   }
 
-  private void checkAndUpdate(final Person user, final String relatedObjectType,
-      final String relatedObjectUuid, final CustomSensitiveInformation csi) {
+  private void checkAndUpdate(final Person user, final Set<String> userAuthorizationGroupUuids,
+      final String relatedObjectType, final String relatedObjectUuid,
+      final CustomSensitiveInformation csi) {
     // Retrieve existing and check
     final CustomSensitiveInformation existingCsi = getByUuid(csi.getUuid());
     if (existingCsi == null) {
@@ -167,7 +184,8 @@ public class CustomSensitiveInformationDao
       // Audit and ignore
       AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
           + " with a different relatedObject to {}, refused", user, existingCsi, csi);
-    } else if (!hasCustomSensitiveInformationAuthorization(user, csi)) {
+    } else if (!hasCustomSensitiveInformationAuthorization(user, userAuthorizationGroupUuids,
+        csi)) {
       // Audit and ignore
       AnetAuditLogger.log("Person {} tried to update CustomSensitiveInformation {}"
           + " which they don't have access to, refused", user, csi);
@@ -180,7 +198,7 @@ public class CustomSensitiveInformationDao
 
   @InTransaction
   public boolean hasCustomSensitiveInformationAuthorization(final Person user,
-      final CustomSensitiveInformation csi) {
+      final Set<String> userAuthorizationGroupUuids, final CustomSensitiveInformation csi) {
     // Admins always have access
     // Note that a `null` user means this is called through a merge function, by an admin
     if (user == null || AuthUtils.isAdmin(user)) {
@@ -192,7 +210,7 @@ public class CustomSensitiveInformationDao
     final boolean isForPerson = PersonDao.TABLE_NAME.equals(csi.getRelatedObjectType());
     if (isForPosition || isForPerson) {
       final AnetObjectEngine engine = AnetObjectEngine.getInstance();
-      final Position currentPosition = user.loadPosition();
+      final Position currentPosition = DaoUtils.getPosition(user);
       if (currentPosition != null) {
         final List<Position> associatedPositions =
             currentPosition.loadAssociatedPositions(engine.getContext()).join();
@@ -227,7 +245,7 @@ public class CustomSensitiveInformationDao
     }
 
     // Check against authorization groups
-    return DaoUtils.isUserInAuthorizationGroup(getDbHandle(), user, authorizationGroupUuids);
+    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
   }
 
   private List<String> getAuthorizationGroupUuids(final String tableName, final String fieldName) {
