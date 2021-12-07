@@ -1,10 +1,8 @@
 package mil.dds.anet.resources;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +26,8 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResourceUtils;
-import mil.dds.anet.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NoteResource {
-
-  private static final Logger logger =
-      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final AnetObjectEngine engine;
   private final NoteDao dao;
@@ -53,8 +45,7 @@ public class NoteResource {
     if (n.getType() == NoteType.ASSESSMENT) {
       ResourceUtils.checkBasicAssessmentPermission(n);
     }
-    checkAndFixText(n);
-    checkNoteRelatedObjects(n);
+    ResourceUtils.checkAndFixNote(n);
     final Person user = DaoUtils.getUserFromContext(context);
     n.setAuthorUuid(DaoUtils.getUuid(user));
     n = dao.insert(n);
@@ -67,8 +58,7 @@ public class NoteResource {
       @GraphQLArgument(name = "note") Note n) {
     final Person user = DaoUtils.getUserFromContext(context);
     checkPermission(n, user, DaoUtils.getAuthorizationGroupUuids(user));
-    checkAndFixText(n);
-    checkNoteRelatedObjects(n);
+    ResourceUtils.checkAndFixNote(n);
     final int numRows = dao.update(n);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process note update", Status.NOT_FOUND);
@@ -176,32 +166,6 @@ public class NoteResource {
     final List<Position> associatedPositions =
         position.loadAssociatedPositions(engine.getContext()).join();
     return associatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
-  }
-
-  private void checkAndFixText(Note n) {
-    if (n.getText() == null || n.getText().trim().length() == 0) {
-      throw new WebApplicationException("Note text must not be empty", Status.BAD_REQUEST);
-    }
-    sanitizeText(n);
-  }
-
-  private void sanitizeText(Note n) {
-    if (NoteType.FREE_TEXT.equals(n.getType())) {
-      n.setText(Utils.isEmptyHtml(n.getText()) ? null : Utils.sanitizeHtml(n.getText()));
-    } else {
-      try {
-        n.setText(Utils.sanitizeJson(n.getText()));
-      } catch (JsonProcessingException e) {
-        n.setText(null);
-        logger.error("Unable to process Json, payload discarded", e);
-      }
-    }
-  }
-
-  private void checkNoteRelatedObjects(Note n) {
-    if (Utils.isEmptyOrNull(n.getNoteRelatedObjects())) {
-      throw new WebApplicationException("Note must have related objects", Status.BAD_REQUEST);
-    }
   }
 
 }

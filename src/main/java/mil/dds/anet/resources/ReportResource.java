@@ -911,26 +911,25 @@ public class ReportResource {
       @GraphQLArgument(name = "assessments") List<Note> assessments) {
     final Person user = DaoUtils.getUserFromContext(context);
     final NoteDao noteDao = engine.getNoteDao();
+    for (final Note assessment : assessments) {
+      ResourceUtils.checkBasicAssessmentPermission(assessment);
+      ResourceUtils.checkAndFixNote(assessment);
+      assessment.setAuthorUuid(DaoUtils.getUuid(user));
+    }
 
     final List<Note> existingNotes = r.loadNotes(engine.getContext()).join();
     final List<Note> existingAssessments = existingNotes.stream()
         .filter(n -> n.getType().equals(NoteType.ASSESSMENT)).collect(Collectors.toList());
     Utils.updateElementsByUuid(existingAssessments, assessments,
         // Create new assessments:
-        newAssessment -> {
-          ResourceUtils.checkBasicAssessmentPermission(newAssessment);
-          newAssessment.setAuthorUuid(DaoUtils.getUuid(user));
-          noteDao.insert(newAssessment);
-        },
+        newAssessment -> noteDao.insert(newAssessment),
         // Delete old assessments:
         oldAssessmentUuid -> noteDao.delete(oldAssessmentUuid),
         // Update existing assessments:
         updatedAssessment -> {
-          ResourceUtils.checkBasicAssessmentPermission(updatedAssessment);
           final Note existingAssessment =
               Utils.getByUuid(existingAssessments, updatedAssessment.getUuid());
           if (!updatedAssessment.getText().equals(existingAssessment.getText())) {
-            updatedAssessment.setAuthorUuid(DaoUtils.getUuid(user));
             noteDao.update(updatedAssessment);
           }
         });

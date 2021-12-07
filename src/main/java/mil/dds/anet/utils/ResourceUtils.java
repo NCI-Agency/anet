@@ -1,13 +1,20 @@
 package mil.dds.anet.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.PersonPositionHistory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceUtils {
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static void validateHistoryInput(final String uuid,
       final List<PersonPositionHistory> previousPositions, final boolean checkPerson,
@@ -100,4 +107,36 @@ public class ResourceUtils {
           Status.FORBIDDEN);
     }
   }
+
+  public static void checkAndFixNote(final Note n) {
+    checkAndFixText(n);
+    checkNoteRelatedObjects(n);
+  }
+
+  private static void checkAndFixText(final Note n) {
+    if (n.getText() == null || n.getText().trim().length() == 0) {
+      throw new WebApplicationException("Note text must not be empty", Status.BAD_REQUEST);
+    }
+    sanitizeText(n);
+  }
+
+  private static void sanitizeText(final Note n) {
+    if (NoteType.FREE_TEXT.equals(n.getType())) {
+      n.setText(Utils.isEmptyHtml(n.getText()) ? null : Utils.sanitizeHtml(n.getText()));
+    } else {
+      try {
+        n.setText(Utils.sanitizeJson(n.getText()));
+      } catch (JsonProcessingException e) {
+        n.setText(null);
+        logger.error("Unable to process Json, payload discarded", e);
+      }
+    }
+  }
+
+  private static void checkNoteRelatedObjects(final Note n) {
+    if (Utils.isEmptyOrNull(n.getNoteRelatedObjects())) {
+      throw new WebApplicationException("Note must have related objects", Status.BAD_REQUEST);
+    }
+  }
+
 }
