@@ -604,14 +604,10 @@ export default class Model {
   }
 
   getInstantAssessmentConfig(assessmentKey) {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
     return this.getAssessmentsConfig()?.[assessmentKey] || {}
   }
 
   getPeriodicAssessmentDetails(assessmentKey) {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
     const assessmentConfig = this.getAssessmentsConfig()?.[assessmentKey] || {}
     return {
       assessmentConfig: assessmentConfig,
@@ -621,8 +617,6 @@ export default class Model {
   }
 
   getPeriodAssessments(assessmentKey, period) {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
     return this.notes
       .filter(n => {
         return (
@@ -697,8 +691,6 @@ export default class Model {
     dateRange,
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
     return this.notes
       .filter(
         n =>
@@ -722,8 +714,6 @@ export default class Model {
   }
 
   static hasPendingAssessments(entity) {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
     const entityAssessments = Object.entries(entity.getAssessmentsConfig())
     const periodicAssessments = entityAssessments.filter(
       ([ak, ac]) => PERIOD_FACTORIES[ac.recurrence]

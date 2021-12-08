@@ -22,8 +22,6 @@ const AssessmentResultsContainer = ({
   if (!entity) {
     return null
   }
-  // TODO: in principle, there can be more than one assessment definition for each recurrence,
-  // so we should distinguish them here by key when we add that to the database.
   const entityAssessments = Object.entries(entity.getAssessmentsConfig())
   return (
     <div ref={contRef}>
