@@ -1137,7 +1137,7 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 UPDATE reports SET
     createdAt=cast(createdAt as datetime2(3)),
     updatedAt=cast(updatedAt as datetime2(3)),
-    releasedAt=cast(updatedAt as datetime2(3)),
+    releasedAt=cast(releasedAt as datetime2(3)),
     engagementDate=cast(engagementDate as datetime2(0))
   ;
 UPDATE people SET
