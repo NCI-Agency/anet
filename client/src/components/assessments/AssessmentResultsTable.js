@@ -26,11 +26,11 @@ import { Table } from "react-bootstrap"
  *   assessments made on tasks, while filling  report related to the tasks) or
  *   assessments made on the entity/subentity itself;
  *   the configuration of these assessments can be retrieved using
- *   entity.getInstantAssessmentConfig()
+ *   entity.getInstantAssessmens()
  * - periodic assessments => made on the entity/subentities periodically,
  *   as a measurement of the given period of time;
  *   the config and yupSchema for these assessments is to be found in
- *   entity.getPeriodicAssessmentDetails(recurrence)
+ *   entity.getPeriodicAssessmentDetails(assessmentKey)
  */
 
 const EntityAssessmentResults = ({
@@ -129,9 +129,9 @@ const AssessmentResultsTable = ({
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
-  const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const entityInstantAssessmentConfig = entity.getInstantAssessments()
   const subEntitiesInstantAssessmentConfig = subEntities
-    ?.map(s => s.getInstantAssessmentConfig())
+    ?.map(s => s.getInstantAssessments())
     .filter(mc => !_isEmpty(mc))
   const { assessmentConfig } = entity.getPeriodicAssessmentDetails(
     assessmentKey
