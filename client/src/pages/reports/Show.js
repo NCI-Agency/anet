@@ -296,7 +296,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     return result
   }
 
-  let report, validationErrors, validationWarnings
+  let hasAssessments
+  let report, validationErrors, validationWarnings, reportSchema
   if (!data) {
     report = new Report()
   } else {
@@ -308,8 +309,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       data.report.customFields
     )
     report = new Report(data.report)
+    // Get initial tasks/people instant assessments values
+    hasAssessments = report.engagementDate && !report.isFuture()
+    if (hasAssessments) {
+      report = Object.assign(report, report.getTasksEngagementAssessments())
+      report = Object.assign(report, report.getAttendeesEngagementAssessments())
+    }
+
+    reportSchema = Report.getReportSchema(
+      data.report.tasks,
+      data.report.reportPeople
+    )
     try {
-      Report.yupSchema.validateSync(report, { abortEarly: false })
+      reportSchema.validateSync(report, { abortEarly: false })
     } catch (e) {
       validationErrors = e.errors
     }
@@ -362,17 +374,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial tasks/people instant assessments values
-  const hasAssessments = report.engagementDate && !report.isFuture()
-  if (hasAssessments) {
-    report = Object.assign(report, report.getTasksEngagementAssessments())
-    report = Object.assign(report, report.getAttendeesEngagementAssessments())
-  }
-
   return (
     <Formik
       enableReinitialize
-      validationSchema={Report.yupSchema}
+      validationSchema={reportSchema}
       validateOnMount
       initialValues={report}
     >

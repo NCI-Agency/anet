@@ -249,29 +249,7 @@ const ReportForm = ({
     }
   }
 
-  // Update the report schema according to the selected report tasks and attendees
-  // instant assessments schema
-  const {
-    assessmentsConfig: tasksInstantAssessmentsConfig,
-    assessmentsSchema: tasksInstantAssessmentsSchema
-  } = Task.getInstantAssessmentsDetailsForEntities(
-    reportTasks,
-    Report.TASKS_ASSESSMENTS_PARENT_FIELD
-  )
-  const {
-    assessmentsConfig: attendeesInstantAssessmentsConfig,
-    assessmentsSchema: attendeesInstantAssessmentsSchema
-  } = Person.getInstantAssessmentsDetailsForEntities(
-    reportPeople?.filter(rp => rp.attendee),
-    Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
-  )
-  let reportSchema = Report.yupSchema
-  if (!_isEmpty(tasksInstantAssessmentsConfig)) {
-    reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
-  }
-  if (!_isEmpty(attendeesInstantAssessmentsConfig)) {
-    reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
-  }
+  const reportSchema = Report.getReportSchema(reportTasks, reportPeople)
   let validateFieldDebounced
   return (
     <Formik

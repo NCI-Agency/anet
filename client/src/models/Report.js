@@ -520,6 +520,33 @@ export default class Report extends Model {
     )
   }
 
+  static getReportSchema(tasks, reportPeople) {
+    // Update the report schema according to the selected report tasks and attendees
+    // instant assessments schema
+    let reportSchema = Report.yupSchema
+    const {
+      assessmentsConfig: tasksInstantAssessmentsConfig,
+      assessmentsSchema: tasksInstantAssessmentsSchema
+    } = Task.getInstantAssessmentsDetailsForEntities(
+      tasks,
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD
+    )
+    const {
+      assessmentsConfig: attendeesInstantAssessmentsConfig,
+      assessmentsSchema: attendeesInstantAssessmentsSchema
+    } = Person.getInstantAssessmentsDetailsForEntities(
+      reportPeople?.filter(rp => rp.attendee),
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+    )
+    if (!_isEmpty(tasksInstantAssessmentsConfig)) {
+      reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
+    }
+    if (!_isEmpty(attendeesInstantAssessmentsConfig)) {
+      reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
+    }
+    return reportSchema
+  }
+
   static hasConflict(report01, report02) {
     if (report01.uuid === report02.uuid) {
       return false // same report is not a conflicting report

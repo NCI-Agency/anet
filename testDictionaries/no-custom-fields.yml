@@ -74,7 +74,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
 
     subLevel:
       shortLabel: Effort
@@ -101,7 +101,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
             status:
               type: enum
               label: Project status
@@ -118,7 +118,7 @@ fields:
                   color: '#ff8279'
               validations:
                 - type: required
-                  params: [You must provide the assessment status]
+                  params: [You must provide the Project status]
         subTaskWeekly:
           recurrence: weekly
           questions:
@@ -131,7 +131,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
         subTaskOnceReport:
           recurrence: once
           relatedObjectType: report
@@ -800,7 +800,7 @@ fields:
               label: Screening and vetting date
               validations:
                 - type: required
-                  params: [You must provide the assessment date]
+                  params: [You must provide the Screening and vetting date]
             expirationDate:
               type: date
               label: Expiration date
