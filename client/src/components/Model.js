@@ -644,14 +644,16 @@ export default class Model {
    * with respect to their assessmentDate.
    * @returns {object}
    */
-  getOndemandAssessments() {
-    // TODO: in principle, there can be more than one assessment definition for each recurrence,
-    // so we should distinguish them here by key when we add that to the database.
-    const onDemandNotes = this.notes.filter(
-      a =>
+  getOndemandAssessments(assessmentKey, entity) {
+    const onDemandNotes = this.notes.filter(a => {
+      const dictionaryPath = entity.getAssessmentDictionaryPath()
+      return (
         a.type === "ASSESSMENT" &&
-        utils.parseJsonSafe(a.text).__recurrence === RECURRENCE_TYPE.ON_DEMAND
-    )
+        utils.parseJsonSafe(a.text).__recurrence ===
+          RECURRENCE_TYPE.ON_DEMAND &&
+        a.assessmentKey === `${dictionaryPath}.${assessmentKey}`
+      )
+    })
     // Sort the notes before visualizing them inside of a Card.
     const sortedOnDemandNotes = onDemandNotes.sort((a, b) => {
       return (

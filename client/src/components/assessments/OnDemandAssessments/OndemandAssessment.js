@@ -83,7 +83,10 @@ const OnDemandAssessment = ({
   // Cards array updated before loading the page & after every save of ondemand assessment.
   const assessmentCards = useMemo(() => {
     const cards = []
-    const sortedOnDemandNotes = entity.getOndemandAssessments()
+    const sortedOnDemandNotes = entity.getOndemandAssessments(
+      assessmentKey,
+      entity
+    )
     sortedOnDemandNotes.forEach((note, index) => {
       const parentFieldName = `assessment-${note.uuid}`
       const assessmentFieldsObject = utils.parseJsonSafe(note.text)
@@ -217,6 +220,7 @@ const OnDemandAssessment = ({
     entity,
     onUpdateAssessment,
     canAddAssessment,
+    assessmentKey,
     numberOfPeriods
   ])
   // Holds JSX element array (assessment cards).
