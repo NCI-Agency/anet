@@ -47,10 +47,6 @@ const EntityAssessmentResults = ({
   }
   const instantAssessments = entity.getInstantAssessments()
   const { periods } = periodsConfig
-  const dataPerPeriod = []
-  periods.forEach(period =>
-    dataPerPeriod.push(entity.getInstantAssessmentResults(period))
-  )
   return (
     <>
       <tr>
@@ -58,32 +54,39 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {instantAssessments.map(([ak, ac]) =>
-        Object.entries(ac?.questions || {}).map(([key, config], index) => (
-          <InstantAssessmentsRow
-            key={key}
-            idSuffix={`${key}-${idSuffix}`}
-            questionKey={key}
-            questionConfig={config}
-            periods={periods}
-            periodsData={dataPerPeriod}
-            isFirstRow={index === 0}
-          />
-        ))
-      )}
-
-      {instantAssessments.map(([ak, ac]) =>
-        Object.entries(ac?.questionSets || {}).map(([questionSet, config]) => (
-          <QuestionSetRow
-            idSuffix={`${idSuffix}-${questionSet}`}
-            key={questionSet}
-            questionSetConfig={config}
-            questionSetKey={questionSet}
-            periods={periods}
-            periodsData={dataPerPeriod}
-          />
-        ))
-      )}
+      {instantAssessments.map(([ak, ac]) => {
+        const dataPerPeriod = []
+        periods.forEach(period =>
+          dataPerPeriod.push(entity.getInstantAssessmentResults(period, ak))
+        )
+        return (
+          <React.Fragment key={ak}>
+            {Object.entries(ac?.questions || {}).map(([key, config], index) => (
+              <InstantAssessmentsRow
+                key={key}
+                idSuffix={`${key}-${idSuffix}`}
+                questionKey={key}
+                questionConfig={config}
+                periods={periods}
+                periodsData={dataPerPeriod}
+                isFirstRow={index === 0}
+              />
+            ))}
+            {Object.entries(ac?.questionSets || {}).map(
+              ([questionSet, config]) => (
+                <QuestionSetRow
+                  idSuffix={`${idSuffix}-${questionSet}`}
+                  key={questionSet}
+                  questionSetConfig={config}
+                  questionSetKey={questionSet}
+                  periods={periods}
+                  periodsData={dataPerPeriod}
+                />
+              )
+            )}
+          </React.Fragment>
+        )
+      })}
       <PeriodicAssessmentsRows
         assessmentKey={assessmentKey}
         entity={entity}

@@ -689,12 +689,15 @@ export default class Model {
 
   getInstantAssessmentResults(
     dateRange,
+    assessmentKey,
     relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
   ) {
+    const dictionaryPath = this.getAssessmentDictionaryPath()
     return this.notes
       .filter(
         n =>
           n.type === NOTE_TYPE.ASSESSMENT &&
+          n.assessmentKey === `${dictionaryPath}.${assessmentKey}` &&
           n.noteRelatedObjects.filter(
             ro =>
               ro.relatedObject &&
