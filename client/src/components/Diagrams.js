@@ -1,6 +1,6 @@
+import BoardDashboard from "components/BoardDashboard"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import BoardDashboard from "pages/dashboards/BoardDashboard"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
