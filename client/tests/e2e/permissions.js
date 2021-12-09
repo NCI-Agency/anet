@@ -2,11 +2,43 @@ const uuidv4 = require("uuid/v4")
 const test = require("../util/test")
 
 test.serial("checking super user permissions", async t => {
-  t.plan(10)
+  t.plan(12)
 
-  const { pageHelpers, assertElementNotPresent, shortWaitMs } = t.context
+  const {
+    pageHelpers,
+    $,
+    By,
+    driver,
+    assertElementDisabled,
+    assertElementNotPresent,
+    shortWaitMs
+  } = t.context
 
   await t.context.get("/", "rebecca")
+
+  const $createButton = await $("#createButton")
+  await $createButton.click()
+  const $createPersonButton = await $("#new-person")
+  await $createPersonButton.click()
+  await assertElementDisabled(
+    t,
+    "#role_ADVISOR",
+    "Advisor button should be disabled for super users"
+  )
+  const $tooltip = await $("#role_ADVISOR_tooltip")
+  t.regex(
+    await $tooltip.getAttribute("title"),
+    /^Super users cannot create .*$/,
+    "Expected tooltip for super users"
+  )
+
+  // Cancel Create Person
+  const $cancelButton = await driver.findElement(
+    By.xpath('//button[text()="Cancel"]')
+  )
+  await $cancelButton.click()
+  await driver.switchTo().alert().accept()
+
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
 
@@ -128,9 +160,42 @@ validateUserCannotEditOtherUser(
 )
 
 test.serial("checking admin permissions", async t => {
-  t.plan(11)
+  t.plan(13)
+
+  const {
+    $,
+    By,
+    driver,
+    assertElementEnabled,
+    assertElementNotPresent,
+    shortWaitMs
+  } = t.context
 
   await t.context.get("/", "arthur")
+
+  const $createButton = await $("#createButton")
+  await $createButton.click()
+  const $createPersonButton = await $("#new-person")
+  await $createPersonButton.click()
+  await assertElementEnabled(
+    t,
+    "#role_ADVISOR",
+    "Advisor button should be enabled for admins"
+  )
+  await assertElementNotPresent(
+    t,
+    "#role_ADVISOR_tooltip",
+    "Unexpected tooltip for admins",
+    shortWaitMs
+  )
+
+  // Cancel Create Person
+  const $cancelButton = await driver.findElement(
+    By.xpath('//button[text()="Cancel"]')
+  )
+  await $cancelButton.click()
+  await driver.switchTo().alert().accept()
+
   await t.context.pageHelpers.clickMenuLinksButton()
   await t.context.pageHelpers.clickMyOrgLink()
   const $arthurLink = await findSuperUserLink(t, "CIV DMIN, Arthur")
