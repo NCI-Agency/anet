@@ -2,7 +2,7 @@ plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.1"
-	id "com.diffplug.spotless" version "6.0.0"
+	id "com.diffplug.spotless" version "6.0.4"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18"
 }
 
@@ -75,9 +75,9 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.0.jre8'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre8'
 	implementation 'org.postgresql:postgresql:42.3.1' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.6.1'
+	implementation 'org.liquibase:liquibase-core:4.6.2'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.7'
@@ -111,7 +111,7 @@ dependencies {
 	implementation 'org.jsoup:jsoup:1.14.3'
 
 	// For fast and simple image scaling
-	implementation 'net.coobird:thumbnailator:0.4.14'
+	implementation 'net.coobird:thumbnailator:0.4.15'
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
@@ -142,7 +142,7 @@ configurations.all {
 	exclude module: 'xalan'
 
 	// Force this transitive dependency to the pre-v3 version for Java 8:
-	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.2'
+	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.3'
 }
 
 test {
