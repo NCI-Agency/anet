@@ -1,9 +1,13 @@
 import BoardDashboard from "components/BoardDashboard"
+import { InputField } from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { FastField, Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Modal } from "react-bootstrap"
+import utils from "utils"
+import * as yup from "yup"
 import "./Diagrams.css"
 
 const DiagramsContainer = ({
@@ -13,25 +17,35 @@ const DiagramsContainer = ({
   onDiagramUpdate
 }) => {
   const [showModal, setShowModal] = useState(false)
-  const [selectedDiagram, setSelectedDiagram] = useState(null)
+  const [selectedDiagram, setSelectedDiagram] = useState({})
   const [error, setError] = useState(null)
-
+  const yupSchema = yup.object().shape({
+    title: yup.string().required()
+  })
   return (
     <Fieldset title="Diagrams" id="diagrams">
-      {diagrams.map(diagram => (
-        <Diagram
-          key={diagram.uuid}
-          diagram={diagram}
-          onSelect={() => {
-            setSelectedDiagram(diagram)
-            setShowModal(true)
-          }}
-          relatedObject={relatedObject}
-        />
-      ))}
+      {diagrams.map(diagram => {
+        const parsedNoteText = utils.parseJsonSafe(diagram.text)
+        const diagramData = {
+          uuid: diagram.uuid,
+          title: parsedNoteText.title,
+          data: parsedNoteText.data
+        }
+        return (
+          <Diagram
+            key={diagram.uuid}
+            diagramData={diagramData}
+            onSelect={() => {
+              setSelectedDiagram(diagramData)
+              setShowModal(true)
+            }}
+            relatedObject={relatedObject}
+          />
+        )
+      })}
       <Button
         onClick={() => {
-          setSelectedDiagram(null)
+          setSelectedDiagram({})
           setShowModal(true)
         }}
       >
@@ -44,22 +58,40 @@ const DiagramsContainer = ({
         onHide={() => setShowModal(false)}
         style={{ zIndex: "1300" }}
       >
-        <Modal.Header closeButton>Diagram Modal</Modal.Header>
+        <Modal.Header closeButton>
+          {selectedDiagram.title || selectedDiagram.uuid || "New Diagram"}
+        </Modal.Header>
         <Modal.Body>
-          <Messages error={error} />
-          <div className="process-diagram" style={{ height: "600px" }}>
-            <BoardDashboard
-              diagramNote={selectedDiagram}
-              readonly={false}
-              relatedObject={relatedObject}
-              relatedObjectType={entityType.relatedObjectType}
-              onUpdate={() => {
-                onDiagramUpdate()
-                setShowModal(false)
-              }}
-              setError={setError}
-            />
-          </div>
+          <Formik
+            enableReinitialize
+            initialValues={selectedDiagram}
+            validationSchema={yupSchema}
+            validateOnMount
+          >
+            {({ values, isValid }) => {
+              return (
+                <>
+                  <Messages error={error} />
+                  <div className="process-diagram" style={{ height: "600px" }}>
+                    <FastField name="title" component={InputField} />
+
+                    <BoardDashboard
+                      diagramData={values}
+                      readonly={false}
+                      relatedObject={relatedObject}
+                      relatedObjectType={entityType.relatedObjectType}
+                      onUpdate={() => {
+                        onDiagramUpdate()
+                        setShowModal(false)
+                      }}
+                      setError={setError}
+                      saveDisabled={!isValid}
+                    />
+                  </div>
+                </>
+              )
+            }}
+          </Formik>
         </Modal.Body>
       </Modal>
     </Fieldset>
@@ -73,18 +105,18 @@ DiagramsContainer.propTypes = {
   onDiagramUpdate: PropTypes.func
 }
 
-const Diagram = ({ diagram, onSelect, relatedObject }) => {
+const Diagram = ({ diagramData, onSelect, relatedObject }) => {
   const [diagramHeight, setDiagramHeight] = useState(300)
   return (
     <div className="process-diagram" style={{ height: `${diagramHeight}px` }}>
       <div className="diagram-header">
-        <div>{diagram.uuid}</div>
+        <legend>{diagramData.title}</legend>
         <Button variant="outline-secondary" onClick={onSelect}>
           Edit
         </Button>
       </div>
       <BoardDashboard
-        diagramNote={diagram}
+        diagramData={diagramData}
         readonly={true}
         relatedObject={relatedObject}
         diagramHeight={diagramHeight}
@@ -95,7 +127,7 @@ const Diagram = ({ diagram, onSelect, relatedObject }) => {
 }
 
 Diagram.propTypes = {
-  diagram: PropTypes.object,
+  diagramData: PropTypes.object,
   onSelect: PropTypes.func,
   relatedObject: PropTypes.object
 }

@@ -99,14 +99,15 @@ PrototypeNode.propTypes = {
 }
 
 const BoardDashboard = ({
-  diagramNote,
+  diagramData,
   readonly,
   relatedObject,
   relatedObjectType,
   diagramHeight,
   setDiagramHeight,
   onUpdate,
-  setError
+  setError,
+  saveDisabled
 }) => {
   // Make sure we have a navigation menu
 
@@ -115,11 +116,7 @@ const BoardDashboard = ({
   const [model, setModel] = useState(null)
   const [selectingEntity, setSelectingEntity] = useState(false)
   const [editedNode, setEditedNode] = useState(null)
-  const diagramModel = useMemo(
-    () => (diagramNote ? utils.parseJsonSafe(diagramNote.text) : null),
-    [diagramNote]
-  )
-
+  const diagramModel = useMemo(() => diagramData?.data || null, [diagramData])
   useEffect(() => {
     setModel(new DiagramModel())
     return () => setModel(null)
@@ -301,26 +298,32 @@ const BoardDashboard = ({
         {!readonly && (
           <>
             <Button
+              disabled={saveDisabled}
               onClick={() =>
                 onSaveDiagram(
+                  diagramData?.uuid,
                   model,
-                  relatedObject?.uuid,
-                  diagramNote?.uuid,
-                  onUpdate,
+                  diagramData?.title || "",
                   relatedObjectType,
+                  relatedObject?.uuid,
+                  onUpdate,
                   setError
                 )
               }
             >
               Save
             </Button>
-            {diagramNote?.uuid && (
+            {diagramData?.uuid && (
               <ConfirmDestructive
                 variant="danger"
                 objectType="diagram"
-                objectDisplay={diagramNote.uuid}
+                objectDisplay={diagramData.title || diagramData.uuid}
                 onConfirm={() =>
-                  onDeleteDiagram(diagramNote.uuid, onUpdate, setError)
+                  onDeleteDiagram(
+                    diagramData.title || diagramData.uuid,
+                    onUpdate,
+                    setError
+                  )
                 }
               >
                 <Icon icon={IconNames.TRASH} />
@@ -374,29 +377,32 @@ const BoardDashboard = ({
 }
 
 BoardDashboard.propTypes = {
-  diagramNote: PropTypes.object,
+  diagramData: PropTypes.object,
   readonly: PropTypes.bool,
   relatedObject: PropTypes.object,
   relatedObjectType: PropTypes.string,
   diagramHeight: PropTypes.number,
   setDiagramHeight: PropTypes.func,
   onUpdate: PropTypes.func,
-  setError: PropTypes.func
+  setError: PropTypes.func,
+  saveDisabled: PropTypes.bool
 }
 
 const onSaveDiagram = (
+  diagramUuid,
   diagramData,
-  relatedObjectUuid,
-  noteUuid,
-  onSuccess,
+  diagramTitle,
   relatedObjectType,
+  relatedObjectUuid,
+  onSuccess,
   setError
 ) => {
   return saveDiagram(
+    diagramUuid,
     diagramData,
-    relatedObjectUuid,
+    diagramTitle,
     relatedObjectType,
-    noteUuid
+    relatedObjectUuid
   )
     .then(response => {
       onSuccess()
@@ -405,14 +411,18 @@ const onSaveDiagram = (
 }
 
 const saveDiagram = (
+  diagramUuid,
   diagramData,
-  relatedObjectUuid,
+  diagramTitle,
   relatedObjectType,
-  noteUuid
+  relatedObjectUuid
 ) => {
-  const serializedData = JSON.stringify(diagramData.serialize())
+  const serializedData = JSON.stringify({
+    title: diagramTitle,
+    data: diagramData.serialize()
+  })
   const updatedNote = {
-    uuid: noteUuid,
+    uuid: diagramUuid,
     type: NOTE_TYPE.DIAGRAM,
     text: serializedData,
     noteRelatedObjects: [
@@ -422,7 +432,7 @@ const saveDiagram = (
       }
     ]
   }
-  return API.mutation(noteUuid ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
+  return API.mutation(diagramUuid ? GQL_UPDATE_NOTE : GQL_CREATE_NOTE, {
     note: updatedNote
   })
 }
