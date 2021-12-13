@@ -4,13 +4,14 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DiagramsContainer from "components/Diagrams"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GeoLocation, { GEO_LOCATION_DISPLAY_TYPE } from "components/GeoLocation"
 import Leaflet from "components/Leaflet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT, NOTE_TYPE } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -68,6 +69,9 @@ const LocationShow = ({ pageDispatchers }) => {
   }
   const location = new Location(data ? data.location : {})
   const canEdit = currentUser.isSuperUser()
+  const diagrams = location.notes.filter(
+    note => note.type === NOTE_TYPE.DIAGRAM
+  )
 
   return (
     <Formik enableReinitialize initialValues={location}>
@@ -185,6 +189,14 @@ const LocationShow = ({ pageDispatchers }) => {
                 mapId="reports"
               />
             </Fieldset>
+            <DiagramsContainer
+              diagrams={diagrams}
+              relatedObject={location}
+              entityType={Location}
+              onDiagramUpdate={() => {
+                refetch()
+              }}
+            />
           </div>
         )
       }}

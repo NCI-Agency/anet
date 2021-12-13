@@ -4,11 +4,12 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
+import DiagramsContainer from "components/Diagrams"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { NOTE_TYPE } from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -193,6 +194,8 @@ const TaskShow = ({ pageDispatchers }) => {
           position => currentUser.position.uuid === position.uuid
         )
       ))
+  const diagrams = task.notes.filter(note => note.type === NOTE_TYPE.DIAGRAM)
+
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -393,6 +396,14 @@ const TaskShow = ({ pageDispatchers }) => {
                 mapId="reports"
               />
             </Fieldset>
+            <DiagramsContainer
+              diagrams={diagrams}
+              relatedObject={task}
+              entityType={Task}
+              onDiagramUpdate={() => {
+                refetch()
+              }}
+            />
           </div>
         )
       }}
