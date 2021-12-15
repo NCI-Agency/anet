@@ -1,7 +1,8 @@
 import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
-import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
+import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import API from "api"
 import CompactTable, {
   CompactFooterContent,
@@ -33,7 +34,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useHistory, useParams } from "react-router-dom"
@@ -218,6 +219,7 @@ const GQL_GET_REPORT = gql`
 const CompactReportView = ({ pageDispatchers }) => {
   const history = useHistory()
   const { uuid } = useParams()
+  const { currentUser } = useContext(AppContext)
   const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -261,6 +263,9 @@ const CompactReportView = ({ pageDispatchers }) => {
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
   const backgroundText = report.isDraft() ? "DRAFT" : ""
+  const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
+  // Author can always read assessments
+  const canReadAssessments = isAuthor
   return (
     <Formik
       validationSchema={Report.yupSchema}
@@ -451,6 +456,7 @@ const CompactReportView = ({ pageDispatchers }) => {
           formikProps={{
             values: report
           }}
+          canRead={canReadAssessments}
           readonly
         />
       ) : (
@@ -472,6 +478,7 @@ const CompactReportView = ({ pageDispatchers }) => {
         formikProps={{
           values: report
         }}
+        canRead={canReadAssessments}
         readonly
       />
     ) : (

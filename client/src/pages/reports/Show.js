@@ -7,7 +7,7 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
+import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -335,8 +335,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  const isAuthor = report.authors?.find(a => Person.isEqual(currentUser, a))
-  const isAttending = report.reportPeople?.find(rp =>
+  const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
+  const isAttending = report.reportPeople?.some(rp =>
     Person.isEqual(currentUser, rp)
   )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
@@ -346,7 +346,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     report.isPending() &&
     currentUser.position &&
     report.approvalStep &&
-    report.approvalStep.approvers.find(member =>
+    report.approvalStep.approvers.some(member =>
       Position.isEqual(member, currentUser.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
@@ -361,6 +361,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers can edit
   canEdit = canEdit || canApprove
+  // Author can always read assessments
+  const canReadAssessments = isAuthor
 
   // Only an author can submit when report is in draft or rejected AND author has a position
   const hasActivePosition = currentUser.hasActivePosition()
@@ -709,6 +711,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       formikProps={{
                         values
                       }}
+                      canRead={canReadAssessments}
                       readonly
                     />
                   </Fieldset>
@@ -725,6 +728,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       formikProps={{
                         values
                       }}
+                      canRead={canReadAssessments}
                       readonly
                     />
                   </Fieldset>

@@ -11,7 +11,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
+import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -249,6 +249,13 @@ const ReportForm = ({
     }
   }
 
+  const isAuthor = initialValues.reportPeople?.some(a =>
+    a.author && Person.isEqual(currentUser, a)
+  )
+  const canReadAssessments = isAuthor
+  const canWriteAssessments =
+    isAuthor && !Report.isPublished(initialValues.state)
+
   const reportSchema = Report.getReportSchema(reportTasks, reportPeople)
   let validateFieldDebounced
   return (
@@ -386,7 +393,7 @@ const ReportForm = ({
         const canDelete =
           !!values.uuid &&
           (Report.isDraft(values.state) || Report.isRejected(values.state)) &&
-          values.authors?.some(a => Person.isEqual(currentUser, a))
+          isAuthor
         // Skip validation on save!
         const action = (
           <div>
@@ -1036,6 +1043,8 @@ const ReportForm = ({
                         values,
                         validateForm
                       }}
+                      canRead={canReadAssessments}
+                      canWrite={canWriteAssessments}
                     />
                   </Fieldset>
 
@@ -1054,6 +1063,8 @@ const ReportForm = ({
                         values,
                         validateForm
                       }}
+                      canRead={canReadAssessments}
+                      canWrite={canWriteAssessments}
                     />
                   </Fieldset>
                 </>
