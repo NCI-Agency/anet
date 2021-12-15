@@ -588,9 +588,35 @@ export default class Model {
     return this.name || this.uuid
   }
 
+  isAuthorizedForAssessment(user, assessmentKey, forReading) {
+    const userAuthorizationGroupUuids = (
+      user?.position?.authorizationGroups || []
+    ).map(ag => ag.uuid)
+    if (user.isAdmin()) {
+      return true
+    }
+    const assessmentConfig = this.getAssessmentConfigByKey(assessmentKey)
+    const authorizationGroupUuids =
+      assessmentConfig?.authorizationGroupUuids?.[forReading ? "read" : "write"]
+    if (
+      authorizationGroupUuids === null ||
+      authorizationGroupUuids === undefined
+    ) {
+      // No groups defined means: anybody has read access, nobody has write access
+      return forReading
+    }
+    return !!authorizationGroupUuids?.some(ag =>
+      userAuthorizationGroupUuids.includes(ag)
+    )
+  }
+
   getAssessmentsConfig() {
     // default assessments configuration
     return {}
+  }
+
+  getAssessmentConfigByKey(assessmentKey) {
+    return this.getAssessmentsConfig()?.[assessmentKey] || {}
   }
 
   getInstantAssessments(
@@ -604,11 +630,11 @@ export default class Model {
   }
 
   getInstantAssessmentConfig(assessmentKey) {
-    return this.getAssessmentsConfig()?.[assessmentKey] || {}
+    return this.getAssessmentConfigByKey(assessmentKey)
   }
 
   getPeriodicAssessmentDetails(assessmentKey) {
-    const assessmentConfig = this.getAssessmentsConfig()?.[assessmentKey] || {}
+    const assessmentConfig = this.getAssessmentConfigByKey(assessmentKey)
     return {
       assessmentConfig: assessmentConfig,
       assessmentYupSchema:
