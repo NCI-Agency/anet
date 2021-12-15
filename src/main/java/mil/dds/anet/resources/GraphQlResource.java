@@ -41,6 +41,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.graphql.DateTimeMapper;
+import mil.dds.anet.graphql.outputtransformers.JsonToPdfTransformer;
 import mil.dds.anet.graphql.outputtransformers.JsonToXlsxTransformer;
 import mil.dds.anet.graphql.outputtransformers.JsonToXmlTransformer;
 import mil.dds.anet.graphql.outputtransformers.XsltXmlTransformer;
@@ -59,6 +60,7 @@ public class GraphQlResource {
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String MEDIATYPE_XLSX =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  private static final String MEDIATYPE_PDF = "application/pdf";
 
   private AnetObjectEngine engine;
   private List<Object> resources;
@@ -115,6 +117,16 @@ public class GraphQlResource {
       public ResponseBuilder apply(final Map<String, Object> json) {
         return Response.ok(xlsxTransformer.apply(json), this.mediaType)
             .header("Content-Disposition", "attachment; filename=anet_export.xslx");
+      }
+    });
+
+    resourceTransformers.add(new ResourceTransformer("pdf", MEDIATYPE_PDF) {
+      final JsonToPdfTransformer pdfTransformer = new JsonToPdfTransformer();
+
+      @Override
+      public ResponseBuilder apply(final Map<String, Object> json) {
+        return Response.ok(pdfTransformer.apply(json), this.mediaType).header("Content-Disposition",
+            "attachment; filename=anet_export.pdf");
       }
     });
 
