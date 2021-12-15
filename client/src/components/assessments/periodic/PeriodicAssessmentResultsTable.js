@@ -1,9 +1,3 @@
-import "components/assessments/AssessmentResultsTable.css"
-import {
-  InstantAssessmentsRow,
-  QuestionSetRow
-} from "components/assessments/InstantAssessmentResults"
-import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
@@ -18,8 +12,11 @@ import {
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
+import { QuestionSetRow, QuestionsRow } from "./PeriodicAssessmentQuestions"
+import { PeriodicAssessmentsRows } from "./PeriodicAssessmentResults"
+import "./PeriodicAssessmentResultsTable.css"
 
-/* The AssessmentResultsTable component displays the results of two types of
+/* The PeriodicAssessmentResultsTable component displays the results of two types of
  * assessments made on a given entity and subentities:
  * - instant assessments => made on the entity/subentities when
  *   working on them in relation to another type of entity (example:
@@ -33,7 +30,7 @@ import { Table } from "react-bootstrap"
  *   entity.getPeriodicAssessmentDetails(assessmentKey)
  */
 
-const EntityAssessmentResults = ({
+const EntityPeriodicAssessmentResults = ({
   assessmentKey,
   idSuffix,
   entity,
@@ -62,7 +59,7 @@ const EntityAssessmentResults = ({
         return (
           <React.Fragment key={ak}>
             {Object.entries(ac?.questions || {}).map(([key, config], index) => (
-              <InstantAssessmentsRow
+              <QuestionsRow
                 key={key}
                 idSuffix={`${key}-${idSuffix}`}
                 questionKey={key}
@@ -98,7 +95,7 @@ const EntityAssessmentResults = ({
     </>
   )
 }
-EntityAssessmentResults.propTypes = {
+EntityPeriodicAssessmentResults.propTypes = {
   assessmentKey: PropTypes.string.isRequired,
   idSuffix: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
@@ -108,7 +105,7 @@ EntityAssessmentResults.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-const AssessmentResultsTable = ({
+const PeriodicAssessmentResultsTable = ({
   assessmentKey,
   entity,
   entityType,
@@ -168,7 +165,7 @@ const AssessmentResultsTable = ({
               <tbody>
                 <>
                   {subEntities?.map(subEntity => (
-                    <EntityAssessmentResults
+                    <EntityPeriodicAssessmentResults
                       key={`subassessment-${subEntity.uuid}`}
                       assessmentKey={assessmentKey}
                       idSuffix={`subassessment-${subEntity.uuid}`}
@@ -180,7 +177,7 @@ const AssessmentResultsTable = ({
                     />
                   ))}
                 </>
-                <EntityAssessmentResults
+                <EntityPeriodicAssessmentResults
                   assessmentKey={assessmentKey}
                   idSuffix={`assessment-${entity.uuid}`}
                   entity={entity}
@@ -197,7 +194,7 @@ const AssessmentResultsTable = ({
     </>
   )
 }
-AssessmentResultsTable.propTypes = {
+PeriodicAssessmentResultsTable.propTypes = {
   style: PropTypes.object,
   assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
@@ -208,4 +205,4 @@ AssessmentResultsTable.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-export default AssessmentResultsTable
+export default PeriodicAssessmentResultsTable

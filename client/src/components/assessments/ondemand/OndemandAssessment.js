@@ -2,8 +2,7 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import AssessmentModal from "components/assessments/AssessmentModal"
-import ValidationBar from "components/assessments/OnDemandAssessments/ValidationBar"
+import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
@@ -18,13 +17,21 @@ import _isEmpty from "lodash/isEmpty"
 import moment from "moment"
 import { PeriodsDetailsPropType, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from "react"
 import { Button, Card, Col, Row, Table } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
+import AssessmentModal from "../AssessmentModal"
 import QuestionSet from "../QuestionSet"
 import "./Ondemand.css"
+import ValidationBar from "./ValidationBar"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -41,6 +48,7 @@ const OnDemandAssessment = ({
   canAddAssessment,
   onUpdateAssessment
 }) => {
+  const { currentUser } = useContext(AppContext)
   /* recurrence has the value 'ondemand' for this specific assessment type and
       numberOfPeriods is a property of the parent component (AssessmentResultsContainer)
       which is used to determine how many columns should be displayed inside of the
@@ -80,9 +88,25 @@ const OnDemandAssessment = ({
     `
   }
 
+  const { hasWriteAccess, hasAccess } = useMemo(() => {
+    const hasReadAccess = entity.isAuthorizedForAssessment(
+      currentUser,
+      assessmentKey,
+      true
+    )
+    const hasWriteAccess =
+      canAddAssessment ||
+      entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
+    const hasAccess = hasReadAccess || hasWriteAccess
+    return { hasReadAccess, hasWriteAccess, hasAccess }
+  }, [assessmentKey, canAddAssessment, currentUser, entity])
+
   // Cards array updated before loading the page & after every save of ondemand assessment.
   const assessmentCards = useMemo(() => {
     const cards = []
+    if (!hasAccess) {
+      return cards
+    }
     const sortedOnDemandNotes = entity.getOndemandAssessments(
       assessmentKey,
       entity
@@ -117,7 +141,7 @@ const OnDemandAssessment = ({
                   </Row>
                 </Col>
                 <Col xs={4} className="text-end">
-                  {canAddAssessment && (
+                  {hasWriteAccess && (
                     <>
                       <Button
                         title="Edit assessment"
@@ -189,7 +213,7 @@ const OnDemandAssessment = ({
                                 [parentFieldName]: assessmentFieldsObject
                               }
                             }}
-                            readonly={true}
+                            readonly
                             vertical
                           />
                         )}
@@ -219,9 +243,10 @@ const OnDemandAssessment = ({
     filteredAssessmentConfig,
     entity,
     onUpdateAssessment,
-    canAddAssessment,
+    hasWriteAccess,
     assessmentKey,
-    numberOfPeriods
+    numberOfPeriods,
+    hasAccess
   ])
   // Holds JSX element array (assessment cards).
   const [onDemandAssessmentCards, setOnDemandAssessmentCards] = useState(
@@ -294,9 +319,11 @@ const OnDemandAssessment = ({
             </Table>
           </div>
           <div style={{ textAlign: "center" }}>
-            <Button onClick={() => setShowModal(true)}>
-              {addAssessmentLabel}
-            </Button>
+            {hasWriteAccess && (
+              <Button onClick={() => setShowModal(true)}>
+                {addAssessmentLabel}
+              </Button>
+            )}
           </div>
         </Fieldset>
 

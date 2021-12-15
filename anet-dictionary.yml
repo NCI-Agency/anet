@@ -1273,6 +1273,8 @@ fields:
           recurrence: ondemand
           onDemandAssessmentExpirationDays: 108
           label: "Screening & Vetting"
+          authorizationGroupUuids:
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
             assessmentDate:
               type: date

@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import AssessmentModal from "components/assessments/AssessmentModal"
+import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
@@ -16,11 +16,12 @@ import {
   periodToString
 } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button, Card, Col, Row } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
-import QuestionSet from "./QuestionSet"
+import AssessmentModal from "../AssessmentModal"
+import QuestionSet from "../QuestionSet"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -180,7 +181,24 @@ export const PeriodicAssessmentsRows = ({
   canAddAssessment,
   onUpdateAssessment
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
+  const { hasWriteAccess, hasAccess } = useMemo(() => {
+    const hasReadAccess = entity.isAuthorizedForAssessment(
+      currentUser,
+      assessmentKey,
+      true
+    )
+    const hasWriteAccess =
+      canAddAssessment ||
+      entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
+    const hasAccess = hasReadAccess || hasWriteAccess
+    return { hasReadAccess, hasWriteAccess, hasAccess }
+  }, [assessmentKey, canAddAssessment, currentUser, entity])
+  if (!hasAccess) {
+    return null
+  }
+
   const { recurrence, periods } = periodsConfig
   if (_isEmpty(periods)) {
     return null
@@ -208,9 +226,7 @@ export const PeriodicAssessmentsRows = ({
     // for it, if the period is configured to allow adding new assessments
     // If there is already an assessment, don't allow to create a new one
     periodsAllowNewAssessment.push(
-      canAddAssessment &&
-        period.allowNewAssessments &&
-        _isEmpty(periodAssessments)
+      period.allowNewAssessments && _isEmpty(periodAssessments)
     )
   })
   const hasAddAssessmentRow = !_isEmpty(
@@ -234,7 +250,7 @@ export const PeriodicAssessmentsRows = ({
                       entity={entity}
                       period={periods[index]}
                       recurrence={recurrence}
-                      canEditAssessment={canAddAssessment}
+                      canEditAssessment={hasWriteAccess}
                       onUpdateAssessment={onUpdateAssessment}
                     />
                   </div>
@@ -246,7 +262,7 @@ export const PeriodicAssessmentsRows = ({
           )
         })}
       </tr>
-      {hasAddAssessmentRow && (
+      {hasAddAssessmentRow && hasWriteAccess && (
         <tr>
           {periods.map((period, index) => {
             const periodDisplay = periodToString(period)
