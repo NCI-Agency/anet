@@ -54,7 +54,8 @@ to exactly one related object: the task it refers to.
 -   admin can read, create, update and delete any _CHANGE_RECORD_
 -   user can read all _CHANGE_RECORD_ notes for objects they are allowed to see
 -   user can create a new _CHANGE_RECORD_, with authorization the same as for the task that is
-    updated
+    updated; note: task permission for changing project status (resulting in a CHANGE_RECORD) is
+    currently restricted to admins, see commit a74e8abe9!
 -   user can not update a _CHANGE_RECORD_
 -   user can not delete a _CHANGE_RECORD_
 

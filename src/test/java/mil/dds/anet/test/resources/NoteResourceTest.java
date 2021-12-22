@@ -367,6 +367,8 @@ public class NoteResourceTest extends AbstractResourceTest {
   public void testChangeRecords()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // TODO: CHANGE_RECORD note tests:
+    // Note: task permission for changing project status (resulting in a CHANGE_RECORD) is currently
+    // restricted to admins, see commit a74e8abe9!
     // - F: create without relatedObjects
     // - F: create with relatedObject which is not a task
     // - F: create with task without task permission
