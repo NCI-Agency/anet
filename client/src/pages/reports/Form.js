@@ -146,8 +146,8 @@ const GQL_DELETE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
-  mutation($report: ReportInput!, $notes: [NoteInput]) {
-    updateReportAssessments(report: $report, assessments: $notes)
+  mutation($uuid: String, $notes: [NoteInput]) {
+    updateReportAssessments(reportUuid: $uuid, assessments: $notes)
   }
 `
 
@@ -1395,7 +1395,6 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      const updateNotesVariables = { report: { uuid: report.uuid } }
       const tasksNotes = createInstantAssessments(
         Task,
         values.tasks,
@@ -1412,7 +1411,10 @@ const ReportForm = ({
         Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD,
         report.uuid
       )
-      updateNotesVariables.notes = tasksNotes.concat(attendeesNotes)
+      const updateNotesVariables = {
+        uuid: report.uuid,
+        notes: tasksNotes.concat(attendeesNotes)
+      }
       return API.mutation(
         GQL_UPDATE_REPORT_ASSESSMENTS,
         updateNotesVariables

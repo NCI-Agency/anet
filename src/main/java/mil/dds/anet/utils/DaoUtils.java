@@ -151,14 +151,16 @@ public class DaoUtils {
   }
 
   public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
-      final Note note) {
+      final Note note, final boolean forReading) {
     // Check against the dictionary whether the user is authorized
+    final String authGroupKeyFmt = "%1$s.authorizationGroupUuids.%2$s";
     @SuppressWarnings("unchecked")
-    final List<String> authorizationGroupUuids = (List<String>) AnetObjectEngine.getConfiguration()
-        .getDictionaryEntry(note.getAssessmentKey() + ".authorizationGroupUuids");
+    final List<String> authorizationGroupUuids =
+        (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(
+            String.format(authGroupKeyFmt, note.getAssessmentKey(), forReading ? "read" : "write"));
     if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
-      // No authorization groups defined for this field
-      return true;
+      // No authorization groups defined for this assessment: read is allowed, write is denied
+      return forReading;
     }
     return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
   }

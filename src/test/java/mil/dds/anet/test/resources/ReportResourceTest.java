@@ -23,6 +23,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AdvisorReportsEntry;
@@ -76,6 +77,7 @@ import mil.dds.anet.test.client.util.QueryExecutor;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.utils.UtilsTest;
 import mil.dds.anet.utils.DaoUtils;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +112,8 @@ public class ReportResourceTest extends AbstractResourceTest {
   private static final String _NOTE_FIELDS = "uuid type assessmentKey text author { uuid }"
       + " noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } ";
   private static final String NOTE_FIELDS = String.format("{ %1$s }", _NOTE_FIELDS);
+  private static final String PERSON_WITH_NOTES_FIELDS =
+      String.format("{ %1$s notes %2$s }", _PERSON_FIELDS, NOTE_FIELDS);
   protected static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s principalOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
@@ -272,14 +276,18 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(created.getCustomFields())
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
-    // Attach note to test report
-    final NoteRelatedObjectInput testNroInput =
+    // Attach note to test report and author
+    final NoteRelatedObjectInput testReportNroInput =
         NoteRelatedObjectInput.builder().withRelatedObjectType(ReportDao.TABLE_NAME)
             .withRelatedObjectUuid(created.getUuid()).build();
-    final NoteInput testNoteInput =
-        NoteInput.builder().withType(NoteType.ASSESSMENT).withText("{\"test\":null}")
-            .withAssessmentKey("fields.advisor.person.assessments.advisorOnceReportLinguist")
-            .withNoteRelatedObjects(Collections.singletonList(testNroInput)).build();
+    final NoteRelatedObjectInput testAdvisorNroInput =
+        NoteRelatedObjectInput.builder().withRelatedObjectType(PersonDao.TABLE_NAME)
+            .withRelatedObjectUuid(author.getUuid()).build();
+    final NoteInput testNoteInput = NoteInput.builder().withType(NoteType.ASSESSMENT)
+        .withText("{\"test\":null,\"__recurrence\":\"once\"}")
+        .withAssessmentKey("fields.advisor.person.assessments.advisorOnceReportLinguist")
+        .withNoteRelatedObjects(Lists.newArrayList(testReportNroInput, testAdvisorNroInput))
+        .build();
     final Note createdNote = authorMutationExecutor.createNote(NOTE_FIELDS, testNoteInput);
     assertThat(createdNote).isNotNull();
     assertThat(createdNote.getUuid()).isNotNull();
@@ -289,7 +297,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(updatedReport.getNotes()).hasSize(1);
     final Note reportNote = updatedReport.getNotes().get(0);
     assertThat(reportNote.getText()).isEqualTo(testNoteInput.getText());
-    assertThat(reportNote.getNoteRelatedObjects()).hasSize(1);
+    assertThat(reportNote.getNoteRelatedObjects()).hasSize(2);
 
     // Admin can read the assessment
     final Report adminReport = adminQueryExecutor.report(FIELDS, created.getUuid());
@@ -306,19 +314,22 @@ public class ReportResourceTest extends AbstractResourceTest {
         getQueryExecutor(getJackJackson().getDomainUsername()).report(FIELDS, created.getUuid());
     assertThat(jackReport.getNotes()).hasSize(0);
 
-    final NoteInput noteWithoutAuthInput =
-        NoteInput.builder().withType(NoteType.ASSESSMENT).withText("{\"test\":null}")
-            .withAssessmentKey("fields.advisor.person.assessments.advisorQuarterly")
-            .withNoteRelatedObjects(Collections.singletonList(testNroInput)).build();
+    final NoteInput noteWithoutAuthInput = NoteInput.builder().withType(NoteType.ASSESSMENT)
+        .withText("{\"test\":null,\"__recurrence\":\"quarterly\"}")
+        .withAssessmentKey("fields.advisor.person.assessments.advisorQuarterly")
+        .withNoteRelatedObjects(Collections.singletonList(testAdvisorNroInput)).build();
     final Note noteWithoutAuth =
         authorMutationExecutor.createNote(NOTE_FIELDS, noteWithoutAuthInput);
     assertThat(noteWithoutAuth).isNotNull();
     assertThat(noteWithoutAuth.getUuid()).isNotNull();
 
     // No authorization groups are defined in the dictionary therefore Jack can fetch the assessment
-    jackReport =
-        getQueryExecutor(getJackJackson().getDomainUsername()).report(FIELDS, created.getUuid());
-    assertThat(jackReport.getNotes()).hasSize(1);
+    final Person authorWithNotes = getQueryExecutor(getJackJackson().getDomainUsername())
+        .person(PERSON_WITH_NOTES_FIELDS, author.getUuid());
+    assertThat(authorWithNotes.getNotes()).isNotNull();
+    final Condition<Note> isAssessment =
+        new Condition<>(n -> NoteType.ASSESSMENT.equals(n.getType()), "is assessment");
+    assertThat(authorWithNotes.getNotes()).haveExactly(1, isAssessment);
 
     // Have another regular user try to submit the report
     try {

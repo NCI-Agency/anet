@@ -98,16 +98,6 @@ public class ResourceUtils {
         && pph2.getEndTime().isAfter(pph1.getStartTime());
   }
 
-  public static void checkBasicAssessmentPermission(final Note note) {
-    if (note.getType() != NoteType.ASSESSMENT) {
-      throw new WebApplicationException("Note must be of assessment type", Status.FORBIDDEN);
-    }
-    if (Utils.isEmptyOrNull(note.getAssessmentKey())) {
-      throw new WebApplicationException("Assessment key must be specified for assessment type note",
-          Status.FORBIDDEN);
-    }
-  }
-
   public static void checkAndFixNote(final Note n) {
     checkAndFixText(n);
     checkNoteRelatedObjects(n);

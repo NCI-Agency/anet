@@ -1,5 +1,10 @@
 package mil.dds.anet.database;
 
+import static mil.dds.anet.utils.PendingAssessmentsHelper.NOTE_RECURRENCE;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -8,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -18,13 +24,17 @@ import mil.dds.anet.beans.Note.NoteType;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.NoteMapper;
 import mil.dds.anet.database.mappers.NoteRelatedObjectMapper;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
-import mil.dds.anet.utils.ResourceUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +43,10 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
 
   public static final String TABLE_NAME = "notes";
+
+  public static enum UpdateType {
+    CREATE, READ, UPDATE, DELETE
+  }
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -140,8 +154,8 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
           authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
       return new ForeignKeyFetcher<Note>()
           .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
-          .thenApply(notes -> notes.stream()
-              .filter(note -> hasAssessmentAuthorization(user, authorizationGroupUuids, note))
+          .thenApply(notes -> notes.stream().filter(note -> hasNotePermission(user,
+              authorizationGroupUuids, note, note.getAuthorUuid(), UpdateType.READ))
               .collect(Collectors.toList()));
     });
   }
@@ -247,23 +261,245 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   }
 
   @InTransaction
-  public boolean hasAssessmentAuthorization(final Person user,
-      final Set<String> authorizationGroupUuids, final Note note) {
+  public boolean hasNotePermission(final Person user, final Set<String> authorizationGroupUuids,
+      final Note note, final String authorUuid, final UpdateType updateType) {
     // Admins always have access
     // Note that a `null` user means this is called through a merge function, by an admin
-    // Only notes of assessment type are restricted
-    if (user == null || AuthUtils.isAdmin(user) || !note.getType().equals(NoteType.ASSESSMENT)) {
+    if (user == null || AuthUtils.isAdmin(user)) {
       return true;
     }
 
-    // Check whether the user is the author
-    if (user.getUuid().equals(note.getAuthorUuid())) {
-      return true;
+    switch (note.getType()) {
+      case FREE_TEXT:
+        // case DIAGRAM: — can be added here
+        return hasFreeTextPermission(user, authorUuid, updateType);
+      case CHANGE_RECORD:
+        return hasChangeRecordPermission(user, note, updateType);
+      case ASSESSMENT:
+        return hasAssessmentPermission(user, authorizationGroupUuids, note, updateType);
+      default:
+        throw new IllegalArgumentException("Unsupport type of note");
+    }
+  }
+
+  private boolean hasFreeTextPermission(final Person user, final String authorUuid,
+      final UpdateType updateType) {
+    switch (updateType) {
+      case CREATE:
+      case READ:
+        return true;
+      case UPDATE:
+      case DELETE:
+        return Objects.equals(authorUuid, DaoUtils.getUuid(user));
+    }
+    return false;
+  }
+
+  private boolean hasChangeRecordPermission(final Person user, final Note note,
+      final UpdateType updateType) {
+    switch (updateType) {
+      case CREATE:
+        // Check that note refers only to one relatedObject
+        final List<NoteRelatedObject> noteRelatedObjects = note.getNoteRelatedObjects();
+        if (noteRelatedObjects == null || noteRelatedObjects.size() != 1) {
+          throw new IllegalArgumentException("Change record must have exactly one related object");
+        }
+        final NoteRelatedObject nro = noteRelatedObjects.get(0);
+        if (!checkTask(nro)) {
+          throw new IllegalArgumentException("Change record must link to a task");
+        }
+        Set<String> responsibleTasksUuids = null;
+        if (hasTaskAssessmentPermission(responsibleTasksUuids, user, nro)) {
+          return true;
+        }
+        return false;
+      case READ:
+        return true;
+      case UPDATE:
+      case DELETE:
+        return false;
+    }
+    return false;
+  }
+
+  private boolean hasAssessmentPermission(final Person user,
+      final Set<String> authorizationGroupUuids, final Note note, final UpdateType updateType) {
+    if (Utils.isEmptyOrNull(note.getAssessmentKey())) {
+      throw new IllegalArgumentException("Assessment key must be specified");
     }
 
-    ResourceUtils.checkBasicAssessmentPermission(note);
-    // Check against authorization groups
-    return DaoUtils.isUserInAuthorizationGroup(authorizationGroupUuids, note);
+    @SuppressWarnings("unchecked")
+    final Map<String, Object> assessmentDefinition = (Map<String, Object>) AnetObjectEngine
+        .getConfiguration().getDictionaryEntry(note.getAssessmentKey());
+    if (assessmentDefinition == null) {
+      throw new IllegalArgumentException("Assessment key not found in dictionary");
+    }
+
+    final String recurrenceString = (String) assessmentDefinition.get("recurrence");
+    if (recurrenceString == null) {
+      throw new IllegalArgumentException("Undefined assessment recurrence");
+    }
+    // Check that note's __recurrence is identical to definition
+    checkAssessmentRecurrence(note, recurrenceString);
+
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final List<NoteRelatedObject> noteRelatedObjects =
+        note.loadNoteRelatedObjects(engine.getContext()).join();
+    if (Utils.isEmptyOrNull(noteRelatedObjects)) {
+      throw new IllegalArgumentException("Assessment must have related objects");
+    }
+    switch (recurrenceString) {
+      case "once":
+        // Instant assessment:
+        if (noteRelatedObjects.size() != 2) {
+          throw new IllegalArgumentException("Instant assessment must have two related objects");
+        }
+        // Check that note refers to a report and an attendee or task
+        final NoteRelatedObject nroReport;
+        final NoteRelatedObject nroPersonOrTask;
+        if (checkReport(noteRelatedObjects.get(0))) {
+          nroReport = noteRelatedObjects.get(0);
+          nroPersonOrTask = noteRelatedObjects.get(1);
+        } else {
+          nroReport = noteRelatedObjects.get(1);
+          nroPersonOrTask = noteRelatedObjects.get(0);
+        }
+        if (!checkReportPersonOrTask(nroReport, nroPersonOrTask)) {
+          throw new IllegalArgumentException(
+              "Instant assessment must link to report and person or task");
+        }
+        final Report report = engine.getReportDao().getByUuid(nroReport.getRelatedObjectUuid());
+        if (report == null) {
+          throw new IllegalArgumentException("Report not found");
+        }
+        // TODO: What about e.g. CANCELLED or PUBLISHED reports?
+        final List<ReportPerson> authors = report.loadAuthors(engine.getContext()).join();
+        if (authors.stream().anyMatch(a -> Objects.equals(a.getUuid(), DaoUtils.getUuid(user)))) {
+          // User is an author of this report
+          return true;
+        }
+        // check authorization groups (below)
+        break;
+      case "ondemand":
+        // On-demand assessment:
+        // Check that note refers only to one relatedObject
+        if (noteRelatedObjects.size() != 1) {
+          throw new IllegalArgumentException(
+              "On-demand assessment must have exactly one related object");
+        }
+        final NoteRelatedObject nroPerson = noteRelatedObjects.get(0);
+        if (!checkPerson(nroPerson)) {
+          throw new IllegalArgumentException("On-demand assessment must link to a person");
+        }
+        // check authorization groups (below)
+        break;
+      default:
+        // Periodic assessment:
+        // Check that note refers only to one relatedObject
+        if (noteRelatedObjects.size() != 1) {
+          throw new IllegalArgumentException(
+              "Periodic assessment must have exactly one related object");
+        }
+        final NoteRelatedObject nro = noteRelatedObjects.get(0);
+        Set<String> responsibleTasksUuids = null;
+        Set<String> associatedPositionsUuids = null;
+        if (checkTask(nro)) {
+          if (hasTaskAssessmentPermission(responsibleTasksUuids, user, nro)) {
+            return true;
+          }
+        } else if (checkPerson(nro)) {
+          associatedPositionsUuids = lazyLoadAssociatedPositions(associatedPositionsUuids, user);
+          final Position position = engine.getPositionDao()
+              .getCurrentPositionForPerson(engine.getContext(), nro.getRelatedObjectUuid()).join();
+          if (associatedPositionsUuids.contains(DaoUtils.getUuid(position))) {
+            // This position is among the associated positions of the user
+            return true;
+          }
+        } else {
+          throw new IllegalArgumentException("Periodic assessment must link to person or task");
+        }
+        break;
+    }
+
+    return DaoUtils.isUserInAuthorizationGroup(authorizationGroupUuids, note,
+        updateType == UpdateType.READ);
+  }
+
+  private boolean checkReportPersonOrTask(NoteRelatedObject nroReport,
+      NoteRelatedObject nroPersonOrTask) {
+    return checkReport(nroReport) && (checkPerson(nroPersonOrTask) || checkTask(nroPersonOrTask));
+  }
+
+  private boolean checkReport(NoteRelatedObject nro) {
+    return ReportDao.TABLE_NAME.equals(nro.getRelatedObjectType());
+  }
+
+  private boolean checkPerson(NoteRelatedObject nro) {
+    return PersonDao.TABLE_NAME.equals(nro.getRelatedObjectType());
+  }
+
+  private boolean checkTask(NoteRelatedObject nro) {
+    return TaskDao.TABLE_NAME.equals(nro.getRelatedObjectType());
+  }
+
+  private void checkAssessmentRecurrence(final Note note, final String recurrenceString) {
+    try {
+      final JsonNode jsonNode = Utils.parseJsonSafe(note.getText());
+      if (jsonNode == null || !jsonNode.isObject() || !jsonNode.has(NOTE_RECURRENCE)) {
+        throw new IllegalArgumentException("Invalid assessment contents");
+      }
+      final ObjectNode objectNode = (ObjectNode) jsonNode;
+      final JsonNode recurrence = objectNode.get(NOTE_RECURRENCE);
+      if (!recurrenceString.equals(recurrence.asText())) {
+        throw new IllegalArgumentException("Invalid recurrence in assessment contents");
+      }
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("Invalid assessment contents");
+    }
+  }
+
+  private boolean hasTaskAssessmentPermission(Set<String> responsibleTasksUuids, final Person user,
+      final NoteRelatedObject nro) {
+    responsibleTasksUuids = lazyLoadResponsibleTasks(responsibleTasksUuids, user);
+    if (responsibleTasksUuids.contains(nro.getRelatedObjectUuid())) {
+      // This task is among the user's responsible tasks
+      return true;
+    }
+    return false;
+  }
+
+  private Set<String> lazyLoadResponsibleTasks(final Set<String> responsibleTasksUuids,
+      final Person user) {
+    if (responsibleTasksUuids != null) {
+      // Already loaded
+      return responsibleTasksUuids;
+    }
+    final Position position = DaoUtils.getPosition(user);
+    if (position == null) {
+      return Collections.emptySet();
+    }
+    // Load
+    final TaskSearchQuery tsq = new TaskSearchQuery();
+    tsq.setStatus(Task.Status.ACTIVE);
+    final List<Task> responsibleTasks =
+        position.loadResponsibleTasks(AnetObjectEngine.getInstance().getContext(), tsq).join();
+    return responsibleTasks.stream().map(rp -> rp.getUuid()).collect(Collectors.toSet());
+  }
+
+  private Set<String> lazyLoadAssociatedPositions(final Set<String> associatedPositionsUuids,
+      final Person user) {
+    if (associatedPositionsUuids != null) {
+      // Already loaded
+      return associatedPositionsUuids;
+    }
+    final Position position = DaoUtils.getPosition(user);
+    if (position == null) {
+      return Collections.emptySet();
+    }
+    // Load
+    final List<Position> associatedPositions =
+        position.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
+    return associatedPositions.stream().map(ap -> ap.getUuid()).collect(Collectors.toSet());
   }
 
   private void updateSubscriptions(int numRows, Note obj) {
