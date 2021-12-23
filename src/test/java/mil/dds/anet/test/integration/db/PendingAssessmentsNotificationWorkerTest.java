@@ -200,7 +200,7 @@ public class PendingAssessmentsNotificationWorkerTest {
       jobHistoryDao.update(jobHistory);
     }
 
-    // From our initial data we should get 6 pending assessments
+    // From our initial data we should get 8 pending assessments
     final List<AnetEmail> emails = testPendingAssessmentsNotificationWorker(8);
     // Check the actual emails
     for (final AnetEmail email : emails) {

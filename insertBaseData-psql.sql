@@ -337,7 +337,7 @@ INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "upd
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
 	VALUES (uuid_generate_v4(), 'EF8', '', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
-	VALUES (uuid_generate_v4(), 'EF9', 'Gender', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (uuid_generate_v4(), 'EF 9', 'Gender', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
 	VALUES (uuid_generate_v4(), 'TAAC-N', '', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
@@ -1089,11 +1089,18 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   FROM tasks t
   WHERE t."shortName" = '1.1.A';
 
--- Add periodic assessment for a person
+-- Add periodic assessments for a person
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'JACKSON, Jack' \gset
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
 INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
   VALUES (:noteUuid, :authorUuid, 3, 'fields.principal.person.assessments.principalQuarterly', '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'people', p.uuid
+  FROM people p
+  WHERE p.name = 'ROGWELL, Roger';
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
+  VALUES (:noteUuid, :authorUuid, 3, 'fields.principal.person.assessments.principalMonthly', '{"text":"sample text","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'people', p.uuid
   FROM people p
