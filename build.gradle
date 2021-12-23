@@ -19,7 +19,7 @@ sourceCompatibility = 1.8
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.0.28"
-String logbackVersion = "1.2.9"
+String logbackVersion = "1.2.10"
 String log4jVersion = "2.17.0"
 
 // If defined, load alternatives for variables
