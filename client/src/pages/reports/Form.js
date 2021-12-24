@@ -1406,6 +1406,11 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
+      if (!canWriteAssessments) {
+        // FIXME: needs better logic to only update the assessments that the user has permission for
+        // For now, skip updating them altogether if the user is not a report author
+        return report
+      }
       const tasksNotes = createInstantAssessments(
         Task,
         values.tasks,
