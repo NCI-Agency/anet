@@ -1,5 +1,9 @@
+import com.bmuschko.gradle.docker.tasks.container.*
+import com.bmuschko.gradle.docker.tasks.image.*
+
 plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
+	// https://github.com/bmuschko/gradle-docker-plugin
 	id "com.bmuschko.docker-remote-api" version "6.7.0"
 	id "com.github.node-gradle.node" version "3.1.1"
 	id "com.diffplug.spotless" version "6.0.5"
@@ -25,6 +29,7 @@ String dropwizardVersion = "2.0.28"
 String logbackVersion = "1.2.9"
 String log4jVersion = "2.17.0"
 String keycloakVersion = "16.1.0"
+String containerPushDataPath = "/var/tmp"
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
@@ -59,6 +64,7 @@ run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] 
 String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
+String keycloakContainerConfigFolder = "/var/tmp"
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -351,20 +357,13 @@ task dbLoad(dependsOn: "dbLoad_${dbType}") {
 	description = "Runs the ANET database load command; loads demo data."
 }
 
-task dbLoad_mssql(dependsOn: 'compileJava', type: JavaExec) {
+task dbLoad_mssql(dependsOn: ['compileJava'], type: JavaExec) {
 	group = "database"
 	description = "Runs the ANET database load command for MS SQL; loads demo data."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	mainClass = mainClassName
 	args = ["dbScript", "-S", "insertBaseData-mssql.sql", anetConfig]
-}
-
-task dbLoad_psql(dependsOn: "dbLoad_psql_createData", type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	group = "database"
-	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
-	targetContainerId { dbContainerName }
-	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "/hostdata/insertBaseData-psql.sql"] as String[] ]
 }
 
 task dbLoad_psql_createData(type: Exec) {
@@ -375,7 +374,21 @@ task dbLoad_psql_createData(type: Exec) {
 	commandLine "${projectDir}/mssql2pg.pl"
 }
 
-task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
+task pushPsqlBaseData(dependsOn: dbLoad_psql_createData, type: DockerCopyFileToContainer) {
+	containerId = dbContainerName
+	description = "Push SQL base data to PostgreSQL"
+	hostPath = "${projectDir}/insertBaseData-psql.sql"
+	remotePath = containerPushDataPath
+}
+
+task dbLoad_psql(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
+	group = "database"
+	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
+	containerId = dbContainerName
+	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${containerPushDataPath}/insertBaseData-psql.sql"] as String[] ]
+}
+
+task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 	description = "Builds anet-app-server container image."
 	doFirst {
 		copy {
@@ -384,39 +397,39 @@ task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.t
 		}
 	}
 	inputDir =  project.file('build/install')
-	def resultTags = ['ncia/anet-app-server:'+project.version]
+	def resultTags = ["ncia/anet-app-server:${project.version}"]
 	if (projectBranch=="candidate")
-		resultTags << 'ncia/anet-app-server:'+projectBranch
+		resultTags << "ncia/anet-app-server:${projectBranch}"
 	if (projectBranch=="main")
 		resultTags << 'ncia/anet-app-server:latest'
 	images = resultTags
 }
 
-task dockerPushCandidateImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
+task dockerPushCandidateImage(type: DockerPushImage) {
 	images = ['ncia/anet-app-server:candidate']
 }
 
-task dockerPushLatestImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
+task dockerPushLatestImage(type: DockerPushImage) {
 	images = ['ncia/anet-app-server:latest']
 }
 
-task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
+task dockerPushImage(type: DockerPushImage) {
 	images = ["ncia/anet-app-server:${project.version}"]
 }
 
 // Database containers (Microsoft SQL Server and PostgreSQL)
 
-task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+task dockerPullDB(type: DockerPullImage) {
 	group = "database container"
 	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgres:latest"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
-task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+task dockerCreateDB(dependsOn: dockerPullDB, type: DockerCreateContainer) {
 	group = "database container"
 	imageId = dockerPullDB.getImage()
 	containerName = dbContainerName
-	description = "Creates an ANET ${dbType} SQL DB container named " + dbContainerName + "."
+	description = "Creates an ANET ${dbType} SQL DB container named ${dbContainerName}."
 	hostConfig.shmSize = 1024*1024*1024L
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	if (isMssql) {
@@ -430,106 +443,113 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	  withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
 	  withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	}
-	hostConfig.portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
+	hostConfig.portBindings = ["${run.environment["ANET_DB_EXPOSED_PORT"]}:${run.environment["ANET_DB_PORT"]}"]
 }
 
 // need to make this invoke dockerCreateDB if there is no anet-${dbType}-server and possibly get newer image if available
-task dockerStartDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+task dockerStartDB(type: DockerStartContainer) {
 	group = "database container"
-	description = "Starts " + dbContainerName + " container."
+	description = "Starts ${dbContainerName} container."
 	targetContainerId { dbContainerName }
 }
 
-task dockerStopDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+task dockerStopDB(type: DockerStopContainer) {
 	group = "database container"
-	description = "Stops " + dbContainerName + " container."
+	description = "Stops ${dbContainerName} container."
 	targetContainerId { dbContainerName }
 }
 
-task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+task dockerRemoveDB(type: DockerRemoveContainer) {
 	group = "database container"
-	description = "Removes " + dbContainerName + " container."
+	description = "Removes ${dbContainerName} container."
 	targetContainerId { dbContainerName }
 }
 
 // Keycloak container
 
-task dockerPullKeycloak(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+task dockerPullKeycloak(type: DockerPullImage) {
 	group = "keycloak container"
 	image = "jboss/keycloak:${keycloakVersion}"
 	description = "Pulls a docker image for keycloak from ${image}."
 }
 
-task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: DockerCreateContainer) {
 	group = "keycloak container"
 	imageId = dockerPullKeycloak.getImage()
 	containerName = keycloakContainerName
-	description = "Creates a keycloak container named " + keycloakContainerName + "."
+	description = "Creates a keycloak container named ${keycloakContainerName}."
 	hostConfig.portBindings = ["9080:8080", "9443:8443"]
-	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+	hostConfig.binds = run.environment.get("DOCKER_MOUNTS", [:])
         withEnvVar("KEYCLOAK_USER", "admin")
         withEnvVar("KEYCLOAK_PASSWORD", "admin")
-        withEnvVar("KEYCLOAK_IMPORT", "/hostdata/ANET-Realm-export.json")
+        withEnvVar("KEYCLOAK_IMPORT", "$containerPushDataPath/ANET-Realm-export.json")
 }
 
-task dockerStartKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
-	group = "keycloak container"
-	description = "Starts " + keycloakContainerName + " container."
-	targetContainerId { keycloakContainerName }
+task dockerConfigureKeycloak(dependsOn: dockerCreateKeycloak, type: DockerCopyFileToContainer) {
+	description = "Push REALM configuration to Keycloak"
+	containerId = keycloakContainerName
+	hostPath = "${rootProject.projectDir}/ANET-Realm-export.json"
+	remotePath = containerPushDataPath
 }
 
-task dockerExportKeycloakRealm(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+task dockerStartKeycloak(type: DockerStartContainer) {
 	group = "keycloak container"
-	description = "Epxorts ANET-Realm from " + keycloakContainerName + " container."
-	targetContainerId { keycloakContainerName }
-	commands = [ ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.socket.binding.port-offset=100", "-Dkeycloak.migration.action=export", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.realmName=ANET-Realm", "-Dkeycloak.migration.file=/hostdata/ANET-Realm-export.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"] as String[] ]
+	description = "Starts ${keycloakContainerName} container."
+	containerId = keycloakContainerName
 }
 
-task dockerStopKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+task dockerExportKeycloakRealm(type: DockerExecContainer) {
 	group = "keycloak container"
-	description = "Stops " + keycloakContainerName + " container."
-	targetContainerId { keycloakContainerName }
+	description = "Epxorts ANET-Realm from ${keycloakContainerName} container."
+	containerId = keycloakContainerName
+	commands = [ ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.socket.binding.port-offset=100", "-Dkeycloak.migration.action=export", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.realmName=ANET-Realm", "-Dkeycloak.migration.file=${containerPushDataPath}/ANET-Realm-export.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"] as String[] ]
 }
 
-task dockerRemoveKeycloak(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+task dockerStopKeycloak(type: DockerStopContainer) {
 	group = "keycloak container"
-	description = "Removes " + keycloakContainerName + " container."
-	targetContainerId { keycloakContainerName }
+	description = "Stops ${keycloakContainerName} container."
+	containerId = keycloakContainerName
+}
+
+task dockerRemoveKeycloak(type: DockerRemoveContainer) {
+	group = "keycloak container"
+	description = "Removes ${keycloakContainerName} container."
+	containerId = keycloakContainerName
 }
 
 // Fake SMTP server container
 
-task dockerPullFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+task dockerPullFakeSmtpServer(type: DockerPullImage) {
 	group = "fake-smtp-server container"
 	image = "devoto13/fake-smtp-server:0.1.0" // No 'latest' available yet
 	description = "Pulls a docker image for the fake-smtp-server from ${image}."
 }
 
-task dockerCreateFakeSmtpServer(dependsOn: dockerPullFakeSmtpServer, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+task dockerCreateFakeSmtpServer(dependsOn: dockerPullFakeSmtpServer, type: DockerCreateContainer) {
 	group = "fake-smtp-server container"
 	imageId = dockerPullFakeSmtpServer.getImage()
 	containerName = fakeSmtpContainerName
-	description = "Creates a fake-smtp-server container named " + fakeSmtpContainerName + "."
+	description = "Creates a fake-smtp-server container named ${fakeSmtpContainerName}."
 	exposePorts("tcp", [1025, 1080])
-	hostConfig.portBindings = [run.environment["ANET_SMTP_PORT"] + ":" + 1025, run.environment["ANET_SMTP_HTTP_PORT"] + ":" + 1080]
+	hostConfig.portBindings = ["${run.environment["ANET_SMTP_PORT"]}:1025", "${run.environment["ANET_SMTP_HTTP_PORT"]}:1080"]
 }
 
-task dockerStartFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+task dockerStartFakeSmtpServer(type: DockerStartContainer) {
 	group = "fake-smtp-server container"
-	description = "Starts " + fakeSmtpContainerName + " container."
-	targetContainerId { fakeSmtpContainerName }
+	description = "Starts ${fakeSmtpContainerName} container."
+	containerId = fakeSmtpContainerName
 }
 
-task dockerStopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+task dockerStopFakeSmtpServer(type: DockerStopContainer) {
 	group = "fake-smtp-server container"
-	description = "Stops " + fakeSmtpContainerName + " container."
-	targetContainerId { fakeSmtpContainerName }
+	description = "Stops ${fakeSmtpContainerName} container."
+	containerId = fakeSmtpContainerName
 }
 
-task dockerRemoveFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+task dockerRemoveFakeSmtpServer(type: DockerRemoveContainer) {
 	group = "fake-smtp-server container"
-	description = "Removes " + fakeSmtpContainerName + " container."
-	targetContainerId { fakeSmtpContainerName }
+	description = "Removes ${fakeSmtpContainerName} container."
+	containerId = fakeSmtpContainerName
 }
 
 // Create the task that runs the maintenance command. Run e.g. with:
