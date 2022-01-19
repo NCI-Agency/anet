@@ -152,7 +152,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
     - run: ./gradlew -PtestEnv dockerCreateDB dockerStartDB
-    - run: ./gradlew -PtestEnv dockerCreateKeycloak dockerStartKeycloak
+    - run: ./gradlew -PtestEnv dockerConfigureKeycloak dockerStartKeycloak
     - run: ./gradlew -PtestEnv dockerCreateFakeSmtpServer dockerStartFakeSmtpServer
     - run: ./gradlew -PtestEnv jar
     - run: ./gradlew -PtestEnv dbWait dbMigrate dbLoad
