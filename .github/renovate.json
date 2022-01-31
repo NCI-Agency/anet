@@ -24,6 +24,30 @@
         "com.microsoft.sqlserver:mssql-jdbc"
       ],
       "allowedVersions": "/^.*\\.jre8$/"
+    },
+    {
+      "groupName": "NPM, dev-dependencies, Storybook",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@storybook/"]
+    },
+    {
+      "groupName": "NPM, dev-dependencies, Babel",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@babel/"]
+    },
+    {
+      "groupName": "NPM, dev-dependencies, WebdriverIO",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@wdio/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Slate",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["slate"]
     }
   ],
   "postUpdateOptions": [
