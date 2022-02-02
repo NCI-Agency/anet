@@ -807,6 +807,8 @@ fields:
         - endOfTourDate
         - biography
         - arrayFieldName
+      showAsFullWidthFields:
+        - biography
       assessments:
         advisorQuarterly:
           recurrence: quarterly
@@ -1329,6 +1331,8 @@ fields:
         - endOfTourDate
         - biography
         - arrayFieldName
+      showAsFullWidthFields:
+        - biography
     position:
       name: Afghan Tashkil
       type: Afghan Partner

@@ -333,6 +333,8 @@ fields:
         - gender
         - endOfTourDate
         - biography
+      showAsFullWidthFields:
+        - biography
     position:
       name: NATO Billet
       type: ANET User
@@ -353,7 +355,6 @@ fields:
         placeholder: the six character code
 
   principal:
-
     person:
       name: Afghan Partner
       countries: [Afghanistan]
@@ -488,6 +489,8 @@ fields:
         - rank
         - gender
         - endOfTourDate
+        - biography
+      showAsFullWidthFields:
         - biography
     position:
       name: Afghan Tashkil

@@ -109,9 +109,6 @@ const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "endOfTour"
 ]
 
-// Large fields that will be displayed at the end
-const WHOLE_WIDTH_FIELDS = ["biography"]
-
 const NORMAL_FIELD_OPTIONS = Object.entries(
   Object.without(
     Settings.fields.person,
@@ -219,14 +216,16 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const isAdmin = currentUser && currentUser.isAdmin()
   const position = person.position
   const hasPosition = position && position.uuid
+  // Keys of fields which should span over 2 columns
+  const fullWidthFieldKeys = person.getFullWidthFields()
   const emailHumanValue = (
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
   const orderedFields = orderPersonFields().filter(
-    field => !WHOLE_WIDTH_FIELDS.includes(field.key)
+    field => !fullWidthFieldKeys.includes(field.key)
   )
   const twoColumnFields = orderPersonFields().filter(field =>
-    WHOLE_WIDTH_FIELDS.includes(field.key)
+    fullWidthFieldKeys.includes(field.key)
   )
   const containsSensitiveInformation = !!orderedFields.find(field =>
     Object.keys(Person.customSensitiveInformation).includes(field.key)
