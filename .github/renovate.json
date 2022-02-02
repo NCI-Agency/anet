@@ -41,7 +41,7 @@
       "groupName": "NPM, dev-dependencies, WebdriverIO",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
-      "matchPackagePrefixes": ["@wdio/"]
+      "matchPackagePrefixes": ["@wdio/", "webdriverio"]
     },
     {
       "groupName": "NPM, dependencies, Slate",
