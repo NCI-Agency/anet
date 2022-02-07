@@ -289,7 +289,7 @@ const TableHeader = ({ showDelete, hide }) => (
         className={"col-xs-1" + (hide ? " empty-cell-header" : "")}
         style={{ textAlign: "center" }}
       >
-        <div style={{ minWidth: "80px" }}>{!hide && "Attendees"}</div>
+        <div style={{ minWidth: "80px" }}>{!hide && "Attendee"}</div>
       </th>
       <th
         className={
@@ -297,7 +297,7 @@ const TableHeader = ({ showDelete, hide }) => (
         }
         style={{ textAlign: "center" }}
       >
-        <div style={{ minWidth: "70px" }}>{!hide && "Authors"}</div>
+        <div style={{ minWidth: "70px" }}>{!hide && "Author"}</div>
       </th>
       <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
         <div style={{ width: showDelete ? "35px" : "120px" }} />
