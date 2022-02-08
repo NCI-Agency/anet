@@ -709,7 +709,12 @@ const ReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title="Recent attendees"
-                        shortcuts={recents.persons}
+                        shortcuts={recents.persons.filter(
+                          ra =>
+                            !values.reportPeople?.find(
+                              person => person.uuid === ra.uuid
+                            )
+                        )}
                         fieldName="reportPeople"
                         objectType={Person}
                         curValue={values.reportPeople}
