@@ -4,6 +4,10 @@ import Home from "../pages/home.page"
 
 describe("Home page", () => {
   describe("When checking the notification numbers", () => {
+    afterEach("On the create authorization group page...", () => {
+      Home.logout()
+    })
+
     it("Should see that Erin has 1 counterpart and no tasks with pending assessments", () => {
       Home.open()
       Home.linksMenuButton.click()

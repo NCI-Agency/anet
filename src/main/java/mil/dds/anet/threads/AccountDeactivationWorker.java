@@ -122,9 +122,10 @@ public class AccountDeactivationWorker extends AbstractWorker {
     p.setStatus(Person.Status.INACTIVE);
 
     AnetAuditLogger.log(
-        "Person {} domainUsername '{}' cleared by system because they are now inactive", p,
-        p.getDomainUsername());
+        "Person {} domainUsername '{}' and openIdSubject '{}' cleared by system because they are now inactive",
+        p, p.getDomainUsername(), p.getOpenIdSubject());
     p.setDomainUsername(null);
+    p.setOpenIdSubject(null);
 
     Position existingPos = p.loadPosition();
     if (existingPos != null) {

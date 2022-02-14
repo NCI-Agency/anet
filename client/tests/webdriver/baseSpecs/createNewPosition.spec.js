@@ -96,6 +96,7 @@ describe("Create position page", () => {
 
       CreatePosition.submitForm()
       CreatePosition.waitForAlertSuccessToLoad()
+      CreatePosition.logout()
     })
   })
 
@@ -154,6 +155,9 @@ describe("Create position page", () => {
 
       // prevents "unexpected alert open" errors on BrowserStack
       browser.acceptAlert()
+
+      // No Logout link, so just call logout directly
+      browser.url("/api/logout")
     })
   })
 })

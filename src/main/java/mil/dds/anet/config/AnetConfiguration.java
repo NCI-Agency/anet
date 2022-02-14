@@ -2,14 +2,20 @@ package mil.dds.anet.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableMap;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.qindesign.json.schema.Annotation;
+import com.qindesign.json.schema.Error;
+import com.qindesign.json.schema.JSONPath;
+import com.qindesign.json.schema.MalformedSchemaException;
+import com.qindesign.json.schema.Option;
+import com.qindesign.json.schema.Options;
+import com.qindesign.json.schema.Specification;
+import com.qindesign.json.schema.Validator;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
@@ -20,9 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -60,15 +66,13 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   private String version;
 
-  private boolean timeWaffleRequests;
-
   @Valid
   @NotNull
   @JsonProperty
   private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
   @NotNull
-  private Map<String, String> waffleConfig = new HashMap<>();
+  private AnetKeycloakConfiguration keycloakConfiguration = new AnetKeycloakConfiguration();
 
   @Valid
   @NotNull
@@ -138,20 +142,12 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     this.views = builder.build();
   }
 
-  public boolean isTimeWaffleRequests() {
-    return timeWaffleRequests;
+  public AnetKeycloakConfiguration getKeycloakConfiguration() {
+    return keycloakConfiguration;
   }
 
-  public void setTimeWaffleRequests(boolean timeWaffleRequests) {
-    this.timeWaffleRequests = timeWaffleRequests;
-  }
-
-  public Map<String, String> getWaffleConfig() {
-    return waffleConfig;
-  }
-
-  public void setWaffleConfig(Map<String, String> config) {
-    this.waffleConfig = config;
+  public void setKeycloakConfiguration(AnetKeycloakConfiguration keycloakConfiguration) {
+    this.keycloakConfiguration = keycloakConfiguration;
   }
 
   public SmtpConfiguration getSmtp() {
@@ -214,7 +210,8 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     final File file = new File(System.getProperty("user.dir"), getAnetDictionaryName());
     try (final InputStream inputStream = new FileInputStream(file)) {
       @SuppressWarnings("unchecked")
-      final Map<String, Object> dictionaryMap = yamlMapper.readValue(inputStream, Map.class);
+      final Map<String, Object> dictionaryMap =
+          addKeycloakConfiguration(yamlMapper.readValue(inputStream, Map.class));
       // Check and then set dictionary if it is valid
       if (isValid(dictionaryMap)) {
         this.setDictionary(dictionaryMap);
@@ -240,22 +237,44 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
         logger.error("ANET schema [anet-schema.yml] not found");
         throw new IOException("ANET schema [anet-schema.yml] not found");
       } else {
-        final JsonSchemaFactory factory = JsonSchemaFactory
-            .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909))
-            .objectMapper(yamlMapper).build();
-        final JsonSchema schema = factory.getSchema(inputStream);
-        final JsonNode anetDictionary = jsonMapper.valueToTree(dictionaryMap);
-        final Set<ValidationMessage> errors = schema.validate(anetDictionary);
-        for (ValidationMessage error : errors) {
-          logger.error(error.getMessage());
-        }
-        if (!errors.isEmpty()) {
+        final Specification jsonSchemaVersion = Specification.DRAFT_2019_09;
+        final Options opts = new Options();
+        opts.set(Option.FORMAT, true);
+        opts.set(Option.CONTENT, true);
+        opts.set(Option.DEFAULT_SPECIFICATION, jsonSchemaVersion);
+        final Map<JSONPath, Map<JSONPath, Error<?>>> errors = new HashMap<>();
+        final Map<JSONPath, Map<String, Map<JSONPath, Annotation<?>>>> annotations =
+            new HashMap<>();
+        final Validator validator =
+            new Validator(convertYamlToJson(inputStream), jsonSchemaVersion.id(), null, null, opts);
+        if (!validator.validate(new Gson().toJsonTree(dictionaryMap), annotations, errors)) {
+          logErrors(errors);
           throw new IllegalArgumentException("Invalid dictionary in the configuration");
         }
-        logger.info("dictionary: {}", yamlMapper.writeValueAsString(anetDictionary));
+        logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
         return true;
       }
+    } catch (MalformedSchemaException e) {
+      logger.error("Malformed ANET schema", e);
     }
+    return false;
+  }
+
+  private final static JsonElement convertYamlToJson(InputStream yaml) throws IOException {
+    return JsonParser
+        .parseString(jsonMapper.writeValueAsString(yamlMapper.readValue(yaml, Object.class)));
+  }
+
+  private static void logErrors(Map<JSONPath, Map<JSONPath, Error<?>>> errors) {
+    errors.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e -> {
+      e.getValue().values().stream()
+          .filter(
+              err -> !err.isPruned() && !err.result && !err.value.toString().startsWith("https://"))
+          .sorted(Comparator.comparing(err -> err.loc.schema)).forEach(err -> {
+            logger.error("JSON error: {} at {}", err.value,
+                Utils.isEmptyOrNull(err.loc.instance) ? "<root>" : err.loc.instance);
+          });
+    });
   }
 
   @SuppressWarnings("unchecked")
@@ -365,6 +384,19 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
       }
       return version;
     }
+  }
+
+  private Map<String, Object> addKeycloakConfiguration(Map<String, Object> dictionaryMap) {
+    // Add client-side Keycloak configuration to the dictionary
+    final Map<String, Object> clientConfig = new HashMap<>();
+    final AnetKeycloakConfiguration keycloakConfiguration = getKeycloakConfiguration();
+    clientConfig.put("realm", keycloakConfiguration.getRealm());
+    clientConfig.put("url", keycloakConfiguration.getAuthServerUrl());
+    clientConfig.put("clientId", keycloakConfiguration.getResource() + "-public");
+    clientConfig.put("showLogoutLink", keycloakConfiguration.isShowLogoutLink());
+    final Map<String, Object> updatedDictionaryMap = new HashMap<>(dictionaryMap);
+    updatedDictionaryMap.put("keycloakConfiguration", clientConfig);
+    return updatedDictionaryMap;
   }
 
 }

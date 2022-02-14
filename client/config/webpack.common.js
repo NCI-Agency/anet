@@ -89,7 +89,7 @@ module.exports = {
       alias: { vm: "vm-browserify" }
     },
     entry: {
-      anet: [require.resolve("./polyfills"), "./src/index.js"]
+      anet: [require.resolve("./polyfills"), "./src/index-auth.js"]
     },
     // A strange workaround for a strange compile-time bug:   Error in
     // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
@@ -147,7 +147,7 @@ module.exports = {
 
   simConfig: merge.merge(commonConfig, {
     resolve: {
-      modules: [paths.appSrc, "node_modules", "platform/node"]
+      modules: ["platform/node", paths.appSrc, "node_modules"]
     },
     target: "node",
     node: {

@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { useEffect, useRef } from "react"
 import { useLocation } from "react-router-dom"
-import { Version } from "settings"
+import Version from "version"
 
 const GQL_GET_VERSION_INFO = gql`
   query {

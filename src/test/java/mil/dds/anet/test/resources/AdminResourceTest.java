@@ -123,7 +123,7 @@ public class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     // Cache a person
-    engine.getPersonDao().findByDomainUsername(user.getDomainUsername());
+    engine.getPersonDao().findByOpenIdSubject(user.getOpenIdSubject());
 
     try {
       final String result = userMutationExecutor.clearCache("");

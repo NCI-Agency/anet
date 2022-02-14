@@ -60,4 +60,6 @@ test("Home Page", async t => {
     "Navigating to a new page clears the hopscotch tour",
     shortWaitMs
   )
+
+  await t.context.logout()
 })

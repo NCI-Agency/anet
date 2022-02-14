@@ -88,7 +88,7 @@ public class ReportResourceTest extends AbstractResourceTest {
       "{ %1$s approvalSteps { uuid name nextStepUuid relatedObjectUuid } }", _ORGANIZATION_FIELDS);
   private static final String _PERSON_FIELDS =
       "uuid name status role emailAddress phoneNumber rank biography country"
-          + " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
+          + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt";
   private static final String PERSON_FIELDS = String.format("{ %1$s }", _PERSON_FIELDS);
   private static final String REPORT_PEOPLE_FIELDS =
       String.format("{ %1$s primary author attendee }", _PERSON_FIELDS);
@@ -134,11 +134,11 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(advisorOrg.getUuid()).isNotNull();
 
     // Create leadership people in the AO who can approve this report
-    Person approver1 = Person.builder().withDomainUsername("testApprover1")
+    Person approver1 = Person.builder().withDomainUsername("testapprover1")
         .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
         .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
     approver1 = findOrPutPersonInDb(approver1);
-    Person approver2 = Person.builder().withDomainUsername("testApprover2")
+    Person approver2 = Person.builder().withDomainUsername("testapprover2")
         .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
         .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
     approver2 = findOrPutPersonInDb(approver2);
@@ -484,7 +484,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     // Create a Person who isn't in a Billet
     final PersonInput authorInput =
         PersonInput.builder().withName("A New Guy").withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
-            .withDomainUsername("newGuy").withEmailAddress("newGuy@example.com").build();
+            .withDomainUsername("newguy").withEmailAddress("newGuy@example.com").build();
     final Person author = adminMutationExecutor.createPerson(PERSON_FIELDS, authorInput);
     assertThat(author).isNotNull();
     assertThat(author.getUuid()).isNotNull();

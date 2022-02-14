@@ -153,13 +153,14 @@ public class PersonResource {
       }
     }
 
-    // If person changed to inactive, clear out the domainUsername
+    // If person changed to inactive, clear out the domainUsername and openIdSubject
     if (Person.Status.INACTIVE.equals(p.getStatus())
         && !Person.Status.INACTIVE.equals(existing.getStatus())) {
       AnetAuditLogger.log(
-          "Person {} domainUsername '{}' cleared by {} because they are now inactive", p,
-          existing.getDomainUsername(), user);
+          "Person {} domainUsername '{}' and openIdSubject '{}' cleared by {} because they are now inactive",
+          p, existing.getDomainUsername(), existing.getOpenIdSubject(), user);
       p.setDomainUsername(null);
+      p.setOpenIdSubject(null);
     }
 
     // Automatically remove people from a position if they are inactive.

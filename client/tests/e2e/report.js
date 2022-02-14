@@ -237,6 +237,8 @@ test.serial("Draft and submit a report", async t => {
     "Report submitted",
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
+
+  await t.context.logout()
 })
 
 test.serial("Publish report chain", async t => {
@@ -355,6 +357,8 @@ test.serial("Publish report chain", async t => {
     "meeting goal",
     "Daily Rollup report list includes the recently approved report"
   )
+
+  await t.context.logout()
 })
 
 async function approveReport(t, user) {
@@ -402,6 +406,8 @@ async function approveReport(t, user) {
   )
   await $ApproveButton.click()
   await t.context.driver.wait(until.stalenessOf($ApproveButton), mediumWaitMs)
+
+  await t.context.logout()
 }
 test.serial("Verify that validations work", async t => {
   t.plan(27)
@@ -670,4 +676,6 @@ test.serial("Verify that validations work", async t => {
     t,
     "This is a DRAFT report and hasn't been submitted."
   )
+
+  await t.context.logout()
 })

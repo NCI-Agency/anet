@@ -203,6 +203,7 @@ fields:
     firstName: First name
     lastName: Last name
     domainUsername: Domain username
+    openIdSubject: OpenID subject
     position: Current Position
     prevPositions: Previous Positions
     emailAddress:
@@ -323,6 +324,7 @@ fields:
         - position
         - prevPositions
         - domainUsername
+        - openIdSubject
         - emailAddress
         - phoneNumber
         - country
@@ -479,6 +481,7 @@ fields:
         - country
         - birthday
         - domainUsername
+        - openIdSubject
         - emailAddress
         - code
         - politicalPosition

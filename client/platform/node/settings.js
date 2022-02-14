@@ -1,11 +1,24 @@
 import fs from "fs"
 import jsyaml from "js-yaml"
 
+console.log("Using config file " + process.env.ANET_CONFIG)
+const anetConfig = jsyaml.load(fs.readFileSync(process.env.ANET_CONFIG, "utf8"))
 console.log("Using dictionary file " + process.env.ANET_DICTIONARY)
-const anetConfig = jsyaml.load(
+const anetDictionary = jsyaml.load(
   fs.readFileSync(process.env.ANET_DICTIONARY, "utf8")
 )
-const Settings = anetConfig
-const Version = "Sim-Mode"
+const Settings = anetDictionary
+const {
+  realm,
+  "auth-server-url": url,
+  resource: clientId,
+  "show-logout-link": showLogoutLink
+} = anetConfig.keycloakConfiguration
+Settings.keycloakConfiguration = {
+  realm,
+  url,
+  clientId,
+  showLogoutLink
+}
 
-export { Version, Settings as default }
+export default Settings

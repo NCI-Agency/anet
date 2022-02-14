@@ -19,9 +19,9 @@ module.exports = {
     // 'PRODUCTION' is used when building the static version of storybook.
 
     config.resolve.modules = [
+      "platform/storybook",
       paths.appSrc,
-      "node_modules",
-      "platform/storybook"
+      "node_modules"
     ]
 
     /**

@@ -7,6 +7,10 @@ describe("Preview rollup page", () => {
     Rollup.rollup.waitForDisplayed()
   })
 
+  afterEach("On the rollup page...", () => {
+    Rollup.logout()
+  })
+
   describe("When clicking the email preview button, the daily rollup should be generated", () => {
     it("Should show the correct header for the rollup", () => {
       Rollup.emailButton.waitForDisplayed()
@@ -39,6 +43,9 @@ describe("Preview rollup page", () => {
         { timeout: 3000, timeoutMsg: "Expected classification" }
       )
       browser.closeWindow()
+      // Switch back and close dialog
+      browser.switchToWindow(currentHandle)
+      browser.$("button.btn-close").click()
     })
   })
 })

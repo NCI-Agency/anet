@@ -6,6 +6,7 @@ describe("Anet home page", function() {
     Home.open()
     const title = browser.getTitle()
     expect(title).to.equal("ANET")
+    Home.logout()
   })
 })
 
@@ -15,6 +16,7 @@ describe("Anet default user login", () => {
     const securityText = Home.securityBanner.getText()
     const defaultUserValue = "DEMO USE ONLY || ERINSON, Erin"
     expect(securityText.startsWith(defaultUserValue)).to.equal(true)
+    Home.logout()
   })
 })
 
@@ -24,6 +26,7 @@ describe("Anet super user login", () => {
     const securityText = Home.securityBanner.getText()
     const superUserValue = "DEMO USE ONLY || BECCABON, Rebecca"
     expect(securityText.startsWith(superUserValue)).to.equal(true)
+    Home.logout()
   })
 })
 
@@ -33,5 +36,6 @@ describe("Anet admin user login", () => {
     const securityText = Home.securityBanner.getText()
     const adminUserValue = "DEMO USE ONLY || DMIN, Arthur"
     expect(securityText.startsWith(adminUserValue)).to.equal(true)
+    Home.logout()
   })
 })

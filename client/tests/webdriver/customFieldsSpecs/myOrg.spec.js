@@ -11,6 +11,10 @@ describe("My Organization page", () => {
     MyOrg.openAsAdminUser(myOrgUrl)
   })
 
+  afterEach("On the My Organization page...", () => {
+    MyOrg.logout()
+  })
+
   describe("When checking the report statistics part of the page", () => {
     it("Should see different types of fields statistics", () => {
       // Note: checks like length.above are being made because the wdio tests

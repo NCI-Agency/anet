@@ -456,6 +456,7 @@ type Person {
   isSubscribed: Boolean
   name: String
   notes: [Note]
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -480,6 +481,7 @@ input PersonInput {
   endOfTourDate: Instant
   gender: String
   name: String
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput
@@ -761,6 +763,7 @@ type ReportPerson {
   isSubscribed: Boolean
   name: String
   notes: [Note]
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: Position
@@ -788,6 +791,7 @@ input ReportPersonInput {
   endOfTourDate: Instant
   gender: String
   name: String
+  openIdSubject: String
   pendingVerification: Boolean
   phoneNumber: String
   position: PositionInput

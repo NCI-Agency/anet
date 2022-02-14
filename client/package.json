@@ -78,6 +78,7 @@
     "eslint-plugin-react": "7.27.1",
     "eslint-plugin-react-hooks": "4.3.0",
     "eslint-webpack-plugin": "3.1.1",
+    "express-session": "1.17.1",
     "faker": "5.5.3",
     "git-describe": "4.1.0",
     "handlebars": "4.7.7",
@@ -88,6 +89,7 @@
     "jest": "27.4.5",
     "js-yaml": "4.1.0",
     "json-loader": "0.5.7",
+    "keycloak-connect": "16.1.0",
     "moment-timezone": "0.5.34",
     "postcss": "8.4.5",
     "postcss-calc": "8.0.0",
@@ -140,6 +142,7 @@
     "hopscotch": "0.3.1",
     "html-react-parser": "1.4.4",
     "jsonpath-plus": "6.0.1",
+    "keycloak-js": "16.1.0",
     "leaflet": "1.7.1",
     "leaflet-defaulticon-compatibility": "0.1.1",
     "leaflet-geosearch": "3.6.0",
@@ -191,8 +194,8 @@
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-wdio-ie\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest && yarn run test-wdio && yarn run test-wdio-ie && yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava --config ava.config.js",
-    "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} SUITE=${TEST_WDIO_SUITE:-withCustomFields}; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js --suite base --suite ${SUITE}",
-    "test-jest": "export ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models|utils)'",
+    "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} SUITE=${TEST_WDIO_SUITE:-withCustomFields} ; NODE_ENV=test wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js --suite base --suite ${SUITE}",
+    "test-jest": "export ANET_CONFIG=../anet.yml ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} ; NODE_ENV=test jest --testPathPattern='tests/(actions|reducers|models|utils)'",
     "test-wdio-ie": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node ./tests/util/wdio.ie.js",
     "test-all-noCF": "yarn run test-wdio-noCF",
     "test-wdio-noCF": "env TEST_WDIO_SUITE=noCustomFields yarn run test-wdio",
@@ -201,7 +204,7 @@
     "build-storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; build-storybook -s ./stories/dictionaryForStories",
     "build-storybook-docs": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; build-storybook -s ./stories/dictionaryForStories --docs",
     "chromatic": "chromatic --project-token ${CHROMATIC_PROJECT_TOKEN}",
-    "sim": "export ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
+    "sim": "export ANET_CONFIG=../anet.yml ANET_DICTIONARY=../${ANET_DICTIONARY_NAME:-anet-dictionary.yml} SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --config config/webpack.sim.dev.js && node build/anet.sim.dev.js"
   },
   "jest": {
     "moduleDirectories": [

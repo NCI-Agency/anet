@@ -182,6 +182,7 @@ export default class Person extends Model {
     emailAddress
     phoneNumber
     domainUsername
+    openIdSubject
     biography
     country
     gender

@@ -198,6 +198,19 @@ const MergePeople = ({ pageDispatchers }) => {
                 dispatchMergeActions={dispatchMergeActions}
               />
               <PersonField
+                label="OpenID subject"
+                value={mergedPerson.openIdSubject}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("openIdSubject", "", null)
+                  )
+                )}
+                fieldName="openIdSubject"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <PersonField
                 label="Role"
                 value={mergedPerson.role}
                 align={ALIGN_OPTIONS.CENTER}
@@ -601,6 +614,28 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               align,
               mergeState,
               "domainUsername"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <PersonField
+            label="OpenID subject"
+            fieldName="openIdSubject"
+            value={person.openIdSubject}
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField(
+                    "openIdSubject",
+                    person.openIdSubject,
+                    align
+                  )
+                )
+              },
+              align,
+              mergeState,
+              "openIdSubject"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

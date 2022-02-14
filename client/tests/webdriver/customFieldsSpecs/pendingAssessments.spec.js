@@ -53,6 +53,7 @@ describe("In my counterparts page", () => {
       cancelButton.waitForDisplayed()
       cancelButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
+      MyCounterparts.logout()
     })
   })
 
@@ -97,6 +98,7 @@ describe("In my counterparts page", () => {
       cancelButton.waitForDisplayed()
       cancelButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
+      MyCounterparts.logout()
     })
   })
 })
@@ -108,6 +110,7 @@ describe("In my tasks page", () => {
       MyTasks.myPendingTasks.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(MyTasks.myPendingTasksContent.isExisting()).to.be.false
+      MyTasks.logout()
     })
   })
 
@@ -166,6 +169,7 @@ describe("In my tasks page", () => {
       cancelButton.waitForDisplayed()
       cancelButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
+      MyTasks.logout()
     })
   })
 })

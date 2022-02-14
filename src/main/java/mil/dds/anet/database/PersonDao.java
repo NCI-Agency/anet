@@ -50,8 +50,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   // Must always retrieve these e.g. for ORDER BY
   public static final String[] minimalFields = {"uuid", "name", "rank", "createdAt"};
   public static final String[] additionalFields = {"status", "role", "emailAddress", "phoneNumber",
-      "biography", "country", "gender", "endOfTourDate", "domainUsername", "pendingVerification",
-      "code", "updatedAt", "customFields"};
+      "biography", "country", "gender", "endOfTourDate", "domainUsername", "openIdSubject",
+      "pendingVerification", "code", "updatedAt", "customFields"};
   // "avatar" has its own batcher
   public static final String[] avatarFields = {"uuid", "avatar"};
   public static final String[] allFields =
@@ -147,7 +147,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     sql.append("/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, "
         + "\"pendingVerification\", gender, country, avatar, code, \"endOfTourDate\", biography, "
-        + "\"domainUsername\", \"createdAt\", \"updatedAt\", \"customFields\") "
+        + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, "
         + ":pendingVerification, :gender, :country, :avatar, :code, ");
     if (DaoUtils.isMsSql()) {
@@ -156,7 +156,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     } else {
       sql.append(":endOfTourDate, ");
     }
-    sql.append(":biography, :domainUsername, :createdAt, :updatedAt, :customFields);");
+    sql.append(
+        ":biography, :domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields);");
     getDbHandle().createUpdate(sql.toString()).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -174,6 +175,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + "\"emailAddress\" = :emailAddress, \"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
+        + "\"openIdSubject\" = :openIdSubject, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");
 
     if (DaoUtils.isMsSql()) {
@@ -190,7 +192,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
     evictFromCache(p);
-    // The domainUsername may have changed, evict original person as well
+    // The openIdSubject may have changed, evict original person as well
     evictFromCache(findInCache(p));
     return nr;
   }
@@ -206,12 +208,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   }
 
   @InTransaction
+  // Should only be used during authentication
   public List<Person> findByDomainUsername(String domainUsername) {
-    final Person person = getFromCache(domainUsername);
-    if (person != null) {
-      return Collections.singletonList(person);
+    if (Utils.isEmptyOrNull(domainUsername)) {
+      return Collections.emptyList();
     }
-    final List<Person> people = getDbHandle()
+    return getDbHandle()
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
             + PositionDao.POSITIONS_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
@@ -220,13 +222,50 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .bind("domainUsername", domainUsername)
         .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
         .list();
+  }
+
+  @InTransaction
+  // Should only be used during authentication
+  public List<Person> findByEmailAddress(String emailAddress) {
+    if (Utils.isEmptyOrNull(emailAddress)) {
+      return Collections.emptyList();
+    }
+    return getDbHandle()
+        .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
+            + PositionDao.POSITIONS_FIELDS
+            + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+            + "WHERE people.\"emailAddress\" = :emailAddress "
+            + "AND people.status != :inactiveStatus")
+        .bind("emailAddress", emailAddress)
+        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
+        .list();
+  }
+
+  @InTransaction
+  public List<Person> findByOpenIdSubject(String openIdSubject) {
+    if (Utils.isEmptyOrNull(openIdSubject)) {
+      return Collections.emptyList();
+    }
+    final Person person = getFromCache(openIdSubject);
+    if (person != null) {
+      return Collections.singletonList(person);
+    }
+    final List<Person> people = getDbHandle()
+        .createQuery("/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + ","
+            + PositionDao.POSITIONS_FIELDS
+            + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
+            + "WHERE people.\"openIdSubject\" = :openIdSubject "
+            + "AND people.status != :inactiveStatus")
+        .bind("openIdSubject", openIdSubject)
+        .bind("inactiveStatus", DaoUtils.getEnumId(Person.Status.INACTIVE)).map(new PersonMapper())
+        .list();
     // There should at most one match
     people.stream().forEach(p -> putInCache(p));
     return people;
   }
 
-  public void logActivitiesByDomainUsername(String domainUsername, Activity activity) {
-    final Person person = domainUsersCache.get(domainUsername);
+  public void logActivitiesByOpenIdSubject(String openIdSubject, Activity activity) {
+    final Person person = domainUsersCache.get(openIdSubject);
     if (person != null) {
       final Deque<Activity> activities = person.getUserActivities();
       activities.addFirst(activity);
@@ -234,7 +273,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         activities.removeLast();
       }
       person.setUserActivities(activities);
-      domainUsersCache.replace(domainUsername, person);
+      domainUsersCache.replace(openIdSubject, person);
     }
   }
 
@@ -256,11 +295,11 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     evictFromCache(findInCacheByPositionUuid(positionUuid));
   }
 
-  private Person getFromCache(String domainUsername) {
-    if (domainUsersCache == null || domainUsername == null) {
+  private Person getFromCache(String openIdSubject) {
+    if (domainUsersCache == null || openIdSubject == null) {
       return null;
     }
-    final Person person = domainUsersCache.get(domainUsername);
+    final Person person = domainUsersCache.get(openIdSubject);
     final MetricRegistry metricRegistry = AnetObjectEngine.getInstance().getMetricRegistry();
     if (metricRegistry != null) {
       metricRegistry.counter(MetricRegistry.name(DOMAIN_USERS_CACHE, "LoadCount")).inc();
@@ -276,24 +315,24 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   private void putInCache(Person person) {
     if (domainUsersCache != null && person != null && person.getUuid() != null
-        && person.getDomainUsername() != null) {
+        && person.getOpenIdSubject() != null) {
       // defensively copy the person we will be caching
       final Person copy = copyPerson(person);
       if (copy != null) {
-        domainUsersCache.put(person.getDomainUsername(), copy);
+        domainUsersCache.put(person.getOpenIdSubject(), copy);
       }
     }
   }
 
   /**
    * Just to be on the safe side, we only cache objects retrieved inside
-   * {@link #findByDomainUsername(String)}.
+   * {@link #findByOpenIdSubject(String)}.
    *
    * @param person the person to be evicted from the domain users cache
    */
   private void evictFromCache(Person person) {
-    if (domainUsersCache != null && person != null && person.getDomainUsername() != null) {
-      domainUsersCache.remove(person.getDomainUsername());
+    if (domainUsersCache != null && person != null && person.getOpenIdSubject() != null) {
+      domainUsersCache.remove(person.getOpenIdSubject());
     }
   }
 
@@ -462,6 +501,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
                 "/* updatePersonBiography */ UPDATE people SET biography = NULL WHERE uuid = :uuid")
             .bind("uuid", p.getUuid()).execute();
         AnetAuditLogger.log("Person {} has an empty html biography, set it to null", p);
+        evictFromCache(p);
       }
     }
   }

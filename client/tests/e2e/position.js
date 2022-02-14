@@ -176,6 +176,8 @@ test.serial("Move someone in and out of a position", async t => {
     foundCorrectRow,
     `Could not find ${positionName} and ${personName} in the supported positions table`
   )
+
+  await t.context.logout()
 })
 
 test.serial("Update permissions while changing positions", async t => {
@@ -485,4 +487,6 @@ test.serial("Update permissions while changing positions", async t => {
     testUsers[testUserMapper.super_user_1].positionName,
     "ANET User"
   )
+
+  await t.context.logout()
 })
