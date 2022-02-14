@@ -4,7 +4,7 @@ import com.bmuschko.gradle.docker.tasks.image.*
 plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	// https://github.com/bmuschko/gradle-docker-plugin
-	id "com.bmuschko.docker-remote-api" version "6.7.0"
+	id "com.bmuschko.docker-remote-api" version "7.2.0"
 	id "com.github.node-gradle.node" version "3.1.1"
 	id "com.diffplug.spotless" version "6.0.5"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18"
