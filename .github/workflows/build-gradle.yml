@@ -93,7 +93,6 @@ jobs:
       fail-fast: false
       matrix:
         database:
-        - DB_DRIVER: sqlserver
         - DB_DRIVER: postgresql
         dictionary:
         - DICTIONARY_NAME: anet-dictionary.yml
