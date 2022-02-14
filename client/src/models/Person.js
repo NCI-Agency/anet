@@ -413,6 +413,15 @@ export default class Person extends Model {
       : Person.advisorShowPageOrderedFields
   }
 
+  /**
+   * @returns Keys of fields which should span over 2 columns
+   */
+  getFullWidthFields() {
+    return (this.isPrincipal()
+      ? Settings.fields.principal.person.showAsFullWidthFields
+      : Settings.fields.advisor.person.showAsFullWidthFields) || []
+  }
+
   static initShowPageFieldsOrdered(isPrincipal) {
     const fieldsArrayFromConfig = isPrincipal
       ? Settings.fields.principal.person.showPageOrderedFields

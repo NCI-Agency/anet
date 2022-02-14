@@ -229,10 +229,25 @@ const PersonShow = ({ pageDispatchers }) => {
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
 
-  const orderedFields = orderPersonFields()
+  const extraColElems = {
+    position: getPositionActions(),
+    prevPositions: getPreviousPositionsActions()
+  }
+
+  // Keys of fields which should span over 2 columns
+  const fullWidthFieldKeys = person.getFullWidthFields()
+
+  const fullWidthFields = []
+  const orderedFields = orderPersonFields().filter(([el, key]) => {
+    if (fullWidthFieldKeys.includes(key)) {
+      fullWidthFields.push(cloneField([el, key], 2))
+      return false
+    }
+    return true
+  }).map(field => cloneField(field, 4))
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
-  const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
-  const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+  const leftColumnUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
+  const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -289,9 +304,12 @@ const PersonShow = ({ pageDispatchers }) => {
                           marginBottom: "10px"
                         }}
                       />
-                      {leftColumUnderAvatar}
+                      {leftColumnUnderAvatar}
                     </Col>
-                    <Col md={6}>{rightColum}</Col>
+                    <Col md={6}>{rightColumn}</Col>
+                  </Row>
+                  <Row>
+                    <Col md={12}>{fullWidthFields}</Col>
                   </Row>
                 </Container>
               </Fieldset>
@@ -404,11 +422,6 @@ const PersonShow = ({ pageDispatchers }) => {
       }
     }
 
-    const extraColElems = {
-      position: getPositionActions(),
-      prevPositions: getPreviousPositionsActions()
-    }
-
     return (
       person
         .getShowPageFieldsOrdered()
@@ -442,14 +455,15 @@ const PersonShow = ({ pageDispatchers }) => {
             mappedSensitiveFields[key],
           key
         ])
-        .map(([el, key]) =>
-          React.cloneElement(el, {
-            key,
-            extraColElem: extraColElems[key] || el.props.extraColElem || null,
-            labelColumnWidth: 4
-          })
-        )
     )
+  }
+
+  function cloneField([el, key], columnWidth) {
+    return React.cloneElement(el, {
+      key,
+      extraColElem: extraColElems[key] || el.props.extraColElem || null,
+      labelColumnWidth: columnWidth
+    })
   }
 
   function mapNonCustomFields() {

@@ -707,6 +707,14 @@ properties:
                 items:
                   type: string
                   description: Ordered fields to show in Person Page in the Person info section
+              showAsFullWidthFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: List of fields spanning over page width
+                  description: Fields from the ordered fields, which should span over 2 columns
               numberOfFieldsInLeftColumn:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced
@@ -790,6 +798,14 @@ properties:
                 items:
                   type: string
                   description: Ordered fields to show in Person Page in the Person info section
+              showAsFullWidthFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: List of fields spanning over page width
+                  description: Fields from the ordered fields, which should span over 2 columns
               numberOfFieldsInLeftColumn:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced
