@@ -6,6 +6,7 @@ import AssignPersonModal from "components/AssignPersonModal"
 import AssociatedPositions from "components/AssociatedPositions"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import DiagramsContainer from "components/Diagrams"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
 import * as FieldHelper from "components/FieldHelper"
@@ -13,7 +14,10 @@ import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import Model, {
+  DEFAULT_CUSTOM_FIELDS_PARENT,
+  NOTE_TYPE
+} from "components/Model"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -115,6 +119,10 @@ const PositionShow = ({ pageDispatchers }) => {
     position.status === Model.STATUS.INACTIVE &&
     position.uuid &&
     (!position.person || !position.person.uuid)
+
+  const diagrams = position.notes.filter(
+    note => note.type === NOTE_TYPE.DIAGRAM
+  )
 
   return (
     <Formik enableReinitialize initialValues={position}>
@@ -370,6 +378,15 @@ const PositionShow = ({ pageDispatchers }) => {
                 </Fieldset>
               )}
             </Form>
+
+            <DiagramsContainer
+              diagrams={diagrams}
+              relatedObject={position}
+              entityType={Position}
+              onDiagramUpdate={() => {
+                refetch()
+              }}
+            />
 
             {canDelete && (
               <div className="submit-buttons">

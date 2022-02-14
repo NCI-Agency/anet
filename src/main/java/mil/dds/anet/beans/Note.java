@@ -20,7 +20,7 @@ public class Note extends AbstractAnetBean {
     FREE_TEXT, CHANGE_RECORD, // -
     @Deprecated
     PARTNER_ASSESSMENT, // Should no longer be used but remain in place to keep the correct values
-    ASSESSMENT
+    ASSESSMENT, DIAGRAM
   }
 
   @GraphQLQuery
