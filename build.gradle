@@ -4,12 +4,12 @@ import com.bmuschko.gradle.docker.tasks.image.*
 plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	// https://github.com/bmuschko/gradle-docker-plugin
-	id "com.bmuschko.docker-remote-api" version "6.7.0"
-	id "com.github.node-gradle.node" version "3.1.1"
-	id "com.diffplug.spotless" version "6.0.5"
+	id "com.bmuschko.docker-remote-api" version "7.2.0"
+	id "com.github.node-gradle.node" version "3.2.1"
+	id "com.diffplug.spotless" version "6.3.0"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18"
 	id "org.beryx.runtime" version "1.12.7"
-	id "nebula.ospackage" version "9.0.0"
+	id "nebula.ospackage" version "9.1.1"
 }
 
 apply plugin: 'java'
@@ -19,7 +19,6 @@ apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
-apply plugin: 'com.graphql_java_generator.graphql-gradle-plugin'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -631,7 +630,7 @@ generateClientCodeConf {
 		[
 			graphQLTypeName: "Long",
 			javaType: "java.lang.Long",
-			graphQLScalarTypeStaticField: "graphql.Scalars.GraphQLLong"
+			graphQLScalarTypeStaticField: "graphql.scalars.ExtendedScalars.GraphQLLong"
 		],
 		[
 			graphQLTypeName: "Map_String_ObjectScalar",
@@ -669,7 +668,7 @@ checkstyleTest {
 spotless {
 	java {
 		importOrderFile 'config/google.importorder'
-		eclipse().configFile 'config/eclipse-java-google-style.xml'
+		eclipse().configFile('config/eclipse-java-google-style.xml')
 		//Exclude generated code
 		targetExclude 'build/generated/**'
 	}
