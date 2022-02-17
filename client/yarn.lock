@@ -3418,7 +3418,7 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@testim/chrome-version@^1.1.2":
+"@testim/chrome-version@^1.0.7", "@testim/chrome-version@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.2.tgz#092005c5b77bd3bb6576a4677110a11485e11864"
   integrity sha512-1c4ZOETSRpI0iBfIFUqU4KqwBAB2lHUAlBjZz/YqOHqwM9dTTzjV6Km0ZkiEiSCx/tLr1BtESIKyWWMww+RUqw==
@@ -5291,6 +5291,13 @@ axe-core@^4.3.5:
   version "4.3.5"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.3.5.tgz#78d6911ba317a8262bfee292aeafcc1e04b49cc5"
   integrity sha512-WKTW1+xAzhMS5dJsxWkliixlO/PqC4VhmO9T4juNYcaTg9jzWiJsou6m5pxWYGfigWbwzJWeFY6z47a+4neRXA==
+
+axios@^0.21.2:
+  version "0.21.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
+  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
+  dependencies:
+    follow-redirects "^1.14.0"
 
 axios@^0.24.0:
   version "0.24.0"
@@ -9376,7 +9383,7 @@ flush-write-stream@^1.0.0:
     inherits "^2.0.3"
     readable-stream "^2.3.6"
 
-follow-redirects@^1.0.0, follow-redirects@^1.14.4:
+follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.14.4:
   version "1.14.8"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.8.tgz#016996fb9a11a100566398b1c6839337d7bfa8fc"
   integrity sha512-1x0S9UVJHsQprFcEC/qnNzBLcIxsjAV905f/UkQxbclCsoTWlacCNOpQa/anodLl2uaEKFhfWOvM2Qg77+15zA==
