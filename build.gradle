@@ -26,7 +26,7 @@ targetCompatibility = 11
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.0.28"
 String logbackVersion = "1.2.10"
-String log4jVersion = "2.17.0"
+String log4jVersion = "2.17.1"
 String keycloakVersion = "16.1.0"
 String containerPushDataPath = "/var/tmp"
 
@@ -81,25 +81,25 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
-	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.4.1-1'
+	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.4.2-1'
 	implementation 'com.google.guava:guava:31.0.1-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported databases:
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre11'
-	implementation 'org.postgresql:postgresql:42.3.1' // If using postgresql
-	implementation 'org.liquibase:liquibase-core:4.6.2'
+	implementation 'org.postgresql:postgresql:42.3.3' // If using postgresql
+	implementation 'org.liquibase:liquibase-core:4.7.1'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.9.9'
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:6.6.1'
+	implementation 'org.simplejavamail:simple-java-mail:6.7.6'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
-	implementation 'com.graphql-java:java-dataloader:2.2.3'
+	implementation 'com.graphql-java:java-dataloader:3.1.2'
 	implementation 'io.leangen.graphql:spqr:0.11.2'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.2'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
@@ -114,18 +114,18 @@ dependencies {
 	implementation 'com.qindesign:snowy-json:0.16.0'
 
 	// used for writing Excel documents
-	implementation 'org.apache.poi:poi:5.1.0'
-	implementation 'org.apache.poi:poi-ooxml:5.1.0'
+	implementation 'org.apache.poi:poi:5.2.0'
+	implementation 'org.apache.poi:poi-ooxml:5.2.0'
 
 	// For Java 9+
-	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
+	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.6'
 	runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
 
 	// For parsing HTML to check for 'empty' input
 	implementation 'org.jsoup:jsoup:1.14.3'
 
 	// For fast and simple image scaling
-	implementation 'net.coobird:thumbnailator:0.4.15'
+	implementation 'net.coobird:thumbnailator:0.4.17'
 
 	// The graphql-java-runtime module agregates all dependencies for the generated code,
 	// including the plugin runtime
@@ -137,7 +137,7 @@ dependencies {
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
 	testImplementation 'org.apache.commons:commons-io:1.3.2'
 
-	testImplementation 'org.assertj:assertj-core:3.21.0'
+	testImplementation 'org.assertj:assertj-core:3.22.0'
 
 	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 	testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
