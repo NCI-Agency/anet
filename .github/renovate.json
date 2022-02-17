@@ -29,6 +29,18 @@
       "allowedVersions": "/^.*\\.jre11$/"
     },
     {
+      "matchPackageNames": [
+        "com.graphql-java:graphql-java-extended-scalars"
+      ],
+      "enabled": false
+    },
+    {
+      "matchPackagePrefixes": [
+        "com.graphql_java_generator:"
+      ],
+      "enabled": false
+    },
+    {
       "groupName": "NPM, dev-dependencies, Storybook",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
