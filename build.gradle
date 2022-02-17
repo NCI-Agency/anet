@@ -479,9 +479,9 @@ task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: DockerCreateConta
 	description = "Creates a keycloak container named ${keycloakContainerName}."
 	hostConfig.portBindings = ["9080:8080", "9443:8443"]
 	hostConfig.binds = run.environment.get("DOCKER_MOUNTS", [:])
-        withEnvVar("KEYCLOAK_USER", "admin")
-        withEnvVar("KEYCLOAK_PASSWORD", "admin")
-        withEnvVar("KEYCLOAK_IMPORT", "$containerPushDataPath/ANET-Realm-export.json")
+	withEnvVar("KEYCLOAK_USER", "admin")
+	withEnvVar("KEYCLOAK_PASSWORD", "admin")
+	withEnvVar("KEYCLOAK_IMPORT", "$containerPushDataPath/ANET-Realm-export.json")
 }
 
 task dockerConfigureKeycloak(dependsOn: dockerCreateKeycloak, type: DockerCopyFileToContainer) {
@@ -497,11 +497,25 @@ task dockerStartKeycloak(type: DockerStartContainer) {
 	containerId = keycloakContainerName
 }
 
-task dockerExportKeycloakRealm(type: DockerExecContainer) {
+task dockerCopyKeycloakExportCommand(type: DockerCopyFileToContainer) {
+	description = "Copy REALM export command to Keycloak"
+	containerId = keycloakContainerName
+	hostPath = "${rootProject.projectDir}/export-anet-realm.sh"
+	remotePath = containerPushDataPath
+}
+
+task dockerExportKeycloakRealm(dependsOn: dockerCopyKeycloakExportCommand, type: DockerExecContainer) {
 	group = "keycloak container"
 	description = "Epxorts ANET-Realm from ${keycloakContainerName} container."
 	containerId = keycloakContainerName
-	commands = [ ["/opt/jboss/keycloak/bin/standalone.sh", "-Djboss.socket.binding.port-offset=100", "-Dkeycloak.migration.action=export", "-Dkeycloak.migration.provider=singleFile", "-Dkeycloak.migration.realmName=ANET-Realm", "-Dkeycloak.migration.file=${containerPushDataPath}/ANET-Realm-export.json", "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"] as String[] ]
+	commands = [ ["/bin/bash", "${containerPushDataPath}/export-anet-realm.sh", "100", "ANET-Realm", "${containerPushDataPath}/ANET-Realm-export.json"] as String[] ]
+}
+
+task dockerGetKeycloakConfiguration(dependsOn: dockerExportKeycloakRealm, type: DockerCopyFileFromContainer) {
+	description = "Pull REALM configuration from Keycloak"
+	containerId = keycloakContainerName
+	hostPath = "${rootProject.projectDir}"
+	remotePath = "${containerPushDataPath}/ANET-Realm-export.json"
 }
 
 task dockerStopKeycloak(type: DockerStopContainer) {
