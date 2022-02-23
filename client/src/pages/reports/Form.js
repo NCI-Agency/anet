@@ -779,7 +779,10 @@ const ReportForm = ({
                       <>
                         <FieldHelper.FieldShortcuts
                           title={`Recent ${tasksLabel}`}
-                          shortcuts={recents.tasks}
+                          shortcuts={recents.tasks.filter(
+                            rt =>
+                              !values.tasks?.find(task => task.uuid === rt.uuid)
+                          )}
                           fieldName="tasks"
                           objectType={Task}
                           curValue={values.tasks}
