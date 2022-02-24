@@ -280,6 +280,7 @@ task dbWait(dependsOn: 'compileJava', type: JavaExec) {
 	mainClass = mainClassName
 	args = ["waitForDB", anetConfig]
 }
+dbWait.mustRunAfter('dockerStartDB')
 
 task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
@@ -308,6 +309,7 @@ task dbPrep(dependsOn: 'compileJava', type: JavaExec) {
 	mainClass = mainClassName
 	args = ["dbScript", "-S", "prepare-${dbType}.sql", anetConfig]
 }
+dbPrep.mustRunAfter('dbWait')
 
 task dbMigrate(dependsOn: dbPrep, type: JavaExec) {
 	group = "database"
@@ -320,6 +322,7 @@ task dbMigrate(dependsOn: dbPrep, type: JavaExec) {
 		args += "--dry-run"
 	}
 }
+dbMigrate.mustRunAfter('dbDrop')
 
 task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
@@ -329,6 +332,7 @@ task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	mainClass = mainClassName
 	args = ["db", "test", anetConfig]
 }
+dbTest.mustRunAfter('dbWait')
 
 task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
@@ -341,6 +345,7 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 		args += "--dry-run"
 	}
 }
+dbRollback.mustRunAfter('dbWait')
 
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
@@ -350,11 +355,13 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	mainClass = mainClassName
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
+dbDrop.mustRunAfter('dbWait')
 
 task dbLoad(dependsOn: "dbLoad_${dbType}") {
 	group = "database"
 	description = "Runs the ANET database load command; loads demo data."
 }
+dbLoad.mustRunAfter('dbMigrate')
 
 task dbLoad_mssql(dependsOn: ['compileJava'], type: JavaExec) {
 	group = "database"
@@ -451,6 +458,7 @@ task dockerStartDB(type: DockerStartContainer) {
 	description = "Starts ${dbContainerName} container."
 	targetContainerId { dbContainerName }
 }
+dockerStartDB.mustRunAfter('dockerCreateDB')
 
 task dockerStopDB(type: DockerStopContainer) {
 	group = "database container"
@@ -463,6 +471,7 @@ task dockerRemoveDB(type: DockerRemoveContainer) {
 	description = "Removes ${dbContainerName} container."
 	targetContainerId { dbContainerName }
 }
+dockerRemoveDB.mustRunAfter('dockerStopDB')
 
 // Keycloak container
 
@@ -529,6 +538,7 @@ task dockerRemoveKeycloak(type: DockerRemoveContainer) {
 	description = "Removes ${keycloakContainerName} container."
 	containerId = keycloakContainerName
 }
+dockerRemoveKeycloak.mustRunAfter('dockerStopKeycloak')
 
 // Fake SMTP server container
 
@@ -564,6 +574,7 @@ task dockerRemoveFakeSmtpServer(type: DockerRemoveContainer) {
 	description = "Removes ${fakeSmtpContainerName} container."
 	containerId = fakeSmtpContainerName
 }
+dockerRemoveFakeSmtpServer.mustRunAfter('dockerStopFakeSmtpServer')
 
 // Create the task that runs the maintenance command. Run e.g. with:
 //   ./gradlew dbMaintenance -Pargs="--clearEmptyBiographies"
@@ -622,7 +633,7 @@ task prepareProcessResources(dependsOn: 'generateClientCode') {
 		sourceSets.main.resources.srcDirs = mainResourceSrcDirs
 	}
 }
-processResources.dependsOn prepareProcessResources
+processResources.dependsOn('prepareProcessResources', 'buildClient')
 
 // Configure the GraphQL Gradle Plugin; all available parameters are described here:
 // https://graphql-maven-plugin-project.graphql-java-generator.com/graphql-maven-plugin/generateClientCode-mojo.html
@@ -661,6 +672,9 @@ generateClientCodeConf {
 
 jar.dependsOn buildClient
 run.dependsOn buildClient
+
+run.mustRunAfter('dbLoad', 'dockerStartKeycloak')
+test.mustRunAfter('dbLoad', 'dockerStartKeycloak', 'dockerStartFakeSmtpServer')
 
 jar {
 	// Add classpath to manifest to prevent variables in startScripts getting too long
