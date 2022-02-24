@@ -279,25 +279,14 @@ TableContainer.propTypes = {
 const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
-      <th
-        className={"col-xs-1" + (hide ? " empty-cell-header" : "")}
-        style={{ textAlign: "center" }}
-      >
+      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "80px" }}>{!hide && "Primary"}</div>
       </th>
-      <th
-        className={"col-xs-1" + (hide ? " empty-cell-header" : "")}
-        style={{ textAlign: "center" }}
-      >
-        <div style={{ minWidth: "80px" }}>{!hide && "Attendees"}</div>
+      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "80px" }}>{!hide && "Attendee"}</div>
       </th>
-      <th
-        className={
-          "col-xs-1 report-author" + (hide ? " empty-cell-header" : "")
-        }
-        style={{ textAlign: "center" }}
-      >
-        <div style={{ minWidth: "70px" }}>{!hide && "Authors"}</div>
+      <th className={"col-xs-1 report-author" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "70px" }}>{!hide && "Author"}</div>
       </th>
       <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
         <div style={{ width: showDelete ? "35px" : "120px" }} />
