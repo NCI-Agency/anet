@@ -994,7 +994,13 @@ const ReportForm = ({
                           <>
                             <FieldHelper.FieldShortcuts
                               title="Recent Authorization Groups"
-                              shortcuts={recents.authorizationGroups}
+                              shortcuts={recents.authorizationGroups.filter(
+                                ag =>
+                                  !values.authorizationGroups?.find(
+                                    authorizationGroup =>
+                                      authorizationGroup.uuid === ag.uuid
+                                  )
+                              )}
                               fieldName="authorizationGroups"
                               objectType={AuthorizationGroup}
                               curValue={values.authorizationGroups}
