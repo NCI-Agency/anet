@@ -291,7 +291,7 @@ UPDATE positions SET currentPersonUuid = (SELECT uuid from people where emailAdd
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANET Administrators','', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
-	VALUES (lower(newid()), 'LNG','Linguistic', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES ('70193ee9-05b4-4aac-80b5-75609825db9f', 'LNG','Linguistic', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, shortName, longName, type, createdAt, updatedAt)
 	VALUES (lower(newid()), 'EF 1', 'Planning Programming, Budgeting and Execution', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 	INSERT INTO organizations(uuid, shortName, longName, type, parentOrgUuid, createdAt, updatedAt)

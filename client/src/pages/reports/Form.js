@@ -349,6 +349,12 @@ const ReportForm = ({
           }
         }
 
+        // Add attendee groups defined in the dictionary
+        const attendeeGroups = Settings.fields.report.attendeeGroups ?? []
+        attendeeGroups.forEach(({ label, filter: queryVars }) => {
+          reportPeopleFilters[label] = { label, queryVars }
+        })
+
         const tasksFilters = {}
 
         if (currentOrg) {
