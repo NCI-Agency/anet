@@ -417,9 +417,11 @@ export default class Person extends Model {
    * @returns Keys of fields which should span over 2 columns
    */
   getFullWidthFields() {
-    return (this.isPrincipal()
-      ? Settings.fields.principal.person.showAsFullWidthFields
-      : Settings.fields.advisor.person.showAsFullWidthFields) || []
+    return (
+      (this.isPrincipal()
+        ? Settings.fields.principal.person.showAsFullWidthFields
+        : Settings.fields.advisor.person.showAsFullWidthFields) || []
+    )
   }
 
   static initShowPageFieldsOrdered(isPrincipal) {

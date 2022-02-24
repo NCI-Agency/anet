@@ -285,7 +285,11 @@ const TableHeader = ({ showDelete, hide }) => (
       <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "80px" }}>{!hide && "Attendee"}</div>
       </th>
-      <th className={"col-xs-1 report-author" + (hide ? " empty-cell-header" : "")}>
+      <th
+        className={
+          "col-xs-1 report-author" + (hide ? " empty-cell-header" : "")
+        }
+      >
         <div style={{ minWidth: "70px" }}>{!hide && "Author"}</div>
       </th>
       <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>

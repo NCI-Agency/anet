@@ -238,15 +238,20 @@ const PersonShow = ({ pageDispatchers }) => {
   const fullWidthFieldKeys = person.getFullWidthFields()
 
   const fullWidthFields = []
-  const orderedFields = orderPersonFields().filter(([el, key]) => {
-    if (fullWidthFieldKeys.includes(key)) {
-      fullWidthFields.push(cloneField([el, key], 2))
-      return false
-    }
-    return true
-  }).map(field => cloneField(field, 4))
+  const orderedFields = orderPersonFields()
+    .filter(([el, key]) => {
+      if (fullWidthFieldKeys.includes(key)) {
+        fullWidthFields.push(cloneField([el, key], 2))
+        return false
+      }
+      return true
+    })
+    .map(field => cloneField(field, 4))
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
-  const leftColumnUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
+  const leftColumnUnderAvatar = orderedFields.slice(
+    0,
+    numberOfFieldsUnderAvatar
+  )
   const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
 
   return (

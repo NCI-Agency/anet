@@ -626,11 +626,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             action={getActionButton(
               () => {
                 dispatchMergeActions(
-                  setAMergedField(
-                    "openIdSubject",
-                    person.openIdSubject,
-                    align
-                  )
+                  setAMergedField("openIdSubject", person.openIdSubject, align)
                 )
               },
               align,
