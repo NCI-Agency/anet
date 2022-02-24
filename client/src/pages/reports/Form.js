@@ -552,7 +552,9 @@ const ReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title="Recent Locations"
-                        shortcuts={recents.locations}
+                        shortcuts={recents.locations.filter(
+                          l => values.location?.uuid !== l.uuid
+                        )}
                         fieldName="location"
                         objectType={Location}
                         curValue={values.location}
@@ -709,7 +711,12 @@ const ReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title="Recent attendees"
-                        shortcuts={recents.persons}
+                        shortcuts={recents.persons.filter(
+                          ra =>
+                            !values.reportPeople?.find(
+                              person => person.uuid === ra.uuid
+                            )
+                        )}
                         fieldName="reportPeople"
                         objectType={Person}
                         curValue={values.reportPeople}
@@ -774,7 +781,10 @@ const ReportForm = ({
                       <>
                         <FieldHelper.FieldShortcuts
                           title={`Recent ${tasksLabel}`}
-                          shortcuts={recents.tasks}
+                          shortcuts={recents.tasks.filter(
+                            rt =>
+                              !values.tasks?.find(task => task.uuid === rt.uuid)
+                          )}
                           fieldName="tasks"
                           objectType={Task}
                           curValue={values.tasks}
@@ -984,7 +994,13 @@ const ReportForm = ({
                           <>
                             <FieldHelper.FieldShortcuts
                               title="Recent Authorization Groups"
-                              shortcuts={recents.authorizationGroups}
+                              shortcuts={recents.authorizationGroups.filter(
+                                ag =>
+                                  !values.authorizationGroups?.find(
+                                    authorizationGroup =>
+                                      authorizationGroup.uuid === ag.uuid
+                                  )
+                              )}
                               fieldName="authorizationGroups"
                               objectType={AuthorizationGroup}
                               curValue={values.authorizationGroups}
