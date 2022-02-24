@@ -552,7 +552,9 @@ const ReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title="Recent Locations"
-                        shortcuts={recents.locations}
+                        shortcuts={recents.locations.filter(
+                          l => values.location?.uuid !== l.uuid
+                        )}
                         fieldName="location"
                         objectType={Location}
                         curValue={values.location}
