@@ -181,12 +181,13 @@ test.serial("Draft and submit a report", async t => {
     shortWaitMs // wait for Slate to save the editor contents
   )
   const $addAuthGroupShortcutButtons = await $$(
-    "#meeting-details .shortcut-list button"
+    "#authorizationGroups-shortcut-list button"
   )
   // Add all recent authorization groups
-  await Promise.all(
-    $addAuthGroupShortcutButtons.map($button => $button.click())
-  )
+  const nrAuthGroups = $addAuthGroupShortcutButtons.length
+  for (let i = 0; i < nrAuthGroups; i++) {
+    await (await $("#authorizationGroups-shortcut-list button")).click()
+  }
 
   const $formButtonSubmit = await $("#formBottomSubmit")
   await t.context.driver.wait(
@@ -660,7 +661,10 @@ test.serial("Verify that validations work", async t => {
     "#reportPeople-shortcut-list button"
   )
   // Add all recent attendees
-  await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
+  const nrAttendees = $addAttendeeShortcutButtons.length
+  for (let i = 0; i < nrAttendees; i++) {
+    await (await $("#reportPeople-shortcut-list button")).click()
+  }
 
   $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
   $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
