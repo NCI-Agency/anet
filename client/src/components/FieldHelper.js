@@ -1,3 +1,5 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import classNames from "classnames"
 import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
@@ -14,11 +16,13 @@ import {
   FormControl,
   FormGroup,
   InputGroup,
+  ListGroup,
   Row,
   ToggleButton,
   ToggleButtonGroup
 } from "react-bootstrap"
 import utils from "utils"
+
 const getFieldId = field => field.id || field.name // name property is required
 
 const getHumanValue = (field, humanValue) => {
@@ -609,21 +613,26 @@ export const FieldShortcuts = ({
   shortcuts.length > 0 && (
     <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
       <h5>{title}</h5>
-      {objectType.map(shortcuts, (shortcut, idx) => (
-        <Button
-          key={shortcut.uuid}
-          variant="link"
-          onClick={() => handleAddItem(shortcut, onChange, curValue)}
-        >
-          Add{" "}
-          <LinkTo
-            modelType={objectType.resourceName}
-            model={shortcut}
-            isLink={false}
-            forShortcut
-          />
-        </Button>
-      ))}
+      <ListGroup>
+        {objectType.map(shortcuts, (shortcut, idx) => (
+          <ListGroup.Item>
+            <Button
+              key={shortcut.uuid}
+              onClick={() => handleAddItem(shortcut, onChange, curValue)}
+              variant="secondary"
+              size="sm"
+            >
+              <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
+            </Button>
+            <LinkTo
+              modelType={objectType.resourceName}
+              model={shortcut}
+              isLink={false}
+              forShortcut
+            />
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
     </div>
   )
 
