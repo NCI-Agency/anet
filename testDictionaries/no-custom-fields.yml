@@ -198,6 +198,10 @@ fields:
     reportText: Key details
     location:
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
+    attendeeGroups:
+      - label: Linguists
+        filter:
+          orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
 
   person:
     firstName: First name
