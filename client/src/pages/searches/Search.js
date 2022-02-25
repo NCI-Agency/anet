@@ -751,6 +751,21 @@ const Search = ({
             </Dropdown.Toggle>
             {/* TODO: Show a warning when there are more than exportUtils.MAX_NR_OF_EXPORTS results */}
             <Dropdown.Menu className="super-colors">
+              {/* PDF export is limited with reports */}
+              {queryTypes.includes(SEARCH_OBJECT_TYPES.REPORTS) && (
+                <Dropdown.Item
+                  onClick={() =>
+                    exportResults(
+                      searchQueryParams,
+                      queryTypes,
+                      "pdf",
+                      setError
+                    )
+                  }
+                >
+                  PDF (pdf)
+                </Dropdown.Item>
+              )}
               <Dropdown.Item
                 onClick={() =>
                   exportResults(searchQueryParams, queryTypes, "xlsx", setError)
