@@ -36,7 +36,7 @@
     },
     {
       "matchPackagePrefixes": [
-        "com.graphql_java_generator:"
+        "com.graphql_java_generator"
       ],
       "enabled": false
     },
