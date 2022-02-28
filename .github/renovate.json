@@ -30,7 +30,8 @@
     },
     {
       "matchPackageNames": [
-        "com.graphql-java:graphql-java-extended-scalars"
+        "com.graphql-java:graphql-java-extended-scalars",
+        "react-router-bootstrap"
       ],
       "enabled": false
     },
