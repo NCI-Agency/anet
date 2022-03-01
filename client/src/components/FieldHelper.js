@@ -615,9 +615,8 @@ export const FieldShortcuts = ({
       <h5>{title}</h5>
       <ListGroup>
         {objectType.map(shortcuts, (shortcut, idx) => (
-          <ListGroup.Item>
+          <ListGroup.Item key={shortcut.uuid}>
             <Button
-              key={shortcut.uuid}
               onClick={() => handleAddItem(shortcut, onChange, curValue)}
               variant="secondary"
               size="sm"
