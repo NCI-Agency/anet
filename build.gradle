@@ -401,15 +401,9 @@ task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 	}
 	inputDir =  project.file('build/install')
 	def resultTags = ["ncia/anet-app-server:${project.version}"]
-	if (projectBranch=="candidate")
-		resultTags << "ncia/anet-app-server:${projectBranch}"
 	if (projectBranch=="main")
 		resultTags << 'ncia/anet-app-server:latest'
 	images = resultTags
-}
-
-task dockerPushCandidateImage(type: DockerPushImage) {
-	images = ['ncia/anet-app-server:candidate']
 }
 
 task dockerPushLatestImage(type: DockerPushImage) {
