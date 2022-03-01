@@ -10,7 +10,7 @@ import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Badge, Form, Table } from "react-bootstrap"
+import { Badge, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
@@ -89,8 +89,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               disabled={disabled}
             />
           )}
-        </td>
-        <td className="report-attendee">
           {/* // only advisors can be non-attending */}
           {Person.isAdvisor(person) && (
             <ReportAttendeeCheckbox
@@ -99,8 +97,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               disabled={disabled}
             />
           )}
-        </td>
-        <td className="report-author">
           {/* // only advisors can be authors */}
           {Person.isAdvisor(person) && (
             <ReportAuthorCheckbox
@@ -280,17 +276,7 @@ const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
       <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ minWidth: "80px" }}>{!hide && "Primary"}</div>
-      </th>
-      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ minWidth: "80px" }}>{!hide && "Attendee"}</div>
-      </th>
-      <th
-        className={
-          "col-xs-1 report-author" + (hide ? " empty-cell-header" : "")
-        }
-      >
-        <div style={{ minWidth: "70px" }}>{!hide && "Author"}</div>
+        <div style={{ minWidth: "80px" }}>{!hide && "Roles"}</div>
       </th>
       <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
         <div style={{ width: showDelete ? "35px" : "120px" }} />
@@ -380,7 +366,11 @@ const ReportAuthorCheckbox = ({
 }) => (
   <Form.Check
     type="checkbox"
-    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />}
+    label={
+      <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
+        <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+      </OverlayTrigger>
+    }
     name={`authorAttendee${person.role}`}
     className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
       !person.author ? " inActive" : ""
@@ -400,7 +390,13 @@ ReportAuthorCheckbox.propTypes = {
 const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
   <Form.Check
     type="checkbox"
-    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />}
+    label={
+      <OverlayTrigger
+        overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
+      >
+        <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
+      </OverlayTrigger>
+    }
     name={`authorAttendee${person.role}`}
     className={`primary${!person.attendee ? " inActive" : ""}`}
     checked={!!person.attendee}
