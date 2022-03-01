@@ -160,7 +160,7 @@ configurations.all {
 	exclude group: 'xml-apis'
 
 	// Force this transitive dependency to the pre-v3 version for Java 8:
-	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:2.9.3'
+	resolutionStrategy.force 'com.github.ben-manes.caffeine:caffeine:3.0.5'
 }
 
 test {
