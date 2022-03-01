@@ -1386,7 +1386,7 @@ imagery:
     - name: OSM
       default: true
       type: tile
-      url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
     - name: OSM - local
       default: false
       type: tile
