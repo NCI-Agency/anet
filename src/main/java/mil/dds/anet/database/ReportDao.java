@@ -91,8 +91,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   private String getWeekFormat(DaoUtils.DbType dbType) {
     switch (dbType) {
-      case MSSQL:
-        return "DATEPART(week, %s)";
       case POSTGRESQL:
         return "EXTRACT(WEEK FROM %s)";
       default:
@@ -113,24 +111,18 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   public Report insertInternal(Report r, Person user) {
-    // MSSQL requires explicit CAST when a datetime2 might be NULL.
-    StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
+    final String sql = "/* insertReport */ INSERT INTO reports "
         + "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
         + "text, \"keyOutcomes\", \"nextSteps\", "
         + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
         + "\"principalOrganizationUuid\", \"customFields\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
-        + ":exsum, :reportText, :keyOutcomes, :nextSteps, ");
-    if (DaoUtils.isMsSql()) {
-      sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
-    } else {
-      sql.append(":engagementDate, :releasedAt, ");
-    }
-    sql.append(":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
-        + ":principalOrgUuid, :customFields)");
+        + ":exsum, :reportText, :keyOutcomes, :nextSteps, :engagementDate, :releasedAt, "
+        + ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, "
+        + ":principalOrgUuid, :customFields)";
 
-    getDbHandle().createUpdate(sql.toString()).bindBean(r)
+    getDbHandle().createUpdate(sql).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
         .bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
@@ -232,24 +224,19 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
     DaoUtils.setUpdateFields(r);
 
-    StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
+    final String sql = "/* updateReport */ UPDATE reports SET "
         + "state = :state, \"updatedAt\" = :updatedAt, \"locationUuid\" = :locationUuid, "
         + "intent = :intent, exsum = :exsum, text = :reportText, \"keyOutcomes\" = :keyOutcomes, "
-        + "\"nextSteps\" = :nextSteps, \"approvalStepUuid\" = :approvalStepUuid, ");
-    if (DaoUtils.isMsSql()) {
-      sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), "
-          + "\"releasedAt\" = CAST(:releasedAt AS datetime2), ");
-    } else {
-      sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
-    }
-    sql.append("duration = :duration, atmosphere = :atmosphere, "
+        + "\"nextSteps\" = :nextSteps, \"approvalStepUuid\" = :approvalStepUuid, "
+        + "\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, "
+        + "duration = :duration, atmosphere = :atmosphere, "
         + "\"atmosphereDetails\" = :atmosphereDetails, "
         + "\"cancelledReason\" = :cancelledReason, "
         + "\"principalOrganizationUuid\" = :principalOrgUuid, "
         + "\"advisorOrganizationUuid\" = :advisorOrgUuid, "
-        + "\"customFields\" = :customFields WHERE uuid = :uuid");
+        + "\"customFields\" = :customFields WHERE uuid = :uuid";
 
-    return getDbHandle().createUpdate(sql.toString()).bindBean(r)
+    return getDbHandle().createUpdate(sql).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
         .bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
         .bind("releasedAt", DaoUtils.asLocalDateTime(r.getReleasedAt()))
@@ -480,7 +467,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   public List<Map<String, Object>> getAdvisorReportInsights(Instant start, Instant end,
       String orgUuid) {
     final Map<String, Object> sqlArgs = new HashMap<String, Object>();
-    StringBuilder sql = new StringBuilder();
+    final StringBuilder sql = new StringBuilder();
 
     sql.append("/* AdvisorReportInsightsQuery */ ");
     sql.append("SELECT ");
@@ -930,21 +917,12 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     sql.append(" SELECT r.uuid AS reports_uuid");
     sql.append(" FROM reports r");
     // Get the last report action
-    // FIXME: Hard-coded MS SQL or PostgreSQL specific query stanza
-    if (DaoUtils.isMsSql()) {
-      sql.append(" OUTER APPLY (SELECT TOP (1)");
-    } else {
-      sql.append(" LEFT JOIN LATERAL (SELECT"); // PostgreSQL
-    }
+    sql.append(" LEFT JOIN LATERAL (SELECT");
     sql.append("   ra.\"approvalStepUuid\", ra.planned");
     sql.append("   FROM \"reportActions\" ra");
     sql.append("   WHERE ra.\"reportUuid\" = r.uuid");
     sql.append("   ORDER BY ra.\"createdAt\" DESC");
-    if (DaoUtils.isMsSql()) {
-      sql.append(" ) ra");
-    } else {
-      sql.append(" LIMIT 1) ra ON TRUE"); // PostgreSQL
-    }
+    sql.append(" LIMIT 1) ra ON TRUE");
     // We are not interested in draft reports, as they will remain draft.
     // We are not interested in cancelled reports, as they will remain cancelled.
     sql.append(" WHERE r.state IN (");

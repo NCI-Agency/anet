@@ -4113,4 +4113,6 @@
 		</createIndex>
 	</changeSet>
 
+	<!-- From this point on, mssql is no longer supported, so only postgresql migrations are needed -->
+
 </databaseChangeLog>

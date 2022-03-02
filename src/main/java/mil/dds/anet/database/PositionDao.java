@@ -204,28 +204,15 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     final Instant now = Instant.now();
     if (currPos != null) {
       // If this person is in a position already, we need to remove them.
-      final String sql;
-      if (DaoUtils.isMsSql()) {
-        sql =
-            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-                + "(SELECT TOP(1) * FROM \"peoplePositions\""
-                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-                + " ORDER BY \"createdAt\" DESC) AS t "
-                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-                + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-                + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-                + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      } else {
-        sql =
-            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-                + "(SELECT * FROM \"peoplePositions\""
-                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-                + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
-                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-                + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-                + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-                + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      }
+      final String sql =
+          "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+              + "(SELECT * FROM \"peoplePositions\""
+              + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+              + "      \"peoplePositions\".\"endedAt\" IS NULL";
       getDbHandle().createUpdate(sql).bind("personUuid", personUuid)
           .bind("positionUuid", currPos.getUuid()).bind("endedAt", DaoUtils.asLocalDateTime(now))
           .execute();
@@ -286,30 +273,17 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
         .execute();
 
-    final String updateSql;
     // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
     // (i.e. with both a position and a person).
-    if (DaoUtils.isMsSql()) {
-      updateSql =
-          "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-              + "(SELECT TOP(1) * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-              + " ORDER BY \"createdAt\" DESC) AS t "
-              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-              + "      \"peoplePositions\".\"endedAt\" IS NULL";
-    } else {
-      updateSql =
-          "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-              + "(SELECT * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-              + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
-              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-              + "      \"peoplePositions\".\"endedAt\" IS NULL";
-    }
+    final String updateSql =
+        "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+            + "(SELECT * FROM \"peoplePositions\""
+            + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+            + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+            + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+            + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+            + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+            + "      \"peoplePositions\".\"endedAt\" IS NULL";
     getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 

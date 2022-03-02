@@ -24,12 +24,6 @@
     },
     {
       "matchPackageNames": [
-        "com.microsoft.sqlserver:mssql-jdbc"
-      ],
-      "allowedVersions": "/^.*\\.jre11$/"
-    },
-    {
-      "matchPackageNames": [
         "com.graphql-java:graphql-java-extended-scalars",
         "react-router-bootstrap"
       ],

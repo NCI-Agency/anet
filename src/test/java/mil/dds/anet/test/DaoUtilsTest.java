@@ -12,7 +12,6 @@ public class DaoUtilsTest {
 
   @Test
   public void testDbTypeFromTag() {
-    assertThat(DbType.fromTag("sqlserver")).isEqualTo(DbType.MSSQL);
     assertThat(DbType.fromTag("postgresql")).isEqualTo(DbType.POSTGRESQL);
     try {
       DbType.fromTag(null);

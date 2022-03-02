@@ -38,16 +38,14 @@ if (!isTestEnv && file('localSettings.gradle').exists()) {
 }
 
 // Defaults for development variables
-run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "sqlserver")
-boolean isMssql = run.environment["DB_DRIVER"] == "sqlserver"
-String dbType = isMssql ? "mssql" : "psql"
+run.environment("DB_DRIVER", run.environment["DB_DRIVER"] ?: "postgresql")
 run.environment("ANET_DB_SERVER", run.environment["ANET_DB_SERVER"] ?: "localhost")
 run.environment("ANET_DB_NAME", run.environment["ANET_DB_NAME"] ?: isTestEnv ? "testAnet" : "devAnet")
 run.environment("ANET_DB_USERNAME", run.environment["ANET_DB_USERNAME"] ?: isTestEnv ? "anetTestUser" : "anetDevUser")
 run.environment("ANET_DB_PASSWORD", run.environment["ANET_DB_PASSWORD"] ?: isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd")
 run.environment("ANET_SA_PASSWORD", run.environment["ANET_SA_PASSWORD"] ?: "SA-P@ssw0rd")
-run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: isMssql ? "1433" : "5432")
-run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: isMssql ? (isTestEnv ? "1434" : "1433") : (isTestEnv ? "5433" : "5432"))
+run.environment("ANET_DB_PORT", run.environment["ANET_DB_PORT"] ?: "5432")
+run.environment("ANET_DB_EXPOSED_PORT", run.environment["ANET_DB_EXPOSED_PORT"] ?: (isTestEnv ? "5433" : "5432"))
 run.environment("ANET_PORT", run.environment["ANET_PORT"] ?: isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", run.environment["ANET_ADMIN_PORT"] ?: isTestEnv ? "8181" : "8081")
 run.environment("ANET_SMTP_DISABLE", run.environment["ANET_SMTP_DISABLE"] ?: isTestEnv ? "false" : "true")
@@ -60,7 +58,7 @@ run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: r
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 
-String dbContainerName = isTestEnv ? "anet-${dbType}-test-server" : "anet-${dbType}-server"
+String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
 String keycloakContainerConfigFolder = "/var/tmp"
@@ -85,9 +83,8 @@ dependencies {
 	implementation 'com.google.guava:guava:31.1-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
-	// Supported databases:
-	implementation 'com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre11'
-	implementation 'org.postgresql:postgresql:42.3.3' // If using postgresql
+	// Supported database is PostgreSQL:
+	implementation 'org.postgresql:postgresql:42.3.3'
 	implementation 'org.liquibase:liquibase-core:4.8.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
@@ -304,7 +301,7 @@ task dbPrep(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	mainClass = mainClassName
-	args = ["dbScript", "-S", "prepare-${dbType}.sql", anetConfig]
+	args = ["dbScript", "-S", "prepare-psql.sql", anetConfig]
 }
 dbPrep.mustRunAfter('dbWait')
 
@@ -354,42 +351,22 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 }
 dbDrop.mustRunAfter('dbWait')
 
-task dbLoad(dependsOn: "dbLoad_${dbType}") {
+task pushPsqlBaseData(type: DockerCopyFileToContainer) {
 	group = "database"
-	description = "Runs the ANET database load command; loads demo data."
-}
-dbLoad.mustRunAfter('dbMigrate')
-
-task dbLoad_mssql(dependsOn: ['compileJava'], type: JavaExec) {
-	group = "database"
-	description = "Runs the ANET database load command for MS SQL; loads demo data."
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	mainClass = mainClassName
-	args = ["dbScript", "-S", "insertBaseData-mssql.sql", anetConfig]
-}
-
-task dbLoad_psql_createData(type: Exec) {
-	group = "database"
-	description = "Convert the ANET demo data from MS SQL to PostgreSQL format."
-	standardInput = new FileInputStream("${projectDir}/insertBaseData-mssql.sql")
-	standardOutput = new FileOutputStream("${projectDir}/insertBaseData-psql.sql")
-	commandLine "${projectDir}/mssql2pg.pl"
-}
-
-task pushPsqlBaseData(dependsOn: dbLoad_psql_createData, type: DockerCopyFileToContainer) {
-	containerId = dbContainerName
 	description = "Push SQL base data to PostgreSQL"
+	containerId = dbContainerName
 	hostPath = "${projectDir}/insertBaseData-psql.sql"
 	remotePath = containerPushDataPath
 }
+pushPsqlBaseData.mustRunAfter('dockerStartDB')
 
-task dbLoad_psql(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
+task dbLoad(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
 	group = "database"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	containerId = dbContainerName
 	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${containerPushDataPath}/insertBaseData-psql.sql"] as String[] ]
 }
+dbLoad.mustRunAfter('dbMigrate')
 
 task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 	description = "Builds anet-app-server container image."
@@ -414,11 +391,11 @@ task dockerPushImage(type: DockerPushImage) {
 	images = ["ncia/anet-app-server:${project.version}"]
 }
 
-// Database containers (Microsoft SQL Server and PostgreSQL)
+// Database container (PostgreSQL)
 
 task dockerPullDB(type: DockerPullImage) {
 	group = "database container"
-	image = isMssql ? "ncia/anet-mssql-linux:latest" : "postgres:latest"
+	image = "postgres:latest"
 	description = "Pulls a docker image for the ANET DB from ${image}."
 }
 
@@ -426,24 +403,16 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: DockerCreateContainer) {
 	group = "database container"
 	imageId = dockerPullDB.getImage()
 	containerName = dbContainerName
-	description = "Creates an ANET ${dbType} SQL DB container named ${dbContainerName}."
+	description = "Creates an ANET SQL DB container named ${dbContainerName}."
 	hostConfig.shmSize = 1024*1024*1024L
 	hostConfig.binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
-	if (isMssql) {
-	  withEnvVar('ACCEPT_EULA', 'Y')
-	  withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
-	  withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
-	  withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
-	  withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
-	} else {
-	  withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
-	  withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
-	  withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
-	}
+	withEnvVar('POSTGRES_DB', run.environment["ANET_DB_NAME"])
+	withEnvVar('POSTGRES_USER', run.environment["ANET_DB_USERNAME"])
+	withEnvVar('POSTGRES_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	hostConfig.portBindings = ["${run.environment["ANET_DB_EXPOSED_PORT"]}:${run.environment["ANET_DB_PORT"]}"]
 }
 
-// need to make this invoke dockerCreateDB if there is no anet-${dbType}-server and possibly get newer image if available
+// need to make this invoke dockerCreateDB if there is no ${dbContainerName} and possibly get newer image if available
 task dockerStartDB(type: DockerStartContainer) {
 	group = "database container"
 	description = "Starts ${dbContainerName} container."
@@ -702,7 +671,6 @@ distributions {
 				from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
 				from(markdownToHtml)
 				from('prepare-psql.sql')
-				from('prepare-mssql.sql')
 			}
 		}
 	}
@@ -741,7 +709,6 @@ ospackage {
 		from('anet-dictionary.yml') { rename('anet-dictionary.yml', 'anet-dictionary.yml.template') }
 		from(markdownToHtml)
 		from('prepare-psql.sql')
-		from('prepare-mssql.sql')
 	}
 }
 

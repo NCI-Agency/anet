@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 public class DaoUtils {
 
   public enum DbType {
-    MSSQL("sqlserver"), POSTGRESQL("postgresql");
+    POSTGRESQL("postgresql");
 
-    private String jdbcTag;
+    private final String jdbcTag;
 
-    private DbType(String tag) {
+    DbType(String tag) {
       jdbcTag = tag;
     }
 
@@ -75,10 +75,6 @@ public class DaoUtils {
     return DB_TYPE;
   }
 
-  public static boolean isMsSql() {
-    return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.MSSQL;
-  }
-
   public static boolean isPostgresql() {
     return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.POSTGRESQL;
   }
@@ -100,7 +96,7 @@ public class DaoUtils {
   }
 
   public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {
-    final List<String> fieldAliases = new LinkedList<String>();
+    final List<String> fieldAliases = new LinkedList<>();
     for (String field : fields) {
       final StringBuilder sb = new StringBuilder(String.format("\"%s\".\"%s\"", tableName, field));
       if (addAs) {
@@ -143,8 +139,8 @@ public class DaoUtils {
 
   public static void addInstantAsLocalDateTime(Map<String, Object> args, String parameterName,
       Instant parameterValue) {
-    // Likewise, the conversion by the MSSQL JDBC driver from java.time.Instant to a query parameter
-    // uses the local time zone, so use java.time.LocalDateTime with an explicit time zone.
+    // For the JDBC driver, convert from java.time.Instant to java.time.LocalDateTime with an
+    // explicit time zone.
     final LocalDateTime localValue;
     if (parameterValue == null) {
       localValue = null;
