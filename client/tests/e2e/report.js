@@ -66,9 +66,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    $principalPrimary1,
-    /* eslint-disable no-unused-vars */ $principalAttendee1 /* eslint-enable no-unused-vars */,
-    /* eslint-disable no-unused-vars */ $principalAuthor1 /* eslint-enable no-unused-vars */,
+    $principalControls1,
     /* eslint-disable no-unused-vars */ $principalConflictBtn /* eslint-enable no-unused-vars */,
     $principalName1,
     $principalPosition1,
@@ -76,8 +74,8 @@ test.serial("Draft and submit a report", async t => {
     $principalOrg1
   ] = await $$(".principalAttendeesTable tbody tr:nth-child(2) td")
 
-  const $principalPrimaryInput1 = await $principalPrimary1.findElement(
-    By.css("input")
+  const $principalPrimaryInput1 = await $principalControls1.findElement(
+    By.css("[name = 'primaryAttendeePRINCIPAL']")
   )
   t.true(
     await $principalPrimaryInput1.isSelected(),
@@ -105,9 +103,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    $principalPrimary2,
-    /* eslint-disable no-unused-vars */ $principalAttendeeCheckbox2 /* eslint-enable no-unused-vars */,
-    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox2 /* eslint-enable no-unused-vars */,
+    $principalControls2,
     /* eslint-disable no-unused-vars */ $principalAuthorConflictBtn /* eslint-enable no-unused-vars */,
     $principalName2,
     /* eslint-disable no-unused-vars */
@@ -117,8 +113,8 @@ test.serial("Draft and submit a report", async t => {
   ] = await $$(".principalAttendeesTable tbody tr:last-child td")
 
   await assertElementText(t, $principalName2, "LtCol STEVESON, Steve")
-  const $principalPrimaryInput2 = await $principalPrimary2.findElement(
-    By.css("input")
+  const $principalPrimaryInput2 = await $principalControls2.findElement(
+    By.css("[name = 'primaryAttendeePRINCIPAL']")
   )
   t.false(
     await $principalPrimaryInput2.isSelected(),
@@ -636,9 +632,7 @@ test.serial("Verify that validations work", async t => {
   )
 
   const [
-    $advisorPrimaryCheckbox,
-    /* eslint-disable no-unused-vars */ $advisorAttendeeCheckbox /* eslint-enable no-unused-vars */,
-    /* eslint-disable no-unused-vars */ $advisorAuthorCheckbox /* eslint-enable no-unused-vars */,
+    $advisorControls,
     /* eslint-disable no-unused-vars */ $advisorConflictBtn /* eslint-enable no-unused-vars */,
     $advisorName,
     $advisorPosition,
@@ -647,8 +641,8 @@ test.serial("Verify that validations work", async t => {
   ] = await $$(".advisorAttendeesTable tbody tr:first-child td")
 
   t.is(
-    await $advisorPrimaryCheckbox
-      .findElement(By.css("input"))
+    await $advisorControls
+      .findElement(By.css("[name = 'primaryAttendeeADVISOR']"))
       .getAttribute("value"),
     "on",
     "Advisor primary attendee checkbox should be checked"
