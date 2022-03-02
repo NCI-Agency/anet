@@ -46,7 +46,7 @@
     "@wdio/sync": "7.16.16",
     "aigle": "1.14.1",
     "autoprefixer": "10.4.2",
-    "ava": "3.15.0",
+    "ava": "4.0.1",
     "babel-jest": "27.5.1",
     "babel-loader": "8.2.3",
     "babel-preset-react-app": "10.0.1",

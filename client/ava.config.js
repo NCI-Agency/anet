@@ -46,4 +46,4 @@ if (testEnv === "remote") {
  *
  * https://github.com/avajs/ava/blob/main/docs/06-configuration.md#avaconfigjs
  */
-export default config
+module.exports = config
