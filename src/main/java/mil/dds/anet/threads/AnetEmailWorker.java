@@ -4,6 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import jakarta.mail.Authenticator;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
@@ -16,11 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import javax.mail.Authenticator;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
@@ -220,7 +220,7 @@ public class AnetEmailWorker extends AbstractWorker {
 
   private Authenticator getSmtpAuth(SmtpConfiguration smtpConfig) {
     if (hasUsername(smtpConfig)) {
-      return new javax.mail.Authenticator() {
+      return new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
           return new PasswordAuthentication(smtpConfig.getUsername(), smtpConfig.getPassword());
