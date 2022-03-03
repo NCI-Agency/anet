@@ -452,6 +452,18 @@ export default class Report extends Model {
     )
   }
 
+  static sortReportPeople(reportPeople) {
+    return [...reportPeople].sort((rp1, rp2) => {
+      // primary first, then authors, then alphabetical
+      if (rp1.primary !== rp2.primary) {
+        return rp1.primary ? -1 : 1
+      } else if (rp1.author !== rp2.author) {
+        return rp1.author ? -1 : 1
+      }
+      return (rp1.name || rp1.uuid).localeCompare(rp2.name || rp2.uuid)
+    })
+  }
+
   static getEngagementDateFormat() {
     return Settings.engagementsIncludeTimeAndDuration
       ? Settings.dateFormats.forms.displayLong.withTime

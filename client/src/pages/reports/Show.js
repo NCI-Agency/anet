@@ -305,7 +305,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   } else {
     data.report.cancelled = !!data.report.cancelledReason
     data.report.tasks = Task.fromArray(data.report.tasks)
-    data.report.reportPeople = Person.fromArray(data.report.reportPeople)
+    data.report.reportPeople = Report.sortReportPeople(
+      Person.fromArray(data.report.reportPeople)
+    )
     data.report.to = ""
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields

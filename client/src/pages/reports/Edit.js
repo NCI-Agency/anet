@@ -136,6 +136,9 @@ const ReportEdit = ({ pageDispatchers }) => {
     data.report[DEFAULT_CUSTOM_FIELDS_PARENT] = utils.parseJsonSafe(
       data.report.customFields
     )
+    data.report.reportPeople = Report.sortReportPeople(
+      Person.fromArray(data.report.reportPeople)
+    )
   }
   const report = new Report(data ? data.report : {})
   const reportInitialValues = Object.assign(
