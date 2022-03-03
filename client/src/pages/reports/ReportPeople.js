@@ -9,14 +9,23 @@ import RemoveButton from "components/RemoveButton"
 import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
-import React, { useContext } from "react"
+import React, { forwardRef, useContext } from "react"
 import { Badge, Form, Table } from "react-bootstrap"
+import FlipMove from "react-flip-move"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
 const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
   const { currentUser } = useContext(AppContext)
   const showNonAttending = report.reportPeople.some(rp => !rp.attendee)
+  const reportPeopleSorted = sortReportPeople([...report.reportPeople])
+  const advisorAttendees = reportPeopleSorted.filter(
+    person => person.role === Person.ROLE.ADVISOR && person.attendee
+  )
+  const principalAttendees = reportPeopleSorted.filter(
+    person => person.role === Person.ROLE.PRINCIPAL && person.attendee
+  )
+  const nonAttending = reportPeopleSorted.filter(person => !person.attendee)
   return (
     <div id="reportPeopleContainer">
       <Table responsive>
@@ -26,14 +35,20 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             <td style={{ padding: "0" }}>
               <TableContainer className="advisorAttendeesTable">
                 <TableHeader showDelete={showDelete} />
-                <TableBody
-                  reportPeople={report.reportPeople}
-                  filterCb={person =>
-                    person.role === Person.ROLE.ADVISOR && person.attendee
-                  }
-                  handleAttendeeRow={renderAttendeeRow}
-                  showDelete={showDelete}
-                />
+                <TableBody enableDivider showDelete={showDelete}>
+                  {advisorAttendees.map(person => (
+                    <AttendeeRow
+                      key={person.uuid}
+                      person={person}
+                      report={report}
+                      disabled={disabled}
+                      showDelete={showDelete}
+                      onDelete={onDelete}
+                      onChange={onChange}
+                      isCurrentEditor={Person.isEqual(person, currentUser)}
+                    />
+                  ))}
+                </TableBody>
               </TableContainer>
             </td>
           </tr>
@@ -42,15 +57,20 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             <td style={{ padding: "0" }}>
               <TableContainer className="principalAttendeesTable">
                 <TableHeader hide showDelete={showDelete} />
-                <TableBody
-                  reportPeople={report.reportPeople}
-                  filterCb={person =>
-                    person.role === Person.ROLE.PRINCIPAL && person.attendee
-                  }
-                  handleAttendeeRow={renderAttendeeRow}
-                  enableDivider
-                  showDelete={showDelete}
-                />
+                <TableBody enableDivider showDelete={showDelete}>
+                  {principalAttendees.map(person => (
+                    <AttendeeRow
+                      key={person.uuid}
+                      person={person}
+                      report={report}
+                      disabled={disabled}
+                      showDelete={showDelete}
+                      onDelete={onDelete}
+                      onChange={onChange}
+                      isCurrentEditor={Person.isEqual(person, currentUser)}
+                    />
+                  ))}
+                </TableBody>
               </TableContainer>
             </td>
           </tr>
@@ -60,13 +80,20 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               <td style={{ padding: "0" }}>
                 <TableContainer className="reportAdministrative">
                   <TableHeader hide showDelete={showDelete} />
-                  <TableBody
-                    reportPeople={report.reportPeople}
-                    filterCb={person => !person.attendee}
-                    handleAttendeeRow={renderAttendeeRow}
-                    enableDivider
-                    showDelete={showDelete}
-                  />
+                  <TableBody enableDivider showDelete={showDelete}>
+                    {nonAttending.map(person => (
+                      <AttendeeRow
+                        key={person.uuid}
+                        person={person}
+                        report={report}
+                        disabled={disabled}
+                        showDelete={showDelete}
+                        onDelete={onDelete}
+                        onChange={onChange}
+                        isCurrentEditor={Person.isEqual(person, currentUser)}
+                      />
+                    ))}
+                  </TableBody>
                 </TableContainer>
               </td>
             </tr>
@@ -75,167 +102,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
       </Table>
     </div>
   )
-
-  function renderAttendeeRow(person) {
-    const isCurrentEditor = Person.isEqual(person, currentUser)
-    return (
-      <tr key={person.uuid}>
-        <td className="primary-attendee">
-          {/* // only attendees can be primary */}
-          {person.attendee && (
-            <PrimaryAttendeeRadioButton
-              person={person}
-              handleOnChange={setPrimaryAttendee}
-              disabled={disabled}
-            />
-          )}
-        </td>
-        <td className="report-attendee">
-          {/* // only advisors can be non-attending */}
-          {Person.isAdvisor(person) && (
-            <ReportAttendeeCheckbox
-              person={person}
-              handleOnChange={setReportAttendee}
-              disabled={disabled}
-            />
-          )}
-        </td>
-        <td className="report-author">
-          {/* // only advisors can be authors */}
-          {Person.isAdvisor(person) && (
-            <ReportAuthorCheckbox
-              person={person}
-              handleOnChange={setReportAuthor}
-              disabled={disabled}
-              isCurrentEditor={isCurrentEditor}
-            />
-          )}
-        </td>
-        <td className="conflictButton">
-          <PlanningConflictForPerson
-            person={person}
-            report={report}
-            iconOnly={!!showDelete}
-          />
-        </td>
-        <td className="reportPeopleName">
-          <LinkTo modelType="Person" model={person} showIcon={false} />
-        </td>
-        <td>
-          {person.position && person.position.uuid && (
-            <LinkTo modelType="Position" model={person.position} />
-          )}
-          {person.position && person.position.code
-            ? `, ${person.position.code}`
-            : ""}
-        </td>
-        <td>
-          <LinkTo
-            modelType="Location"
-            model={person.position && person.position.location}
-            whenUnspecified=""
-          />
-        </td>
-        <td>
-          <LinkTo
-            modelType="Organization"
-            model={person.position && person.position.organization}
-            whenUnspecified=""
-          />
-        </td>
-        {showDelete && (
-          <td
-            className="deleteReportPeople"
-            style={{ verticalAlign: "middle" }}
-          >
-            {!isCurrentEditor && (
-              <RemoveButton
-                title="Remove person"
-                onClick={() => onDelete(person)}
-              />
-            )}
-          </td>
-        )}
-      </tr>
-    )
-  }
-
-  function setPrimaryAttendee(person) {
-    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
-    newPeopleList.forEach(np => {
-      if (Person.isEqual(np, person)) {
-        np.primary = true
-      } else if (np.role === person.role) {
-        np.primary = false
-      }
-    })
-    onChange(newPeopleList)
-  }
-
-  function setReportAuthor(person) {
-    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
-    if (passesAuthorValidationSteps(person)) {
-      newPeopleList.forEach(rp => {
-        if (Person.isEqual(rp, person)) {
-          rp.author = !rp.author
-        }
-      })
-      onChange(newPeopleList)
-    }
-  }
-
-  function setReportAttendee(person) {
-    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
-    if (passesAttendeeValidationSteps(person)) {
-      newPeopleList.forEach(rp => {
-        if (Person.isEqual(rp, person)) {
-          rp.attendee = !rp.attendee
-        }
-      })
-      forceOnlyAttendingPersonPerRoleToPrimary(newPeopleList)
-      onChange(newPeopleList)
-    }
-  }
-
-  function passesAuthorValidationSteps(person) {
-    // 1- Prevent self removing from authors
-    const isRemovingSelfAuthor =
-      Person.isEqual(currentUser, person) && person.author
-    if (isRemovingSelfAuthor) {
-      toast.warning("You cannot remove yourself from authors list", {
-        toastId: "removingPrimaryAttendee"
-      })
-      return false
-    }
-
-    // 2- Prevent the removal of the last author
-    const anyAuthorsBesideCurrentPerson = report.reportPeople.some(
-      rp => rp.author && !Person.isEqual(rp, person)
-    )
-    // are we toggling the last author, get the authorness value before toggle
-    const isTheLastAuthorBeingRemoved =
-      !anyAuthorsBesideCurrentPerson && person.author
-
-    if (isTheLastAuthorBeingRemoved) {
-      toast.warning("You must provide at least 1 author for a report", {
-        toastId: "removingLastAuthor"
-      })
-      return false
-    }
-
-    return true
-  }
-
-  function passesAttendeeValidationSteps(person) {
-    // Prevent removal of primary attendee without making someone else primary
-    if (person.attendee && person.primary) {
-      toast.warning("Select a primary first to remove this person", {
-        toastId: "removingPrimaryAttendee"
-      })
-      return false
-    }
-    return true
-  }
 }
 
 export function forceOnlyAttendingPersonPerRoleToPrimary(peopleList) {
@@ -318,29 +184,16 @@ TableHeader.propTypes = {
   hide: PropTypes.bool
 }
 
-const TableBody = ({
-  reportPeople,
-  handleAttendeeRow,
-  filterCb,
-  enableDivider,
-  showDelete
-}) => (
-  <tbody>
+const TableBody = ({ enableDivider, showDelete, children }) => (
+  <FlipMove typeName="tbody">
     {enableDivider && <AttendeeDividerRow showDelete={showDelete} />}
-    {Person.map(sortReportPeople(reportPeople.filter(filterCb)), person =>
-      handleAttendeeRow(person)
-    )}
-  </tbody>
+    {children}
+  </FlipMove>
 )
 TableBody.propTypes = {
-  reportPeople: PropTypes.array.isRequired,
-  handleAttendeeRow: PropTypes.func,
-  filterCb: PropTypes.func,
   enableDivider: PropTypes.bool,
-  showDelete: PropTypes.bool
-}
-TableBody.defaultProps = {
-  reportPeople: []
+  showDelete: PropTypes.bool,
+  children: PropTypes.node
 }
 
 function sortReportPeople(reportPeople) {
@@ -414,15 +267,197 @@ ReportAttendeeCheckbox.propTypes = {
   handleOnChange: PropTypes.func
 }
 
-const AttendeeDividerRow = ({ showDelete }) => (
-  <tr className="attendee-divider-row">
+const AttendeeDividerRow = forwardRef(({ showDelete }, ref) => (
+  <tr className="attendee-divider-row" ref={ref}>
     <td colSpan={showDelete ? 9 : 8}>
       <hr />
     </td>
   </tr>
-)
+))
+
 AttendeeDividerRow.propTypes = {
   showDelete: PropTypes.bool
+}
+
+const AttendeeRow = forwardRef(
+  (
+    {
+      person,
+      report,
+      disabled,
+      showDelete,
+      onDelete,
+      onChange,
+      isCurrentEditor
+    },
+    ref
+  ) => {
+    return (
+      <tr ref={ref}>
+        <td className="primary-attendee">
+          {/* // only attendees can be primary */}
+          {person.attendee && (
+            <PrimaryAttendeeRadioButton
+              person={person}
+              handleOnChange={setPrimaryAttendee}
+              disabled={disabled}
+            />
+          )}
+        </td>
+        <td className="report-attendee">
+          {/* // only advisors can be non-attending */}
+          {Person.isAdvisor(person) && (
+            <ReportAttendeeCheckbox
+              person={person}
+              handleOnChange={setReportAttendee}
+              disabled={disabled}
+            />
+          )}
+        </td>
+        <td className="report-author">
+          {/* // only advisors can be authors */}
+          {Person.isAdvisor(person) && (
+            <ReportAuthorCheckbox
+              person={person}
+              handleOnChange={setReportAuthor}
+              disabled={disabled}
+              isCurrentEditor={isCurrentEditor}
+            />
+          )}
+        </td>
+        <td className="conflictButton">
+          <PlanningConflictForPerson
+            person={person}
+            report={report}
+            iconOnly={!!showDelete}
+          />
+        </td>
+        <td className="reportPeopleName">
+          <LinkTo modelType="Person" model={person} showIcon={false} />
+        </td>
+        <td>
+          {person.position && person.position.uuid && (
+            <LinkTo modelType="Position" model={person.position} />
+          )}
+          {person.position && person.position.code
+            ? `, ${person.position.code}`
+            : ""}
+        </td>
+        <td>
+          <LinkTo
+            modelType="Location"
+            model={person.position && person.position.location}
+            whenUnspecified=""
+          />
+        </td>
+        <td>
+          <LinkTo
+            modelType="Organization"
+            model={person.position && person.position.organization}
+            whenUnspecified=""
+          />
+        </td>
+        {showDelete && (
+          <td
+            className="deleteReportPeople"
+            style={{ verticalAlign: "middle" }}
+          >
+            {!isCurrentEditor && (
+              <RemoveButton
+                title="Remove person"
+                onClick={() => onDelete(person)}
+              />
+            )}
+          </td>
+        )}
+      </tr>
+    )
+
+    function setPrimaryAttendee(person) {
+      const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+      newPeopleList.forEach(np => {
+        if (Person.isEqual(np, person)) {
+          np.primary = true
+        } else if (np.role === person.role) {
+          np.primary = false
+        }
+      })
+      onChange(newPeopleList)
+    }
+
+    function setReportAuthor(person) {
+      const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+      if (passesAuthorValidationSteps(person)) {
+        newPeopleList.forEach(rp => {
+          if (Person.isEqual(rp, person)) {
+            rp.author = !rp.author
+          }
+        })
+        onChange(newPeopleList)
+      }
+    }
+
+    function setReportAttendee(person) {
+      const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+      if (passesAttendeeValidationSteps(person)) {
+        newPeopleList.forEach(rp => {
+          if (Person.isEqual(rp, person)) {
+            rp.attendee = !rp.attendee
+          }
+        })
+        forceOnlyAttendingPersonPerRoleToPrimary(newPeopleList)
+        onChange(newPeopleList)
+      }
+    }
+
+    function passesAuthorValidationSteps(person) {
+      // 1- Prevent self removing from authors
+      const isRemovingSelfAuthor = isCurrentEditor && person.author
+      if (isRemovingSelfAuthor) {
+        toast.warning("You cannot remove yourself from authors list", {
+          toastId: "removingPrimaryAttendee"
+        })
+        return false
+      }
+
+      // 2- Prevent the removal of the last author
+      const anyAuthorsBesideCurrentPerson = report.reportPeople.some(
+        rp => rp.author && !Person.isEqual(rp, person)
+      )
+      // are we toggling the last author, get the authorness value before toggle
+      const isTheLastAuthorBeingRemoved =
+        !anyAuthorsBesideCurrentPerson && person.author
+
+      if (isTheLastAuthorBeingRemoved) {
+        toast.warning("You must provide at least 1 author for a report", {
+          toastId: "removingLastAuthor"
+        })
+        return false
+      }
+
+      return true
+    }
+
+    function passesAttendeeValidationSteps(person) {
+      // Prevent removal of primary attendee without making someone else primary
+      if (person.attendee && person.primary) {
+        toast.warning("Select a primary first to remove this person", {
+          toastId: "removingPrimaryAttendee"
+        })
+        return false
+      }
+      return true
+    }
+  }
+)
+AttendeeRow.propTypes = {
+  person: PropTypes.instanceOf(Person),
+  report: PropTypes.instanceOf(Report),
+  disabled: PropTypes.bool,
+  showDelete: PropTypes.bool,
+  onDelete: PropTypes.func,
+  onChange: PropTypes.func,
+  isCurrentEditor: PropTypes.bool
 }
 
 export default ReportPeople
