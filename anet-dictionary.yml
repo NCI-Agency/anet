@@ -1268,6 +1268,7 @@ fields:
         principalOndemandScreeningAndVetting:
           recurrence: ondemand
           onDemandAssessmentExpirationDays: 108
+          label: "Screening & Vetting"
           questions:
             assessmentDate:
               type: date

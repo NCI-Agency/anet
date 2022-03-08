@@ -246,6 +246,10 @@ $defs:
         minimum: 1
         title: The number of days before an on-demand assessment expires
         description: Used in the UI to determine which on-demand assessments have expired
+      label:
+        title: assessment label
+        type: string
+        description: Used in the title of the assessment. If not specified, recurrence type is used instead and the assessments with the same recurrence type will have the same title!
       questions:
         "$ref": "#/$defs/questions"
       questionSets:
