@@ -345,8 +345,10 @@ const Navigation = ({
       )}
 
       {externalDocumentationUrl && externalDocumentationUrlText && (
-        <Nav.Item href={externalDocumentationUrl} target="_extdocs">
-          {externalDocumentationUrlText}
+        <Nav.Item>
+          <Nav.Link href={externalDocumentationUrl} target="_extdocs">
+            {externalDocumentationUrlText}
+          </Nav.Link>
         </Nav.Item>
       )}
 
