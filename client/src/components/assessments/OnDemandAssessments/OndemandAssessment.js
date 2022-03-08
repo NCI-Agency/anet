@@ -46,7 +46,6 @@ const OnDemandAssessment = ({
       ondemand assessment table. Recalculated according to the screensize. */
   const { recurrence, numberOfPeriods } = periodsDetails
   // Button text.
-  const addAssessmentLabel = `Make a new ${entity?.toString()} assessment`
   const [showModal, setShowModal] = useState(false)
   // Used to determine if the AssessmentModal is in edit mode or create mode.
   const [editModeObject, setEditModeObject] = useState({
@@ -59,6 +58,9 @@ const OnDemandAssessment = ({
     () => entity.getPeriodicAssessmentDetails(recurrence),
     [entity, recurrence]
   )
+  const addAssessmentLabel = `Add ${
+    assessmentConfig.label || "a new assessment"
+  }`
 
   const filteredAssessmentConfig = useMemo(
     () => Model.filterAssessmentConfig(assessmentConfig, entity),
@@ -261,7 +263,9 @@ const OnDemandAssessment = ({
     return (
       <div style={{ ...style }}>
         <Fieldset
-          title={"Assessment results - on demand"}
+          title={`Assessment results - ${
+            assessmentConfig.label || "on demand"
+          }`}
           id={`entity-assessments-results-${recurrence}`}
         >
           <PeriodsNavigation
