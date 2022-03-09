@@ -143,22 +143,14 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   @Override
   public Person insertInternal(Person p) {
-    StringBuilder sql = new StringBuilder();
-    sql.append("/* personInsert */ INSERT INTO people "
+    final String sql = "/* personInsert */ INSERT INTO people "
         + "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, "
         + "\"pendingVerification\", gender, country, avatar, code, \"endOfTourDate\", biography, "
         + "\"domainUsername\", \"openIdSubject\", \"createdAt\", \"updatedAt\", \"customFields\") "
         + "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, "
-        + ":pendingVerification, :gender, :country, :avatar, :code, ");
-    if (DaoUtils.isMsSql()) {
-      // MsSql requires an explicit CAST when datetime2 might be NULL.
-      sql.append("CAST(:endOfTourDate AS datetime2), ");
-    } else {
-      sql.append(":endOfTourDate, ");
-    }
-    sql.append(
-        ":biography, :domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields);");
-    getDbHandle().createUpdate(sql.toString()).bindBean(p)
+        + ":pendingVerification, :gender, :country, :avatar, :code, :endOfTourDate, :biography, "
+        + ":domainUsername, :openIdSubject, :createdAt, :updatedAt, :customFields)";
+    getDbHandle().createUpdate(sql).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
@@ -170,23 +162,16 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   @Override
   public int updateInternal(Person p) {
-    StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
+    final String sql = "/* personUpdate */ UPDATE people "
         + "SET name = :name, status = :status, role = :role, gender = :gender, country = :country, "
         + "\"emailAddress\" = :emailAddress, \"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
         + "\"openIdSubject\" = :openIdSubject, "
-        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, ");
+        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
+        + "WHERE uuid = :uuid";
 
-    if (DaoUtils.isMsSql()) {
-      // MsSql requires an explicit CAST when datetime2 might be NULL.
-      sql.append("\"endOfTourDate\" = CAST(:endOfTourDate AS datetime2) ");
-    } else {
-      sql.append("\"endOfTourDate\" = :endOfTourDate ");
-    }
-    sql.append("WHERE uuid = :uuid");
-
-    final int nr = getDbHandle().createUpdate(sql.toString()).bindBean(p)
+    final int nr = getDbHandle().createUpdate(sql).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
@@ -407,26 +392,26 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + "  FROM \"reportPeople\" rpw"
         + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
         + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
-        + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary %1$s dups.lprimary),"
-        + " \"isAttendee\" = (dups.wattendee %1$s dups.lattendee),"
-        + " \"isAuthor\" = (dups.wauthor %1$s dups.lauthor) FROM dups"
+        + " UPDATE \"reportPeople\" SET \"isPrimary\" = (dups.wprimary OR dups.lprimary),"
+        + " \"isAttendee\" = (dups.wattendee OR dups.lattendee),"
+        + " \"isAuthor\" = (dups.wauthor OR dups.lauthor) FROM dups"
         + " WHERE \"reportPeople\".\"reportUuid\" = dups.wreportuuid"
         + " AND \"reportPeople\".\"personUuid\" = dups.wpersonuuid";
     // MS SQL has no real booleans, so bitwise-or the 0/1 values in that case
-    getDbHandle().createUpdate(String.format(sqlUpd, DaoUtils.isMsSql() ? "|" : "OR"))
-        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+    getDbHandle().createUpdate(sqlUpd).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .execute();
     // 2. delete the loser so we don't have duplicates
     final String sqlDel = "WITH dups AS ( SELECT"
         + "  rpl.\"reportUuid\" AS lreportuuid, rpl.\"personUuid\" AS lpersonuuid"
         + "  FROM \"reportPeople\" rpw"
         + "  JOIN \"reportPeople\" rpl ON rpl.\"reportUuid\" = rpw.\"reportUuid\""
         + "  WHERE rpw.\"personUuid\" = :winnerUuid AND rpl.\"personUuid\" = :loserUuid )"
-        + " DELETE FROM \"reportPeople\" %1$s dups"
+        + " DELETE FROM \"reportPeople\" USING dups"
         + " WHERE \"reportPeople\".\"reportUuid\" = dups.lreportuuid"
         + " AND \"reportPeople\".\"personUuid\" = dups.lpersonuuid";
     // MS SQL and PostgreSQL have slightly different DELETE syntax
-    getDbHandle().createUpdate(String.format(sqlDel, DaoUtils.isMsSql() ? "FROM" : "USING"))
-        .bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid).execute();
+    getDbHandle().createUpdate(sqlDel).bind("winnerUuid", winnerUuid).bind("loserUuid", loserUuid)
+        .execute();
 
     // Update report people, should now be unique
     updateForMerge("reportPeople", "personUuid", winnerUuid, loserUuid);
@@ -581,22 +566,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @InTransaction
   protected void updatePeoplePositions(final String positionUuid, final String personUuid,
       final Instant startTime, final Instant endTime) {
-    if (endTime == null) {
-      // we have to make an exception here, as MSSQL has problems inserting a null datetime
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime)).execute();
-    } else {
-      getDbHandle()
-          .createUpdate("INSERT INTO \"peoplePositions\" "
-              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
-              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
-          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
-          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
-    }
+    getDbHandle()
+        .createUpdate("INSERT INTO \"peoplePositions\" "
+            + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+            + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+        .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+        .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+        .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
   }
 }

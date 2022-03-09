@@ -37,21 +37,15 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
 
 ### Development database backend configuration
 
-1. You can either use [PostgreSQL](https://www.postgresql.org/) or [Microsoft SQL Server](https://en.wikipedia.org/wiki/Microsoft_SQL_Server) for your database. Both allow you to run entirely on your local machine and develop offline.
-    1. MSSQL
-        1. This is currently the default, so you don't need to do anything special
+1. Only [PostgreSQL](https://www.postgresql.org/) can be used for your database. You can run it entirely on your local machine and develop offline.
+   1. PostgreSQL
+        1. This is the default, so you don't need to do anything special
         1. If you want to change any of the default database settings (see `build.gradle` for the defaults), you can paste them as following in your `localSettings.gradle` file (do it for the ones you want to change and with the correct values):
             ```java
-            run.environment("DB_DRIVER", "sqlserver")
             run.environment("ANET_DB_USERNAME","username")
             run.environment("ANET_DB_PASSWORD", "password")
             run.environment("ANET_DB_SERVER", "db server hostname")
             run.environment("ANET_DB_NAME","database name")
-            ```
-   1. PostgreSQL
-        1. To re-force gradle to use [PostgreSQL](https://www.postgresql.org/) you can set the `DB_DRIVER` environment variable to `postgresql` (e.g. `export DB_DRIVER=postgresql`), or you can paste the following in your `localSettings.gradle` file:
-            ```java
-            run.environment("DB_DRIVER", "postgresql")
             ```
 
 ### Setup development database
@@ -67,7 +61,7 @@ The frontend is run with [`yarn`](https://yarnpkg.com/).  We recommend running t
 _Note_: it will also start the back-end but at this step we are not interested in that.
 
 ### The Base Data Set
-Provided with the ANET source code is the file `insertBaseData-mssql.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
+Provided with the ANET source code is the file `insertBaseData-psql.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
 
 | User | username | organization | position | role |
 |------|----------|--------------|----------|------|
@@ -116,10 +110,10 @@ To log in as one of the base data users, when prompted for a username and passwo
 First [configure the database backend](#database_backend_configuration).
 The following instructions initialize a database for testing purposes, within the database container.
 Use the `-PtestEnv` property to access the test environment settings in `gradle`.
-1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
-1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
+1. Create the PostgreSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
+1. Start the PostgreSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
 1. Wait until the container is fully started (can be done automatically with `./gradlew -PtestEnv dbWait`), then run `./gradlew -PtestEnv dbMigrate`
-1. Seed initial data - MSSQL: `./gradlew -PtestEnv dbLoad`.
+1. Seed initial data - PostgreSQL: `./gradlew -PtestEnv dbLoad`.
 1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
 
 #### Override Default Gradle Settings
@@ -147,7 +141,7 @@ If you have updated the generated schema and need to update the generated Java c
 Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
 This driver can either run the tests locally on your system, or remotely via [BrowserStack](https://www.browserstack.com/).
 
-The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-mssql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
+The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData-psql.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
 
 #### Prerequisites
 1. Start with a clean test-database when running tests: `./gradlew -PtestEnv dbDrop dbMigrate dbLoad`

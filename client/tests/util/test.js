@@ -33,7 +33,7 @@ console.log(
       "..",
       "..",
       "..",
-      "insertBaseData-mssql.sql"
+      "insertBaseData-psql.sql"
     )} on your database instance`
   )
 )
