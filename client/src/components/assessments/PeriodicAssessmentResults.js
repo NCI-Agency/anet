@@ -245,7 +245,9 @@ export const PeriodicAssessmentsRows = ({
         <tr>
           {periods.map((period, index) => {
             const periodDisplay = periodToString(period)
-            const addAssessmentLabel = `Make a new ${entity?.toString()} assessment for ${periodDisplay}`
+            const addAssessmentLabel = `Add ${
+              assessmentConfig.label || "a new assessment"
+            } for ${periodDisplay}`
             const modalKey = `${entity.uuid}-${periodDisplay}`
             return (
               <td key={index}>
