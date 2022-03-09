@@ -225,10 +225,10 @@ const Collection = ({ queryParams }) => (
       paginationKey="r_rollup"
       queryParams={queryParams}
       viewFormats={[
-        FORMAT_CALENDAR,
-        FORMAT_TABLE,
         FORMAT_SUMMARY,
-        FORMAT_STATISTICS
+        FORMAT_TABLE,
+        FORMAT_STATISTICS,
+        FORMAT_CALENDAR
       ]}
     />
   </div>
@@ -295,15 +295,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       renderer: renderReportMap
     }
   ]
-  const INITIAL_LAYOUT = {
-    direction: "row",
-    first: VISUALIZATIONS[0].id,
-    second: {
-      direction: "column",
-      first: VISUALIZATIONS[1].id,
-      second: VISUALIZATIONS[2].id
-    }
-  }
+  const INITIAL_LAYOUT = VISUALIZATIONS[1].id
   const DESCRIPTION = "Number of reports released per organization."
   const flexStyle = {
     display: "flex",

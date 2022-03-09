@@ -141,7 +141,7 @@ MosaicLayout.propTypes = {
       renderer: PropTypes.func.isRequired
     })
   ).isRequired,
-  initialNode: PropTypes.object, // FIXME: actually MosaicNode
+  initialNode: PropTypes.oneOfType([PropTypes.object, PropTypes.string]), // FIXME: actually MosaicNode
   description: PropTypes.string,
   style: PropTypes.object
 }
