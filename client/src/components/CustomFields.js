@@ -846,10 +846,15 @@ export function getInvisibleFields(
   return curInvisibleFields
 }
 
-const filterDeprecatedFields = fieldsConfig => {
+const filterDeprecatedFields = (fieldsConfig, values, parentFieldName) => {
   const deprecatedFields = Object.entries(fieldsConfig).reduce(
     (accum, [fieldName, fieldConfig]) => {
-      fieldConfig.deprecated && accum.push(fieldName)
+      if (fieldConfig.deprecated) {
+        const hasNoValue = isFieldValueNotSet(
+          values[parentFieldName][fieldName]
+        )
+        hasNoValue && accum.push(fieldName)
+      }
       return accum
     },
     []
@@ -861,13 +866,29 @@ const filterDeprecatedFields = fieldsConfig => {
   return deprecatedFieldsFiltered
 }
 
+const isFieldValueNotSet = value => {
+  return (
+    value === undefined ||
+    value === null ||
+    Number.isNaN(value) ||
+    (typeof value === "object" &&
+      !(value instanceof Date) &&
+      Object.keys(value).length === 0) ||
+    (typeof value === "string" && value.trim().length === 0)
+  )
+}
+
 export const CustomFieldsContainer = props => {
   const {
     parentFieldName,
     formikProps: { values, setFieldValue },
     fieldsConfig
   } = props
-  const deprecatedFieldsFiltered = filterDeprecatedFields(fieldsConfig)
+  const deprecatedFieldsFiltered = filterDeprecatedFields(
+    fieldsConfig,
+    values,
+    parentFieldName
+  )
   const invisibleFields = useMemo(
     () => getInvisibleFields(fieldsConfig, parentFieldName, values),
     [fieldsConfig, parentFieldName, values]
@@ -914,6 +935,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     visibleWhen,
     test,
     objectFields,
+    deprecated,
     ...fieldProps
   } = fieldConfig
   return fieldProps
@@ -926,18 +948,16 @@ const CustomField = ({
   invisibleFields,
   vertical
 }) => {
-  const { type, helpText, authorizationGroupUuids } = fieldConfig
+  const { type, helpText, authorizationGroupUuids, deprecated } = fieldConfig
   let extraColElem
-  if (authorizationGroupUuids) {
-    if (fieldConfig.authorizationGroupUuids) {
-      extraColElem = (
-        <div>
-          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
-            <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
-          </Tooltip2>
-        </div>
-      )
-    }
+  if (authorizationGroupUuids || deprecated) {
+    extraColElem = (
+      <div>
+        <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+          <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+        </Tooltip2>
+      </div>
+    )
   }
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
@@ -1081,9 +1101,14 @@ export const ReadonlyCustomFields = ({
   extraColElem,
   labelColumnWidth
 }) => {
+  const deprecatedFieldsFiltered = filterDeprecatedFields(
+    fieldsConfig,
+    values,
+    parentFieldName
+  )
   return (
     <>
-      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
+      {Object.entries(deprecatedFieldsFiltered).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
         const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
         const { type } = fieldConfig

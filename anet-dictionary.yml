@@ -491,6 +491,7 @@ fields:
         label: Not later than date
         helpText: Help text for date field
         deprecated: true
+        tooltipText: "This field is deprecated. When cleared, it won't be displayed!"
       nlt_dt:
         type: datetime
         label: Not later than datetime
