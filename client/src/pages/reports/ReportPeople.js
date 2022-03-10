@@ -275,26 +275,26 @@ TableContainer.propTypes = {
 const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
-      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ minWidth: "80px" }}>{!hide && "Roles"}</div>
+      <th className={"col-1" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "100px" }}>{!hide && "Roles"}</div>
       </th>
-      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ width: showDelete ? "35px" : "120px" }} />
+      <th className={"col-1" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ width: showDelete ? "35px" : "100px" }} />
       </th>
-      <th className={"col-xs-3" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-3" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "120px" }}>{!hide && "Name"}</div>
       </th>
-      <th className={"col-xs-3" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-3" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "90px" }}>{!hide && "Position"}</div>
       </th>
-      <th className={"col-xs-2" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-2" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "90px" }}>{!hide && "Location"}</div>
       </th>
-      <th className={"col-xs-2" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-2" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "90px" }}>{!hide && "Organization"}</div>
       </th>
       {showDelete && (
-        <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")} />
+        <th className={"col-1" + (hide ? " empty-cell-header" : "")} />
       )}
     </tr>
   </thead>
