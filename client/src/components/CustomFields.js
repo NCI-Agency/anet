@@ -586,7 +586,7 @@ const AnetObjectField = ({
               <td>
                 <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
               </td>
-              <td className="col-xs-1">
+              <td className="col-1">
                 <RemoveButton
                   title={`Unlink this ${fieldValue.type}`}
                   onClick={() => setFieldValue(name, null)}
@@ -695,7 +695,7 @@ const ArrayOfAnetObjectsField = ({
                 <td>
                   <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
                 </td>
-                <td className="col-xs-1">
+                <td className="col-1">
                   <RemoveButton
                     title={`Unlink this ${entity.type}`}
                     onClick={() => {
