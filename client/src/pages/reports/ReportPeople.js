@@ -341,69 +341,86 @@ function sortReportPeople(reportPeople) {
   })
 }
 
-const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
-  <Form.Check
-    type="radio"
-    label={<Badge bg="primary">Primary</Badge>}
-    name={`primaryAttendee${person.role}`}
-    className={`primary${!person.primary ? " inActive" : ""}`}
-    checked={person.primary}
-    disabled={disabled || !person.attendee}
-    onChange={() => !disabled && handleOnChange(person)}
-  />
-)
-
+const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) =>
+  disabled ? (
+    person.primary && <Badge bg="primary">Primary</Badge>
+  ) : (
+    <Form.Check
+      type="radio"
+      label={<Badge bg="primary">Primary</Badge>}
+      name={`primaryAttendee${person.role}`}
+      className={`primary${!person.primary ? " inActive" : ""}`}
+      checked={person.primary}
+      onChange={() => handleOnChange(person)}
+    />
+  )
 PrimaryAttendeeRadioButton.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
+
 const ReportAuthorCheckbox = ({
   person,
   disabled,
   isCurrentEditor,
   handleOnChange
-}) => (
-  <Form.Check
-    type="checkbox"
-    label={
+}) =>
+  disabled ? (
+    !!person.author && (
       <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
         <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
       </OverlayTrigger>
-    }
-    name={`authorAttendee${person.role}`}
-    className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
-      !person.author ? " inActive" : ""
-    }`}
-    checked={!!person.author}
-    disabled={disabled}
-    readOnly={isCurrentEditor}
-    onChange={() => !disabled && handleOnChange(person)}
-  />
-)
+    )
+  ) : (
+    <Form.Check
+      type="checkbox"
+      label={
+        <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+        </OverlayTrigger>
+      }
+      name={`authorAttendee${person.role}`}
+      className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
+        !person.author ? " inActive" : ""
+      }`}
+      checked={!!person.author}
+      readOnly={isCurrentEditor}
+      onChange={() => handleOnChange(person)}
+    />
+  )
 ReportAuthorCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   isCurrentEditor: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
-const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
-  <Form.Check
-    type="checkbox"
-    label={
+
+const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) =>
+  disabled ? (
+    !!person.attendee && (
       <OverlayTrigger
         overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
       >
         <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
       </OverlayTrigger>
-    }
-    name={`authorAttendee${person.role}`}
-    className={`primary${!person.attendee ? " inActive" : ""}`}
-    checked={!!person.attendee}
-    disabled={disabled}
-    onChange={() => !disabled && handleOnChange(person)}
-  />
-)
+    )
+  ) : (
+    <Form.Check
+      type="checkbox"
+      label={
+        <OverlayTrigger
+          overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
+        >
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
+        </OverlayTrigger>
+      }
+      name={`authorAttendee${person.role}`}
+      className={`primary${!person.attendee ? " inActive" : ""}`}
+      checked={!!person.attendee}
+      onChange={() => handleOnChange(person)}
+    />
+  )
 ReportAttendeeCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
