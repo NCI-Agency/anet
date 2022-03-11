@@ -882,7 +882,8 @@ export const CustomFieldsContainer = props => {
   const {
     parentFieldName,
     formikProps: { values, setFieldValue },
-    fieldsConfig
+    fieldsConfig,
+    setShowCustomFields
   } = props
   const deprecatedFieldsFiltered = filterDeprecatedFields(
     fieldsConfig,
@@ -901,6 +902,12 @@ export const CustomFieldsContainer = props => {
     }
   }, [invisibleFields, values, invisibleFieldsFieldName, setFieldValue])
 
+  useEffect(() => {
+    if (setShowCustomFields) {
+      setShowCustomFields(!_isEmpty(deprecatedFieldsFiltered))
+    }
+  }, [setShowCustomFields, deprecatedFieldsFiltered])
+
   return (
     <>
       <CustomFields
@@ -915,6 +922,7 @@ CustomFieldsContainer.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
+  setShowCustomFields: PropTypes.func,
   vertical: PropTypes.bool
 }
 CustomFieldsContainer.defaultProps = {
@@ -1099,13 +1107,21 @@ export const ReadonlyCustomFields = ({
   vertical,
   isCompact,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  setShowCustomFields
 }) => {
   const deprecatedFieldsFiltered = filterDeprecatedFields(
     fieldsConfig,
     values,
     parentFieldName
   )
+
+  useEffect(() => {
+    if (setShowCustomFields) {
+      setShowCustomFields(!_isEmpty(deprecatedFieldsFiltered))
+    }
+  }, [setShowCustomFields, deprecatedFieldsFiltered])
+
   return (
     <>
       {Object.entries(deprecatedFieldsFiltered).map(([key, fieldConfig]) => {
@@ -1154,7 +1170,8 @@ ReadonlyCustomFields.propTypes = {
   vertical: PropTypes.bool,
   isCompact: PropTypes.bool,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  setShowCustomFields: PropTypes.func
 }
 ReadonlyCustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,

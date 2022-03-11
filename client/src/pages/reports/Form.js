@@ -170,6 +170,9 @@ const ReportForm = ({
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
+  const [showCustomFields, setShowCustomFields] = useState(
+    !!Settings.fields.report.customFields
+  )
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -808,7 +811,7 @@ const ReportForm = ({
                 </Fieldset>
               )}
 
-              {Settings.fields.report.customFields && (
+              {showCustomFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
                   <CustomFieldsContainer
                     fieldsConfig={Settings.fields.report.customFields}
@@ -818,6 +821,7 @@ const ReportForm = ({
                       values,
                       validateForm
                     }}
+                    setShowCustomFields={setShowCustomFields}
                   />
                 </Fieldset>
               )}
