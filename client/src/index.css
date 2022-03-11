@@ -992,11 +992,11 @@ header.searchPagination {
   padding-bottom: 5px;
 }
 
-.advanced-search .col-xs-3 select {
+.advanced-search .col-3 select {
   margin-top: -8px;
 }
 
-.advanced-search .col-xs-1 .btn img,
+.advanced-search .col-1 .btn img,
 .advanced-search .col-sm-1 .btn img {
   vertical-align: baseline;
 }

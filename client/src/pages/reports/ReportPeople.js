@@ -10,7 +10,7 @@ import { Person } from "models"
 import Report from "models/Report"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
-import { Badge, Form, Table } from "react-bootstrap"
+import { Badge, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { toast } from "react-toastify"
 import "./ReportPeople.css"
 
@@ -89,8 +89,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               disabled={disabled}
             />
           )}
-        </td>
-        <td className="report-attendee">
           {/* // only advisors can be non-attending */}
           {Person.isAdvisor(person) && (
             <ReportAttendeeCheckbox
@@ -99,8 +97,6 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               disabled={disabled}
             />
           )}
-        </td>
-        <td className="report-author">
           {/* // only advisors can be authors */}
           {Person.isAdvisor(person) && (
             <ReportAuthorCheckbox
@@ -279,36 +275,26 @@ TableContainer.propTypes = {
 const TableHeader = ({ showDelete, hide }) => (
   <thead>
     <tr>
-      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ minWidth: "80px" }}>{!hide && "Primary"}</div>
+      <th className={"col-1" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ minWidth: "100px" }}>{!hide && "Roles"}</div>
       </th>
-      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ minWidth: "80px" }}>{!hide && "Attendee"}</div>
+      <th className={"col-1" + (hide ? " empty-cell-header" : "")}>
+        <div style={{ width: showDelete ? "35px" : "100px" }} />
       </th>
-      <th
-        className={
-          "col-xs-1 report-author" + (hide ? " empty-cell-header" : "")
-        }
-      >
-        <div style={{ minWidth: "70px" }}>{!hide && "Author"}</div>
-      </th>
-      <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")}>
-        <div style={{ width: showDelete ? "35px" : "120px" }} />
-      </th>
-      <th className={"col-xs-3" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-3" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "120px" }}>{!hide && "Name"}</div>
       </th>
-      <th className={"col-xs-3" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-3" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "90px" }}>{!hide && "Position"}</div>
       </th>
-      <th className={"col-xs-2" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-2" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "90px" }}>{!hide && "Location"}</div>
       </th>
-      <th className={"col-xs-2" + (hide ? " empty-cell-header" : "")}>
+      <th className={"col-2" + (hide ? " empty-cell-header" : "")}>
         <div style={{ minWidth: "90px" }}>{!hide && "Organization"}</div>
       </th>
       {showDelete && (
-        <th className={"col-xs-1" + (hide ? " empty-cell-header" : "")} />
+        <th className={"col-1" + (hide ? " empty-cell-header" : "")} />
       )}
     </tr>
   </thead>
@@ -355,59 +341,86 @@ function sortReportPeople(reportPeople) {
   })
 }
 
-const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) => (
-  <Form.Check
-    type="radio"
-    label={<Badge bg="primary">Primary</Badge>}
-    name={`primaryAttendee${person.role}`}
-    className={`primary${!person.primary ? " inActive" : ""}`}
-    checked={person.primary}
-    disabled={disabled || !person.attendee}
-    onChange={() => !disabled && handleOnChange(person)}
-  />
-)
-
+const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) =>
+  disabled ? (
+    person.primary && <Badge bg="primary">Primary</Badge>
+  ) : (
+    <Form.Check
+      type="radio"
+      label={<Badge bg="primary">Primary</Badge>}
+      name={`primaryAttendee${person.role}`}
+      className={`primary${!person.primary ? " inActive" : ""}`}
+      checked={person.primary}
+      onChange={() => handleOnChange(person)}
+    />
+  )
 PrimaryAttendeeRadioButton.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
+
 const ReportAuthorCheckbox = ({
   person,
   disabled,
   isCurrentEditor,
   handleOnChange
-}) => (
-  <Form.Check
-    type="checkbox"
-    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />}
-    name={`authorAttendee${person.role}`}
-    className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
-      !person.author ? " inActive" : ""
-    }`}
-    checked={!!person.author}
-    disabled={disabled}
-    readOnly={isCurrentEditor}
-    onChange={() => !disabled && handleOnChange(person)}
-  />
-)
+}) =>
+  disabled ? (
+    !!person.author && (
+      <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
+        <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+      </OverlayTrigger>
+    )
+  ) : (
+    <Form.Check
+      type="checkbox"
+      label={
+        <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+        </OverlayTrigger>
+      }
+      name={`authorAttendee${person.role}`}
+      className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
+        !person.author ? " inActive" : ""
+      }`}
+      checked={!!person.author}
+      readOnly={isCurrentEditor}
+      onChange={() => handleOnChange(person)}
+    />
+  )
 ReportAuthorCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   isCurrentEditor: PropTypes.bool,
   handleOnChange: PropTypes.func
 }
-const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) => (
-  <Form.Check
-    type="checkbox"
-    label={<Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />}
-    name={`authorAttendee${person.role}`}
-    className={`primary${!person.attendee ? " inActive" : ""}`}
-    checked={!!person.attendee}
-    disabled={disabled}
-    onChange={() => !disabled && handleOnChange(person)}
-  />
-)
+
+const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) =>
+  disabled ? (
+    !!person.attendee && (
+      <OverlayTrigger
+        overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
+      >
+        <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
+      </OverlayTrigger>
+    )
+  ) : (
+    <Form.Check
+      type="checkbox"
+      label={
+        <OverlayTrigger
+          overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
+        >
+          <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
+        </OverlayTrigger>
+      }
+      name={`authorAttendee${person.role}`}
+      className={`primary${!person.attendee ? " inActive" : ""}`}
+      checked={!!person.attendee}
+      onChange={() => handleOnChange(person)}
+    />
+  )
 ReportAttendeeCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
