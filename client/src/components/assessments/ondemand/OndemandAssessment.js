@@ -355,9 +355,6 @@ const OnDemandAssessment = ({
           title={`Assessment for ${entity.toString()}`}
           assessmentYupSchema={assessmentYupSchema}
           recurrence={recurrence}
-          assessmentPeriod={{
-            start: moment() // This prop is required but has no impact on this component.
-          }}
           assessmentConfig={filteredAssessmentConfig}
           onSuccess={() => {
             setShowModal(false)

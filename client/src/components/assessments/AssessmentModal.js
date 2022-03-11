@@ -13,10 +13,11 @@ import Model, {
 import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
-import { formatPeriodBoundary } from "periodUtils"
+import { formatPeriodBoundary, RECURRENCE_TYPE } from "periodUtils"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, Modal } from "react-bootstrap"
+import utils from "utils"
 import QuestionSet from "./QuestionSet"
 
 const AssessmentModal = ({
@@ -171,9 +172,12 @@ const AssessmentModal = ({
     // values contains the assessment fields
     const clonedValues = _cloneDeep(values)
     clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__recurrence = recurrence
-    clonedValues[
-      ENTITY_ASSESSMENT_PARENT_FIELD
-    ].__periodStart = formatPeriodBoundary(assessmentPeriod.start)
+    if (recurrence !== RECURRENCE_TYPE.ON_DEMAND) {
+      // __periodStart is not used for ondemand assessments
+      clonedValues[
+        ENTITY_ASSESSMENT_PARENT_FIELD
+      ].__periodStart = formatPeriodBoundary(assessmentPeriod.start)
+    }
     updatedNote.text = customFieldsJSONString(
       clonedValues,
       true,
@@ -191,7 +195,11 @@ AssessmentModal.propTypes = {
   assessment: PropTypes.object,
   assessmentYupSchema: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
-  assessmentPeriod: PropTypes.object.isRequired,
+  assessmentPeriod: utils.fnRequiredWhenNot.bind(
+    null,
+    "recurrence",
+    RECURRENCE_TYPE.ON_DEMAND
+  ),
   recurrence: PropTypes.string.isRequired,
   title: PropTypes.string,
   onSuccess: PropTypes.func.isRequired,
