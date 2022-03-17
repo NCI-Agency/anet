@@ -276,6 +276,9 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
+  const [showCustomFields, setShowCustomFields] = useState(
+    !!Settings.fields.report.customFields
+  )
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -676,11 +679,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   )) || <h5>No groups are authorized!</h5>}
                 </Fieldset>
               )}
-              {Settings.fields.report.customFields && (
+              {showCustomFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
                     values={values}
+                    setShowCustomFields={setShowCustomFields}
                   />
                 </Fieldset>
               )}
