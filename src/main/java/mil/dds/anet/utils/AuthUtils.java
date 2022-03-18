@@ -1,9 +1,8 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -55,25 +54,42 @@ public class AuthUtils {
     // Given that we know it's a super-user position, does it actually match this organization?
     Organization loadedOrg =
         AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(organizationUuid);
-    if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG) {
-      return allowPrincipalOrgs;
+    if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG && allowPrincipalOrgs) {
+      return true;
     }
 
     if (position.getOrganizationUuid() == null) {
       return false;
     }
+
     if (Objects.equals(organizationUuid, position.getOrganizationUuid())) {
       return true;
     }
 
-    // As a last check, load the descendant orgs.
+    // Check the descendant organizations of the position's own organization.
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
     final Organization posOrg = position.loadOrganization(context).join();
     final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
     osQuery.setPageSize(0);
-    final Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(context, osQuery).join()
-        .stream().filter(o -> o.getUuid().equals(organizationUuid)).findFirst();
-    return orgMatch.isPresent();
+    if (posOrg.loadDescendantOrgs(context, osQuery).join().stream()
+        .anyMatch(o -> o.getUuid().equals(organizationUuid))) {
+      return true;
+    }
+
+    // Check the responsible organizations.
+    final List<Organization> responsibleOrgs =
+        position.loadResponsibleOrganizations(context).join();
+    if (responsibleOrgs.stream().anyMatch(o -> o.getUuid().equals(organizationUuid))) {
+      return true;
+    }
+    // As a final resort, check the descendant orgs of the position's responsible orgs.
+    for (final Organization responsibleOrg : responsibleOrgs) {
+      if (responsibleOrg.loadDescendantOrgs(context, osQuery).join().stream()
+          .anyMatch(o -> o.getUuid().equals(organizationUuid))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static void assertSuperUserForOrg(Person user, String organizationUuid,

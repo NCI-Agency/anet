@@ -13,6 +13,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -83,6 +84,12 @@ public class OrganizationResource {
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
+    if (org.getResponsiblePositions() != null) {
+      // Assign all of these positions to this organization.
+      for (Position position : org.getResponsiblePositions()) {
+        dao.addPositionToOrganization(position, org);
+      }
+    }
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
         org.getCustomSensitiveInformation());
@@ -98,7 +105,7 @@ public class OrganizationResource {
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
-    // Verify correct Organization
+    // Verify correct Organization TODO: update the permissions
     AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
 
     // Check for loops in the hierarchy
@@ -110,8 +117,7 @@ public class OrganizationResource {
 
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
-    final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(org, existing) : 1;
-    doSuperUserUpdates(org, existing);
+    final int numRows = update(user, org, existing);
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, org.getUuid(),
         org.getCustomSensitiveInformation());
@@ -122,7 +128,7 @@ public class OrganizationResource {
     return numRows;
   }
 
-  private int doAdminUpdates(Organization org, Organization existing) {
+  private int update(Person user, Organization org, Organization existing) {
     final int numRows;
     try {
       numRows = dao.update(org);
@@ -140,17 +146,24 @@ public class OrganizationResource {
           newTask -> engine.getTaskDao().addTaskedOrganizationsToTask(org, newTask),
           oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org, oldTaskUuid));
     }
+    if (AuthUtils.isAdmin(user)) {
+      if (org.getResponsiblePositions() != null) {
+        logger.debug("Editing responsible positions for {}", org);
+        Utils.addRemoveElementsByUuid(existing.loadResponsiblePositions(engine.getContext()).join(),
+            org.getResponsiblePositions(),
+            newPosition -> dao.addPositionToOrganization(newPosition, org),
+            oldPositionUuid -> dao.removePositionFromOrganization(oldPositionUuid, org));
+      }
+    }
 
-    return numRows;
-  }
-
-  private void doSuperUserUpdates(Organization org, Organization existing) {
     final List<ApprovalStep> existingPlanningApprovalSteps =
         existing.loadPlanningApprovalSteps(engine.getContext()).join();
     final List<ApprovalStep> existingApprovalSteps =
         existing.loadApprovalSteps(engine.getContext()).join();
     Utils.updateApprovalSteps(org, org.getPlanningApprovalSteps(), existingPlanningApprovalSteps,
         org.getApprovalSteps(), existingApprovalSteps);
+
+    return numRows;
   }
 
   @GraphQLQuery(name = "organizationList")

@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -53,6 +54,8 @@ public class Position extends AbstractCustomizableAnetBean
   private List<Task> responsibleTasks;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
+  // annotated below
+  private List<Organization> responsibleOrganizations;
 
   public String getName() {
     return name;
@@ -275,6 +278,22 @@ public class Position extends AbstractCustomizableAnetBean
     return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
         .getAuthorizationGroupsForPosition(context, uuid).thenApply(o -> {
           authorizationGroups = o;
+          return o;
+        });
+  }
+
+  @GraphQLQuery(name = "responsibleOrganizations")
+  public CompletableFuture<List<Organization>> loadResponsibleOrganizations(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (responsibleOrganizations != null) {
+      return CompletableFuture.completedFuture(responsibleOrganizations);
+    }
+    final OrganizationSearchQuery query = new OrganizationSearchQuery();
+    query.setBatchParams(new M2mBatchParams<Organization, OrganizationSearchQuery>("organizations",
+        "\"organizationResponsiblePositions\"", "\"organizationUuid\"", "\"positionUuid\""));
+    return AnetObjectEngine.getInstance().getOrganizationDao()
+        .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
+          responsibleOrganizations = o;
           return o;
         });
   }

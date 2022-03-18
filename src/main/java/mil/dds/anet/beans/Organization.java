@@ -57,6 +57,8 @@ public class Organization extends AbstractCustomizableAnetBean
   List<ApprovalStep> approvalSteps; /* Approval process for this Org */
   // annotated below
   List<Task> tasks;
+  // annotated below
+  List<Position> responsiblePositions;
 
   public String getShortName() {
     return shortName;
@@ -255,6 +257,28 @@ public class Organization extends AbstractCustomizableAnetBean
   @GraphQLInputField(name = "tasks")
   public void setTasks(List<Task> tasks) {
     this.tasks = tasks;
+  }
+
+  @GraphQLQuery(name = "responsiblePositions")
+  public CompletableFuture<List<Position>> loadResponsiblePositions(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (responsiblePositions != null) {
+      return CompletableFuture.completedFuture(responsiblePositions);
+    }
+    return AnetObjectEngine.getInstance().getOrganizationDao()
+        .getResponsiblePositionsForOrganization(context, uuid).thenApply(o -> {
+          responsiblePositions = o;
+          return o;
+        });
+  }
+
+  public List<Position> getResponsiblePositions() {
+    return responsiblePositions;
+  }
+
+  @GraphQLInputField(name = "responsiblePositions")
+  public void setResponsiblePositions(List<Position> responsiblePositions) {
+    this.responsiblePositions = responsiblePositions;
   }
 
   @Override

@@ -140,6 +140,15 @@ public final class BatchingUtils {
                 dispatcherService);
           }
         }, dataLoaderOptions));
+    dataLoaderRegistry.register(FkDataLoaderKey.ORGANIZATION_RESPONSIBLE_POSITIONS.toString(),
+        new DataLoader<>(new BatchLoader<String, List<Position>>() {
+          @Override
+          public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
+            return CompletableFuture.supplyAsync(
+                () -> engine.getOrganizationDao().getResponsiblePositions(foreignKeys),
+                dispatcherService);
+          }
+        }, dataLoaderOptions));
     dataLoaderRegistry.register(IdDataLoaderKey.ORGANIZATIONS.toString(),
         new DataLoader<>(new BatchLoader<String, Organization>() {
           @Override

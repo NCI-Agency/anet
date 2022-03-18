@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
+import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
@@ -18,7 +20,10 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -95,6 +100,24 @@ public class OrganizationDao
         personUuid);
   }
 
+  static class ResponsiblePositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String sql =
+        "/* batch.getResponsiblePositionsForOrganization */ SELECT \"organizationResponsiblePositions\".\"organizationUuid\", "
+            + PositionDao.POSITIONS_FIELDS + " FROM \"organizationResponsiblePositions\" "
+            + "INNER JOIN positions on positions.uuid = \"organizationResponsiblePositions\".\"positionUuid\" "
+            + "AND \"organizationResponsiblePositions\".\"organizationUuid\" IN ( <foreignKeys> ) ";
+
+    public ResponsiblePositionsBatcher() {
+      super(sql, "foreignKeys", new PositionMapper(), "organizationUuid");
+    }
+  }
+
+  public List<List<Position>> getResponsiblePositions(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Position> responsiblePositionsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ResponsiblePositionsBatcher.class);
+    return responsiblePositionsBatcher.getByForeignKeys(foreignKeys);
+  }
+
   public interface OrgListQueries {
     @RegisterRowMapper(OrganizationMapper.class)
     @SqlQuery("SELECT uuid AS organizations_uuid, uuid AS uuid"
@@ -130,7 +153,17 @@ public class OrganizationDao
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
         .bind("type", DaoUtils.getEnumId(org.getType()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg())).execute();
+    final OrganizationBatch ob = getDbHandle().attach(OrganizationBatch.class);
+    if (org.getResponsiblePositions() != null) {
+      ob.insertOrganizationResponsiblePositions(org.getUuid(), org.getResponsiblePositions());
+    }
     return org;
+  }
+
+  public interface OrganizationBatch {
+    @SqlBatch("INSERT INTO \"organizationResponsiblePositions\" (\"organizationUuid\", \"positionUuid\") VALUES (:organizationUuid, :uuid)")
+    void insertOrganizationResponsiblePositions(@Bind("organizationUuid") String organizationUuid,
+        @BindBean List<Position> responsiblePositions);
   }
 
   @Override
@@ -145,6 +178,28 @@ public class OrganizationDao
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
         .bind("type", DaoUtils.getEnumId(org.getType()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg())).execute();
+  }
+
+  @InTransaction
+  public int addPositionToOrganization(Position p, Organization o) {
+    return getDbHandle().createUpdate(
+        "/* addPositionToOrganization */ INSERT INTO \"organizationResponsiblePositions\" (\"organizationUuid\", \"positionUuid\") "
+            + "VALUES (:organizationUuid, :positionUuid)")
+        .bind("organizationUuid", o.getUuid()).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int removePositionFromOrganization(String positionUuid, Organization o) {
+    return getDbHandle().createUpdate(
+        "/* removePositionFromOrganization*/ DELETE FROM \"organizationResponsiblePositions\" "
+            + "WHERE \"organizationUuid\" = :organizationUuid AND \"positionUuid\" = :positionUuid")
+        .bind("organizationUuid", o.getUuid()).bind("positionUuid", positionUuid).execute();
+  }
+
+  public CompletableFuture<List<Position>> getResponsiblePositionsForOrganization(
+      Map<String, Object> context, String organizationUuid) {
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.ORGANIZATION_RESPONSIBLE_POSITIONS, organizationUuid);
   }
 
   @Override
