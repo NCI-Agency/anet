@@ -12,7 +12,6 @@ import RS_ICON from "resources/rs_small.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
-import Organization from "./Organization"
 import Position from "./Position"
 
 export const advisorPerson = Settings.fields.advisor.person
@@ -316,9 +315,10 @@ export default class Person extends Model {
   // Checks if this user is a valid super user for a particular organization
   // Must be either
   // - An Administrator
-  // - A super user and this org is a PRINCIPAL_ORG
   // - A super user for this organization
   // - A super user for this orgs parents.
+  // - A super user responsible for this org
+  // - A super user responsible for this orgs parent
   isSuperUserForOrg(org) {
     if (!org) {
       return false
@@ -329,18 +329,29 @@ export default class Person extends Model {
     if (this.position && this.position.type !== Position.TYPE.SUPER_USER) {
       return false
     }
-    if (org.type === Organization.TYPE.PRINCIPAL_ORG) {
-      return true
-    }
-
     if (!this.position || !this.position.organization) {
       return false
     }
-    const orgs = this.position.organization.descendantOrgs || []
-    orgs.push(this.position.organization)
-    const orgUuids = orgs.map(o => o.uuid)
-
-    return orgUuids.includes(org.uuid)
+    const ownOrgs = this.position.organization.descendantOrgs || []
+    ownOrgs.push(this.position.organization)
+    const isOwnOrg = ownOrgs.map(o => o.uuid).includes(org.uuid)
+    if (isOwnOrg) {
+      return true
+    }
+    if (this.position.responsibleOrganizations) {
+      const responsibleOrgUuids = this.position.responsibleOrganizations.reduce(
+        (acc, org) => {
+          acc.push(org.uuid)
+          org.descendantOrgs.forEach(descOrg => {
+            acc.push(descOrg.uuid)
+          })
+          return acc
+        },
+        []
+      )
+      return responsibleOrgUuids.includes(org.uuid)
+    }
+    return false
   }
 
   iconUrl() {
