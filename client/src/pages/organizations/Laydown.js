@@ -3,6 +3,7 @@ import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
+import PositionTable from "components/PositionTable"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -14,8 +15,10 @@ import Settings from "settings"
 const OrganizationLaydown = ({ organization }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
-  const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
-
+  const isSuperUserForOrg =
+    currentUser && currentUser.isSuperUserForOrg(organization)
+  const isSuperUser = currentUser && currentUser.isSuperUser()
+  const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const numInactivePos = organization.positions.filter(
     p => p.status === Model.STATUS.INACTIVE
   ).length
@@ -26,6 +29,8 @@ const OrganizationLaydown = ({ organization }) => {
   const supportedPositions = organization.positions.filter(
     position => positionsNeedingAttention.indexOf(position) === -1
   )
+  const canCreatePositions =
+    isSuperUserForOrg || (isSuperUser && isPrincipalOrg)
 
   return (
     <Element name="laydown">
@@ -60,7 +65,7 @@ const OrganizationLaydown = ({ organization }) => {
         title="Supported positions"
         action={
           <div>
-            {isSuperUser && (
+            {canCreatePositions && (
               <LinkTo
                 modelType="Position"
                 model={Position.pathForNew({
@@ -99,6 +104,9 @@ const OrganizationLaydown = ({ organization }) => {
         {positionsNeedingAttention.length === 0 && (
           <em>There are no vacant positions</em>
         )}
+      </Fieldset>
+      <Fieldset id="responsiblePositions" title="Responsible Positions">
+        <PositionTable positions={organization.responsiblePositions} />
       </Fieldset>
     </Element>
   )

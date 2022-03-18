@@ -50,6 +50,23 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      responsiblePositions {
+        uuid
+        name
+        status
+        person {
+          uuid
+          name
+        }
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+        }
+      }
       approvalSteps {
         uuid
         name

@@ -100,6 +100,21 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      responsiblePositions {
+        uuid
+        name
+        code
+        status
+        type
+        person {
+          uuid
+          name
+          status
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
       planningApprovalSteps {
         uuid
         name
@@ -174,7 +189,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
-  const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
+  const isSuperUserForOrg =
+    currentUser && currentUser.isSuperUserForOrg(organization)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
@@ -207,6 +223,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
         </Nav.Item>
         <Nav.Item>
           <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="responsiblePositions">
+            Responsible positions
+          </AnchorNavItem>
         </Nav.Item>
         {!isPrincipalOrg && (
           <Nav.Item>
@@ -253,7 +274,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
               </LinkTo>
             )}
 
-            {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
+            {isSuperUserForOrg && (
               <LinkTo
                 modelType="Organization"
                 model={organization}

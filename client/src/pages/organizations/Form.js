@@ -3,6 +3,7 @@ import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
+  PositionOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -20,6 +21,7 @@ import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
+import PositionTable from "components/PositionTable"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
@@ -28,6 +30,7 @@ import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
@@ -76,6 +79,18 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   ]
   const IdentificationCodeFieldWithLabel = DictionaryField(FastField)
   const LongNameWithLabel = DictionaryField(FastField)
+  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
+
+  const positionsFilters = {
+    allAdvisorPositions: {
+      label: "All advisor positions",
+      queryVars: {
+        status: Model.STATUS.ACTIVE,
+        type: [Position.TYPE.SUPER_USER],
+        matchPersonName: true
+      }
+    }
+  }
 
   return (
     <Formik
@@ -95,10 +110,11 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
-        const isPrincipalOrg = values.type === Organization.TYPE.PRINCIPAL_ORG
-        const orgSettings = isPrincipalOrg
-          ? Settings.fields.principal.org
-          : Settings.fields.advisor.org
+        const isSuperUserForOrg =
+          currentUser && currentUser.isSuperUserForOrg(values)
+        const orgSettings = isAdvisorOrg
+          ? Settings.fields.advisor.org
+          : Settings.fields.principal.org
         const orgSearchQuery = {
           status: Model.STATUS.ACTIVE,
           type: values.type
@@ -111,7 +127,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         ) {
           values.parentOrg = {}
         }
-        const action = (isAdmin || !isPrincipalOrg) && (
+        const action = isSuperUserForOrg && (
           <div>
             <Button
               key="submit"
@@ -176,7 +192,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                {!isAdmin ? (
+                {/* TODO: First condition can be removed when the privileges are clear. */}
+                {!isSuperUserForOrg ? (
                   <>
                     <FastField
                       name="type"
@@ -261,25 +278,58 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       component={FieldHelper.InputField}
                       label={Settings.fields.organization.shortName}
                       placeholder="e.g. EF1.1"
-                      disabled={!isAdmin}
                     />
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
                       component={FieldHelper.InputField}
-                      disabled={!isAdmin}
                     />
                     <FastField
                       name="status"
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
-                      disabled={!isAdmin}
                     />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
                       component={FieldHelper.InputField}
+                    />
+                    <ResponsiblePositionsMultiSelect
+                      name="responsiblePositions"
+                      component={FieldHelper.SpecialField}
+                      dictProps={orgSettings.responsiblePositions}
+                      disabled={!isAdmin}
+                      onChange={value => {
+                        // validation will be done by setFieldValue
+                        value = value.map(position =>
+                          Position.filterClientSideFields(position)
+                        )
+                        setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
+                        setFieldValue("responsiblePositions", value)
+                      }}
+                      widget={
+                        <AdvancedMultiSelect
+                          fieldName="responsiblePositions"
+                          value={values.responsiblePositions}
+                          renderSelected={
+                            <PositionTable
+                              positions={values.responsiblePositions || []}
+                              showDelete={isAdmin}
+                            />
+                          }
+                          overlayColumns={[
+                            "Position",
+                            "Organization",
+                            "Current Occupant"
+                          ]}
+                          overlayRenderRow={PositionOverlayRow}
+                          filterDefs={positionsFilters}
+                          objectType={Position}
+                          fields={Position.autocompleteQuery}
+                          addon={POSITIONS_ICON}
+                        />
+                      }
                     />
                   </>
                 )}
@@ -376,7 +426,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     Cancel
                   </Button>
                 </div>
-                {(isAdmin || !isPrincipalOrg) && (
+                {isSuperUserForOrg && (
                   <div>
                     <Button
                       id="formBottomSubmit"
