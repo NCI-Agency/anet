@@ -136,7 +136,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
-
+        const respOrgsUuids = currentUser.position.responsibleOrganizations.map(
+          org => org.uuid
+        )
         const orgSearchQuery = { status: Model.STATUS.ACTIVE }
         if (isPrincipal) {
           orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
@@ -148,7 +150,8 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
             currentUser.position.type === Position.TYPE.SUPER_USER
           ) {
             orgSearchQuery.parentOrgUuid = [
-              currentUser.position.organization.uuid
+              currentUser.position.organization.uuid,
+              ...respOrgsUuids
             ]
             orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
           }
