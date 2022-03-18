@@ -689,6 +689,9 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
+      responsiblePositions:
+        label: Responsible positions
+        placeholder: Search for a position...
 
   principal:
     person:
@@ -901,6 +904,9 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
+      responsiblePositions:
+        label: Responsible positions
+        placeholder: Search for a position...
 
   superUser:
 
