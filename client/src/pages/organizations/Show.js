@@ -191,7 +191,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
 
   const isSuperUserForOrg =
     currentUser && currentUser.isSuperUserForOrg(organization)
-  const isAdmin = currentUser && currentUser.isAdmin()
   const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const orgSettings = isPrincipalOrg
@@ -262,7 +261,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <div>
-            {isAdmin && (
+            {isSuperUserForOrg && (
               <LinkTo
                 modelType="Organization"
                 model={Organization.pathForNew({

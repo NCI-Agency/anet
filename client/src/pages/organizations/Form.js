@@ -23,6 +23,7 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -32,6 +33,7 @@ import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
@@ -110,14 +112,29 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
-        const isSuperUserForOrg =
-          currentUser && currentUser.isSuperUserForOrg(values)
+        const isSuperUserForParentOrg =
+          _isEmpty(values.parentOrg) ||
+          (currentUser && currentUser.isSuperUserForOrg(values.parentOrg))
+        const isSuperUserForOrg = edit
+          ? currentUser && currentUser.isSuperUserForOrg(values)
+          : isSuperUserForParentOrg
         const orgSettings = isAdvisorOrg
           ? Settings.fields.advisor.org
           : Settings.fields.principal.org
         const orgSearchQuery = {
           status: Model.STATUS.ACTIVE,
           type: values.type
+        }
+        // Super users can select parent organizations among the ones they are responsible from
+        if (!isAdmin) {
+          const respOrgsUuids = currentUser.position.responsibleOrganizations.map(
+            org => org.uuid
+          )
+          orgSearchQuery.parentOrgUuid = [
+            currentUser.position.organization.uuid,
+            ...respOrgsUuids
+          ]
+          orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
         // Reset the parentOrg property when changing the organization type
         if (
@@ -247,6 +264,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
+                      disabled={!isAdmin}
                     />
                     <Field
                       name="parentOrg"
@@ -257,10 +275,12 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
                         setFieldValue("parentOrg", value)
                       }}
+                      disabled={!isSuperUserForParentOrg}
                       widget={
                         <AdvancedSingleSelect
                           fieldName="parentOrg"
                           placeholder="Search for a higher level organization..."
+                          showRemoveButton={isAdmin}
                           value={values.parentOrg}
                           overlayColumns={["Name"]}
                           overlayRenderRow={OrganizationOverlayRow}
