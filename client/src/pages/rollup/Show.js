@@ -7,7 +7,6 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
-import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -26,9 +25,8 @@ import ReportCollection, {
 } from "components/ReportCollection"
 import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
-import { Organization, Report } from "models"
+import { Report } from "models"
 import moment from "moment"
-import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
@@ -120,8 +118,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
-  const [focusedOrg, setFocusedOrg] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const previewPlaceholderUrl = "/help"
@@ -176,10 +172,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
         title={
           <div style={{ float: "left" }}>
             <div className="rollup-date-range-container">
-              <div style={{ marginRight: 5 }}>
-                Rollup
-                {focusedOrg && ` for ${focusedOrg.shortName}`}
-              </div>
+              <div style={{ marginRight: 5 }}>Rollup</div>
               <DateRangeInput
                 className="rollupDateRange"
                 startInputProps={{ style }}
@@ -202,29 +195,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
                 shortcuts
               />
             </div>
-            {focusedOrg ? (
-              <Button
-                onClick={() => setFocusedOrg(null)}
-                variant="outline-secondary"
-              >
-                All organizations
-              </Button>
-            ) : (
-              <ButtonToggleGroup value={orgType} onChange={setOrgType}>
-                <Button
-                  value={Organization.TYPE.ADVISOR_ORG}
-                  variant="outline-secondary"
-                >
-                  {pluralize(Settings.fields.advisor.org.name)}
-                </Button>
-                <Button
-                  value={Organization.TYPE.PRINCIPAL_ORG}
-                  variant="outline-secondary"
-                >
-                  {pluralize(Settings.fields.principal.org.name)}
-                </Button>
-              </ButtonToggleGroup>
-            )}
           </div>
         }
         action={
@@ -289,15 +259,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       sortOrder: "DESC",
       ...sqParams
     }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        reportsQueryParams.principalOrgUuid = focusedOrg.uuid
-        reportsQueryParams.includePrincipalOrgChildren = true
-      } else {
-        reportsQueryParams.advisorOrgUuid = focusedOrg.uuid
-        reportsQueryParams.includeAdvisorOrgChildren = true
-      }
-    }
     return reportsQueryParams
   }
 
@@ -358,11 +319,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <h5>
-              {focusedOrg
-                ? `Reports for ${focusedOrg.shortName}`
-                : `All reports by ${orgType.replace("_", " ").toLowerCase()}`}
-            </h5>
             <Field
               name="to"
               component={FieldHelper.InputField}
@@ -427,16 +383,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       startDate: getRollupStart().valueOf(),
       endDate: getRollupEnd().valueOf()
     }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        variables.principalOrganizationUuid = focusedOrg.uuid
-      } else {
-        variables.advisorOrganizationUuid = focusedOrg.uuid
-      }
-    }
-    if (orgType) {
-      variables.orgType = orgType
-    }
     return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
       const rollupWindow = window.open("", "rollup")
       const doc = rollupWindow.document
@@ -481,16 +427,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       startDate: getRollupStart().valueOf(),
       endDate: getRollupEnd().valueOf(),
       email: emailDelivery
-    }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        variables.principalOrganizationUuid = focusedOrg.uuid
-      } else {
-        variables.advisorOrganizationUuid = focusedOrg.uuid
-      }
-    }
-    if (orgType) {
-      variables.orgType = orgType
     }
     return API.mutation(GQL_EMAIL_ROLLUP, variables)
   }
