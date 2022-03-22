@@ -8,7 +8,6 @@ import API from "api"
 import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import DailyRollupChart from "components/DailyRollupChart"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -31,7 +30,7 @@ import { Organization, Report } from "models"
 import moment from "moment"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useContext, useMemo, useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
@@ -39,30 +38,6 @@ import { useHistory, useLocation } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
-const GQL_ROLLUP_GRAPH = gql`
-  query(
-    $startDate: Instant!
-    $endDate: Instant!
-    $principalOrganizationUuid: String
-    $advisorOrganizationUuid: String
-    $orgType: OrganizationType
-  ) {
-    rollupGraph(
-      startDate: $startDate
-      endDate: $endDate
-      principalOrganizationUuid: $principalOrganizationUuid
-      advisorOrganizationUuid: $advisorOrganizationUuid
-      orgType: $orgType
-    ) {
-      org {
-        uuid
-        shortName
-      }
-      published
-      cancelled
-    }
-  }
-`
 const GQL_SHOW_ROLLUP_EMAIL = gql`
   query(
     $startDate: Instant!
@@ -99,125 +74,6 @@ const GQL_EMAIL_ROLLUP = gql`
     )
   }
 `
-
-const Chart = ({
-  pageDispatchers,
-  rollupStart,
-  rollupEnd,
-  focusedOrg,
-  setFocusedOrg,
-  orgType
-}) => {
-  const variables = getVariables()
-  const { loading, error, data } = API.useApiQuery(GQL_ROLLUP_GRAPH, variables)
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  const graphData = useMemo(() => {
-    if (!data) {
-      return []
-    }
-    const pinnedOrgs = Settings.pinned_ORGs
-    return data.rollupGraph
-      .map(d => {
-        d.org = d.org || { uuid: "-1", shortName: "Other" }
-        return d
-      })
-      .sort((a, b) => {
-        const aIndex = pinnedOrgs.indexOf(a.org.shortName)
-        const bIndex = pinnedOrgs.indexOf(b.org.shortName)
-        if (aIndex < 0) {
-          const nameOrder = a.org.shortName.localeCompare(b.org.shortName)
-          return bIndex < 0
-            ? nameOrder === 0
-              ? a.org.uuid - b.org.uuid
-              : nameOrder
-            : 1
-        } else {
-          return bIndex < 0 ? -1 : aIndex - bIndex
-        }
-      })
-  }, [data])
-  if (done) {
-    return result
-  }
-
-  const CHART_ID = "reports_by_organization"
-  const barColors = {
-    cancelled: "#ec971f",
-    published: "#75eb75"
-  }
-  const legendCss = {
-    width: "14px",
-    height: "14px",
-    display: "inline-block"
-  }
-
-  return (
-    <div className="scrollable-y">
-      <ContainerDimensions>
-        {({ width }) => (
-          <DailyRollupChart
-            width={width}
-            chartId={CHART_ID}
-            data={graphData}
-            onBarClick={setFocusedOrg}
-            tooltip={d => `
-              <h4>${d.org.shortName}</h4>
-              <p>Published: ${d.published}</p>
-              <p>Cancelled: ${d.cancelled}</p>
-              <p>Click to view details</p>
-            `}
-            barColors={barColors}
-          />
-        )}
-      </ContainerDimensions>
-
-      <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.published }} />{" "}
-        Published reports:&nbsp;
-        <strong>
-          {graphData.reduce((acc, org) => acc + org.published, 0)}
-        </strong>
-      </div>
-      <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.cancelled }} />{" "}
-        Cancelled engagements:&nbsp;
-        <strong>
-          {graphData.reduce((acc, org) => acc + org.cancelled, 0)}
-        </strong>
-      </div>
-    </div>
-  )
-
-  function getVariables() {
-    const variables = {
-      startDate: rollupStart.valueOf(),
-      endDate: rollupEnd.valueOf()
-    }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        variables.principalOrganizationUuid = focusedOrg.uuid
-      } else {
-        variables.advisorOrganizationUuid = focusedOrg.uuid
-      }
-    } else if (orgType) {
-      variables.orgType = orgType
-    }
-    return variables
-  }
-}
-
-Chart.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  rollupStart: PropTypes.object,
-  rollupEnd: PropTypes.object,
-  focusedOrg: PropTypes.object,
-  setFocusedOrg: PropTypes.func,
-  orgType: PropTypes.string
-}
 
 const Collection = ({ queryParams }) => (
   <div className="scrollable">
@@ -277,12 +133,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
 
   const VISUALIZATIONS = [
     {
-      id: "rbdow-chart",
-      icons: [IconNames.GROUPED_BAR_CHART],
-      title: "Chart by organization",
-      renderer: renderChart
-    },
-    {
       id: "rbdow-collection",
       icons: [IconNames.PANEL_TABLE],
       title: "Reports by organization",
@@ -295,7 +145,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       renderer: renderReportMap
     }
   ]
-  const INITIAL_LAYOUT = VISUALIZATIONS[1].id
+  const INITIAL_LAYOUT = VISUALIZATIONS[0].id
   const DESCRIPTION = "Number of reports released per organization."
   const flexStyle = {
     display: "flex",
@@ -415,19 +265,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       </Formik>
     </div>
   )
-
-  function renderChart(id) {
-    return (
-      <Chart
-        pageDispatchers={pageDispatchers}
-        rollupStart={getRollupStart()}
-        rollupEnd={getRollupEnd()}
-        focusedOrg={focusedOrg}
-        setFocusedOrg={setFocusedOrg}
-        orgType={orgType}
-      />
-    )
-  }
 
   function renderReportCollection(id) {
     return <Collection queryParams={getQueryParams()} />
