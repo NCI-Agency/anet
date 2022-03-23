@@ -27,7 +27,7 @@ boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.0.28"
 String logbackVersion = "1.2.10"
 String log4jVersion = "2.17.2"
-String keycloakVersion = "16.1.1"
+String keycloakVersion = "17.0.1"
 String containerPushDataPath = "/var/tmp"
 
 // If defined, load alternatives for variables
