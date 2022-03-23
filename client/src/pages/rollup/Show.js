@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
-import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
 import {
@@ -12,6 +12,7 @@ import {
 } from "actions"
 import API from "api"
 import "components/BlueprintOverrides.css"
+import ButtonToggleGroup from "components/ButtonToggleGroup"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -41,7 +42,6 @@ import React, { useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
-import { useHistory, useLocation } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -87,6 +87,8 @@ const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
 })
 
+const ROLLUP_PERIODS = ["day", "week", "month"]
+
 const Collection = ({ queryParams }) => (
   <div className="scrollable">
     <ReportCollection
@@ -127,9 +129,7 @@ Map.propTypes = {
 }
 
 const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
-  const history = useHistory()
-  const routerLocation = useLocation()
-  const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
+  const [period, setPeriod] = useState(ROLLUP_PERIODS[0])
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
@@ -142,6 +142,8 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   } else {
     queryParams = getSearchQuery(searchQuery)
   }
+  const startDate = moment(queryParams.releasedAtStart)
+  const endDate = moment(queryParams.releasedAtEnd)
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: REPORT_SEARCH_PROPS,
@@ -182,8 +184,6 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     flex: "1 1 auto",
     height: "100%"
   }
-  const inputFormat = Settings.dateFormats.forms.input.date[0]
-  const style = { width: "7em", fontSize: "1em" }
 
   return (
     <div id="daily-rollup" style={flexStyle}>
@@ -194,27 +194,38 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
           <div style={{ float: "left" }}>
             <div className="rollup-date-range-container">
               <div style={{ marginRight: 5 }}>Rollup</div>
-              <DateRangeInput
-                className="rollupDateRange"
-                startInputProps={{ style }}
-                endInputProps={{ style }}
-                value={[startDate.toDate(), endDate.toDate()]}
-                onChange={changeRollupDate}
-                formatDate={date => moment(date).format(inputFormat)}
-                parseDate={str =>
-                  moment(
-                    str,
-                    Settings.dateFormats.forms.input.date,
-                    true
-                  ).toDate()
-                }
-                placeholder={inputFormat}
-                maxDate={moment().toDate()}
-                allowSingleDayRange
-                closeOnSelection={false}
-                contiguousCalendarMonths={false}
-                shortcuts
-              />
+              <Button
+                id="previous-period"
+                onClick={() => showPreviousPeriod(period)}
+                variant="outline-secondary"
+                style={{ marginRight: 5 }}
+              >
+                <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
+              </Button>
+              <ButtonToggleGroup
+                value={period}
+                onChange={period => {
+                  changePeriod(period)
+                }}
+              >
+                {ROLLUP_PERIODS.map(period => (
+                  <Button
+                    key={period}
+                    value={period}
+                    variant="outline-secondary"
+                  >
+                    {period}
+                  </Button>
+                ))}
+              </ButtonToggleGroup>
+              <Button
+                id="next-period"
+                onClick={() => showNextPeriod(period)}
+                variant="outline-secondary"
+                style={{ marginLeft: 5 }}
+              >
+                <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
+              </Button>
             </div>
           </div>
         }
@@ -265,6 +276,60 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     return <Map queryParams={queryParams} />
   }
 
+  function showNextPeriod(nextPeriod) {
+    const periodStart = moment(queryParams.releasedAtStart)
+      .add(1, nextPeriod)
+      .startOf(nextPeriod)
+    const periodEnd = moment(queryParams.releasedAtStart)
+      .add(1, nextPeriod)
+      .endOf(nextPeriod)
+    const newQueryParams = {
+      ...queryParams,
+      releasedAtStart: periodStart,
+      releasedAtEnd: periodEnd
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
+  }
+
+  function showPreviousPeriod(nextPeriod) {
+    const periodStart = moment(queryParams.releasedAtStart)
+      .subtract(1, nextPeriod)
+      .startOf(nextPeriod)
+    const periodEnd = moment(queryParams.releasedAtStart)
+      .subtract(1, nextPeriod)
+      .endOf(nextPeriod)
+    const newQueryParams = {
+      ...queryParams,
+      releasedAtStart: periodStart,
+      releasedAtEnd: periodEnd
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
+  }
+
+  function changePeriod(nextPeriod) {
+    const periodStart = moment(queryParams.releasedAtStart).startOf(nextPeriod)
+    const periodEnd = moment(queryParams.releasedAtStart).endOf(nextPeriod)
+    const newQueryParams = {
+      ...queryParams,
+      releasedAtStart: periodStart,
+      releasedAtEnd: periodEnd
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
+    setPeriod(nextPeriod)
+  }
+
   function deserializeCallback(objectType, filters, text) {
     // We update the Redux state
     setSearchQuery({
@@ -306,34 +371,6 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
 
   function getRollupEnd() {
     return moment(endDate).endOf("day")
-  }
-
-  function getDateOrDefault(qsDate) {
-    return qsDate ? moment(+qsDate) : moment().subtract(1, "day") // default to yesterday
-  }
-
-  function getDateRangeFromQS(search) {
-    // Having a qs with ?date=… overrides startDate and endDate (for backwards compatibility)
-    const qs = utils.parseQueryString(search)
-    return {
-      startDate: getDateOrDefault(qs.date || qs.startDate),
-      endDate: getDateOrDefault(qs.date || qs.endDate)
-    }
-  }
-
-  function changeRollupDate(dateRange) {
-    const startDate = dateRange[0] && dateRange[0].valueOf()
-    const endDate = dateRange[1] && dateRange[1].valueOf()
-    if (!startDate || !endDate) {
-      return
-    }
-    history.replace({
-      pathname: "rollup",
-      search: utils.formatQueryString({
-        startDate,
-        endDate
-      })
-    })
   }
 
   function renderEmailModal(formikProps) {
