@@ -79,7 +79,7 @@
     "eslint-plugin-react-hooks": "4.3.0",
     "eslint-webpack-plugin": "3.1.1",
     "express-session": "1.17.2",
-    "faker": "5.5.3",
+    "faker": "6.6.6",
     "git-describe": "4.1.0",
     "handlebars": "4.7.7",
     "handlebars-loader": "1.7.1",
