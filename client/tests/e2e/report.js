@@ -247,9 +247,7 @@ test.serial("Publish report chain", async t => {
     $$,
     assertElementText,
     By,
-    Key,
     until,
-    shortWaitMs,
     mediumWaitMs,
     longWaitMs
   } = t.context
@@ -325,16 +323,6 @@ test.serial("Publish report chain", async t => {
   )
   await $("#daily-rollup")
 
-  const $$rollupDateRange = await $$(".rollupDateRange .bp3-input")
-  await $$rollupDateRange[0].click()
-  await t.context.driver.sleep(shortWaitMs) // wait for datepicker to show
-  const $todayButton = await t.context.driver.findElement(
-    By.xpath('//a/div[text()="Today"]')
-  )
-  await $todayButton.click()
-  // Now dismiss the date popup
-  await $$rollupDateRange[0].sendKeys(Key.TAB)
-  await $$rollupDateRange[1].sendKeys(Key.TAB)
   await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
   const $rollupTableTab = await $(".report-collection button[value='table']")
