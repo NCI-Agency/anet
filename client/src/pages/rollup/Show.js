@@ -3,9 +3,14 @@ import "@blueprintjs/core/lib/css/blueprint.css"
 import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  DEFAULT_SEARCH_QUERY,
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
+} from "actions"
 import API from "api"
-import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -23,12 +28,16 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
-import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext, useState } from "react"
+import React, { useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
@@ -73,6 +82,11 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
+const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
+  onSearchGoToSearchPage: false,
+  searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
+})
+
 const Collection = ({ queryParams }) => (
   <div className="scrollable">
     <ReportCollection
@@ -112,8 +126,7 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const RollupShow = ({ pageDispatchers, searchQuery }) => {
-  const { appSettings } = useContext(AppContext)
+const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   const history = useHistory()
   const routerLocation = useLocation()
   const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
@@ -121,9 +134,17 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const previewPlaceholderUrl = "/help"
+  let queryParams
+  if (searchQuery === DEFAULT_SEARCH_QUERY) {
+    // when going from a different page to the rollup page, use the default
+    // rollup search query
+    queryParams = setRollupDefaultSearchQuery()
+  } else {
+    queryParams = getSearchQuery(searchQuery)
+  }
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
-    searchProps: DEFAULT_SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     pageDispatchers
   })
 
@@ -237,29 +258,34 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
   )
 
   function renderReportCollection(id) {
-    return <Collection queryParams={getQueryParams()} />
+    return <Collection queryParams={queryParams} />
   }
 
   function renderReportMap(id) {
-    return <Map queryParams={getQueryParams()} />
+    return <Map queryParams={queryParams} />
   }
 
-  function getQueryParams() {
-    const sqParams = getSearchQuery(searchQuery)
-    const maxReportAge =
-      1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
-    const reportsQueryParams = {
-      state: [Report.STATE.PUBLISHED], // Specifically excluding cancelled engagements.
-      releasedAtStart: getRollupStart().valueOf(),
-      releasedAtEnd: getRollupEnd().valueOf(),
-      engagementDateStart: moment(getRollupStart())
-        .subtract(maxReportAge, "days")
-        .valueOf(),
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC",
-      ...sqParams
+  function deserializeCallback(objectType, filters, text) {
+    // We update the Redux state
+    setSearchQuery({
+      objectType: objectType,
+      filters: filters,
+      text: text
+    })
+  }
+
+  function setRollupDefaultSearchQuery() {
+    const queryParams = {
+      state: [Report.STATE.PUBLISHED],
+      releasedAtStart: moment().startOf("day"),
+      releasedAtEnd: moment().endOf("day")
     }
-    return reportsQueryParams
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      queryParams,
+      deserializeCallback
+    )
+    return queryParams
   }
 
   function getDateStr() {
@@ -434,11 +460,20 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
 
 RollupShow.propTypes = {
   searchQuery: SearchQueryPropType,
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  setSearchQuery: PropTypes.func
 }
 
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
 
-export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    ...pageDispatchers
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)
