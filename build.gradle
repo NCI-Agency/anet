@@ -114,6 +114,9 @@ dependencies {
 	implementation 'org.apache.poi:poi:5.2.0'
 	implementation 'org.apache.poi:poi-ooxml:5.2.0'
 
+	// used for pdf documentation
+	implementation 'com.itextpdf:itext7-core:7.0.2'
+
 	// For Java 9+
 	runtimeOnly 'org.glassfish.jaxb:jaxb-runtime:2.3.6'
 	runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
