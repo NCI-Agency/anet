@@ -1751,8 +1751,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText("<p>Trying to get this report unpublished</p>")
         .withLocation(getLocationInput(loc)).withEngagementDate(engagementDate).build();
 
-    // Reference task Gender
-    final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("Gender").build();
+    // Reference task EF7
+    final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("EF7").build();
     final AnetBeanList_Task searchObjects =
         authorQueryExecutor.taskList(getListFields(TASK_FIELDS), query);
     assertThat(searchObjects).isNotNull();
@@ -1760,7 +1760,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final List<Task> searchResults = searchObjects.getList();
     assertThat(searchResults).isNotEmpty();
     final Task t11a =
-        searchResults.stream().filter(t -> t.getShortName().equals("Gender")).findFirst().get();
+        searchResults.stream().filter(t -> t.getShortName().equals("EF7")).findFirst().get();
     rInput.setTasks(ImmutableList.of(getTaskInput(t11a)));
 
     // Create the report

@@ -41,7 +41,14 @@ import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
-import { AuthorizationGroup, Location, Person, Report, Task } from "models"
+import {
+  AuthorizationGroup,
+  Location,
+  Person,
+  Position,
+  Report,
+  Task
+} from "models"
 import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
@@ -252,9 +259,15 @@ const ReportForm = ({
   const isAuthor = initialValues.reportPeople?.some(
     a => a.author && Person.isEqual(currentUser, a)
   )
-  const canReadAssessments = isAuthor
+  // User can approve if report is pending approval and user is one of the approvers in the current approval step
+  const canApprove =
+    Report.isPending(initialValues.state) &&
+    initialValues.approvalStep?.approvers?.some(member =>
+      Position.isEqual(member, currentUser?.position)
+    )
+  const canReadAssessments = isAuthor || canApprove
   const canWriteAssessments =
-    isAuthor && !Report.isPublished(initialValues.state)
+    canReadAssessments && !Report.isPublished(initialValues.state)
 
   const reportSchema = Report.getReportSchema(reportTasks, reportPeople)
   let validateFieldDebounced
@@ -1407,10 +1420,10 @@ const ReportForm = ({
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
       if (!canWriteAssessments) {
-        // FIXME: needs better logic to only update the assessments that the user has permission for
-        // For now, skip updating them altogether if the user is not a report author
+        // Skip updating assessments!
         return report
       }
+      // Update assessments
       const tasksNotes = createInstantAssessments(
         Task,
         values.tasks,

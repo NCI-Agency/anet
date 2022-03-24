@@ -206,6 +206,10 @@ public abstract class AbstractResourceTest {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("reina").build());
   }
 
+  public static Person getYoshieBeau() {
+    return findOrPutPersonInDb(Person.builder().withDomainUsername("yoshie").build());
+  }
+
   // Principals in the test database
   public static Person getChristopfTopferness() {
     return findOrPutPersonInDb(Person.builder().withName("TOPFERNESS, Christopf").build());

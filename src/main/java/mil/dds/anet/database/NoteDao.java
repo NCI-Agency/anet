@@ -378,6 +378,17 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
           // User is an author of this report
           return true;
         }
+        final List<String> approverPositions = report.loadApprovalStep(engine.getContext())
+            .thenCompose(approvalStep -> approvalStep == null
+                ? CompletableFuture.completedFuture(Collections.<String>emptyList())
+                : approvalStep.loadApprovers(engine.getContext())
+                    .thenCompose(approvers -> CompletableFuture.completedFuture(
+                        approvers.stream().map(Position::getUuid).collect(Collectors.toList()))))
+            .join();
+        if (approverPositions.contains(DaoUtils.getUuid(user.getPosition()))) {
+          // User is an approver
+          return true;
+        }
         // check authorization groups (below)
         break;
       case "ondemand":

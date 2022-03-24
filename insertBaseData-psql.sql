@@ -95,6 +95,7 @@ INSERT INTO people (uuid, name, status, role, "emailAddress", "phoneNumber", ran
 --People
 		(uuid_generate_v4(), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'BEAU, Yoshie', 0, 0, 'hunter+yoshie@example.com', '+1-202-7320', 'CIV', NULL, 'yoshie', 'b3f67185-77e7-42a0-a2eb-f0739077eab5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Create locations
@@ -173,6 +174,7 @@ INSERT INTO positions (uuid, name, type, status, "currentPersonUuid", "locationU
 		(uuid_generate_v4(), 'EF 5.1 Super User Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 5.1 Super User Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 9 Advisor', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 9 Approver', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'LNG Advisor A', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'LNG Advisor B', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
@@ -277,6 +279,11 @@ UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "email
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
 	VALUES ((SELECT uuid from positions where name = 'EF 9 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+nick@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+nick@example.com') WHERE name = 'EF 9 Advisor';
+
+-- Put Yoshie Beau into the EF 9 Approver
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
+	VALUES ((SELECT uuid from positions where name = 'EF 9 Approver'), (SELECT uuid from people where "emailAddress" = 'hunter+yoshie@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+yoshie@example.com') WHERE name = 'EF 9 Approver';
 
 -- Put Lin into the LNG Advisor A
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
@@ -386,6 +393,13 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Secondary Reviewers'), (SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'));
 
+-- Create the EF 9 approval process
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+	VALUES (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='EF 9'), 'EF 9 Approvers', 1);
+INSERT INTO approvers ("approvalStepUuid", "positionUuid")
+	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 9 Approvers'), (SELECT uuid from positions where name = 'EF 9 Approver'));
+
+-- Create some tasks
 INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "updatedAt", "customFieldRef1Uuid")
 	VALUES
 		(N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -423,7 +437,8 @@ INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "update
 		(N'12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(N'19364d81-3203-483d-a6bf-461d58888c76', 'EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(N'9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-		(N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'4831e09b-2bbb-4717-9bfa-91071e62260a', 'EF9', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'4831e09b-2bbb-4717-9bfa-91071e62260a'),
 		(uuid_generate_v4(), 'TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(uuid_generate_v4(), 'TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(uuid_generate_v4(), 'TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -459,7 +474,8 @@ INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid")
 		((SELECT uuid from tasks where "shortName" = '4.b.3'), (SELECT uuid from organizations where "shortName"='EF 4')),
 		((SELECT uuid from tasks where "shortName" = '4.b.4'), (SELECT uuid from organizations where "shortName"='EF 4')),
 		((SELECT uuid from tasks where "shortName" = '4.b.5'), (SELECT uuid from organizations where "shortName"='EF 4')),
-		((SELECT uuid from tasks where "shortName" = '4.c'), (SELECT uuid from organizations where "shortName"='EF 4'));
+		((SELECT uuid from tasks where "shortName" = '4.c'), (SELECT uuid from organizations where "shortName"='EF 4')),
+		((SELECT uuid from tasks where "shortName" = 'Gender'), (SELECT uuid from organizations where "shortName"='EF 9'));
 
 -- Create a task approval process for some tasks
 INSERT INTO "taskResponsiblePositions" ("taskUuid", "positionUuid")

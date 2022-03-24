@@ -344,10 +344,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
   const canApprove =
     report.isPending() &&
-    currentUser.position &&
-    report.approvalStep &&
-    report.approvalStep.approvers.some(member =>
-      Position.isEqual(member, currentUser.position)
+    report.approvalStep?.approvers?.some(member =>
+      Position.isEqual(member, currentUser?.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
   // Approved reports may be published by an admin user
@@ -361,8 +359,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers can edit
   canEdit = canEdit || canApprove
-  // Author can always read assessments
-  const canReadAssessments = isAuthor
+  // Authors and approvers can always read assessments
+  const canReadAssessments = isAuthor || canApprove
 
   // Only an author can submit when report is in draft or rejected AND author has a position
   const hasActivePosition = currentUser.hasActivePosition()
