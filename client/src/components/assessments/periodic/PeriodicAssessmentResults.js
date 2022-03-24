@@ -183,7 +183,7 @@ export const PeriodicAssessmentsRows = ({
 }) => {
   const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
-  const { hasWriteAccess, hasAccess } = useMemo(() => {
+  const { hasReadAccess, hasWriteAccess } = useMemo(() => {
     const hasReadAccess = entity.isAuthorizedForAssessment(
       currentUser,
       assessmentKey,
@@ -192,10 +192,9 @@ export const PeriodicAssessmentsRows = ({
     const hasWriteAccess =
       canAddAssessment ||
       entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
-    const hasAccess = hasReadAccess || hasWriteAccess
-    return { hasReadAccess, hasWriteAccess, hasAccess }
+    return { hasReadAccess, hasWriteAccess }
   }, [assessmentKey, canAddAssessment, currentUser, entity])
-  if (!hasAccess) {
+  if (!hasReadAccess) {
     return null
   }
 

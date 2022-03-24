@@ -88,7 +88,7 @@ const OnDemandAssessment = ({
     `
   }
 
-  const { hasWriteAccess, hasAccess } = useMemo(() => {
+  const { hasReadAccess, hasWriteAccess } = useMemo(() => {
     const hasReadAccess = entity.isAuthorizedForAssessment(
       currentUser,
       assessmentKey,
@@ -97,14 +97,13 @@ const OnDemandAssessment = ({
     const hasWriteAccess =
       canAddAssessment ||
       entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
-    const hasAccess = hasReadAccess || hasWriteAccess
-    return { hasReadAccess, hasWriteAccess, hasAccess }
+    return { hasReadAccess, hasWriteAccess }
   }, [assessmentKey, canAddAssessment, currentUser, entity])
 
   // Cards array updated before loading the page & after every save of ondemand assessment.
   const assessmentCards = useMemo(() => {
     const cards = []
-    if (!hasAccess) {
+    if (!hasReadAccess) {
       return cards
     }
     const sortedOnDemandNotes = entity.getOndemandAssessments(
@@ -246,7 +245,7 @@ const OnDemandAssessment = ({
     hasWriteAccess,
     assessmentKey,
     numberOfPeriods,
-    hasAccess
+    hasReadAccess
   ])
   // Holds JSX element array (assessment cards).
   const [onDemandAssessmentCards, setOnDemandAssessmentCards] = useState(

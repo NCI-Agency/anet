@@ -511,9 +511,10 @@ public class NoteResourceTest extends AbstractResourceTest {
     testNoteInputs.add(testNoteInputAdmin);
     final Note createdNoteAdmin = succeedNoteCreate(adminMutationExecutor, testNoteInputAdmin);
 
-    // - F: read it as someone not in the read auth.groups
-    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
-    assertNotes(jackPerson.getNotes(), Collections.emptyList(), assessmentKey, 1);
+    // - F: read it as someone not in the read and write auth.groups
+    final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
+    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    assertNotes(bobPerson.getNotes(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
     final QueryExecutor erinQueryExecutor = getQueryExecutor(getRegularUser().getDomainUsername());
@@ -648,9 +649,10 @@ public class NoteResourceTest extends AbstractResourceTest {
     testNoteInputs.add(testNoteInputAdmin);
     final Note createdNoteAdmin = succeedNoteCreate(adminMutationExecutor, testNoteInputAdmin);
 
-    // - F: read it as someone not in the read auth.groups
-    final Person jackPerson = jackQueryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID);
-    assertNotes(jackPerson.getNotes(), Collections.emptyList(), assessmentKey, 1);
+    // - F: read it as someone not in the read and write auth.groups
+    final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
+    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, TEST_COUNTERPART_PERSON_UUID);
+    assertNotes(bobPerson.getNotes(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
     final QueryExecutor reinaQueryExecutor =
@@ -821,9 +823,10 @@ public class NoteResourceTest extends AbstractResourceTest {
     testNoteInputs.add(testNoteInputAdmin);
     final Note createdNoteAdmin = succeedNoteCreate(adminMutationExecutor, testNoteInputAdmin);
 
-    // - F: read it as someone not in the read auth.groups
-    final Task jackTask = jackQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID);
-    assertNotes(jackTask.getNotes(), Collections.emptyList(), assessmentKey, 1);
+    // - F: read it as someone not in the read and write auth.groups
+    final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
+    final Task bobTask = bobQueryExecutor.task(TASK_FIELDS, TEST_RESPONSIBLE_TASK_UUID);
+    assertNotes(bobTask.getNotes(), Collections.emptyList(), assessmentKey, 1);
 
     // - S: read it as someone in the read auth.groups
     final QueryExecutor erinQueryExecutor = getQueryExecutor(getRegularUser().getDomainUsername());
@@ -1042,9 +1045,10 @@ public class NoteResourceTest extends AbstractResourceTest {
     final Report erinReport = erinQueryExecutor.report(REPORT_FIELDS, reportUuid);
     assertNotes(erinReport.getNotes(), testNoteInputs, assessmentKey, 2);
 
-    // - F: read it as someone else not in the read auth.groups
-    final Report jackReport = jackQueryExecutor.report(REPORT_FIELDS, reportUuid);
-    assertNotes(jackReport.getNotes(), Collections.emptyList(), assessmentKey, 2);
+    // - F: read it as someone else not in the read and write auth.groups
+    final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
+    final Report bobReport = bobQueryExecutor.report(REPORT_FIELDS, reportUuid);
+    assertNotes(bobReport.getNotes(), Collections.emptyList(), assessmentKey, 2);
 
     // - S: read it as admin
     final Report adminReport = adminQueryExecutor.report(REPORT_FIELDS, reportUuid);
@@ -1268,9 +1272,10 @@ public class NoteResourceTest extends AbstractResourceTest {
     final Report erinReport = erinQueryExecutor.report(REPORT_FIELDS, reportUuid);
     assertNotes(erinReport.getNotes(), testNoteInputs, assessmentKey, 2);
 
-    // - F: read it as someone else not in the read auth.groups
-    final Report jackReport = jackQueryExecutor.report(REPORT_FIELDS, reportUuid);
-    assertNotes(jackReport.getNotes(), Collections.emptyList(), assessmentKey, 2);
+    // - F: read it as someone else not in the read and write auth.groups
+    final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
+    final Report bobReport = bobQueryExecutor.report(REPORT_FIELDS, reportUuid);
+    assertNotes(bobReport.getNotes(), Collections.emptyList(), assessmentKey, 2);
 
     // - S: read it as admin
     final Report adminReport = adminQueryExecutor.report(REPORT_FIELDS, reportUuid);

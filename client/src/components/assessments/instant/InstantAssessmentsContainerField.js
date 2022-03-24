@@ -23,17 +23,16 @@ const InstantAssessmentRow = ({
   readonly
 }) => {
   const { currentUser } = useContext(AppContext)
-  const { hasWriteAccess, hasAccess } = useMemo(() => {
+  const { hasReadAccess, hasWriteAccess } = useMemo(() => {
     const hasReadAccess =
       canRead ||
       entity.isAuthorizedForAssessment(currentUser, assessmentKey, true)
     const hasWriteAccess =
       canWrite ||
       entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
-    const hasAccess = hasReadAccess || hasWriteAccess
-    return { hasReadAccess, hasWriteAccess, hasAccess }
+    return { hasReadAccess, hasWriteAccess }
   }, [assessmentKey, canRead, canWrite, currentUser, entity])
-  if (!hasAccess) {
+  if (!hasReadAccess) {
     return null
   }
 

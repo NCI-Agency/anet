@@ -249,8 +249,8 @@ const ReportForm = ({
     }
   }
 
-  const isAuthor = initialValues.reportPeople?.some(a =>
-    a.author && Person.isEqual(currentUser, a)
+  const isAuthor = initialValues.reportPeople?.some(
+    a => a.author && Person.isEqual(currentUser, a)
   )
   const canReadAssessments = isAuthor
   const canWriteAssessments =

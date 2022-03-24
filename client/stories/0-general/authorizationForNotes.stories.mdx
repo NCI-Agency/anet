@@ -78,7 +78,8 @@ Note that authorization groups are applicable only to _ASSESSMENT_ notes. Assess
 distinguished by the assessmentKey, which is defined in the dictionary and recorded in the note.
 Using this key, the type of assessment and its corresponding (optional) authorization groups can be
 looked up in the dictionary, and checked against the note. We distinguish groups with read
-permission and write permission (which includes create, update and delete). Example:
+permission and write permission (which includes create, update and delete, as well as read).
+Example:
 
 ```
 fields:
@@ -100,22 +101,22 @@ fields:
 ### Instant assessments
 
 -   user can read, create, update or delete instant assessments if they are an author of the report
--   if no authorization groups for read are defined in the dictionary, user can read any instant
-    assessment
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    instant assessment
 -   if authorization groups for read are defined in the dictionary, user can read instant
     assessments if they are in these groups
--   if authorization groups for write are defined in the dictionary, user can create, update or
-    delete instant assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete instant assessments if they are in these groups
 
 ### On-demand assessments
 
 -   admin can read, create, update and delete any on-demand assessment
--   if no authorization groups for read are defined in the dictionary, user can read any on-demand
-    assessment
--   if authorization groups for read are defined in the dictionary, a user can read on-demand
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    on-demand assessment
+-   if authorization groups for read are defined in the dictionary, user can read on-demand
     assessments if they are in these groups
--   if authorization groups for write are defined in the dictionary, a user can create, update or
-    delete on-demand assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete on-demand assessments if they are in these groups
 
 ### Periodic assessments
 
@@ -123,19 +124,20 @@ fields:
 
 -   admin can read, create, update and delete any periodic assessment
 -   user has to be responsible for a task to be able to read, create, update or delete
--   if no authorization groups are defined in the dictionary, user can read any periodic assessment
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    periodic assessment
 -   if authorization groups for read are defined in the dictionary, user can read periodic
     assessments if they are in these groups
--   if authorization groups for write are defined in the dictionary, user can create, update or
-    delete periodic assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete periodic assessments if they are in these groups
 
 #### For a person:
 
 -   admin can read, create, update and delete any periodic assessment
--   person has to be a user's counterpart to be able to read, create, update or delete
--   if no authorization groups for read are defined in the dictionary, user can read any periodic
-    assessment
+-   person has to be user's counterpart to be able to read, create, update or delete
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    periodic assessment
 -   if authorization groups for read are defined in the dictionary, user can read periodic
     assessments if they are in these groups
--   if authorization groups for write are defined in the dictionary, user can create, update or
-    delete periodic assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete periodic assessments if they are in these groups

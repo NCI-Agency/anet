@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -154,11 +155,25 @@ public class DaoUtils {
       final Note note, final boolean forReading) {
     // Check against the dictionary whether the user is authorized
     final String authGroupKeyFmt = "%1$s.authorizationGroupUuids.%2$s";
+    final List<String> authorizationGroupUuids = new ArrayList<>();
     @SuppressWarnings("unchecked")
-    final List<String> authorizationGroupUuids =
-        (List<String>) AnetObjectEngine.getConfiguration().getDictionaryEntry(
-            String.format(authGroupKeyFmt, note.getAssessmentKey(), forReading ? "read" : "write"));
-    if (Utils.isEmptyOrNull(authorizationGroupUuids)) {
+    final List<String> writeAuthorizationGroupUuids =
+        (List<String>) AnetObjectEngine.getConfiguration()
+            .getDictionaryEntry(String.format(authGroupKeyFmt, note.getAssessmentKey(), "write"));
+    // Note: write access implies read access!
+    if (writeAuthorizationGroupUuids != null) {
+      authorizationGroupUuids.addAll(writeAuthorizationGroupUuids);
+    }
+    if (forReading) {
+      @SuppressWarnings("unchecked")
+      final List<String> readAuthorizationGroupUuids =
+          (List<String>) AnetObjectEngine.getConfiguration()
+              .getDictionaryEntry(String.format(authGroupKeyFmt, note.getAssessmentKey(), "read"));
+      if (readAuthorizationGroupUuids != null) {
+        authorizationGroupUuids.addAll(readAuthorizationGroupUuids);
+      }
+    }
+    if (authorizationGroupUuids.isEmpty()) {
       // No authorization groups defined for this assessment: read is allowed, write is denied
       return forReading;
     }

@@ -589,22 +589,25 @@ export default class Model {
   }
 
   isAuthorizedForAssessment(user, assessmentKey, forReading) {
-    const userAuthorizationGroupUuids = (
-      user?.position?.authorizationGroups || []
-    ).map(ag => ag.uuid)
     if (user.isAdmin()) {
       return true
     }
     const assessmentConfig = this.getAssessmentConfigByKey(assessmentKey)
-    const authorizationGroupUuids =
-      assessmentConfig?.authorizationGroupUuids?.[forReading ? "read" : "write"]
-    if (
-      authorizationGroupUuids === null ||
-      authorizationGroupUuids === undefined
-    ) {
+    const authorizationGroupUuids = [
+      ...(assessmentConfig?.authorizationGroupUuids?.write ?? [])
+    ]
+    if (forReading) {
+      authorizationGroupUuids.push(
+        ...(assessmentConfig?.authorizationGroupUuids?.read ?? [])
+      )
+    }
+    if (_isEmpty(authorizationGroupUuids)) {
       // No groups defined means: anybody has read access, nobody has write access
       return forReading
     }
+    const userAuthorizationGroupUuids = (
+      user?.position?.authorizationGroups || []
+    ).map(ag => ag.uuid)
     return !!authorizationGroupUuids?.some(ag =>
       userAuthorizationGroupUuids.includes(ag)
     )
