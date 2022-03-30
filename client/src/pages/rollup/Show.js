@@ -1,14 +1,18 @@
 import { gql } from "@apollo/client"
+import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
-import { DateRangeInput } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { IconNames } from "@blueprintjs/icons"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  DEFAULT_SEARCH_QUERY,
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
+} from "actions"
 import API from "api"
-import AppContext from "components/AppContext"
 import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
-import DailyRollupChart from "components/DailyRollupChart"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -25,44 +29,22 @@ import ReportCollection, {
   FORMAT_SUMMARY,
   FORMAT_TABLE
 } from "components/ReportCollection"
-import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
+import {
+  deserializeQueryParams,
+  getSearchQuery,
+  SearchQueryPropType
+} from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
-import { Organization, Report } from "models"
+import { Report } from "models"
 import moment from "moment"
-import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useContext, useMemo, useState } from "react"
+import React, { useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
-import { useHistory, useLocation } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
-const GQL_ROLLUP_GRAPH = gql`
-  query(
-    $startDate: Instant!
-    $endDate: Instant!
-    $principalOrganizationUuid: String
-    $advisorOrganizationUuid: String
-    $orgType: OrganizationType
-  ) {
-    rollupGraph(
-      startDate: $startDate
-      endDate: $endDate
-      principalOrganizationUuid: $principalOrganizationUuid
-      advisorOrganizationUuid: $advisorOrganizationUuid
-      orgType: $orgType
-    ) {
-      org {
-        uuid
-        shortName
-      }
-      published
-      cancelled
-    }
-  }
-`
 const GQL_SHOW_ROLLUP_EMAIL = gql`
   query(
     $startDate: Instant!
@@ -100,124 +82,12 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const Chart = ({
-  pageDispatchers,
-  rollupStart,
-  rollupEnd,
-  focusedOrg,
-  setFocusedOrg,
-  orgType
-}) => {
-  const variables = getVariables()
-  const { loading, error, data } = API.useApiQuery(GQL_ROLLUP_GRAPH, variables)
-  const { done, result } = useBoilerplate({
-    loading,
-    error,
-    pageDispatchers
-  })
-  const graphData = useMemo(() => {
-    if (!data) {
-      return []
-    }
-    const pinnedOrgs = Settings.pinned_ORGs
-    return data.rollupGraph
-      .map(d => {
-        d.org = d.org || { uuid: "-1", shortName: "Other" }
-        return d
-      })
-      .sort((a, b) => {
-        const aIndex = pinnedOrgs.indexOf(a.org.shortName)
-        const bIndex = pinnedOrgs.indexOf(b.org.shortName)
-        if (aIndex < 0) {
-          const nameOrder = a.org.shortName.localeCompare(b.org.shortName)
-          return bIndex < 0
-            ? nameOrder === 0
-              ? a.org.uuid - b.org.uuid
-              : nameOrder
-            : 1
-        } else {
-          return bIndex < 0 ? -1 : aIndex - bIndex
-        }
-      })
-  }, [data])
-  if (done) {
-    return result
-  }
+const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
+  onSearchGoToSearchPage: false,
+  searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]
+})
 
-  const CHART_ID = "reports_by_organization"
-  const barColors = {
-    cancelled: "#ec971f",
-    published: "#75eb75"
-  }
-  const legendCss = {
-    width: "14px",
-    height: "14px",
-    display: "inline-block"
-  }
-
-  return (
-    <div className="scrollable-y">
-      <ContainerDimensions>
-        {({ width }) => (
-          <DailyRollupChart
-            width={width}
-            chartId={CHART_ID}
-            data={graphData}
-            onBarClick={setFocusedOrg}
-            tooltip={d => `
-              <h4>${d.org.shortName}</h4>
-              <p>Published: ${d.published}</p>
-              <p>Cancelled: ${d.cancelled}</p>
-              <p>Click to view details</p>
-            `}
-            barColors={barColors}
-          />
-        )}
-      </ContainerDimensions>
-
-      <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.published }} />{" "}
-        Published reports:&nbsp;
-        <strong>
-          {graphData.reduce((acc, org) => acc + org.published, 0)}
-        </strong>
-      </div>
-      <div className="graph-legend">
-        <div style={{ ...legendCss, background: barColors.cancelled }} />{" "}
-        Cancelled engagements:&nbsp;
-        <strong>
-          {graphData.reduce((acc, org) => acc + org.cancelled, 0)}
-        </strong>
-      </div>
-    </div>
-  )
-
-  function getVariables() {
-    const variables = {
-      startDate: rollupStart.valueOf(),
-      endDate: rollupEnd.valueOf()
-    }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        variables.principalOrganizationUuid = focusedOrg.uuid
-      } else {
-        variables.advisorOrganizationUuid = focusedOrg.uuid
-      }
-    } else if (orgType) {
-      variables.orgType = orgType
-    }
-    return variables
-  }
-}
-
-Chart.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  rollupStart: PropTypes.object,
-  rollupEnd: PropTypes.object,
-  focusedOrg: PropTypes.object,
-  setFocusedOrg: PropTypes.func,
-  orgType: PropTypes.string
-}
+const ROLLUP_PERIODS = ["day", "week", "month"]
 
 const Collection = ({ queryParams }) => (
   <div className="scrollable">
@@ -258,30 +128,29 @@ Map.propTypes = {
   queryParams: PropTypes.object
 }
 
-const RollupShow = ({ pageDispatchers, searchQuery }) => {
-  const { appSettings } = useContext(AppContext)
-  const history = useHistory()
-  const routerLocation = useLocation()
-  const { startDate, endDate } = getDateRangeFromQS(routerLocation.search)
+const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
+  const [period, setPeriod] = useState(ROLLUP_PERIODS[0])
   const [showEmailModal, setShowEmailModal] = useState(false)
-  const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
-  const [focusedOrg, setFocusedOrg] = useState(null)
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const previewPlaceholderUrl = "/help"
+  let queryParams
+  if (searchQuery === DEFAULT_SEARCH_QUERY) {
+    // when going from a different page to the rollup page, use the default
+    // rollup search query
+    queryParams = setRollupDefaultSearchQuery()
+  } else {
+    queryParams = getSearchQuery(searchQuery)
+  }
+  const startDate = moment(queryParams.releasedAtStart)
+  const endDate = moment(queryParams.releasedAtEnd)
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
-    searchProps: DEFAULT_SEARCH_PROPS,
+    searchProps: REPORT_SEARCH_PROPS,
     pageDispatchers
   })
 
   const VISUALIZATIONS = [
-    {
-      id: "rbdow-chart",
-      icons: [IconNames.GROUPED_BAR_CHART],
-      title: "Chart by organization",
-      renderer: renderChart
-    },
     {
       id: "rbdow-collection",
       icons: [IconNames.PANEL_TABLE],
@@ -295,7 +164,7 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       renderer: renderReportMap
     }
   ]
-  const INITIAL_LAYOUT = VISUALIZATIONS[1].id
+  const INITIAL_LAYOUT = VISUALIZATIONS[0].id
   const DESCRIPTION = "Number of reports released per organization."
   const flexStyle = {
     display: "flex",
@@ -315,8 +184,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
     flex: "1 1 auto",
     height: "100%"
   }
-  const inputFormat = Settings.dateFormats.forms.input.date[0]
-  const style = { width: "7em", fontSize: "1em" }
 
   return (
     <div id="daily-rollup" style={flexStyle}>
@@ -326,55 +193,40 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
         title={
           <div style={{ float: "left" }}>
             <div className="rollup-date-range-container">
-              <div style={{ marginRight: 5 }}>
-                Rollup
-                {focusedOrg && ` for ${focusedOrg.shortName}`}
-              </div>
-              <DateRangeInput
-                className="rollupDateRange"
-                startInputProps={{ style }}
-                endInputProps={{ style }}
-                value={[startDate.toDate(), endDate.toDate()]}
-                onChange={changeRollupDate}
-                formatDate={date => moment(date).format(inputFormat)}
-                parseDate={str =>
-                  moment(
-                    str,
-                    Settings.dateFormats.forms.input.date,
-                    true
-                  ).toDate()
-                }
-                placeholder={inputFormat}
-                maxDate={moment().toDate()}
-                allowSingleDayRange
-                closeOnSelection={false}
-                contiguousCalendarMonths={false}
-                shortcuts
-              />
-            </div>
-            {focusedOrg ? (
+              <div style={{ marginRight: 5 }}>Rollup</div>
               <Button
-                onClick={() => setFocusedOrg(null)}
+                id="previous-period"
+                onClick={() => showPreviousPeriod(period)}
                 variant="outline-secondary"
+                style={{ marginRight: 5 }}
               >
-                All organizations
+                <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
               </Button>
-            ) : (
-              <ButtonToggleGroup value={orgType} onChange={setOrgType}>
-                <Button
-                  value={Organization.TYPE.ADVISOR_ORG}
-                  variant="outline-secondary"
-                >
-                  {pluralize(Settings.fields.advisor.org.name)}
-                </Button>
-                <Button
-                  value={Organization.TYPE.PRINCIPAL_ORG}
-                  variant="outline-secondary"
-                >
-                  {pluralize(Settings.fields.principal.org.name)}
-                </Button>
+              <ButtonToggleGroup
+                value={period}
+                onChange={period => {
+                  changePeriod(period)
+                }}
+              >
+                {ROLLUP_PERIODS.map(period => (
+                  <Button
+                    key={period}
+                    value={period}
+                    variant="outline-secondary"
+                  >
+                    {period}
+                  </Button>
+                ))}
               </ButtonToggleGroup>
-            )}
+              <Button
+                id="next-period"
+                onClick={() => showNextPeriod(period)}
+                variant="outline-secondary"
+                style={{ marginLeft: 5 }}
+              >
+                <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
+              </Button>
+            </div>
           </div>
         }
         action={
@@ -416,52 +268,89 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
     </div>
   )
 
-  function renderChart(id) {
-    return (
-      <Chart
-        pageDispatchers={pageDispatchers}
-        rollupStart={getRollupStart()}
-        rollupEnd={getRollupEnd()}
-        focusedOrg={focusedOrg}
-        setFocusedOrg={setFocusedOrg}
-        orgType={orgType}
-      />
-    )
-  }
-
   function renderReportCollection(id) {
-    return <Collection queryParams={getQueryParams()} />
+    return <Collection queryParams={queryParams} />
   }
 
   function renderReportMap(id) {
-    return <Map queryParams={getQueryParams()} />
+    return <Map queryParams={queryParams} />
   }
 
-  function getQueryParams() {
-    const sqParams = getSearchQuery(searchQuery)
-    const maxReportAge =
-      1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
-    const reportsQueryParams = {
-      state: [Report.STATE.PUBLISHED], // Specifically excluding cancelled engagements.
-      releasedAtStart: getRollupStart().valueOf(),
-      releasedAtEnd: getRollupEnd().valueOf(),
-      engagementDateStart: moment(getRollupStart())
-        .subtract(maxReportAge, "days")
-        .valueOf(),
-      sortBy: "ENGAGEMENT_DATE",
-      sortOrder: "DESC",
-      ...sqParams
+  function showNextPeriod(nextPeriod) {
+    const periodStart = moment(queryParams.releasedAtStart)
+      .add(1, nextPeriod)
+      .startOf(nextPeriod)
+    const periodEnd = moment(queryParams.releasedAtStart)
+      .add(1, nextPeriod)
+      .endOf(nextPeriod)
+    const newQueryParams = {
+      ...queryParams,
+      releasedAtStart: periodStart,
+      releasedAtEnd: periodEnd
     }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        reportsQueryParams.principalOrgUuid = focusedOrg.uuid
-        reportsQueryParams.includePrincipalOrgChildren = true
-      } else {
-        reportsQueryParams.advisorOrgUuid = focusedOrg.uuid
-        reportsQueryParams.includeAdvisorOrgChildren = true
-      }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
+  }
+
+  function showPreviousPeriod(nextPeriod) {
+    const periodStart = moment(queryParams.releasedAtStart)
+      .subtract(1, nextPeriod)
+      .startOf(nextPeriod)
+    const periodEnd = moment(queryParams.releasedAtStart)
+      .subtract(1, nextPeriod)
+      .endOf(nextPeriod)
+    const newQueryParams = {
+      ...queryParams,
+      releasedAtStart: periodStart,
+      releasedAtEnd: periodEnd
     }
-    return reportsQueryParams
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
+  }
+
+  function changePeriod(nextPeriod) {
+    const periodStart = moment(queryParams.releasedAtStart).startOf(nextPeriod)
+    const periodEnd = moment(queryParams.releasedAtStart).endOf(nextPeriod)
+    const newQueryParams = {
+      ...queryParams,
+      releasedAtStart: periodStart,
+      releasedAtEnd: periodEnd
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
+    setPeriod(nextPeriod)
+  }
+
+  function deserializeCallback(objectType, filters, text) {
+    // We update the Redux state
+    setSearchQuery({
+      objectType: objectType,
+      filters: filters,
+      text: text
+    })
+  }
+
+  function setRollupDefaultSearchQuery() {
+    const queryParams = {
+      state: [Report.STATE.PUBLISHED],
+      releasedAtStart: moment().startOf("day"),
+      releasedAtEnd: moment().endOf("day")
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      queryParams,
+      deserializeCallback
+    )
+    return queryParams
   }
 
   function getDateStr() {
@@ -484,34 +373,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
     return moment(endDate).endOf("day")
   }
 
-  function getDateOrDefault(qsDate) {
-    return qsDate ? moment(+qsDate) : moment().subtract(1, "day") // default to yesterday
-  }
-
-  function getDateRangeFromQS(search) {
-    // Having a qs with ?date=… overrides startDate and endDate (for backwards compatibility)
-    const qs = utils.parseQueryString(search)
-    return {
-      startDate: getDateOrDefault(qs.date || qs.startDate),
-      endDate: getDateOrDefault(qs.date || qs.endDate)
-    }
-  }
-
-  function changeRollupDate(dateRange) {
-    const startDate = dateRange[0] && dateRange[0].valueOf()
-    const endDate = dateRange[1] && dateRange[1].valueOf()
-    if (!startDate || !endDate) {
-      return
-    }
-    history.replace({
-      pathname: "rollup",
-      search: utils.formatQueryString({
-        startDate,
-        endDate
-      })
-    })
-  }
-
   function renderEmailModal(formikProps) {
     const { isSubmitting, submitForm } = formikProps
     return (
@@ -521,11 +382,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
             <Modal.Title>Email rollup - {getDateStr()}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <h5>
-              {focusedOrg
-                ? `Reports for ${focusedOrg.shortName}`
-                : `All reports by ${orgType.replace("_", " ").toLowerCase()}`}
-            </h5>
             <Field
               name="to"
               component={FieldHelper.InputField}
@@ -590,16 +446,6 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       startDate: getRollupStart().valueOf(),
       endDate: getRollupEnd().valueOf()
     }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        variables.principalOrganizationUuid = focusedOrg.uuid
-      } else {
-        variables.advisorOrganizationUuid = focusedOrg.uuid
-      }
-    }
-    if (orgType) {
-      variables.orgType = orgType
-    }
     return API.query(GQL_SHOW_ROLLUP_EMAIL, variables).then(data => {
       const rollupWindow = window.open("", "rollup")
       const doc = rollupWindow.document
@@ -645,27 +491,26 @@ const RollupShow = ({ pageDispatchers, searchQuery }) => {
       endDate: getRollupEnd().valueOf(),
       email: emailDelivery
     }
-    if (focusedOrg) {
-      if (orgType === Organization.TYPE.PRINCIPAL_ORG) {
-        variables.principalOrganizationUuid = focusedOrg.uuid
-      } else {
-        variables.advisorOrganizationUuid = focusedOrg.uuid
-      }
-    }
-    if (orgType) {
-      variables.orgType = orgType
-    }
     return API.mutation(GQL_EMAIL_ROLLUP, variables)
   }
 }
 
 RollupShow.propTypes = {
   searchQuery: SearchQueryPropType,
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  setSearchQuery: PropTypes.func
 }
 
 const mapStateToProps = (state, ownProps) => ({
   searchQuery: state.searchQuery
 })
 
-export default connect(mapStateToProps, mapPageDispatchersToProps)(RollupShow)
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+    ...pageDispatchers
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(RollupShow)
