@@ -54,7 +54,10 @@ public class OrganizationResource {
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertAdministrator(user);
+    // Check if super user is authorized to create a sub organization
+    if (!AuthUtils.isAdmin(user)) {
+      AuthUtils.assertSuperUserForOrg(user, org.getParentOrgUuid(), false);
+    }
     final Organization created;
     try {
       created = dao.insert(org);
@@ -84,7 +87,7 @@ public class OrganizationResource {
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
-    if (org.getResponsiblePositions() != null) {
+    if (AuthUtils.isAdmin(user) && org.getResponsiblePositions() != null) {
       // Assign all of these positions to this organization.
       for (Position position : org.getResponsiblePositions()) {
         dao.addPositionToOrganization(position, org);
@@ -105,8 +108,11 @@ public class OrganizationResource {
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
-    // Verify correct Organization TODO: update the permissions
+    // Verify correct Organization
     AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
+
+    // Load the existing organization, so we can check for differences.
+    final Organization existing = dao.getByUuid(org.getUuid());
 
     // Check for loops in the hierarchy
     final Map<String, Organization> children =
@@ -115,8 +121,25 @@ public class OrganizationResource {
       throw new WebApplicationException("Organization can not be its own (grand…)parent");
     }
 
-    // Load the existing organization, so we can check for differences.
-    final Organization existing = dao.getByUuid(org.getUuid());
+    if (!AuthUtils.isAdmin(user)) {
+      // Check if super user is responsible for the organizations that will be modified with the
+      // parent organization update
+      if (!org.getParentOrgUuid().equals(existing.getParentOrgUuid())) {
+        if (!org.getParentOrg().getType().equals(org.getType())) {
+          throw new WebApplicationException(
+              "You cannot assign a different type of organization as the parent", Status.FORBIDDEN);
+        }
+        AuthUtils.assertSuperUserForOrg(user, existing.getParentOrgUuid(), false);
+        AuthUtils.assertSuperUserForOrg(user, org.getParentOrgUuid(), false);
+      }
+      // Super user is not authorized to change the organization type
+      if (!org.getType().toString().equals(existing.getType().toString())) {
+        throw new WebApplicationException(
+            "You do not have permissions to change the type of this organization",
+            Status.FORBIDDEN);
+      }
+    }
+
     final int numRows = update(user, org, existing);
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, org.getUuid(),
@@ -146,14 +169,13 @@ public class OrganizationResource {
           newTask -> engine.getTaskDao().addTaskedOrganizationsToTask(org, newTask),
           oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org, oldTaskUuid));
     }
-    if (AuthUtils.isAdmin(user)) {
-      if (org.getResponsiblePositions() != null) {
-        logger.debug("Editing responsible positions for {}", org);
-        Utils.addRemoveElementsByUuid(existing.loadResponsiblePositions(engine.getContext()).join(),
-            org.getResponsiblePositions(),
-            newPosition -> dao.addPositionToOrganization(newPosition, org),
-            oldPositionUuid -> dao.removePositionFromOrganization(oldPositionUuid, org));
-      }
+
+    if (AuthUtils.isAdmin(user) && org.getResponsiblePositions() != null) {
+      logger.debug("Editing responsible positions for {}", org);
+      Utils.addRemoveElementsByUuid(existing.loadResponsiblePositions(engine.getContext()).join(),
+          org.getResponsiblePositions(),
+          newPosition -> dao.addPositionToOrganization(newPosition, org),
+          oldPositionUuid -> dao.removePositionFromOrganization(oldPositionUuid, org));
     }
 
     final List<ApprovalStep> existingPlanningApprovalSteps =

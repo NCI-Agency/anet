@@ -58,25 +58,11 @@ public class AuthUtils {
       return true;
     }
 
-    if (position.getOrganizationUuid() == null) {
-      return false;
-    }
-
-    if (Objects.equals(organizationUuid, position.getOrganizationUuid())) {
-      return true;
-    }
-
-    // Check the descendant organizations of the position's own organization.
+    // Check the responsible organizations.
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-    final Organization posOrg = position.loadOrganization(context).join();
     final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
     osQuery.setPageSize(0);
-    if (posOrg.loadDescendantOrgs(context, osQuery).join().stream()
-        .anyMatch(o -> o.getUuid().equals(organizationUuid))) {
-      return true;
-    }
 
-    // Check the responsible organizations.
     final List<Organization> responsibleOrgs =
         position.loadResponsibleOrganizations(context).join();
     if (responsibleOrgs.stream().anyMatch(o -> o.getUuid().equals(organizationUuid))) {
