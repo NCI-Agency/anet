@@ -6,7 +6,7 @@ import { formatPeriodBoundary, PeriodsPropType } from "periodUtils"
 import PropTypes from "prop-types"
 import React from "react"
 
-/* The InstantAssessmentsRow component displays the results of the aggregation
+/* The QuestionsRow component displays the results of the aggregation
  * of the assessments made on a given question (as part of the instant
  * assessments made on a given entity), grouped per period of time:
  * - instant assessments => made on the entity/subentities when
@@ -15,7 +15,7 @@ import React from "react"
  *   assessments made on the entity/subentity itself;
  */
 
-export const InstantAssessmentsRow = ({
+export const QuestionsRow = ({
   idSuffix,
   questionKey,
   questionConfig,
@@ -55,7 +55,7 @@ export const InstantAssessmentsRow = ({
     </tr>
   )
 }
-InstantAssessmentsRow.propTypes = {
+QuestionsRow.propTypes = {
   idSuffix: PropTypes.string.isRequired,
   periods: PeriodsPropType.isRequired,
   periodsData: PropTypes.arrayOf(PropTypes.array).isRequired,

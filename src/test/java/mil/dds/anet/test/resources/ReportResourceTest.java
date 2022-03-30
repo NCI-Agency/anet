@@ -105,11 +105,11 @@ public class ReportResourceTest extends AbstractResourceTest {
   protected static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s principalOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"
-          + " comments %6$s authorizationGroups { uuid name }"
+          + " comments %6$s notes %7$s authorizationGroups { uuid name }"
           + " workflow { step { uuid relatedObjectUuid approvers { uuid person { uuid } } }"
           + " person { uuid } type createdAt } reportSensitiveInformation { uuid text } }",
       REPORT_FIELDS, ORGANIZATION_FIELDS, REPORT_PEOPLE_FIELDS, TASK_FIELDS, LOCATION_FIELDS,
-      COMMENT_FIELDS);
+      COMMENT_FIELDS, NoteResourceTest.NOTE_FIELDS);
 
   @Test
   public void createReport()
@@ -1751,8 +1751,8 @@ public class ReportResourceTest extends AbstractResourceTest {
         .withReportText("<p>Trying to get this report unpublished</p>")
         .withLocation(getLocationInput(loc)).withEngagementDate(engagementDate).build();
 
-    // Reference task Gender
-    final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("Gender").build();
+    // Reference task EF7
+    final TaskSearchQueryInput query = TaskSearchQueryInput.builder().withText("EF7").build();
     final AnetBeanList_Task searchObjects =
         authorQueryExecutor.taskList(getListFields(TASK_FIELDS), query);
     assertThat(searchObjects).isNotNull();
@@ -1760,7 +1760,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     final List<Task> searchResults = searchObjects.getList();
     assertThat(searchResults).isNotEmpty();
     final Task t11a =
-        searchResults.stream().filter(t -> t.getShortName().equals("Gender")).findFirst().get();
+        searchResults.stream().filter(t -> t.getShortName().equals("EF7")).findFirst().get();
     rInput.setTasks(ImmutableList.of(getTaskInput(t11a)));
 
     // Create the report

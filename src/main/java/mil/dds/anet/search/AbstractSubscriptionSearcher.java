@@ -34,7 +34,7 @@ public abstract class AbstractSubscriptionSearcher extends
     qb.addSelectClause("subscriptions.*");
     qb.addTotalCount();
     qb.addFromClause("subscriptions");
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     qb.addStringEqualsClause("positionUuid", "subscriptions.\"subscriberUuid\"",
         DaoUtils.getUuid(position));
     addOrderByClauses(qb, query);

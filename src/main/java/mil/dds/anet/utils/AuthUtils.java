@@ -38,7 +38,7 @@ public class AuthUtils {
           organizationUuid, user); // DANGER: possible log injection vector here?
       return false;
     }
-    Position position = user.loadPosition();
+    Position position = DaoUtils.getPosition(user);
     if (position == null) {
       logger.warn("User {} has no position, hence no permissions", user);
       return false;
@@ -88,7 +88,7 @@ public class AuthUtils {
 
   public static void assertSuperUser(Person user) {
     logger.debug("Asserting some superuser status for {}", user);
-    Position position = user.loadPosition();
+    Position position = DaoUtils.getPosition(user);
     if (position != null && (position.getType() == PositionType.SUPER_USER
         || position.getType() == PositionType.ADMINISTRATOR)) {
       return;
@@ -97,7 +97,7 @@ public class AuthUtils {
   }
 
   public static boolean isAdmin(Person user) {
-    Position position = user.loadPosition();
+    Position position = DaoUtils.getPosition(user);
     return (position != null) && (position.getType() == PositionType.ADMINISTRATOR);
   }
 

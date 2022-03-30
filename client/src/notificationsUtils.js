@@ -9,6 +9,7 @@ export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
     }
     createdAt
     type
+    assessmentKey
     text
   }
 `

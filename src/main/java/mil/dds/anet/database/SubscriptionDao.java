@@ -86,7 +86,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
 
   @InTransaction
   public int deleteObjectSubscription(Person user, String uuid) {
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     return getDbHandle()
         .createUpdate("/* deleteObjectSubscription */ DELETE FROM subscriptions"
             + " WHERE \"subscriberUuid\" = :subscriberUuid"
@@ -163,7 +163,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription, AbstractSearchQue
   @InTransaction
   public boolean isSubscribedObject(Map<String, Object> context, String subscribedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     final String sql = "/* isSubscribedObject */ SELECT COUNT(*) AS count FROM subscriptions"
         + " WHERE \"subscriberUuid\" = :subscriberUuid"
         + " AND \"subscribedObjectUuid\" = :subscribedObjectUuid";

@@ -18,6 +18,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class AccountDeactivationWorker extends AbstractWorker {
@@ -127,7 +128,7 @@ public class AccountDeactivationWorker extends AbstractWorker {
     p.setDomainUsername(null);
     p.setOpenIdSubject(null);
 
-    Position existingPos = p.loadPosition();
+    Position existingPos = DaoUtils.getPosition(p);
     if (existingPos != null) {
       AnetAuditLogger.log("Person {} removed from position by system because they are now inactive",
           p);

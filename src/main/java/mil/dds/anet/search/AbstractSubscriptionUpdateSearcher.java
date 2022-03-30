@@ -36,7 +36,7 @@ public abstract class AbstractSubscriptionUpdateSearcher
     qb.addSelectClause("\"subscriptionUpdates\".*");
     qb.addTotalCount();
     qb.addFromClause("\"subscriptionUpdates\"");
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     qb.addWhereClause(
         "\"subscriptionUpdates\".\"subscriptionUuid\" IN ( SELECT uuid FROM subscriptions "
             + "  WHERE subscriptions.\"subscriberUuid\" = :positionUuid )");

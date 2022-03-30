@@ -63,8 +63,41 @@ fields:
         style:
           height: 400px
       assessments:
+        topTaskOnceReport:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            question1:
+              type: special_field
+              widget: likertScale
+              label: Instant assessment Question 1
+              helpText: Please provide assessment for something important
+              levels:
+                - color: red
+                  endValue: 2
+                  label: test
+                - color: "#FFBF00"
+                  endValue: 8
+                  label: mid
+                - color: green
+                  endValue: 10
+                  label: high
+              aggregation:
+                widget: likertScale
+            question2:
+              type: number
+              label: Instant assessment Question 2
+            question3:
+              type: number
+              label: Instant assessment Question 3
         topTaskSemiannually:
           recurrence: semiannually
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
             issues:
               type: special_field
@@ -75,7 +108,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
 
     subLevel:
       shortLabel: Effort
@@ -102,7 +135,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
             status:
               type: enum
               label: Project status
@@ -119,7 +152,7 @@ fields:
                   color: '#ff8279'
               validations:
                 - type: required
-                  params: [You must provide the assessment status]
+                  params: [You must provide the Project status]
         subTaskWeekly:
           recurrence: weekly
           questions:
@@ -132,7 +165,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
         subTaskOnceReport:
           recurrence: once
           relatedObjectType: report
@@ -293,7 +326,7 @@ fields:
         placeholder: Enter the issue echelon to fix
         validations:
           - type: required
-            params: [You must provide the text field]
+            params: [You must provide the Issue echelon to fix]
         visibleWhen: $[?(@ && @.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
       itemsAgreed:
         type: array_of_objects
@@ -308,7 +341,7 @@ fields:
             placeholder: Enter description of the item that has been agreed to
             validations:
               - type: required
-                params: [You must provide the text field]
+                params: [You must provide the Item]
           dueDate:
             type: date
             label: Due date
@@ -815,42 +848,12 @@ fields:
       showAsFullWidthFields:
         - biography
       assessments:
-        advisorQuarterly:
-          recurrence: quarterly
-          questions:
-            test1:
-              type: enum
-              label: Test question 1
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ffe396'
-                "3":
-                  label: three
-                  color: '#ff8279'
-          questionSets:
-            set1:
-              label: Set 1
-              questions:
-                test1:
-                  type: enum
-                  label: Set 1 question 1
-                  choices:
-                    "1":
-                      label: one
-                      color: '#c2ffb3'
-                    "2":
-                      label: two
-                      color: '#ffe396'
-                    "3":
-                      label: three
-                      color: '#ff8279'
         advisorOnceReportLinguist:
           recurrence: once
           relatedObjectType: report
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
             linguistRole:
               test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
@@ -866,7 +869,7 @@ fields:
             translator:
               label: Translator Questions
               description: Set of questions to assess the linguist in translator role
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "translator")]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.linguistRole === "translator")]
               questions:
                 translatorGotAdequateTime:
                   type: enum
@@ -907,7 +910,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorSubjectComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.translator && @.advisorOnceReportLinguist.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad translator subject vocabulary"
                   label: Vocabulary comments
@@ -934,7 +937,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 translatorOverallComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.translator && @.questionSets.translator.questions.translatorOverallScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.translator && @.advisorOnceReportLinguist.questionSets.translator.questions.translatorOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall translator evaluation"
                   label: Overall comments
@@ -944,7 +947,7 @@ fields:
             interpreter:
               label: Interpreter Questions
               description: Set of questions to assess the linguist in interpreter role
-              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.linguistRole === "interpreter")]
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.linguistRole === "interpreter")]
               questions:
                 interpreterHadPreMeeting:
                   type: enum
@@ -985,7 +988,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectVocabularyComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid &&  @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject vocabulary"
                   label: Vocabulary comments
@@ -1013,7 +1016,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterSubjectUnderstandingComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter subject understanding"
                   label: Subject understanding comments
@@ -1041,7 +1044,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterWorkEthicComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter work ethic"
                   label: Work ethic comments
@@ -1069,7 +1072,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterPostureComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterPostureScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterPostureScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter posture"
                   label: Posture comments
@@ -1097,7 +1100,7 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterRoleComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterRoleScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterRoleScore === "B")]
                   type: special_field
                   helpText: "Comment on bad interpreter role"
                   label: Role comment
@@ -1124,13 +1127,25 @@ fields:
                       label: Bad
                       color: "#fc5a03"
                 interpreterInterpretationOverallComment:
-                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.questionSets && @.questionSets.interpreter && @.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
                   type: special_field
                   helpText: "Comment on bad overall interpreter evaluation"
                   label: Overall evaluation comment
                   widget: richTextEditor
                   style:
                     height: 100px
+        advisorOndemand:
+          recurrence: ondemand
+          questions:
+            assessmentDate:
+              type: date
+              label: Assessment date
+            question1:
+              type: special_field
+              label: General remarks
+              widget: richTextEditor
+              style:
+                height: 70px
     position:
       name: NATO Billet
       type: ANET User
@@ -1155,6 +1170,18 @@ fields:
       name: Afghan Partner
       countries: [Afghanistan]
       assessments:
+        principalMonthly:
+          recurrence: monthly
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            text:
+              type: special_field
+              label: Text
+              widget: richTextEditor
+              style:
+                height: 100px
         principalQuarterly:
           recurrence: quarterly
           questions:
@@ -1270,13 +1297,16 @@ fields:
           recurrence: ondemand
           onDemandAssessmentExpirationDays: 108
           label: "Screening & Vetting"
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
             assessmentDate:
               type: date
               label: Screening and vetting date
               validations:
                 - type: required
-                  params: [You must provide the assessment date]
+                  params: [You must provide the Screening and vetting date]
             expirationDate:
               type: date
               label: Expiration date
@@ -1370,7 +1400,7 @@ fields:
 
 pinned_ORGs: [Key Leader Engagement]
 non_reporting_ORGs: [ANET Administrators]
-tasking_ORGs: [EF 2.2]
+tasking_ORGs: [EF 2.2, EF 9]
 domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
 imagery:

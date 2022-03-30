@@ -93,25 +93,37 @@ public class Utils {
   }
 
   /*
-   * Performs a diff of the two lists of elements For each element that is in newElements but is not
-   * in oldElements it will call addFunc For each element that is in oldElements but is not in
-   * newElements, it will call removeFunc
+   * Performs a diff of the two lists of elements. For each element that is in newElements but is
+   * not in oldElements it will call addFunc. For each element that is in oldElements but is not in
+   * newElements, it will call removeFunc. For each element that is in both oldElements and
+   * newElements, it will call updateFunc (if set).
    */
-  public static <T extends AbstractAnetBean> void addRemoveElementsByUuid(List<T> oldElements,
-      List<T> newElements, Consumer<T> addFunc, Consumer<String> removeFunc) {
-    List<String> existingUuids =
-        oldElements.stream().map(p -> p.getUuid()).collect(Collectors.toList());
-    for (T newEl : newElements) {
-      if (existingUuids.remove(newEl.getUuid()) == false) {
-        // Add this element
-        addFunc.accept(newEl);
+  public static <T extends AbstractAnetBean> void updateElementsByUuid(List<T> oldElements,
+      List<T> newElements, Consumer<T> addFunc, Consumer<String> removeFunc,
+      Consumer<T> updateFunc) {
+    final Set<String> existingUuids =
+        oldElements.stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+    for (final T newElement : newElements) {
+      if (existingUuids.remove(newElement.getUuid())) {
+        // Update existing element (optional)
+        if (updateFunc != null) {
+          updateFunc.accept(newElement);
+        }
+      } else {
+        // Add this new element
+        addFunc.accept(newElement);
       }
     }
 
-    // Now remove all items in existingUuids.
-    for (String uuid : existingUuids) {
+    // Finally remove all items remaining in existingUuids
+    for (final String uuid : existingUuids) {
       removeFunc.accept(uuid);
     }
+  }
+
+  public static <T extends AbstractAnetBean> void addRemoveElementsByUuid(List<T> oldElements,
+      List<T> newElements, Consumer<T> addFunc, Consumer<String> removeFunc) {
+    updateElementsByUuid(oldElements, newElements, addFunc, removeFunc, null);
   }
 
   public static <T> T orIfNull(T value, T ifNull) {

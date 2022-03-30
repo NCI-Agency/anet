@@ -93,7 +93,7 @@ public class TaskResource {
         dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
     // User has to be admin or responsible for the task
     if (!AuthUtils.isAdmin(user)) {
-      final Position userPosition = user.loadPosition();
+      final Position userPosition = DaoUtils.getPosition(user);
       final boolean canUpdate = existingResponsiblePositions.stream()
           .anyMatch(p -> Objects.equals(DaoUtils.getUuid(p), DaoUtils.getUuid(userPosition)));
       if (!canUpdate) {

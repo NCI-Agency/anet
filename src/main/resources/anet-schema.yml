@@ -250,6 +250,24 @@ $defs:
         title: assessment label
         type: string
         description: Used in the title of the assessment. If not specified, recurrence type is used instead and the assessments with the same recurrence type will have the same title!
+      authorizationGroupUuids:
+        type: object
+        additionalProperties: false
+        properties:
+          read:
+            title: The list of authorization group uuid's that have read access to this assessment
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
+          write:
+            title: The list of authorization group uuid's that have write (i.e. create/update/delete) access to this assessment
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
       questions:
         "$ref": "#/$defs/questions"
       questionSets:

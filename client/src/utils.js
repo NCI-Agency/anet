@@ -35,6 +35,23 @@ const fnRequiredWhen = (boolPropName, props, propName, componentName) => {
   }
 }
 
+const fnRequiredWhenNot = (
+  relatedPropName,
+  relatedPropValue,
+  props,
+  propName,
+  componentName
+) => {
+  if (
+    props[relatedPropName] !== relatedPropValue &&
+    typeof props[propName] !== "object"
+  ) {
+    return new Error(
+      `Prop "${componentName}.${propName}" is a required object if "${relatedPropName}" is NOT ${relatedPropValue}`
+    )
+  }
+}
+
 const ellipsize = (value, maxLength) =>
   value.length > maxLength
     ? value.substring(0, maxLength - 1) + "\u2026"
@@ -45,6 +62,7 @@ export default {
   pluralize,
   isNullOrUndefined,
   fnRequiredWhen,
+  fnRequiredWhenNot,
   ellipsize,
   resourceize: function(string) {
     return pluralize(wrappedChangeCase.camelCase(string))

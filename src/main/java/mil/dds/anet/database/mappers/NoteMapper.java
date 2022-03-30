@@ -14,6 +14,7 @@ public class NoteMapper implements RowMapper<Note> {
     final Note n = new Note();
     MapperUtils.setCommonBeanFields(n, rs, null);
     n.setType(MapperUtils.getEnumIdx(rs, "type", NoteType.class));
+    n.setAssessmentKey(rs.getString("assessmentKey"));
     n.setText(rs.getString("text"));
     n.setAuthorUuid(rs.getString("authorUuid"));
 

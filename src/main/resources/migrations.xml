@@ -4115,4 +4115,10 @@
 
 	<!-- From this point on, mssql is no longer supported, so only postgresql migrations are needed -->
 
+	<changeSet id="add-assessmentKey-to-notes" author="gjvoosten">
+		<addColumn tableName="notes">
+			<column name="assessmentKey" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

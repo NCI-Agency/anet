@@ -1,9 +1,3 @@
-import "components/assessments/AssessmentResultsTable.css"
-import {
-  InstantAssessmentsRow,
-  QuestionSetRow
-} from "components/assessments/InstantAssessmentResults"
-import { PeriodicAssessmentsRows } from "components/assessments/PeriodicAssessmentResults"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
@@ -18,22 +12,26 @@ import {
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Table } from "react-bootstrap"
+import { QuestionSetRow, QuestionsRow } from "./PeriodicAssessmentQuestions"
+import { PeriodicAssessmentsRows } from "./PeriodicAssessmentResults"
+import "./PeriodicAssessmentResultsTable.css"
 
-/* The AssessmentResultsTable component displays the results of two types of
+/* The PeriodicAssessmentResultsTable component displays the results of two types of
  * assessments made on a given entity and subentities:
  * - instant assessments => made on the entity/subentities when
  *   working on them in relation to another type of entity (example:
  *   assessments made on tasks, while filling  report related to the tasks) or
  *   assessments made on the entity/subentity itself;
  *   the configuration of these assessments can be retrieved using
- *   entity.getInstantAssessmentConfig()
+ *   entity.getInstantAssessmens()
  * - periodic assessments => made on the entity/subentities periodically,
  *   as a measurement of the given period of time;
  *   the config and yupSchema for these assessments is to be found in
- *   entity.getPeriodicAssessmentDetails(recurrence)
+ *   entity.getPeriodicAssessmentDetails(assessmentKey)
  */
 
-const EntityAssessmentResults = ({
+const EntityPeriodicAssessmentResults = ({
+  assessmentKey,
   idSuffix,
   entity,
   entityType,
@@ -44,12 +42,8 @@ const EntityAssessmentResults = ({
   if (!entity) {
     return null
   }
-  const instantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const instantAssessments = entity.getInstantAssessments()
   const { periods } = periodsConfig
-  const dataPerPeriod = []
-  periods.forEach(period =>
-    dataPerPeriod.push(entity.getInstantAssessmentResults(period))
-  )
   return (
     <>
       <tr>
@@ -57,32 +51,41 @@ const EntityAssessmentResults = ({
           <LinkTo modelType={entityType.resourceName} model={entity} />
         </td>
       </tr>
-      {Object.entries(instantAssessmentConfig?.questions || {}).map(
-        ([key, config], index) => (
-          <InstantAssessmentsRow
-            key={key}
-            idSuffix={`${key}-${idSuffix}`}
-            questionKey={key}
-            questionConfig={config}
-            periods={periods}
-            periodsData={dataPerPeriod}
-            isFirstRow={index === 0}
-          />
+      {instantAssessments.map(([ak, ac]) => {
+        const dataPerPeriod = []
+        periods.forEach(period =>
+          dataPerPeriod.push(entity.getInstantAssessmentResults(period, ak))
         )
-      )}
-      {Object.entries(instantAssessmentConfig?.questionSets || {}).map(
-        ([questionSet, config]) => (
-          <QuestionSetRow
-            idSuffix={`${idSuffix}-${questionSet}`}
-            key={questionSet}
-            questionSetConfig={config}
-            questionSetKey={questionSet}
-            periods={periods}
-            periodsData={dataPerPeriod}
-          />
+        return (
+          <React.Fragment key={ak}>
+            {Object.entries(ac?.questions || {}).map(([key, config], index) => (
+              <QuestionsRow
+                key={key}
+                idSuffix={`${key}-${idSuffix}`}
+                questionKey={key}
+                questionConfig={config}
+                periods={periods}
+                periodsData={dataPerPeriod}
+                isFirstRow={index === 0}
+              />
+            ))}
+            {Object.entries(ac?.questionSets || {}).map(
+              ([questionSet, config]) => (
+                <QuestionSetRow
+                  idSuffix={`${idSuffix}-${questionSet}`}
+                  key={questionSet}
+                  questionSetConfig={config}
+                  questionSetKey={questionSet}
+                  periods={periods}
+                  periodsData={dataPerPeriod}
+                />
+              )
+            )}
+          </React.Fragment>
         )
-      )}
+      })}
       <PeriodicAssessmentsRows
+        assessmentKey={assessmentKey}
         entity={entity}
         entityType={entityType}
         periodsConfig={periodsConfig}
@@ -92,7 +95,8 @@ const EntityAssessmentResults = ({
     </>
   )
 }
-EntityAssessmentResults.propTypes = {
+EntityPeriodicAssessmentResults.propTypes = {
+  assessmentKey: PropTypes.string.isRequired,
   idSuffix: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
@@ -101,7 +105,8 @@ EntityAssessmentResults.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-const AssessmentResultsTable = ({
+const PeriodicAssessmentResultsTable = ({
+  assessmentKey,
   entity,
   entityType,
   subEntities,
@@ -124,11 +129,13 @@ const AssessmentResultsTable = ({
   if (_isEmpty(periodsConfig?.periods)) {
     return null
   }
-  const entityInstantAssessmentConfig = entity.getInstantAssessmentConfig()
+  const entityInstantAssessmentConfig = entity.getInstantAssessments()
   const subEntitiesInstantAssessmentConfig = subEntities
-    ?.map(s => s.getInstantAssessmentConfig())
+    ?.map(s => s.getInstantAssessments())
     .filter(mc => !_isEmpty(mc))
-  const { assessmentConfig } = entity.getPeriodicAssessmentDetails(recurrence)
+  const { assessmentConfig } = entity.getPeriodicAssessmentDetails(
+    assessmentKey
+  )
   const filteredAssessmentConfig = Model.filterAssessmentConfig(
     assessmentConfig,
     entity
@@ -158,8 +165,9 @@ const AssessmentResultsTable = ({
               <tbody>
                 <>
                   {subEntities?.map(subEntity => (
-                    <EntityAssessmentResults
+                    <EntityPeriodicAssessmentResults
                       key={`subassessment-${subEntity.uuid}`}
+                      assessmentKey={assessmentKey}
                       idSuffix={`subassessment-${subEntity.uuid}`}
                       entity={subEntity}
                       entityType={entityType}
@@ -169,7 +177,8 @@ const AssessmentResultsTable = ({
                     />
                   ))}
                 </>
-                <EntityAssessmentResults
+                <EntityPeriodicAssessmentResults
+                  assessmentKey={assessmentKey}
                   idSuffix={`assessment-${entity.uuid}`}
                   entity={entity}
                   entityType={entityType}
@@ -185,8 +194,9 @@ const AssessmentResultsTable = ({
     </>
   )
 }
-AssessmentResultsTable.propTypes = {
+PeriodicAssessmentResultsTable.propTypes = {
   style: PropTypes.object,
+  assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   subEntities: PropTypes.array,
@@ -195,4 +205,4 @@ AssessmentResultsTable.propTypes = {
   canAddAssessment: PropTypes.bool
 }
 
-export default AssessmentResultsTable
+export default PeriodicAssessmentResultsTable

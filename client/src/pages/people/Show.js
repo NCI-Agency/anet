@@ -188,7 +188,7 @@ const PersonShow = ({ pageDispatchers }) => {
     (!hasPosition && currentUser.isSuperUser()) ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-  const canAddAssessment =
+  const canAddPeriodicAssessment =
     Position.isAdvisor(position) ||
     (Position.isPrincipal(position) &&
       (isAdmin ||
@@ -196,6 +196,7 @@ const PersonShow = ({ pageDispatchers }) => {
           .filter(ap => ap.person)
           .map(ap => ap.person.uuid)
           .includes(person.uuid)))
+  const canAddOndemandAssessment = isAdmin
 
   const action = (
     <div>
@@ -394,7 +395,8 @@ const PersonShow = ({ pageDispatchers }) => {
             <AssessmentResultsContainer
               entity={person}
               entityType={Person}
-              canAddAssessment={canAddAssessment}
+              canAddPeriodicAssessment={canAddPeriodicAssessment}
+              canAddOndemandAssessment={canAddOndemandAssessment}
               onUpdateAssessment={() => {
                 loadAppData()
                 refetch()

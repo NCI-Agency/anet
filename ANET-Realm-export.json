@@ -380,10 +380,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -402,10 +399,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -424,10 +418,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -446,10 +437,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -471,10 +459,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -493,10 +478,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -515,10 +497,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -537,10 +516,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -559,10 +535,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -581,10 +554,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -622,10 +592,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -644,10 +611,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -666,10 +630,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -688,10 +649,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -729,10 +687,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -751,10 +706,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -773,10 +725,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -795,10 +744,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -817,10 +763,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -839,10 +782,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -861,10 +801,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -883,10 +820,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -905,10 +839,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -927,10 +858,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -944,10 +872,7 @@
     "credentials" : [ ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -966,10 +891,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -988,10 +910,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
@@ -1010,10 +929,26 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "offline_access", "uma_authorization" ],
-    "clientRoles" : {
-      "account" : [ "view-profile", "manage-account" ]
-    },
+    "realmRoles" : [ "default-roles-anet-realm" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "b3f67185-77e7-42a0-a2eb-f0739077eab5",
+    "createdTimestamp" : 1648132254453,
+    "username" : "yoshie",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "899fecbd-513c-4397-8a9f-f7ed94dddefe",
+      "type" : "password",
+      "createdDate" : 1648132284197,
+      "secretData" : "{\"value\":\"C9k4kw24WWu0x7mIoGu8AbNe2HQGcLTRBjBQnUhvsYpfmt4XgEZZbY60O6tnarMsUBE2rbBIUmq4S38s02griQ==\",\"salt\":\"mzHByZcPYOXW6Z4GbLNwgQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-anet-realm" ],
     "notBefore" : 0,
     "groups" : [ ]
   } ],

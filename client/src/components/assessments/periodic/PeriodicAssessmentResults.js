@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import API from "api"
-import AssessmentModal from "components/assessments/AssessmentModal"
+import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
@@ -16,11 +16,12 @@ import {
   periodToString
 } from "periodUtils"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { Button, Card, Col, Row } from "react-bootstrap"
 import { toast } from "react-toastify"
 import Settings from "settings"
-import QuestionSet from "./QuestionSet"
+import AssessmentModal from "../AssessmentModal"
+import QuestionSet from "../QuestionSet"
 
 const GQL_DELETE_NOTE = gql`
   mutation($uuid: String!) {
@@ -29,6 +30,7 @@ const GQL_DELETE_NOTE = gql`
 `
 
 const PeriodicAssessment = ({
+  assessmentKey,
   assessment,
   assessmentYupSchema,
   assessmentConfig,
@@ -73,6 +75,7 @@ const PeriodicAssessment = ({
                 <AssessmentModal
                   showModal={showAssessmentModalKey === note.uuid}
                   note={note}
+                  assessmentKey={assessmentKey}
                   assessment={assessment}
                   assessmentYupSchema={assessmentYupSchema}
                   assessmentConfig={assessmentConfig}
@@ -158,6 +161,7 @@ const PeriodicAssessment = ({
   }
 }
 PeriodicAssessment.propTypes = {
+  assessmentKey: PropTypes.string.isRequired,
   assessment: PropTypes.object.isRequired,
   assessmentConfig: PropTypes.object.isRequired,
   assessmentYupSchema: PropTypes.object.isRequired,
@@ -170,13 +174,30 @@ PeriodicAssessment.propTypes = {
 }
 
 export const PeriodicAssessmentsRows = ({
+  assessmentKey,
   entity,
   entityType,
   periodsConfig,
   canAddAssessment,
   onUpdateAssessment
 }) => {
+  const { currentUser } = useContext(AppContext)
   const [showAssessmentModalKey, setShowAssessmentModalKey] = useState(null)
+  const { hasReadAccess, hasWriteAccess } = useMemo(() => {
+    const hasReadAccess = entity.isAuthorizedForAssessment(
+      currentUser,
+      assessmentKey,
+      true
+    )
+    const hasWriteAccess =
+      canAddAssessment ||
+      entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
+    return { hasReadAccess, hasWriteAccess }
+  }, [assessmentKey, canAddAssessment, currentUser, entity])
+  if (!hasReadAccess) {
+    return null
+  }
+
   const { recurrence, periods } = periodsConfig
   if (_isEmpty(periods)) {
     return null
@@ -185,7 +206,7 @@ export const PeriodicAssessmentsRows = ({
   const {
     assessmentConfig,
     assessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails(recurrence)
+  } = entity.getPeriodicAssessmentDetails(assessmentKey)
   const filteredAssessmentConfig = Model.filterAssessmentConfig(
     assessmentConfig,
     entity
@@ -197,16 +218,14 @@ export const PeriodicAssessmentsRows = ({
   const periodsAssessments = []
   const periodsAllowNewAssessment = []
   periods.forEach(period => {
-    const periodAssessments = entity.getPeriodAssessments(recurrence, period)
+    const periodAssessments = entity.getPeriodAssessments(assessmentKey, period)
 
     periodsAssessments.push(periodAssessments)
     // Only allow adding new assessments for a period if the user has the rights
     // for it, if the period is configured to allow adding new assessments
     // If there is already an assessment, don't allow to create a new one
     periodsAllowNewAssessment.push(
-      canAddAssessment &&
-        period.allowNewAssessments &&
-        _isEmpty(periodAssessments)
+      period.allowNewAssessments && _isEmpty(periodAssessments)
     )
   })
   const hasAddAssessmentRow = !_isEmpty(
@@ -223,13 +242,14 @@ export const PeriodicAssessmentsRows = ({
                   <div key={note.uuid}>
                     <PeriodicAssessment
                       note={note}
+                      assessmentKey={assessmentKey}
                       assessment={assessment}
                       assessmentYupSchema={assessmentYupSchema}
                       assessmentConfig={filteredAssessmentConfig}
                       entity={entity}
                       period={periods[index]}
                       recurrence={recurrence}
-                      canEditAssessment={canAddAssessment}
+                      canEditAssessment={hasWriteAccess}
                       onUpdateAssessment={onUpdateAssessment}
                     />
                   </div>
@@ -241,7 +261,7 @@ export const PeriodicAssessmentsRows = ({
           )
         })}
       </tr>
-      {hasAddAssessmentRow && (
+      {hasAddAssessmentRow && hasWriteAccess && (
         <tr>
           {periods.map((period, index) => {
             const periodDisplay = periodToString(period)
@@ -261,6 +281,7 @@ export const PeriodicAssessmentsRows = ({
                     </Button>
                     <AssessmentModal
                       showModal={showAssessmentModalKey === modalKey}
+                      assessmentKey={assessmentKey}
                       note={{
                         type: NOTE_TYPE.ASSESSMENT,
                         noteRelatedObjects: [
@@ -294,6 +315,7 @@ export const PeriodicAssessmentsRows = ({
   )
 }
 PeriodicAssessmentsRows.propTypes = {
+  assessmentKey: PropTypes.string.isRequired,
   entity: PropTypes.object.isRequired,
   entityType: PropTypes.func.isRequired,
   periodsConfig: AssessmentPeriodsConfigPropType.isRequired,

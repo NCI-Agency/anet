@@ -101,6 +101,7 @@ public class MaintenanceCommand extends EnvironmentCommand<AnetConfiguration> {
     engine.getNoteDao().deleteDanglingNotes();
   }
 
+  @Deprecated
   private void migratePartnerAssessments(final AnetObjectEngine engine,
       final AnetConfiguration configuration) {
     logger.info("Migrating old-style partner assessments");

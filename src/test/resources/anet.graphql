@@ -329,11 +329,12 @@ type Mutation {
   updatePosition(position: PositionInput): Int
   updatePositionHistory(position: PositionInput): Int!
   updateReport(report: ReportInput, sendEditEmail: Boolean = true): Report
-  updateReportAssessments(assessments: [NoteInput], report: ReportInput): Int!
+  updateReportAssessments(assessments: [NoteInput], reportUuid: String): Int!
   updateTask(task: TaskInput): Int
 }
 
 type Note {
+  assessmentKey: String
   author: Person
   createdAt: Instant
   noteRelatedObjects: [NoteRelatedObject]
@@ -344,6 +345,7 @@ type Note {
 }
 
 input NoteInput {
+  assessmentKey: String
   author: PersonInput
   createdAt: Instant
   noteRelatedObjects: [NoteRelatedObjectInput]

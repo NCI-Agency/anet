@@ -95,6 +95,7 @@ INSERT INTO people (uuid, name, status, role, "emailAddress", "phoneNumber", ran
 --People
 		(uuid_generate_v4(), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@example.com', '+1-412-9314', 'CIV', NULL, NULL, NULL, 'United States of America', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@example.com', '+1-202-7324', 'CIV', NULL, 'nick', '2a1e98bd-13dc-49c9-a1c5-7137eacc0e8f', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'BEAU, Yoshie', 0, 0, 'hunter+yoshie@example.com', '+1-202-7320', 'CIV', NULL, 'yoshie', 'b3f67185-77e7-42a0-a2eb-f0739077eab5', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@example.com', '+99-9999-9999', 'CIV', NULL, NULL, NULL, 'Italy', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Create locations
@@ -173,6 +174,7 @@ INSERT INTO positions (uuid, name, type, status, "currentPersonUuid", "locationU
 		(uuid_generate_v4(), 'EF 5.1 Super User Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 5.1 Super User Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 9 Advisor', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 9 Approver', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'LNG Advisor A', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'LNG Advisor B', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
@@ -278,6 +280,11 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
 	VALUES ((SELECT uuid from positions where name = 'EF 9 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+nick@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+nick@example.com') WHERE name = 'EF 9 Advisor';
 
+-- Put Yoshie Beau into the EF 9 Approver
+INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
+	VALUES ((SELECT uuid from positions where name = 'EF 9 Approver'), (SELECT uuid from people where "emailAddress" = 'hunter+yoshie@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+yoshie@example.com') WHERE name = 'EF 9 Approver';
+
 -- Put Lin into the LNG Advisor A
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
 	VALUES ((SELECT uuid from positions where name = 'LNG Advisor A'), (SELECT uuid from people where "emailAddress" = 'lin+guist@example.com'), CURRENT_TIMESTAMP);
@@ -337,7 +344,7 @@ INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "upd
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
 	VALUES (uuid_generate_v4(), 'EF8', '', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
-	VALUES (uuid_generate_v4(), 'EF9', 'Gender', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (uuid_generate_v4(), 'EF 9', 'Gender', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
 	VALUES (uuid_generate_v4(), 'TAAC-N', '', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO organizations(uuid, "shortName", "longName", type, "createdAt", "updatedAt")
@@ -386,6 +393,13 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Secondary Reviewers'), (SELECT uuid from positions where name = 'EF 2.2 Final Reviewer'));
 
+-- Create the EF 9 approval process
+INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
+	VALUES (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='EF 9'), 'EF 9 Approvers', 1);
+INSERT INTO approvers ("approvalStepUuid", "positionUuid")
+	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 9 Approvers'), (SELECT uuid from positions where name = 'EF 9 Approver'));
+
+-- Create some tasks
 INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "updatedAt", "customFieldRef1Uuid")
 	VALUES
 		(N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -423,7 +437,8 @@ INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "update
 		(N'12b8dbcc-8f31-444a-9437-00fe00fc1f7b', 'EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(N'19364d81-3203-483d-a6bf-461d58888c76', 'EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(N'9b9f4205-0721-4893-abf8-69e020d4db23', 'EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-		(N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'4831e09b-2bbb-4717-9bfa-91071e62260a', 'EF9', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+		(N'5173f34b-16f5-4e18-aa3d-def55c40e36d', 'Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'4831e09b-2bbb-4717-9bfa-91071e62260a'),
 		(uuid_generate_v4(), 'TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(uuid_generate_v4(), 'TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(uuid_generate_v4(), 'TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
@@ -459,7 +474,8 @@ INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid")
 		((SELECT uuid from tasks where "shortName" = '4.b.3'), (SELECT uuid from organizations where "shortName"='EF 4')),
 		((SELECT uuid from tasks where "shortName" = '4.b.4'), (SELECT uuid from organizations where "shortName"='EF 4')),
 		((SELECT uuid from tasks where "shortName" = '4.b.5'), (SELECT uuid from organizations where "shortName"='EF 4')),
-		((SELECT uuid from tasks where "shortName" = '4.c'), (SELECT uuid from organizations where "shortName"='EF 4'));
+		((SELECT uuid from tasks where "shortName" = '4.c'), (SELECT uuid from organizations where "shortName"='EF 4')),
+		((SELECT uuid from tasks where "shortName" = 'Gender'), (SELECT uuid from organizations where "shortName"='EF 9'));
 
 -- Create a task approval process for some tasks
 INSERT INTO "taskResponsiblePositions" ("taskUuid", "positionUuid")
@@ -1056,8 +1072,8 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 
 -- Add instant assessments to tasks related to reports
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
-  VALUES (:noteUuid, :authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
+  VALUES (:noteUuid, :authorUuid, 3, 'fields.task.subLevel.assessments.subTaskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":4.462819020045945,"question2":"1","question3":"22"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'reports', r.uuid
   FROM reports r
@@ -1068,8 +1084,8 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
   WHERE t."shortName" = '1.2.A';
 
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
-  VALUES (:noteUuid, :authorUuid, 3, '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
+  VALUES (:noteUuid, :authorUuid, 3, 'fields.task.subLevel.assessments.subTaskOnceReport', '{"__recurrence":"once","__relatedObjectType":"report","question1":3.141592653589793,"question2":"3","question3":"14"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'reports', r.uuid
   FROM reports r
@@ -1082,18 +1098,25 @@ INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjec
 -- Add periodic assessment for a task
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'ANDERSON, Andrew' \gset
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
-  VALUES (:noteUuid, :authorUuid, 3, '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
+  VALUES (:noteUuid, :authorUuid, 3, 'fields.task.subLevel.assessments.subTaskMonthly', '{"status":"GREEN","issues":"<ol><li>one</li><li>two</li><li>three</li></ol>","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'tasks', t.uuid
   FROM tasks t
   WHERE t."shortName" = '1.1.A';
 
--- Add periodic assessment for a person
+-- Add periodic assessments for a person
 SELECT ('''' || uuid || '''') AS "authorUuid" FROM people WHERE name = 'JACKSON, Jack' \gset
 SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
-INSERT INTO notes (uuid, "authorUuid", type, text, "createdAt", "updatedAt")
-  VALUES (:noteUuid, :authorUuid, 3, '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
+  VALUES (:noteUuid, :authorUuid, 3, 'fields.principal.person.assessments.principalQuarterly', '{"test3":"3","test2":"3","test1":"3","__recurrence":"quarterly","__periodStart":"' || to_char(date_trunc('quarter', CURRENT_TIMESTAMP) + INTERVAL '-3 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
+  SELECT :noteUuid, 'people', p.uuid
+  FROM people p
+  WHERE p.name = 'ROGWELL, Roger';
+SELECT ('''' || uuid_generate_v4() || '''') AS "noteUuid" \gset
+INSERT INTO notes (uuid, "authorUuid", type, "assessmentKey", text, "createdAt", "updatedAt")
+  VALUES (:noteUuid, :authorUuid, 3, 'fields.principal.person.assessments.principalMonthly', '{"text":"sample text","__recurrence":"monthly","__periodStart":"' || to_char(date_trunc('month', CURRENT_TIMESTAMP) + INTERVAL '-1 month', 'YYYY-MM-DD') || '"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO "noteRelatedObjects" ("noteUuid", "relatedObjectType", "relatedObjectUuid")
   SELECT :noteUuid, 'people', p.uuid
   FROM people p

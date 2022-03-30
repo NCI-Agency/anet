@@ -480,7 +480,8 @@ export default class Report extends Model {
           .filter(ro => ro.relatedObjectType === entityType.relatedObjectType)
           .map(ro => ro.relatedObjectUuid),
         assessmentUuid: n.uuid,
-        assessment: utils.parseJsonSafe(n.text)
+        assessment: utils.parseJsonSafe(n.text),
+        assessmentKey: n.assessmentKey
       }))
       .filter(n => !_isEmpty(n.entityUuids))
     // When updating the instant assessments, we need for each entity the uuid of the
@@ -490,8 +491,11 @@ export default class Report extends Model {
     const entitiesAssessments = {}
     notesToAssessments.forEach(m => {
       m.entityUuids.forEach(entityUuid => {
+        const splittedKey = m.assessmentKey.split(".")
+        const parsedKey = splittedKey.pop()
         entitiesAssessmentsUuids[entityUuid] = m.assessmentUuid
-        entitiesAssessments[entityUuid] = m.assessment
+        entitiesAssessments[entityUuid] = entitiesAssessments[entityUuid] || {}
+        entitiesAssessments[entityUuid][parsedKey] = m.assessment
       })
     })
     return {
@@ -514,6 +518,33 @@ export default class Report extends Model {
       Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
       Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD
     )
+  }
+
+  static getReportSchema(tasks, reportPeople) {
+    // Update the report schema according to the selected report tasks and attendees
+    // instant assessments schema
+    let reportSchema = Report.yupSchema
+    const {
+      assessmentsConfig: tasksInstantAssessmentsConfig,
+      assessmentsSchema: tasksInstantAssessmentsSchema
+    } = Task.getInstantAssessmentsDetailsForEntities(
+      tasks,
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD
+    )
+    const {
+      assessmentsConfig: attendeesInstantAssessmentsConfig,
+      assessmentsSchema: attendeesInstantAssessmentsSchema
+    } = Person.getInstantAssessmentsDetailsForEntities(
+      reportPeople?.filter(rp => rp.attendee),
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+    )
+    if (!_isEmpty(tasksInstantAssessmentsConfig)) {
+      reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
+    }
+    if (!_isEmpty(attendeesInstantAssessmentsConfig)) {
+      reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
+    }
+    return reportSchema
   }
 
   static hasConflict(report01, report02) {
