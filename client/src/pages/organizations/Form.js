@@ -52,7 +52,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
 `
 
 const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
-  const { currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -127,9 +127,8 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         }
         // Super users can select parent organizations among the ones they are responsible from
         if (!isAdmin) {
-          const respOrgsUuids = currentUser.position.responsibleOrganizations.map(
-            org => org.uuid
-          )
+          const respOrgsUuids =
+            currentUser.position.responsibleOrganizations.map(org => org.uuid)
           orgSearchQuery.parentOrgUuid = [
             currentUser.position.organization.uuid,
             ...respOrgsUuids
@@ -490,6 +489,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
+    loadAppData()
     if (!edit) {
       navigate(Organization.pathForEdit(organization), { replace: true })
     }

@@ -332,12 +332,6 @@ export default class Person extends Model {
     if (!this.position || !this.position.organization) {
       return false
     }
-    const ownOrgs = this.position.organization.descendantOrgs || []
-    ownOrgs.push(this.position.organization)
-    const isOwnOrg = ownOrgs.map(o => o.uuid).includes(org.uuid)
-    if (isOwnOrg) {
-      return true
-    }
     if (this.position.responsibleOrganizations) {
       const responsibleOrgUuids = this.position.responsibleOrganizations.reduce(
         (acc, org) => {
