@@ -270,7 +270,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
         {edit && (
           <>
             <Card variant="primary">
-              <Card.Heading>Node palette</Card.Heading>
+              <Card.Header>Node palette</Card.Header>
               <Card.Body style={{ display: "flex", flexDirection: "column" }}>
                 {Object.values(Models).map(Model => {
                   const instance = new Model()
@@ -296,7 +296,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
               </Card.Body>
             </Card>
             <Card variant="primary">
-              <Card.Heading>Node editor</Card.Heading>
+              <Card.Header>Node editor</Card.Header>
               <Card.Body>
                 {editedNode ? (
                   <>

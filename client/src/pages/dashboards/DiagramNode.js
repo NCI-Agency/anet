@@ -24,6 +24,7 @@ import { SPECIAL_WIDGET_TYPES } from "components/CustomFields"
 import LinkTo from "components/LinkTo"
 import { CUSTOM_FIELD_TYPE, GRAPHQL_ENTITY_FIELDS } from "components/Model"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment"
 import { PERIOD_FACTORIES, RECURRENCE_TYPE } from "periodUtils"
@@ -125,7 +126,8 @@ export const DiagramNodeWidget = ({ size, node, engine }) => {
   const instantAssessmentConfig =
     anetObject && anetObject.getInstantAssessmentConfig()
   const instantAssessmentResults =
-    instantAssessmentConfig && anetObject.getInstantAssessmentResults(period)
+    !_isEmpty(instantAssessmentConfig) &&
+    anetObject.getInstantAssessmentResults(period)
   return (
     <div
       className="diagram-node"
