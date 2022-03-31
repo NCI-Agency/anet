@@ -173,6 +173,9 @@ const Leaflet = ({
     setMarkerLayer(newMarkerLayer)
 
     setDoInitializeMarkerLayer(true)
+
+    // Destroy map when done
+    return () => newMap.remove()
   }, [mapId])
 
   useEffect(() => {
