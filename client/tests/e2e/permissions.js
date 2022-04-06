@@ -2,7 +2,7 @@ const uuidv4 = require("uuid").v4
 const test = require("../util/test")
 
 test.serial("checking super user permissions", async t => {
-  t.plan(12)
+  t.plan(13)
 
   const {
     pageHelpers,
@@ -54,8 +54,8 @@ test.serial("checking super user permissions", async t => {
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is super user, he/she may edit position of type super user for
-  // his/her own organization
+  // User is super user, they may edit position of type super user for
+  // the organization they are responsible for
   await editAndSavePositionFromCurrentUserPage(t, true)
 
   await t.context.logout()
@@ -69,11 +69,12 @@ test.serial("checking super user permissions", async t => {
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is super user, he/she may edit position of type super user for
-  // his/her own organization
+  // User is super user, they may edit position of type super user for
+  // the organization they are responsible for
   await editAndSavePositionFromCurrentUserPage(t, true)
 
-  // User is super user, he/she may edit positions only for his/her own organization
+  // User is super user, they may edit positions only for
+  // the organization they are responsible for
   const $otherOrgPositionLink = await getFromSearchResults(
     t,
     "EF 1 Manager",
@@ -88,7 +89,7 @@ test.serial("checking super user permissions", async t => {
   await assertElementNotPresent(
     t,
     ".edit-position",
-    "super user should not be able to edit positions of another organization than his/her own",
+    "super user should not be able to edit positions of the organization they are not responsible for",
     shortWaitMs
   )
 
@@ -111,6 +112,23 @@ test.serial("checking super user permissions", async t => {
   await validateSuperUserLocationPermissions(t)
 
   await t.context.logout()
+
+  await t.context.get("/", "jacob")
+  const $ownOrgPositionLink = await getFromSearchResults(
+    t,
+    "EF 2.2 Final Reviewer",
+    "EF 2.2 Final Reviewer",
+    "positions"
+  )
+  await $ownOrgPositionLink.click()
+  await t.context.driver.wait(t.context.until.stalenessOf($ownOrgPositionLink))
+
+  await assertElementNotPresent(
+    t,
+    ".edit-position",
+    "super user should not be able to edit positions of the organization they are not responsible for",
+    shortWaitMs
+  )
 })
 
 validateUserCannotEditOtherUser(
@@ -119,6 +137,14 @@ validateUserCannotEditOtherUser(
   "arthur",
   "CIV DMIN, Arthur",
   "ANET Administrator"
+)
+
+validateUserCannotEditOtherUser(
+  "super user cannot edit people from the organizations they are not responsible for",
+  "jacob",
+  "rebecca",
+  "CTR BECCABON, Rebecca",
+  "EF 2.2 Final Reviewer"
 )
 
 test.serial("checking regular user permissions", async t => {
