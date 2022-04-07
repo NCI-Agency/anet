@@ -1,3 +1,4 @@
+const webpack = require("webpack")
 const paths = require("../config/paths")
 
 module.exports = {
@@ -23,6 +24,11 @@ module.exports = {
       paths.appSrc,
       "node_modules"
     ]
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        "process.env.NODE_ENV": JSON.stringify("development")
+      })
+    )
 
     /**
      * CSS handling, specifically overriding postcss loader
