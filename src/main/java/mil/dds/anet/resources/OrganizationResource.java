@@ -7,6 +7,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -89,7 +90,7 @@ public class OrganizationResource {
     }
     if (AuthUtils.isAdmin(user) && org.getResponsiblePositions() != null) {
       // Assign all of these positions to this organization.
-      for (Position position : org.getResponsiblePositions()) {
+      for (final Position position : org.getResponsiblePositions()) {
         dao.addPositionToOrganization(position, org);
       }
     }
@@ -124,16 +125,22 @@ public class OrganizationResource {
     if (!AuthUtils.isAdmin(user)) {
       // Check if super user is responsible for the organizations that will be modified with the
       // parent organization update
-      if (!org.getParentOrgUuid().equals(existing.getParentOrgUuid())) {
-        if (!org.getParentOrg().getType().equals(org.getType())) {
-          throw new WebApplicationException(
-              "You cannot assign a different type of organization as the parent", Status.FORBIDDEN);
+      if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {
+        if (org.getParentOrgUuid() != null) {
+          final Organization parentOrg = dao.getByUuid(org.getParentOrgUuid());
+          if (parentOrg.getType() != org.getType()) {
+            throw new WebApplicationException(
+                "You cannot assign a different type of organization as the parent",
+                Status.FORBIDDEN);
+          }
+          AuthUtils.assertSuperUserForOrg(user, org.getParentOrgUuid(), false);
         }
-        AuthUtils.assertSuperUserForOrg(user, existing.getParentOrgUuid(), false);
-        AuthUtils.assertSuperUserForOrg(user, org.getParentOrgUuid(), false);
+        if (existing.getParentOrgUuid() != null) {
+          AuthUtils.assertSuperUserForOrg(user, existing.getParentOrgUuid(), false);
+        }
       }
       // Super user is not authorized to change the organization type
-      if (!org.getType().toString().equals(existing.getType().toString())) {
+      if (org.getType() != existing.getType()) {
         throw new WebApplicationException(
             "You do not have permissions to change the type of this organization",
             Status.FORBIDDEN);

@@ -42,6 +42,7 @@ TRUNCATE TABLE "reportAuthorizationGroups";
 TRUNCATE TABLE "noteRelatedObjects";
 TRUNCATE TABLE "taskTaskedOrganizations";
 TRUNCATE TABLE "taskResponsiblePositions";
+TRUNCATE TABLE "organizationResponsiblePositions";
 DELETE FROM positions;
 DELETE FROM tasks WHERE "customFieldRef1Uuid" IS NOT NULL;
 DELETE FROM tasks WHERE "customFieldRef1Uuid" IS NULL;
