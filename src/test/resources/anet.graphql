@@ -372,7 +372,7 @@ enum NoteType {
   ASSESSMENT
   CHANGE_RECORD
   FREE_TEXT
-  PARTNER_ASSESSMENT
+  PARTNER_ASSESSMENT @deprecated(reason: "Deprecated")
 }
 
 type Organization {
@@ -871,7 +871,7 @@ enum ReportState {
   APPROVED
   CANCELLED
   DRAFT
-  FUTURE
+  FUTURE @deprecated(reason: "Deprecated")
   PENDING_APPROVAL
   PUBLISHED
   REJECTED
