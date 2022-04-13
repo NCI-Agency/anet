@@ -60,6 +60,36 @@
       "matchPackagePrefixes": ["@wdio/", "webdriverio"]
     },
     {
+      "groupName": "NPM, dependencies, Blueprint",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@blueprint/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Emotion",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@emotion/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Fullcalendar",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@fullcalendar/"]
+    },
+    {
+      "groupName": "Gradle/NPM, dependencies, Keycloak",
+      "matchManagers": ["gradle", "npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["org.keycloak:", "keycloak-"]
+    },
+    {
+      "groupName": "NPM, dependencies, Projectstorm",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@projectstorm/"]
+    },
+    {
       "groupName": "NPM, dependencies, Slate",
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
