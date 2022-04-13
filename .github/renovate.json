@@ -63,7 +63,7 @@
       "groupName": "NPM, dependencies, Blueprint",
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["@blueprint/"]
+      "matchPackagePrefixes": ["@blueprintjs/"]
     },
     {
       "groupName": "NPM, dependencies, Emotion",
