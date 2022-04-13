@@ -78,12 +78,6 @@
       "matchPackagePrefixes": ["@fullcalendar/"]
     },
     {
-      "groupName": "Gradle/NPM, dependencies, Keycloak",
-      "matchManagers": ["gradle", "npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["org.keycloak:", "keycloak-"]
-    },
-    {
       "groupName": "NPM, dependencies, Projectstorm",
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
@@ -94,6 +88,11 @@
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
       "matchPackagePrefixes": ["slate"]
+    },
+    {
+      "groupName": "Gradle/NPM, dependencies, Keycloak",
+      "matchManagers": ["gradle", "npm"],
+      "matchPackagePrefixes": ["org.keycloak:", "keycloak-"]
     }
   ],
   "postUpdateOptions": [
