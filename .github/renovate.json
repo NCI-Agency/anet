@@ -92,7 +92,7 @@
     {
       "groupName": "Gradle/NPM, dependencies, Keycloak",
       "matchManagers": ["gradle", "npm"],
-      "matchPackagePrefixes": ["org.keycloak:", "keycloak-"]
+      "matchSourceUrlPrefixes": ["https://github.com/keycloak/"]
     }
   ],
   "postUpdateOptions": [
