@@ -68,13 +68,13 @@ const GQL_GET_ORGANIZATION = gql`
         code
         type
         status
-        organization {
-          uuid
-          shortName
-        }
         location {
           uuid
           name
+        }
+        organization {
+          uuid
+          shortName
         }
         person {
           uuid

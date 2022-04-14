@@ -53,11 +53,9 @@ const GQL_GET_ORGANIZATION = gql`
       responsiblePositions {
         uuid
         name
+        code
+        type
         status
-        person {
-          uuid
-          name
-        }
         location {
           uuid
           name
@@ -65,6 +63,13 @@ const GQL_GET_ORGANIZATION = gql`
         organization {
           uuid
           shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
         }
       }
       approvalSteps {

@@ -104,12 +104,19 @@ const GQL_GET_ORGANIZATION = gql`
         uuid
         name
         code
-        status
         type
+        status
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+        }
         person {
           uuid
           name
-          status
           rank
           role
           avatar(size: 32)

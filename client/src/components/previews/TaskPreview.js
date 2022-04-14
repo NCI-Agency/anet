@@ -39,13 +39,13 @@ const GQL_GET_TASK = gql`
         code
         type
         status
-        organization {
-          uuid
-          shortName
-        }
         location {
           uuid
           name
+        }
+        organization {
+          uuid
+          shortName
         }
         person {
           uuid
