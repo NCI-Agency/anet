@@ -3,7 +3,6 @@ import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
   OrganizationOverlayRow,
-  PositionOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -21,7 +20,6 @@ import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
-import PositionTable from "components/PositionTable"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position, Task } from "models"
@@ -31,7 +29,6 @@ import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
@@ -81,18 +78,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   ]
   const IdentificationCodeFieldWithLabel = DictionaryField(FastField)
   const LongNameWithLabel = DictionaryField(FastField)
-  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
-
-  const positionsFilters = {
-    allAdvisorPositions: {
-      label: "All advisor positions",
-      queryVars: {
-        status: Model.STATUS.ACTIVE,
-        type: [Position.TYPE.SUPER_USER],
-        matchPersonName: true
-      }
-    }
-  }
 
   return (
     <Formik
@@ -313,42 +298,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       dictProps={orgSettings.identificationCode}
                       name="identificationCode"
                       component={FieldHelper.InputField}
-                    />
-                    <ResponsiblePositionsMultiSelect
-                      name="responsiblePositions"
-                      component={FieldHelper.SpecialField}
-                      dictProps={orgSettings.responsiblePositions}
-                      disabled={!isAdmin}
-                      onChange={value => {
-                        // validation will be done by setFieldValue
-                        value = value.map(position =>
-                          Position.filterClientSideFields(position)
-                        )
-                        setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
-                        setFieldValue("responsiblePositions", value)
-                      }}
-                      widget={
-                        <AdvancedMultiSelect
-                          fieldName="responsiblePositions"
-                          value={values.responsiblePositions}
-                          renderSelected={
-                            <PositionTable
-                              positions={values.responsiblePositions || []}
-                              showDelete={isAdmin}
-                            />
-                          }
-                          overlayColumns={[
-                            "Position",
-                            "Organization",
-                            "Current Occupant"
-                          ]}
-                          overlayRenderRow={PositionOverlayRow}
-                          filterDefs={positionsFilters}
-                          objectType={Position}
-                          fields={Position.autocompleteQuery}
-                          addon={POSITIONS_ICON}
-                        />
-                      }
                     />
                   </>
                 )}

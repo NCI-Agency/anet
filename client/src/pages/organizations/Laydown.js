@@ -1,4 +1,5 @@
 import AppContext from "components/AppContext"
+import EditResponsiblePositionsModal from "components/EditResponsiblePositionsModal"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
@@ -12,9 +13,14 @@ import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 import Settings from "settings"
 
-const OrganizationLaydown = ({ organization }) => {
+const OrganizationLaydown = ({ organization, refetch }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
+  const [
+    showResponsiblePositionsModal,
+    setShowResponsiblePositionsModal
+  ] = useState(false)
+  const isAdmin = currentUser && currentUser.isAdmin()
   const isSuperUserForOrg =
     currentUser && currentUser.isSuperUserForOrg(organization)
   const isSuperUser = currentUser && currentUser.isSuperUser()
@@ -105,8 +111,27 @@ const OrganizationLaydown = ({ organization }) => {
           <em>There are no vacant positions</em>
         )}
       </Fieldset>
-      <Fieldset id="responsiblePositions" title="Responsible Positions">
+      <Fieldset
+        id="responsiblePositions"
+        title="Responsible Positions"
+        action={
+          isAdmin && (
+            <Button
+              onClick={() => setShowResponsiblePositionsModal(true)}
+              variant="outline-secondary"
+            >
+              Edit Responsible Positions
+            </Button>
+          )
+        }
+      >
         <PositionTable positions={organization.responsiblePositions} />
+        <EditResponsiblePositionsModal
+          organization={organization}
+          showModal={showResponsiblePositionsModal}
+          onCancel={() => hideResponsiblePositionsModal(false)}
+          onSuccess={() => hideResponsiblePositionsModal(true)}
+        />
       </Fieldset>
     </Element>
   )
@@ -230,10 +255,18 @@ const OrganizationLaydown = ({ organization }) => {
   function toggleShowInactive() {
     setShowInactivePositions(!showInactivePositions)
   }
+
+  function hideResponsiblePositionsModal(success) {
+    setShowResponsiblePositionsModal(false)
+    if (success) {
+      refetch()
+    }
+  }
 }
 
 OrganizationLaydown.propTypes = {
-  organization: PropTypes.instanceOf(Organization).isRequired
+  organization: PropTypes.instanceOf(Organization).isRequired,
+  refetch: PropTypes.func.isRequired
 }
 
 export default OrganizationLaydown
