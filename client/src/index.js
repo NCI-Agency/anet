@@ -5,7 +5,7 @@ import { jumpToTop } from "components/Page"
 import "locale-compare-polyfill"
 import App from "pages/App"
 import React from "react"
-import ReactDOM from "react-dom"
+import { createRoot } from "react-dom/client"
 import { Provider } from "react-redux"
 import { BrowserRouter, Route } from "react-router-dom"
 import { persistStore } from "redux-persist"
@@ -22,7 +22,9 @@ window.onerror = function(message, url, lineNumber, columnNumber) {
   return false
 }
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root"))
+
+root.render(
   <Provider store={store}>
     <PersistGate persistor={persistor}>
       <ApolloProvider client={API.client}>
@@ -31,6 +33,5 @@ ReactDOM.render(
         </BrowserRouter>
       </ApolloProvider>
     </PersistGate>
-  </Provider>,
-  document.getElementById("root")
+  </Provider>
 )
