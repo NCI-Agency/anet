@@ -426,7 +426,7 @@ const ReportForm = ({
 
         return (
           <div className="report-form">
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={saveError} />
 
             {showAssignedPositionWarning && (
