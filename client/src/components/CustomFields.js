@@ -885,10 +885,9 @@ export const CustomFieldsContainer = props => {
     fieldsConfig,
     setShowCustomFields
   } = props
-  const deprecatedFieldsFiltered = filterDeprecatedFields(
-    fieldsConfig,
-    values,
-    parentFieldName
+  const deprecatedFieldsFiltered = useMemo(
+    () => filterDeprecatedFields(fieldsConfig, values, parentFieldName),
+    [fieldsConfig, parentFieldName, values]
   )
   const invisibleFields = useMemo(
     () => getInvisibleFields(fieldsConfig, parentFieldName, values),

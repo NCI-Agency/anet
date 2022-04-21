@@ -422,7 +422,7 @@ const ReportForm = ({
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
-        const relatedObject = hasAssessments ? new Report(values) : {}
+        const relatedObject = hasAssessments ? values : {}
 
         return (
           <div className="report-form">
