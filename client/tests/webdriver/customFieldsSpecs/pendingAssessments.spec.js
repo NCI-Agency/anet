@@ -49,9 +49,9 @@ describe("In my counterparts page", () => {
         ).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
       MyCounterparts.logout()
     })
@@ -94,9 +94,9 @@ describe("In my counterparts page", () => {
         ).isExisting()
       ).to.be.false
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
       MyCounterparts.logout()
     })
@@ -141,9 +141,9 @@ describe("In my tasks page", () => {
         AssessmentsSection.getModalAssessmentQuestion("status").isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
     })
     it("Should be able to add a weekly assessment with 1 question for the task", () => {
@@ -165,9 +165,9 @@ describe("In my tasks page", () => {
         AssessmentsSection.getModalAssessmentQuestion("status").isExisting()
       ).to.be.false
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
       MyTasks.logout()
     })
