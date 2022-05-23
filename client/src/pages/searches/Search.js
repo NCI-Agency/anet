@@ -631,11 +631,9 @@ const Search = ({
       }),
     [searchQueryParams]
   )
-  const queryTypes = _isEmpty(searchQueryParams)
-    ? []
-    : searchQuery.objectType
-      ? [searchQuery.objectType]
-      : Object.keys(SEARCH_OBJECT_TYPES)
+  const queryTypes = searchQuery.objectType
+    ? [searchQuery.objectType]
+    : Object.keys(SEARCH_OBJECT_TYPES)
   const hasOrganizationsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) &&
     numOrganizations > 0
