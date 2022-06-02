@@ -1308,3 +1308,36 @@ div[id*='fg-entityAssessment'] {
     text-align: left;
   }
 }
+
+.all-locations-marker-cluster-icon-container {
+	border: 1px solid #3272cb;
+	position: relative !important;
+	border-radius: 6px;
+	background: white;
+}
+
+.all-locations-marker-cluster-icon-container:hover {
+	z-index: 9999 !important;
+}
+
+.all-locations-marker-cluster-icon-container .alm-cluster-icon {
+	transform-origin: bottom center;
+	transform: translate(-14px, -54px);
+	/* Prevents hover on parent container. If the mouse is on the image, parent container is not hovered while
+	 other childs and parent itself remains hoverable. Image is much larger than the container and it overflows parent.
+	 If hover is not prevented on the image then parent receives "z-index: 9999" which makes any marker beneath unclickable. */
+	pointer-events: none;
+}
+
+.all-locations-marker-cluster-icon-container .alm-cluster-text {
+	width: 34px;
+	height: 26px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	transform: translate(3px, -36px);
+	font-size: 14px;
+	padding: 3px 0 0 5px;
+	color: white;
+	font-weight: bold;
+}
