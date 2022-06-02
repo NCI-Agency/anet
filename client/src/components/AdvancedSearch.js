@@ -238,7 +238,13 @@ const AdvancedSearch = ({
 
     setFilters(
       filters
-        .filter(value => commonFiltersForAllObjectTypes[value.key])
+        .filter(
+          value =>
+            // Keep the common filters for every object type
+            commonFiltersForAllObjectTypes[value.key] &&
+            // Discard the default filters as they will be concatenated later
+            !ALL_FILTERS[objectType].filters[value.key].isDefault
+        )
         // Add defaults as well
         .concat(defaultFiltersForObjectType)
     )
