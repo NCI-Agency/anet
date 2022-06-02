@@ -70,7 +70,10 @@ class Page {
     pathName = "/",
     credentials = Page.DEFAULT_CREDENTIALS.user
   ) {
-    browser.url(this._buildUrl(pathName, credentials))
+    browser.url(pathName)
+    if (this.loginForm.isExisting()) {
+      this.login(credentials)
+    }
   }
 
   open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {

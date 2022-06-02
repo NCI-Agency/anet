@@ -30,7 +30,8 @@ const bstackOptions = {
   userName: user,
   accessKey: key,
   // This requires that BrowserStackLocal is running!
-  local: "true"
+  local: "true",
+  seleniumVersion: "4.1.2"
 }
 const capabilities = {
   maxInstances: 1,
