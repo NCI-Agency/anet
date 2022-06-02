@@ -122,7 +122,7 @@
     "@fullcalendar/daygrid": "5.11.0",
     "@fullcalendar/interaction": "5.11.0",
     "@fullcalendar/list": "5.11.0",
-    "@fullcalendar/react": "5.11.0",
+    "@fullcalendar/react": "5.11.1",
     "@fullcalendar/timegrid": "5.11.0",
     "@projectstorm/react-diagrams-core": "6.7.0",
     "@projectstorm/react-diagrams-defaults": "6.7.0",
