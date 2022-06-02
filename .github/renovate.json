@@ -24,7 +24,9 @@
     },
     {
       "matchPackageNames": [
+        "autoprefixer",
         "com.graphql-java:graphql-java-extended-scalars",
+        "leaflet",
         "react-router-bootstrap"
       ],
       "enabled": false
