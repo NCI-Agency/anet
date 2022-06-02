@@ -39,7 +39,6 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
-import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Organization } from "models"
 import pluralize from "pluralize"
@@ -631,11 +630,9 @@ const Search = ({
       }),
     [searchQueryParams]
   )
-  const queryTypes = _isEmpty(searchQueryParams)
-    ? []
-    : searchQuery.objectType
-      ? [searchQuery.objectType]
-      : Object.keys(SEARCH_OBJECT_TYPES)
+  const queryTypes = searchQuery.objectType
+    ? [searchQuery.objectType]
+    : Object.keys(SEARCH_OBJECT_TYPES)
   const hasOrganizationsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) &&
     numOrganizations > 0
@@ -775,7 +772,7 @@ const Search = ({
             </Dropdown.Menu>
           </Dropdown>
         )}
-        {!_isEmpty(searchQueryParams) && numResults >= 0 && (
+        {numResults >= 0 && (
           <Button
             onClick={openSaveModal}
             id="saveSearchButton"
@@ -787,19 +784,12 @@ const Search = ({
         )}
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
-      {!_isEmpty(searchQueryParams) && (
-        <h4 className="d-none d-print-block">
-          Search query: {searchQuery.text}
-          <br />
-          Filters: <SearchDescription searchQuery={searchQuery} />
-        </h4>
-      )}
-      {_isEmpty(searchQueryParams) && (
-        <Alert variant="warning">
-          <b>You did not enter any search criteria.</b>
-        </Alert>
-      )}
-      {!_isEmpty(searchQueryParams) && numResults === 0 && (
+      <h4 className="d-none d-print-block">
+        Search query: {searchQuery.text}
+        <br />
+        Filters: <SearchDescription searchQuery={searchQuery} />
+      </h4>
+      {numResults === 0 && (
         <Alert variant="warning">
           <b>No search results found!</b>
         </Alert>
