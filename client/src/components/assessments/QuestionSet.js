@@ -6,7 +6,7 @@ import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useMemo } from "react"
 
 const QuestionSet = ({
   entity,
@@ -17,15 +17,21 @@ const QuestionSet = ({
   readonly,
   vertical
 }) => {
+  const filteredQuestionSets = useMemo(() => {
+    const entityConfigs = {}
+    Object.keys(questionSets).forEach(set => {
+      entityConfigs[set] = Model.filterAssessmentConfig(
+        questionSets[set],
+        entity,
+        relatedObject
+      )
+    })
+    return entityConfigs
+  }, [entity, questionSets, relatedObject])
   const { values } = formikProps
   return (
     <>
       {Object.keys(questionSets).map(set => {
-        const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
-          questionSets[set],
-          entity,
-          relatedObject
-        )
         return (
           <Fieldset
             title={questionSets[set]?.label}
@@ -33,27 +39,27 @@ const QuestionSet = ({
             key={`questionSet-${set}`}
             style={{ paddingRight: "0", marginBottom: "0" }}
           >
-            {!_isEmpty(entityInstantAssessmentConfig.questions) &&
+            {!_isEmpty(filteredQuestionSets[set].questions) &&
               (readonly ? (
                 <ReadonlyCustomFields
                   parentFieldName={`${parentFieldName}.${set}.questions`}
-                  fieldsConfig={entityInstantAssessmentConfig.questions}
+                  fieldsConfig={filteredQuestionSets[set].questions}
                   values={values}
                   vertical={vertical}
                 />
               ) : (
                 <CustomFieldsContainer
                   formikProps={formikProps}
-                  fieldsConfig={entityInstantAssessmentConfig.questions}
+                  fieldsConfig={filteredQuestionSets[set].questions}
                   parentFieldName={`${parentFieldName}.${set}.questions`}
                   vertical={vertical}
                 />
               ))}
-            {!_isEmpty(entityInstantAssessmentConfig.questionSets) && (
+            {!_isEmpty(filteredQuestionSets[set].questionSets) && (
               <QuestionSet
                 entity={entity}
                 relatedObject={relatedObject}
-                questionSets={entityInstantAssessmentConfig.questionSets}
+                questionSets={filteredQuestionSets[set].questionSets}
                 parentFieldName={`${parentFieldName}.${set}.questionSets`}
                 formikProps={formikProps}
                 readonly={readonly}

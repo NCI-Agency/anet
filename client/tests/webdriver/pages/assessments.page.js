@@ -19,8 +19,8 @@ class AssessmentsSection extends Page {
     return this.modalContent.$("div.modal-title")
   }
 
-  get modalCancelButton() {
-    return this.modalContent.$('//button[text()="Cancel"]')
+  get modalCloseButton() {
+    return this.modalContent.$(".btn-close")
   }
 
   getModalAssessmentQuestion(key) {

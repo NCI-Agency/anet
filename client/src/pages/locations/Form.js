@@ -156,7 +156,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
 
         return (
           <div>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />

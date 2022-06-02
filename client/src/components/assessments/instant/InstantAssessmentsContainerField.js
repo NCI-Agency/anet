@@ -32,17 +32,16 @@ const InstantAssessmentRow = ({
       entity.isAuthorizedForAssessment(currentUser, assessmentKey, false)
     return { hasReadAccess, hasWriteAccess }
   }, [assessmentKey, canRead, canWrite, currentUser, entity])
+  const entityInstantAssessmentConfig = useMemo(
+    () => Model.filterAssessmentConfig(assessmentConfig, entity, relatedObject),
+    [assessmentConfig, entity, relatedObject]
+  )
   if (!hasReadAccess) {
     return null
   }
 
   const readOnlyAccess = readonly || !hasWriteAccess
   const { values } = formikProps
-  const entityInstantAssessmentConfig = Model.filterAssessmentConfig(
-    assessmentConfig,
-    entity,
-    relatedObject
-  )
   if (
     _isEmpty(entityInstantAssessmentConfig.questions) &&
     _isEmpty(entityInstantAssessmentConfig.questionSets)

@@ -195,7 +195,7 @@ const PersonForm = ({
 
         return (
           <>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Form className="form-horizontal" method="post">
               <Messages error={error} />
               <Fieldset title={title} action={action} />
