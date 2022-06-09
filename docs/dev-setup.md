@@ -149,7 +149,8 @@ The tests are reliant on the data looking pretty similar to what you'd get after
 1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
 1. Optionally, make sure you have the proper nodejs and yarn in your path (see the [React Frontend](#react-frontend) instructions).
 
-Run `./gradlew yarn_run_lint-fix` to automatically fix some kinds of lint errors.
+Run `./gradlew yarn_run_lint:fix` to automatically fix some kinds of lint errors.
+Run `./gradlew yarn_run_prettier:format` to reformat the JavaScript code according to our style guide.
 
 #### Client-side testing locally
 To run the tests locally, make sure you have the server using the test-database running as above.
