@@ -2,9 +2,9 @@
 import CreateAuthorizationGroup from "../pages/createAuthorizationGroup.page"
 import CreateOrganization from "../pages/createNewOrganization.page"
 import CreatePerson from "../pages/createNewPerson.page"
+import CreatePosition from "../pages/createNewPosition.page"
 import CreateTask from "../pages/createNewTask.page"
 import CreateReport from "../pages/createReport.page"
-import CreatePosition from "../pages/createNewPosition.page"
 import CreateNewLocation from "../pages/location/createNewLocation.page"
 
 // Forms should work just fine without custom fields

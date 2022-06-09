@@ -1,4 +1,5 @@
-import FullCalendar from "@fullcalendar/react" // needs to be imported first, before plugins
+// needs to be imported first, before plugins:
+import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import {
   aggregationWidgetDefaultProps,

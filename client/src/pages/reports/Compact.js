@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
-import API from "api"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,

@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import AggregationWidgetContainer, {
-  AGGREGATION_WIDGET_TYPE,
   AGGREGATION_TYPE,
+  AGGREGATION_WIDGET_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import { CALENDAR_OBJECT_TYPES } from "components/aggregations/utils"

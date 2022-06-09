@@ -1,7 +1,7 @@
-import userTypes from "./users/userTypes"
-import buildupOld from "./buildup/oldScenario"
 import buildupLotsOfData from "./buildup/lotsOfData"
+import buildupOld from "./buildup/oldScenario"
 import stories from "./stories/storySim"
+import userTypes from "./users/userTypes"
 
 // Original scenario which was not in use anymore
 const scenario1 = {

@@ -1,7 +1,8 @@
 import { Icon, IconSize } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
+// needed for the mosaic tile buttons (expand, close):
+import "@blueprintjs/icons/lib/css/blueprint-icons.css"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import PlanningConflictForPerson from "components/PlanningConflictForPerson"

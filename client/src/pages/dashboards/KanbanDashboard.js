@@ -4,8 +4,8 @@ import API from "api"
 import Kanban from "components/Kanban"
 import Model from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { LAST_MONTH } from "dateUtils"

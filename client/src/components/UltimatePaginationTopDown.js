@@ -1,6 +1,6 @@
+import UltimatePagination from "components/UltimatePagination"
 import PropTypes from "prop-types"
 import React from "react"
-import UltimatePagination from "components/UltimatePagination"
 
 const UltimatePaginationTopDown = ({
   componentClassName,

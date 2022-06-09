@@ -5,8 +5,8 @@ import AppContext from "components/AppContext"
 import Fieldset from "components/Fieldset"
 import Model from "components/Model"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Person, Position } from "models"

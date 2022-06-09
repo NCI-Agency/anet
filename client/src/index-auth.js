@@ -1,4 +1,5 @@
 import { initOptions, keycloak } from "keycloak"
+
 ;(async() => {
   keycloak.onTokenExpired = () =>
     keycloak

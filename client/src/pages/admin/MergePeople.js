@@ -32,8 +32,8 @@ import useMergeObjects, {
   getClearButton,
   getInfoButton,
   getOtherSide,
-  mergedPersonIsValid,
   MERGE_SIDES,
+  mergedPersonIsValid,
   selectAllFields,
   setAMergedField,
   setMergeable
