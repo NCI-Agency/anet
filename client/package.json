@@ -38,6 +38,7 @@
     "@storybook/theming": "6.3.12",
     "@testing-library/jest-dom": "5.16.4",
     "@testing-library/react": "13.3.0",
+    "@trivago/prettier-plugin-sort-imports": "3.2.0",
     "@wdio/browserstack-service": "7.19.7",
     "@wdio/cli": "7.19.7",
     "@wdio/local-runner": "7.19.7",
@@ -400,6 +401,18 @@
   },
   "prettier": {
     "arrowParens": "avoid",
+    "importOrder": [
+      "@fullcalendar/react",
+      "^[^.]",
+      "^[./]"
+    ],
+    "importOrderCaseInsensitive": true,
+    "importOrderParserPlugins": [
+      "exportDefaultFrom",
+      "typescript",
+      "jsx"
+    ],
+    "importOrderSortSpecifiers": true,
     "semi": false,
     "trailingComma": "none"
   }
