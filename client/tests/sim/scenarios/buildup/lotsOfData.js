@@ -1,5 +1,5 @@
 import Model from "components/Model"
-import { Person, Organization, Report } from "models"
+import { Organization, Person, Report } from "models"
 import { createLocation } from "../../stories/LocationStories"
 import { createNote } from "../../stories/NoteStories"
 import { createHierarchy } from "../../stories/OrganizationStories"

@@ -6,8 +6,8 @@ import {
   InMemoryCache,
   useQuery
 } from "@apollo/client"
-import _isEmpty from "lodash/isEmpty"
 import { keycloak } from "keycloak"
+import _isEmpty from "lodash/isEmpty"
 
 const GRAPHQL_ENDPOINT = "/graphql"
 const LOGGING_ENDPOINT = "/api/logging/log"

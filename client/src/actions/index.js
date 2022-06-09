@@ -1,6 +1,6 @@
+import Model from "components/Model"
 import pluralize from "pluralize"
 import Settings from "settings"
-import Model from "components/Model"
 import * as types from "../constants/ActionTypes"
 
 export const DEFAULT_PAGE_PROPS = {

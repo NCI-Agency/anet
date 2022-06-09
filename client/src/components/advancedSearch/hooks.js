@@ -1,5 +1,5 @@
 import _isEqualWith from "lodash/isEqualWith"
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import utils from "utils"
 
 const useSearchFilter = (

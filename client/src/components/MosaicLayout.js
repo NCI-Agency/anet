@@ -1,7 +1,8 @@
 import { Classes, Icon, IconSize } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
+// needed for the mosaic tile buttons (expand, close):
+import "@blueprintjs/icons/lib/css/blueprint-icons.css"
 import classNames from "classnames"
 import _cloneDeep from "lodash/cloneDeep"
 import _dropRight from "lodash/dropRight"
