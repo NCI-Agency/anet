@@ -1,0 +1,117 @@
+%! NCI Agency template
+
+\newenvironment{unbreakable}{\samepage}{\pagebreak[0]}
+
+\documentclass[a4paper,11pt,twoside]{scrartcl}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[bottom=1in]{geometry}
+\usepackage{grffile}
+\usepackage{todonotes}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb}
+% Use NotoColorEmoji as fallback font for Emoji
+\usepackage{fontspec}
+\directlua{luaotfload.add_fallback
+   ("emojifallback",
+    {
+      "NotoColorEmoji:mode=harf"
+    }
+   )}
+% Similar to Calibri font
+\setmainfont{carlito}[
+  RawFeature={fallback=emojifallback}
+]
+\setsansfont{carlito}[
+  RawFeature={fallback=emojifallback}
+]
+\usepackage{iftex}
+\usepackage{unicode-math}
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\usepackage{xcolor}
+% Add URL line breaks if available
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{}
+\usepackage{listings}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+\usepackage{etoolbox}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{svg}
+
+\svgpath{.}
+
+\title{$title$}
+\author{$author$}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{$classification$}
+
+% Prevent paragraph indentation
+\setlength{\parindent}{0pt}
+
+% Improve code listing layout
+\lstset{basicstyle=\ttfamily,columns=fullflexible}
+
+% From pandoc default.latex
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+% Define tightlist
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% Define passthrough
+%\newcommand{\passthrough}[1]{\lstset{mathescape=false}#1\lstset{mathescape=true}}
+\newcommand{\passthrough}[1]{#1}
+
+% Document
+\begin{document}
+
+  \begin{titlepage}
+
+    % Include header on title page
+    \thispagestyle{fancy}% changed from "empty"
+    % Set header length (must be >= 14pt)
+
+    \begin{center}
+      \includesvg[width=0.6\columnwidth]{images/logo-ncia.svg}
+      \vskip 1.5cm
+      \includesvg[width=0.3\columnwidth]{images/logo-nato.svg}
+      \vskip 1.5cm
+      \includesvg[width=0.6\columnwidth]{$productLogo$}
+      \vskip 1.5cm
+      \textbf{$title$}
+      \vskip 0.5cm
+      Version $productVersion$-$docVersion$
+      \vskip 0.5cm
+      \textbf{$author$}
+      \vfill
+    \end{center}
+  \end{titlepage}
+
+  \pagenumbering{roman}
+  \cfoot{\thepage}
+  \section*{Document history}\label{sec:doc-history}
+
+  \begin{tabular}{| p{0.18\linewidth} | p{0.12\linewidth} | p{0.28\linewidth} | p{0.27\linewidth} |}
+    \hline
+    \multicolumn{4}{|c|}{Document version history} \\
+    \hline
+    \textbf{Date} & \textbf{Version} & \textbf{Author} & \textbf{Notes} \\
+    \hline
+    $versionHistory$
+    \hline
+  \end{tabular}
+
+  \newpage
+
+  \setcounter{tocdepth}{2}
+  \tableofcontents
+  \newpage
+
+  \pagenumbering{arabic}
+  $body$
+
+\end{document}
