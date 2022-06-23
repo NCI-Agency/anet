@@ -63,6 +63,7 @@ import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ViewRequestFilter;
 import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -396,8 +397,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(loggingResource);
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
-    environment.jersey().register(new ViewResponseFilter(configuration));
     environment.jersey().register(graphQlResource);
+    environment.jersey().register(ViewRequestFilter.class);
+    environment.jersey().register(ViewResponseFilter.class);
   }
 
   private void runAccountDeactivationWorker(final AnetConfiguration configuration,
