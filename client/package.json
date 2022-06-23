@@ -182,10 +182,10 @@
     "redux": "4.2.0",
     "redux-persist": "6.0.0",
     "resize-observer-polyfill": "1.5.1",
-    "slate": "0.76.1",
+    "slate": "0.81.1",
     "slate-history": "0.66.0",
-    "slate-hyperscript": "0.67.0",
-    "slate-react": "0.76.1",
+    "slate-hyperscript": "0.77.0",
+    "slate-react": "0.81.0",
     "use-debounce": "7.0.1",
     "yup": "0.32.11"
   },
