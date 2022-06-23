@@ -4,7 +4,13 @@
 name: ShiftLeft Scan
 
 # This section configures the trigger for the workflow. Feel free to customize depending on your convention
-on: push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
   Scan-Build:
