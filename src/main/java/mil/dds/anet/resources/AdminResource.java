@@ -19,9 +19,9 @@ import javax.ws.rs.core.MediaType;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.userActivity.Activity;
-import mil.dds.anet.beans.userActivity.RecentActivities;
-import mil.dds.anet.beans.userActivity.UserActivity;
+import mil.dds.anet.beans.recentActivity.Activity;
+import mil.dds.anet.beans.recentActivity.RecentActivities;
+import mil.dds.anet.beans.recentActivity.RecentUserActivity;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -104,25 +104,25 @@ public class AdminResource {
   }
 
   /**
-   * Returns user logs in descending order of time
+   * Returns recent user activities in descending order of time
    */
-  @GraphQLQuery(name = "userActivities")
-  public RecentActivities userActivities(@GraphQLRootContext Map<String, Object> context) {
+  @GraphQLQuery(name = "recentActivities")
+  public RecentActivities recentActivities(@GraphQLRootContext Map<String, Object> context) {
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
 
-    final List<UserActivity> byActivity = new ArrayList<>();
-    final List<UserActivity> byUser = new ArrayList<>();
+    final List<RecentUserActivity> byActivity = new ArrayList<>();
+    final List<RecentUserActivity> byUser = new ArrayList<>();
 
     final Cache<String, Person> domainUsersCache =
         AnetObjectEngine.getInstance().getPersonDao().getDomainUsersCache();
     for (final Cache.Entry<String, Person> entry : domainUsersCache) {
       final Person person = entry.getValue();
-      final Deque<Activity> activities = person.getUserActivities();
+      final Deque<Activity> activities = person.getRecentActivities();
       if (!Utils.isEmptyOrNull(activities)) {
-        byUser.add(new UserActivity(person, activities.getFirst()));
+        byUser.add(new RecentUserActivity(person, activities.getFirst()));
         activities.forEach(activity -> {
-          byActivity.add(new UserActivity(person, activity));
+          byActivity.add(new RecentUserActivity(person, activity));
         });
       }
     }

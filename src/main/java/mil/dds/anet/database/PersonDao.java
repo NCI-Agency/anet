@@ -25,8 +25,8 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.userActivity.Activity;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
@@ -252,12 +252,12 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   public void logActivitiesByOpenIdSubject(String openIdSubject, Activity activity) {
     final Person person = domainUsersCache.get(openIdSubject);
     if (person != null) {
-      final Deque<Activity> activities = person.getUserActivities();
+      final Deque<Activity> activities = person.getRecentActivities();
       activities.addFirst(activity);
       while (activities.size() > ACTIVITY_LOG_LIMIT) {
         activities.removeLast();
       }
-      person.setUserActivities(activities);
+      person.setRecentActivities(activities);
       domainUsersCache.replace(openIdSubject, person);
     }
   }

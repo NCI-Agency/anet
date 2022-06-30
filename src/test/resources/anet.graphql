@@ -689,19 +689,25 @@ type Query {
   position(uuid: String): Position
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
   projectVersion: String
+  recentActivities: RecentActivities
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
   rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
   showRollupEmail(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
-  userActivities: RecentActivities
 }
 
 """"""
 type RecentActivities {
-  byActivity: [UserActivity]
-  byUser: [UserActivity]
+  byActivity: [RecentUserActivity]
+  byUser: [RecentUserActivity]
+}
+
+""""""
+type RecentUserActivity {
+  activity: Activity
+  user: Person
 }
 
 """"""
@@ -1153,9 +1159,3 @@ enum TaskSearchSortBy {
 
 """Use SPQR's SchemaPrinter to remove this from SDL"""
 scalar UNREPRESENTABLE
-
-""""""
-type UserActivity {
-  activity: Activity
-  user: Person
-}

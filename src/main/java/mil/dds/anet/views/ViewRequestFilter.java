@@ -8,7 +8,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Context;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.userActivity.Activity;
+import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
@@ -27,7 +27,7 @@ public class ViewRequestFilter implements ContainerRequestFilter {
       final Person person = (Person) userPrincipal;
       final Activity activity = new Activity(ResponseUtils.getRemoteAddr(request),
           ResponseUtils.getReferer(requestContext), DaoUtils.getCurrentMinute());
-      // Store user activities in Person bean
+      // Store recent user activities in Person bean
       AnetObjectEngine.getInstance().getPersonDao()
           .logActivitiesByOpenIdSubject(person.getOpenIdSubject(), activity);
     }
