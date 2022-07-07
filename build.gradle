@@ -5,8 +5,8 @@ plugins {
 	id "org.kordamp.gradle.markdown" version "2.2.0"
 	// https://github.com/bmuschko/gradle-docker-plugin
 	id "com.bmuschko.docker-remote-api" version "7.4.0"
-	id "com.github.node-gradle.node" version "3.3.0"
-	id "com.diffplug.spotless" version "6.6.1"
+	id "com.github.node-gradle.node" version "3.4.0"
+	id "com.diffplug.spotless" version "6.8.0"
 	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18"
 	id "org.beryx.runtime" version "1.12.7"
 	id "nebula.ospackage" version "9.1.1"
@@ -24,9 +24,9 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 boolean isTestEnv = project.hasProperty("testEnv")
-String dropwizardVersion = "2.1.0"
+String dropwizardVersion = "2.1.1"
 String logbackVersion = "1.2.11"
-String log4jVersion = "2.17.2"
+String log4jVersion = "2.18.0"
 String keycloakVersion = "16.1.1"
 String containerPushDataPath = "/var/tmp"
 
@@ -79,13 +79,13 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-views-freemarker:${dropwizardVersion}"
 	implementation 'io.dropwizard-bundles:dropwizard-configurable-assets-bundle:1.3.5'
 
-	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.5.0-1'
+	implementation 'ru.vyarus.guicey:guicey-jdbi3:5.6.1-1'
 	implementation 'com.google.guava:guava:31.1-jre' // Pick the non-Android version of Guice
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.3.6'
-	implementation 'org.liquibase:liquibase-core:4.11.0'
+	implementation 'org.postgresql:postgresql:42.4.0'
+	implementation 'org.liquibase:liquibase-core:4.12.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
 	implementation 'org.ehcache:ehcache:3.10.0'
@@ -96,7 +96,7 @@ dependencies {
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
-	implementation 'com.graphql-java:java-dataloader:3.1.3'
+	implementation 'com.graphql-java:java-dataloader:3.1.4'
 	implementation 'io.leangen.graphql:spqr:0.11.2'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20220608.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
@@ -119,7 +119,7 @@ dependencies {
 	runtimeOnly 'javax.xml.bind:jaxb-api:2.3.1'
 
 	// For parsing HTML to check for 'empty' input
-	implementation 'org.jsoup:jsoup:1.15.1'
+	implementation 'org.jsoup:jsoup:1.15.2'
 
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.17'
