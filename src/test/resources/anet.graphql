@@ -117,6 +117,14 @@ type AnetBeanList_Task {
 }
 
 """"""
+type AnetBeanList_UserActivity {
+  list: [UserActivity]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 input AnetEmailInput {
   comment: String
   createdAt: Instant
@@ -318,6 +326,9 @@ enum LocationType {
   PRINCIPAL_LOCATION
   VIRTUAL_LOCATION
 }
+
+"""Long type"""
+scalar Long
 
 """Mutation root"""
 type Mutation {
@@ -696,6 +707,7 @@ type Query {
   showRollupEmail(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
+  userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
 }
 
 """"""
@@ -998,6 +1010,13 @@ enum SearchObjectType {
 }
 
 """"""
+enum SearchType {
+  ORGANIZATION
+  PERSON
+  TOP_LEVEL_ORGANIZATION
+}
+
+""""""
 enum SortOrder {
   ASC
   DESC
@@ -1159,3 +1178,32 @@ enum TaskSearchSortBy {
 
 """Use SPQR's SchemaPrinter to remove this from SDL"""
 scalar UNREPRESENTABLE
+
+""""""
+type UserActivity {
+  count: Long!
+  organization: Organization
+  organizationUuid: String
+  person: Person
+  personUuid: String
+  visitedAt: Instant
+}
+
+""""""
+input UserActivitySearchQueryInput {
+  endDate: Instant
+  pageNum: Int
+  pageSize: Int
+  searchType: SearchType
+  showDeleted: Boolean
+  sortBy: UserActivitySearchSortBy
+  sortOrder: SortOrder
+  startDate: Instant
+  status: Status
+  text: String
+}
+
+""""""
+enum UserActivitySearchSortBy {
+  COUNT
+}
