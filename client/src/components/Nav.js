@@ -8,10 +8,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Badge, Collapse, Nav, NavDropdown } from "react-bootstrap"
 import { connect } from "react-redux"
-import {
-  IndexLinkContainer as Link,
-  LinkContainer
-} from "react-router-bootstrap"
+import { LinkContainer } from "react-router-bootstrap"
 import { useLocation } from "react-router-dom"
 import { ScrollLink, scrollSpy } from "react-scroll"
 import { bindActionCreators } from "redux"
@@ -60,11 +57,11 @@ const SidebarLink = ({
       setIsMenuLinksOpened && setIsMenuLinksOpened()
     }}
   >
-    <Link to={linkTo}>
+    <LinkContainer to={linkTo}>
       <Nav.Link eventKey={id}>
         <span>{children}</span>
       </Nav.Link>
-    </Link>
+    </LinkContainer>
   </Nav.Item>
 )
 SidebarLink.propTypes = {
@@ -246,7 +243,7 @@ const Navigation = ({
         active={inOrg && advisorOrganizationUuids.includes(orgUuid) && !inMyOrg}
       >
         {Organization.map(advisorOrganizations, org => (
-          <Link
+          <LinkContainer
             to={Organization.pathFor(org)}
             key={org.uuid}
             onClick={() => {
@@ -255,7 +252,7 @@ const Navigation = ({
             }}
           >
             <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
-          </Link>
+          </LinkContainer>
         ))}
       </NavDropdown>
 
@@ -269,7 +266,7 @@ const Navigation = ({
         }
       >
         {Organization.map(principalOrganizations, org => (
-          <Link
+          <LinkContainer
             to={Organization.pathFor(org)}
             key={org.uuid}
             onClick={() => {
@@ -278,7 +275,7 @@ const Navigation = ({
             }}
           >
             <NavDropdown.Item>{org.shortName}</NavDropdown.Item>
-          </Link>
+          </LinkContainer>
         ))}
       </NavDropdown>
 
@@ -301,47 +298,54 @@ const Navigation = ({
               clearSearchQuery()
               setIsMenuLinksOpened(false)
             }}
+            isActive={inAdmin}
           >
             <Nav.Link>Admin</Nav.Link>
           </LinkContainer>
-        </Nav.Item>
-      )}
 
-      {inAdmin && (
-        <Nav className="flex-column">
-          <span id="style-nav" style={{ lineHeight: "10px" }}>
-            <Nav.Item>
-              <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
-                <Nav.Link>Merge people</Nav.Link>
-              </LinkContainer>
-            </Nav.Item>
-            <Nav.Item>
-              <LinkContainer to="/admin/mergePositions" onClick={resetPages}>
-                <Nav.Link>Merge positions</Nav.Link>
-              </LinkContainer>
-            </Nav.Item>
-            <Nav.Item>
-              <LinkContainer to="/admin/mergeLocations" onClick={resetPages}>
-                <Nav.Link>Merge locations</Nav.Link>
-              </LinkContainer>
-            </Nav.Item>
-            <Nav.Item>
-              <LinkContainer
-                to="/admin/authorizationGroups"
-                onClick={resetPages}
-              >
-                <Nav.Link>Authorization groups</Nav.Link>
-              </LinkContainer>
-            </Nav.Item>
-            <SidebarLink
-              id="grapgQL-nav"
-              linkTo="/admin/graphiql"
-              handleOnClick={resetPages}
-            >
-              GraphQL
-            </SidebarLink>
-          </span>
-        </Nav>
+          {inAdmin && (
+            <Nav className="flex-column">
+              <span id="style-nav" style={{ lineHeight: "10px" }}>
+                <Nav.Item>
+                  <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
+                    <Nav.Link>Merge people</Nav.Link>
+                  </LinkContainer>
+                </Nav.Item>
+                <Nav.Item>
+                  <LinkContainer
+                    to="/admin/mergePositions"
+                    onClick={resetPages}
+                  >
+                    <Nav.Link>Merge positions</Nav.Link>
+                  </LinkContainer>
+                </Nav.Item>
+                <Nav.Item>
+                  <LinkContainer
+                    to="/admin/mergeLocations"
+                    onClick={resetPages}
+                  >
+                    <Nav.Link>Merge locations</Nav.Link>
+                  </LinkContainer>
+                </Nav.Item>
+                <Nav.Item>
+                  <LinkContainer
+                    to="/admin/authorizationGroups"
+                    onClick={resetPages}
+                  >
+                    <Nav.Link>Authorization groups</Nav.Link>
+                  </LinkContainer>
+                </Nav.Item>
+                <SidebarLink
+                  id="grapgQL-nav"
+                  linkTo="/admin/graphiql"
+                  handleOnClick={resetPages}
+                >
+                  GraphQL
+                </SidebarLink>
+              </span>
+            </Nav>
+          )}
+        </Nav.Item>
       )}
 
       {externalDocumentationUrl && externalDocumentationUrlText && (
@@ -364,7 +368,7 @@ const Navigation = ({
       {(currentUser.isAdmin() || currentUser.isSuperUser()) && (
         <NavDropdown title="Insights" id="insights" active={inInsights}>
           {INSIGHTS.map(insight => (
-            <Link
+            <LinkContainer
               to={"/insights/" + insight}
               key={insight}
               onClick={() => {
@@ -375,7 +379,7 @@ const Navigation = ({
               <NavDropdown.Item>
                 {INSIGHT_DETAILS[insight].navTitle}
               </NavDropdown.Item>
-            </Link>
+            </LinkContainer>
           ))}
         </NavDropdown>
       )}
@@ -383,7 +387,7 @@ const Navigation = ({
       {Settings.dashboards && (
         <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
           {Settings.dashboards.map(dashboard => (
-            <Link
+            <LinkContainer
               to={`/dashboards/${dashboard.type}/${dashboard.label}`}
               key={dashboard.label}
               onClick={() => {
@@ -392,7 +396,7 @@ const Navigation = ({
               }}
             >
               <NavDropdown.Item>{dashboard.label}</NavDropdown.Item>
-            </Link>
+            </LinkContainer>
           ))}
         </NavDropdown>
       )}
