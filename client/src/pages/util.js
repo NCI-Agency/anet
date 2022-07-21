@@ -16,9 +16,7 @@ export const PAGE_URLS = {
   TASKS: "/tasks",
   ADMIN: "/admin",
   INSIGHTS: "/insights",
-  BOARD: "/dashboards/board",
-  KANBAN: "/dashboards/kanban",
-  DECISIVES: "/dashboards/decisives",
+  DASHBOARDS: "/dashboards",
   ONBOARDING: "/onboarding",
   SUBSCRIPTIONS: "/subscriptions",
   MISSING: "*"

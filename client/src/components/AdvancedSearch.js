@@ -23,7 +23,7 @@ import {
   Row
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
 
 const ORG_QUERY_PARAM_TYPES = {
@@ -52,7 +52,7 @@ const AdvancedSearch = ({
   searchObjectTypes,
   text
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [objectType, setObjectType] = useState(searchQuery.objectType)
   const [filters, setFilters] = useState(
     searchQuery.filters ? searchQuery.filters.slice() : []
@@ -285,9 +285,7 @@ const AdvancedSearch = ({
       text
     })
     if (onSearchGoToSearchPage) {
-      history.push({
-        pathname: "/search"
-      })
+      navigate("/search")
     }
     // Prevent browser navigation to the url
     event.preventDefault()

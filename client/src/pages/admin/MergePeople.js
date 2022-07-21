@@ -44,7 +44,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
@@ -56,7 +56,7 @@ const GQL_MERGE_PERSON = gql`
 `
 
 const MergePeople = ({ pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -464,8 +464,8 @@ const MergePeople = ({ pageDispatchers }) => {
     })
       .then(res => {
         if (res) {
-          history.push(Person.pathFor({ uuid: mergedPerson.uuid }), {
-            success: "People merged. Displaying merged Person below."
+          navigate(Person.pathFor({ uuid: mergedPerson.uuid }), {
+            state: { success: "People merged. Displaying merged Person below." }
           })
         }
       })

@@ -9,7 +9,7 @@ import { DndProvider } from "react-dnd-multi-backend"
 import HTML5ToTouch from "react-dnd-multi-backend/dist/cjs/HTML5toTouch"
 import { createRoot } from "react-dom/client"
 import { Provider } from "react-redux"
-import { BrowserRouter, Route } from "react-router-dom"
+import { BrowserRouter } from "react-router-dom"
 import { persistStore } from "redux-persist"
 import { PersistGate } from "redux-persist/lib/integration/react"
 import "./bootstrapOverrides.css"
@@ -32,7 +32,7 @@ root.render(
       <ApolloProvider client={API.client}>
         <DndProvider options={HTML5ToTouch}>
           <BrowserRouter onUpdate={jumpToTop}>
-            <Route path="/" component={App} />
+            <App />
           </BrowserRouter>
         </DndProvider>
       </ApolloProvider>

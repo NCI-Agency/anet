@@ -43,7 +43,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -272,7 +272,7 @@ const GQL_APPROVE_REPORT = gql`
 
 const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
@@ -893,8 +893,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   function onConfirmUnpublish() {
     API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
       .then(data => {
-        history.push("/", {
-          success: `${reportTypeUpperFirst} unpublished`
+        navigate("/", {
+          state: { success: `${reportTypeUpperFirst} unpublished` }
         })
       })
       .catch(error => {
@@ -907,8 +907,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   function onConfirmDelete() {
     API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
-        history.push("/", {
-          success: `${reportTypeUpperFirst} deleted`
+        navigate("/", {
+          state: { success: `${reportTypeUpperFirst} deleted` }
         })
       })
       .catch(error => {
@@ -1019,7 +1019,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function onCompactClick() {
     if (!_isEmpty(report)) {
-      history.push(`${report.uuid}/compact`)
+      navigate("compact")
     }
   }
 
@@ -1140,7 +1140,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       text: text
     })
     toast.success(message, { toastId: "success-message" })
-    history.push("/search")
+    navigate("/search")
   }
 
   function approveReport(text) {

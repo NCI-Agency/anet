@@ -26,7 +26,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
@@ -48,7 +48,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
 
 const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -397,7 +397,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
   )
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -418,13 +418,13 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         : initialValues.uuid
     })
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     if (!edit) {
-      history.replace(Organization.pathForEdit(organization))
+      navigate(Organization.pathForEdit(organization), { replace: true })
     }
-    history.push(Organization.pathFor(organization), {
-      success: "Organization saved"
+    navigate(Organization.pathFor(organization), {
+      state: { success: "Organization saved" }
     })
   }
 

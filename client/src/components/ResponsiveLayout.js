@@ -4,7 +4,7 @@ import TopBar from "components/TopBar"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 import LoadingBar from "react-redux-loading-bar"
-import { useHistory } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { Element } from "react-scroll"
 
 const anetContainer = {
@@ -52,17 +52,13 @@ const loadingBar = {
 }
 
 const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
-  const history = useHistory()
+  const location = useLocation()
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)
   useEffect(() => {
     // We want to hide the floating menu on navigation events
-    const unlistenHistory = history.listen((location, action) => {
-      showFloatingMenu(false)
-    })
-
-    return () => unlistenHistory()
-  }, [history])
+    showFloatingMenu(false)
+  }, [location])
 
   const sidebarClass = floatingMenu ? "nav-overlay" : "d-none d-sm-block"
 

@@ -265,7 +265,7 @@ const AdminIndex = ({ pageDispatchers }) => {
 
   function onSubmitSuccess(response, values, form) {
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess("Admin settings saved")

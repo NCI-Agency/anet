@@ -19,8 +19,7 @@ import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
-import { Redirect } from "react-router"
-import { useHistory, useLocation } from "react-router-dom"
+import { Navigate, useLocation, useNavigate } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import ReactTooltip from "react-tooltip"
@@ -152,7 +151,7 @@ const GQL_GET_APP_DATA = gql`
 `
 
 const App = ({ pageDispatchers, pageProps }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const routerLocation = useLocation()
 
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_APP_DATA)
@@ -178,7 +177,7 @@ const App = ({ pageDispatchers, pageProps }) => {
     appState.currentUser.isPendingVerification() &&
     !routerLocation.pathname.startsWith("/onboarding")
   ) {
-    return <Redirect to="/onboarding" />
+    return <Navigate replace to="/onboarding" />
   }
   return (
     <AppContext.Provider
@@ -192,7 +191,7 @@ const App = ({ pageDispatchers, pageProps }) => {
     >
       <ResponsiveLayout
         pageProps={pageProps}
-        pageHistory={history}
+        pageHistory={navigate}
         location={routerLocation}
         sidebarData={{
           advisorOrganizations: appState.advisorOrganizations,

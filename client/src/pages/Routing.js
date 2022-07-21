@@ -46,191 +46,125 @@ import TaskNew from "pages/tasks/New"
 import TaskShow from "pages/tasks/Show"
 import { PAGE_URLS } from "pages/util"
 import React, { useContext } from "react"
-import { Redirect, Route, Switch } from "react-router-dom"
+import { Navigate, Route, Routes } from "react-router-dom"
 
 const Routing = () => {
   const { currentUser } = useContext(AppContext)
   return (
-    <Switch>
-      <Route exact path={PAGE_URLS.HOME} component={Home} />
-      <Route path={PAGE_URLS.ROLLUP} component={RollupShow} />
-      <Route path={PAGE_URLS.HELP} component={Help} />
-      <Route
-        path={PAGE_URLS.SEARCH}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route exact path={`${url}/`} component={Search} />
-            <Route path={`${url}/mine`} component={MySavedSearches} />
-          </Switch>
+    <Routes>
+      <Route index path={PAGE_URLS.HOME} element={<Home />} />
+      <Route path={PAGE_URLS.ROLLUP} element={<RollupShow />} />
+      <Route path={PAGE_URLS.HELP} element={<Help />} />
+      <Route path={PAGE_URLS.SEARCH}>
+        <Route index element={<Search />} />
+        <Route path="mine" element={<MySavedSearches />} />
+      </Route>
+      <Route path={PAGE_URLS.REPORTS}>
+        <Route path="mine" element={<MyReports />} />
+        <Route path="new" element={<ReportNew />} />
+        <Route path=":uuid">
+          <Route index element={<ReportShow />} />
+          <Route path="compact" element={<ReportCompact />} />
+          <Route path="edit" element={<ReportEdit />} />
+          {/* TODO: Backwards-compatibility; this route can be removed at some point */}
+          <Route path="min" element={<ReportShow />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.PEOPLE}>
+        <Route path="new" element={<PersonNew />} />
+        <Route path=":uuid">
+          <Route index element={<PersonShow />} />
+          <Route path="compact" element={<PersonCompact />} />
+          <Route path="edit" element={<PersonEdit />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.ORGANIZATIONS}>
+        <Route path="new" element={<OrganizationNew />} />
+        <Route path=":uuid">
+          <Route index element={<OrganizationShow />} />
+          <Route path=":action" element={<OrganizationShow />} />
+          <Route path="edit" element={<OrganizationEdit />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.LOCATIONS}>
+        <Route path="new" element={<LocationNew />} />
+        <Route path=":uuid">
+          <Route index element={<LocationShow />} />
+          <Route path="edit" element={<LocationEdit />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.POSITIONS}>
+        {currentUser.position?.uuid && (
+          <Route path="counterparts" element={<MyCounterparts />} />
         )}
-      />
-      <Route
-        path={PAGE_URLS.REPORTS}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/mine`} component={MyReports} />
-            <Route path={`${url}/new`} component={ReportNew} />
-            <Route path={`${url}/:uuid/compact`} component={ReportCompact} />
-            <Route path={`${url}/:uuid/edit`} component={ReportEdit} />
-            {/* TODO: Backwards-compatibility; this route can be removed at some point */}
-            <Route path={`${url}/:uuid/min`} component={ReportShow} />
-            <Route path={`${url}/:uuid`} component={ReportShow} />
-          </Switch>
+        <Route path="new" element={<PositionNew />} />
+        <Route path=":uuid">
+          <Route index element={<PositionShow />} />
+          <Route path="edit" element={<PositionEdit />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.TASKS}>
+        {currentUser.position?.uuid && (
+          <Route path="mine" element={<MyTasks />} />
         )}
-      />
-      <Route
-        path={PAGE_URLS.PEOPLE}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/new`} component={PersonNew} />
-            <Route path={`${url}/:uuid/compact`} component={PersonCompact} />
-            <Route path={`${url}/:uuid/edit`} component={PersonEdit} />
-            <Route path={`${url}/:uuid`} component={PersonShow} />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.ORGANIZATIONS}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/new`} component={OrganizationNew} />
-            <Route path={`${url}/:uuid/edit`} component={OrganizationEdit} />
-            <Route
-              path={`${url}/:uuid/:action?`}
-              component={OrganizationShow}
-            />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.LOCATIONS}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/new`} component={LocationNew} />
-            <Route path={`${url}/:uuid/edit`} component={LocationEdit} />
-            <Route path={`${url}/:uuid`} component={LocationShow} />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.POSITIONS}
-        render={({ match: { url } }) => (
-          <Switch>
-            {currentUser.position?.uuid && (
-              <Route path={`${url}/counterparts`} component={MyCounterparts} />
-            )}
-            <Route path={`${url}/new`} component={PositionNew} />
-            <Route path={`${url}/:uuid/edit`} component={PositionEdit} />
-            <Route path={`${url}/:uuid`} component={PositionShow} />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.TASKS}
-        render={({ match: { url } }) => (
-          <Switch>
-            {currentUser.position?.uuid && (
-              <Route path={`${url}/mine`} component={MyTasks} />
-            )}
-            <Route path={`${url}/new`} component={TaskNew} />
-            <Route path={`${url}/:uuid/edit`} component={TaskEdit} />
-            <Route path={`${url}/:uuid`} component={TaskShow} />
-          </Switch>
-        )}
-      />
+        <Route path="new" element={<TaskNew />} />
+        <Route path=":uuid">
+          <Route index element={<TaskShow />} />
+          <Route path="edit" element={<TaskEdit />} />
+        </Route>
+      </Route>
       {currentUser.isAdmin() && (
-        <Route
-          path={PAGE_URLS.ADMIN}
-          render={({ match: { url } }) => (
-            <Switch>
-              <Route exact path={`${url}/`} component={AdminIndex} />
-              <Route path={`${url}/mergePeople`} component={MergePeople} />
-              <Route
-                path={`${url}/mergePositions`}
-                component={MergePositions}
-              />
-              <Route
-                path={`${url}/mergeLocations`}
-                component={MergeLocations}
-              />
-              <Route
-                exact
-                path={`${url}/authorizationGroups`}
-                component={AuthorizationGroups}
-              />
-              <Route
-                path={`${url}/authorizationGroups/new`}
-                component={AuthorizationGroupNew}
-              />
-              <Route
-                path={`${url}/authorizationGroups/:uuid/edit`}
-                component={AuthorizationGroupEdit}
-              />
-              <Route
-                path={`${url}/authorizationGroups/:uuid`}
-                component={AuthorizationGroupShow}
-              />
-              <Route path={`${url}/graphiql`} component={GraphiQL} />
-            </Switch>
-          )}
-        />
+        <Route path={PAGE_URLS.ADMIN}>
+          <Route index element={<AdminIndex />} />
+          <Route path="mergePeople" element={<MergePeople />} />
+          <Route path="mergePositions" element={<MergePositions />} />
+          <Route path="mergeLocations" element={<MergeLocations />} />
+          <Route path="authorizationGroups">
+            <Route index element={<AuthorizationGroups />} />
+            <Route path="new" element={<AuthorizationGroupNew />} />
+            <Route path=":uuid">
+              <Route index element={<AuthorizationGroupShow />} />
+              <Route path="edit" element={<AuthorizationGroupEdit />} />
+            </Route>
+          </Route>
+          <Route path="graphiql" element={<GraphiQL />} />
+        </Route>
       )}
-      <Route
-        path={PAGE_URLS.INSIGHTS}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/:insight`} component={InsightsShow} />
-          </Switch>
+      <Route path={PAGE_URLS.INSIGHTS}>
+        <Route path=":insight" element={<InsightsShow />} />
+      </Route>
+      <Route path={PAGE_URLS.DASHBOARDS}>
+        <Route path="kanban">
+          <Route path=":dashboard" element={<KanbanDashboard />} />
+        </Route>
+        <Route path="decisives">
+          <Route path=":dashboard" element={<DecisivesDashboard />} />
+        </Route>
+        <Route path="board">
+          <Route path=":dashboard" element={<BoardDashboard />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.ONBOARDING}>
+        {currentUser.isPendingVerification() ? (
+          <>
+            <Route index element={<OnboardingShow />} />
+            <Route path="edit" element={<OnboardingEdit />} />
+          </>
+        ) : (
+          // Replace with home if user account exists already.
+          // Some users bookmark the onboarding - the very first page they hit.
+          <Route
+            index
+            path="*"
+            element={<Navigate replace to={PAGE_URLS.HOME} />}
+          />
         )}
-      />
-      <Route
-        path={PAGE_URLS.KANBAN}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/:dashboard`} component={KanbanDashboard} />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.DECISIVES}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/:dashboard`} component={DecisivesDashboard} />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.BOARD}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/:dashboard`} component={BoardDashboard} />
-          </Switch>
-        )}
-      />
-      <Route
-        path={PAGE_URLS.ONBOARDING}
-        render={({ match: { url } }) =>
-          currentUser.isPendingVerification() ? (
-            <Switch>
-              <Route exact path={`${url}/`} component={OnboardingShow} />
-              <Route path={`${url}/edit`} component={OnboardingEdit} />
-            </Switch>
-          ) : (
-            // Redirect to home if user account exists already. Some users bookmark the onboarding - the very first page they hit
-            <Redirect to="/" />
-          )
-        }
-      />
-      <Route
-        path={PAGE_URLS.SUBSCRIPTIONS}
-        render={({ match: { url } }) => (
-          <Switch>
-            <Route path={`${url}/mine`} component={MySubscriptions} />
-          </Switch>
-        )}
-      />
-      <Route path={PAGE_URLS.MISSING} component={PageMissing} />
-    </Switch>
+      </Route>
+      <Route path={PAGE_URLS.SUBSCRIPTIONS}>
+        <Route path="mine" element={<MySubscriptions />} />
+      </Route>
+      <Route path={PAGE_URLS.MISSING} element={<PageMissing />} />
+    </Routes>
   )
 }
 

@@ -37,7 +37,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -217,7 +217,7 @@ const GQL_GET_REPORT = gql`
 `
 
 const CompactReportView = ({ pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { uuid } = useParams()
   const { currentUser } = useContext(AppContext)
   const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
@@ -388,7 +388,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   )
 
   function returnToDefaultPage() {
-    history.push(`/reports/${report.uuid}`)
+    navigate("..")
   }
 
   function printReport() {

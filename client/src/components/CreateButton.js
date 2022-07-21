@@ -2,7 +2,7 @@ import AppContext from "components/AppContext"
 import * as Models from "models"
 import React, { useContext } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 const DEFAULT_ACTIONS = [Models.Report]
 
@@ -16,7 +16,7 @@ const ADMIN_ACTIONS = [
 
 const CreateButton = () => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const modelClasses = DEFAULT_ACTIONS.concat(
     currentUser.isSuperUser() && SUPER_USER_ACTIONS,
@@ -56,7 +56,7 @@ const CreateButton = () => {
   }
 
   function onSelect(modelClass) {
-    history.push(modelClass.pathForNew())
+    navigate(modelClass.pathForNew())
   }
 }
 

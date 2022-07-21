@@ -51,7 +51,7 @@ import {
   Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -125,7 +125,7 @@ const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
 
 const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
@@ -683,7 +683,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   function onCompactClick() {
     if (!_isEmpty(person)) {
-      history.push(`${person.uuid}/compact`)
+      navigate("compact")
     }
   }
 
