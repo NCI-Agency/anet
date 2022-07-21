@@ -37,7 +37,12 @@ test.serial("checking super user permissions", async t => {
     By.xpath('//button[text()="Cancel"]')
   )
   await $cancelButton.click()
-  await driver.switchTo().alert().accept()
+  const $alertOkButton = await driver.findElement(
+    By.xpath(
+      '//div[contains(@class, "triggerable-confirm-bootstrap-modal")]//button[text()="OK"]'
+    )
+  )
+  await $alertOkButton.click()
 
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
@@ -194,7 +199,12 @@ test.serial("checking admin permissions", async t => {
     By.xpath('//button[text()="Cancel"]')
   )
   await $cancelButton.click()
-  await driver.switchTo().alert().accept()
+  const $alertOkButton = await driver.findElement(
+    By.xpath(
+      '//div[contains(@class, "triggerable-confirm-bootstrap-modal")]//button[text()="OK"]'
+    )
+  )
+  await $alertOkButton.click()
 
   await t.context.pageHelpers.clickMenuLinksButton()
   await t.context.pageHelpers.clickMyOrgLink()
