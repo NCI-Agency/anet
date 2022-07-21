@@ -16,8 +16,8 @@ import {
   getNodeAtPath,
   getOtherDirection,
   getPathToCorner,
-  Mosaic,
   MosaicWindow,
+  MosaicWithoutDragDropContext,
   updateTree
 } from "react-mosaic-component"
 import "react-mosaic-component/react-mosaic-component.css"
@@ -29,7 +29,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
     <div className="mosaic-box" style={style}>
       <div className="mosaic-container">
         {renderNavBar()}
-        <Mosaic
+        <MosaicWithoutDragDropContext
           value={currentNode}
           onChange={updateCurrentNode}
           renderTile={(id, path) => {
