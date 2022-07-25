@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -239,5 +241,11 @@ public class DaoUtils {
       return Instant.ofEpochMilli(now + input.toEpochMilli());
     }
     return input;
+  }
+
+  public static Instant getCurrentMinute() {
+    final ZonedDateTime now = Instant.now().atZone(getServerNativeZoneId());
+    final ZonedDateTime bom = now.truncatedTo(ChronoUnit.MINUTES);
+    return bom.toInstant();
   }
 }
