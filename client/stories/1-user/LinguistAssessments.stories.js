@@ -7,7 +7,7 @@ import { Person } from "models"
 import moment from "moment"
 import { useResponsiveNumberOfPeriods } from "periodUtils"
 import React, { useState } from "react"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from "uuid"
 import { admin } from "../utils"
 import linguistAssessmentsDoc from "./linguistAssessments.stories.mdx"
 

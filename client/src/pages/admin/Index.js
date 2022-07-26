@@ -24,7 +24,7 @@ import React, { useContext, useState } from "react"
 import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from "uuid"
 
 const DROPDOWN_FIELDS = [
   {

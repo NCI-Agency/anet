@@ -1,4 +1,4 @@
-const uuidv4 = require("uuid/v4")
+const uuidv4 = require("uuid").v4
 const test = require("../util/test")
 
 test.serial("checking super user permissions", async t => {
