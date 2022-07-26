@@ -32,7 +32,7 @@ const GQL_GET_SAVED_SEARCHES = gql`
 `
 
 const GQL_DELETE_SAVED_SEARCH = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteSavedSearch(uuid: $uuid)
   }
 `

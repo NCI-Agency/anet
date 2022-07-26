@@ -50,7 +50,7 @@ import utils from "utils"
 import PreviousPeople from "../positions/PreviousPeople"
 
 const GQL_MERGE_POSITION = gql`
-  mutation($loserUuid: String!, $winnerPosition: PositionInput!) {
+  mutation ($loserUuid: String!, $winnerPosition: PositionInput!) {
     mergePositions(loserUuid: $loserUuid, winnerPosition: $winnerPosition) {
       uuid
     }

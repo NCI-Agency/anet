@@ -26,7 +26,7 @@ import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
-  query($uuid: String) {
+  query ($uuid: String) {
     authorizationGroup(uuid: $uuid) {
       uuid
       name

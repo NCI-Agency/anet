@@ -17,7 +17,7 @@ import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
 import Settings from "settings"
 
 const GQL_GET_POSITION_LIST = gql`
-  query($positionQuery: PositionSearchQueryInput) {
+  query ($positionQuery: PositionSearchQueryInput) {
     positionList(query: $positionQuery) {
       list {
         uuid

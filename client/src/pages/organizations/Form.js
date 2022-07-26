@@ -34,14 +34,14 @@ import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_CREATE_ORGANIZATION = gql`
-  mutation($organization: OrganizationInput!) {
+  mutation ($organization: OrganizationInput!) {
     createOrganization(organization: $organization) {
       uuid
     }
   }
 `
 const GQL_UPDATE_ORGANIZATION = gql`
-  mutation($organization: OrganizationInput!) {
+  mutation ($organization: OrganizationInput!) {
     updateOrganization(organization: $organization)
   }
 `

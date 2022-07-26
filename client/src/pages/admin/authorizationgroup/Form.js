@@ -19,14 +19,14 @@ import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 
 const GQL_CREATE_AUTHORIZATION_GROUP = gql`
-  mutation($authorizationGroup: AuthorizationGroupInput!) {
+  mutation ($authorizationGroup: AuthorizationGroupInput!) {
     createAuthorizationGroup(authorizationGroup: $authorizationGroup) {
       uuid
     }
   }
 `
 const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
-  mutation($authorizationGroup: AuthorizationGroupInput!) {
+  mutation ($authorizationGroup: AuthorizationGroupInput!) {
     updateAuthorizationGroup(authorizationGroup: $authorizationGroup)
   }
 `

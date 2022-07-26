@@ -21,7 +21,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_CHART_DATA = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     organization(uuid: $uuid) {
       uuid
       shortName

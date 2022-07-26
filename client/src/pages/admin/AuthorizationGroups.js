@@ -12,7 +12,7 @@ import { connect } from "react-redux"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
-  query($query: AuthorizationGroupSearchQueryInput) {
+  query ($query: AuthorizationGroupSearchQueryInput) {
     authorizationGroupList(query: $query) {
       list {
         uuid

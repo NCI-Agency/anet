@@ -14,13 +14,11 @@ describe("Show report page", () => {
       // and two other questions
       const svgAssessments = ShowReport.tasksEngagementAssessments.$$("svg")
       expect(svgAssessments).to.have.length(2)
-      const question2Assessments = ShowReport.tasksEngagementAssessments.$$(
-        "[name*=question2]"
-      )
+      const question2Assessments =
+        ShowReport.tasksEngagementAssessments.$$("[name*=question2]")
       expect(question2Assessments).to.have.length(2)
-      const question3Assessments = ShowReport.tasksEngagementAssessments.$$(
-        "[name*=question3]"
-      )
+      const question3Assessments =
+        ShowReport.tasksEngagementAssessments.$$("[name*=question3]")
       expect(question3Assessments).to.have.length(2)
     })
   })

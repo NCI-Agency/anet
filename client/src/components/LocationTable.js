@@ -15,7 +15,7 @@ import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const GQL_GET_LOCATION_LIST = gql`
-  query($locationQuery: LocationSearchQueryInput) {
+  query ($locationQuery: LocationSearchQueryInput) {
     locationList(query: $locationQuery) {
       pageNum
       pageSize

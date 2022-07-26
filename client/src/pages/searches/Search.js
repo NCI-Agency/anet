@@ -68,14 +68,14 @@ import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
 const GQL_CREATE_SAVED_SEARCH = gql`
-  mutation($savedSearch: SavedSearchInput!) {
+  mutation ($savedSearch: SavedSearchInput!) {
     createSavedSearch(savedSearch: $savedSearch) {
       uuid
     }
   }
 `
 const GQL_GET_ORGANIZATION_LIST = gql`
-  query($organizationQuery: OrganizationSearchQueryInput) {
+  query ($organizationQuery: OrganizationSearchQueryInput) {
     organizationList(query: $organizationQuery) {
       pageNum
       pageSize
@@ -91,7 +91,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
   }
 `
 const GQL_GET_PERSON_LIST = gql`
-  query($personQuery: PersonSearchQueryInput) {
+  query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
       pageNum
       pageSize
@@ -122,7 +122,7 @@ const GQL_GET_PERSON_LIST = gql`
   }
 `
 const GQL_GET_POSITION_LIST = gql`
-  query($positionQuery: PositionSearchQueryInput) {
+  query ($positionQuery: PositionSearchQueryInput) {
     positionList(query: $positionQuery) {
       pageNum
       pageSize
@@ -153,7 +153,7 @@ const GQL_GET_POSITION_LIST = gql`
   }
 `
 const GQL_GET_TASK_LIST = gql`
-  query($taskQuery: TaskSearchQueryInput) {
+  query ($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       pageNum
       pageSize
@@ -167,7 +167,7 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 const GQL_GET_LOCATION_LIST = gql`
-  query($locationQuery: LocationSearchQueryInput) {
+  query ($locationQuery: LocationSearchQueryInput) {
     locationList(query: $locationQuery) {
       pageNum
       pageSize
@@ -222,10 +222,10 @@ const Organizations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.organizationList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -323,10 +323,10 @@ const People = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.personList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -397,10 +397,10 @@ const Positions = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.positionList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -471,10 +471,10 @@ export const Tasks = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.taskList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -545,10 +545,10 @@ const Locations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.locationList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -611,9 +611,10 @@ const Search = ({
   )
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
-  const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
-    searchQuery
-  ])
+  const searchQueryParams = useMemo(
+    () => getSearchQuery(searchQuery),
+    [searchQuery]
+  )
   const genericSearchQueryParams = useMemo(
     () =>
       Object.assign({}, searchQueryParams, {

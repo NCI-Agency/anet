@@ -46,7 +46,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_MERGE_LOCATION = gql`
-  mutation($loserUuid: String!, $winnerLocation: LocationInput!) {
+  mutation ($loserUuid: String!, $winnerLocation: LocationInput!) {
     mergeLocations(loserUuid: $loserUuid, winnerLocation: $winnerLocation) {
       uuid
     }

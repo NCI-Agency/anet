@@ -37,7 +37,7 @@ import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_CREATE_TASK = gql`
-  mutation($task: TaskInput!) {
+  mutation ($task: TaskInput!) {
     createTask(task: $task) {
       uuid
     }

@@ -11,7 +11,7 @@ import React, { useEffect } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       pageNum
       pageSize
@@ -50,10 +50,10 @@ const ReportMap = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }

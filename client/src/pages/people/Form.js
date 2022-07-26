@@ -44,14 +44,14 @@ import { useNavigate } from "react-router-dom"
 import Settings from "settings"
 
 const GQL_CREATE_PERSON = gql`
-  mutation($person: PersonInput!) {
+  mutation ($person: PersonInput!) {
     createPerson(person: $person) {
       uuid
     }
   }
 `
 const GQL_UPDATE_PERSON = gql`
-  mutation($person: PersonInput!) {
+  mutation ($person: PersonInput!) {
     updatePerson(person: $person)
   }
 `

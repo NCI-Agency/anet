@@ -48,10 +48,11 @@ test.serial("Draft and submit a report", async t => {
   const $positiveAtmosphereButton = await $('label[for="atmosphere_POSITIVE"]')
   await $positiveAtmosphereButton.click()
 
-  const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
-    "#reportPeople",
-    "topferness, christopf"
-  )
+  const $attendeesAdvancedSelect1 =
+    await pageHelpers.chooseAdvancedSelectOption(
+      "#reportPeople",
+      "topferness, christopf"
+    )
 
   const $attendeesTitle = await t.context.driver.findElement(
     // if future "People who will be involved in this planned engagement"
@@ -90,10 +91,11 @@ test.serial("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg1, "MoD")
 
-  const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
-    "#reportPeople",
-    "steveson, steve"
-  )
+  const $attendeesAdvancedSelect2 =
+    await pageHelpers.chooseAdvancedSelectOption(
+      "#reportPeople",
+      "steveson, steve"
+    )
   await $attendeesTitle.click()
 
   t.is(

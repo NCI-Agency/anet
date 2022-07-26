@@ -17,7 +17,7 @@ import { connect } from "react-redux"
 import utils from "utils"
 
 const GQL_GET_POSITION_LIST = gql`
-  query($positionQuery: PositionSearchQueryInput) {
+  query ($positionQuery: PositionSearchQueryInput) {
     positionList(query: $positionQuery) {
       pageNum
       pageSize

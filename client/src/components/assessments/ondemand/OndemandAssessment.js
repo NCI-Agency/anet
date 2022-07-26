@@ -34,7 +34,7 @@ import "./Ondemand.css"
 import ValidationBar from "./ValidationBar"
 
 const GQL_DELETE_NOTE = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteNote(uuid: $uuid)
   }
 `
@@ -248,9 +248,8 @@ const OnDemandAssessment = ({
     hasReadAccess
   ])
   // Holds JSX element array (assessment cards).
-  const [onDemandAssessmentCards, setOnDemandAssessmentCards] = useState(
-    assessmentCards
-  )
+  const [onDemandAssessmentCards, setOnDemandAssessmentCards] =
+    useState(assessmentCards)
   /* Used for navigating when PeriodsNavigation buttons are pressed. Initial value
       should show the valid card in the table to the user when the page is loaded. */
   const [tableLocation, setTableLocation] = useState(

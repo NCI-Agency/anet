@@ -11,7 +11,7 @@ import PropTypes from "prop-types"
 import React from "react"
 
 const GET_REPORT_WITH_ATTENDED_REPORTS = gql`
-  query($uuid: String, $attendedReportsQuery: ReportSearchQueryInput) {
+  query ($uuid: String, $attendedReportsQuery: ReportSearchQueryInput) {
     report(uuid: $uuid) {
       uuid
       engagementDate

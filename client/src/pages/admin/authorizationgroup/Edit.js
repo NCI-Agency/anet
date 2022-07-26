@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom"
 import AuthorizationGroupForm from "./Form"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     authorizationGroup(uuid: $uuid) {
       uuid
       name

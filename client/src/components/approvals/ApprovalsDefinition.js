@@ -15,7 +15,7 @@ import { Button, FormCheck, Modal, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
 const GQL_GET_APPROVAL_STEP_IN_USE = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     approvalStepInUse(uuid: $uuid)
   }
 `
@@ -68,13 +68,10 @@ const ApprovalsDefinition = ({
   setFieldTouched,
   setFieldValue
 }) => {
-  const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] = useState(
-    false
-  )
-  const [
-    showRemoveApprovalStepAlert,
-    setShowRemoveApprovalStepAlert
-  ] = useState(false)
+  const [showAddApprovalStepAlert, setShowAddApprovalStepAlert] =
+    useState(false)
+  const [showRemoveApprovalStepAlert, setShowRemoveApprovalStepAlert] =
+    useState(false)
 
   return (
     <div>

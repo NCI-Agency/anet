@@ -34,14 +34,14 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_CREATE_POSITION = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     createPosition(position: $position) {
       uuid
     }
   }
 `
 const GQL_UPDATE_POSITION = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     updatePosition(position: $position)
   }
 `

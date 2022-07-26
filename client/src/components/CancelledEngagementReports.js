@@ -19,7 +19,7 @@ import ContainerDimensions from "react-container-dimensions"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LIST_BY_ORG = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {
@@ -33,7 +33,7 @@ const GQL_GET_REPORT_LIST_BY_ORG = gql`
   }
 `
 const GQL_GET_REPORT_LIST_BY_REASON = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {

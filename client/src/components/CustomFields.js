@@ -384,10 +384,10 @@ const ArrayOfObjectsField = fieldProps => {
     vertical,
     children
   } = fieldProps
-  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
-    formikProps.values,
-    name
-  ])
+  const value = useMemo(
+    () => getArrayObjectValue(formikProps.values, name),
+    [formikProps.values, name]
+  )
   const objDefault = useMemo(() => {
     const objDefault = {}
     const objSchema = createYupObjectShape(
@@ -797,9 +797,8 @@ export function initInvisibleFields(
 ) {
   if (anetObj[parentFieldName]) {
     // set initial invisible custom fields
-    anetObj[parentFieldName][
-      INVISIBLE_CUSTOM_FIELDS_FIELD
-    ] = getInvisibleFields(config, parentFieldName, anetObj)
+    anetObj[parentFieldName][INVISIBLE_CUSTOM_FIELDS_FIELD] =
+      getInvisibleFields(config, parentFieldName, anetObj)
   }
 }
 
@@ -970,18 +969,20 @@ const CustomField = ({
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
   const validateFormDebounced = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
-    () => (value, shouldValidate = true) => {
-      let val = value?.target?.value !== undefined ? value.target.value : value
-      if (type === "number" && val === "") {
-        val = null
-      }
-      const sv = shouldValidate === undefined ? true : shouldValidate
-      setFieldTouched(fieldName, true, false)
-      setFieldValue(fieldName, val, sv)
-      if (!sv) {
-        validateFormDebounced()
-      }
-    },
+    () =>
+      (value, shouldValidate = true) => {
+        let val =
+          value?.target?.value !== undefined ? value.target.value : value
+        if (type === "number" && val === "") {
+          val = null
+        }
+        const sv = shouldValidate === undefined ? true : shouldValidate
+        setFieldTouched(fieldName, true, false)
+        setFieldValue(fieldName, val, sv)
+        if (!sv) {
+          validateFormDebounced()
+        }
+      },
     [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
   const FieldComponent = FIELD_COMPONENTS[type]

@@ -15,9 +15,8 @@ export const GRAPHQL_NOTIFICATIONS_NOTE_FIELDS = `
 `
 
 export const getNotifications = position => {
-  const counterpartsWithPendingAssessments = getCounterpartsWithPendingAssessments(
-    position
-  )
+  const counterpartsWithPendingAssessments =
+    getCounterpartsWithPendingAssessments(position)
 
   const tasksWithPendingAssessments = getTasksWithPendingAssessments(position)
 

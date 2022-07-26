@@ -326,13 +326,8 @@ async function findSuperUserLink(t, desiredSuperUserName) {
 }
 
 async function validateUserCanEditUserForCurrentPage(t) {
-  const {
-    $,
-    assertElementText,
-    shortWaitMs,
-    mediumWaitMs,
-    longWaitMs
-  } = t.context
+  const { $, assertElementText, shortWaitMs, mediumWaitMs, longWaitMs } =
+    t.context
 
   await t.context.driver.sleep(mediumWaitMs) // wait for transition
   const $editPersonButton = await $(".edit-person")

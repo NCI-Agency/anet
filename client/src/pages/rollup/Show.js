@@ -46,7 +46,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_SHOW_ROLLUP_EMAIL = gql`
-  query(
+  query (
     $startDate: Instant!
     $endDate: Instant!
     $principalOrganizationUuid: String
@@ -63,7 +63,7 @@ const GQL_SHOW_ROLLUP_EMAIL = gql`
   }
 `
 const GQL_EMAIL_ROLLUP = gql`
-  mutation(
+  mutation (
     $startDate: Instant!
     $endDate: Instant!
     $email: AnetEmailInput!

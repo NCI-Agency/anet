@@ -29,7 +29,7 @@ import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const GQL_GET_REPORT_COUNT = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
     }

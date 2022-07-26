@@ -27,7 +27,7 @@ import utils from "utils"
 import "./BlueprintOverrides.css"
 
 const GQL_DELETE_NOTE = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteNote(uuid: $uuid)
   }
 `
@@ -61,10 +61,8 @@ const RelatedObjectNotes = ({
   )
 
   const [error, setError] = useState(null)
-  const [
-    showRelatedObjectNoteModalKey,
-    setShowRelatedObjectNoteModalKey
-  ] = useState(null)
+  const [showRelatedObjectNoteModalKey, setShowRelatedObjectNoteModalKey] =
+    useState(null)
   const [noteType, setNoteType] = useState(null)
   const [notes, setNotes] = useState(notesFiltered)
   const [show, setShow] = useState(false)

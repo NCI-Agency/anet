@@ -228,44 +228,44 @@ const GQL_GET_REPORT = gql`
   }
 `
 const GQL_DELETE_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteReport(uuid: $uuid)
   }
 `
 const GQL_UNPUBLISH_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     unpublishReport(uuid: $uuid)
   }
 `
 const GQL_EMAIL_REPORT = gql`
-  mutation($uuid: String!, $email: AnetEmailInput!) {
+  mutation ($uuid: String!, $email: AnetEmailInput!) {
     emailReport(uuid: $uuid, email: $email)
   }
 `
 const GQL_SUBMIT_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     submitReport(uuid: $uuid)
   }
 `
 const GQL_PUBLISH_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     publishReport(uuid: $uuid)
   }
 `
 const GQL_ADD_REPORT_COMMENT = gql`
-  mutation($uuid: String!, $comment: CommentInput!) {
+  mutation ($uuid: String!, $comment: CommentInput!) {
     addComment(uuid: $uuid, comment: $comment) {
       uuid
     }
   }
 `
 const GQL_REJECT_REPORT = gql`
-  mutation($uuid: String!, $comment: CommentInput!) {
+  mutation ($uuid: String!, $comment: CommentInput!) {
     rejectReport(uuid: $uuid, comment: $comment)
   }
 `
 const GQL_APPROVE_REPORT = gql`
-  mutation($uuid: String!, $comment: CommentInput!) {
+  mutation ($uuid: String!, $comment: CommentInput!) {
     approveReport(uuid: $uuid, comment: $comment)
   }
 `

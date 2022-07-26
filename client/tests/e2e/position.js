@@ -109,10 +109,8 @@ test.serial("Move someone in and out of a position", async t => {
   await $changeAssignedPersonButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
-  const $assignedPerson = await t.context.pageHelpers.chooseAdvancedSelectOption(
-    "#person",
-    person
-  )
+  const $assignedPerson =
+    await t.context.pageHelpers.chooseAdvancedSelectOption("#person", person)
   t.is(
     await $assignedPerson.getAttribute("value"),
     person,

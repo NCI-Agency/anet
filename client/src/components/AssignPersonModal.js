@@ -24,13 +24,13 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_DELETE_PERSON_FROM_POSITION = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deletePersonFromPosition(uuid: $uuid)
   }
 `
 
 const GQL_PUT_PERSON_IN_POSITION = gql`
-  mutation($uuid: String!, $person: PersonInput!) {
+  mutation ($uuid: String!, $person: PersonInput!) {
     putPersonInPosition(uuid: $uuid, person: $person)
   }
 `

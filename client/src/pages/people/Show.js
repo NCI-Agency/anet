@@ -118,7 +118,7 @@ const GQL_GET_PERSON = gql`
 `
 
 const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
-  mutation($person: PersonInput!) {
+  mutation ($person: PersonInput!) {
     updatePersonHistory(person: $person)
   }
 `
@@ -132,10 +132,8 @@ const PersonShow = ({ pageDispatchers }) => {
     routerLocation.state && routerLocation.state.error
   )
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
-  const [
-    showAssociatedPositionsModal,
-    setShowAssociatedPositionsModal
-  ] = useState(false)
+  const [showAssociatedPositionsModal, setShowAssociatedPositionsModal] =
+    useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {

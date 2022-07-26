@@ -19,7 +19,7 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_TASK_LIST = gql`
-  query($taskQuery: TaskSearchQueryInput) {
+  query ($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       pageNum
       pageSize

@@ -18,7 +18,7 @@ import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const GQL_UPDATE_ASSOCIATED_POSITION = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     updateAssociatedPosition(position: $position)
   }
 `

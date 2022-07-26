@@ -14,7 +14,7 @@ import React, { useContext } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_PERSON = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     person(uuid: $uuid) {
       uuid
       name

@@ -330,19 +330,22 @@ export const createAssessmentSchema = (
 
   /** *********** Additional validation section for specific assessment fields. *************/
   if (assessmentSchemaShape.fields.expirationDate) {
-    assessmentSchemaShape.fields.expirationDate = assessmentSchemaShape.fields.expirationDate.when(
-      ENTITY_ON_DEMAND_ASSESSMENT_DATE,
-      (assessmentDate, schema) => {
-        if (assessmentDate) {
-          return schema.min(
-            assessmentDate,
-            `${
-              assessmentConfig.questions.expirationDate.label
-            } must be later than ${moment(assessmentDate).format("DD-MM-YYYY")}`
-          )
+    assessmentSchemaShape.fields.expirationDate =
+      assessmentSchemaShape.fields.expirationDate.when(
+        ENTITY_ON_DEMAND_ASSESSMENT_DATE,
+        (assessmentDate, schema) => {
+          if (assessmentDate) {
+            return schema.min(
+              assessmentDate,
+              `${
+                assessmentConfig.questions.expirationDate.label
+              } must be later than ${moment(assessmentDate).format(
+                "DD-MM-YYYY"
+              )}`
+            )
+          }
         }
-      }
-    )
+      )
   }
   /******************************************************************************************/
 

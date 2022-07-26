@@ -18,7 +18,7 @@ import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {

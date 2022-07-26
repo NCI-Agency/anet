@@ -46,7 +46,7 @@ const GQL_GET_ADMIN_SETTINGS = gql`
   }
 `
 const GQL_SAVE_ADMIN_SETTINGS = gql`
-  mutation($settings: [AdminSettingInput]!) {
+  mutation ($settings: [AdminSettingInput]!) {
     saveAdminSettings(settings: $settings)
   }
 `

@@ -10,7 +10,7 @@ import React, { useRef } from "react"
 import { useNavigate } from "react-router-dom"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       pageNum
       pageSize

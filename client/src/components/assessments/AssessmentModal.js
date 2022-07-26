@@ -174,9 +174,8 @@ const AssessmentModal = ({
     clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__recurrence = recurrence
     if (recurrence !== RECURRENCE_TYPE.ON_DEMAND) {
       // __periodStart is not used for ondemand assessments
-      clonedValues[
-        ENTITY_ASSESSMENT_PARENT_FIELD
-      ].__periodStart = formatPeriodBoundary(assessmentPeriod.start)
+      clonedValues[ENTITY_ASSESSMENT_PARENT_FIELD].__periodStart =
+        formatPeriodBoundary(assessmentPeriod.start)
     }
     updatedNote.text = customFieldsJSONString(
       clonedValues,

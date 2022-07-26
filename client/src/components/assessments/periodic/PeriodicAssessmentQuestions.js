@@ -97,9 +97,8 @@ export const QuestionSetRow = ({
                 </div>
                 {Object.entries(questionSetConfig.questions || {}).map(
                   ([question, questionConfig]) => {
-                    const aggregationWidget = getAggregationWidget(
-                      questionConfig
-                    )
+                    const aggregationWidget =
+                      getAggregationWidget(questionConfig)
                     return (
                       <AggregationWidgetContainer
                         key={question}

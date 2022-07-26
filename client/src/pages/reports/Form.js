@@ -118,7 +118,7 @@ const GQL_GET_RECENTS = gql`
   }
 `
 const GQL_CREATE_REPORT = gql`
-  mutation($report: ReportInput!) {
+  mutation ($report: ReportInput!) {
     createReport(report: $report) {
       uuid
       state
@@ -133,7 +133,7 @@ const GQL_CREATE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT = gql`
-  mutation($report: ReportInput!, $sendEditEmail: Boolean!) {
+  mutation ($report: ReportInput!, $sendEditEmail: Boolean!) {
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
       state
@@ -148,12 +148,12 @@ const GQL_UPDATE_REPORT = gql`
   }
 `
 const GQL_DELETE_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteReport(uuid: $uuid)
   }
 `
 const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
-  mutation($uuid: String, $notes: [NoteInput]) {
+  mutation ($uuid: String, $notes: [NoteInput]) {
     updateReportAssessments(reportUuid: $uuid, assessments: $notes)
   }
 `

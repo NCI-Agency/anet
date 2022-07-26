@@ -216,7 +216,7 @@ const GQL_GET_REPORT_LIST = gql`
   }
 `
 const GQL_GET_DATA = gql`
-  query(
+  query (
     $includeOrganizations: Boolean!
     $organizationQuery: OrganizationSearchQueryInput
     $includePeople: Boolean!

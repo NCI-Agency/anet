@@ -28,14 +28,14 @@ import { useNavigate } from "react-router-dom"
 import Settings from "settings"
 
 const GQL_CREATE_LOCATION = gql`
-  mutation($location: LocationInput!) {
+  mutation ($location: LocationInput!) {
     createLocation(location: $location) {
       uuid
     }
   }
 `
 const GQL_UPDATE_LOCATION = gql`
-  mutation($location: LocationInput!) {
+  mutation ($location: LocationInput!) {
     updateLocation(location: $location)
   }
 `

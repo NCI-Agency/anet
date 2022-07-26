@@ -14,7 +14,7 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
-  query($orgUuid: String!) {
+  query ($orgUuid: String!) {
     advisorReportInsights(orgUuid: $orgUuid) {
       uuid
       name

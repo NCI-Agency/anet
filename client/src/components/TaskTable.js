@@ -15,7 +15,7 @@ import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const GQL_GET_TASK_LIST = gql`
-  query($taskQuery: TaskSearchQueryInput) {
+  query ($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       pageNum
       pageSize

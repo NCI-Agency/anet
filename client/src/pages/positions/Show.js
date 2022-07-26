@@ -42,13 +42,13 @@ const GQL_GET_POSITION = gql`
   }
 `
 const GQL_DELETE_POSITION = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deletePosition(uuid: $uuid)
   }
 `
 
 const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     updatePositionHistory(position: $position)
   }
 `
@@ -57,10 +57,8 @@ const PositionShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
-  const [
-    showAssociatedPositionsModal,
-    setShowAssociatedPositionsModal
-  ] = useState(false)
+  const [showAssociatedPositionsModal, setShowAssociatedPositionsModal] =
+    useState(false)
   const [showEditHistoryModal, setShowEditHistoryModal] = useState(false)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success

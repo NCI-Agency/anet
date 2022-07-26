@@ -133,9 +133,8 @@ const PeriodicAssessmentResultsTable = ({
   const subEntitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessments())
     .filter(mc => !_isEmpty(mc))
-  const { assessmentConfig } = entity.getPeriodicAssessmentDetails(
-    assessmentKey
-  )
+  const { assessmentConfig } =
+    entity.getPeriodicAssessmentDetails(assessmentKey)
   const filteredAssessmentConfig = Model.filterAssessmentConfig(
     assessmentConfig,
     entity

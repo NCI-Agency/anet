@@ -24,7 +24,7 @@ import AssessmentModal from "../AssessmentModal"
 import QuestionSet from "../QuestionSet"
 
 const GQL_DELETE_NOTE = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteNote(uuid: $uuid)
   }
 `
@@ -203,10 +203,8 @@ export const PeriodicAssessmentsRows = ({
     return null
   }
 
-  const {
-    assessmentConfig,
-    assessmentYupSchema
-  } = entity.getPeriodicAssessmentDetails(assessmentKey)
+  const { assessmentConfig, assessmentYupSchema } =
+    entity.getPeriodicAssessmentDetails(assessmentKey)
   const filteredAssessmentConfig = Model.filterAssessmentConfig(
     assessmentConfig,
     entity

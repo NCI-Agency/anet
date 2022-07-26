@@ -16,7 +16,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_PERSON = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     person(uuid: $uuid) {
       uuid
       name

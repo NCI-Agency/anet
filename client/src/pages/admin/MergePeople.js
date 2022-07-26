@@ -50,7 +50,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_MERGE_PERSON = gql`
-  mutation($loserUuid: String!, $winnerPerson: PersonInput!) {
+  mutation ($loserUuid: String!, $winnerPerson: PersonInput!) {
     mergePeople(loserUuid: $loserUuid, winnerPerson: $winnerPerson)
   }
 `
