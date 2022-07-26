@@ -5,11 +5,14 @@ import "./TriggerableConfirm.css"
 
 const TriggerableConfirm = ({
   onConfirm,
+  onCancel,
   title,
   body,
   confirmText,
   cancelText,
   variant,
+  showDialog,
+  renderTriggerButton,
   buttonLabel,
   buttonSize,
   buttonClassName,
@@ -18,24 +21,31 @@ const TriggerableConfirm = ({
   buttonRef,
   children
 }) => {
-  const [show, setShow] = useState(false)
-  const handleClose = () => setShow(false)
+  const [show, setShow] = useState(showDialog)
+  const handleClose = () => {
+    setShow(false)
+    if (typeof onCancel === "function") {
+      onCancel()
+    }
+  }
   const handleShow = () => setShow(true)
 
   return (
     <>
-      <Button
-        variant={variant}
-        onClick={handleShow}
-        size={buttonSize}
-        className={buttonClassName}
-        disabled={buttonDisabled}
-        id={buttonId}
-        ref={buttonRef}
-      >
-        {buttonLabel}
-        {children}
-      </Button>
+      {renderTriggerButton && (
+        <Button
+          variant={variant}
+          onClick={handleShow}
+          size={buttonSize}
+          className={buttonClassName}
+          disabled={buttonDisabled}
+          id={buttonId}
+          ref={buttonRef}
+        >
+          {buttonLabel}
+          {children}
+        </Button>
+      )}
 
       <Modal
         centered
@@ -80,11 +90,14 @@ const TriggerableConfirm = ({
 }
 TriggerableConfirm.propTypes = {
   onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
   title: PropTypes.string,
   body: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
   variant: PropTypes.string,
+  showDialog: PropTypes.bool,
+  renderTriggerButton: PropTypes.bool,
   buttonLabel: PropTypes.string,
   buttonSize: PropTypes.string,
   buttonClassName: PropTypes.string,
@@ -92,6 +105,12 @@ TriggerableConfirm.propTypes = {
   buttonId: PropTypes.string,
   buttonRef: PropTypes.object,
   children: PropTypes.node
+}
+TriggerableConfirm.defaultProps = {
+  confirmText: "OK",
+  cancelText: "Cancel",
+  showDialog: false,
+  renderTriggerButton: true
 }
 
 export default TriggerableConfirm

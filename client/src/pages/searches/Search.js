@@ -56,7 +56,7 @@ import {
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -592,7 +592,7 @@ const Search = ({
   pagination,
   setPagination
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
   const [numOrganizations, setNumOrganizations] = useState(null)
@@ -658,7 +658,7 @@ const Search = ({
         <Container className="p-0">
           <Row style={{ paddingLeft: 0 }}>
             <div>
-              <Button onClick={history.goBack} variant="link" size="sm">
+              <Button onClick={() => navigate(-1)} variant="link" size="sm">
                 &lt; Return to previous page
               </Button>
             </div>

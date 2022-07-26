@@ -4,7 +4,7 @@ import "hopscotch/dist/css/hopscotch.css"
 import PropTypes from "prop-types"
 import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Button } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import TOUR_ICON from "resources/tour-icon.png"
 
 const iconCss = {
@@ -18,15 +18,15 @@ const HOPSCOTCH_CONFIG = {
 
 const GuidedTour = ({ autostart, title, tour, onEnd }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [runningTour, setRunningTour] = useState(false)
   const startTour = useCallback(() => {
     // I don't know why hopscotch requires itself to be reconfigured
     // EVERY TIME you start a tour, but it does. so this does that.
     hopscotch.configure(HOPSCOTCH_CONFIG)
-    hopscotch.startTour(tour(currentUser, history))
+    hopscotch.startTour(tour(currentUser, navigate))
     setRunningTour(true)
-  }, [currentUser, tour, history])
+  }, [currentUser, tour, navigate])
   useEffect(() => {
     hopscotch.listen("end", handleOnEnd)
     hopscotch.listen("close", handleOnEnd)

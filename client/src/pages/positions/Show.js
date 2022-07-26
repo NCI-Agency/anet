@@ -29,7 +29,7 @@ import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
 import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 import PreviousPeople from "./PreviousPeople"
@@ -55,7 +55,7 @@ const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
 
 const PositionShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
   const [
     showAssociatedPositionsModal,
@@ -409,7 +409,7 @@ const PositionShow = ({ pageDispatchers }) => {
     const { uuid } = position
     API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
-        history.push("/", { success: "Position deleted" })
+        navigate("/", { state: { success: "Position deleted" } })
       })
       .catch(error => {
         setStateError(error)

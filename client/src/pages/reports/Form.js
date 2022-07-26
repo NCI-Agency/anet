@@ -56,7 +56,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -169,7 +169,7 @@ const ReportForm = ({
   notesComponent
 }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -1265,9 +1265,9 @@ const ReportForm = ({
     API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
         // reset the form to latest values
-        // to avoid unsaved changes propmt if it somehow becomes dirty
+        // to avoid unsaved changes prompt if it somehow becomes dirty
         resetForm({ values, isSubmitting: true })
-        history.push("/", { success: "Report deleted" })
+        navigate("/", { state: { success: "Report deleted" } })
       })
       .catch(error => {
         setSaveError(error)
@@ -1276,7 +1276,7 @@ const ReportForm = ({
   }
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -1293,13 +1293,13 @@ const ReportForm = ({
   function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     resetForm({ values, isSubmitting: true })
     if (!edit) {
-      history.replace(Report.pathForEdit(report))
+      navigate(Report.pathForEdit(report), { replace: true })
     }
-    history.push(Report.pathFor(report), {
-      success: `${getReportTypeUpperFirst(values)} saved`
+    navigate(Report.pathFor(report), {
+      state: { success: `${getReportTypeUpperFirst(values)} saved` }
     })
   }
 

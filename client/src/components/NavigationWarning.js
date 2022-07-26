@@ -1,27 +1,14 @@
+import Prompt from "components/Prompt"
 import PropTypes from "prop-types"
-import React, { useEffect } from "react"
-import { Prompt } from "react-router-dom"
+import React from "react"
 
+const LEAVE_TITLE = "Warning: unsaved changes"
 const LEAVE_WARNING =
   "Are you sure you wish to navigate away from the page? You will lose unsaved changes."
 
-const NavigationWarning = ({ isBlocking }) => {
-  useEffect(() => {
-    window.addEventListener("beforeunload", onBeforeUnloadListener)
-
-    return () =>
-      window.removeEventListener("beforeunload", onBeforeUnloadListener)
-
-    function onBeforeUnloadListener(event) {
-      if (isBlocking) {
-        event.returnValue = LEAVE_WARNING
-        event.preventDefault()
-      }
-    }
-  }, [isBlocking])
-
-  return <Prompt when={isBlocking} message={LEAVE_WARNING} />
-}
+const NavigationWarning = ({ isBlocking }) => (
+  <Prompt when={isBlocking} title={LEAVE_TITLE} message={LEAVE_WARNING} />
+)
 
 NavigationWarning.propTypes = {
   isBlocking: PropTypes.bool

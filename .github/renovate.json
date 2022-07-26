@@ -25,8 +25,7 @@
     {
       "matchPackageNames": [
         "autoprefixer",
-        "com.graphql-java:graphql-java-extended-scalars",
-        "react-router-bootstrap"
+        "com.graphql-java:graphql-java-extended-scalars"
       ],
       "enabled": false
     },

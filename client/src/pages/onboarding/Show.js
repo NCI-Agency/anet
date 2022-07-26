@@ -7,7 +7,7 @@ import {
 import React from "react"
 import { Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 const OnboardingShow = ({ pageDispatchers }) => {
   useBoilerplate({
@@ -15,7 +15,7 @@ const OnboardingShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <div className="onboarding-new">
@@ -37,7 +37,7 @@ const OnboardingShow = ({ pageDispatchers }) => {
   )
 
   function onCreateAccountClick() {
-    history.push("/onboarding/edit")
+    navigate("/onboarding/edit")
   }
 }
 
