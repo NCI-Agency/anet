@@ -107,7 +107,7 @@
     "thread-loader": "3.0.4",
     "wdio-chromedriver-service": "7.3.2",
     "webdriverio": "7.20.7",
-    "webpack": "5.73.0",
+    "webpack": "5.74.0",
     "webpack-cli": "4.10.0",
     "webpack-dev-server": "4.9.3",
     "webpack-merge": "5.8.0",
@@ -189,6 +189,11 @@
     "use-debounce": "7.0.1",
     "yup": "0.32.11"
   },
+  "resolutions": {
+    "webpack": "^5",
+    "@storybook/builder-webpack4": "link:./node_modules/@storybook/builder-webpack5",
+    "@storybook/manager-webpack4": "link:./node_modules/@storybook/manager-webpack5"
+  },
   "scripts": {
     "build": "NODE_ENV=production webpack --config config/webpack.client.prod.js",
     "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack serve --config config/webpack.client.dev.js",
@@ -204,7 +209,7 @@
     "test-all-noCF": "yarn run test-wdio-noCF",
     "test-wdio-noCF": "env TEST_WDIO_SUITE=noCustomFields yarn run test-wdio",
     "generate-graphql-schema": "graphql-codegen -p anet",
-    "storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary.yml} ; start-storybook -s .. -p 6006",
+    "storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary.yml} ; start-storybook -p 6006",
     "build-storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; build-storybook -s ./stories/dictionaryForStories",
     "build-storybook-docs": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; build-storybook -s ./stories/dictionaryForStories --docs",
     "chromatic": "chromatic --project-token ${CHROMATIC_PROJECT_TOKEN}",
