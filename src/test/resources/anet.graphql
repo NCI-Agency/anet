@@ -1,3 +1,4 @@
+""""""
 enum ActionType {
   APPROVE
   PUBLISH
@@ -6,12 +7,14 @@ enum ActionType {
   UNPUBLISH
 }
 
+""""""
 type Activity {
   ip: String
   request: String
   time: Instant
 }
 
+""""""
 type AdminSetting {
   createdAt: Instant
   key: String
@@ -19,6 +22,7 @@ type AdminSetting {
   value: String
 }
 
+""""""
 input AdminSettingInput {
   createdAt: Instant
   key: String
@@ -26,18 +30,21 @@ input AdminSettingInput {
   value: String
 }
 
+""""""
 type AdvisorReportsEntry {
   name: String
   stats: [AdvisorReportsStats]
   uuid: String
 }
 
+""""""
 type AdvisorReportsStats {
   nrEngagementsAttended: Int!
   nrReportsSubmitted: Int!
   week: Int!
 }
 
+""""""
 type AnetBeanList_AuthorizationGroup {
   list: [AuthorizationGroup]
   pageNum: Int
@@ -45,6 +52,7 @@ type AnetBeanList_AuthorizationGroup {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Location {
   list: [Location]
   pageNum: Int
@@ -52,6 +60,7 @@ type AnetBeanList_Location {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Organization {
   list: [Organization]
   pageNum: Int
@@ -59,6 +68,7 @@ type AnetBeanList_Organization {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Person {
   list: [Person]
   pageNum: Int
@@ -66,6 +76,7 @@ type AnetBeanList_Person {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Position {
   list: [Position]
   pageNum: Int
@@ -73,6 +84,7 @@ type AnetBeanList_Position {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Report {
   list: [Report]
   pageNum: Int
@@ -80,6 +92,7 @@ type AnetBeanList_Report {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Subscription {
   list: [Subscription]
   pageNum: Int
@@ -87,6 +100,7 @@ type AnetBeanList_Subscription {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_SubscriptionUpdate {
   list: [SubscriptionUpdate]
   pageNum: Int
@@ -94,6 +108,7 @@ type AnetBeanList_SubscriptionUpdate {
   totalCount: Int
 }
 
+""""""
 type AnetBeanList_Task {
   list: [Task]
   pageNum: Int
@@ -101,12 +116,14 @@ type AnetBeanList_Task {
   totalCount: Int
 }
 
+""""""
 input AnetEmailInput {
   comment: String
   createdAt: Instant
   toAddresses: [String]
 }
 
+""""""
 type ApprovalStep {
   approvers: [Position]
   createdAt: Instant
@@ -119,6 +136,7 @@ type ApprovalStep {
   uuid: String
 }
 
+""""""
 input ApprovalStepInput {
   approvers: [PositionInput]
   createdAt: Instant
@@ -131,17 +149,20 @@ input ApprovalStepInput {
   uuid: String
 }
 
+""""""
 enum ApprovalStepType {
   PLANNING_APPROVAL
   REPORT_APPROVAL
 }
 
+""""""
 enum Atmosphere {
   NEGATIVE
   NEUTRAL
   POSITIVE
 }
 
+""""""
 type AuthorizationGroup {
   createdAt: Instant
   description: String
@@ -152,6 +173,7 @@ type AuthorizationGroup {
   uuid: String
 }
 
+""""""
 input AuthorizationGroupInput {
   createdAt: Instant
   description: String
@@ -162,6 +184,7 @@ input AuthorizationGroupInput {
   uuid: String
 }
 
+""""""
 input AuthorizationGroupSearchQueryInput {
   inMyReports: Boolean
   pageNum: Int
@@ -173,12 +196,14 @@ input AuthorizationGroupSearchQueryInput {
   text: String
 }
 
+""""""
 enum AuthorizationGroupSearchSortBy {
   CREATED_AT
   NAME
   RECENT
 }
 
+""""""
 type Comment {
   author: Person
   createdAt: Instant
@@ -188,6 +213,7 @@ type Comment {
   uuid: String
 }
 
+""""""
 input CommentInput {
   author: PersonInput
   createdAt: Instant
@@ -197,6 +223,7 @@ input CommentInput {
   uuid: String
 }
 
+""""""
 type CustomSensitiveInformation {
   createdAt: Instant
   customFieldName: String
@@ -208,6 +235,7 @@ type CustomSensitiveInformation {
   uuid: String
 }
 
+""""""
 input CustomSensitiveInformationInput {
   createdAt: Instant
   customFieldName: String
@@ -218,6 +246,7 @@ input CustomSensitiveInformationInput {
   uuid: String
 }
 
+""""""
 enum EngagementStatus {
   CANCELLED
   FUTURE
@@ -226,6 +255,7 @@ enum EngagementStatus {
 
 scalar Instant
 
+""""""
 type Location {
   approvalSteps: [ApprovalStep]
   createdAt: Instant
@@ -243,6 +273,7 @@ type Location {
   uuid: String
 }
 
+""""""
 input LocationInput {
   approvalSteps: [ApprovalStepInput]
   createdAt: Instant
@@ -258,6 +289,7 @@ input LocationInput {
   uuid: String
 }
 
+""""""
 input LocationSearchQueryInput {
   inMyReports: Boolean
   pageNum: Int
@@ -270,12 +302,14 @@ input LocationSearchQueryInput {
   type: LocationType
 }
 
+""""""
 enum LocationSearchSortBy {
   CREATED_AT
   NAME
   RECENT
 }
 
+""""""
 enum LocationType {
   ADVISOR_LOCATION
   GEOGRAPHICAL_AREA
@@ -333,6 +367,7 @@ type Mutation {
   updateTask(task: TaskInput): Int
 }
 
+""""""
 type Note {
   assessmentKey: String
   author: Person
@@ -344,6 +379,7 @@ type Note {
   uuid: String
 }
 
+""""""
 input NoteInput {
   assessmentKey: String
   author: PersonInput
@@ -355,6 +391,7 @@ input NoteInput {
   uuid: String
 }
 
+""""""
 type NoteRelatedObject {
   noteUuid: String
   relatedObject: RelatableObject
@@ -362,12 +399,14 @@ type NoteRelatedObject {
   relatedObjectUuid: String
 }
 
+""""""
 input NoteRelatedObjectInput {
   noteUuid: String
   relatedObjectType: String
   relatedObjectUuid: String
 }
 
+""""""
 enum NoteType {
   ASSESSMENT
   CHANGE_RECORD
@@ -375,6 +414,7 @@ enum NoteType {
   PARTNER_ASSESSMENT @deprecated(reason: "Deprecated")
 }
 
+""""""
 type Organization {
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
@@ -398,6 +438,7 @@ type Organization {
   uuid: String
 }
 
+""""""
 input OrganizationInput {
   approvalSteps: [ApprovalStepInput]
   createdAt: Instant
@@ -415,6 +456,7 @@ input OrganizationInput {
   uuid: String
 }
 
+""""""
 input OrganizationSearchQueryInput {
   hasParentOrg: Boolean
   inMyReports: Boolean
@@ -430,17 +472,20 @@ input OrganizationSearchQueryInput {
   type: OrganizationType
 }
 
+""""""
 enum OrganizationSearchSortBy {
   CREATED_AT
   NAME
   TYPE
 }
 
+""""""
 enum OrganizationType {
   ADVISOR_ORG
   PRINCIPAL_ORG
 }
 
+""""""
 type Person {
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
@@ -470,6 +515,7 @@ type Person {
   uuid: String
 }
 
+""""""
 input PersonInput {
   avatar: String
   biography: String
@@ -495,6 +541,7 @@ input PersonInput {
   uuid: String
 }
 
+""""""
 type PersonPositionHistory {
   createdAt: Instant
   endTime: Instant
@@ -504,6 +551,7 @@ type PersonPositionHistory {
   updatedAt: Instant
 }
 
+""""""
 input PersonPositionHistoryInput {
   createdAt: Instant
   endTime: Instant
@@ -513,6 +561,7 @@ input PersonPositionHistoryInput {
   updatedAt: Instant
 }
 
+""""""
 input PersonSearchQueryInput {
   country: String
   endOfTourDateEnd: Instant
@@ -535,6 +584,7 @@ input PersonSearchQueryInput {
   text: String
 }
 
+""""""
 enum PersonSearchSortBy {
   CREATED_AT
   NAME
@@ -542,6 +592,7 @@ enum PersonSearchSortBy {
   RECENT
 }
 
+""""""
 type Position {
   associatedPositions: [Position]
   authorizationGroups: [AuthorizationGroup]
@@ -564,6 +615,7 @@ type Position {
   uuid: String
 }
 
+""""""
 input PositionInput {
   associatedPositions: [PositionInput]
   code: String
@@ -581,6 +633,7 @@ input PositionInput {
   uuid: String
 }
 
+""""""
 input PositionSearchQueryInput {
   authorizationGroupUuid: String
   hasCounterparts: Boolean
@@ -601,12 +654,14 @@ input PositionSearchQueryInput {
   type: [PositionType]
 }
 
+""""""
 enum PositionSearchSortBy {
   CODE
   CREATED_AT
   NAME
 }
 
+""""""
 enum PositionType {
   ADMINISTRATOR
   ADVISOR
@@ -643,19 +698,23 @@ type Query {
   userActivities: RecentActivities
 }
 
+""""""
 type RecentActivities {
   byActivity: [UserActivity]
   byUser: [UserActivity]
 }
 
+""""""
 enum RecurseStrategy {
   CHILDREN
   NONE
   PARENTS
 }
 
+""""""
 union RelatableObject = AuthorizationGroup | Location | Organization | Person | Position | Report | ReportPerson | Task
 
+""""""
 type Report {
   advisorOrg: Organization
   approvalStep: ApprovalStep
@@ -694,6 +753,7 @@ type Report {
   workflow: [ReportAction]
 }
 
+""""""
 type ReportAction {
   createdAt: Instant
   person: Person
@@ -704,6 +764,7 @@ type ReportAction {
   updatedAt: Instant
 }
 
+""""""
 enum ReportCancelledReason {
   CANCELLED_BY_ADVISOR
   CANCELLED_BY_PRINCIPAL
@@ -716,6 +777,7 @@ enum ReportCancelledReason {
   NO_REASON_GIVEN
 }
 
+""""""
 input ReportInput {
   advisorOrg: OrganizationInput
   approvalStep: ApprovalStepInput
@@ -746,6 +808,7 @@ input ReportInput {
   uuid: String
 }
 
+""""""
 type ReportPerson {
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   attendee: Boolean!
@@ -778,6 +841,7 @@ type ReportPerson {
   uuid: String
 }
 
+""""""
 input ReportPersonInput {
   attendee: Boolean!
   author: Boolean!
@@ -806,6 +870,7 @@ input ReportPersonInput {
   uuid: String
 }
 
+""""""
 input ReportSearchQueryInput {
   advisorOrgUuid: String
   atmosphere: Atmosphere
@@ -846,6 +911,7 @@ input ReportSearchQueryInput {
   updatedAtStart: Instant
 }
 
+""""""
 enum ReportSearchSortBy {
   CREATED_AT
   ENGAGEMENT_DATE
@@ -853,6 +919,7 @@ enum ReportSearchSortBy {
   UPDATED_AT
 }
 
+""""""
 type ReportSensitiveInformation {
   createdAt: Instant
   text: String
@@ -860,6 +927,7 @@ type ReportSensitiveInformation {
   uuid: String
 }
 
+""""""
 input ReportSensitiveInformationInput {
   createdAt: Instant
   text: String
@@ -867,6 +935,7 @@ input ReportSensitiveInformationInput {
   uuid: String
 }
 
+""""""
 enum ReportState {
   APPROVED
   CANCELLED
@@ -877,17 +946,20 @@ enum ReportState {
   REJECTED
 }
 
+""""""
 enum Role {
   ADVISOR
   PRINCIPAL
 }
 
+""""""
 type RollupGraph {
   cancelled: Int!
   org: Organization
   published: Int!
 }
 
+""""""
 type SavedSearch {
   createdAt: Instant
   name: String
@@ -898,6 +970,7 @@ type SavedSearch {
   uuid: String
 }
 
+""""""
 input SavedSearchInput {
   createdAt: Instant
   name: String
@@ -908,6 +981,7 @@ input SavedSearchInput {
   uuid: String
 }
 
+""""""
 enum SearchObjectType {
   LOCATIONS
   ORGANIZATIONS
@@ -917,18 +991,22 @@ enum SearchObjectType {
   TASKS
 }
 
+""""""
 enum SortOrder {
   ASC
   DESC
 }
 
+""""""
 enum Status {
   ACTIVE
   INACTIVE
 }
 
+""""""
 union SubscribableObject = Location | Organization | Person | Position | Report | ReportPerson | Task
 
+""""""
 type Subscription {
   createdAt: Instant
   subscribedObject: SubscribableObject
@@ -939,6 +1017,7 @@ type Subscription {
   uuid: String
 }
 
+""""""
 input SubscriptionInput {
   createdAt: Instant
   subscribedObjectType: String
@@ -948,6 +1027,7 @@ input SubscriptionInput {
   uuid: String
 }
 
+""""""
 input SubscriptionSearchQueryInput {
   inMyReports: Boolean
   pageNum: Int
@@ -958,10 +1038,12 @@ input SubscriptionSearchQueryInput {
   text: String
 }
 
+""""""
 enum SubscriptionSearchSortBy {
   CREATED_AT
 }
 
+""""""
 type SubscriptionUpdate {
   createdAt: Instant
   isNote: Boolean!
@@ -971,6 +1053,7 @@ type SubscriptionUpdate {
   updatedObjectUuid: String
 }
 
+""""""
 input SubscriptionUpdateSearchQueryInput {
   inMyReports: Boolean
   pageNum: Int
@@ -981,10 +1064,12 @@ input SubscriptionUpdateSearchQueryInput {
   text: String
 }
 
+""""""
 enum SubscriptionUpdateSearchSortBy {
   CREATED_AT
 }
 
+""""""
 type Task {
   approvalSteps: [ApprovalStep]
   category: String
@@ -1010,6 +1095,7 @@ type Task {
   uuid: String
 }
 
+""""""
 input TaskInput {
   approvalSteps: [ApprovalStepInput]
   category: String
@@ -1032,6 +1118,7 @@ input TaskInput {
   uuid: String
 }
 
+""""""
 input TaskSearchQueryInput {
   category: String
   customField: String
@@ -1056,6 +1143,7 @@ input TaskSearchQueryInput {
   text: String
 }
 
+""""""
 enum TaskSearchSortBy {
   CATEGORY
   CREATED_AT
@@ -1066,6 +1154,7 @@ enum TaskSearchSortBy {
 """Use SPQR's SchemaPrinter to remove this from SDL"""
 scalar UNREPRESENTABLE
 
+""""""
 type UserActivity {
   activity: Activity
   user: Person
