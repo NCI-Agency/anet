@@ -107,7 +107,7 @@
     "thread-loader": "3.0.4",
     "wdio-chromedriver-service": "7.3.2",
     "webdriverio": "7.20.7",
-    "webpack": "5.73.0",
+    "webpack": "5.74.0",
     "webpack-cli": "4.10.0",
     "webpack-dev-server": "4.9.3",
     "webpack-merge": "5.8.0",
@@ -188,6 +188,11 @@
     "slate-react": "0.81.0",
     "use-debounce": "7.0.1",
     "yup": "0.32.11"
+  },
+  "resolutions": {
+    "webpack": "^5",
+    "@storybook/builder-webpack4": "link:./node_modules/@storybook/builder-webpack5",
+    "@storybook/manager-webpack4": "link:./node_modules/@storybook/manager-webpack5"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --config config/webpack.client.prod.js",
