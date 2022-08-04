@@ -144,7 +144,7 @@
     "graphql": "16.5.0",
     "hopscotch": "0.3.1",
     "html-react-parser": "1.4.14",
-    "jsonpath-plus": "6.0.1",
+    "jsonpath-plus": "7.0.0",
     "keycloak-js": "16.1.1",
     "leaflet": "1.8.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
