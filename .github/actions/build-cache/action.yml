@@ -1,0 +1,50 @@
+name: Build cache for ANET
+
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/checkout@v3
+    with:
+      fetch-depth: 0
+  - name: Setup kernel for a.o. Storybook, increase number of file watches
+    run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+    shell: bash
+  - name: Set up chromedriver
+    run: echo "CHROMEDRIVER_FILEPATH=$CHROMEWEBDRIVER/chromedriver" >> $GITHUB_ENV
+    shell: bash
+  - uses: actions/setup-java@v3
+    with:
+      distribution: "zulu"
+      java-version: 15
+  - name: Cache gradle
+    uses: actions/cache@v3
+    with:
+      path: |
+        ~/.gradle/caches
+        ./.gradle
+      key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      restore-keys: |
+        ${{ runner.os }}-gradle-
+  - name: Set up yarn
+    run: ./gradlew yarnSetup
+    shell: bash
+  - name: Get yarn cache directory path
+    id: yarn-cache-dir-path
+    run: echo "::set-output name=dir::$(./gradlew -q yarn_cache_dir)"
+    shell: bash
+  - name: Cache yarn and node_modules
+    uses: actions/cache@v3
+    with:
+      path: |
+        ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        ./client/node_modules
+      key: ${{ runner.os }}-yarn-${{ hashFiles('client/yarn.lock') }}
+      restore-keys: |
+        ${{ runner.os }}-yarn-
+  - name: Cache build
+    uses: actions/cache@v3
+    with:
+      path: ./build
+      key: ${{ runner.os }}-build
+      restore-keys: |
+        ${{ runner.os }}-build
