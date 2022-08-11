@@ -12,7 +12,8 @@ const OrganizationAdvisorsTable = ({
   data: dataProp,
   filterText,
   columnGroups,
-  onRowSelection
+  onRowSelection,
+  weeksAgo
 }) => {
   const [data, setData] = useState(dataProp || [])
   const [selectedAll, setSelectedAll] = useState(false)
@@ -34,6 +35,7 @@ const OrganizationAdvisorsTable = ({
           name={organization.name}
           uuid={organization.uuid}
           columnGroups={columnGroups}
+          weeksAgo={weeksAgo}
         />
       )
       return (
@@ -48,7 +50,7 @@ const OrganizationAdvisorsTable = ({
         />
       )
     })
-  }, [columnGroups, data])
+  }, [columnGroups, data, weeksAgo])
 
   useEffect(() => {
     latestOnRowSelection.current = onRowSelection
@@ -109,7 +111,8 @@ OrganizationAdvisorsTable.propTypes = {
   data: PropTypes.array,
   columnGroups: PropTypes.array.isRequired,
   filterText: PropTypes.string,
-  onRowSelection: PropTypes.func
+  onRowSelection: PropTypes.func,
+  weeksAgo: PropTypes.number
 }
 OrganizationAdvisorsTable.defaultProps = {
   data: []
