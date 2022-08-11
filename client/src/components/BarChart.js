@@ -1,4 +1,5 @@
 import * as d3 from "d3"
+import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
@@ -11,14 +12,12 @@ import "./BarChart.css"
  * return obj[prop1][prop2][prop3]
  */
 function getPropValue(obj, prop) {
-  const getterDetails = [obj]
-  const objProps = prop.split(".")
-  for (let i = 0; i < objProps.length; i++) {
-    getterDetails.push(objProps[i])
+  const defaultValue = "<undefined>"
+  if (Array.isArray(prop)) {
+    return _get(obj, prop[0], prop[1] || defaultValue)
+  } else {
+    return _get(obj, prop, defaultValue)
   }
-  return getterDetails.reduce(function(d, v) {
-    return d[v]
-  })
 }
 
 const BarChart = ({
@@ -207,9 +206,18 @@ BarChart.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   chartId: PropTypes.string,
   data: PropTypes.array,
-  xProp: PropTypes.string.isRequired,
-  yProp: PropTypes.string.isRequired,
-  xLabel: PropTypes.string,
+  xProp: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string)
+  ]).isRequired,
+  yProp: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string)
+  ]).isRequired,
+  xLabel: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string)
+  ]),
   barClass: PropTypes.string,
   onBarClick: PropTypes.func,
   tooltip: PropTypes.func,
