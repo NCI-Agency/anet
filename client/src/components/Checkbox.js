@@ -3,7 +3,7 @@ import React from "react"
 
 const Checkbox = props => (
   <div className="checkbox">
-    <label>
+    <label className="d-flex align-items-center">
       <input
         className="checkbox"
         type="checkbox"
