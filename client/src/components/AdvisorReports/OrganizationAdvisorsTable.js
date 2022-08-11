@@ -71,6 +71,7 @@ const OrganizationAdvisorsTable = ({
         <AdvisorReportsTableHead
           columnGroups={columnGroups}
           title="Organization name"
+          selectAllRows={selectedAll}
           onSelectAllRows={handleSelectAllRows}
         />
         <tbody>{filteredRows}</tbody>

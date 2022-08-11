@@ -24,7 +24,10 @@ const AdvisorReportsTableHead = props => {
       <tr key="advisor-heading">
         {props.onSelectAllRows && (
           <th rowSpan="2">
-            <Checkbox onChange={props.onSelectAllRows} />
+            <Checkbox
+              checked={props.selectAllRows}
+              onChange={props.onSelectAllRows}
+            />
           </th>
         )}
         <th rowSpan="2">{props.title}</th>
@@ -38,6 +41,7 @@ const AdvisorReportsTableHead = props => {
 AdvisorReportsTableHead.propTypes = {
   title: PropTypes.string,
   columnGroups: PropTypes.array,
+  selectAllRows: PropTypes.bool,
   onSelectAllRows: PropTypes.func
 }
 
