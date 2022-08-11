@@ -10,13 +10,13 @@ variables:
   NODE_OPTIONS: '--max-old-space-size=8192'
 
 steps:
-- task: Gradle@2
+- task: Gradle@3
   inputs:
     workingDirectory: ''
     gradleWrapperFile: 'gradlew'
     gradleOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.10'
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
