@@ -36,8 +36,9 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
-import { Report } from "models"
+import { Organization, Report } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
@@ -46,28 +47,34 @@ import { connect } from "react-redux"
 import Settings from "settings"
 import utils from "utils"
 
-const GQL_ROLLUP_GRAPH = gql`
-  query(
-    $startDate: Instant!
-    $endDate: Instant!
-    $principalOrganizationUuid: String
-    $advisorOrganizationUuid: String
-    $orgType: OrganizationType
-  ) {
-    rollupGraph(
-      startDate: $startDate
-      endDate: $endDate
-      principalOrganizationUuid: $principalOrganizationUuid
-      advisorOrganizationUuid: $advisorOrganizationUuid
-      orgType: $orgType
-    ) {
-      org {
+const GQL_GET_REPORT_LIST = gql`
+  query ($reportQuery: ReportSearchQueryInput) {
+    reportList(query: $reportQuery) {
+      totalCount
+      list {
         uuid
-        shortName
-        type
+        state
+        advisorOrg {
+          ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            type
+          }
+          uuid
+          shortName
+          type
+        }
+        principalOrg {
+          ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            type
+          }
+          uuid
+          shortName
+          type
+        }
       }
-      published
-      cancelled
     }
   }
 `
@@ -109,45 +116,43 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const Chart = ({
-  pageDispatchers,
-  rollupStart,
-  rollupEnd,
-  orgUuid,
-  setFocusedOrg
-}) => {
-  const variables = getVariables()
-  const { loading, error, data } = API.useApiQuery(GQL_ROLLUP_GRAPH, variables)
+const Chart = ({ queryParams, pageDispatchers }) => {
+  const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
+    reportQuery: { ...queryParams, pageSize: 0 }
+  })
   const { done, result } = useBoilerplate({
     loading,
     error,
     pageDispatchers
   })
+
   const graphData = useMemo(() => {
     if (!data) {
-      return []
+      return {}
     }
-    const pinnedOrgs = Settings.pinned_ORGs
-    return data.rollupGraph
-      .map(d => {
-        d.org = d.org || { uuid: "-1", shortName: "Other" }
-        return d
-      })
-      .sort((a, b) => {
-        const aIndex = pinnedOrgs.indexOf(a.org.shortName)
-        const bIndex = pinnedOrgs.indexOf(b.org.shortName)
-        if (aIndex < 0) {
-          const nameOrder = a.org.shortName.localeCompare(b.org.shortName)
-          return bIndex < 0
-            ? nameOrder === 0
-              ? a.org.uuid - b.org.uuid
-              : nameOrder
-            : 1
-        } else {
-          return bIndex < 0 ? -1 : aIndex - bIndex
-        }
-      })
-  }, [data])
+    return generateChartDataFromAllReports(
+      data.reportList.list,
+      queryParams.orgUuid
+    )
+  }, [data, queryParams.orgUuid])
+
+  const advisorOrgGraphData = useMemo(() => {
+    return Object.values(graphData?.advisorOrgReports || {}).sort((a, b) =>
+      a.org.shortName > b.org.shortName ? 1 : -1
+    )
+  }, [graphData])
+  const principalOrgGraphData = useMemo(() => {
+    return Object.values(graphData?.principalOrgReports || {}).sort((a, b) =>
+      a.org.shortName > b.org.shortName ? 1 : -1
+    )
+  }, [graphData])
+
+  const displayedGraphData =
+    orgType === Organization.TYPE.ADVISOR_ORG
+      ? advisorOrgGraphData
+      : principalOrgGraphData
+
   if (done) {
     return result
   }
@@ -162,24 +167,38 @@ const Chart = ({
     height: "14px",
     display: "inline-block"
   }
-
   return (
     <div className="scrollable-y">
       <ContainerDimensions>
         {({ width }) => (
-          <DailyRollupChart
-            width={width}
-            chartId={CHART_ID}
-            data={graphData}
-            onBarClick={setFocusedOrg}
-            tooltip={d => `
+          <>
+            <ButtonToggleGroup value={orgType} onChange={setOrgType}>
+              <Button
+                value={Organization.TYPE.ADVISOR_ORG}
+                variant="outline-secondary"
+              >
+                {pluralize(Settings.fields.advisor.org.name)}
+              </Button>
+              <Button
+                value={Organization.TYPE.PRINCIPAL_ORG}
+                variant="outline-secondary"
+              >
+                {pluralize(Settings.fields.principal.org.name)}
+              </Button>
+            </ButtonToggleGroup>
+            <DailyRollupChart
+              width={width}
+              chartId={CHART_ID}
+              data={displayedGraphData}
+              tooltip={d => `
               <h4>${d.org.shortName}</h4>
               <p>Published: ${d.published}</p>
               <p>Cancelled: ${d.cancelled}</p>
               <p>Click to view details</p>
             `}
-            barColors={barColors}
-          />
+              barColors={barColors}
+            />
+          </>
         )}
       </ContainerDimensions>
 
@@ -187,36 +206,69 @@ const Chart = ({
         <div style={{ ...legendCss, background: barColors.published }} />{" "}
         Published reports:&nbsp;
         <strong>
-          {graphData.reduce((acc, org) => acc + org.published, 0)}
+          {displayedGraphData.reduce((acc, org) => acc + org.published, 0)}
         </strong>
       </div>
       <div className="graph-legend">
         <div style={{ ...legendCss, background: barColors.cancelled }} />{" "}
         Cancelled engagements:&nbsp;
         <strong>
-          {graphData.reduce((acc, org) => acc + org.cancelled, 0)}
+          {displayedGraphData.reduce((acc, org) => acc + org.cancelled, 0)}
         </strong>
       </div>
     </div>
   )
-
-  function getVariables() {
-    const variables = {
-      startDate: rollupStart,
-      endDate: rollupEnd,
-      advisorOrganizationUuid: orgUuid
-      // TODO: We cannot read orgType from the searchQuery
-    }
-    return variables
-  }
 }
 
 Chart.propTypes = {
-  pageDispatchers: PageDispatchersPropType,
-  rollupStart: PropTypes.object,
-  rollupEnd: PropTypes.object,
-  orgUuid: PropTypes.string,
-  setFocusedOrg: PropTypes.func
+  queryParams: PropTypes.object,
+  pageDispatchers: PageDispatchersPropType
+}
+
+const updateOrgReports = (orgReports, displayedOrg, reportState) => {
+  // Initialize the organization object if it is the first report belongs to the organization
+  const elem = (orgReports[displayedOrg.uuid] ??= {
+    org: displayedOrg,
+    published: 0,
+    cancelled: 0
+  })
+  if (reportState === Report.STATE.PUBLISHED) {
+    elem.published++
+  } else if (reportState === Report.STATE.CANCELLED) {
+    elem.cancelled++
+  }
+  return elem
+}
+
+const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
+  return allReports.reduce(
+    (acc, r) => {
+      if (r.advisorOrg) {
+        const topLevelAdvisorOrg = r.advisorOrg.ascendantOrgs[0]
+        // If reports are not filtered for organization show reports under the top level organization
+        const displayedAdvisorOrg =
+          orgFilterUuid === r.advisorOrg.uuid
+            ? r.advisorOrg
+            : topLevelAdvisorOrg
+        updateOrgReports(acc.advisorOrgReports, displayedAdvisorOrg, r.state)
+      }
+      if (r.principalOrg) {
+        const topLevelPrincipalOrg = r.principalOrg.ascendantOrgs[0]
+        const displayedPrincipalOrg =
+          orgFilterUuid === r.principalOrg.uuid
+            ? r.principalOrg
+            : topLevelPrincipalOrg
+        updateOrgReports(
+          acc.principalOrgReports,
+          displayedPrincipalOrg,
+          r.state
+        )
+      }
+
+      return acc
+    },
+    { advisorOrgReports: {}, principalOrgReports: {} }
+  )
 }
 
 const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
@@ -281,7 +333,6 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   }
   const startDate = moment(queryParams.releasedAtStart)
   const endDate = moment(queryParams.releasedAtEnd)
-  const orgUuid = queryParams.orgUuid
   useBoilerplate({
     pageProps: DEFAULT_PAGE_PROPS,
     searchProps: REPORT_SEARCH_PROPS,
@@ -412,19 +463,8 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     </div>
   )
 
-  function renderChart(id) {
-    return (
-      <Chart
-        pageDispatchers={pageDispatchers}
-        rollupStart={startDate}
-        rollupEnd={endDate}
-        orgUuid={orgUuid}
-        setFocusedOrg={setFocusedOrg}
-        // TODO: orgType cannot be set using the search query.
-        // We need to find a way to set it or remove from rollupGraph query.
-        orgType={""}
-      />
-    )
+  function renderChart() {
+    return <Chart queryParams={queryParams} pageDispatchers={pageDispatchers} />
   }
 
   function renderReportCollection(id) {
@@ -487,20 +527,6 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       deserializeCallback
     )
     setPeriod(nextPeriod)
-  }
-
-  function setFocusedOrg(org) {
-    const newQueryParams = {
-      ...queryParams,
-      orgUuid: org.uuid,
-      orgRecurseStrategy: "CHILDREN",
-      orgType: org.type
-    }
-    deserializeQueryParams(
-      REPORT_SEARCH_PROPS.searchObjectTypes[0],
-      newQueryParams,
-      deserializeCallback
-    )
   }
 
   function deserializeCallback(objectType, filters, text) {
