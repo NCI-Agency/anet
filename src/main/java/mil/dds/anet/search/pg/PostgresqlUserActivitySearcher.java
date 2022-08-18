@@ -46,16 +46,16 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
 
   private void queryByOrganization(final UserActivitySearchQuery query,
       final PostgresqlSearchQueryBuilder<UserActivity, UserActivitySearchQuery> withQb) {
-    withQb.addSelectClause("p.\"organizationUuid\", COUNT(*)");
+    withQb.addSelectClause("u.\"organizationUuid\", COUNT(*)");
     withQb.addFromClause("\"userActivities\" u");
-    withQb.addFromClause("LEFT JOIN positions p ON p.\"currentPersonUuid\" = u.\"personUuid\"");
     withQb.addDateRangeClause("startDate", "u.\"visitedAt\"",
         AbstractSearchQueryBuilder.Comparison.AFTER, query.getStartDate(), "endDate",
         "u.\"visitedAt\"", AbstractSearchQueryBuilder.Comparison.BEFORE, query.getEndDate());
     if (!query.getShowDeleted()) {
-      withQb.addWhereClause("p.\"organizationUuid\" IS NOT NULL");
+      withQb.addWhereClause(
+          "EXISTS (SELECT uuid FROM organizations WHERE uuid = u.\"organizationUuid\")");
     }
-    withQb.addGroupByClause("p.\"organizationUuid\"");
+    withQb.addGroupByClause("u.\"organizationUuid\"");
   }
 
   private void queryByTopLevelOrganization(final UserActivitySearchQuery query,
@@ -63,8 +63,7 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
     withQb.createWithClause(null, "parent_orgs", "organizations", "\"parentOrgUuid\"", false);
     withQb.addSelectClause("parent_orgs.parent_uuid AS \"organizationUuid\", COUNT(*)");
     withQb.addFromClause("\"userActivities\" u");
-    withQb.addFromClause("LEFT JOIN positions p ON p.\"currentPersonUuid\" = u.\"personUuid\"");
-    withQb.addFromClause("LEFT JOIN parent_orgs ON parent_orgs.uuid = p.\"organizationUuid\"");
+    withQb.addFromClause("LEFT JOIN parent_orgs ON parent_orgs.uuid = u.\"organizationUuid\"");
     withQb.addDateRangeClause("startDate", "u.\"visitedAt\"",
         AbstractSearchQueryBuilder.Comparison.AFTER, query.getStartDate(), "endDate",
         "u.\"visitedAt\"", AbstractSearchQueryBuilder.Comparison.BEFORE, query.getEndDate());
