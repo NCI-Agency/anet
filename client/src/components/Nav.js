@@ -335,8 +335,16 @@ const Navigation = ({
                     <Nav.Link>Authorization groups</Nav.Link>
                   </LinkContainer>
                 </Nav.Item>
+                <Nav.Item>
+                  <LinkContainer
+                    to="/admin/userActivities"
+                    onClick={resetPages}
+                  >
+                    <Nav.Link>User activities</Nav.Link>
+                  </LinkContainer>
+                </Nav.Item>
                 <SidebarLink
-                  id="grapgQL-nav"
+                  id="graphQL-nav"
                   linkTo="/admin/graphiql"
                   handleOnClick={resetPages}
                 >
