@@ -44,6 +44,7 @@ import React, { useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 
@@ -116,7 +117,7 @@ const GQL_EMAIL_ROLLUP = gql`
   }
 `
 
-const Chart = ({ queryParams, pageDispatchers }) => {
+const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
   const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
     reportQuery: { ...queryParams, pageSize: 0 }
@@ -190,6 +191,7 @@ const Chart = ({ queryParams, pageDispatchers }) => {
               width={width}
               chartId={CHART_ID}
               data={displayedGraphData}
+              onBarClick={setOrg}
               tooltip={d => `
               <h4>${d.org.shortName}</h4>
               <p>Published: ${d.published}</p>
@@ -222,7 +224,8 @@ const Chart = ({ queryParams, pageDispatchers }) => {
 
 Chart.propTypes = {
   queryParams: PropTypes.object,
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  setOrg: PropTypes.func
 }
 
 const updateOrgReports = (orgReports, displayedOrg, reportState) => {
@@ -246,18 +249,16 @@ const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
       if (r.advisorOrg) {
         const topLevelAdvisorOrg = r.advisorOrg.ascendantOrgs[0]
         // If reports are not filtered for organization show reports under the top level organization
-        const displayedAdvisorOrg =
-          orgFilterUuid === r.advisorOrg.uuid
-            ? r.advisorOrg
-            : topLevelAdvisorOrg
+        const displayedAdvisorOrg = orgFilterUuid
+          ? r.advisorOrg
+          : topLevelAdvisorOrg
         updateOrgReports(acc.advisorOrgReports, displayedAdvisorOrg, r.state)
       }
       if (r.principalOrg) {
         const topLevelPrincipalOrg = r.principalOrg.ascendantOrgs[0]
-        const displayedPrincipalOrg =
-          orgFilterUuid === r.principalOrg.uuid
-            ? r.principalOrg
-            : topLevelPrincipalOrg
+        const displayedPrincipalOrg = orgFilterUuid
+          ? r.principalOrg
+          : topLevelPrincipalOrg
         updateOrgReports(
           acc.principalOrgReports,
           displayedPrincipalOrg,
@@ -464,7 +465,13 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
   )
 
   function renderChart() {
-    return <Chart queryParams={queryParams} pageDispatchers={pageDispatchers} />
+    return (
+      <Chart
+        queryParams={queryParams}
+        pageDispatchers={pageDispatchers}
+        setOrg={changeOrganization}
+      />
+    )
   }
 
   function renderReportCollection(id) {
@@ -527,6 +534,19 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       deserializeCallback
     )
     setPeriod(nextPeriod)
+  }
+
+  function changeOrganization(organization) {
+    const newQueryParams = {
+      ...queryParams,
+      orgUuid: organization.uuid,
+      orgRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
   }
 
   function deserializeCallback(objectType, filters, text) {
