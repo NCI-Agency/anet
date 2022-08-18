@@ -21,9 +21,11 @@ public class UserActivityDao {
   @InTransaction
   public int insert(final UserActivity userActivity) {
     return getDbHandle()
-        .createUpdate("INSERT INTO \"userActivities\" (\"personUuid\", \"visitedAt\") "
-            + "VALUES (:personUuid, :visitedAt) ON CONFLICT DO NOTHING")
+        .createUpdate(
+            "INSERT INTO \"userActivities\" (\"personUuid\", \"organizationUuid\", \"visitedAt\") "
+                + "VALUES (:personUuid, :organizationUuid, :visitedAt) ON CONFLICT DO NOTHING")
         .bind("personUuid", userActivity.getPersonUuid())
+        .bind("organizationUuid", userActivity.getOrganizationUuid())
         .bind("visitedAt", DaoUtils.asLocalDateTime(userActivity.getVisitedAt())).execute();
   }
 

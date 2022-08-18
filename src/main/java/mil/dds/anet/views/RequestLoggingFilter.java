@@ -7,6 +7,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.UserActivity;
 import mil.dds.anet.database.UserActivityDao;
 import mil.dds.anet.utils.DaoUtils;
@@ -28,7 +29,10 @@ public class RequestLoggingFilter implements ContainerRequestFilter {
     if (!isGet && userPrincipal instanceof Person
         && !ResponseUtils.ignoreActivity(requestContext)) {
       // Store this request in the database (only once per minute)
-      dao.insert(new UserActivity(((Person) userPrincipal).getUuid(), DaoUtils.getCurrentMinute()));
+      final Person person = (Person) userPrincipal;
+      final Position position = person.getPosition();
+      dao.insert(new UserActivity(person.getUuid(),
+          position == null ? null : position.getOrganizationUuid(), DaoUtils.getCurrentMinute()));
     }
   }
 }

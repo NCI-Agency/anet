@@ -9,6 +9,7 @@ import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.UuidFetcher;
 
 public class UserActivity {
+
   public enum AggregationPeriod {
     DAY, WEEK, MONTH
   }
@@ -20,8 +21,10 @@ public class UserActivity {
 
   public UserActivity() {}
 
-  public UserActivity(final String personUuid, final Instant visitedAt) {
+  public UserActivity(final String personUuid, final String organizationUuid,
+      final Instant visitedAt) {
     this.personUuid = personUuid;
+    this.organizationUuid = organizationUuid;
     this.visitedAt = visitedAt;
   }
 
