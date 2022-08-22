@@ -88,12 +88,6 @@ public class OrganizationResource {
         engine.getApprovalStepDao().insertAtEnd(step);
       }
     }
-    if (AuthUtils.isAdmin(user) && org.getResponsiblePositions() != null) {
-      // Assign all of these positions to this organization.
-      for (final Position position : org.getResponsiblePositions()) {
-        dao.addPositionToOrganization(position, org);
-      }
-    }
 
     DaoUtils.saveCustomSensitiveInformation(user, OrganizationDao.TABLE_NAME, created.getUuid(),
         org.getCustomSensitiveInformation());

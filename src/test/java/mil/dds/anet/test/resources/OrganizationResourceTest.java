@@ -7,7 +7,9 @@ import com.google.common.collect.ImmutableList;
 import com.graphql_java_generator.exception.GraphQLRequestExecutionException;
 import com.graphql_java_generator.exception.GraphQLRequestPreparationException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import mil.dds.anet.test.TestData;
@@ -22,11 +24,11 @@ import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
-import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
@@ -323,68 +325,203 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void organizationCreateSuperUserPermissionTest()
+  public void organizationUpdateTypePermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    createOrganization(getSuperUser());
+    final Person superUser = getBobBobtown();
+    final Person regularUser = getRegularUser();
+    final MutationExecutor superUserMutationExecutor =
+        getMutationExecutor(superUser.getDomainUsername());
+    final MutationExecutor regularUserMutationExecutor =
+        getMutationExecutor(regularUser.getDomainUsername());
+
+    final OrganizationInput orgInput = OrganizationInput.builder().withShortName("Type Test")
+        .withLongName("Advisor Organization for Type Update Test").withStatus(Status.ACTIVE)
+        .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
+        .build();
+    final Organization org = succeedCreateOrganization(adminMutationExecutor, orgInput);
+
+    org.setType(OrganizationType.PRINCIPAL_ORG);
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(org));
+    org.setType(OrganizationType.ADVISOR_ORG);
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(org));
+    failUpdateOrganization(regularUserMutationExecutor, getOrganizationInput(org));
+  }
+
+  @Test
+  public void organizationSuperUserPermissionTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Person superUser = getBobBobtown();
+    final Position superUserPosition = superUser.getPosition();
+    final MutationExecutor superUserMutationExecutor =
+        getMutationExecutor(superUser.getDomainUsername());
+
+    final OrganizationInput orgInput =
+        OrganizationInput.builder().withShortName("Parent Organization")
+            .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withType(OrganizationType.ADVISOR_ORG).build();
+    failCreateOrganization(superUserMutationExecutor, orgInput);
+    final Organization parentOrg = succeedCreateOrganization(adminMutationExecutor, orgInput);
+
+    final OrganizationInput childOrgInput = OrganizationInput.builder()
+        .withShortName("Child Organization").withLongName("Child Organization of Test Organization")
+        .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
+        .withParentOrg(getOrganizationInput(parentOrg)).withType(OrganizationType.ADVISOR_ORG)
+        .build();
+    failCreateOrganization(superUserMutationExecutor, childOrgInput);
+
+    // Set super-user as responsible for the parent organization
+    parentOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(parentOrg));
+
+    final Organization createdChildOrg =
+        succeedCreateOrganization(superUserMutationExecutor, childOrgInput);
+
+    // Can edit the child of their responsible organization
+    createdChildOrg.setShortName("Updated Child Organization");
+    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+
+    // Super-users cannot change the type of the organization
+    createdChildOrg.setType(OrganizationType.PRINCIPAL_ORG);
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+
+    // Super-users cannot update their own organizations if they're not responsible
+    final Organization superUserOrg =
+        adminQueryExecutor.organization(FIELDS, superUserPosition.getOrganization().getUuid());
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(superUserOrg));
+
+    // Given responsibility now they can edit their organization
+    superUserOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superUserOrg));
+    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(superUserOrg));
+
+    // Remove position
+    superUserOrg.setResponsiblePositions(new ArrayList<>());
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superUserOrg));
+  }
+
+  @Test
+  public void changeParentOrganizationAsSuperUserTest()
+      throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
+    final Person superUser = getBobBobtown();
+    final Position superUserPosition = superUser.getPosition();
+    final MutationExecutor superUserMutationExecutor =
+        getMutationExecutor(superUser.getDomainUsername());
+
+    final OrganizationInput orgInput =
+        OrganizationInput.builder().withShortName("Parent Organization")
+            .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withType(OrganizationType.ADVISOR_ORG).build();
+    final Organization createdParentOrg =
+        succeedCreateOrganization(adminMutationExecutor, orgInput);
+
+    final OrganizationInput childOrgInput = OrganizationInput.builder()
+        .withShortName("Child Organization").withLongName("Child Organization of Test Organization")
+        .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
+        .withParentOrg(getOrganizationInput(createdParentOrg))
+        .withType(OrganizationType.ADVISOR_ORG).build();
+    final Organization createdChildOrg =
+        succeedCreateOrganization(adminMutationExecutor, childOrgInput);
+
+    createdChildOrg.setParentOrg(null);
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    createdChildOrg.setParentOrg(createdParentOrg);
+
+    // Set super-user as responsible for the child organization
+    createdChildOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdChildOrg));
+
+    // Cannot set parent as null because they're not responsible for the parent organization
+    createdChildOrg.setParentOrg(null);
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    createdChildOrg.setParentOrg(createdParentOrg);
+    // Set super-user as responsible for the parent organization
+    createdParentOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdParentOrg));
+    // Now super-user can set the parent organization as null
+    createdChildOrg.setParentOrg(null);
+    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+
+    final OrganizationInput newParentOrg =
+        OrganizationInput.builder().withShortName("New Parent Organization")
+            .withLongName("New Parent Organization for Testing Super Users")
+            .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
+            .withType(OrganizationType.ADVISOR_ORG).build();
+
+    final Organization createdNewParentOrg =
+        succeedCreateOrganization(adminMutationExecutor, newParentOrg);
+
+    // Cannot assign the new organization as the child's parent because they're not responsible for
+    // the new organization
+    createdChildOrg.setParentOrg(createdNewParentOrg);
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    // Revert previous change
+    createdChildOrg.setParentOrg(createdParentOrg);
+
+    // Update responsible position
+    createdNewParentOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdNewParentOrg));
+
+    // Now they can assign the new parent
+    createdChildOrg.setParentOrg(createdNewParentOrg);
+    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+
+    // Test for changing the parent to a different type of organization
+    createdParentOrg.setType(OrganizationType.PRINCIPAL_ORG);
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdParentOrg));
+    createdChildOrg.setParentOrg(createdParentOrg);
+    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
   }
 
   @Test
   public void organizationCreateRegularUserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    createOrganization(getRegularUser());
+    final MutationExecutor regularUserExecutor =
+        getMutationExecutor(getRegularUser().getDomainUsername());
+    final OrganizationInput orgInput =
+        OrganizationInput.builder().withShortName("Regular User Test")
+            .withLongName("Advisor Organization for Regular User Test").withStatus(Status.ACTIVE)
+            .withIdentificationCode(UUID.randomUUID().toString())
+            .withType(OrganizationType.ADVISOR_ORG).build();
+    failCreateOrganization(regularUserExecutor, orgInput);
+    failUpdateOrganization(regularUserExecutor, orgInput);
   }
 
-  private void createOrganization(Person user)
+  private void failCreateOrganization(final MutationExecutor mutationExecutor,
+      final OrganizationInput orgInput)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
-    final OrganizationInput oInput = TestData.createAdvisorOrganizationInput(true);
     try {
-      userMutationExecutor.createOrganization(FIELDS, oInput);
+      mutationExecutor.createOrganization(FIELDS, orgInput);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
   }
 
-  @Test
-  public void organizationUpdateSuperUserPermissionTest()
+  private Organization succeedCreateOrganization(final MutationExecutor mutationExecutor,
+      final OrganizationInput orgInput)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    updateOrganization(getRegularUser());
+    final Organization createdOrg = mutationExecutor.createOrganization(FIELDS, orgInput);
+    assertThat(createdOrg).isNotNull();
+    assertThat(createdOrg.getUuid()).isNotNull();
+    return createdOrg;
   }
 
-  @Test
-  public void organizationUpdateRegularUserPermissionTest()
+  private void failUpdateOrganization(final MutationExecutor mutationExecutor,
+      final OrganizationInput orgInput)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    updateOrganization(getRegularUser());
-  }
-
-  private void updateOrganization(Person user)
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
-    final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
-    final OrganizationInput organizationInput = getOrganizationInput(position.getOrganization());
-
-    // own organization
     try {
-      final Integer nrUpdated = userMutationExecutor.updateOrganization("", organizationInput);
-      if (isSuperUser) {
-        assertThat(nrUpdated).isEqualTo(1);
-      } else {
-        fail("Expected ForbiddenException");
-      }
-    } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
-        fail("Unexpected ForbiddenException");
-      }
-    }
-
-    // other organization
-    final OrganizationInput oInput = TestData.createAdvisorOrganizationInput(true);
-    try {
-      userMutationExecutor.createOrganization(FIELDS, oInput);
+      mutationExecutor.updateOrganization("", orgInput);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
+  }
+
+  private void succeedUpdateOrganization(final MutationExecutor mutationExecutor,
+      final OrganizationInput orgInput)
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final Integer numOrg = mutationExecutor.updateOrganization("", orgInput);
+    assertThat(numOrg).isOne();
   }
 
 }

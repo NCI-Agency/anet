@@ -105,7 +105,7 @@ public class OrganizationDao
         "/* batch.getResponsiblePositionsForOrganization */ SELECT \"organizationResponsiblePositions\".\"organizationUuid\", "
             + PositionDao.POSITIONS_FIELDS + " FROM \"organizationResponsiblePositions\" "
             + "INNER JOIN positions on positions.uuid = \"organizationResponsiblePositions\".\"positionUuid\" "
-            + "AND \"organizationResponsiblePositions\".\"organizationUuid\" IN ( <foreignKeys> ) ";
+            + "WHERE \"organizationResponsiblePositions\".\"organizationUuid\" IN ( <foreignKeys> ) ";
 
     public ResponsiblePositionsBatcher() {
       super(sql, "foreignKeys", new PositionMapper(), "organizationUuid");
