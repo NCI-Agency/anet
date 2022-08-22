@@ -145,6 +145,12 @@ export default class Position extends Model {
         }
       }
     }
+    responsibleOrganizations {
+      uuid
+      shortName
+      longName
+      identificationCode
+    }
     location {
       uuid
       name
