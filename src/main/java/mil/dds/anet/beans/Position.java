@@ -220,6 +220,15 @@ public class Position extends AbstractCustomizableAnetBean
     return location.getForeignObject();
   }
 
+  @GraphQLInputField(name = "responsibleOrganizations")
+  public void setResponsiblePositions(List<Organization> responsibleOrganizations) {
+    this.responsibleOrganizations = responsibleOrganizations;
+  }
+
+  public List<Organization> getResponsibleOrganizations() {
+    return responsibleOrganizations;
+  }
+
   @GraphQLQuery(name = "previousPeople")
   public CompletableFuture<List<PersonPositionHistory>> loadPreviousPeople(
       @GraphQLRootContext Map<String, Object> context) {

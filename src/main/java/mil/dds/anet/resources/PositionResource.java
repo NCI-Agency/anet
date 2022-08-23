@@ -130,11 +130,19 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
 
+    final Position current = dao.getByUuid(pos.getUuid());
+
+    if (AuthUtils.isAdmin(user) && pos.getResponsibleOrganizations() != null) {
+      Utils.addRemoveElementsByUuid(
+          current.loadResponsibleOrganizations(engine.getContext()).join(),
+          pos.getResponsibleOrganizations(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
+          oldOrgUuid -> dao.removeOrganizationFromPosition(oldOrgUuid, pos));
+    }
+
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getCustomSensitiveInformation());
 
     if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
-      final Position current = dao.getByUuid(pos.getUuid());
       if (current != null) {
         // Run the diff and see if anything changed and update.
         if (pos.getPerson() != null) {

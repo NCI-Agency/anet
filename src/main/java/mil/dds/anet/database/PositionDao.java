@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -247,6 +248,22 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
     // GraphQL mutations *have* to return something, so we return the number of inserted rows
     return nr;
+  }
+
+  @InTransaction
+  public int addOrganizationToPosition(Position p, Organization o) {
+    return getDbHandle().createUpdate(
+        "/* addOrganizationToPosition */ INSERT INTO \"organizationResponsiblePositions\" (\"organizationUuid\", \"positionUuid\") "
+            + "VALUES (:organizationUuid, :positionUuid)")
+        .bind("organizationUuid", o.getUuid()).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int removeOrganizationFromPosition(String orgUuid, Position p) {
+    return getDbHandle().createUpdate(
+        "/* removeOrganizationToPosition*/ DELETE FROM \"organizationResponsiblePositions\" "
+            + "WHERE \"organizationUuid\" = :organizationUuid AND \"positionUuid\" = :positionUuid")
+        .bind("organizationUuid", orgUuid).bind("positionUuid", p.getUuid()).execute();
   }
 
   @InTransaction
