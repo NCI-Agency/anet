@@ -912,6 +912,10 @@ properties:
             additionalProperties: false
             required: [type]
             properties:
+              name:
+                type: string
+                title: The permision name of this field
+                description: Used in the UI for the type filter of position,
               type:
                 type: string
                 title: The permissions type of this field
@@ -928,6 +932,10 @@ properties:
             additionalProperties: false
             required: [type]
             properties:
+              name:
+                  type: string
+                  title: The permision name of this field
+                  description: Used in the UI for the type filter of position,
               type:
                 type: string
                 title: The permissions type of this field
