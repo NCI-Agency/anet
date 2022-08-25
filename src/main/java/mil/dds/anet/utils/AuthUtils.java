@@ -60,15 +60,15 @@ public class AuthUtils {
 
     // Check the responsible organizations.
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-    final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
-    osQuery.setPageSize(0);
-
     final List<Organization> responsibleOrgs =
         position.loadResponsibleOrganizations(context).join();
     if (responsibleOrgs.stream().anyMatch(o -> o.getUuid().equals(organizationUuid))) {
       return true;
     }
+
     // As a final resort, check the descendant orgs of the position's responsible orgs.
+    final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
+    osQuery.setPageSize(0);
     for (final Organization responsibleOrg : responsibleOrgs) {
       if (responsibleOrg.loadDescendantOrgs(context, osQuery).join().stream()
           .anyMatch(o -> o.getUuid().equals(organizationUuid))) {

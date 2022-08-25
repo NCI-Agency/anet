@@ -575,6 +575,10 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     updateM2mForMerge("authorizationGroupPositions", "authorizationGroupUuid", "positionUuid",
         winnerUuid, loserUuid);
 
+    // Update organizationResponsiblePositions
+    updateM2mForMerge("organizationResponsiblePositions", "organizationUuid", "positionUuid",
+        winnerUuid, loserUuid);
+
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
         winner.getCustomSensitiveInformation());

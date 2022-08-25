@@ -4114,31 +4114,6 @@
 	</changeSet>
 
 	<!-- From this point on, mssql is no longer supported, so only postgresql migrations are needed -->
-	<changeSet id="add_organization_responsible_positions" author="nur.yilmaz">
-		<createTable tableName="organizationResponsiblePositions">
-			<column name="organizationUuid" type="${uuid_type}">
-				<constraints nullable="false"/>
-			</column>
-			<column name="positionUuid" type="${uuid_type}">
-				<constraints nullable="false"/>
-			</column>
-		</createTable>
-		<addUniqueConstraint tableName="organizationResponsiblePositions" columnNames="organizationUuid, positionUuid" constraintName="uniqueOrganizationResponsiblePositions" />
-		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="organizationResponsiblePositions"
-			constraintName="fk_organizationResponsiblePositions_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
-			referencedColumnNames="uuid" referencedTableName="organizations" />
-		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="organizationResponsiblePositions"
-			constraintName="fk_organizationResponsiblePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
-			referencedColumnNames="uuid" referencedTableName="positions" />
-		<createIndex
-			indexName="IDX_organizationResponsiblePositions_organizationUuid" tableName="organizationResponsiblePositions">
-			<column name="organizationUuid"/>
-		</createIndex>
-		<createIndex
-			indexName="IDX_organizationResponsiblePositions_positionUuid" tableName="organizationResponsiblePositions">
-			<column name="positionUuid"/>
-		</createIndex>
-	</changeSet>
 
 	<changeSet id="add-assessmentKey-to-notes" author="gjvoosten">
 		<addColumn tableName="notes">
@@ -4175,6 +4150,32 @@
 		<!-- Make sure rows with a NULL positionUuid or a NULL personUuid are no longer allowed -->
 		<addNotNullConstraint tableName="peoplePositions" columnName="positionUuid" columnDataType="${uuid_type}" />
 		<addNotNullConstraint tableName="peoplePositions" columnName="personUuid" columnDataType="${uuid_type}" />
+	</changeSet>
+
+	<changeSet id="add_organization_responsible_positions" author="nur.yilmaz">
+		<createTable tableName="organizationResponsiblePositions">
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+			<column name="positionUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="organizationResponsiblePositions" columnNames="organizationUuid, positionUuid" constraintName="UQ_uniqueOrganizationResponsiblePositions" />
+		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="organizationResponsiblePositions"
+								 constraintName="FK_organizationResponsiblePositions_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="organizations" />
+		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="organizationResponsiblePositions"
+								 constraintName="FK_organizationResponsiblePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="positions" />
+		<createIndex
+				indexName="IDX_organizationResponsiblePositions_organizationUuid" tableName="organizationResponsiblePositions">
+			<column name="organizationUuid"/>
+		</createIndex>
+		<createIndex
+				indexName="IDX_organizationResponsiblePositions_positionUuid" tableName="organizationResponsiblePositions">
+			<column name="positionUuid"/>
+		</createIndex>
 	</changeSet>
 
 </databaseChangeLog>

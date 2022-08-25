@@ -273,7 +273,12 @@ public class PositionResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
-    assertCanUpdatePosition(user, winnerPosition);
+    AuthUtils.assertAdministrator(user);
+
+    if (winnerPosition.getOrganizationUuid() == null) {
+      throw new WebApplicationException("A Position must belong to an organization",
+          Status.BAD_REQUEST);
+    }
 
     final String winnerPersonUuid = DaoUtils.getUuid(winnerPosition.getPerson());
     ResourceUtils.validateHistoryInput(winnerPosition.getUuid(), winnerPosition.getPreviousPeople(),
