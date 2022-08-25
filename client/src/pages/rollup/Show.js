@@ -13,6 +13,7 @@ import {
 import API from "api"
 import "components/BlueprintOverrides.css"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
+import DailyRollupChart from "components/DailyRollupChart"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -35,15 +36,49 @@ import {
   SearchQueryPropType
 } from "components/SearchFilters"
 import { Field, Form, Formik } from "formik"
-import { Report } from "models"
+import { Organization, Report } from "models"
 import moment from "moment"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Button, FormText, Modal } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
+
+const GQL_GET_REPORT_LIST = gql`
+  query ($reportQuery: ReportSearchQueryInput) {
+    reportList(query: $reportQuery) {
+      totalCount
+      list {
+        uuid
+        state
+        advisorOrg {
+          ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            type
+          }
+          uuid
+          shortName
+          type
+        }
+        principalOrg {
+          ascendantOrgs(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            type
+          }
+          uuid
+          shortName
+          type
+        }
+      }
+    }
+  }
+`
 
 const GQL_SHOW_ROLLUP_EMAIL = gql`
   query (
@@ -81,6 +116,161 @@ const GQL_EMAIL_ROLLUP = gql`
     )
   }
 `
+
+const Chart = ({ queryParams, pageDispatchers, setOrg }) => {
+  const [orgType, setOrgType] = useState(Organization.TYPE.ADVISOR_ORG)
+  const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT_LIST, {
+    reportQuery: { ...queryParams, pageSize: 0 }
+  })
+  const { done, result } = useBoilerplate({
+    loading,
+    error,
+    pageDispatchers
+  })
+
+  const graphData = useMemo(() => {
+    if (!data) {
+      return {}
+    }
+    return generateChartDataFromAllReports(
+      data.reportList.list,
+      queryParams.orgUuid
+    )
+  }, [data, queryParams.orgUuid])
+
+  const advisorOrgGraphData = useMemo(() => {
+    return Object.values(graphData?.advisorOrgReports || {}).sort((a, b) =>
+      a.org.shortName > b.org.shortName ? 1 : -1
+    )
+  }, [graphData])
+  const principalOrgGraphData = useMemo(() => {
+    return Object.values(graphData?.principalOrgReports || {}).sort((a, b) =>
+      a.org.shortName > b.org.shortName ? 1 : -1
+    )
+  }, [graphData])
+
+  const displayedGraphData =
+    orgType === Organization.TYPE.ADVISOR_ORG
+      ? advisorOrgGraphData
+      : principalOrgGraphData
+
+  if (done) {
+    return result
+  }
+
+  const CHART_ID = "reports_by_organization"
+  const barColors = {
+    cancelled: "#ec971f",
+    published: "#75eb75"
+  }
+  const legendCss = {
+    width: "14px",
+    height: "14px",
+    display: "inline-block"
+  }
+  return (
+    <div className="scrollable-y">
+      <ContainerDimensions>
+        {({ width }) => (
+          <>
+            <ButtonToggleGroup value={orgType} onChange={setOrgType}>
+              <Button
+                value={Organization.TYPE.ADVISOR_ORG}
+                variant="outline-secondary"
+              >
+                {pluralize(Settings.fields.advisor.org.name)}
+              </Button>
+              <Button
+                value={Organization.TYPE.PRINCIPAL_ORG}
+                variant="outline-secondary"
+              >
+                {pluralize(Settings.fields.principal.org.name)}
+              </Button>
+            </ButtonToggleGroup>
+            <DailyRollupChart
+              width={width}
+              chartId={CHART_ID}
+              data={displayedGraphData}
+              onBarClick={setOrg}
+              tooltip={d => `
+              <h4>${d.org.shortName}</h4>
+              <p>Published: ${d.published}</p>
+              <p>Cancelled: ${d.cancelled}</p>
+              <p>Click to view details</p>
+            `}
+              barColors={barColors}
+            />
+          </>
+        )}
+      </ContainerDimensions>
+
+      <div className="graph-legend">
+        <div style={{ ...legendCss, background: barColors.published }} />{" "}
+        Published reports:&nbsp;
+        <strong>
+          {displayedGraphData.reduce((acc, org) => acc + org.published, 0)}
+        </strong>
+      </div>
+      <div className="graph-legend">
+        <div style={{ ...legendCss, background: barColors.cancelled }} />{" "}
+        Cancelled engagements:&nbsp;
+        <strong>
+          {displayedGraphData.reduce((acc, org) => acc + org.cancelled, 0)}
+        </strong>
+      </div>
+    </div>
+  )
+}
+
+Chart.propTypes = {
+  queryParams: PropTypes.object,
+  pageDispatchers: PageDispatchersPropType,
+  setOrg: PropTypes.func
+}
+
+const updateOrgReports = (orgReports, displayedOrg, reportState) => {
+  // Initialize the organization object if it is the first report belongs to the organization
+  const elem = (orgReports[displayedOrg.uuid] ??= {
+    org: displayedOrg,
+    published: 0,
+    cancelled: 0
+  })
+  if (reportState === Report.STATE.PUBLISHED) {
+    elem.published++
+  } else if (reportState === Report.STATE.CANCELLED) {
+    elem.cancelled++
+  }
+  return elem
+}
+
+const generateChartDataFromAllReports = (allReports, orgFilterUuid) => {
+  return allReports.reduce(
+    (acc, r) => {
+      if (r.advisorOrg) {
+        const topLevelAdvisorOrg = r.advisorOrg.ascendantOrgs[0]
+        // If reports are not filtered for organization show reports under the top level organization
+        const displayedAdvisorOrg = orgFilterUuid
+          ? r.advisorOrg
+          : topLevelAdvisorOrg
+        updateOrgReports(acc.advisorOrgReports, displayedAdvisorOrg, r.state)
+      }
+      if (r.principalOrg) {
+        const topLevelPrincipalOrg = r.principalOrg.ascendantOrgs[0]
+        const displayedPrincipalOrg = orgFilterUuid
+          ? r.principalOrg
+          : topLevelPrincipalOrg
+        updateOrgReports(
+          acc.principalOrgReports,
+          displayedPrincipalOrg,
+          r.state
+        )
+      }
+
+      return acc
+    },
+    { advisorOrgReports: {}, principalOrgReports: {} }
+  )
+}
 
 const REPORT_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {
   onSearchGoToSearchPage: false,
@@ -156,6 +346,12 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       icons: [IconNames.PANEL_TABLE],
       title: "Reports by organization",
       renderer: renderReportCollection
+    },
+    {
+      id: "rbdow-chart",
+      icons: [IconNames.GROUPED_BAR_CHART],
+      title: "Chart by organization",
+      renderer: renderChart
     },
     {
       id: "rbdow-map",
@@ -268,6 +464,16 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     </div>
   )
 
+  function renderChart() {
+    return (
+      <Chart
+        queryParams={queryParams}
+        pageDispatchers={pageDispatchers}
+        setOrg={changeOrganization}
+      />
+    )
+  }
+
   function renderReportCollection(id) {
     return <Collection queryParams={queryParams} />
   }
@@ -328,6 +534,19 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       deserializeCallback
     )
     setPeriod(nextPeriod)
+  }
+
+  function changeOrganization(organization) {
+    const newQueryParams = {
+      ...queryParams,
+      orgUuid: organization.uuid,
+      orgRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+    }
+    deserializeQueryParams(
+      REPORT_SEARCH_PROPS.searchObjectTypes[0],
+      newQueryParams,
+      deserializeCallback
+    )
   }
 
   function deserializeCallback(objectType, filters, text) {
