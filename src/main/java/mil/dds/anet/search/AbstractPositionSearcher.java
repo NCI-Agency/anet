@@ -57,7 +57,7 @@ public abstract class AbstractPositionSearcher
 
   @Override
   protected void buildQuery(PositionSearchQuery query) {
-    qb.addSelectClause(PositionDao.POSITIONS_FIELDS);
+    qb.addSelectClause(PositionDao.POSITION_FIELDS);
     qb.addTotalCount();
     qb.addFromClause("positions");
 
@@ -131,17 +131,17 @@ public abstract class AbstractPositionSearcher
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PositionSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions_createdAt"));
         break;
       case CODE:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions", "code"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions_code"));
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "positions_name"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "positions", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "positions_uuid"));
   }
 
 }

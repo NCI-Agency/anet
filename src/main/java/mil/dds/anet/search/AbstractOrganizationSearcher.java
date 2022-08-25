@@ -85,18 +85,18 @@ public abstract class AbstractOrganizationSearcher extends
       OrganizationSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations_createdAt"));
         break;
       case TYPE:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations", "type"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations_type"));
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations", "\"shortName\"",
-            "\"longName\"", "\"identificationCode\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "organizations_shortName",
+            "organizations_longName", "organizations_identificationCode"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "organizations", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "organizations_uuid"));
   }
 
 }

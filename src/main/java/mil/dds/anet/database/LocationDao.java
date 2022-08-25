@@ -12,7 +12,10 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
+  private static final String[] fields =
+      {"uuid", "name", "status", "lat", "lng", "type", "createdAt", "updatedAt", "customFields"};
   public static final String TABLE_NAME = "locations";
+  public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
   public Location getByUuid(String uuid) {
@@ -21,8 +24,8 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
 
   static class SelfIdBatcher extends IdBatcher<Location> {
 
-    private static final String sql =
-        "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
+    private static final String sql = "/* batch.getLocationsByUuids */ SELECT " + LOCATION_FIELDS
+        + " FROM locations WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new LocationMapper());

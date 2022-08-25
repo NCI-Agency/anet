@@ -324,10 +324,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   @InTransaction
   public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
-    return getDbHandle().createQuery(
-        "/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
-            + "WHERE \"reportAuthorizationGroups\".\"reportUuid\" = :reportUuid "
-            + "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = \"authorizationGroups\".uuid")
+    return getDbHandle().createQuery("/* getAuthorizationGroupsForReport */ SELECT "
+        + AuthorizationGroupDao.AUTHORIZATION_GROUP_FIELDS
+        + " FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
+        + "WHERE \"reportAuthorizationGroups\".\"reportUuid\" = :reportUuid "
+        + "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = \"authorizationGroups\".uuid")
         .bind("reportUuid", reportUuid).map(new AuthorizationGroupMapper()).list();
   }
 
@@ -724,10 +725,10 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   static class TasksBatcher extends ForeignKeyBatcher<Task> {
-    private static final String sql =
-        "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
-            + "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
-            + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
+    private static final String sql = "/* batch.getTasksForReport */ SELECT " + TaskDao.TASK_FIELDS
+        + ", \"reportTasks\".\"reportUuid\" FROM tasks, \"reportTasks\" "
+        + "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
+        + "AND \"reportTasks\".\"taskUuid\" = tasks.uuid ORDER BY uuid";
 
     public TasksBatcher() {
       super(sql, "foreignKeys", new TaskMapper(), "reportUuid");

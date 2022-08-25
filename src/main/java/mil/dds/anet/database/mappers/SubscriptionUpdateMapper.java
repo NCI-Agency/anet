@@ -11,11 +11,11 @@ public class SubscriptionUpdateMapper implements RowMapper<SubscriptionUpdate> {
   @Override
   public SubscriptionUpdate map(ResultSet rs, StatementContext ctx) throws SQLException {
     final SubscriptionUpdate s = new SubscriptionUpdate();
-    s.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "createdAt"));
-    s.setSubscriptionUuid(rs.getString("subscriptionUuid"));
-    s.setUpdatedObjectType(rs.getString("updatedObjectType"));
-    s.setUpdatedObjectUuid(rs.getString("updatedObjectUuid"));
-    s.setIsNote(rs.getBoolean("isNote"));
+    s.setCreatedAt(MapperUtils.getInstantAsLocalDateTime(rs, "subscriptionUpdates_createdAt"));
+    s.setSubscriptionUuid(rs.getString("subscriptionUpdates_subscriptionUuid"));
+    s.setUpdatedObjectType(rs.getString("subscriptionUpdates_updatedObjectType"));
+    s.setUpdatedObjectUuid(rs.getString("subscriptionUpdates_updatedObjectUuid"));
+    s.setIsNote(rs.getBoolean("subscriptionUpdates_isNote"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

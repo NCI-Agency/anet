@@ -97,14 +97,10 @@ public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
     return String.format("(%1$s || %2$s)", tsQueryAnet, tsQuerySimple);
   }
 
-  protected List<String> getOrderBy(SortOrder sortOrder, String table, String... columns) {
+  protected List<String> getOrderBy(SortOrder sortOrder, String... columns) {
     final List<String> clauses = new ArrayList<>();
     for (final String column : columns) {
-      if (table == null) {
-        clauses.add(String.format("%1$s %2$s", column, sortOrder));
-      } else {
-        clauses.add(String.format("%1$s.%2$s %3$s", table, column, sortOrder));
-      }
+      clauses.add(String.format("\"%1$s\" %2$s", column, sortOrder));
     }
     return clauses;
   }

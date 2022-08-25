@@ -11,17 +11,17 @@ public class TaskMapper implements RowMapper<Task> {
   @Override
   public Task map(ResultSet r, StatementContext ctx) throws SQLException {
     Task p = new Task();
-    MapperUtils.setCustomizableBeanFields(p, r, null);
-    p.setLongName(r.getString("longName"));
-    p.setShortName(r.getString("shortName"));
-    p.setCategory(r.getString("category"));
-    p.setCustomField(r.getString("customField"));
-    p.setCustomFieldEnum1(r.getString("customFieldEnum1"));
-    p.setCustomFieldEnum2(r.getString("customFieldEnum2"));
-    p.setPlannedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "plannedCompletion"));
-    p.setProjectedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "projectedCompletion"));
-    p.setStatus(MapperUtils.getEnumIdx(r, "status", Task.Status.class));
-    p.setCustomFieldRef1Uuid(r.getString("customFieldRef1Uuid"));
+    MapperUtils.setCustomizableBeanFields(p, r, "tasks");
+    p.setLongName(r.getString("tasks_longName"));
+    p.setShortName(r.getString("tasks_shortName"));
+    p.setCategory(r.getString("tasks_category"));
+    p.setCustomField(r.getString("tasks_customField"));
+    p.setCustomFieldEnum1(r.getString("tasks_customFieldEnum1"));
+    p.setCustomFieldEnum2(r.getString("tasks_customFieldEnum2"));
+    p.setPlannedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "tasks_plannedCompletion"));
+    p.setProjectedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "tasks_projectedCompletion"));
+    p.setStatus(MapperUtils.getEnumIdx(r, "tasks_status", Task.Status.class));
+    p.setCustomFieldRef1Uuid(r.getString("tasks_customFieldRef1Uuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {
       ctx.define("totalCount", r.getInt("totalCount"));

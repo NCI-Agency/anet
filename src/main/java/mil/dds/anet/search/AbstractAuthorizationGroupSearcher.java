@@ -4,6 +4,7 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -26,7 +27,7 @@ public abstract class AbstractAuthorizationGroupSearcher
 
   @Override
   protected void buildQuery(AuthorizationGroupSearchQuery query) {
-    qb.addSelectClause("\"authorizationGroups\".*");
+    qb.addSelectClause(AuthorizationGroupDao.AUTHORIZATION_GROUP_FIELDS);
     qb.addTotalCount();
     qb.addFromClause("\"authorizationGroups\"");
 
@@ -45,6 +46,7 @@ public abstract class AbstractAuthorizationGroupSearcher
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("
           + "  SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
@@ -64,22 +66,20 @@ public abstract class AbstractAuthorizationGroupSearcher
       AuthorizationGroupSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(
-            getOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "authorizationGroups_createdAt"));
         break;
       case RECENT:
         if (Boolean.TRUE.equals(query.isInMyReports())) {
           // Otherwise the JOIN won't exist
-          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "inMyReports_max"));
         }
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(
-            getOrderBy(query.getSortOrder(), "\"authorizationGroups\"", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "authorizationGroups_name"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "\"authorizationGroups\"", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "authorizationGroups_uuid"));
   }
 
 }
