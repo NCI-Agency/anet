@@ -193,7 +193,6 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                {/* TODO: First condition can be removed when the privileges are clear. */}
                 {!isSuperUserForOrg ? (
                   <>
                     <FastField

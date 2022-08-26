@@ -371,7 +371,9 @@ const PositionShow = ({ pageDispatchers }) => {
               {isSuperUser && (
                 <Fieldset
                   id="responsibleOrganizations"
-                  title="Responsible Organizations"
+                  title={utils.sentenceCase(
+                    positionSettings.responsibleOrganizations.label
+                  )}
                   action={
                     currentUser.isAdmin() && (
                       <Button
@@ -380,7 +382,10 @@ const PositionShow = ({ pageDispatchers }) => {
                         }
                         variant="outline-secondary"
                       >
-                        Edit Responsible Organizations
+                        Edit{" "}
+                        {utils.noCase(
+                          positionSettings.responsibleOrganizations.label
+                        )}
                       </Button>
                     )
                   }

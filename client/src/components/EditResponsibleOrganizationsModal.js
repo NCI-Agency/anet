@@ -7,12 +7,15 @@ import Messages from "components/Messages"
 import Model from "components/Model"
 import OrganizationTable from "components/OrganizationTable"
 import { FastField, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
 import Organization from "models/Organization"
 import Position from "models/Position"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Modal, Row } from "react-bootstrap"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
+import Settings from "settings"
+import utils from "utils"
 
 const GQL_UPDATE_POSITION = gql`
   mutation ($position: PositionInput!) {
@@ -28,6 +31,7 @@ const EditResponsibleOrganizationsModal = ({
 }) => {
   const [error, setError] = useState(null)
 
+  const ResponsibleOrganizationsMultiSelect = DictionaryField(FastField)
   const organizationsFilters = {
     allOrganizations: {
       label: "All organizations",
@@ -40,6 +44,8 @@ const EditResponsibleOrganizationsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm, setFieldTouched }) => {
+        const responsibleOrgSettings =
+          Settings.fields.advisor.position.responsibleOrganizations
         return (
           <Modal
             centered
@@ -49,7 +55,9 @@ const EditResponsibleOrganizationsModal = ({
             style={{ zIndex: "1300" }}
           >
             <Modal.Header closeButton>
-              <Modal.Title>Edit responsible organizations</Modal.Title>
+              <Modal.Title>
+                Edit {utils.noCase(responsibleOrgSettings.label)}
+              </Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Messages error={error} />
@@ -57,9 +65,10 @@ const EditResponsibleOrganizationsModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <FastField
+                      <ResponsibleOrganizationsMultiSelect
                         name="responsibleOrganizations"
                         component={FieldHelper.SpecialField}
+                        dictProps={responsibleOrgSettings}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           value = value.map(organization =>

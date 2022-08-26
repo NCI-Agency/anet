@@ -791,6 +791,8 @@ properties:
                       type: string
                       enum:
                         [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+              responsibleOrganizations:
+                "$ref": "#/$defs/inputField"
 
           org:
             type: object

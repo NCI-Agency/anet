@@ -12,14 +12,13 @@ import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 import Settings from "settings"
+import utils from "utils"
 
 const OrganizationLaydown = ({ organization, refetch }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
-  const [
-    showResponsiblePositionsModal,
-    setShowResponsiblePositionsModal
-  ] = useState(false)
+  const [showResponsiblePositionsModal, setShowResponsiblePositionsModal] =
+    useState(false)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isSuperUserForOrg =
     currentUser && currentUser.isSuperUserForOrg(organization)
@@ -37,6 +36,10 @@ const OrganizationLaydown = ({ organization, refetch }) => {
   )
   const canCreatePositions =
     isSuperUserForOrg || (isSuperUser && isPrincipalOrg)
+
+  const orgSettings = isPrincipalOrg
+    ? Settings.fields.principal.org
+    : Settings.fields.advisor.org
 
   return (
     <Element name="laydown">
@@ -113,14 +116,14 @@ const OrganizationLaydown = ({ organization, refetch }) => {
       </Fieldset>
       <Fieldset
         id="responsiblePositions"
-        title="Responsible Positions"
+        title={utils.sentenceCase(orgSettings.responsiblePositions.label)}
         action={
           isAdmin && (
             <Button
               onClick={() => setShowResponsiblePositionsModal(true)}
               variant="outline-secondary"
             >
-              Edit Responsible Positions
+              Edit {utils.noCase(orgSettings.responsiblePositions.label)}
             </Button>
           )
         }

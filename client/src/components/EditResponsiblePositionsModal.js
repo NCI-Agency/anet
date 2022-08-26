@@ -19,7 +19,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_UPDATE_ORGANIZATION = gql`
-  mutation($organization: OrganizationInput!) {
+  mutation ($organization: OrganizationInput!) {
     updateOrganization(organization: $organization)
   }
 `
@@ -59,7 +59,9 @@ const EditResponsiblePositionsModal = ({
             size="lg"
           >
             <Modal.Header closeButton>
-              <Modal.Title>Edit responsible positions</Modal.Title>
+              <Modal.Title>
+                Edit {utils.noCase(orgSettings.responsiblePositions.label)}
+              </Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Messages error={error} />
