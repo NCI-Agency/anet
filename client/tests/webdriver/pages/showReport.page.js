@@ -1,6 +1,10 @@
 import Page from "./page"
 
 class ShowReport extends Page {
+  get editReportButton() {
+    return browser.$("//a[text()='Edit']")
+  }
+
   get tasksEngagementAssessments() {
     return browser.$("#tasks-engagement-assessments")
   }
@@ -39,6 +43,20 @@ class ShowReport extends Page {
 
   get detailedViewButton() {
     return browser.$("button[value='detailedView']")
+  }
+
+  get reportText() {
+    return browser.$("#report-text")
+  }
+
+  getReportTextContent(selector, multipleElements, index) {
+    if (!selector) {
+      return this.reportText
+    }
+    if (multipleElements) {
+      return this.reportText.$(selector).$$(multipleElements)[index]
+    }
+    return this.reportText.$(selector)
   }
 }
 
