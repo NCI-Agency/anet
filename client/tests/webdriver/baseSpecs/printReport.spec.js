@@ -1,7 +1,7 @@
 import { expect } from "chai"
 import Home from "../pages/home.page"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
-import ShowReport from "../pages/showReport.page"
+import ShowReport from "../pages/report/showReport.page"
 
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
