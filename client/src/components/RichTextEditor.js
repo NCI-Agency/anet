@@ -5,7 +5,6 @@ import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
-import _trim from "lodash/trim"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
@@ -149,13 +148,6 @@ const serializeDebounced = debounce((node, onChange) => {
 }, 100)
 
 const deserialize = element => {
-  if (
-    element.nodeName === "#text" &&
-    _isEmpty(_trim(element.textContent, "\n"))
-  ) {
-    // Skip empty elements
-    return null
-  }
   let children = Array.from(element.childNodes).map(deserialize)
   // Body must have at least one children node for user to be able to edit the text in it
   // Every other node must have a non-empty array of children
