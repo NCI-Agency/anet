@@ -1,12 +1,12 @@
 import { expect } from "chai"
 import Home from "../pages/home.page"
-import MyReports from "../pages/myReports.page"
-import ShowReport from "../pages/showReport.page"
+import MyReports, { REPORT_STATES } from "../pages/myReports.page"
+import ShowReport from "../pages/report/showReport.page"
 
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open()
-    MyReports.selectReport("A test report from Arthur")
+    MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
     ShowReport.compactViewButton.click()
     ShowReport.compactView.waitForExist()
     ShowReport.compactView.waitForDisplayed()

@@ -667,7 +667,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
               </Fieldset>
               {report.reportText && (
-                <Fieldset title={Settings.fields.report.reportText}>
+                <Fieldset
+                  title={Settings.fields.report.reportText}
+                  id="report-text"
+                >
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}

@@ -1,12 +1,12 @@
 import { expect } from "chai"
-import MyReports from "../pages/myReports.page"
-import ShowReport from "../pages/showReport.page"
+import MyReports, { REPORT_STATES } from "../pages/myReports.page"
+import ShowReport from "../pages/report/showReport.page"
 import ShowTask from "../pages/showTask.page"
 
 describe("Show task page", () => {
   beforeEach("Open the show task page", () => {
     MyReports.open()
-    MyReports.selectReport("A test report from Arthur")
+    MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
     ShowTask.openAsAdminUser(ShowReport.task12BUrl)
   })
 

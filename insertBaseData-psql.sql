@@ -845,6 +845,17 @@ INSERT INTO "reportTasks" ("taskUuid", "reportUuid")
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid")
 	VALUES ((SELECT uuid from tasks where "shortName" = '1.2.B'), :reportuuid);
 
+SELECT ('''' || uuid_generate_v4() || '''') AS reportuuid \gset
+INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, text, "nextSteps", state, "engagementDate", atmosphere, "advisorOrganizationUuid", "principalOrganizationUuid")
+	VALUES (:reportuuid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT uuid from locations where name='General Hospital'), 'Test report with rich text',
+	'<h1>Heading 1</h1><h2>Heading 2</h2><h3>Heading 3</h3>Handle text without tags. <p>Handle the white space below</p> <p>'||chr(10)||'</p> <blockquote>Blockquote</blockquote><b>Bold</b> <i>Italic</i> <u>Underline</u> <strike>Strike</strike> <strike><b>BoldStrike</b></strike> <i><b>BoldItalic</b></i><ol><li>numbered list 1</li><li>numbered list 2</li></ol><ul><li>bulleted list 1</li><li>bulleted list 2</li></ul>',
+	'Keep testing', 0, '2022-08-25', 0,
+	(SELECT uuid FROM organizations where "shortName" = 'EF 2.1'), (SELECT uuid FROM organizations WHERE "longName" LIKE 'Ministry of Defense'));
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+arthur@example.com'), :reportuuid, TRUE, TRUE);
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+jack@example.com'), :reportuuid, TRUE, TRUE);
+
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET "releasedAt" = reports."createdAt" WHERE state = 2 OR state = 4;
 

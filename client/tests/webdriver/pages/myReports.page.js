@@ -2,14 +2,36 @@ import Page from "./page"
 
 const PAGE_URL = "/reports/mine"
 
+export const REPORT_STATES = {
+  DRAFT: {
+    id: "draft-reports"
+  },
+  PLANNED_ENGAGEMENTS: {
+    id: "planned-engagements"
+  },
+  PENDING_APPROVAL: {
+    id: "pending-approval"
+  },
+  APPROVED: {
+    id: "approved"
+  },
+  PUBLISHED: {
+    id: "published-reports"
+  },
+  CANCELLED: {
+    id: "cancelled-reports"
+  }
+}
+
 class MyReports extends Page {
   open() {
     super.openAsAdminUser(PAGE_URL)
   }
 
-  selectReport(linkText) {
+  selectReport(linkText, reportState) {
+    const sectionId = reportState.id
     const tableTab = browser.$(
-      "#published-reports .report-collection div header div button[value='table']"
+      `#${sectionId} .report-collection div header div button[value='table']`
     )
     tableTab.waitForExist()
     tableTab.waitForDisplayed()
