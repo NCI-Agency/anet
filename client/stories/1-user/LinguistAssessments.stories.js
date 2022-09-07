@@ -46,6 +46,8 @@ const ASSESSMENT_RESULTS = [
           translatorSubjectVocabularyScore: "B",
           translatorSubjectComment:
             "Translator doesn't know the meanings of some <i>mission specific</i> words",
+          preparedDocuments: "yes",
+          documentQuality: "EX",
           translatorOverallScore: "VG"
         }
       }
@@ -61,6 +63,8 @@ const ASSESSMENT_RESULTS = [
           translatorGotAdequateTime: "no",
           translatorMetDeadline: "yes",
           translatorSubjectVocabularyScore: "EX",
+          preparedDocuments: "yes",
+          documentQuality: "B",
           translatorOverallScore: "EX"
         }
       }
@@ -76,6 +80,7 @@ const ASSESSMENT_RESULTS = [
           translatorGotAdequateTime: "yes",
           translatorMetDeadline: "no",
           translatorSubjectVocabularyScore: "S",
+          preparedDocuments: "no",
           translatorOverallScore: "B",
           translatorOverallComment:
             "He <b>couldn't</b> translate most of the sentences"
@@ -97,6 +102,8 @@ const ASSESSMENT_RESULTS = [
           interpreterWorkEthicScore: "EX",
           interpreterPostureScore: "G",
           interpreterRoleScore: "VG",
+          preparedDocuments: "yes",
+          documentQuality: "VG",
           interpreterInterpretationOverallScore: "VG"
         }
       }

@@ -855,6 +855,37 @@ fields:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
+            preparedDocuments:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              helpText: "Did the linguist prepare any written documents used for the engagement meeting?"
+              label: Prepared documents
+              choices:
+                yes:
+                  label: "Yes"
+                no:
+                  label: "No"
+            documentQuality:
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.preparedDocuments === "yes")]
+              type: enum
+              helpText: "What was the quality of the document the linuist prepared?"
+              label: Document quality
+              choices:
+                "EX":
+                  label: Excellent
+                  color: "#03f8fc"
+                "VG":
+                  label: Very Good
+                  color: "#00fc03"
+                "G":
+                  label: Good
+                  color: "#84fc03"
+                "S":
+                  label: Satisfactory
+                  color: "#e3fc03"
+                "B":
+                  label: Bad
+                  color: "#fc5a03"
             linguistRole:
               test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
               type: enum
@@ -1134,6 +1165,15 @@ fields:
                   widget: richTextEditor
                   style:
                     height: 100px
+        advisorPeriodic:
+          recurrence: "monthly"
+          questions:
+            question1:
+                type: special_field
+                label: General remarks
+                widget: richTextEditor
+                style:
+                  height: 70px
         advisorOndemand:
           recurrence: ondemand
           questions:
