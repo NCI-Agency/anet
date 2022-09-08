@@ -13,9 +13,6 @@ client/jsconfig.json
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# Gradle generated files
-bin/
-
 # Local environment variables
 .env
 
