@@ -50,7 +50,7 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
-      responsiblePositions {
+      administratingPositions {
         uuid
         name
         code

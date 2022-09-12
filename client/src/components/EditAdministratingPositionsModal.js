@@ -24,7 +24,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
   }
 `
 
-const EditResponsiblePositionsModal = ({
+const EditAdministratingPositionsModal = ({
   organization,
   showModal,
   onCancel,
@@ -32,7 +32,7 @@ const EditResponsiblePositionsModal = ({
 }) => {
   const [error, setError] = useState(null)
 
-  const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
+  const AdministratingPositionsMultiSelect = DictionaryField(FastField)
   const positionsFilters = {
     allAdvisorPositions: {
       label: "All advisor positions",
@@ -60,7 +60,7 @@ const EditResponsiblePositionsModal = ({
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Edit {utils.noCase(orgSettings.responsiblePositions.label)}
+                Edit {utils.noCase(orgSettings.administratingPositions.label)}
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -69,26 +69,30 @@ const EditResponsiblePositionsModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <ResponsiblePositionsMultiSelect
-                        name="responsiblePositions"
+                      <AdministratingPositionsMultiSelect
+                        name="administratingPositions"
                         component={FieldHelper.SpecialField}
-                        dictProps={orgSettings.responsiblePositions}
+                        dictProps={orgSettings.administratingPositions}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           value = value.map(position =>
                             Position.filterClientSideFields(position)
                           )
-                          setFieldTouched("responsiblePositions", true, false) // onBlur doesn't work when selecting an option
-                          setFieldValue("responsiblePositions", value)
+                          setFieldTouched(
+                            "administratingPositions",
+                            true,
+                            false
+                          ) // onBlur doesn't work when selecting an option
+                          setFieldValue("administratingPositions", value)
                         }}
                         vertical
                         widget={
                           <AdvancedMultiSelect
-                            fieldName="responsiblePositions"
-                            value={values.responsiblePositions}
+                            fieldName="administratingPositions"
+                            value={values.administratingPositions}
                             renderSelected={
                               <PositionTable
-                                positions={values.responsiblePositions || []}
+                                positions={values.administratingPositions || []}
                                 showDelete
                               />
                             }
@@ -130,7 +134,10 @@ const EditResponsiblePositionsModal = ({
   function close(setFieldValue) {
     // Reset state before closing (cancel)
     setError(null)
-    setFieldValue("responsiblePositions", organization.responsiblePositions)
+    setFieldValue(
+      "administratingPositions",
+      organization.administratingPositions
+    )
     onCancel()
   }
 
@@ -156,11 +163,11 @@ const EditResponsiblePositionsModal = ({
   }
 }
 
-EditResponsiblePositionsModal.propTypes = {
+EditAdministratingPositionsModal.propTypes = {
   organization: PropTypes.object.isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired
 }
 
-export default EditResponsiblePositionsModal
+export default EditAdministratingPositionsModal

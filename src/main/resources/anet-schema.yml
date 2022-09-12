@@ -811,7 +811,7 @@ properties:
                 "$ref": "#/$defs/inputField"
               identificationCode:
                 "$ref": "#/$defs/inputField"
-              responsiblePositions:
+              administratingPositions:
                 "$ref": "#/$defs/inputField"
 
       principal:
@@ -890,7 +890,7 @@ properties:
           org:
             type: object
             additionalProperties: false
-            required: [name, allOrgName, longName, responsiblePositions]
+            required: [name, allOrgName, longName, administratingPositions]
             properties:
               name:
                 type: string
@@ -904,7 +904,7 @@ properties:
                 "$ref": "#/$defs/inputField"
               identificationCode:
                 "$ref": "#/$defs/inputField"
-              responsiblePositions:
+              administratingPositions:
                 "$ref": "#/$defs/inputField"
 
       superUser:

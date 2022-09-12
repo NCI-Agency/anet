@@ -1,5 +1,5 @@
 import AppContext from "components/AppContext"
-import EditResponsiblePositionsModal from "components/EditResponsiblePositionsModal"
+import EditAdministratingPositionsModal from "components/EditAdministratingPositionsModal"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
@@ -17,8 +17,10 @@ import utils from "utils"
 const OrganizationLaydown = ({ organization, refetch }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
-  const [showResponsiblePositionsModal, setShowResponsiblePositionsModal] =
-    useState(false)
+  const [
+    showAdministratingPositionsModal,
+    setShowAdministratingPositionsModal
+  ] = useState(false)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isSuperUserForOrg =
     currentUser && currentUser.isSuperUserForOrg(organization)
@@ -115,25 +117,25 @@ const OrganizationLaydown = ({ organization, refetch }) => {
         )}
       </Fieldset>
       <Fieldset
-        id="responsiblePositions"
-        title={utils.sentenceCase(orgSettings.responsiblePositions.label)}
+        id="administratingPositions"
+        title={utils.sentenceCase(orgSettings.administratingPositions.label)}
         action={
           isAdmin && (
             <Button
-              onClick={() => setShowResponsiblePositionsModal(true)}
+              onClick={() => setShowAdministratingPositionsModal(true)}
               variant="outline-secondary"
             >
-              Edit {utils.noCase(orgSettings.responsiblePositions.label)}
+              Edit {utils.noCase(orgSettings.administratingPositions.label)}
             </Button>
           )
         }
       >
-        <PositionTable positions={organization.responsiblePositions} />
-        <EditResponsiblePositionsModal
+        <PositionTable positions={organization.administratingPositions} />
+        <EditAdministratingPositionsModal
           organization={organization}
-          showModal={showResponsiblePositionsModal}
-          onCancel={() => hideResponsiblePositionsModal(false)}
-          onSuccess={() => hideResponsiblePositionsModal(true)}
+          showModal={showAdministratingPositionsModal}
+          onCancel={() => hideAdministratingPositionsModal(false)}
+          onSuccess={() => hideAdministratingPositionsModal(true)}
         />
       </Fieldset>
     </Element>
@@ -259,8 +261,8 @@ const OrganizationLaydown = ({ organization, refetch }) => {
     setShowInactivePositions(!showInactivePositions)
   }
 
-  function hideResponsiblePositionsModal(success) {
-    setShowResponsiblePositionsModal(false)
+  function hideAdministratingPositionsModal(success) {
+    setShowAdministratingPositionsModal(false)
     if (success) {
       refetch()
     }

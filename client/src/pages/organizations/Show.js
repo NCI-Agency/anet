@@ -100,7 +100,7 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
-      responsiblePositions {
+      administratingPositions {
         uuid
         name
         code
@@ -231,8 +231,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
           <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
         </Nav.Item>
         <Nav.Item>
-          <AnchorNavItem to="responsiblePositions">
-            Responsible positions
+          <AnchorNavItem to="administratingPositions">
+            {orgSettings.administratingPositions.label}
           </AnchorNavItem>
         </Nav.Item>
         {!isPrincipalOrg && (

@@ -1207,8 +1207,8 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
-      responsiblePositions:
-        label: Responsible positions
+      administratingPositions:
+        label: Administrating positions
         placeholder: Search for a position...
 
   principal:
@@ -1433,8 +1433,8 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
-      responsiblePositions:
-        label: Responsible positions
+      administratingPositions:
+        label: Administrating positions
         placeholder: Search for a position...
 
   superUser:
