@@ -23,7 +23,7 @@ const GQL_UPDATE_POSITION = gql`
   }
 `
 
-const EditResponsibleOrganizationsModal = ({
+const EditOrganizationsAdministratedModal = ({
   position,
   showModal,
   onCancel,
@@ -31,7 +31,7 @@ const EditResponsibleOrganizationsModal = ({
 }) => {
   const [error, setError] = useState(null)
 
-  const ResponsibleOrganizationsMultiSelect = DictionaryField(FastField)
+  const OrganizationsAdministratedMultiSelect = DictionaryField(FastField)
   const organizationsFilters = {
     allOrganizations: {
       label: "All organizations",
@@ -44,8 +44,8 @@ const EditResponsibleOrganizationsModal = ({
   return (
     <Formik enableReinitialize onSubmit={onSubmit} initialValues={position}>
       {({ setFieldValue, values, submitForm, setFieldTouched }) => {
-        const responsibleOrgSettings =
-          Settings.fields.advisor.position.responsibleOrganizations
+        const organizationsAdministratedSettings =
+          Settings.fields.advisor.position.organizationsAdministrated
         return (
           <Modal
             centered
@@ -56,7 +56,7 @@ const EditResponsibleOrganizationsModal = ({
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Edit {utils.noCase(responsibleOrgSettings.label)}
+                Edit {utils.noCase(organizationsAdministratedSettings.label)}
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -65,31 +65,31 @@ const EditResponsibleOrganizationsModal = ({
                 <Container fluid>
                   <Row>
                     <Col md={12}>
-                      <ResponsibleOrganizationsMultiSelect
-                        name="responsibleOrganizations"
+                      <OrganizationsAdministratedMultiSelect
+                        name="organizationsAdministrated"
                         component={FieldHelper.SpecialField}
-                        dictProps={responsibleOrgSettings}
+                        dictProps={organizationsAdministratedSettings}
                         onChange={value => {
                           // validation will be done by setFieldValue
                           value = value.map(organization =>
                             Organization.filterClientSideFields(organization)
                           )
                           setFieldTouched(
-                            "responsibleOrganizations",
+                            "organizationsAdministrated",
                             true,
                             false
                           ) // onBlur doesn't work when selecting an option
-                          setFieldValue("responsibleOrganizations", value)
+                          setFieldValue("organizationsAdministrated", value)
                         }}
                         vertical
                         widget={
                           <AdvancedMultiSelect
-                            fieldName="responsibleOrganizations"
-                            value={values.responsibleOrganizations}
+                            fieldName="organizationsAdministrated"
+                            value={values.organizationsAdministrated}
                             renderSelected={
                               <OrganizationTable
                                 organizations={
-                                  values.responsibleOrganizations || []
+                                  values.organizationsAdministrated || []
                                 }
                                 showDelete
                               />
@@ -128,7 +128,10 @@ const EditResponsibleOrganizationsModal = ({
   function close(setFieldValue) {
     // Reset state before closing (cancel)
     setError(null)
-    setFieldValue("responsibleOrganizations", position.responsiblePositions)
+    setFieldValue(
+      "organizationsAdministrated",
+      position.organizationsAdministrated
+    )
     onCancel()
   }
 
@@ -148,11 +151,11 @@ const EditResponsibleOrganizationsModal = ({
   }
 }
 
-EditResponsibleOrganizationsModal.propTypes = {
+EditOrganizationsAdministratedModal.propTypes = {
   position: PropTypes.object.isRequired,
   showModal: PropTypes.bool,
   onCancel: PropTypes.func.isRequired,
   onSuccess: PropTypes.func.isRequired
 }
 
-export default EditResponsibleOrganizationsModal
+export default EditOrganizationsAdministratedModal

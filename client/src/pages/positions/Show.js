@@ -8,7 +8,7 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
-import EditResponsibleOrganizationsModal from "components/EditResponsibleOrganizationsModal"
+import EditOrganizationsAdministratedModal from "components/EditOrganizationsAdministratedModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -69,8 +69,8 @@ const PositionShow = ({ pageDispatchers }) => {
     routerLocation.state && routerLocation.state.error
   )
   const [
-    showResponsibleOrganizationsModal,
-    setShowResponsibleOrganizationsModal
+    showOrganizationsAdministratedModal,
+    setShowOrganizationsAdministratedModal
   ] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_POSITION, {
@@ -370,34 +370,34 @@ const PositionShow = ({ pageDispatchers }) => {
               </Fieldset>
               {isSuperUser && (
                 <Fieldset
-                  id="responsibleOrganizations"
+                  id="organizationsAdministrated"
                   title={utils.sentenceCase(
-                    positionSettings.responsibleOrganizations.label
+                    positionSettings.organizationsAdministrated.label
                   )}
                   action={
                     currentUser.isAdmin() && (
                       <Button
                         onClick={() =>
-                          setShowResponsibleOrganizationsModal(true)
+                          setShowOrganizationsAdministratedModal(true)
                         }
                         variant="outline-secondary"
                       >
                         Edit{" "}
                         {utils.noCase(
-                          positionSettings.responsibleOrganizations.label
+                          positionSettings.organizationsAdministrated.label
                         )}
                       </Button>
                     )
                   }
                 >
                   <OrganizationTable
-                    organizations={position.responsibleOrganizations}
+                    organizations={position.organizationsAdministrated}
                   />
-                  <EditResponsibleOrganizationsModal
+                  <EditOrganizationsAdministratedModal
                     position={position}
-                    showModal={showResponsibleOrganizationsModal}
-                    onCancel={() => hideResponsiblePositionsModal(false)}
-                    onSuccess={() => hideResponsiblePositionsModal(true)}
+                    showModal={showOrganizationsAdministratedModal}
+                    onCancel={() => hideOrganizationsAdministratedModal(false)}
+                    onSuccess={() => hideOrganizationsAdministratedModal(true)}
                   />
                 </Fieldset>
               )}
@@ -445,8 +445,8 @@ const PositionShow = ({ pageDispatchers }) => {
     }
   }
 
-  function hideResponsiblePositionsModal(success) {
-    setShowResponsibleOrganizationsModal(false)
+  function hideOrganizationsAdministratedModal(success) {
+    setShowOrganizationsAdministratedModal(false)
     if (success) {
       refetch()
     }

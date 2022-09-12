@@ -55,7 +55,7 @@ test.serial("checking super user permissions", async t => {
   await validateUserCanEditUserForCurrentPage(t)
 
   // User is super user, they may edit position of type super user for
-  // the organization they are responsible for
+  // the organization their position is administrating
   await editAndSavePositionFromCurrentUserPage(t, true)
 
   await t.context.logout()
@@ -70,11 +70,11 @@ test.serial("checking super user permissions", async t => {
   await validateUserCanEditUserForCurrentPage(t)
 
   // User is super user, they may edit position of type super user for
-  // the organization they are responsible for
+  // the organization their position is administrating
   await editAndSavePositionFromCurrentUserPage(t, true)
 
   // User is super user, they may edit positions only for
-  // the organization they are responsible for
+  // the organization their position is administrating
   const $otherOrgPositionLink = await getFromSearchResults(
     t,
     "EF 1 Manager",
@@ -89,7 +89,7 @@ test.serial("checking super user permissions", async t => {
   await assertElementNotPresent(
     t,
     ".edit-position",
-    "super user should not be able to edit positions of the organization they are not responsible for",
+    "super user should not be able to edit positions of the organization their position is not administrating",
     shortWaitMs
   )
 
@@ -126,7 +126,7 @@ test.serial("checking super user permissions", async t => {
   await assertElementNotPresent(
     t,
     ".edit-position",
-    "super user should not be able to edit positions of the organization they are not responsible for",
+    "super user should not be able to edit positions of the organization their position is not administrating",
     shortWaitMs
   )
 })
@@ -140,7 +140,7 @@ validateUserCannotEditOtherUser(
 )
 
 validateUserCannotEditOtherUser(
-  "super user cannot edit people from the organizations they are not responsible for",
+  "super user cannot edit people from the organizations their position is not administrating",
   "jacob",
   "rebecca",
   "CTR BECCABON, Rebecca",

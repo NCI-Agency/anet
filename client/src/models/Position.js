@@ -145,7 +145,7 @@ export default class Position extends Model {
         }
       }
     }
-    responsibleOrganizations {
+    organizationsAdministrated {
       uuid
       shortName
       longName

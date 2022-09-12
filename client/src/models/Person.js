@@ -317,8 +317,8 @@ export default class Person extends Model {
   // - An Administrator
   // - A super user for this organization
   // - A super user for this orgs parents.
-  // - A super user responsible for this org
-  // - A super user responsible for this orgs parent
+  // - A super user administrating this org
+  // - A super user administrating this orgs parent
   isSuperUserForOrg(org) {
     if (!org) {
       return false
@@ -332,18 +332,16 @@ export default class Person extends Model {
     if (!this.position || !this.position.organization) {
       return false
     }
-    if (this.position.responsibleOrganizations) {
-      const responsibleOrgUuids = this.position.responsibleOrganizations.reduce(
-        (acc, org) => {
+    if (this.position.organizationsAdministrated) {
+      const orgsAdministratedUuids =
+        this.position.organizationsAdministrated.reduce((acc, org) => {
           acc.push(org.uuid)
           org.descendantOrgs.forEach(descOrg => {
             acc.push(descOrg.uuid)
           })
           return acc
-        },
-        []
-      )
-      return responsibleOrgUuids.includes(org.uuid)
+        }, [])
+      return orgsAdministratedUuids.includes(org.uuid)
     }
     return false
   }

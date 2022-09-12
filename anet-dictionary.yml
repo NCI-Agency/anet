@@ -1194,8 +1194,8 @@ fields:
         placeholder: the CE post number for this position
       location:
         filter: [POINT_LOCATION]
-      responsibleOrganizations:
-        label: Responsible organizations
+      organizationsAdministrated:
+        label: Organizations administrated
         placeholder: Search for an organization...
 
     org:

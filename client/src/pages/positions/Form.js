@@ -150,19 +150,18 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
-        const respOrgsUuids = currentUser.position.responsibleOrganizations.map(
-          org => org.uuid
-        )
+        const administratingOrgUuids =
+          currentUser.position.organizationsAdministrated.map(org => org.uuid)
         const isSuperUser =
           currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()
-        const isSuperUserWithoutRespOrgs =
-          isSuperUser && _isEmpty(respOrgsUuids)
-        // Super users without responsible organizations cannot create advisor positions
-        const typeButtons = isSuperUserWithoutRespOrgs
+        const isSuperUserWithoutAdministratingOrgs =
+          isSuperUser && _isEmpty(administratingOrgUuids)
+        // Super users without organizations administrated cannot create advisor positions
+        const typeButtons = isSuperUserWithoutAdministratingOrgs
           ? advisorDisabledTypeButtons
           : regularTypeButtons
         if (
-          isSuperUserWithoutRespOrgs &&
+          isSuperUserWithoutAdministratingOrgs &&
           values.type !== Position.TYPE.PRINCIPAL
         ) {
           setFieldValue("type", Position.TYPE.PRINCIPAL)
@@ -173,7 +172,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         } else {
           orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
           if (isSuperUser) {
-            orgSearchQuery.parentOrgUuid = [...respOrgsUuids]
+            orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
             orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
           }
         }

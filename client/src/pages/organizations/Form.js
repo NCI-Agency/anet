@@ -110,13 +110,13 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
           status: Model.STATUS.ACTIVE,
           type: values.type
         }
-        // Super users can select parent organizations among the ones they are responsible from
+        // Super users can select parent organizations among the ones their position is administrating
         if (!isAdmin) {
-          const respOrgsUuids =
-            currentUser.position.responsibleOrganizations.map(org => org.uuid)
+          const orgsAdministratedUuids =
+            currentUser.position.organizationsAdministrated.map(org => org.uuid)
           orgSearchQuery.parentOrgUuid = [
             currentUser.position.organization.uuid,
-            ...respOrgsUuids
+            ...orgsAdministratedUuids
           ]
           orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }

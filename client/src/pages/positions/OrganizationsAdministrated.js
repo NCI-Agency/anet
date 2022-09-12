@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Table } from "react-bootstrap"
 
-const ResponsibleOrganizations = ({ organizations }) => {
+const OrganizationsAdministrated = ({ organizations }) => {
   return (
     <Table>
       <thead>
@@ -26,8 +26,8 @@ const ResponsibleOrganizations = ({ organizations }) => {
   )
 }
 
-ResponsibleOrganizations.propTypes = {
+OrganizationsAdministrated.propTypes = {
   organizations: PropTypes.arrayOf(PropTypes.object).isRequired
 }
 
-export default ResponsibleOrganizations
+export default OrganizationsAdministrated

@@ -40,8 +40,8 @@ import useMergeObjects, {
   unassignedPerson
 } from "mergeUtils"
 import { Position } from "models"
+import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
-import ResponsibleOrganizations from "pages/positions/ResponsibleOrganizations"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
@@ -288,19 +288,19 @@ const MergePositions = ({ pageDispatchers }) => {
               />
               {mergeState?.merged?.type === Position.TYPE.SUPER_USER && (
                 <PositionField
-                  label="Responsible Organizations"
-                  fieldName="responsibleOrganizations"
+                  label="Organizations Administrated"
+                  fieldName="organizationsAdministrated"
                   value={
-                    <ResponsibleOrganizations
+                    <OrganizationsAdministrated
                       organizations={
-                        mergedPosition.responsibleOrganizations || []
+                        mergedPosition.organizationsAdministrated || []
                       }
                     />
                   }
                   align={ALIGN_OPTIONS.CENTER}
                   action={getClearButton(() =>
                     dispatchMergeActions(
-                      setAMergedField("responsibleOrganizations", [], null)
+                      setAMergedField("organizationsAdministrated", [], null)
                     )
                   )}
                   mergeState={mergeState}
@@ -624,11 +624,11 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           />
           {position.type === Position.TYPE.SUPER_USER && (
             <PositionField
-              label="Responsible Organizations"
-              fieldName="responsibleOrganizations"
+              label="Organizations Administrated"
+              fieldName="organizationsAdministrated"
               value={
-                <ResponsibleOrganizations
-                  organizations={position.responsibleOrganizations}
+                <OrganizationsAdministrated
+                  organizations={position.organizationsAdministrated}
                 />
               }
               align={align}
@@ -636,14 +636,14 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
                 () =>
                   dispatchMergeActions(
                     setAMergedField(
-                      "responsibleOrganizations",
-                      position.responsibleOrganizations,
+                      "organizationsAdministrated",
+                      position.organizationsAdministrated,
                       align
                     )
                   ),
                 align,
                 mergeState,
-                "responsibleOrganizations"
+                "organizationsAdministrated"
               )}
               mergeState={mergeState}
               dispatchMergeActions={dispatchMergeActions}
