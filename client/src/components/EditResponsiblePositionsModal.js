@@ -134,13 +134,14 @@ const EditResponsiblePositionsModal = ({
     onCancel()
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
-      .then(response => onSuccess())
-      .catch(error => {
-        form.setSubmitting(false)
-        setError(error)
-      })
+  async function onSubmit(values, form) {
+    try {
+      await save(values, form)
+      return onSuccess()
+    } catch (error) {
+      form.setSubmitting(false)
+      setError(error)
+    }
   }
 
   function save(values, form) {
@@ -151,7 +152,7 @@ const EditResponsiblePositionsModal = ({
     organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
     organization.customFields = customFieldsJSONString(values)
-    return API.mutation(GQL_UPDATE_ORGANIZATION, { organization }).then()
+    return API.mutation(GQL_UPDATE_ORGANIZATION, { organization })
   }
 }
 

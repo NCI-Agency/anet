@@ -132,18 +132,19 @@ const EditResponsibleOrganizationsModal = ({
     onCancel()
   }
 
-  function onSubmit(values, form) {
-    return save(values, form)
-      .then(response => onSuccess())
-      .catch(error => {
-        form.setSubmitting(false)
-        setError(error)
-      })
+  async function onSubmit(values, form) {
+    try {
+      await save(values, form)
+      return onSuccess()
+    } catch (error) {
+      form.setSubmitting(false)
+      setError(error)
+    }
   }
 
   function save(values, form) {
     const position = Position.filterClientSideFields(new Position(values))
-    return API.mutation(GQL_UPDATE_POSITION, { position }).then()
+    return API.mutation(GQL_UPDATE_POSITION, { position })
   }
 }
 
