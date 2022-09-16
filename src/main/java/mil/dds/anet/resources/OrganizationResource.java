@@ -117,7 +117,8 @@ public class OrganizationResource {
     }
 
     if (!AuthUtils.isAdmin(user)) {
-      // Check if super user is responsible for the organizations that will be modified with the
+      // Check if superuser has administrative permission for the organizations that will be
+      // modified with the
       // parent organization update
       if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {
         if (org.getParentOrgUuid() != null) {
@@ -171,10 +172,11 @@ public class OrganizationResource {
           oldTaskUuid -> engine.getTaskDao().removeTaskedOrganizationsFromTask(org, oldTaskUuid));
     }
 
-    if (AuthUtils.isAdmin(user) && org.getResponsiblePositions() != null) {
-      logger.debug("Editing responsible positions for {}", org);
-      Utils.addRemoveElementsByUuid(existing.loadResponsiblePositions(engine.getContext()).join(),
-          org.getResponsiblePositions(),
+    if (AuthUtils.isAdmin(user) && org.getAdministratingPositions() != null) {
+      logger.debug("Editing administrating positions for {}", org);
+      Utils.addRemoveElementsByUuid(
+          existing.loadAdministratingPositions(engine.getContext()).join(),
+          org.getAdministratingPositions(),
           newPosition -> dao.addPositionToOrganization(newPosition, org),
           oldPositionUuid -> dao.removePositionFromOrganization(oldPositionUuid, org));
     }

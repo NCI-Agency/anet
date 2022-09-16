@@ -4152,8 +4152,8 @@
 		<addNotNullConstraint tableName="peoplePositions" columnName="personUuid" columnDataType="${uuid_type}" />
 	</changeSet>
 
-	<changeSet id="add_organization_responsible_positions" author="nur.yilmaz">
-		<createTable tableName="organizationResponsiblePositions">
+	<changeSet id="add_organization_administrative_positions" author="nur.yilmaz">
+		<createTable tableName="organizationAdministrativePositions">
 			<column name="organizationUuid" type="${uuid_type}">
 				<constraints nullable="false"/>
 			</column>
@@ -4161,19 +4161,19 @@
 				<constraints nullable="false"/>
 			</column>
 		</createTable>
-		<addUniqueConstraint tableName="organizationResponsiblePositions" columnNames="organizationUuid, positionUuid" constraintName="UQ_uniqueOrganizationResponsiblePositions" />
-		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="organizationResponsiblePositions"
-								 constraintName="FK_organizationResponsiblePositions_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
+		<addUniqueConstraint tableName="organizationAdministrativePositions" columnNames="organizationUuid, positionUuid" constraintName="UQ_uniqueOrganizationAdministrativePositions" />
+		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="organizationAdministrativePositions"
+								 constraintName="FK_organizationAdministrativePositions_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
 								 referencedColumnNames="uuid" referencedTableName="organizations" />
-		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="organizationResponsiblePositions"
-								 constraintName="FK_organizationResponsiblePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="organizationAdministrativePositions"
+								 constraintName="FK_organizationAdministrativePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
 								 referencedColumnNames="uuid" referencedTableName="positions" />
 		<createIndex
-				indexName="IDX_organizationResponsiblePositions_organizationUuid" tableName="organizationResponsiblePositions">
+				indexName="IDX_organizationAdministrativePositions_organizationUuid" tableName="organizationAdministrativePositions">
 			<column name="organizationUuid"/>
 		</createIndex>
 		<createIndex
-				indexName="IDX_organizationResponsiblePositions_positionUuid" tableName="organizationResponsiblePositions">
+				indexName="IDX_organizationAdministrativePositions_positionUuid" tableName="organizationAdministrativePositions">
 			<column name="positionUuid"/>
 		</createIndex>
 	</changeSet>

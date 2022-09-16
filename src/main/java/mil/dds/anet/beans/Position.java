@@ -55,7 +55,7 @@ public class Position extends AbstractCustomizableAnetBean
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
   // annotated below
-  private List<Organization> responsibleOrganizations;
+  private List<Organization> organizationsAdministrated;
 
   public String getName() {
     return name;
@@ -220,13 +220,13 @@ public class Position extends AbstractCustomizableAnetBean
     return location.getForeignObject();
   }
 
-  @GraphQLInputField(name = "responsibleOrganizations")
-  public void setResponsiblePositions(List<Organization> responsibleOrganizations) {
-    this.responsibleOrganizations = responsibleOrganizations;
+  @GraphQLInputField(name = "organizationsAdministrated")
+  public void setOrganizationsAdministrated(List<Organization> organizationsAdministrated) {
+    this.organizationsAdministrated = organizationsAdministrated;
   }
 
-  public List<Organization> getResponsibleOrganizations() {
-    return responsibleOrganizations;
+  public List<Organization> getOrganizationsAdministrated() {
+    return organizationsAdministrated;
   }
 
   @GraphQLQuery(name = "previousPeople")
@@ -291,18 +291,18 @@ public class Position extends AbstractCustomizableAnetBean
         });
   }
 
-  @GraphQLQuery(name = "responsibleOrganizations")
-  public CompletableFuture<List<Organization>> loadResponsibleOrganizations(
+  @GraphQLQuery(name = "organizationsAdministrated")
+  public CompletableFuture<List<Organization>> loadOrganizationsAdministrated(
       @GraphQLRootContext Map<String, Object> context) {
-    if (responsibleOrganizations != null) {
-      return CompletableFuture.completedFuture(responsibleOrganizations);
+    if (organizationsAdministrated != null) {
+      return CompletableFuture.completedFuture(organizationsAdministrated);
     }
     final OrganizationSearchQuery query = new OrganizationSearchQuery();
     query.setBatchParams(new M2mBatchParams<Organization, OrganizationSearchQuery>("organizations",
-        "\"organizationResponsiblePositions\"", "\"organizationUuid\"", "\"positionUuid\""));
+        "\"organizationAdministrativePositions\"", "\"organizationUuid\"", "\"positionUuid\""));
     return AnetObjectEngine.getInstance().getOrganizationDao()
         .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
-          responsibleOrganizations = o;
+          organizationsAdministrated = o;
           return o;
         });
   }

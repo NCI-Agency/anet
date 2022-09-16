@@ -132,10 +132,10 @@ public class PositionResource {
 
     final Position current = dao.getByUuid(pos.getUuid());
 
-    if (AuthUtils.isAdmin(user) && pos.getResponsibleOrganizations() != null) {
+    if (AuthUtils.isAdmin(user) && pos.getOrganizationsAdministrated() != null) {
       Utils.addRemoveElementsByUuid(
-          current.loadResponsibleOrganizations(engine.getContext()).join(),
-          pos.getResponsibleOrganizations(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
+          current.loadOrganizationsAdministrated(engine.getContext()).join(),
+          pos.getOrganizationsAdministrated(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
           oldOrgUuid -> dao.removeOrganizationFromPosition(oldOrgUuid, pos));
     }
 

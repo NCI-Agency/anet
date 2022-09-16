@@ -253,7 +253,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   @InTransaction
   public int addOrganizationToPosition(Position p, Organization o) {
     return getDbHandle().createUpdate(
-        "/* addOrganizationToPosition */ INSERT INTO \"organizationResponsiblePositions\" (\"organizationUuid\", \"positionUuid\") "
+        "/* addOrganizationToPosition */ INSERT INTO \"organizationAdministrativePositions\" (\"organizationUuid\", \"positionUuid\") "
             + "VALUES (:organizationUuid, :positionUuid)")
         .bind("organizationUuid", o.getUuid()).bind("positionUuid", p.getUuid()).execute();
   }
@@ -261,7 +261,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   @InTransaction
   public int removeOrganizationFromPosition(String orgUuid, Position p) {
     return getDbHandle().createUpdate(
-        "/* removeOrganizationToPosition*/ DELETE FROM \"organizationResponsiblePositions\" "
+        "/* removeOrganizationToPosition*/ DELETE FROM \"organizationAdministrativePositions\" "
             + "WHERE \"organizationUuid\" = :organizationUuid AND \"positionUuid\" = :positionUuid")
         .bind("organizationUuid", orgUuid).bind("positionUuid", p.getUuid()).execute();
   }
@@ -575,8 +575,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     updateM2mForMerge("authorizationGroupPositions", "authorizationGroupUuid", "positionUuid",
         winnerUuid, loserUuid);
 
-    // Update organizationResponsiblePositions
-    updateM2mForMerge("organizationResponsiblePositions", "organizationUuid", "positionUuid",
+    // Update organizationAdministrativePositions
+    updateM2mForMerge("organizationAdministrativePositions", "organizationUuid", "positionUuid",
         winnerUuid, loserUuid);
 
     // Update customSensitiveInformation for winner

@@ -58,7 +58,7 @@ public class Organization extends AbstractCustomizableAnetBean
   // annotated below
   List<Task> tasks;
   // annotated below
-  List<Position> responsiblePositions;
+  List<Position> administratingPositions;
 
   public String getShortName() {
     return shortName;
@@ -259,26 +259,26 @@ public class Organization extends AbstractCustomizableAnetBean
     this.tasks = tasks;
   }
 
-  @GraphQLQuery(name = "responsiblePositions")
-  public CompletableFuture<List<Position>> loadResponsiblePositions(
+  @GraphQLQuery(name = "administratingPositions")
+  public CompletableFuture<List<Position>> loadAdministratingPositions(
       @GraphQLRootContext Map<String, Object> context) {
-    if (responsiblePositions != null) {
-      return CompletableFuture.completedFuture(responsiblePositions);
+    if (administratingPositions != null) {
+      return CompletableFuture.completedFuture(administratingPositions);
     }
     return AnetObjectEngine.getInstance().getOrganizationDao()
-        .getResponsiblePositionsForOrganization(context, uuid).thenApply(o -> {
-          responsiblePositions = o;
+        .getAdministratingPositionsForOrganization(context, uuid).thenApply(o -> {
+          administratingPositions = o;
           return o;
         });
   }
 
-  public List<Position> getResponsiblePositions() {
-    return responsiblePositions;
+  public List<Position> getAdministratingPositions() {
+    return administratingPositions;
   }
 
-  @GraphQLInputField(name = "responsiblePositions")
-  public void setResponsiblePositions(List<Position> responsiblePositions) {
-    this.responsiblePositions = responsiblePositions;
+  @GraphQLInputField(name = "administratingPositions")
+  public void setAdministratingPositions(List<Position> administratingPositions) {
+    this.administratingPositions = administratingPositions;
   }
 
   @Override
