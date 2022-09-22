@@ -154,9 +154,15 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
           authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
       return new ForeignKeyFetcher<Note>()
           .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
-          .thenApply(notes -> notes.stream().filter(note -> hasNotePermission(user,
-              authorizationGroupUuids, note, note.getAuthorUuid(), UpdateType.READ))
-              .collect(Collectors.toList()));
+          .thenApply(notes -> notes.stream().filter(note -> {
+            try {
+              return hasNotePermission(user, authorizationGroupUuids, note, note.getAuthorUuid(),
+                  UpdateType.READ);
+            } catch (Exception e) {
+              // something wrong with the note, just filter it out
+              return false;
+            }
+          }).collect(Collectors.toList()));
     });
   }
 
