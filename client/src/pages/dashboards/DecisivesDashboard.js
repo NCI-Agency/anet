@@ -380,7 +380,7 @@ const StatsTable = ({
                 ? "red"
                 : "white"
           return (
-            <td bgcolor={color} key={item.uuid}>
+            <td style={{ backgroundColor: color }} key={item.uuid}>
               {current}/{previous}
             </td>
           )
