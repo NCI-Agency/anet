@@ -17,8 +17,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.recentActivity.Activity;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.beans.userActivity.Activity;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.InsertionOrderLinkedList;
@@ -88,7 +88,7 @@ public class Person extends AbstractCustomizableAnetBean
   private String code;
 
   // non-GraphQL
-  private Deque<Activity> userActivities;
+  private Deque<Activity> recentActivities;
 
   @Override
   public String getName() {
@@ -331,21 +331,21 @@ public class Person extends AbstractCustomizableAnetBean
   }
 
   @JsonIgnore
-  public Deque<Activity> getUserActivities() {
-    if (userActivities == null) {
+  public Deque<Activity> getRecentActivities() {
+    if (recentActivities == null) {
       return new InsertionOrderLinkedList<>();
     }
-    return new InsertionOrderLinkedList<>(userActivities);
+    return new InsertionOrderLinkedList<>(recentActivities);
   }
 
   @JsonIgnore
-  public void setUserActivities(Deque<Activity> userActivities) {
-    this.userActivities = userActivities;
+  public void setRecentActivities(Deque<Activity> recentActivities) {
+    this.recentActivities = recentActivities;
   }
 
   @Override
   public int compareTo(Person o) {
-    // Used by Collections.sort() in AdminResource::userActivities
+    // Used by Collections.sort() in AdminResource::recentActivities
     return COMPARATOR.compare(this, o);
   }
 

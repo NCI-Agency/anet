@@ -8,8 +8,8 @@ import moment from "moment"
 import React, { useState } from "react"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
-  query {
-    advisorReportInsights {
+  query ($weeksAgo: Int) {
+    advisorReportInsights(weeksAgo: $weeksAgo) {
       uuid
       name
       stats {
@@ -26,8 +26,12 @@ const DEFAULT_WEEKS_AGO = 3
 const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
   const [filterText, setFilterText] = useState("")
   const [selectedData, setSelectedData] = useState([])
+  const weeksAgo = DEFAULT_WEEKS_AGO // TODO: should be selectable by the user
   const { loading, error, data } = API.useApiQuery(
-    GQL_GET_ADVISOR_REPORTS_INSIGHT
+    GQL_GET_ADVISOR_REPORTS_INSIGHT,
+    {
+      weeksAgo
+    }
   )
   const { done, result } = useBoilerplate({
     loading,
@@ -53,6 +57,7 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
         columnGroups={columnGroups}
         filterText={filterText}
         onRowSelection={handleRowSelection}
+        weeksAgo={weeksAgo}
       />
     </div>
   )
@@ -69,9 +74,7 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
 
   function getWeekColumns() {
     const dateEnd = moment().startOf("week")
-    const dateStart = moment()
-      .startOf("week")
-      .subtract(DEFAULT_WEEKS_AGO, "weeks")
+    const dateStart = moment().startOf("week").subtract(weeksAgo, "weeks")
     let currentDate = dateStart
     const weekColumns = []
     while (currentDate.isBefore(dateEnd)) {

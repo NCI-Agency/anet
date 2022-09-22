@@ -1,23 +1,22 @@
-package mil.dds.anet.beans.userActivity;
+package mil.dds.anet.beans.recentActivity;
 
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.util.Comparator;
 import java.util.Objects;
 import mil.dds.anet.beans.Person;
 
-public class UserActivity implements Comparable<UserActivity> {
+public class RecentUserActivity implements Comparable<RecentUserActivity> {
 
-  private static final Comparator<UserActivity> COMPARATOR =
-      Comparator.comparing(UserActivity::getActivity).thenComparing(UserActivity::getUser);
-
+  private static final Comparator<RecentUserActivity> COMPARATOR = Comparator
+      .comparing(RecentUserActivity::getActivity).thenComparing(RecentUserActivity::getUser);
   @GraphQLQuery
   private Person user;
   @GraphQLQuery
   private Activity activity;
 
-  public UserActivity() {}
+  public RecentUserActivity() {}
 
-  public UserActivity(Person user, Activity activity) {
+  public RecentUserActivity(Person user, Activity activity) {
     this.user = user;
     this.activity = activity;
   }
@@ -39,7 +38,7 @@ public class UserActivity implements Comparable<UserActivity> {
   }
 
   @Override
-  public int compareTo(UserActivity o) {
+  public int compareTo(RecentUserActivity o) {
     // Used by Collections.sort() in AdminResource::userActivities
     return COMPARATOR.compare(this, o);
   }
@@ -49,7 +48,7 @@ public class UserActivity implements Comparable<UserActivity> {
     if (!(o instanceof Activity)) {
       return false;
     }
-    final UserActivity other = (UserActivity) o;
+    final RecentUserActivity other = (RecentUserActivity) o;
     return Objects.equals(user, other.getUser()) && Objects.equals(activity, other.getActivity());
   }
 

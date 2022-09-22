@@ -4121,4 +4121,23 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-userActivities-table" author="gjvoosten">
+		<createTable tableName="userActivities">
+			<!-- Note: personUuid and organizationUuid are *not* a foreign key so they can still be deleted without deleting the activities -->
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints />
+			</column>
+			<column name="visitedAt" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			tableName="userActivities"
+			columnNames="personUuid, organizationUuid, visitedAt"
+			constraintName="uniqueUserActivities" />
+	</changeSet>
+
 </databaseChangeLog>

@@ -15,7 +15,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 
-public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>> {
+public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
 
   private static final int MIN_UUID_PREFIX = 4;
 

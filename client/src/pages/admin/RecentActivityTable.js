@@ -4,9 +4,9 @@ import PropTypes from "prop-types"
 import React from "react"
 import { Alert, Table } from "react-bootstrap"
 import Settings from "settings"
-import "./UserActivityTable.css"
+import "./RecentActivityTable.css"
 
-const UserActivityTable = ({ text, values }) => {
+const RecentActivityTable = ({ text, values }) => {
   if (!values) {
     return (
       <Alert variant="info" style={{ textAlign: "center" }}>
@@ -25,7 +25,7 @@ const UserActivityTable = ({ text, values }) => {
   }
 
   return (
-    <div className="user-activities-table-container">
+    <div className="recent-activities-table-container">
       <Table striped hover size="sm">
         <thead>
           <tr>
@@ -60,9 +60,9 @@ const UserActivityTable = ({ text, values }) => {
   )
 }
 
-UserActivityTable.propTypes = {
+RecentActivityTable.propTypes = {
   text: PropTypes.string.isRequired,
   values: PropTypes.arrayOf(PropTypes.object)
 }
 
-export default UserActivityTable
+export default RecentActivityTable

@@ -8,6 +8,7 @@ const AdvisorReportsModal = props => (
     <AdvisorReportsTable
       columnGroups={props.columnGroups}
       orgUuid={props.uuid}
+      weeksAgo={props.weeksAgo}
     />
   </SimpleModal>
 )
@@ -15,7 +16,8 @@ const AdvisorReportsModal = props => (
 AdvisorReportsModal.propTypes = {
   columnGroups: PropTypes.array.isRequired,
   name: PropTypes.string.isRequired,
-  uuid: PropTypes.string.isRequired
+  uuid: PropTypes.string.isRequired,
+  weeksAgo: PropTypes.number
 }
 
 export default AdvisorReportsModal

@@ -12,6 +12,7 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import * as d3 from "d3"
+import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
@@ -112,8 +113,8 @@ const Chart = ({
             xLabel="advisorOrg.shortName"
             onBarClick={goToSelection}
             tooltip={d => `
-              <h4>${d.advisorOrg.shortName}</h4>
-              <p>${d.notApproved}</p>
+              <h4>${_escape(d.advisorOrg.shortName)}</h4>
+              <p>${_escape(d.notApproved)}</p>
             `}
             selectedBarClass={selectedBarClass}
             selectedBar={

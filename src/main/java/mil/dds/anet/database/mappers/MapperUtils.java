@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 public class MapperUtils {
 
+  public static final String TOTAL_COUNT_COLUMN = "totalCount";
+
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

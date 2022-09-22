@@ -117,6 +117,14 @@ type AnetBeanList_Task {
 }
 
 """"""
+type AnetBeanList_UserActivity {
+  list: [UserActivity]
+  pageNum: Int
+  pageSize: Int
+  totalCount: Int
+}
+
+""""""
 input AnetEmailInput {
   comment: String
   createdAt: Instant
@@ -318,6 +326,9 @@ enum LocationType {
   PRINCIPAL_LOCATION
   VIRTUAL_LOCATION
 }
+
+"""Long type"""
+scalar Long
 
 """Mutation root"""
 type Mutation {
@@ -689,19 +700,26 @@ type Query {
   position(uuid: String): Position
   positionList(query: PositionSearchQueryInput): AnetBeanList_Position
   projectVersion: String
+  recentActivities: RecentActivities
   report(uuid: String): Report
   reportList(query: ReportSearchQueryInput): AnetBeanList_Report
   rollupGraph(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, startDate: Instant): [RollupGraph]
   showRollupEmail(advisorOrganizationUuid: String, endDate: Instant, orgType: OrganizationType, principalOrganizationUuid: String, showText: Boolean = false, startDate: Instant): String
   task(uuid: String): Task
   taskList(query: TaskSearchQueryInput): AnetBeanList_Task
-  userActivities: RecentActivities
+  userActivityList(query: UserActivitySearchQueryInput): AnetBeanList_UserActivity
 }
 
 """"""
 type RecentActivities {
-  byActivity: [UserActivity]
-  byUser: [UserActivity]
+  byActivity: [RecentUserActivity]
+  byUser: [RecentUserActivity]
+}
+
+""""""
+type RecentUserActivity {
+  activity: Activity
+  user: Person
 }
 
 """"""
@@ -992,6 +1010,13 @@ enum SearchObjectType {
 }
 
 """"""
+enum SearchType {
+  ORGANIZATION
+  PERSON
+  TOP_LEVEL_ORGANIZATION
+}
+
+""""""
 enum SortOrder {
   ASC
   DESC
@@ -1156,6 +1181,29 @@ scalar UNREPRESENTABLE
 
 """"""
 type UserActivity {
-  activity: Activity
-  user: Person
+  count: Long!
+  organization: Organization
+  organizationUuid: String
+  person: Person
+  personUuid: String
+  visitedAt: Instant
+}
+
+""""""
+input UserActivitySearchQueryInput {
+  endDate: Instant
+  pageNum: Int
+  pageSize: Int
+  searchType: SearchType
+  showDeleted: Boolean
+  sortBy: UserActivitySearchSortBy
+  sortOrder: SortOrder
+  startDate: Instant
+  status: Status
+  text: String
+}
+
+""""""
+enum UserActivitySearchSortBy {
+  COUNT
 }

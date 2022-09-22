@@ -1,4 +1,4 @@
-package mil.dds.anet.beans.userActivity;
+package mil.dds.anet.beans.recentActivity;
 
 import io.leangen.graphql.annotations.GraphQLQuery;
 import java.time.Instant;
@@ -51,7 +51,7 @@ public class Activity implements Comparable<Activity> {
 
   @Override
   public int compareTo(Activity o) {
-    // Used by Collections.sort() in AdminResource::userActivities
+    // Used by Collections.sort() in AdminResource::recentActivities
     return COMPARATOR.compare(this, o);
   }
 
