@@ -4,9 +4,9 @@ import AuthorizationGroupNew from "pages/admin/authorizationgroup/New"
 import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
-import MergeLocations from "pages/admin/MergeLocations"
-import MergePeople from "pages/admin/MergePeople"
-import MergePositions from "pages/admin/MergePositions"
+import MergeLocations from "pages/admin/merge/MergeLocations"
+import MergePeople from "pages/admin/merge/MergePeople"
+import MergePositions from "pages/admin/merge/MergePositions"
 import UserActivities from "pages/admin/UserActivities"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
@@ -117,9 +117,11 @@ const Routing = () => {
       {currentUser.isAdmin() && (
         <Route path={PAGE_URLS.ADMIN}>
           <Route index element={<AdminIndex />} />
-          <Route path="mergePeople" element={<MergePeople />} />
-          <Route path="mergePositions" element={<MergePositions />} />
-          <Route path="mergeLocations" element={<MergeLocations />} />
+          <Route path="merge">
+            <Route path="people" element={<MergePeople />} />
+            <Route path="positions" element={<MergePositions />} />
+            <Route path="locations" element={<MergeLocations />} />
+          </Route>
           <Route path="authorizationGroups">
             <Route index element={<AuthorizationGroups />} />
             <Route path="new" element={<AuthorizationGroupNew />} />
