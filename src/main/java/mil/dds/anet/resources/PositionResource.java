@@ -125,16 +125,17 @@ public class PositionResource {
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
 
+    final Position existing = dao.getByUuid(pos.getUuid());
+
     final int numRows = dao.update(pos);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
     }
 
-    final Position current = dao.getByUuid(pos.getUuid());
-
-    if (AuthUtils.isAdmin(user) && pos.getOrganizationsAdministrated() != null) {
+    if (AuthUtils.isAdmin(user) && pos.getOrganizationsAdministrated() != null
+        && existing != null) {
       Utils.addRemoveElementsByUuid(
-          current.loadOrganizationsAdministrated(engine.getContext()).join(),
+          existing.loadOrganizationsAdministrated(engine.getContext()).join(),
           pos.getOrganizationsAdministrated(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
           oldOrgUuid -> dao.removeOrganizationFromPosition(oldOrgUuid, pos));
     }
@@ -143,27 +144,27 @@ public class PositionResource {
         pos.getCustomSensitiveInformation());
 
     if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
-      if (current != null) {
+      if (existing != null) {
         // Run the diff and see if anything changed and update.
         if (pos.getPerson() != null) {
           if (pos.getPersonUuid() == null) {
             // Intentionally remove the person
-            dao.removePersonFromPosition(current.getUuid());
+            dao.removePersonFromPosition(existing.getUuid());
             AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPersonUuid(),
-                current, user);
-          } else if (!Objects.equals(pos.getPersonUuid(), current.getPersonUuid())) {
+                existing, user);
+          } else if (!Objects.equals(pos.getPersonUuid(), existing.getPersonUuid())) {
             dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid());
-            AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), current,
+            AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), existing,
                 user);
           }
         }
 
-        if (Position.Status.INACTIVE.equals(pos.getStatus()) && current.getPersonUuid() != null) {
+        if (Position.Status.INACTIVE.equals(pos.getStatus()) && existing.getPersonUuid() != null) {
           // Remove this person from this position.
           AnetAuditLogger.log(
               "Person {} removed from position {} by {} because the position is now inactive",
-              current.getPersonUuid(), current, user);
-          dao.removePersonFromPosition(current.getUuid());
+              existing.getPersonUuid(), existing, user);
+          dao.removePersonFromPosition(existing.getUuid());
         }
       }
     }

@@ -371,7 +371,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failCreateOrganization(superUserMutationExecutor, childOrgInput);
 
     // Set super-user as responsible for the parent organization
-    parentOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    parentOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(parentOrg));
 
     final Organization createdChildOrg =
@@ -391,12 +391,12 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(superUserOrg));
 
     // Given responsibility now they can edit their organization
-    superUserOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    superUserOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superUserOrg));
     succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(superUserOrg));
 
     // Remove position
-    superUserOrg.setResponsiblePositions(new ArrayList<>());
+    superUserOrg.setAdministratingPositions(new ArrayList<>());
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superUserOrg));
   }
 
@@ -429,7 +429,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Set super-user as responsible for the child organization
-    createdChildOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    createdChildOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdChildOrg));
 
     // Cannot set parent as null because they're not responsible for the parent organization
@@ -437,7 +437,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
     // Set super-user as responsible for the parent organization
-    createdParentOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    createdParentOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdParentOrg));
     // Now super-user can set the parent organization as null
     createdChildOrg.setParentOrg(null);
@@ -460,7 +460,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Update responsible position
-    createdNewParentOrg.setResponsiblePositions(Lists.newArrayList(superUserPosition));
+    createdNewParentOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdNewParentOrg));
 
     // Now they can assign the new parent

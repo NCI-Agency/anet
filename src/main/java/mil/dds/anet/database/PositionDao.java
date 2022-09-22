@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -492,10 +493,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   public int mergePositions(Position winner, Position loser) {
     final String winnerUuid = winner.getUuid();
     final String loserUuid = loser.getUuid();
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Map<String, Object> context = engine.getContext();
     // Get some data related to the existing position in the database
     final Position existingPos = getByUuid(winnerUuid);
     final List<Position> existingAssociatedPositions =
-        existingPos.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
+        existingPos.loadAssociatedPositions(context).join();
 
     // Clear loser's code to prevent update conflicts (code must be unique)
     getDbHandle()
@@ -576,8 +579,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         winnerUuid, loserUuid);
 
     // Update organizationAdministrativePositions
-    updateM2mForMerge("organizationAdministrativePositions", "organizationUuid", "positionUuid",
-        winnerUuid, loserUuid);
+    deleteForMerge("organizationAdministrativePositions", "positionUuid", loserUuid);
+
+    Utils.addRemoveElementsByUuid(existingPos.loadOrganizationsAdministrated(context).join(),
+        Utils.orIfNull(winner.getOrganizationsAdministrated(), new ArrayList<>()),
+        newOrg -> addOrganizationToPosition(winner, newOrg),
+        oldOrgUuid -> removeOrganizationFromPosition(oldOrgUuid, winner));
 
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
@@ -589,7 +596,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     final int nr = deleteForMerge("positions", "uuid", loserUuid);
 
     // Evict the persons (previously) holding these positions from the domain users cache
-    final PersonDao personDao = AnetObjectEngine.getInstance().getPersonDao();
+    final PersonDao personDao = engine.getPersonDao();
     personDao.evictFromCacheByPositionUuid(loserUuid);
     personDao.evictFromCacheByPositionUuid(winnerUuid);
     return nr;

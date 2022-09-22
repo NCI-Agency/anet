@@ -454,7 +454,7 @@ type Organization {
   parentOrg: Organization
   planningApprovalSteps: [ApprovalStep]
   positions(query: PositionSearchQueryInput): [Position]
-  responsiblePositions: [Position]
+  administratingPositions: [Position]
   shortName: String
   status: Status
   tasks: [Task]
@@ -473,7 +473,7 @@ input OrganizationInput {
   longName: String
   parentOrg: OrganizationInput
   planningApprovalSteps: [ApprovalStepInput]
-  responsiblePositions: [PositionInput]
+  administratingPositions: [PositionInput]
   shortName: String
   status: Status
   tasks: [TaskInput]
