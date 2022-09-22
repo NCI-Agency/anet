@@ -7,7 +7,7 @@ import AdminIndex from "pages/admin/Index"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
-import UserActivities from "pages/admin/UserActivities"
+import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
@@ -130,7 +130,9 @@ const Routing = () => {
               <Route path="edit" element={<AuthorizationGroupEdit />} />
             </Route>
           </Route>
-          <Route path="userActivities" element={<UserActivities />} />
+          <Route path="userActivities">
+            <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
+          </Route>
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>
       )}

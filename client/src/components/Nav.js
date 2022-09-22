@@ -21,6 +21,8 @@ const MERGE_OPTIONS = [
   { key: "locations", label: "Merge locations" }
 ]
 
+const USER_ACTIVITY_OPTIONS = [{ key: "perPeriod", label: "Per period" }]
+
 export const AnchorNavItem = ({ to, disabled, children }) => {
   const { showFloatingMenu, topbarOffset } = useContext(ResponsiveLayoutContext)
   const ScrollLinkNavItem = ScrollLink(Nav.Link)
@@ -96,6 +98,7 @@ const Navigation = ({
   const path = routerLocation.pathname
   const inAdmin = path.indexOf("/admin") === 0
   const inMerge = path.indexOf("/admin/merge") === 0
+  const inUserActivities = path.indexOf("/admin/userActivities") === 0
 
   const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
     const inOrg = path.indexOf("/organizations") === 0
@@ -332,14 +335,23 @@ const Navigation = ({
                     <Nav.Link>Authorization groups</Nav.Link>
                   </LinkContainer>
                 </Nav.Item>
-                <Nav.Item>
-                  <LinkContainer
-                    to="/admin/userActivities"
-                    onClick={resetPages}
-                  >
-                    <Nav.Link>User activities</Nav.Link>
-                  </LinkContainer>
-                </Nav.Item>
+                <NavDropdown
+                  title="User activities"
+                  id="user-activities"
+                  active={inUserActivities}
+                >
+                  {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
+                    <LinkContainer
+                      to={`/admin/userActivities/${userActivityOption.key}`}
+                      key={userActivityOption.key}
+                      onClick={resetPages}
+                    >
+                      <NavDropdown.Item>
+                        {userActivityOption.label}
+                      </NavDropdown.Item>
+                    </LinkContainer>
+                  ))}
+                </NavDropdown>
                 <SidebarLink
                   id="graphQL-nav"
                   linkTo="/admin/graphiql"

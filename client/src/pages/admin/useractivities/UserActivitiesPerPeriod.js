@@ -91,7 +91,7 @@ const GQL_QUERIES = {
     GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION
 }
 
-const UserActivities = ({ pageDispatchers }) => {
+const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [aggregationPeriod, setAggregationPeriod] = useState(
@@ -442,8 +442,8 @@ const UserActivities = ({ pageDispatchers }) => {
   }
 }
 
-UserActivities.propTypes = {
+UserActivitiesPerPeriod.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapPageDispatchersToProps)(UserActivities)
+export default connect(null, mapPageDispatchersToProps)(UserActivitiesPerPeriod)
