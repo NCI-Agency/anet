@@ -350,7 +350,8 @@ public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuer
 
   protected void addOrderByClauses() {
     if (!orderByClauses.isEmpty()) {
-      sql.append(" ORDER BY ");
+      sql.insert(0, "SELECT * FROM (");
+      sql.append(") AS results ORDER BY ");
       sql.append(Joiner.on(", ").join(orderByClauses));
     }
   }

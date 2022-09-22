@@ -6,6 +6,7 @@ import mil.dds.anet.beans.SubscriptionUpdate;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.SubscriptionUpdateSearchQuery;
+import mil.dds.anet.database.SubscriptionUpdateDao;
 import mil.dds.anet.database.mappers.SubscriptionUpdateMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -33,7 +34,7 @@ public abstract class AbstractSubscriptionUpdateSearcher
   }
 
   protected void buildQuery(SubscriptionUpdateSearchQuery query, Person user) {
-    qb.addSelectClause("\"subscriptionUpdates\".*");
+    qb.addSelectClause(SubscriptionUpdateDao.SUBSCRIPTION_UPDATE_FIELDS);
     qb.addTotalCount();
     qb.addFromClause("\"subscriptionUpdates\"");
     final Position position = DaoUtils.getPosition(user);
@@ -54,12 +55,11 @@ public abstract class AbstractSubscriptionUpdateSearcher
     switch (query.getSortBy()) {
       case CREATED_AT:
       default:
-        qb.addAllOrderByClauses(
-            getOrderBy(query.getSortOrder(), "\"subscriptionUpdates\"", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "subscriptionUpdates_createdAt"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "\"subscriptionUpdates\"",
-        "\"updatedObjectType\"", "\"updatedObjectUuid\""));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "subscriptionUpdates_updatedObjectType",
+        "subscriptionUpdates_updatedObjectUuid"));
   }
 
 }

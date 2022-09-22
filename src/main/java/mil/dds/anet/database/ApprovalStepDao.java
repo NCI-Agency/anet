@@ -60,7 +60,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep, AbstractSearchQue
   static class PositionsBatcher extends ForeignKeyBatcher<Position> {
     private static final String sql =
         "/* batch.getApproversForStep */ SELECT \"approvalStepUuid\", "
-            + PositionDao.POSITIONS_FIELDS + " FROM approvers "
+            + PositionDao.POSITION_FIELDS + " FROM approvers "
             + "LEFT JOIN positions ON \"positions\".\"uuid\" = approvers.\"positionUuid\" "
             + "WHERE \"approvalStepUuid\" IN ( <foreignKeys> )";
 

@@ -28,11 +28,11 @@ public class AnetDbLogger implements SqlLogger {
     if (logger.isDebugEnabled() && !renderedSql.startsWith("INSERT INTO \"userActivities\"")) {
       final String msg = renderedSql.replace(PersonDao.PERSON_FIELDS, " <PERSON_FIELDS> ")
           .replace(PersonDao.PERSON_FIELDS_NOAS, " <PERSON_FIELDS> ")
-          .replace(PositionDao.POSITIONS_FIELDS, " <POSITION_FIELDS> ")
+          .replace(PositionDao.POSITION_FIELDS, " <POSITION_FIELDS> ")
           .replace(OrganizationDao.ORGANIZATION_FIELDS, " <ORGANIZATION_FIELDS> ")
           .replace(ReportDao.REPORT_FIELDS, " <REPORT_FIELDS> ")
-          .replace(ReportSensitiveInformationDao.REPORTS_SENSITIVE_INFORMATION_FIELDS,
-              " <REPORTS_SENSITIVE_INFORMATION_FIELDS> ")
+          .replace(ReportSensitiveInformationDao.REPORT_SENSITIVE_INFORMATION_FIELDS,
+              " <REPORT_SENSITIVE_INFORMATION_FIELDS> ")
           .replace(CommentDao.COMMENT_FIELDS, " <COMMENT_FIELDS> ")
           .replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
           .replaceFirst("LEFT JOIN (mv_fts_\\S+) ON \\S+\\s*=\\s*\\S+", "<$1>")

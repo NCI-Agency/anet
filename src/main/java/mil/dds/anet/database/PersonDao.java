@@ -200,7 +200,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
     return getDbHandle()
         .createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITIONS_FIELDS
+            + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
             + "WHERE people.\"domainUsername\" = :domainUsername "
             + "AND people.status != :inactiveStatus")
@@ -217,7 +217,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
     return getDbHandle()
         .createQuery("/* findByEmailAddress */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITIONS_FIELDS
+            + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
             + "WHERE people.\"emailAddress\" = :emailAddress "
             + "AND people.status != :inactiveStatus")
@@ -237,7 +237,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     }
     final List<Person> people = getDbHandle()
         .createQuery("/* findByOpenIdSubject */ SELECT " + PERSON_FIELDS + ","
-            + PositionDao.POSITIONS_FIELDS
+            + PositionDao.POSITION_FIELDS
             + "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
             + "WHERE people.\"openIdSubject\" = :openIdSubject "
             + "AND people.status != :inactiveStatus")

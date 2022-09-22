@@ -11,10 +11,11 @@ public class AuthorizationGroupMapper implements RowMapper<AuthorizationGroup> {
   @Override
   public AuthorizationGroup map(ResultSet rs, StatementContext ctx) throws SQLException {
     final AuthorizationGroup a = new AuthorizationGroup();
-    MapperUtils.setCommonBeanFields(a, rs, null);
-    a.setName(rs.getString("name"));
-    a.setDescription(rs.getString("description"));
-    a.setStatus(MapperUtils.getEnumIdx(rs, "status", AuthorizationGroup.Status.class));
+    MapperUtils.setCommonBeanFields(a, rs, "authorizationGroups");
+    a.setName(rs.getString("authorizationGroups_name"));
+    a.setDescription(rs.getString("authorizationGroups_description"));
+    a.setStatus(
+        MapperUtils.getEnumIdx(rs, "authorizationGroups_status", AuthorizationGroup.Status.class));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

@@ -26,7 +26,11 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
+  private static final String[] fields = {"uuid", "shortName", "longName", "status", "category",
+      "createdAt", "updatedAt", "projectedCompletion", "plannedCompletion", "customField",
+      "customFieldEnum1", "customFieldEnum2", "customFieldRef1Uuid", "customFields"};
   public static final String TABLE_NAME = "tasks";
+  public static final String TASK_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
   public Task getByUuid(String uuid) {
@@ -34,8 +38,8 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   }
 
   static class SelfIdBatcher extends IdBatcher<Task> {
-    private static final String sql =
-        "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
+    private static final String sql = "/* batch.getTasksByUuids */ SELECT " + TASK_FIELDS
+        + " FROM tasks WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new TaskMapper());
@@ -52,7 +56,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   static class ResponsiblePositionsBatcher extends ForeignKeyBatcher<Position> {
     private static final String sql =
         "/* batch.getResponsiblePositionsForTask */ SELECT \"taskUuid\", "
-            + PositionDao.POSITIONS_FIELDS + " FROM positions, \"taskResponsiblePositions\" "
+            + PositionDao.POSITION_FIELDS + " FROM positions, \"taskResponsiblePositions\" "
             + "WHERE \"taskResponsiblePositions\".\"taskUuid\" IN ( <foreignKeys> ) "
             + "AND \"taskResponsiblePositions\".\"positionUuid\" = positions.uuid";
 
