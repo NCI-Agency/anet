@@ -462,13 +462,21 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         "DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?",
         positionUuid, positionUuid);
 
-    // delete customSensitiveInformation for this position
-    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(positionUuid);
+    final AnetObjectEngine instance = AnetObjectEngine.getInstance();
+    // Delete customSensitiveInformation
+    instance.getCustomSensitiveInformationDao().deleteFor(positionUuid);
 
+    final NoteDao noteDao = instance.getNoteDao();
+    // Delete noteRelatedObjects
+    noteDao.deleteNoteRelatedObjects(TABLE_NAME, positionUuid);
+    // Delete orphan notes
+    noteDao.deleteOrphanNotes();
+
+    // Delete position
     final int nr = getDbHandle().createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
         .bind("positionUuid", positionUuid).execute();
     // Evict the person (previously) holding this position from the domain users cache
-    AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
+    instance.getPersonDao().evictFromCacheByPositionUuid(positionUuid);
     return nr;
   }
 
