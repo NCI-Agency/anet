@@ -98,7 +98,7 @@ const UserActivities = ({ pageDispatchers }) => {
     DEFAULT_AGGREGATION_PERIOD
   )
   const [startDate, setStartDate] = useState(
-    moment().startOf(aggregationPeriod)
+    startOfCurrentPeriod(aggregationPeriod)
   )
   const [searchType, setSearchType] = useState(DEFAULT_SEARCH_TYPE)
   const [showDeleted, setShowDeleted] = useState(false)
@@ -389,6 +389,11 @@ const UserActivities = ({ pageDispatchers }) => {
         </tbody>
       </Table>
     )
+  }
+
+  function startOfCurrentPeriod(period) {
+    // always in UTC!
+    return moment.utc().startOf(period)
   }
 
   function showNextPeriod(period) {
