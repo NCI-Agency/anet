@@ -226,6 +226,14 @@ const UserActivities = ({ pageDispatchers }) => {
                 >
                   <Icon icon={IconNames.DOUBLE_CHEVRON_RIGHT} />
                 </Button>
+                <Button
+                  id="today"
+                  onClick={() => showToday(aggregationPeriod)}
+                  variant="outline-secondary"
+                  className="ms-4"
+                >
+                  Today
+                </Button>
                 <div className="d-flex align-items-center">
                   <FormSelect
                     className="me-1"
@@ -404,6 +412,11 @@ const UserActivities = ({ pageDispatchers }) => {
   function showPreviousPeriod(period) {
     setPageNum(0)
     setStartDate(moment(startDate).subtract(1, period).startOf(period))
+  }
+
+  function showToday(period) {
+    setPageNum(0)
+    setStartDate(startOfCurrentPeriod(period))
   }
 
   function changePeriod(period) {
