@@ -8,14 +8,12 @@ import BarChart from "components/BarChart"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import Checkbox from "components/Checkbox"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
-import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import moment from "moment"
 import React, { useState } from "react"
@@ -24,91 +22,53 @@ import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
 import utils from "utils"
 
-const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
+const GQL_GET_USER_ACTIVITY_COUNT = gql`
   query ($userActivityQuery: UserActivitySearchQueryInput) {
     userActivityList(query: $userActivityQuery) {
-      pageNum
-      pageSize
       totalCount
       list {
-        organizationUuid
-        organization {
-          uuid
-          shortName
-          longName
-          identificationCode
-        }
         visitedAt
         count
       }
     }
   }
 `
-
-const GQL_GET_USER_ACTIVITY_LIST_BY_PERSON = gql`
-  query ($userActivityQuery: UserActivitySearchQueryInput) {
-    userActivityList(query: $userActivityQuery) {
-      pageNum
-      pageSize
-      totalCount
-      list {
-        personUuid
-        person {
-          uuid
-          name
-          rank
-          role
-          domainUsername
-        }
-        visitedAt
-        count
-      }
-    }
-  }
-`
-
-const DELETED_PERSON = "<deleted person>"
-const UNKNOWN_ORGANIZATION = "<unknown organization>"
-const PAGESIZES = [10, 25, 50, 100]
-const DEFAULT_PAGESIZE = 25
 
 const AGGREGATION_DATE_FORMATS = {
-  day: "D MMMM YYYY",
-  week: "[week] W YYYY",
-  month: "MMMM YYYY"
+  DAY: "D MMMM YYYY",
+  WEEK: "[week] W YYYY",
+  MONTH: "MMMM YYYY"
 }
-const DEFAULT_AGGREGATION_PERIOD = "month"
+const DEFAULT_AGGREGATION_PERIOD = "MONTH"
 const SEARCH_TYPES = {
   PERSON: "PERSON",
   ORGANIZATION: "ORGANIZATION",
   TOP_LEVEL_ORGANIZATION: "TOP_LEVEL_ORGANIZATION"
 }
 const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.TOP_LEVEL_ORGANIZATION
-const GQL_QUERIES = {
-  [SEARCH_TYPES.PERSON]: GQL_GET_USER_ACTIVITY_LIST_BY_PERSON,
-  [SEARCH_TYPES.ORGANIZATION]: GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION,
-  [SEARCH_TYPES.TOP_LEVEL_ORGANIZATION]:
-    GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION
-}
+const DEFAULT_TIME_WINDOW = 5
 
-const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
-  const [pageNum, setPageNum] = useState(0)
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
+const UserActivitiesOverTime = ({ pageDispatchers }) => {
   const [aggregationPeriod, setAggregationPeriod] = useState(
     DEFAULT_AGGREGATION_PERIOD
   )
   const [startDate, setStartDate] = useState(
     startOfCurrentPeriod(aggregationPeriod)
   )
+  const endDate = moment(startDate)
+    .add(DEFAULT_TIME_WINDOW, aggregationPeriod)
+    .endOf(aggregationPeriod)
   const [searchType, setSearchType] = useState(DEFAULT_SEARCH_TYPE)
   const [showDeleted, setShowDeleted] = useState(false)
   const userActivityQuery = {
-    pageNum,
-    pageSize,
+    pageNum: 0,
+    pageSize: DEFAULT_TIME_WINDOW + 1,
+    sortBy: "NONE",
     startDate,
-    endDate: moment(startDate).endOf(aggregationPeriod),
+    endDate,
     searchType,
-    aggregationType: "BY_OBJECT",
+    aggregationType: "OVER_TIME",
+    aggregationPeriod,
     showDeleted
   }
   useBoilerplate({
@@ -116,9 +76,12 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  const { loading, error, data } = API.useApiQuery(GQL_QUERIES[searchType], {
-    userActivityQuery
-  })
+  const { loading, error, data } = API.useApiQuery(
+    GQL_GET_USER_ACTIVITY_COUNT,
+    {
+      userActivityQuery
+    }
+  )
   const { done, result } = useBoilerplate({
     loading,
     error,
@@ -134,8 +97,6 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
   const userActivities = paginatedUserActivities
     ? paginatedUserActivities.list
     : []
-  const { totalCount } = paginatedUserActivities
-  const userActivitiesExist = totalCount > 0
   const showDeletedLabel = `\u00A0incl.\u00A0${
     searchType === SEARCH_TYPES.PERSON ? "deleted" : "unknown"
   }`
@@ -183,21 +144,16 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
     <div id="user-activities" style={flexStyle}>
       <Fieldset style={fieldsetStyle}>
         <div>
-          <UltimatePagination
-            Component="header"
-            className="float-end"
-            pageNum={pageNum}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            goToPage={setPageNum}
-          />
           <div>
             <h2>
-              User Activities for{" "}
+              User Activities over time from{" "}
               {moment(userActivityQuery.startDate).format(
                 AGGREGATION_DATE_FORMATS[aggregationPeriod]
+              )}{" "}
+              until{" "}
+              {moment(userActivityQuery.endDate).format(
+                AGGREGATION_DATE_FORMATS[aggregationPeriod]
               )}
-              , total this period: {totalCount}
             </h2>
             <div className="clearfix">
               <div className="float-start">
@@ -215,7 +171,7 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
                 >
                   {Object.keys(AGGREGATION_DATE_FORMATS).map(ap => (
                     <Button key={ap} value={ap} variant="outline-secondary">
-                      {ap}
+                      {ap.toLowerCase()}
                     </Button>
                   ))}
                 </ButtonToggleGroup>
@@ -256,23 +212,6 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
                   />
                 </div>
               </div>
-              <div className="float-end">
-                Number per page:
-                <FormSelect
-                  defaultValue={pageSize}
-                  onChange={e =>
-                    changePageSize(
-                      parseInt(e.target.value, 10) || DEFAULT_PAGESIZE
-                    )
-                  }
-                >
-                  {PAGESIZES.map(size => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </FormSelect>
-              </div>
             </div>
           </div>
         </div>
@@ -287,25 +226,20 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
   )
 
   function renderChart() {
-    let xProp
-    let xLabel
-    let tooltip
-    if (searchType === SEARCH_TYPES.PERSON) {
-      xProp = "personUuid"
-      xLabel = ["person.name", DELETED_PERSON]
-      tooltip = d => `
-        <h4>${_escape(d?.person?.name || DELETED_PERSON)}</h4>
-        <p>${_escape(d.count)}</p>
-      `
-    } else {
-      xProp = "organizationUuid"
-      xLabel = ["organization.shortName", UNKNOWN_ORGANIZATION]
-      tooltip = d => `
-        <h4>${_escape(d?.organization?.shortName || UNKNOWN_ORGANIZATION)}</h4>
-        <p>${_escape(d.count)}</p>
-      `
-    }
-
+    userActivities.forEach(
+      ua =>
+        (ua.dateLabel = moment
+          .utc(ua.visitedAt)
+          .format(AGGREGATION_DATE_FORMATS[aggregationPeriod]))
+    )
+    const tooltip = d => `
+      <h4>${_escape(
+    moment
+      .utc(d.visitedAt)
+      .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])
+  )}</h4>
+      <p>${_escape(d.count)}</p>
+    `
     return (
       <div className="non-scrollable">
         <ContainerDimensions>
@@ -315,9 +249,9 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
               height={height}
               chartId="user_activity_chart"
               data={userActivities}
-              xProp={xProp}
+              xProp="visitedAt"
               yProp="count"
-              xLabel={xLabel}
+              xLabel="dateLabel"
               tooltip={tooltip}
             />
           )}
@@ -327,70 +261,21 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
   }
 
   function renderTable() {
-    if (!userActivitiesExist) {
-      return (
-        <div className="scrollable">
-          <div className="clearfix">
-            <em>No user activities found</em>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="scrollable">
-        {searchType === SEARCH_TYPES.PERSON
-          ? renderPeopleTable()
-          : renderOrganizationsTable()}
-      </div>
-    )
-  }
-
-  function renderOrganizationsTable() {
     return (
       <Table responsive hover striped id="user-activities">
         <thead>
           <tr>
-            <th>Organization</th>
-            <th>#minutes active</th>
+            <th>Period</th>
+            <th>#total active</th>
           </tr>
         </thead>
         <tbody>
           {userActivities.map(ua => (
-            <tr key={ua.organizationUuid}>
+            <tr key={ua.label}>
               <td>
-                <LinkTo
-                  modelType="Organization"
-                  model={ua.organization}
-                  whenUnspecified={UNKNOWN_ORGANIZATION}
-                />
-              </td>
-              <td>{ua.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    )
-  }
-
-  function renderPeopleTable() {
-    return (
-      <Table responsive hover striped id="user-activities">
-        <thead>
-          <tr>
-            <th>Person</th>
-            <th>#minutes active</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userActivities.map(ua => (
-            <tr key={ua.personUuid}>
-              <td>
-                <LinkTo
-                  modelType="Person"
-                  model={ua.person}
-                  whenUnspecified={DELETED_PERSON}
-                />
+                {moment
+                  .utc(ua.visitedAt)
+                  .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])}
               </td>
               <td>{ua.count}</td>
             </tr>
@@ -402,49 +287,39 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
 
   function startOfCurrentPeriod(period) {
     // always in UTC!
-    return moment.utc().startOf(period)
+    return moment.utc().subtract(DEFAULT_TIME_WINDOW, period).startOf(period)
   }
 
   function showNextPeriod(period) {
-    setPageNum(0)
     setStartDate(moment(startDate).add(1, period).startOf(period))
   }
 
   function showPreviousPeriod(period) {
-    setPageNum(0)
     setStartDate(moment(startDate).subtract(1, period).startOf(period))
   }
 
   function showToday(period) {
-    setPageNum(0)
     setStartDate(startOfCurrentPeriod(period))
   }
 
   function changePeriod(period) {
-    setPageNum(0)
-    setStartDate(moment(startDate).startOf(period))
+    const end = moment.utc(endDate).endOf(period)
+    const now = moment.utc()
+    setStartDate(moment.min(now, end).subtract(DEFAULT_TIME_WINDOW, period).startOf(period))
     setAggregationPeriod(period)
   }
 
   function toggleShowDeleted() {
-    setPageNum(0)
     setShowDeleted(!showDeleted)
   }
 
   function changeSearchType(newSearchType) {
-    setPageNum(0)
     setSearchType(newSearchType)
-  }
-
-  function changePageSize(newPageSize) {
-    const newPageNum = Math.floor((pageNum * pageSize) / newPageSize)
-    setPageNum(newPageNum)
-    setPageSize(newPageSize)
   }
 }
 
-UserActivitiesPerPeriod.propTypes = {
+UserActivitiesOverTime.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapPageDispatchersToProps)(UserActivitiesPerPeriod)
+export default connect(null, mapPageDispatchersToProps)(UserActivitiesOverTime)

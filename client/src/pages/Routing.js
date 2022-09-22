@@ -7,6 +7,7 @@ import AdminIndex from "pages/admin/Index"
 import MergeLocations from "pages/admin/merge/MergeLocations"
 import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
+import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
@@ -132,6 +133,7 @@ const Routing = () => {
           </Route>
           <Route path="userActivities">
             <Route path="perPeriod" element={<UserActivitiesPerPeriod />} />
+            <Route path="overTime" element={<UserActivitiesOverTime />} />
           </Route>
           <Route path="graphiql" element={<GraphiQL />} />
         </Route>

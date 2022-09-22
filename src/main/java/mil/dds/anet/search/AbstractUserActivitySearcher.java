@@ -26,7 +26,15 @@ public abstract class AbstractUserActivitySearcher extends
 
   @Override
   protected void buildQuery(final UserActivitySearchQuery query) {
-    qb.addSelectClause(getColumn(query));
+    final String column = getColumn(query);
+    switch (query.getAggregationType()) {
+      case BY_OBJECT:
+        qb.addSelectClause(column);
+        break;
+      case OVER_TIME:
+        qb.addSelectClause(column + " AS \"aggregatedDate\"");
+        break;
+    }
     qb.addSelectClause("count");
     qb.addTotalCount();
     qb.addFromClause(WITH_CLAUSE_NAME);
@@ -41,6 +49,8 @@ public abstract class AbstractUserActivitySearcher extends
   protected void addOrderByClauses(final AbstractSearchQueryBuilder<?, ?> qb,
       final UserActivitySearchQuery query) {
     switch (query.getSortBy()) {
+      case NONE:
+        break;
       case COUNT:
       default:
         qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), WITH_CLAUSE_NAME, "count"));
@@ -50,12 +60,18 @@ public abstract class AbstractUserActivitySearcher extends
   }
 
   private String getColumn(final UserActivitySearchQuery query) {
-    switch (query.getSearchType()) {
-      case PERSON:
-        return "\"personUuid\"";
-      case ORGANIZATION:
-      case TOP_LEVEL_ORGANIZATION:
-        return "\"organizationUuid\"";
+    switch (query.getAggregationType()) {
+      case BY_OBJECT:
+        switch (query.getSearchType()) {
+          case PERSON:
+            return "\"personUuid\"";
+          case ORGANIZATION:
+          case TOP_LEVEL_ORGANIZATION:
+            return "\"organizationUuid\"";
+        }
+        break;
+      case OVER_TIME:
+        return "period";
     }
     return null;
   }

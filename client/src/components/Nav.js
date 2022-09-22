@@ -21,7 +21,10 @@ const MERGE_OPTIONS = [
   { key: "locations", label: "Merge locations" }
 ]
 
-const USER_ACTIVITY_OPTIONS = [{ key: "perPeriod", label: "Per period" }]
+const USER_ACTIVITY_OPTIONS = [
+  { key: "perPeriod", label: "Per period" },
+  { key: "overTime", label: "Over time" }
+]
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
   const { showFloatingMenu, topbarOffset } = useContext(ResponsiveLayoutContext)

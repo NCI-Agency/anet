@@ -45,6 +45,19 @@ type AdvisorReportsStats {
 }
 
 """"""
+enum AggregationPeriod {
+  DAY
+  MONTH
+  WEEK
+}
+
+""""""
+enum AggregationType {
+  BY_OBJECT
+  OVER_TIME
+}
+
+""""""
 type AnetBeanList_AuthorizationGroup {
   list: [AuthorizationGroup]
   pageNum: Int
@@ -1191,6 +1204,8 @@ type UserActivity {
 
 """"""
 input UserActivitySearchQueryInput {
+  aggregationPeriod: AggregationPeriod
+  aggregationType: AggregationType
   endDate: Instant
   pageNum: Int
   pageSize: Int
@@ -1206,4 +1221,5 @@ input UserActivitySearchQueryInput {
 """"""
 enum UserActivitySearchSortBy {
   COUNT
+  NONE
 }
