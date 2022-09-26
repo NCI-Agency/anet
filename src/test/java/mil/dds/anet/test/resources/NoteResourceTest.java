@@ -119,21 +119,12 @@ public class NoteResourceTest extends AbstractResourceTest {
     final int nrNotes = countNotes();
     final Integer nrDeleted = adminMutationExecutor.deleteReport("", testReport.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
-    assertThat(nrNotes).isEqualTo(countNotes());
-
-    // The note should still be there, try to update it
-    createdNote.setText("a report test note updated by testDeleteDanglingReportNote");
-    final Note updatedNote = succeedNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
-    assertThat(updatedNote.getNoteRelatedObjects()).hasSize(1);
-
-    // Delete dangling notes
-    final NoteDao noteDao = AnetObjectEngine.getInstance().getNoteDao();
-    noteDao.deleteDanglingNotes();
+    // Note is deleted thus needs to be less than before
     assertThat(nrNotes).isEqualTo(countNotes() + 1);
 
-    // The note should no longer be there, updating it should fail
-    updatedNote.setText("a report test note updated twice by testDeleteDanglingReportNote");
-    failNoteUpdate(adminMutationExecutor, getNoteInput(updatedNote));
+    // The note should not be there, try to update it
+    createdNote.setText("a report test note updated by testDeleteDanglingReportNote");
+    failNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
   }
 
   @Test
@@ -180,23 +171,12 @@ public class NoteResourceTest extends AbstractResourceTest {
     final int nrNotes = countNotes();
     final Integer nrDeleted = adminMutationExecutor.deleteReport("", testReport.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
-    assertThat(nrNotes).isEqualTo(countNotes());
-
-    // The note should still be there, try to update it
-    createdNote.setText("{\"text\":"
-        + "\"a report test task assessment updated by testDeleteDanglingReportTaskAssessment\"}");
-    final Note updatedNote = succeedNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
-    assertThat(updatedNote.getNoteRelatedObjects()).hasSize(2);
-
-    // Delete dangling notes
-    final NoteDao noteDao = AnetObjectEngine.getInstance().getNoteDao();
-    noteDao.deleteDanglingNotes();
     assertThat(nrNotes).isEqualTo(countNotes() + 1);
 
-    // The note should no longer be there, updating it should fail
-    updatedNote.setText("{\"text\":"
-        + "\"a report test task assessment updated twice by testDeleteDanglingReportTaskAssessment\"}");
-    failNoteUpdate(adminMutationExecutor, getNoteInput(updatedNote));
+    // The note should not be there, try to update it
+    createdNote.setText("{\"text\":"
+        + "\"a report test task assessment updated by testDeleteDanglingReportTaskAssessment\"}");
+    failNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
   }
 
   @Test
@@ -239,23 +219,12 @@ public class NoteResourceTest extends AbstractResourceTest {
     final int nrNotes = countNotes();
     final Integer nrDeleted = adminMutationExecutor.deleteReport("", testReport.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
-    assertThat(nrNotes).isEqualTo(countNotes());
-
-    // The note should still be there, try to update it
-    createdNote.setText("{\"text\":"
-        + "\"a report test attendee assessment updated by testDeleteDanglingReportAttendeeAssessment\"}");
-    final Note updatedNote = succeedNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
-    assertThat(updatedNote.getNoteRelatedObjects()).hasSize(2);
-
-    // Delete dangling notes
-    final NoteDao noteDao = AnetObjectEngine.getInstance().getNoteDao();
-    noteDao.deleteDanglingNotes();
     assertThat(nrNotes).isEqualTo(countNotes() + 1);
 
-    // The note should no longer be there, updating it should fail
-    updatedNote.setText("{\"text\":"
-        + "\"a report test attendee assessment updated twice by testDeleteDanglingReportAttendeeAssessment\"}");
-    failNoteUpdate(adminMutationExecutor, getNoteInput(updatedNote));
+    // The note should not be there, try to update it
+    createdNote.setText("{\"text\":"
+        + "\"a report test attendee assessment updated by testDeleteDanglingReportAttendeeAssessment\"}");
+    failNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
   }
 
   @Test
@@ -296,21 +265,11 @@ public class NoteResourceTest extends AbstractResourceTest {
     final int nrNotes = countNotes();
     final Integer nrDeleted = adminMutationExecutor.deletePosition("", testPosition.getUuid());
     assertThat(nrDeleted).isEqualTo(1);
-    assertThat(nrNotes).isEqualTo(countNotes());
-
-    // The note should still be there, try to update it
-    createdNote.setText("a position test note updated by testDeleteDanglingPositionNote");
-    final Note updatedNote = succeedNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
-    assertThat(updatedNote.getNoteRelatedObjects()).hasSize(1);
-
-    // Delete dangling notes
-    final NoteDao noteDao = AnetObjectEngine.getInstance().getNoteDao();
-    noteDao.deleteDanglingNotes();
     assertThat(nrNotes).isEqualTo(countNotes() + 1);
 
-    // The note should no longer be there, updating it should fail
-    updatedNote.setText("a position test note updated twice by testDeleteDanglingPositionNote");
-    failNoteUpdate(adminMutationExecutor, getNoteInput(updatedNote));
+    // The note should not be there, try to update it
+    createdNote.setText("a position test note updated by testDeleteDanglingPositionNote");
+    failNoteUpdate(adminMutationExecutor, getNoteInput(createdNote));
   }
 
   @Test
