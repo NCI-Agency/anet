@@ -22,8 +22,8 @@ const MERGE_OPTIONS = [
 ]
 
 const USER_ACTIVITY_OPTIONS = [
-  { key: "perPeriod", label: "Per period" },
-  { key: "overTime", label: "Over time" }
+  { key: "overTime", label: "Over time" },
+  { key: "perPeriod", label: "Per period" }
 ]
 
 export const AnchorNavItem = ({ to, disabled, children }) => {
@@ -347,7 +347,6 @@ const Navigation = ({
                     <LinkContainer
                       to={`/admin/userActivities/${userActivityOption.key}`}
                       key={userActivityOption.key}
-                      onClick={resetPages}
                     >
                       <NavDropdown.Item>
                         {userActivityOption.label}

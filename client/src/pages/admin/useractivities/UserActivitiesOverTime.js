@@ -2,7 +2,11 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  setUserActivitiesState
+} from "actions"
 import API from "api"
 import BarChart from "components/BarChart"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
@@ -16,10 +20,12 @@ import {
 } from "components/Page"
 import _escape from "lodash/escape"
 import moment from "moment"
+import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { useNavigate } from "react-router-dom"
 import utils from "utils"
 
 const GQL_GET_USER_ACTIVITY_COUNT = gql`
@@ -48,18 +54,29 @@ const SEARCH_TYPES = {
 const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.TOP_LEVEL_ORGANIZATION
 const DEFAULT_TIME_WINDOW = 5
 
-const UserActivitiesOverTime = ({ pageDispatchers }) => {
+const UserActivitiesOverTime = ({
+  pageDispatchers,
+  userActivitiesState,
+  setUserActivitiesState
+}) => {
+  const navigate = useNavigate()
   const [aggregationPeriod, setAggregationPeriod] = useState(
-    DEFAULT_AGGREGATION_PERIOD
+    userActivitiesState?.aggregationPeriod ?? DEFAULT_AGGREGATION_PERIOD
   )
   const [startDate, setStartDate] = useState(
-    startOfCurrentPeriod(aggregationPeriod)
+    userActivitiesState?.startDateOverTime
+      ? userActivitiesState?.startDateOverTime
+      : startOfCurrentPeriod(aggregationPeriod)
   )
   const endDate = moment(startDate)
     .add(DEFAULT_TIME_WINDOW, aggregationPeriod)
     .endOf(aggregationPeriod)
-  const [searchType, setSearchType] = useState(DEFAULT_SEARCH_TYPE)
-  const [showDeleted, setShowDeleted] = useState(false)
+  const [searchType, setSearchType] = useState(
+    userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
+  )
+  const [showDeleted, setShowDeleted] = useState(
+    userActivitiesState?.showDeleted ?? false
+  )
   const userActivityQuery = {
     pageNum: 0,
     pageSize: DEFAULT_TIME_WINDOW + 1,
@@ -252,12 +269,21 @@ const UserActivitiesOverTime = ({ pageDispatchers }) => {
               xProp="visitedAt"
               yProp="count"
               xLabel="dateLabel"
+              onBarClick={goToSelection}
               tooltip={tooltip}
             />
           )}
         </ContainerDimensions>
       </div>
     )
+  }
+
+  function goToSelection(item) {
+    navigate("../perPeriod", {
+      state: {
+        startDate: item.visitedAt
+      }
+    })
   }
 
   function renderTable() {
@@ -271,7 +297,7 @@ const UserActivitiesOverTime = ({ pageDispatchers }) => {
         </thead>
         <tbody>
           {userActivities.map(ua => (
-            <tr key={ua.label}>
+            <tr key={ua.visitedAt}>
               <td>
                 {moment
                   .utc(ua.visitedAt)
@@ -291,35 +317,75 @@ const UserActivitiesOverTime = ({ pageDispatchers }) => {
   }
 
   function showNextPeriod(period) {
-    setStartDate(moment(startDate).add(1, period).startOf(period))
+    changeStartDate(moment(startDate).add(1, period).startOf(period))
   }
 
   function showPreviousPeriod(period) {
-    setStartDate(moment(startDate).subtract(1, period).startOf(period))
+    changeStartDate(moment(startDate).subtract(1, period).startOf(period))
   }
 
   function showToday(period) {
-    setStartDate(startOfCurrentPeriod(period))
+    changeStartDate(startOfCurrentPeriod(period))
+  }
+
+  function changeStartDate(newStartDate) {
+    setUserActivitiesState({
+      ...userActivitiesState,
+      startDateOverTime: newStartDate
+    })
+    setStartDate(newStartDate)
   }
 
   function changePeriod(period) {
     const end = moment.utc(endDate).endOf(period)
     const now = moment.utc()
-    setStartDate(moment.min(now, end).subtract(DEFAULT_TIME_WINDOW, period).startOf(period))
+    changeStartDate(
+      moment.min(now, end).subtract(DEFAULT_TIME_WINDOW, period).startOf(period)
+    )
+    setUserActivitiesState({
+      ...userActivitiesState,
+      aggregationPeriod: period
+    })
     setAggregationPeriod(period)
   }
 
   function toggleShowDeleted() {
+    setUserActivitiesState({
+      ...userActivitiesState,
+      showDeleted: !showDeleted
+    })
     setShowDeleted(!showDeleted)
   }
 
   function changeSearchType(newSearchType) {
+    setUserActivitiesState({
+      ...userActivitiesState,
+      searchType: newSearchType
+    })
     setSearchType(newSearchType)
   }
 }
 
 UserActivitiesOverTime.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  userActivitiesState: PropTypes.object,
+  setUserActivitiesState: PropTypes.func.isRequired
 }
 
-export default connect(null, mapPageDispatchersToProps)(UserActivitiesOverTime)
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setUserActivitiesState: userActivitiesState =>
+      dispatch(setUserActivitiesState(userActivitiesState)),
+    ...pageDispatchers
+  }
+}
+
+const mapStateToProps = (state, ownProps) => ({
+  userActivitiesState: state.userActivitiesState
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UserActivitiesOverTime)

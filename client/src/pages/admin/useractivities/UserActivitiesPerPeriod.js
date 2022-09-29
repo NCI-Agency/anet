@@ -2,7 +2,11 @@ import { gql } from "@apollo/client"
 import { Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  setUserActivitiesState
+} from "actions"
 import API from "api"
 import BarChart from "components/BarChart"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
@@ -18,10 +22,12 @@ import {
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import moment from "moment"
+import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { connect } from "react-redux"
+import { useLocation } from "react-router-dom"
 import utils from "utils"
 
 const GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION = gql`
@@ -73,11 +79,11 @@ const PAGESIZES = [10, 25, 50, 100]
 const DEFAULT_PAGESIZE = 25
 
 const AGGREGATION_DATE_FORMATS = {
-  day: "D MMMM YYYY",
-  week: "[week] W YYYY",
-  month: "MMMM YYYY"
+  DAY: "D MMMM YYYY",
+  WEEK: "[week] W YYYY",
+  MONTH: "MMMM YYYY"
 }
-const DEFAULT_AGGREGATION_PERIOD = "month"
+const DEFAULT_AGGREGATION_PERIOD = "MONTH"
 const SEARCH_TYPES = {
   PERSON: "PERSON",
   ORGANIZATION: "ORGANIZATION",
@@ -91,17 +97,31 @@ const GQL_QUERIES = {
     GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION
 }
 
-const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
+const UserActivitiesPerPeriod = ({
+  pageDispatchers,
+  userActivitiesState,
+  setUserActivitiesState
+}) => {
   const [pageNum, setPageNum] = useState(0)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGESIZE)
   const [aggregationPeriod, setAggregationPeriod] = useState(
-    DEFAULT_AGGREGATION_PERIOD
+    userActivitiesState?.aggregationPeriod ?? DEFAULT_AGGREGATION_PERIOD
   )
+  const routerLocation = useLocation()
+  const { state } = routerLocation
   const [startDate, setStartDate] = useState(
-    startOfCurrentPeriod(aggregationPeriod)
+    state?.startDate
+      ? moment.utc(state?.startDate)
+      : userActivitiesState?.startDatePerPeriod
+        ? userActivitiesState?.startDatePerPeriod
+        : startOfCurrentPeriod(aggregationPeriod)
   )
-  const [searchType, setSearchType] = useState(DEFAULT_SEARCH_TYPE)
-  const [showDeleted, setShowDeleted] = useState(false)
+  const [searchType, setSearchType] = useState(
+    userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
+  )
+  const [showDeleted, setShowDeleted] = useState(
+    userActivitiesState?.showDeleted ?? false
+  )
   const userActivityQuery = {
     pageNum,
     pageSize,
@@ -215,7 +235,7 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
                 >
                   {Object.keys(AGGREGATION_DATE_FORMATS).map(ap => (
                     <Button key={ap} value={ap} variant="outline-secondary">
-                      {ap}
+                      {ap.toLowerCase()}
                     </Button>
                   ))}
                 </ButtonToggleGroup>
@@ -407,32 +427,52 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
 
   function showNextPeriod(period) {
     setPageNum(0)
-    setStartDate(moment(startDate).add(1, period).startOf(period))
+    changeStartDate(moment(startDate).add(1, period).startOf(period))
   }
 
   function showPreviousPeriod(period) {
     setPageNum(0)
-    setStartDate(moment(startDate).subtract(1, period).startOf(period))
+    changeStartDate(moment(startDate).subtract(1, period).startOf(period))
   }
 
   function showToday(period) {
     setPageNum(0)
-    setStartDate(startOfCurrentPeriod(period))
+    changeStartDate(startOfCurrentPeriod(period))
+  }
+
+  function changeStartDate(newStartDate) {
+    setUserActivitiesState({
+      ...userActivitiesState,
+      startDatePerPeriod: newStartDate
+    })
+    setStartDate(newStartDate)
   }
 
   function changePeriod(period) {
     setPageNum(0)
-    setStartDate(moment(startDate).startOf(period))
+    changeStartDate(moment(startDate).startOf(period))
+    setUserActivitiesState({
+      ...userActivitiesState,
+      aggregationPeriod: period
+    })
     setAggregationPeriod(period)
   }
 
   function toggleShowDeleted() {
     setPageNum(0)
+    setUserActivitiesState({
+      ...userActivitiesState,
+      showDeleted: !showDeleted
+    })
     setShowDeleted(!showDeleted)
   }
 
   function changeSearchType(newSearchType) {
     setPageNum(0)
+    setUserActivitiesState({
+      ...userActivitiesState,
+      searchType: newSearchType
+    })
     setSearchType(newSearchType)
   }
 
@@ -444,7 +484,25 @@ const UserActivitiesPerPeriod = ({ pageDispatchers }) => {
 }
 
 UserActivitiesPerPeriod.propTypes = {
-  pageDispatchers: PageDispatchersPropType
+  pageDispatchers: PageDispatchersPropType,
+  userActivitiesState: PropTypes.object,
+  setUserActivitiesState: PropTypes.func.isRequired
 }
 
-export default connect(null, mapPageDispatchersToProps)(UserActivitiesPerPeriod)
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const pageDispatchers = mapPageDispatchersToProps(dispatch, ownProps)
+  return {
+    setUserActivitiesState: userActivitiesState =>
+      dispatch(setUserActivitiesState(userActivitiesState)),
+    ...pageDispatchers
+  }
+}
+
+const mapStateToProps = (state, ownProps) => ({
+  userActivitiesState: state.userActivitiesState
+})
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UserActivitiesPerPeriod)
