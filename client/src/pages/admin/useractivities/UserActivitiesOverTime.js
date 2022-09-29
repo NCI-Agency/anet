@@ -46,13 +46,17 @@ const AGGREGATION_DATE_FORMATS = {
   MONTH: "MMMM YYYY"
 }
 const DEFAULT_AGGREGATION_PERIOD = "MONTH"
+const TIME_WINDOWS = {
+  DAY: 31,
+  WEEK: 13,
+  MONTH: 6
+}
 const SEARCH_TYPES = {
   PERSON: "PERSON",
   ORGANIZATION: "ORGANIZATION",
   TOP_LEVEL_ORGANIZATION: "TOP_LEVEL_ORGANIZATION"
 }
 const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.TOP_LEVEL_ORGANIZATION
-const DEFAULT_TIME_WINDOW = 5
 
 const UserActivitiesOverTime = ({
   pageDispatchers,
@@ -68,8 +72,9 @@ const UserActivitiesOverTime = ({
       ? userActivitiesState?.startDateOverTime
       : startOfCurrentPeriod(aggregationPeriod)
   )
+  const timeWindow = TIME_WINDOWS[aggregationPeriod]
   const endDate = moment(startDate)
-    .add(DEFAULT_TIME_WINDOW, aggregationPeriod)
+    .add(timeWindow, aggregationPeriod)
     .endOf(aggregationPeriod)
   const [searchType, setSearchType] = useState(
     userActivitiesState?.searchType ?? DEFAULT_SEARCH_TYPE
@@ -79,7 +84,7 @@ const UserActivitiesOverTime = ({
   )
   const userActivityQuery = {
     pageNum: 0,
-    pageSize: DEFAULT_TIME_WINDOW + 1,
+    pageSize: timeWindow + 1,
     sortBy: "NONE",
     startDate,
     endDate,
@@ -288,32 +293,34 @@ const UserActivitiesOverTime = ({
 
   function renderTable() {
     return (
-      <Table responsive hover striped id="user-activities">
-        <thead>
-          <tr>
-            <th>Period</th>
-            <th>#total active</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userActivities.map(ua => (
-            <tr key={ua.visitedAt}>
-              <td>
-                {moment
-                  .utc(ua.visitedAt)
-                  .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])}
-              </td>
-              <td>{ua.count}</td>
+      <div className="scrollable">
+        <Table responsive hover striped id="user-activities">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>#total active</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {userActivities.map(ua => (
+              <tr key={ua.visitedAt}>
+                <td>
+                  {moment
+                    .utc(ua.visitedAt)
+                    .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])}
+                </td>
+                <td>{ua.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     )
   }
 
   function startOfCurrentPeriod(period) {
     // always in UTC!
-    return moment.utc().subtract(DEFAULT_TIME_WINDOW, period).startOf(period)
+    return moment.utc().subtract(timeWindow, period).startOf(period)
   }
 
   function showNextPeriod(period) {
@@ -336,17 +343,20 @@ const UserActivitiesOverTime = ({
     setStartDate(newStartDate)
   }
 
-  function changePeriod(period) {
-    const end = moment.utc(endDate).endOf(period)
+  function changePeriod(newPeriod) {
     const now = moment.utc()
+    const newTimeWindow = TIME_WINDOWS[newPeriod]
     changeStartDate(
-      moment.min(now, end).subtract(DEFAULT_TIME_WINDOW, period).startOf(period)
+      moment
+        .min(now, endDate)
+        .subtract(newTimeWindow, newPeriod)
+        .startOf(newPeriod)
     )
     setUserActivitiesState({
       ...userActivitiesState,
-      aggregationPeriod: period
+      aggregationPeriod: newPeriod
     })
-    setAggregationPeriod(period)
+    setAggregationPeriod(newPeriod)
   }
 
   function toggleShowDeleted() {
