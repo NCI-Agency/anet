@@ -27,7 +27,7 @@ boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.1.1"
 String logbackVersion = "1.2.11"
 String log4jVersion = "2.18.0"
-String keycloakVersion = "16.1.1"
+String keycloakVersion = "19.0.2"
 String containerPushDataPath = "/var/tmp"
 
 // If defined, load alternatives for variables
@@ -437,7 +437,7 @@ dockerRemoveDB.mustRunAfter('dockerStopDB')
 
 task dockerPullKeycloak(type: DockerPullImage) {
 	group = "keycloak container"
-	image = "jboss/keycloak:${keycloakVersion}"
+	image = "quay.io/keycloak/keycloak:${keycloakVersion}"
 	description = "Pulls a docker image for keycloak from ${image}."
 }
 
@@ -448,9 +448,9 @@ task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: DockerCreateConta
 	description = "Creates a keycloak container named ${keycloakContainerName}."
 	hostConfig.portBindings = ["9080:8080", "9443:8443"]
 	hostConfig.binds = run.environment.get("DOCKER_MOUNTS", [:])
-	withEnvVar("KEYCLOAK_USER", "admin")
-	withEnvVar("KEYCLOAK_PASSWORD", "admin")
-	withEnvVar("KEYCLOAK_IMPORT", "$containerPushDataPath/ANET-Realm-export.json")
+	withEnvVar("KEYCLOAK_ADMIN", "admin")
+	withEnvVar("KEYCLOAK_ADMIN_PASSWORD", "admin")
+	cmd = ["start-dev"]
 }
 
 task dockerConfigureKeycloak(dependsOn: dockerCreateKeycloak, type: DockerCopyFileToContainer) {
