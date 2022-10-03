@@ -28,7 +28,8 @@ String dropwizardVersion = "2.1.1"
 String logbackVersion = "1.2.11"
 String log4jVersion = "2.18.0"
 String keycloakVersion = "19.0.2"
-String containerPushDataPath = "/var/tmp"
+String psqlPushDataPath = "/var/tmp"
+String keycloakPushDataPath = "/opt/keycloak/data"
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
@@ -356,7 +357,7 @@ task pushPsqlBaseData(type: DockerCopyFileToContainer) {
 	description = "Push SQL base data to PostgreSQL"
 	containerId = dbContainerName
 	hostPath = "${projectDir}/insertBaseData-psql.sql"
-	remotePath = containerPushDataPath
+	remotePath = psqlPushDataPath
 }
 pushPsqlBaseData.mustRunAfter('dockerStartDB')
 
@@ -364,7 +365,7 @@ task dbLoad(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
 	group = "database"
 	description = "Runs the ANET database load command for PostgreSQL; loads demo data."
 	containerId = dbContainerName
-	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${containerPushDataPath}/insertBaseData-psql.sql"] as String[] ]
+	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
 }
 dbLoad.mustRunAfter('dbMigrate')
 
@@ -450,14 +451,14 @@ task dockerCreateKeycloak(dependsOn: dockerPullKeycloak, type: DockerCreateConta
 	hostConfig.binds = run.environment.get("DOCKER_MOUNTS", [:])
 	withEnvVar("KEYCLOAK_ADMIN", "admin")
 	withEnvVar("KEYCLOAK_ADMIN_PASSWORD", "admin")
-	cmd = ["start-dev"]
+	cmd = ["start-dev", "--import-realm"]
 }
 
 task dockerConfigureKeycloak(dependsOn: dockerCreateKeycloak, type: DockerCopyFileToContainer) {
 	description = "Push REALM configuration to Keycloak"
 	containerId = keycloakContainerName
-	hostPath = "${rootProject.projectDir}/ANET-Realm-export.json"
-	remotePath = containerPushDataPath
+	hostPath = "${rootProject.projectDir}/keycloak/import"
+	remotePath = keycloakPushDataPath
 }
 
 task dockerStartKeycloak(type: DockerStartContainer) {
@@ -470,21 +471,21 @@ task dockerCopyKeycloakExportCommand(type: DockerCopyFileToContainer) {
 	description = "Copy REALM export command to Keycloak"
 	containerId = keycloakContainerName
 	hostPath = "${rootProject.projectDir}/export-anet-realm.sh"
-	remotePath = containerPushDataPath
+	remotePath = keycloakPushDataPath
 }
 
 task dockerExportKeycloakRealm(dependsOn: dockerCopyKeycloakExportCommand, type: DockerExecContainer) {
 	group = "keycloak container"
 	description = "Epxorts ANET-Realm from ${keycloakContainerName} container."
 	containerId = keycloakContainerName
-	commands = [ ["/bin/bash", "${containerPushDataPath}/export-anet-realm.sh", "100", "ANET-Realm", "${containerPushDataPath}/ANET-Realm-export.json"] as String[] ]
+	commands = [ ["/bin/bash", "${keycloakPushDataPath}/export-anet-realm.sh", "100", "ANET-Realm", "${keycloakPushDataPath}/ANET-Realm-export.json"] as String[] ]
 }
 
 task dockerGetKeycloakConfiguration(dependsOn: dockerExportKeycloakRealm, type: DockerCopyFileFromContainer) {
 	description = "Pull REALM configuration from Keycloak"
 	containerId = keycloakContainerName
 	hostPath = "${rootProject.projectDir}"
-	remotePath = "${containerPushDataPath}/ANET-Realm-export.json"
+	remotePath = "${keycloakPushDataPath}/ANET-Realm-export.json"
 }
 
 task dockerStopKeycloak(type: DockerStopContainer) {
