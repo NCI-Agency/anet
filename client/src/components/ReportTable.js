@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { Table } from "react-bootstrap"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       pageNum
       pageSize
@@ -110,10 +110,10 @@ const ReportTable = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }

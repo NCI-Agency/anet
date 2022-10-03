@@ -11,7 +11,7 @@ import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Button, Form, FormControl, InputGroup } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import SEARCH_ICON from "resources/search-alt.png"
 
 export const SearchPopover = ({
@@ -64,7 +64,7 @@ const SearchBar = ({
   setSearchQuery,
   onSearchGoToSearchPage
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   // (Re)set searchTerms if the searchQuery.text prop changes
   const latestQueryText = useRef(searchQuery.text)
   const queryTextUnchanged = _isEqual(latestQueryText.current, searchQuery.text)
@@ -137,7 +137,7 @@ const SearchBar = ({
       resetPagination()
       setSearchQuery({ text: searchTerms })
       if (onSearchGoToSearchPage) {
-        history.push("/search")
+        navigate("/search")
       }
     }
     event.preventDefault()

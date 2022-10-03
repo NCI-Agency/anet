@@ -25,9 +25,10 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
   const { currentUser, notifications } = useContext(AppContext)
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
-  const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
-    searchQuery
-  ])
+  const searchQueryParams = useMemo(
+    () => getSearchQuery(searchQuery),
+    [searchQuery]
+  )
   const taskedTasksSearchQueryParams = useMemo(
     () =>
       Object.assign({}, searchQueryParams, {

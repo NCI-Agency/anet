@@ -32,8 +32,8 @@ import useMergeObjects, {
   getClearButton,
   getInfoButton,
   getOtherSide,
-  mergedPersonIsValid,
   MERGE_SIDES,
+  mergedPersonIsValid,
   selectAllFields,
   setAMergedField,
   setMergeable
@@ -44,19 +44,19 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import PEOPLE_ICON from "resources/people.png"
 import Settings from "settings"
 import utils from "utils"
 
 const GQL_MERGE_PERSON = gql`
-  mutation($loserUuid: String!, $winnerPerson: PersonInput!) {
+  mutation ($loserUuid: String!, $winnerPerson: PersonInput!) {
     mergePeople(loserUuid: $loserUuid, winnerPerson: $winnerPerson)
   }
 `
 
 const MergePeople = ({ pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -194,6 +194,19 @@ const MergePeople = ({ pageDispatchers }) => {
                   )
                 )}
                 fieldName="domainUsername"
+                mergeState={mergeState}
+                dispatchMergeActions={dispatchMergeActions}
+              />
+              <PersonField
+                label="OpenID subject"
+                value={mergedPerson.openIdSubject}
+                align={ALIGN_OPTIONS.CENTER}
+                action={getClearButton(() =>
+                  dispatchMergeActions(
+                    setAMergedField("openIdSubject", "", null)
+                  )
+                )}
+                fieldName="openIdSubject"
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
@@ -451,8 +464,8 @@ const MergePeople = ({ pageDispatchers }) => {
     })
       .then(res => {
         if (res) {
-          history.push(Person.pathFor({ uuid: mergedPerson.uuid }), {
-            success: "People merged. Displaying merged Person below."
+          navigate(Person.pathFor({ uuid: mergedPerson.uuid }), {
+            state: { success: "People merged. Displaying merged Person below." }
           })
         }
       })
@@ -601,6 +614,24 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
               align,
               mergeState,
               "domainUsername"
+            )}
+            mergeState={mergeState}
+            dispatchMergeActions={dispatchMergeActions}
+          />
+          <PersonField
+            label="OpenID subject"
+            fieldName="openIdSubject"
+            value={person.openIdSubject}
+            align={align}
+            action={getActionButton(
+              () => {
+                dispatchMergeActions(
+                  setAMergedField("openIdSubject", person.openIdSubject, align)
+                )
+              },
+              align,
+              mergeState,
+              "openIdSubject"
             )}
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}

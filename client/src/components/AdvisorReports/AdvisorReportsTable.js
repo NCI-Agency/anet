@@ -14,8 +14,8 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
-  query($orgUuid: String!) {
-    advisorReportInsights(orgUuid: $orgUuid) {
+  query ($orgUuid: String!, $weeksAgo: Int) {
+    advisorReportInsights(orgUuid: $orgUuid, weeksAgo: $weeksAgo) {
       uuid
       name
       stats {
@@ -27,11 +27,17 @@ const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
   }
 `
 
-const AdvisorReportsTable = ({ pageDispatchers, columnGroups, orgUuid }) => {
+const AdvisorReportsTable = ({
+  pageDispatchers,
+  columnGroups,
+  orgUuid,
+  weeksAgo
+}) => {
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_ADVISOR_REPORTS_INSIGHT,
     {
-      orgUuid
+      orgUuid,
+      weeksAgo
     }
   )
   const { done, result } = useBoilerplate({
@@ -72,7 +78,8 @@ const AdvisorReportsTable = ({ pageDispatchers, columnGroups, orgUuid }) => {
 AdvisorReportsTable.propTypes = {
   pageDispatchers: PageDispatchersPropType,
   columnGroups: PropTypes.array,
-  orgUuid: PropTypes.string
+  orgUuid: PropTypes.string,
+  weeksAgo: PropTypes.number
 }
 
 export default connect(null, mapPageDispatchersToProps)(AdvisorReportsTable)

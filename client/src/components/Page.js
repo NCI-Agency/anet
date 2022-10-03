@@ -11,14 +11,14 @@ import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
 
 const GQL_CREATE_SUBSCRIPTION = gql`
-  mutation($subscription: SubscriptionInput!) {
+  mutation ($subscription: SubscriptionInput!) {
     createSubscription(subscription: $subscription) {
       uuid
     }
   }
 `
 const GQL_DELETE_OBJECT_SUBSCRIPTION = gql`
-  mutation($subscribedObjectUuid: String!) {
+  mutation ($subscribedObjectUuid: String!) {
     deleteObjectSubscription(uuid: $subscribedObjectUuid)
   }
 `

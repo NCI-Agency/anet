@@ -9,12 +9,13 @@ const _isRegExp = require("lodash/isRegExp")
 const chalk = require("chalk")
 const fetch = require("cross-fetch")
 
-let capabilities = {}
+let capabilities
 const testEnv =
   (process.env.GIT_TAG_NAME && "remote") || process.env.TEST_ENV || "local"
 if (testEnv === "local") {
   // This gives us access to send Chrome commands.
   require("chromedriver")
+  capabilities = webdriver.Capabilities.chrome()
 } else {
   // Set capabilities for BrowserStack
   require("./keep-alive.js")
@@ -32,7 +33,7 @@ console.log(
       "..",
       "..",
       "..",
-      "insertBaseData-mssql.sql"
+      "insertBaseData-psql.sql"
     )} on your database instance`
   )
 )
@@ -96,7 +97,7 @@ test.beforeEach(t => {
     const chrome = require("selenium-webdriver/chrome")
     builder = builder
       .forBrowser("chrome")
-      .setChromeOptions(new chrome.Options().headless())
+      .setChromeOptions(new chrome.Options(capabilities).headless())
       /*
        * If we don't explicitly define ServiceBuilder for ChromeDriver it uses a default ServiceBuilder
        * which is a singleton, shared amongst different driver instances. As a result, the same
@@ -130,9 +131,14 @@ test.beforeEach(t => {
   // pass the information along via window.fetch.
   t.context.get = async(pathname, userPw) => {
     const credentials = userPw || "erin"
-    const urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
-    debugLog("Getting URL", urlToGet)
+    const urlToGet = `${process.env.SERVER_URL}${pathname}`
+    debugLog("Getting URL", urlToGet, "as", credentials)
     await t.context.driver.get(urlToGet)
+    await t.context.$("#kc-form-login", shortWaitMs)
+    await t.context.pageHelpers.writeInForm("#username", credentials)
+    await t.context.pageHelpers.writeInForm("#password", credentials)
+    const $loginFormSubmitButton = await t.context.$("#kc-login")
+    await $loginFormSubmitButton.click()
     await t.context.waitForLoadingFinished()
 
     // If we have a page-wide error message, we would like to cleanly fail the test on that.
@@ -171,6 +177,12 @@ test.beforeEach(t => {
       "Loading indicator should disappear",
       mediumWaitMs
     )
+  }
+
+  t.context.logout = async() => {
+    const urlToGet = `${process.env.SERVER_URL}/api/logout`
+    debugLog("Logging out via URL", urlToGet)
+    await t.context.driver.get(urlToGet)
   }
 
   // For debugging purposes.

@@ -28,7 +28,7 @@ import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -37,7 +37,7 @@ import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_CREATE_TASK = gql`
-  mutation($task: TaskInput!) {
+  mutation ($task: TaskInput!) {
     createTask(task: $task) {
       uuid
     }
@@ -54,7 +54,7 @@ const GQL_UPDATE_TASK = gql`
 
 const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -172,7 +172,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
         )
         return (
           <div>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
@@ -457,7 +457,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   )
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -478,14 +478,13 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
         : initialValues.uuid
     })
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
-    history.replace(Task.pathForEdit(task))
     if (!edit) {
-      history.replace(Task.pathForEdit(task))
+      navigate(Task.pathForEdit(task), { replace: true })
     }
-    history.push(Task.pathFor(task), {
-      success: "Task saved"
+    navigate(Task.pathFor(task), {
+      state: { success: "Task saved" }
     })
   }
 

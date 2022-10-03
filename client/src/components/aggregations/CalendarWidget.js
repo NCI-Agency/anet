@@ -1,4 +1,5 @@
-import FullCalendar from "@fullcalendar/react" // needs to be imported first, before plugins
+// needs to be imported first, before plugins:
+import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import {
   aggregationWidgetDefaultProps,
@@ -8,7 +9,7 @@ import {
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import "../Calendar.css"
 
 const DATE_FORMAT = "YYYY-MM-DD"
@@ -22,7 +23,7 @@ const CalendarWidget = ({
 }) => {
   const calendarComponentRef = useRef(null)
   const events = GET_CALENDAR_EVENTS_FROM[valueType]?.(values)
-  const history = useHistory()
+  const navigate = useNavigate()
   if (_isEmpty(events)) {
     return whenUnspecified
   }
@@ -56,7 +57,7 @@ const CalendarWidget = ({
       ref={calendarComponentRef}
       events={events}
       eventClick={info => {
-        history.push(info.event.url)
+        navigate(info.event.url)
         // Prevent browser navigation to the url
         info.jsEvent.preventDefault()
       }}

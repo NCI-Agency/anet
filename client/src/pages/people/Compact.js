@@ -37,7 +37,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton, Table } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -108,9 +108,6 @@ const DEFAULT_FIELD_GROUP_EXCEPTIONS = [
   "code",
   "endOfTour"
 ]
-
-// Large fields that will be displayed at the end
-const WHOLE_WIDTH_FIELDS = ["biography"]
 
 const NORMAL_FIELD_OPTIONS = Object.entries(
   Object.without(
@@ -184,7 +181,7 @@ const PRESETS = [
 
 const CompactPersonView = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const { uuid } = useParams()
   const [leftColumnFields, setLeftColumnFields] = useState("6")
   const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
@@ -219,14 +216,16 @@ const CompactPersonView = ({ pageDispatchers }) => {
   const isAdmin = currentUser && currentUser.isAdmin()
   const position = person.position
   const hasPosition = position && position.uuid
+  // Keys of fields which should span over 2 columns
+  const fullWidthFieldKeys = person.getFullWidthFields()
   const emailHumanValue = (
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
   const orderedFields = orderPersonFields().filter(
-    field => !WHOLE_WIDTH_FIELDS.includes(field.key)
+    field => !fullWidthFieldKeys.includes(field.key)
   )
   const twoColumnFields = orderPersonFields().filter(field =>
-    WHOLE_WIDTH_FIELDS.includes(field.key)
+    fullWidthFieldKeys.includes(field.key)
   )
   const containsSensitiveInformation = !!orderedFields.find(field =>
     Object.keys(Person.customSensitiveInformation).includes(field.key)
@@ -312,7 +311,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
   )
 
   function returnToDefaultPage() {
-    history.push(`/people/${person.uuid}`)
+    navigate("..")
   }
 
   function orderPersonFields() {

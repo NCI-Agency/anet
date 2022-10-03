@@ -17,7 +17,7 @@ import utils from "utils"
 import TaskForm from "./Form"
 
 const GQL_GET_ORGANIZATION = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     organization(uuid: $uuid) {
       uuid
       shortName

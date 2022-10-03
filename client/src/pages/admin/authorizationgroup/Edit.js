@@ -2,8 +2,8 @@ import { gql } from "@apollo/client"
 import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import API from "api"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { AuthorizationGroup } from "models"
@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom"
 import AuthorizationGroupForm from "./Form"
 
 const GQL_GET_AUTHORIZATION_GROUP = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     authorizationGroup(uuid: $uuid) {
       uuid
       name

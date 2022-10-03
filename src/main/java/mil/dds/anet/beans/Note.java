@@ -28,6 +28,9 @@ public class Note extends AbstractAnetBean {
   private NoteType type;
   @GraphQLQuery
   @GraphQLInputField
+  private String assessmentKey;
+  @GraphQLQuery
+  @GraphQLInputField
   private String text;
   // annotated below
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
@@ -40,6 +43,14 @@ public class Note extends AbstractAnetBean {
 
   public void setType(NoteType type) {
     this.type = type;
+  }
+
+  public String getAssessmentKey() {
+    return assessmentKey;
+  }
+
+  public void setAssessmentKey(String assessmentKey) {
+    this.assessmentKey = assessmentKey;
   }
 
   public String getText() {
@@ -110,12 +121,13 @@ public class Note extends AbstractAnetBean {
     }
     final Note n = (Note) o;
     return Objects.equals(n.getUuid(), uuid) && Objects.equals(n.getAuthorUuid(), getAuthorUuid())
-        && Objects.equals(n.getType(), type) && Objects.equals(n.getText(), text);
+        && Objects.equals(n.getType(), type) && Objects.equals(n.getAssessmentKey(), assessmentKey)
+        && Objects.equals(n.getText(), text);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, type, text);
+    return Objects.hash(uuid, type, assessmentKey, text);
   }
 
   @Override

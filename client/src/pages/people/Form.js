@@ -40,18 +40,18 @@ import {
   FormText,
   Row
 } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Settings from "settings"
 
 const GQL_CREATE_PERSON = gql`
-  mutation($person: PersonInput!) {
+  mutation ($person: PersonInput!) {
     createPerson(person: $person) {
       uuid
     }
   }
 `
 const GQL_UPDATE_PERSON = gql`
-  mutation($person: PersonInput!) {
+  mutation ($person: PersonInput!) {
     updatePerson(person: $person)
   }
 `
@@ -65,7 +65,7 @@ const PersonForm = ({
   notesComponent
 }) => {
   const { loadAppData, currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const confirmHasReplacementButton = useRef(null)
   const [error, setError] = useState(null)
   const [currentAvatar, setCurrentAvatar] = useState(initialValues.avatar)
@@ -195,7 +195,7 @@ const PersonForm = ({
 
         return (
           <>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Form className="form-horizontal" method="post">
               <Messages error={error} />
               <Fieldset title={title} action={action} />
@@ -699,7 +699,7 @@ const PersonForm = ({
   }
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -720,7 +720,7 @@ const PersonForm = ({
       localStorage.clear()
       localStorage.newUser = "true"
       loadAppData()
-      history.push("/")
+      navigate("/")
     } else {
       const operation = edit ? "updatePerson" : "createPerson"
       const person = new Person({
@@ -732,10 +732,10 @@ const PersonForm = ({
         loadAppData()
       }
       if (!edit) {
-        history.replace(Person.pathForEdit(person))
+        navigate(Person.pathForEdit(person), { replace: true })
       }
-      history.push(Person.pathFor(person), {
-        success: "Person saved"
+      navigate(Person.pathFor(person), {
+        state: { success: "Person saved" }
       })
     }
   }

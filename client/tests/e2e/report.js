@@ -48,10 +48,11 @@ test.serial("Draft and submit a report", async t => {
   const $positiveAtmosphereButton = await $('label[for="atmosphere_POSITIVE"]')
   await $positiveAtmosphereButton.click()
 
-  const $attendeesAdvancedSelect1 = await pageHelpers.chooseAdvancedSelectOption(
-    "#reportPeople",
-    "topferness, christopf"
-  )
+  const $attendeesAdvancedSelect1 =
+    await pageHelpers.chooseAdvancedSelectOption(
+      "#reportPeople",
+      "topferness, christopf"
+    )
 
   const $attendeesTitle = await t.context.driver.findElement(
     // if future "People who will be involved in this planned engagement"
@@ -66,9 +67,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    $principalPrimary1,
-    /* eslint-disable no-unused-vars */ $principalAttendee1 /* eslint-enable no-unused-vars */,
-    /* eslint-disable no-unused-vars */ $principalAuthor1 /* eslint-enable no-unused-vars */,
+    $principalControls1,
     /* eslint-disable no-unused-vars */ $principalConflictBtn /* eslint-enable no-unused-vars */,
     $principalName1,
     $principalPosition1,
@@ -76,8 +75,8 @@ test.serial("Draft and submit a report", async t => {
     $principalOrg1
   ] = await $$(".principalAttendeesTable tbody tr:nth-child(2) td")
 
-  const $principalPrimaryInput1 = await $principalPrimary1.findElement(
-    By.css("input")
+  const $principalPrimaryInput1 = await $principalControls1.findElement(
+    By.css("[name = 'primaryAttendeePRINCIPAL']")
   )
   t.true(
     await $principalPrimaryInput1.isSelected(),
@@ -92,10 +91,11 @@ test.serial("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg1, "MoD")
 
-  const $attendeesAdvancedSelect2 = await pageHelpers.chooseAdvancedSelectOption(
-    "#reportPeople",
-    "steveson, steve"
-  )
+  const $attendeesAdvancedSelect2 =
+    await pageHelpers.chooseAdvancedSelectOption(
+      "#reportPeople",
+      "steveson, steve"
+    )
   await $attendeesTitle.click()
 
   t.is(
@@ -105,9 +105,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const [
-    $principalPrimary2,
-    /* eslint-disable no-unused-vars */ $principalAttendeeCheckbox2 /* eslint-enable no-unused-vars */,
-    /* eslint-disable no-unused-vars */ $principalAuthorCheckbox2 /* eslint-enable no-unused-vars */,
+    $principalControls2,
     /* eslint-disable no-unused-vars */ $principalAuthorConflictBtn /* eslint-enable no-unused-vars */,
     $principalName2,
     /* eslint-disable no-unused-vars */
@@ -117,8 +115,8 @@ test.serial("Draft and submit a report", async t => {
   ] = await $$(".principalAttendeesTable tbody tr:last-child td")
 
   await assertElementText(t, $principalName2, "LtCol STEVESON, Steve")
-  const $principalPrimaryInput2 = await $principalPrimary2.findElement(
-    By.css("input")
+  const $principalPrimaryInput2 = await $principalControls2.findElement(
+    By.css("[name = 'primaryAttendeePRINCIPAL']")
   )
   t.false(
     await $principalPrimaryInput2.isSelected(),
@@ -181,12 +179,13 @@ test.serial("Draft and submit a report", async t => {
     shortWaitMs // wait for Slate to save the editor contents
   )
   const $addAuthGroupShortcutButtons = await $$(
-    "#meeting-details .shortcut-list button"
+    "#authorizationGroups-shortcut-list button"
   )
   // Add all recent authorization groups
-  await Promise.all(
-    $addAuthGroupShortcutButtons.map($button => $button.click())
-  )
+  const nrAuthGroups = $addAuthGroupShortcutButtons.length
+  for (let i = 0; i < nrAuthGroups; i++) {
+    await (await $("#authorizationGroups-shortcut-list button")).click()
+  }
 
   const $formButtonSubmit = await $("#formBottomSubmit")
   await t.context.driver.wait(
@@ -237,6 +236,8 @@ test.serial("Draft and submit a report", async t => {
     "Report submitted",
     "Clicking the submit report button displays a message telling the user that the action was successful."
   )
+
+  await t.context.logout()
 })
 
 test.serial("Publish report chain", async t => {
@@ -248,9 +249,7 @@ test.serial("Publish report chain", async t => {
     $$,
     assertElementText,
     By,
-    Key,
     until,
-    shortWaitMs,
     mediumWaitMs,
     longWaitMs
   } = t.context
@@ -326,16 +325,6 @@ test.serial("Publish report chain", async t => {
   )
   await $("#daily-rollup")
 
-  const $$rollupDateRange = await $$(".rollupDateRange .bp3-input")
-  await $$rollupDateRange[0].click()
-  await t.context.driver.sleep(shortWaitMs) // wait for datepicker to show
-  const $todayButton = await t.context.driver.findElement(
-    By.xpath('//a/div[text()="Today"]')
-  )
-  await $todayButton.click()
-  // Now dismiss the date popup
-  await $$rollupDateRange[0].sendKeys(Key.TAB)
-  await $$rollupDateRange[1].sendKeys(Key.TAB)
   await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
   const $rollupTableTab = await $(".report-collection button[value='table']")
@@ -355,6 +344,8 @@ test.serial("Publish report chain", async t => {
     "meeting goal",
     "Daily Rollup report list includes the recently approved report"
   )
+
+  await t.context.logout()
 })
 
 async function approveReport(t, user) {
@@ -402,6 +393,8 @@ async function approveReport(t, user) {
   )
   await $ApproveButton.click()
   await t.context.driver.wait(until.stalenessOf($ApproveButton), mediumWaitMs)
+
+  await t.context.logout()
 }
 test.serial("Verify that validations work", async t => {
   t.plan(27)
@@ -629,9 +622,7 @@ test.serial("Verify that validations work", async t => {
   )
 
   const [
-    $advisorPrimaryCheckbox,
-    /* eslint-disable no-unused-vars */ $advisorAttendeeCheckbox /* eslint-enable no-unused-vars */,
-    /* eslint-disable no-unused-vars */ $advisorAuthorCheckbox /* eslint-enable no-unused-vars */,
+    $advisorControls,
     /* eslint-disable no-unused-vars */ $advisorConflictBtn /* eslint-enable no-unused-vars */,
     $advisorName,
     $advisorPosition,
@@ -640,8 +631,8 @@ test.serial("Verify that validations work", async t => {
   ] = await $$(".advisorAttendeesTable tbody tr:first-child td")
 
   t.is(
-    await $advisorPrimaryCheckbox
-      .findElement(By.css("input"))
+    await $advisorControls
+      .findElement(By.css("[name = 'primaryAttendeeADVISOR']"))
       .getAttribute("value"),
     "on",
     "Advisor primary attendee checkbox should be checked"
@@ -654,7 +645,10 @@ test.serial("Verify that validations work", async t => {
     "#reportPeople-shortcut-list button"
   )
   // Add all recent attendees
-  await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
+  const nrAttendees = $addAttendeeShortcutButtons.length
+  for (let i = 0; i < nrAttendees; i++) {
+    await (await $("#reportPeople-shortcut-list button")).click()
+  }
 
   $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
   $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
@@ -670,4 +664,6 @@ test.serial("Verify that validations work", async t => {
     t,
     "This is a DRAFT report and hasn't been submitted."
   )
+
+  await t.context.logout()
 })

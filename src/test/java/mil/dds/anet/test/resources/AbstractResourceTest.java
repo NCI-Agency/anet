@@ -88,7 +88,7 @@ public abstract class AbstractResourceTest {
   private static BatchingUtils batchingUtils;
 
   private static final String PERSON_FIELDS =
-      "{ uuid name domainUsername role emailAddress rank status phoneNumber biography"
+      "{ uuid name domainUsername openIdSubject role emailAddress rank status phoneNumber biography"
           + " pendingVerification createdAt updatedAt position { uuid name type status"
           + " organization { uuid shortName parentOrg { uuid shortName } } } }";
 
@@ -202,6 +202,14 @@ public abstract class AbstractResourceTest {
     return findOrPutPersonInDb(Person.builder().withDomainUsername("nick").build());
   }
 
+  public static Person getReinaReinton() {
+    return findOrPutPersonInDb(Person.builder().withDomainUsername("reina").build());
+  }
+
+  public static Person getYoshieBeau() {
+    return findOrPutPersonInDb(Person.builder().withDomainUsername("yoshie").build());
+  }
+
   // Principals in the test database
   public static Person getChristopfTopferness() {
     return findOrPutPersonInDb(Person.builder().withName("TOPFERNESS, Christopf").build());
@@ -252,6 +260,10 @@ public abstract class AbstractResourceTest {
     return getInput(getNickNicholson(), mil.dds.anet.beans.Person.class);
   }
 
+  public static mil.dds.anet.beans.Person getReinaReintonBean() {
+    return getInput(getReinaReinton(), mil.dds.anet.beans.Person.class);
+  }
+
   public static mil.dds.anet.beans.Person getChristopfTopfernessBean() {
     return getInput(getChristopfTopferness(), mil.dds.anet.beans.Person.class);
   }
@@ -298,6 +310,10 @@ public abstract class AbstractResourceTest {
 
   protected static NoteInput getNoteInput(final Note note) {
     return getInput(note, NoteInput.class);
+  }
+
+  protected static List<NoteInput> getNotesInput(final List<Note> notes) {
+    return notes.stream().map(n -> getNoteInput(n)).collect(Collectors.toList());
   }
 
   protected static OrganizationInput getOrganizationInput(final Organization organization) {

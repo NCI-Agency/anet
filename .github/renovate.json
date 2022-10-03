@@ -10,6 +10,9 @@
   "labels": [
     "dependencies"
   ],
+  "schedule": [
+    "every weekday"
+  ],
   "packageRules": [
     {
       "matchUpdateTypes": [
@@ -21,9 +24,75 @@
     },
     {
       "matchPackageNames": [
-        "com.microsoft.sqlserver:mssql-jdbc"
+        "autoprefixer",
+        "com.graphql-java:graphql-java-extended-scalars"
       ],
-      "allowedVersions": "/^.*\\.jre8$/"
+      "enabled": false
+    },
+    {
+      "matchPackagePrefixes": [
+        "com.graphql_java_generator"
+      ],
+      "enabled": false
+    },
+    {
+      "groupName": "NPM, dev-dependencies, Babel",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@babel/"]
+    },
+    {
+      "groupName": "NPM, dev-dependencies, GraphQL Code Generator",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@graphql-codegen/"]
+    },
+    {
+      "groupName": "NPM, dev-dependencies, Storybook",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@storybook/"]
+    },
+    {
+      "groupName": "NPM, dev-dependencies, WebdriverIO",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePrefixes": ["@wdio/", "webdriverio"]
+    },
+    {
+      "groupName": "NPM, dependencies, Blueprint",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@blueprintjs/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Emotion",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@emotion/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Fullcalendar",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@fullcalendar/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Projectstorm",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["@projectstorm/"]
+    },
+    {
+      "groupName": "NPM, dependencies, Slate",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePrefixes": ["slate"]
+    },
+    {
+      "groupName": "Gradle/NPM, dependencies, Keycloak",
+      "matchManagers": ["gradle", "npm"],
+      "matchSourceUrlPrefixes": ["https://github.com/keycloak/"]
     }
   ],
   "postUpdateOptions": [

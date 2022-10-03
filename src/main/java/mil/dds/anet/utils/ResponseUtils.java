@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.XMLConstants;
@@ -210,5 +212,20 @@ public class ResponseUtils {
     }
     logger.error("Unexpected SQL exception raised", e);
     return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+  }
+
+  public static String getRemoteAddr(final HttpServletRequest request) {
+    final String remoteAddr = request.getRemoteAddr();
+    return remoteAddr == null ? "-" : remoteAddr;
+  }
+
+  public static String getReferer(final ContainerRequestContext requestContext) {
+    final String referer = requestContext.getHeaderString(HttpHeaders.REFERER);
+    return referer == null ? "-" : referer;
+  }
+
+  public static boolean ignoreActivity(final ContainerRequestContext requestContext) {
+    final String activityHeader = requestContext.getHeaderString("x-activity");
+    return "ignore".equals(activityHeader);
   }
 }

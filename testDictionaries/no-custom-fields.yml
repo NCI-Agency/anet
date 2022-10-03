@@ -62,8 +62,41 @@ fields:
         style:
           height: 400px
       assessments:
+        topTaskOnceReport:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            question1:
+              type: special_field
+              widget: likertScale
+              label: Instant assessment Question 1
+              helpText: Please provide assessment for something important
+              levels:
+                - color: red
+                  endValue: 2
+                  label: test
+                - color: "#FFBF00"
+                  endValue: 8
+                  label: mid
+                - color: green
+                  endValue: 10
+                  label: high
+              aggregation:
+                widget: likertScale
+            question2:
+              type: number
+              label: Instant assessment Question 2
+            question3:
+              type: number
+              label: Instant assessment Question 3
         topTaskSemiannually:
           recurrence: semiannually
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
             issues:
               type: special_field
@@ -74,7 +107,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
 
     subLevel:
       shortLabel: Effort
@@ -101,7 +134,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
             status:
               type: enum
               label: Project status
@@ -118,7 +151,7 @@ fields:
                   color: '#ff8279'
               validations:
                 - type: required
-                  params: [You must provide the assessment status]
+                  params: [You must provide the Project status]
         subTaskWeekly:
           recurrence: weekly
           questions:
@@ -131,7 +164,7 @@ fields:
                 height: 300px
               validations:
                 - type: required
-                  params: [You must provide the top 3 issues]
+                  params: [You must provide the Top 3 issues]
         subTaskOnceReport:
           recurrence: once
           relatedObjectType: report
@@ -198,11 +231,16 @@ fields:
     reportText: Key details
     location:
       filter: [POINT_LOCATION, VIRTUAL_LOCATION]
+    attendeeGroups:
+      - label: Linguists
+        filter:
+          orgUuid: 70193ee9-05b4-4aac-80b5-75609825db9f
 
   person:
     firstName: First name
     lastName: Last name
     domainUsername: Domain username
+    openIdSubject: OpenID subject
     position: Current Position
     prevPositions: Previous Positions
     emailAddress:
@@ -323,6 +361,7 @@ fields:
         - position
         - prevPositions
         - domainUsername
+        - openIdSubject
         - emailAddress
         - phoneNumber
         - country
@@ -331,6 +370,307 @@ fields:
         - gender
         - endOfTourDate
         - biography
+      showAsFullWidthFields:
+        - biography
+      assessments:
+        advisorOnceReportLinguist:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            linguistRole:
+              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
+              type: enum
+              helpText: "What was the linguist's role?"
+              label: "Linguist Role"
+              choices:
+                translator:
+                  label: Translator
+                interpreter:
+                  label: Interpreter
+          questionSets:
+            translator:
+              label: Translator Questions
+              description: Set of questions to assess the linguist in translator role
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.linguistRole === "translator")]
+              questions:
+                translatorGotAdequateTime:
+                  type: enum
+                  helpText: "Did you provide the translator with adequate time to finish the translation?"
+                  label: Provided adequate time
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                translatorMetDeadline:
+                  type: enum
+                  helpText: "Did the translator meet the deadline?"
+                  label: Met the deadline
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                translatorSubjectVocabularyScore:
+                  type: enum
+                  helpText: "How was the translator's subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+                  label: Subject vocabulary
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                translatorSubjectComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.translator && @.advisorOnceReportLinguist.questionSets.translator.questions.translatorSubjectVocabularyScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad translator subject vocabulary"
+                  label: Vocabulary comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                translatorOverallScore:
+                  type: enum
+                  label: Overall evaluation
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                translatorOverallComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.translator && @.advisorOnceReportLinguist.questionSets.translator.questions.translatorOverallScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad overall translator evaluation"
+                  label: Overall comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+            interpreter:
+              label: Interpreter Questions
+              description: Set of questions to assess the linguist in interpreter role
+              test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.linguistRole === "interpreter")]
+              questions:
+                interpreterHadPreMeeting:
+                  type: enum
+                  helpText: "Did you hold a pre-meeting with the interpreter?"
+                  label: Pre-meeting
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                interpreterProvidedWithNecessarySubjectMaterial:
+                  type: enum
+                  helpText: "Did you provide the interpreter with the necessary subject material in adequate time to prepare for the mission?"
+                  label: Subject material provided
+                  choices:
+                    yes:
+                      label: "Yes"
+                    no:
+                      label: "No"
+                interpreterSubjectVocabularyScore:
+                  type: enum
+                  helpText: "How was the interpreter’s subject vocabulary (Knowledge of acronyms, abbreviations and terminology)?"
+                  label: Subject vocabulary
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterSubjectVocabularyComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid &&  @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectVocabularyScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter subject vocabulary"
+                  label: Vocabulary comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterSubjectUnderstandingScore:
+                  type: enum
+                  helpText: "How was the interpreter's subject understanding (Did the conversation/presentation about the subject flow unobstructed)?"
+                  label: Subject understanding
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterSubjectUnderstandingComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterSubjectUnderstandingScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter subject understanding"
+                  label: Subject understanding comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterWorkEthicScore:
+                  type: enum
+                  helpText: "How was the interpreter’s work ethic?"
+                  label: Work ethic
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterWorkEthicComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterWorkEthicScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter work ethic"
+                  label: Work ethic comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterPostureScore:
+                  type: enum
+                  helpText: "How was the interpreter’s posture (Polite behavior, clothing)?"
+                  label: Posture
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterPostureComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterPostureScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter posture"
+                  label: Posture comments
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterRoleScore:
+                  type: enum
+                  helpText: "How did the interpreter perform the role of interpreter (Did the interpreter answer questions instead of interpreting, getting too involved and share own opinions/ideas)?"
+                  label: Role score
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterRoleComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterRoleScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad interpreter role"
+                  label: Role comment
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+                interpreterInterpretationOverallScore:
+                  type: enum
+                  label: Overall evaluation
+                  choices:
+                    "EX":
+                      label: Excellent
+                      color: "#03f8fc"
+                    "VG":
+                      label: Very Good
+                      color: "#00fc03"
+                    "G":
+                      label: Good
+                      color: "#84fc03"
+                    "S":
+                      label: Satisfactory
+                      color: "#e3fc03"
+                    "B":
+                      label: Bad
+                      color: "#fc5a03"
+                interpreterInterpretationOverallComment:
+                  test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.questionSets && @.advisorOnceReportLinguist.questionSets.interpreter && @.advisorOnceReportLinguist.questionSets.interpreter.questions.interpreterInterpretationOverallScore === "B")]
+                  type: special_field
+                  helpText: "Comment on bad overall interpreter evaluation"
+                  label: Overall evaluation comment
+                  widget: richTextEditor
+                  style:
+                    height: 100px
+        advisorOndemand:
+          recurrence: ondemand
+          questions:
+            assessmentDate:
+              type: date
+              label: Assessment date
+            question1:
+              type: special_field
+              label: General remarks
+              widget: richTextEditor
+              style:
+                height: 70px
     position:
       name: NATO Billet
       type: ANET User
@@ -351,11 +691,22 @@ fields:
         placeholder: the six character code
 
   principal:
-
     person:
       name: Afghan Partner
       countries: [Afghanistan]
       assessments:
+        principalMonthly:
+          recurrence: monthly
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            text:
+              type: special_field
+              label: Text
+              widget: richTextEditor
+              style:
+                height: 100px
         principalQuarterly:
           recurrence: quarterly
           questions:
@@ -467,7 +818,50 @@ fields:
                 yes:
                   label: 👍
                   color: '#0000ff'
-
+        principalOndemandScreeningAndVetting:
+          recurrence: ondemand
+          onDemandAssessmentExpirationDays: 108
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            assessmentDate:
+              type: date
+              label: Screening and vetting date
+              validations:
+                - type: required
+                  params: [You must provide the Screening and vetting date]
+            expirationDate:
+              type: date
+              label: Expiration date
+            question1:
+              type: enum
+              label: Screening and vetting level
+              choices:
+                pass1:
+                  label: Pass 1
+                  color: '#c2ffb3'
+                pass2:
+                  label: Pass 2
+                  color: '#c2ffb3'
+                pass3:
+                  label: Pass 3
+                  color: '#c2ffb3'
+                fail1:
+                  label: Fail 1
+                  color: '#ff8279'
+                fail2:
+                  label: Fail 2
+                  color: '#ff8279'
+                fail3:
+                  label: Fail 3
+                  color: '#ff8279'
+            question2:
+              type: special_field
+              label: Screening and vetting comment
+              widget: richTextEditor
+              style:
+                height: 70px
       # number of fields after Avatar in the left column for principals
       # adjust this number if two columns are not balanced on the Person Page
       numberOfFieldsInLeftColumn: 7
@@ -479,12 +873,15 @@ fields:
         - country
         - birthday
         - domainUsername
+        - openIdSubject
         - emailAddress
         - code
         - politicalPosition
         - rank
         - gender
         - endOfTourDate
+        - biography
+      showAsFullWidthFields:
         - biography
     position:
       name: Afghan Tashkil
@@ -535,7 +932,7 @@ imagery:
     - name: OSM
       default: true
       type: tile
-      url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
     - name: OSM - local
       default: false
       type: tile

@@ -19,12 +19,12 @@ import {
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import moment from "moment"
-import UserActivityTable from "pages/admin/UserActivityTable"
+import RecentActivityTable from "pages/admin/RecentActivityTable"
 import React, { useContext, useState } from "react"
 import { Button, Col, Container, FormSelect, Row } from "react-bootstrap"
 import { connect } from "react-redux"
 import { toast } from "react-toastify"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from "uuid"
 
 const DROPDOWN_FIELDS = [
   {
@@ -46,7 +46,7 @@ const GQL_GET_ADMIN_SETTINGS = gql`
   }
 `
 const GQL_SAVE_ADMIN_SETTINGS = gql`
-  mutation($settings: [AdminSettingInput]!) {
+  mutation ($settings: [AdminSettingInput]!) {
     saveAdminSettings(settings: $settings)
   }
 `
@@ -61,19 +61,19 @@ const RELOAD_DICTIONARY = gql`
     reloadDictionary
   }
 `
-const USER_ACTIVITIES = gql`
+const RECENT_ACTIVITIES = gql`
   query {
-    userActivities {
+    recentActivities {
       byActivity {
-        ...userActivity
+        ...recentActivity
       }
       byUser {
-        ...userActivity
+        ...recentActivity
       }
     }
   }
 
-  fragment userActivity on UserActivity {
+  fragment recentActivity on RecentUserActivity {
     user {
       uuid
       rank
@@ -112,11 +112,11 @@ const AdminIndex = ({ pageDispatchers }) => {
   const settings = {}
   data.adminSettings.forEach(setting => (settings[setting.key] = setting.value))
 
-  const userActivitiesActionButton = (
+  const recentActivitiesActionButton = (
     <Button
       disabled={actionLoading}
       variant="primary"
-      onClick={loadUserActivities}
+      onClick={loadRecentActivities}
     >
       {Array.isArray(recentActivities) || Array.isArray(recentUsers)
         ? "Reload"
@@ -225,15 +225,18 @@ const AdminIndex = ({ pageDispatchers }) => {
       </Fieldset>
       <Fieldset
         title={getTitleText(recentActivities, "Recent Activities")}
-        action={userActivitiesActionButton}
+        action={recentActivitiesActionButton}
       >
-        <UserActivityTable text="user activities" values={recentActivities} />
+        <RecentActivityTable
+          text="recent activities"
+          values={recentActivities}
+        />
       </Fieldset>
       <Fieldset
         title={getTitleText(recentUsers, "Recent Users")}
-        action={userActivitiesActionButton}
+        action={recentActivitiesActionButton}
       >
-        <UserActivityTable text="recent users" values={recentUsers} />
+        <RecentActivityTable text="recent users" values={recentUsers} />
       </Fieldset>
     </div>
   )
@@ -265,7 +268,7 @@ const AdminIndex = ({ pageDispatchers }) => {
 
   function onSubmitSuccess(response, values, form) {
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     setSaveError(null)
     setSaveSuccess("Admin settings saved")
@@ -296,21 +299,21 @@ const AdminIndex = ({ pageDispatchers }) => {
       .finally(() => setActionLoading(false))
   }
 
-  function loadUserActivities() {
+  function loadRecentActivities() {
     setActionLoading(true)
-    return API.query(USER_ACTIVITIES, {})
+    return API.query(RECENT_ACTIVITIES, {})
       .then(data => {
-        const byActivity = data?.userActivities?.byActivity || []
+        const byActivity = data?.recentActivities?.byActivity || []
         /*
          * We need a stable identity to be used as Key by react.
          * Since this data is not coming from database it doesn't have a uuid by itself.
-         * "listKey" is used by react as stable identity while displaying these as list in UserActivityTable
+         * "listKey" is used by react as stable identity while displaying these as list in RecentActivityTable
          */
         byActivity.forEach(ua => (ua.listKey = uuidv4()))
         setRecentActivities(byActivity)
 
-        const byUser = data?.userActivities?.byUser || []
-        // "listKey" is used by react as stable identity while displaying these as list in UserActivityTable
+        const byUser = data?.recentActivities?.byUser || []
+        // "listKey" is used by react as stable identity while displaying these as list in RecentActivityTable
         byUser.forEach(ua => (ua.listKey = uuidv4()))
         setRecentUsers(byUser)
         setLastLoaded(moment())

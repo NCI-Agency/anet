@@ -24,18 +24,18 @@ import { Location, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, FormSelect } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Settings from "settings"
 
 const GQL_CREATE_LOCATION = gql`
-  mutation($location: LocationInput!) {
+  mutation ($location: LocationInput!) {
     createLocation(location: $location) {
       uuid
     }
   }
 `
 const GQL_UPDATE_LOCATION = gql`
-  mutation($location: LocationInput!) {
+  mutation ($location: LocationInput!) {
     updateLocation(location: $location)
   }
 `
@@ -56,7 +56,7 @@ const LOCATION_TYPES_SUPER_USER =
 
 const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
@@ -156,7 +156,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
 
         return (
           <div>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
@@ -330,7 +330,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   }
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -351,13 +351,13 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
         : initialValues.uuid
     })
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     if (!edit) {
-      history.replace(Location.pathForEdit(location))
+      navigate(Location.pathForEdit(location), { replace: true })
     }
-    history.push(Location.pathFor(location), {
-      success: "Location saved"
+    navigate(Location.pathFor(location), {
+      state: { success: "Location saved" }
     })
   }
 

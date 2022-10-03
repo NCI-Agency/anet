@@ -1,9 +1,14 @@
-import OnDemandAssessment from "components/assessments/OnDemandAssessments/OndemandAssessment"
+import AppContext from "components/AppContext"
+import OnDemandAssessment from "components/assessments/ondemand/OndemandAssessment"
 import { Person } from "models"
 import moment from "moment"
 import { useResponsiveNumberOfPeriods } from "periodUtils"
 import React, { useState } from "react"
+import { admin } from "../utils"
 import vettingAndScreeningDoc from "./vettingAndScreening.stories.mdx"
+
+const assessmentSubkey = "principalOndemandScreeningAndVetting"
+const assessmentKey = `fields.principal.person.assessments.${assessmentSubkey}`
 
 const personData = {
   avatar: null,
@@ -33,10 +38,15 @@ const personData = {
       createdAt: moment(),
       updatedAt: moment(),
       type: "ASSESSMENT",
-      text: `{"question2":"<p>Assessment rich text!</p>","question1":"pass1","expirationDate":${moment().add(
-        108,
-        "days"
-      )},"assessmentDate":${moment()},"__recurrence":"ondemand","__periodStart":"2021-10-08"}`,
+      assessmentKey,
+      text: JSON.stringify({
+        question2: "<p>Assessment rich text!</p>",
+        question1: "pass1",
+        expirationDate: moment().add(108, "days"),
+        assessmentDate: moment(),
+        __recurrence: "ondemand",
+        __periodStart: "2021-10-08"
+      }),
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
@@ -62,13 +72,15 @@ const personData = {
       createdAt: moment().subtract(3, "days"),
       updatedAt: moment().subtract(3, "days"),
       type: "ASSESSMENT",
-      text: `{"question2":"<p>Assessment rich text!</p>","question1":"pass3","expirationDate":${moment().subtract(
-        1,
-        "day"
-      )}, "assessmentDate":${moment().subtract(
-        3,
-        "days"
-      )},"__recurrence":"ondemand","__periodStart":"2021-10-08"}`,
+      assessmentKey,
+      text: JSON.stringify({
+        question2: "<p>Assessment rich text!</p>",
+        question1: "pass3",
+        expirationDate: moment().subtract(1, "day"),
+        assessmentDate: moment().subtract(3, "days"),
+        __recurrence: "ondemand",
+        __periodStart: "2021-10-08"
+      }),
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
@@ -94,13 +106,15 @@ const personData = {
       createdAt: moment().subtract(6, "days"),
       updatedAt: moment().subtract(6, "days"),
       type: "ASSESSMENT",
-      text: `{"question2":"<p>Assessment rich text!</p>","question1":"fail1","expirationDate":${moment().add(
-        102,
-        "days"
-      )},"assessmentDate":${moment().subtract(
-        6,
-        "days"
-      )},"__recurrence":"ondemand","__periodStart":"2021-10-08"}`,
+      assessmentKey,
+      text: JSON.stringify({
+        question2: "<p>Assessment rich text!</p>",
+        question1: "fail1",
+        expirationDate: moment().add(102, "days"),
+        assessmentDate: moment().subtract(6, "days"),
+        __recurrence: "ondemand",
+        __periodStart: "2021-10-08"
+      }),
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
@@ -126,13 +140,15 @@ const personData = {
       createdAt: moment().subtract(9, "days"),
       updatedAt: moment().subtract(9, "days"),
       type: "ASSESSMENT",
-      text: `{"question2":"<p>Assessment rich text!</p>","question1":"fail3","expirationDate":${moment().subtract(
-        6,
-        "days"
-      )},"assessmentDate":${moment().subtract(
-        9,
-        "days"
-      )},"__recurrence":"ondemand","__periodStart":"2021-10-08"}`,
+      assessmentKey,
+      text: JSON.stringify({
+        question2: "<p>Assessment rich text!</p>",
+        question1: "fail3",
+        expirationDate: moment().subtract(6, "days"),
+        assessmentDate: moment().subtract(9, "days"),
+        __recurrence: "ondemand",
+        __periodStart: "2021-10-08"
+      }),
       author: {
         uuid: "6fc24fab-f869-49de-bfb9-3f0eb3a36488",
         name: "DMIN, Arthur",
@@ -172,20 +188,27 @@ export const VettingAndScreening = () => {
   const contRef = useResponsiveNumberOfPeriods(setNumberOfPeriods)
   return (
     <div ref={contRef}>
-      <OnDemandAssessment
-        key="ondemand"
-        style={{ flex: "0 0 100%" }}
-        entity={person}
-        entityType={Person}
-        periodsDetails={{
-          recurrence: "ondemand",
-          numberOfPeriods: numberOfPeriods
+      <AppContext.Provider
+        value={{
+          currentUser: admin
         }}
-        canAddAssessment={true}
-        onUpdateAssessment={() => {
-          console.log("Assessment updated")
-        }}
-      />
+      >
+        <OnDemandAssessment
+          key="ondemand"
+          assessmentKey={assessmentSubkey}
+          style={{ flex: "0 0 100%" }}
+          entity={person}
+          entityType={Person}
+          periodsDetails={{
+            recurrence: "ondemand",
+            numberOfPeriods
+          }}
+          canAddAssessment
+          onUpdateAssessment={() => {
+            console.log("Assessment updated")
+          }}
+        />
+      </AppContext.Provider>
     </div>
   )
 }

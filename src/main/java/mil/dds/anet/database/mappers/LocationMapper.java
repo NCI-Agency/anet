@@ -12,13 +12,13 @@ public class LocationMapper implements RowMapper<Location> {
   @Override
   public Location map(ResultSet rs, StatementContext ctx) throws SQLException {
     Location l = new Location();
-    MapperUtils.setCustomizableBeanFields(l, rs, null);
-    l.setName(rs.getString("name"));
-    l.setStatus(MapperUtils.getEnumIdx(rs, "status", Location.Status.class));
+    MapperUtils.setCustomizableBeanFields(l, rs, "locations");
+    l.setName(rs.getString("locations_name"));
+    l.setStatus(MapperUtils.getEnumIdx(rs, "locations_status", Location.Status.class));
     // preserve NULL values; when NULL there are no coordinates set:
-    l.setLat(MapperUtils.getOptionalDouble(rs, "lat"));
-    l.setLng(MapperUtils.getOptionalDouble(rs, "lng"));
-    l.setType(LocationType.valueOfCode(rs.getString("type")));
+    l.setLat(MapperUtils.getOptionalDouble(rs, "locations_lat"));
+    l.setLng(MapperUtils.getOptionalDouble(rs, "locations_lng"));
+    l.setType(LocationType.valueOfCode(rs.getString("locations_type")));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

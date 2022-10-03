@@ -12,13 +12,14 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import * as d3 from "d3"
+import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
 import ContainerDimensions from "react-container-dimensions"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {
@@ -107,8 +108,8 @@ const Chart = ({
             xLabel="dayOfWeekString"
             onBarClick={goToSelection}
             tooltip={d => `
-              <h4>${d.dayOfWeekString}</h4>
-              <p>${d.reportsCount}</p>
+              <h4>${_escape(d.dayOfWeekString)}</h4>
+              <p>${_escape(d.reportsCount)}</p>
             `}
             selectedBarClass={selectedBarClass}
             selectedBar={

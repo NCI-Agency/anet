@@ -86,6 +86,14 @@ const GQL_GET_REPORT = gql`
         }
         customFields
       }
+      approvalStep {
+        uuid
+        name
+        approvers {
+          uuid
+        }
+        nextStepUuid
+      }
       reportSensitiveInformation {
         uuid
         text

@@ -43,7 +43,7 @@ public final class BatchingUtils {
   private final DataLoaderOptions dataLoaderOptions;
 
   public BatchingUtils(AnetObjectEngine engine, boolean batchingEnabled, boolean cachingEnabled) {
-    final int maxBatchSize = DaoUtils.isMsSql() ? 1000 : 25000;
+    final int maxBatchSize = 25000;
     // Give each registry its own thread pool
     dispatcherService = Executors.newFixedThreadPool(3);
     dataLoaderRegistry = new DataLoaderRegistry();

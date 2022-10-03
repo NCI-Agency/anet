@@ -15,7 +15,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_REPORT = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     report(uuid: $uuid) {
       uuid
       intent

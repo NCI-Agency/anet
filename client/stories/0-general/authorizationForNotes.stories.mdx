@@ -1,0 +1,145 @@
+import { Meta } from "@storybook/addon-docs"
+
+<Meta title="0. ANET Stories/Authorization for Notes" />
+
+## Authorization for notes
+
+There are (or there will be) four basic types of notes:
+
+-   _FREE_TEXT_
+-   _DIAGRAM_ (future)
+-   _CHANGE_RECORD_
+-   _ASSESSMENT_
+
+There's also a deprecated type _PARTNER_ASSESSMENT_ that was only used in RSM.
+
+There are two main GraphQL endpoints to manipulate notes, through:
+
+-   `NoteResource::createNote`, `NoteResource::updateNote`, `NoteResource::deleteNote`, which all
+    three take exactly one note
+-   `ReportResource::updateReportAssessments`, which can take multiple instant assessments for a
+    report (assessments for people and tasks of that report can be combined in this call)
+
+These all fully check whether the note or notes passed to it are completely valid. And more
+importantly, they also check whether the user is authorized to perform this action.
+
+## _FREE_TEXT_
+
+These are the notes in the sidebar. A _FREE_TEXT_ note can be linked to any number of related
+objects.
+
+-   admin can read, create, update and delete any _FREE_TEXT_ note
+-   user can read all _FREE_TEXT_ notes for objects they are allowed to see
+-   any user can create _FREE_TEXT_ notes
+-   user can update a _FREE_TEXT_ note if they are the original author
+-   user can delete a _FREE_TEXT_ note if they are the original author
+
+## _DIAGRAM_
+
+These are the (future) notes that will hold the new diagrams. A _DIAGRAM_ note can be linked to any
+number of related objects.
+
+-   admin can read, create, update and delete any _DIAGRAM_ note
+-   user can read all _DIAGRAM_ notes for objects they are allowed to see
+-   any user can create _DIAGRAM_ notes
+-   user can update a _DIAGRAM_ note if they are the original author
+-   user can delete a _DIAGRAM_ note if they are the original author
+
+## _CHANGE_RECORD_
+
+Only used when tasks are updated, to record changes in `customFieldEnum1` ("Project status"), which
+requires the user to fill in a reason for the change as well. A _CHANGE_RECORD_ note must be linked
+to exactly one related object: the task it refers to.
+
+-   admin can read, create, update and delete any _CHANGE_RECORD_
+-   user can read all _CHANGE_RECORD_ notes for objects they are allowed to see
+-   user can create a new _CHANGE_RECORD_, with authorization the same as for the task that is
+    updated; note: task permission for changing project status (resulting in a CHANGE_RECORD) is
+    currently restricted to admins, see commit a74e8abe9!
+-   user can not update a _CHANGE_RECORD_
+-   user can not delete a _CHANGE_RECORD_
+
+## _ASSESSMENT_
+
+There are three basic types of assessments: instant, on-demand and periodic:
+
+-   **instant** ("once") assessments are linked to an engagement report, and concern people
+    (specific attendees at the engagement) or tasks (that have been addressed in the engagement);
+    these should have exactly two related objects: one for the person or task being assessed, and
+    one for the report that holds the assessment
+-   **on-demand** ("ondemand") assessments are for people, like the Vetting & Screening; these
+    should have an `assessmentDate` and optionally an `expirationDate`, and exactly one related
+    object: the person being assessed
+-   **periodic** (daily, weekly, biweekly, semimonthly, monthly, quarterly, semiannually, annually)
+    assessments can be for people or tasks, and should have at most one assessment per defined
+    period; these should have exactly one related object: for the person or task being assessed
+
+Note that authorization groups are applicable only to _ASSESSMENT_ notes. Assessment definitions are
+distinguished by the assessmentKey, which is defined in the dictionary and recorded in the note.
+Using this key, the type of assessment and its corresponding (optional) authorization groups can be
+looked up in the dictionary, and checked against the note. We distinguish groups with read
+permission and write permission (which includes create, update and delete, as well as read).
+Example:
+
+```
+fields:
+  person:
+    advisor:
+      assessments:
+        advisorOnceReportLinguist:
+          recurrence: once
+          relatedObjectType: report
+          authorizationGroupUuids:
+            read: ['c21e7321-7ec5-4837-8805-a302f9575754']
+            write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
+          questions:
+            …
+          questionSets:
+            …
+```
+
+### Instant assessments
+
+-   user can read, create, update or delete instant assessments if they are an author of the report
+-   user can read, create, update or delete instant assessments if they are an approver for the
+    report
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    instant assessment
+-   if authorization groups for read are defined in the dictionary, user can read instant
+    assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete instant assessments if they are in these groups
+
+### On-demand assessments
+
+-   admin can read, create, update and delete any on-demand assessment
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    on-demand assessment
+-   if authorization groups for read are defined in the dictionary, user can read on-demand
+    assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete on-demand assessments if they are in these groups
+
+### Periodic assessments
+
+#### For a task:
+
+-   admin can read, create, update and delete any periodic assessment
+-   user has to be responsible for a task to be able to read, create, update or delete
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    periodic assessment
+-   if authorization groups for read are defined in the dictionary, user can read periodic
+    assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete periodic assessments if they are in these groups
+
+#### For a person:
+
+-   admin can read, create, update and delete any periodic assessment
+-   person has to be user's counterpart to be able to read, create, update or delete
+-   if no authorization groups for read or write are defined in the dictionary, user can read any
+    periodic assessment
+-   if authorization groups for read are defined in the dictionary, user can read periodic
+    assessments if they are in these groups
+-   if authorization groups for write are defined in the dictionary, user can read, create, update
+    or delete periodic assessments if they are in these groups

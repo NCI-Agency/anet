@@ -2,6 +2,8 @@ import { gql } from "@apollo/client"
 import styled from "@emotion/styled"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
+import AppContext from "components/AppContext"
+import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
@@ -12,14 +14,13 @@ import CompactTable, {
   CompactTitle,
   CompactView,
   FullColumn,
-  InnerTable,
   PAGE_SIZES
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -29,15 +30,14 @@ import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
-import _groupBy from "lodash/groupBy"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -217,8 +217,9 @@ const GQL_GET_REPORT = gql`
 `
 
 const CompactReportView = ({ pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { uuid } = useParams()
+  const { currentUser } = useContext(AppContext)
   const [pageSize, setPageSize] = useState(PAGE_SIZES.A4)
   const { loading, error, data } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -262,6 +263,9 @@ const CompactReportView = ({ pageDispatchers }) => {
   report = Object.assign(report, report.getTasksEngagementAssessments())
   report = Object.assign(report, report.getAttendeesEngagementAssessments())
   const backgroundText = report.isDraft() ? "DRAFT" : ""
+  const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
+  // Author can always read assessments
+  const canReadAssessments = isAuthor
   return (
     <Formik
       validationSchema={Report.yupSchema}
@@ -384,7 +388,7 @@ const CompactReportView = ({ pageDispatchers }) => {
   )
 
   function returnToDefaultPage() {
-    history.push(`/reports/${report.uuid}`)
+    navigate("..")
   }
 
   function printReport() {
@@ -442,166 +446,46 @@ const CompactReportView = ({ pageDispatchers }) => {
 
   function getTasksAndAssessments() {
     return (
-      <InnerTable>
-        <FullColumn>
-          {report.tasks.map(task => {
-            const taskInstantAssessmentConfig = Model.filterAssessmentConfig(
-              task.getInstantAssessmentConfig(),
-              task,
-              report
-            )
-            // return only name and objective if no assessment
-            return (
-              <CompactRow
-                key={task.uuid}
-                label={<LinkTo modelType={Task.resourceName} model={task} />}
-                content={
-                  <InnerTable>
-                    <FullColumn>
-                      <CompactRow
-                        label={Settings.fields.task.topLevel.shortLabel}
-                        content={
-                          task.customFieldRef1 && (
-                            <LinkTo
-                              modelType="Task"
-                              model={task.customFieldRef1}
-                            >
-                              {task.customFieldRef1.shortName}
-                            </LinkTo>
-                          )
-                        }
-                      />
-                      {optionalFields.assessments.active &&
-                        taskInstantAssessmentConfig && (
-                          <ReadonlyCustomFields
-                            parentFieldName={`${Report.TASKS_ASSESSMENTS_PARENT_FIELD}.${task.uuid}`}
-                            fieldsConfig={taskInstantAssessmentConfig}
-                            values={report}
-                            vertical
-                            isCompact
-                          />
-                      )}
-                    </FullColumn>
-                  </InnerTable>
-                }
-              />
-            )
-          })}
-        </FullColumn>
-      </InnerTable>
+      // return only name and objective if no assessment
+      optionalFields.assessments.active ? (
+        <InstantAssessmentsContainerField
+          entityType={Task}
+          entities={report.tasks}
+          relatedObject={report}
+          parentFieldName={Report.TASKS_ASSESSMENTS_PARENT_FIELD}
+          formikProps={{
+            values: report
+          }}
+          canRead={canReadAssessments}
+          readonly
+        />
+      ) : (
+        report.tasks.map(task => (
+          <LinkTo key={task.uuid} modelType="Task" model={task} />
+        ))
+      )
     )
   }
 
   function getAttendeesAndAssessments(role) {
-    const attendees = getAttendessByRole(role)
-
-    // to keep track of different organization, if it is same consecutively, don't show for compactness
-    let prevDiffOrgName = ""
-    return (
-      <InnerTable>
-        <FullColumn>
-          {attendees.map(attendee => {
-            const attendeeInstantAssessmentConfig = Model.filterAssessmentConfig(
-              attendee.getInstantAssessmentConfig(),
-              attendee,
-              report
-            )
-            const renderOrgName =
-              prevDiffOrgName !== attendee.position?.organization?.shortName
-            prevDiffOrgName = renderOrgName
-              ? attendee.position?.organization?.shortName
-              : prevDiffOrgName
-            return (
-              <CompactRow
-                key={attendee.uuid}
-                label={
-                  <>
-                    <LinkTo modelType="Person" model={attendee} />
-                    {(renderOrgName || !attendee.position?.organization) && (
-                      <LinkTo
-                        modelType="Organization"
-                        model={
-                          attendee.position && attendee.position.organization
-                        }
-                        whenUnspecified=" 'NA'"
-                      />
-                    )}
-                  </>
-                }
-                content={
-                  optionalFields.assessments.active &&
-                  attendeeInstantAssessmentConfig && (
-                    <InnerTable>
-                      <FullColumn>
-                        <ReadonlyCustomFields
-                          parentFieldName={`${Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}.${attendee.uuid}`}
-                          fieldsConfig={attendeeInstantAssessmentConfig}
-                          values={report}
-                          vertical
-                          isCompact
-                        />
-                      </FullColumn>
-                    </InnerTable>
-                  )
-                }
-                style={`
-                  th {
-                    line-height: 1.4;
-                    width: max-content;
-                  }
-                  th label {
-                    margin-right: 4px;
-                  }
-                `}
-              />
-            )
-          })}
-        </FullColumn>
-      </InnerTable>
+    const attendees = report.attendees.filter(at => at.role === role)
+    return optionalFields.assessments.active ? (
+      <InstantAssessmentsContainerField
+        entityType={Person}
+        entities={attendees}
+        relatedObject={report}
+        parentFieldName={Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD}
+        formikProps={{
+          values: report
+        }}
+        canRead={canReadAssessments}
+        readonly
+      />
+    ) : (
+      attendees.map(attendee => (
+        <LinkTo key={attendee.uuid} modelType="Person" model={attendee} />
+      ))
     )
-  }
-
-  function getAttendessByRole(role) {
-    const primaryOrgName =
-      Report.getPrimaryAttendee(report.attendees, role)?.position?.organization
-        ?.shortName || ""
-
-    const noOrgName = "__noOrg__"
-
-    const people = report.attendees.filter(ra => ra.role === role)
-
-    const peopleGroupedByOrg = _groupBy(
-      people,
-      person => person?.position?.organization?.shortName || noOrgName
-    )
-
-    // sort organizations, primary person's org first, empty orgs last
-    const sortedOrgNames = Object.keys(peopleGroupedByOrg).sort((o1, o2) => {
-      if (o1 === primaryOrgName || o2 === noOrgName) {
-        return -1
-      }
-      if (o2 === primaryOrgName || o1 === noOrgName) {
-        return 1
-      }
-      return o1.localeCompare(o2)
-    })
-
-    // populate people list from sorted orgs
-    return sortedOrgNames.reduce(
-      (result, orgName) => [
-        ...result,
-        ...peopleGroupedByOrg[orgName].sort(compareAttendees)
-      ],
-      []
-    )
-  }
-
-  function compareAttendees(a1, a2) {
-    return a1.primary
-      ? -1
-      : a2.primary
-        ? 1
-        : a1.toString().localeCompare(a2.toString())
   }
 }
 

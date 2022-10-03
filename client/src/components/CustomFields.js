@@ -384,10 +384,10 @@ const ArrayOfObjectsField = fieldProps => {
     vertical,
     children
   } = fieldProps
-  const value = useMemo(() => getArrayObjectValue(formikProps.values, name), [
-    formikProps.values,
-    name
-  ])
+  const value = useMemo(
+    () => getArrayObjectValue(formikProps.values, name),
+    [formikProps.values, name]
+  )
   const objDefault = useMemo(() => {
     const objDefault = {}
     const objSchema = createYupObjectShape(
@@ -586,7 +586,7 @@ const AnetObjectField = ({
               <td>
                 <LinkAnetEntity type={fieldValue.type} uuid={fieldValue.uuid} />
               </td>
-              <td className="col-xs-1">
+              <td className="col-1">
                 <RemoveButton
                   title={`Unlink this ${fieldValue.type}`}
                   onClick={() => setFieldValue(name, null)}
@@ -695,7 +695,7 @@ const ArrayOfAnetObjectsField = ({
                 <td>
                   <LinkAnetEntity type={entity.type} uuid={entity.uuid} />
                 </td>
-                <td className="col-xs-1">
+                <td className="col-1">
                   <RemoveButton
                     title={`Unlink this ${entity.type}`}
                     onClick={() => {
@@ -797,9 +797,8 @@ export function initInvisibleFields(
 ) {
   if (anetObj[parentFieldName]) {
     // set initial invisible custom fields
-    anetObj[parentFieldName][
-      INVISIBLE_CUSTOM_FIELDS_FIELD
-    ] = getInvisibleFields(config, parentFieldName, anetObj)
+    anetObj[parentFieldName][INVISIBLE_CUSTOM_FIELDS_FIELD] =
+      getInvisibleFields(config, parentFieldName, anetObj)
   }
 }
 
@@ -846,10 +845,15 @@ export function getInvisibleFields(
   return curInvisibleFields
 }
 
-const filterDeprecatedFields = fieldsConfig => {
+const filterDeprecatedFields = (fieldsConfig, values, parentFieldName) => {
   const deprecatedFields = Object.entries(fieldsConfig).reduce(
     (accum, [fieldName, fieldConfig]) => {
-      fieldConfig.deprecated && accum.push(fieldName)
+      if (fieldConfig.deprecated) {
+        const hasNoValue = isFieldValueNotSet(
+          values[parentFieldName][fieldName]
+        )
+        hasNoValue && accum.push(fieldName)
+      }
       return accum
     },
     []
@@ -861,13 +865,29 @@ const filterDeprecatedFields = fieldsConfig => {
   return deprecatedFieldsFiltered
 }
 
+const isFieldValueNotSet = value => {
+  return (
+    value === undefined ||
+    value === null ||
+    Number.isNaN(value) ||
+    (typeof value === "object" &&
+      !(value instanceof Date) &&
+      Object.keys(value).length === 0) ||
+    (typeof value === "string" && value.trim().length === 0)
+  )
+}
+
 export const CustomFieldsContainer = props => {
   const {
     parentFieldName,
     formikProps: { values, setFieldValue },
-    fieldsConfig
+    fieldsConfig,
+    setShowCustomFields
   } = props
-  const deprecatedFieldsFiltered = filterDeprecatedFields(fieldsConfig)
+  const deprecatedFieldsFiltered = useMemo(
+    () => filterDeprecatedFields(fieldsConfig, values, parentFieldName),
+    [fieldsConfig, parentFieldName, values]
+  )
   const invisibleFields = useMemo(
     () => getInvisibleFields(fieldsConfig, parentFieldName, values),
     [fieldsConfig, parentFieldName, values]
@@ -876,9 +896,15 @@ export const CustomFieldsContainer = props => {
   const invisibleFieldsFieldName = `${parentFieldName}.${INVISIBLE_CUSTOM_FIELDS_FIELD}`
   useEffect(() => {
     if (!_isEqual(_get(values, invisibleFieldsFieldName), invisibleFields)) {
-      setFieldValue(invisibleFieldsFieldName, invisibleFields, true)
+      setFieldValue(invisibleFieldsFieldName, invisibleFields, false)
     }
   }, [invisibleFields, values, invisibleFieldsFieldName, setFieldValue])
+
+  useEffect(() => {
+    if (setShowCustomFields) {
+      setShowCustomFields(!_isEmpty(deprecatedFieldsFiltered))
+    }
+  }, [setShowCustomFields, deprecatedFieldsFiltered])
 
   return (
     <>
@@ -894,6 +920,7 @@ CustomFieldsContainer.propTypes = {
   fieldsConfig: PropTypes.object,
   formikProps: PropTypes.object,
   parentFieldName: PropTypes.string.isRequired,
+  setShowCustomFields: PropTypes.func,
   vertical: PropTypes.bool
 }
 CustomFieldsContainer.defaultProps = {
@@ -914,6 +941,7 @@ export const getFieldPropsFromFieldConfig = fieldConfig => {
     visibleWhen,
     test,
     objectFields,
+    deprecated,
     ...fieldProps
   } = fieldConfig
   return fieldProps
@@ -926,35 +954,35 @@ const CustomField = ({
   invisibleFields,
   vertical
 }) => {
-  const { type, helpText, authorizationGroupUuids } = fieldConfig
+  const { type, helpText, authorizationGroupUuids, deprecated } = fieldConfig
   let extraColElem
-  if (authorizationGroupUuids) {
-    if (fieldConfig.authorizationGroupUuids) {
-      extraColElem = (
-        <div>
-          <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
-            <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
-          </Tooltip2>
-        </div>
-      )
-    }
+  if (authorizationGroupUuids || deprecated) {
+    extraColElem = (
+      <div>
+        <Tooltip2 content={fieldConfig.tooltipText} intent={Intent.WARNING}>
+          <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
+        </Tooltip2>
+      </div>
+    )
   }
   const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
   const { setFieldValue, setFieldTouched, validateForm } = formikProps
   const validateFormDebounced = useDebouncedCallback(validateForm, 400) // with validateField it somehow doesn't work
   const handleChange = useMemo(
-    () => (value, shouldValidate = true) => {
-      let val = value?.target?.value !== undefined ? value.target.value : value
-      if (type === "number" && val === "") {
-        val = null
-      }
-      const sv = shouldValidate === undefined ? true : shouldValidate
-      setFieldTouched(fieldName, true, false)
-      setFieldValue(fieldName, val, sv)
-      if (!sv) {
-        validateFormDebounced()
-      }
-    },
+    () =>
+      (value, shouldValidate = true) => {
+        let val =
+          value?.target?.value !== undefined ? value.target.value : value
+        if (type === "number" && val === "") {
+          val = null
+        }
+        const sv = shouldValidate === undefined ? true : shouldValidate
+        setFieldTouched(fieldName, true, false)
+        setFieldValue(fieldName, val, sv)
+        if (!sv) {
+          validateFormDebounced()
+        }
+      },
     [fieldName, setFieldTouched, setFieldValue, validateFormDebounced, type]
   )
   const FieldComponent = FIELD_COMPONENTS[type]
@@ -1079,11 +1107,24 @@ export const ReadonlyCustomFields = ({
   vertical,
   isCompact,
   extraColElem,
-  labelColumnWidth
+  labelColumnWidth,
+  setShowCustomFields
 }) => {
+  const deprecatedFieldsFiltered = filterDeprecatedFields(
+    fieldsConfig,
+    values,
+    parentFieldName
+  )
+
+  useEffect(() => {
+    if (setShowCustomFields) {
+      setShowCustomFields(!_isEmpty(deprecatedFieldsFiltered))
+    }
+  }, [setShowCustomFields, deprecatedFieldsFiltered])
+
   return (
     <>
-      {Object.entries(fieldsConfig).map(([key, fieldConfig]) => {
+      {Object.entries(deprecatedFieldsFiltered).map(([key, fieldConfig]) => {
         const fieldName = `${parentFieldName}.${key}`
         const fieldProps = getFieldPropsFromFieldConfig(fieldConfig)
         const { type } = fieldConfig
@@ -1129,7 +1170,8 @@ ReadonlyCustomFields.propTypes = {
   vertical: PropTypes.bool,
   isCompact: PropTypes.bool,
   extraColElem: PropTypes.object,
-  labelColumnWidth: PropTypes.number
+  labelColumnWidth: PropTypes.number,
+  setShowCustomFields: PropTypes.func
 }
 ReadonlyCustomFields.defaultProps = {
   parentFieldName: DEFAULT_CUSTOM_FIELDS_PARENT,

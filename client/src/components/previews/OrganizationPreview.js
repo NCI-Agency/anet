@@ -12,7 +12,7 @@ import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
 
 const GQL_GET_ORGANIZATION = gql`
-  query($uuid: String) {
+  query ($uuid: String) {
     organization(uuid: $uuid) {
       uuid
       shortName

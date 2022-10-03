@@ -6,13 +6,23 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.CustomSensitiveInformation;
+import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +30,11 @@ import org.slf4j.LoggerFactory;
 public class DaoUtils {
 
   public enum DbType {
-    MSSQL("sqlserver"), POSTGRESQL("postgresql");
+    POSTGRESQL("postgresql");
 
-    private String jdbcTag;
+    private final String jdbcTag;
 
-    private DbType(String tag) {
+    DbType(String tag) {
       jdbcTag = tag;
     }
 
@@ -75,10 +85,6 @@ public class DaoUtils {
     return DB_TYPE;
   }
 
-  public static boolean isMsSql() {
-    return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.MSSQL;
-  }
-
   public static boolean isPostgresql() {
     return getDbType(AnetObjectEngine.getInstance().getDbUrl()) == DbType.POSTGRESQL;
   }
@@ -100,7 +106,7 @@ public class DaoUtils {
   }
 
   public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {
-    final List<String> fieldAliases = new LinkedList<String>();
+    final List<String> fieldAliases = new LinkedList<>();
     for (String field : fields) {
       final StringBuilder sb = new StringBuilder(String.format("\"%s\".\"%s\"", tableName, field));
       if (addAs) {
@@ -119,14 +125,68 @@ public class DaoUtils {
   }
 
   public static Person getUserFromContext(Map<String, Object> context) {
+    if (context == null) {
+      // Called from e.g. merge
+      return null;
+    }
     return (Person) context.get("user");
+  }
+
+  public static Position getPosition(final Person user) {
+    return user == null ? null : user.loadPosition();
   }
 
   public static void saveCustomSensitiveInformation(final Person user, final String tableName,
       final String uuid, final List<CustomSensitiveInformation> customSensitiveInformation) {
     AnetObjectEngine.getInstance().getCustomSensitiveInformationDao()
-        .insertOrUpdateCustomSensitiveInformation(user, tableName, uuid,
-            customSensitiveInformation);
+        .insertOrUpdateCustomSensitiveInformation(user, getAuthorizationGroupUuids(user), tableName,
+            uuid, customSensitiveInformation);
+  }
+
+  public static Set<String> getAuthorizationGroupUuids(final Person user) {
+    final Position position = getPosition(user);
+    if (user == null || position == null) {
+      return Collections.emptySet();
+    }
+    final List<AuthorizationGroup> authorizationGroups =
+        position.loadAuthorizationGroups(AnetObjectEngine.getInstance().getContext()).join();
+    return authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
+  }
+
+  public static boolean isUserInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
+      final Note note, final boolean forReading) {
+    // Check against the dictionary whether the user is authorized
+    final String authGroupKeyFmt = "%1$s.authorizationGroupUuids.%2$s";
+    final List<String> authorizationGroupUuids = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    final List<String> writeAuthorizationGroupUuids =
+        (List<String>) AnetObjectEngine.getConfiguration()
+            .getDictionaryEntry(String.format(authGroupKeyFmt, note.getAssessmentKey(), "write"));
+    // Note: write access implies read access!
+    if (writeAuthorizationGroupUuids != null) {
+      authorizationGroupUuids.addAll(writeAuthorizationGroupUuids);
+    }
+    if (forReading) {
+      @SuppressWarnings("unchecked")
+      final List<String> readAuthorizationGroupUuids =
+          (List<String>) AnetObjectEngine.getConfiguration()
+              .getDictionaryEntry(String.format(authGroupKeyFmt, note.getAssessmentKey(), "read"));
+      if (readAuthorizationGroupUuids != null) {
+        authorizationGroupUuids.addAll(readAuthorizationGroupUuids);
+      }
+    }
+    if (authorizationGroupUuids.isEmpty()) {
+      // No authorization groups defined for this assessment: read is allowed, write is denied
+      return forReading;
+    }
+    return DaoUtils.isInAuthorizationGroup(userAuthorizationGroupUuids, authorizationGroupUuids);
+  }
+
+  public static boolean isInAuthorizationGroup(final Set<String> userAuthorizationGroupUuids,
+      final List<String> checkAuthorizationGroupUuids) {
+    final Set<String> checkAuthGroupUuids = new HashSet<>(checkAuthorizationGroupUuids);
+    checkAuthGroupUuids.retainAll(userAuthorizationGroupUuids);
+    return !checkAuthGroupUuids.isEmpty();
   }
 
   public static ZoneId getServerNativeZoneId() {
@@ -143,8 +203,8 @@ public class DaoUtils {
 
   public static void addInstantAsLocalDateTime(Map<String, Object> args, String parameterName,
       Instant parameterValue) {
-    // Likewise, the conversion by the MSSQL JDBC driver from java.time.Instant to a query parameter
-    // uses the local time zone, so use java.time.LocalDateTime with an explicit time zone.
+    // For the JDBC driver, convert from java.time.Instant to java.time.LocalDateTime with an
+    // explicit time zone.
     final LocalDateTime localValue;
     if (parameterValue == null) {
       localValue = null;
@@ -181,5 +241,11 @@ public class DaoUtils {
       return Instant.ofEpochMilli(now + input.toEpochMilli());
     }
     return input;
+  }
+
+  public static Instant getCurrentMinute() {
+    final ZonedDateTime now = Instant.now().atZone(getServerNativeZoneId());
+    final ZonedDateTime bom = now.truncatedTo(ChronoUnit.MINUTES);
+    return bom.toInstant();
   }
 }

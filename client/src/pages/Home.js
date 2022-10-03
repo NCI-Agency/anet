@@ -24,12 +24,12 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button, Col, Container, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 
 const GQL_GET_REPORT_COUNT = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
     }
@@ -37,7 +37,7 @@ const GQL_GET_REPORT_COUNT = gql`
 `
 
 const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const reportQuery = Object.assign({}, query.query, {
     // we're only interested in the totalCount, so just get at most one report
     pageSize: 1
@@ -80,7 +80,7 @@ const HomeTile = ({ query, setSearchQuery, pageDispatchers }) => {
       filters: filters,
       text: text
     })
-    history.push("/search")
+    navigate("/search")
   }
 }
 

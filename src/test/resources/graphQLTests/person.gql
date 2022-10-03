@@ -10,6 +10,7 @@ person(uuid:"${personUuid}") {
   emailAddress
   phoneNumber
   domainUsername
+  openIdSubject
   biography
   country
   gender

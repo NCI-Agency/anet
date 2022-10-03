@@ -1,8 +1,8 @@
+import PieWidget from "components/aggregations/PieWidget"
 import {
   aggregationWidgetDefaultProps,
   aggregationWidgetPropTypes
 } from "components/aggregations/utils"
-import PieWidget from "components/aggregations/PieWidget"
 import LikertScale from "components/graphs/LikertScale"
 import _isEmpty from "lodash/isEmpty"
 import React from "react"

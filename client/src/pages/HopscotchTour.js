@@ -15,7 +15,7 @@ const principalPositionSingular = Settings.fields.principal.position.name
 const advisorPositionCode = Settings.fields.advisor.position.code.label
 const principalPositionCode = Settings.fields.principal.position.code.label
 
-const userTour = (currentUser, history) => {
+const userTour = (currentUser, navigate) => {
   return {
     id: "home",
     steps: [
@@ -68,7 +68,7 @@ const userTour = (currentUser, history) => {
   }
 }
 
-const superUserTour = (currentUser, history) => {
+const superUserTour = (currentUser, navigate) => {
   return {
     id: "home",
     steps: [
@@ -119,14 +119,14 @@ const superUserTour = (currentUser, history) => {
         fixedElement: true,
         multipage: true,
         onNext: () =>
-          history.push(Organization.pathFor(currentUser.position.organization))
+          navigate(Organization.pathFor(currentUser.position.organization))
       },
       {}
     ]
   }
 }
 
-const reportTour = (currentUser, history) => {
+const reportTour = (currentUser, navigate) => {
   return {
     id: "report",
     steps: [
@@ -229,7 +229,7 @@ const reportTour = (currentUser, history) => {
   }
 }
 
-const orgTour = (currentUser, history) => {
+const orgTour = (currentUser, navigate) => {
   return {
     id: "org",
     steps: [
@@ -304,7 +304,7 @@ const orgTour = (currentUser, history) => {
   }
 }
 
-const positionTour = (currentUser, history) => {
+const positionTour = (currentUser, navigate) => {
   return {
     id: "position",
     steps: [
@@ -356,7 +356,7 @@ const positionTour = (currentUser, history) => {
   }
 }
 
-const personTour = (currentUser, history) => {
+const personTour = (currentUser, navigate) => {
   return {
     id: "person",
     steps: [

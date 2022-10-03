@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 public class MapperUtils {
 
+  public static final String TOTAL_COUNT_COLUMN = "totalCount";
+
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -136,8 +138,8 @@ public class MapperUtils {
       return null;
     }
     // We would like to do <code>rs.getObject(columnName, java.time.Instant.class)</code>
-    // but the MSSQL JDBC driver does not support that (yet).
-    // However, as of the 7.1.0 preview, at least java.time.LocalDateTime *is* supported.
+    // but the JDBC driver does not support that (yet), so use java.time.LocalDateTime instead
+    // and convert it.
     final LocalDateTime result = rs.getObject(columnName, LocalDateTime.class);
     if (result != null) {
       return result.toInstant(DaoUtils.getServerNativeZoneOffset());

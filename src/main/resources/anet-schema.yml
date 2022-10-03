@@ -9,7 +9,6 @@ $defs:
 # base definition for a value with a description
   describedValue:
     type: object
-    additionalProperties: true
     required: [value, description]
     properties:
       value:
@@ -20,7 +19,6 @@ $defs:
 # base definition for all Fields. Every field is assumed to have a label
   labeledField:
     type: object
-    additionalProperties: true
     required: [label]
     properties:
       label:
@@ -34,6 +32,7 @@ $defs:
 
 # definition for fields that allow free-form entry
   inputField:
+    unevaluatedProperties: false
     allOf:
     - "$ref": "#/$defs/labeledField"
     - properties:
@@ -56,6 +55,7 @@ $defs:
 
 # definition for fields that present a choice to be selected from
   choiceField:
+    unevaluatedProperties: false
     allOf:
     - "$ref": "#/$defs/labeledField"
     - properties:
@@ -70,7 +70,7 @@ $defs:
 # definition for custom fields
   customField:
     type: object
-    additionalProperties: false
+    unevaluatedProperties: true # FIXME: ugly work-around for customSensitiveInformation
     required: [type]
     properties:
       test:
@@ -127,40 +127,6 @@ $defs:
           widget:
             type: string
             enum: [default, calendar, iqrBoxPlot, likertScale, likertScaleAndPie, pie, reportsByTask, reportsMap, richText]
-      # TODO: The following properties should not be here as these are only dependency fields.
-      # When we have proper handling of `unevaluatedProperties` this section can be removed.
-      choices:
-        type: object
-      addButtonLabel:
-        type: string
-      objectLabel:
-        type: string
-      objectFields:
-        type: object
-        additionalProperties:
-          "$ref": "#/$defs/customField"
-      types:
-        type: array
-      widget:
-        type: string
-        enum: [likertScale, richTextEditor, default]
-      levels:
-        type: array
-        uniqueItems: true
-        items:
-          type: object
-          title: likert scale range
-          properties:
-            color:
-              type: string
-            endValue:
-              type: number
-            label:
-              type: string
-      authorizationGroupUuids:
-        type: array
-      tooltipText:
-        type: string
 
     dependentSchemas:
       type:
@@ -263,7 +229,7 @@ $defs:
 # definition for assessment configuration
   assessmentDef:
     type: object
-    additionalProperties: false
+    unevaluatedProperties: false
     required: [recurrence]
     properties:
       recurrence:
@@ -280,6 +246,28 @@ $defs:
         minimum: 1
         title: The number of days before an on-demand assessment expires
         description: Used in the UI to determine which on-demand assessments have expired
+      label:
+        title: assessment label
+        type: string
+        description: Used in the title of the assessment. If not specified, recurrence type is used instead and the assessments with the same recurrence type will have the same title!
+      authorizationGroupUuids:
+        type: object
+        additionalProperties: false
+        properties:
+          read:
+            title: The list of authorization group uuid's that have read access to this assessment
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
+          write:
+            title: The list of authorization group uuid's that have write (i.e. create/update/delete) access to this assessment
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
       questions:
         "$ref": "#/$defs/questions"
       questionSets:
@@ -325,8 +313,14 @@ $defs:
 #########################################################
 type: object
 additionalProperties: false
-required: [CONNECTION_ERROR_MSG, VERSION_CHANGED_MSG, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
+required: [keycloakConfiguration, CONNECTION_ERROR_MSG, VERSION_CHANGED_MSG, SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, activeDomainNames, imagery]
 properties:
+  keycloakConfiguration:
+    type: object
+    additionalProperties: true
+    title: Client-side Keycloak configuration properties
+    description: Automatically defined based on the `keycloakConfiguration` settings in `anet.yml`
+
   CONNECTION_ERROR_MSG:
     type: string
     description: Banner text when the connection is lost
@@ -576,11 +570,30 @@ properties:
             type: object
             additionalProperties:
               "$ref": "#/$defs/customField"
+          attendeeGroups:
+            type: array
+            uniqueItems: true
+            items:
+              type: object
+              additionalProperties: false
+              title: Attendee-group
+              required: [label, filter]
+              properties:
+                label:
+                  type: string
+                  title: The label of the attendee group
+                filter:
+                  type: object
+                  title: Attendee group filters
+                  properties:
+                    orgUuid:
+                      type: string
+                      title: UUID of organisation membership to form
 
       person:
         type: object
         additionalProperties: false
-        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, position, prevPositions]
+        required: [firstName, lastName, domainUsername, openIdSubject, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate, biography, position, prevPositions]
         properties:
           firstName:
             type: string
@@ -602,6 +615,10 @@ properties:
             type: string
             title: The label for a person's domain username
             description: Used in the UI where a person's domain username is shown.
+          openIdSubject:
+            type: string
+            title: The label for a person's OpenID subject
+            description: Used in the UI where a person's OpenID subject is shown.
           emailAddress:
             "$ref": "#/$defs/inputField"
           phoneNumber:
@@ -731,6 +748,14 @@ properties:
                 items:
                   type: string
                   description: Ordered fields to show in Person Page in the Person info section
+              showAsFullWidthFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: List of fields spanning over page width
+                  description: Fields from the ordered fields, which should span over 2 columns
               numberOfFieldsInLeftColumn:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced
@@ -814,6 +839,14 @@ properties:
                 items:
                   type: string
                   description: Ordered fields to show in Person Page in the Person info section
+              showAsFullWidthFields:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: List of fields spanning over page width
+                  description: Fields from the ordered fields, which should span over 2 columns
               numberOfFieldsInLeftColumn:
                 type: number
                 description: Used for dividing fields into 2 columns, make sure the columns are balanced

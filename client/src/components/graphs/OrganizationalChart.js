@@ -13,7 +13,7 @@ import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 import COLLAPSE_ICON from "resources/organizations.png"
 import EXPAND_ICON from "resources/plus.png"
@@ -21,7 +21,7 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_GET_CHART_DATA = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     organization(uuid: $uuid) {
       uuid
       shortName
@@ -90,7 +90,7 @@ const OrganizationalChart = ({
 }) => {
   const [expanded, setExpanded] = useState([])
   const [personnelDepth, setPersonnelDepth] = useState(5)
-  const history = useHistory()
+  const navigate = useNavigate()
   const canvasRef = useRef(null)
   const linkRef = useRef(null)
   const nodeRef = useRef(null)
@@ -252,7 +252,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("g")
-      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .each(function(d) {
         const positions = sortPositions(d.data.positions)
         const unitcode = Settings.fields.person.ranks.find(
@@ -270,7 +270,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("text")
-      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .attr("font-size", "20px")
       .attr("font-family", "monospace")
       .attr("font-weight", "bold")
@@ -284,7 +284,7 @@ const OrganizationalChart = ({
 
     iconNodeG
       .append("text")
-      .on("click", (event, d) => history.push(Organization.pathFor(d.data)))
+      .on("click", (event, d) => navigate(Organization.pathFor(d.data)))
       .attr("font-family", "monospace")
       .attr("dy", 45)
       .attr("x", -40)
@@ -304,7 +304,7 @@ const OrganizationalChart = ({
       .append("g")
       .attr("class", "head")
       .attr("transform", "translate(-63, 65)")
-      .on("click", (event, d) => history.push(Position.pathFor(d)))
+      .on("click", (event, d) => navigate(Position.pathFor(d)))
 
     headG.exit().remove()
 
@@ -356,7 +356,7 @@ const OrganizationalChart = ({
       .append("g")
       .attr("class", "position")
       .attr("transform", (d, i) => `translate(-63,${87 + i * 11})`)
-      .on("click", (event, d) => history.push(Position.pathFor(d)))
+      .on("click", (event, d) => navigate(Position.pathFor(d)))
 
     positionsGA
       .append("image")
@@ -377,7 +377,7 @@ const OrganizationalChart = ({
         } ${d.name}`
         return utils.ellipsize(result, 31)
       })
-  }, [data, expanded, history, personnelDepth, root, link, node])
+  }, [data, expanded, navigate, personnelDepth, root, link, node])
 
   if (done) {
     return result

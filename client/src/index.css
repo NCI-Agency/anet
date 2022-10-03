@@ -172,10 +172,18 @@ textarea.form-control {
   margin-top: -4px;
 }
 
-.shortcut-list .btn-link {
+.shortcut-list .list-group-item {
   text-align: left;
   white-space: initial;
-  padding: 0;
+  padding: 2px;
+}
+
+.shortcut-list .list-group-item .btn {
+  margin-right: 5px;
+}
+
+.shortcut-list .list-group-item .btn:focus {
+  box-shadow: none;
 }
 
 a.btn {
@@ -984,11 +992,11 @@ header.searchPagination {
   padding-bottom: 5px;
 }
 
-.advanced-search .col-xs-3 select {
+.advanced-search .col-3 select {
   margin-top: -8px;
 }
 
-.advanced-search .col-xs-1 .btn img,
+.advanced-search .col-1 .btn img,
 .advanced-search .col-sm-1 .btn img {
   vertical-align: baseline;
 }

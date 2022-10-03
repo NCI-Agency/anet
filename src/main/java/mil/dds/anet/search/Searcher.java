@@ -10,7 +10,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.database.SubscriptionUpdateGroup;
 import mil.dds.anet.database.SubscriptionUpdateStatement;
-import mil.dds.anet.search.mssql.MssqlSearcher;
 import mil.dds.anet.search.pg.PostgresqlSearcher;
 import mil.dds.anet.utils.DaoUtils;
 
@@ -24,8 +23,6 @@ public abstract class Searcher implements ISearcher {
 
   public static Searcher getSearcher(DaoUtils.DbType dbType, Injector injector) {
     switch (dbType) {
-      case MSSQL:
-        return new MssqlSearcher(injector);
       case POSTGRESQL:
         return new PostgresqlSearcher(injector);
       default:
@@ -51,7 +48,7 @@ public abstract class Searcher implements ISearcher {
     final String sql =
         "EXISTS ( SELECT uuid FROM subscriptions WHERE \"subscriberUuid\" = :subscriberUuid "
             + "AND ( " + Joiner.on(" OR ").join(stmts) + " ) )";
-    final Position position = user.loadPosition();
+    final Position position = DaoUtils.getPosition(user);
     args.put("subscriberUuid", DaoUtils.getUuid(position));
     return sql;
   }

@@ -26,7 +26,7 @@ import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Button, Form as FormBS } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -34,14 +34,14 @@ import Settings from "settings"
 import utils from "utils"
 
 const GQL_CREATE_POSITION = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     createPosition(position: $position) {
       uuid
     }
   }
 `
 const GQL_UPDATE_POSITION = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     updatePosition(position: $position)
   }
 `
@@ -49,7 +49,7 @@ const MIN_CHARS_FOR_DUPLICATES = 3
 
 const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSimilarPositions, setShowSimilarPositions] = useState(false)
   const statusButtons = [
@@ -187,7 +187,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
 
         return (
           <div>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
@@ -378,7 +378,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   }
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -399,13 +399,13 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         : initialValues.uuid
     })
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     if (!edit) {
-      history.replace(Position.pathForEdit(position))
+      navigate(Position.pathForEdit(position), { replace: true })
     }
-    history.push(Position.pathFor(position), {
-      success: "Position saved"
+    navigate(Position.pathFor(position), {
+      state: { success: "Position saved" }
     })
   }
 

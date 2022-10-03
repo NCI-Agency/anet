@@ -21,33 +21,14 @@ div.checkbox.primary > label > span {
   align-items: center;
 }
 
-.report-author .isCurrentEditor.checkbox.primary > label > span {
-  outline: 2px solid green;
-}
-
-.report-attendee .checkbox.primary > label > span,
-.report-author .checkbox.primary > label > span {
-  color: #337ab7;
-  background-color: white;
-  font-style: italic;
-}
-
-.primary-attendee .inActive.radio.primary > label > span,
-.report-attendee .inActive.checkbox.primary > label > span,
-.report-author .inActive.checkbox.primary > label > span {
+.primary-attendee .inActive.radio.primary > label > span {
   color: grey;
   background-color: white;
   font-style: italic;
 }
 
-
 .inActive.radio.disabled.primary > label > span {
   text-decoration: line-through;
-}
-@media print {
-  .report-author {
-    display: none;
-  }
 }
 .empty-cell-header{
   padding: 0 5px !important;
@@ -57,11 +38,8 @@ div.checkbox.primary > label > span {
 .deleteReportPeople {
   min-width: 50px;
 }
-.report-attendee {
-  text-align: center;
-}
 .primary-attendee {
-  text-align: center;
+  text-align: left;
 }
 .conflictButton {
   text-align: center;

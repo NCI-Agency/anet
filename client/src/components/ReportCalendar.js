@@ -7,10 +7,10 @@ import _isEqual from "lodash/isEqual"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useRef } from "react"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       pageNum
       pageSize
@@ -45,7 +45,7 @@ const ReportCalendar = ({
   queryParams,
   setTotalCount
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const prevReportQuery = useRef(null)
   const apiPromise = useRef(null)
   const calendarComponentRef = useRef(null)
@@ -53,7 +53,7 @@ const ReportCalendar = ({
     <Calendar
       events={getEvents}
       eventClick={info => {
-        history.push(info.event.url)
+        navigate(info.event.url)
         // Prevent browser navigation to the url
         info.jsEvent.preventDefault()
       }}

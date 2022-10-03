@@ -30,7 +30,7 @@ import { useParams } from "react-router-dom"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LISTS = gql`
-  query(
+  query (
     $reportQuery: ReportSearchQueryInput
     $reportPreviousQuery: ReportSearchQueryInput
   ) {
@@ -64,7 +64,7 @@ const GQL_GET_REPORT_LISTS = gql`
 `
 // TODO: replace this with a way ask graphql for the content of a set of UUIDs
 const GQL_GET_STATIC_DATA = gql`
-  query(
+  query (
     $positionQuery: PositionSearchQueryInput
     $locationQuery: LocationSearchQueryInput
     $taskQuery: TaskSearchQueryInput
@@ -380,7 +380,7 @@ const StatsTable = ({
                 ? "red"
                 : "white"
           return (
-            <td bgcolor={color} key={item.uuid}>
+            <td style={{ backgroundColor: color }} key={item.uuid}>
               {current}/{previous}
             </td>
           )

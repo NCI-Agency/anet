@@ -36,8 +36,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   public static final String[] fields = {"uuid", "name", "code", "createdAt", "updatedAt",
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "positions";
-  public static final String POSITIONS_FIELDS =
-      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String POSITION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
   public Position insertInternal(Position p) {
@@ -84,7 +83,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   static class SelfIdBatcher extends IdBatcher<Position> {
-    private static final String sql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
+    private static final String sql = "/* batch.getPositionsByUuids */ SELECT " + POSITION_FIELDS
         + "FROM positions WHERE positions.uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
@@ -117,7 +116,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
   static class PositionsBatcher extends ForeignKeyBatcher<Position> {
     private static final String sql =
-        "/* batch.getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS + " FROM positions "
+        "/* batch.getCurrentPositionForPerson */ SELECT " + POSITION_FIELDS + " FROM positions "
             + "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> )";
 
     public PositionsBatcher() {
@@ -189,7 +188,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     }
     // Find out if person already holds a position (we also need its type later on)
     final Position currPos = getDbHandle()
-        .createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
+        .createQuery("/* positionSetPerson.find */ SELECT " + POSITION_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).findFirst().orElse(null);
     if (currPos != null && currPos.getUuid().equals(positionUuid)) {
@@ -204,28 +203,15 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     final Instant now = Instant.now();
     if (currPos != null) {
       // If this person is in a position already, we need to remove them.
-      final String sql;
-      if (DaoUtils.isMsSql()) {
-        sql =
-            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-                + "(SELECT TOP(1) * FROM \"peoplePositions\""
-                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-                + " ORDER BY \"createdAt\" DESC) AS t "
-                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-                + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-                + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-                + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      } else {
-        sql =
-            "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-                + "(SELECT * FROM \"peoplePositions\""
-                + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-                + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
-                + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-                + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-                + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-                + "      \"peoplePositions\".\"endedAt\" IS NULL";
-      }
+      final String sql =
+          "/* positionSetPerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+              + "(SELECT * FROM \"peoplePositions\""
+              + " WHERE \"personUuid\" = :personUuid AND \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+              + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+              + "      \"peoplePositions\".\"endedAt\" IS NULL";
       getDbHandle().createUpdate(sql).bind("personUuid", personUuid)
           .bind("positionUuid", currPos.getUuid()).bind("endedAt", DaoUtils.asLocalDateTime(now))
           .execute();
@@ -286,30 +272,17 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
         .bind("updatedAt", DaoUtils.asLocalDateTime(now)).bind("positionUuid", positionUuid)
         .execute();
 
-    final String updateSql;
     // Note: also doing an implicit join on personUuid so as to only update 'real' history rows
     // (i.e. with both a position and a person).
-    if (DaoUtils.isMsSql()) {
-      updateSql =
-          "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-              + "(SELECT TOP(1) * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-              + " ORDER BY \"createdAt\" DESC) AS t "
-              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-              + "      \"peoplePositions\".\"endedAt\" IS NULL";
-    } else {
-      updateSql =
-          "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
-              + "(SELECT * FROM \"peoplePositions\""
-              + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
-              + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
-              + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
-              + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
-              + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
-              + "      \"peoplePositions\".\"endedAt\" IS NULL";
-    }
+    final String updateSql =
+        "/* positionRemovePerson.end */ UPDATE \"peoplePositions\" SET \"endedAt\" = :endedAt FROM "
+            + "(SELECT * FROM \"peoplePositions\""
+            + " WHERE \"positionUuid\" = :positionUuid AND \"endedAt\" IS NULL"
+            + " ORDER BY \"createdAt\" DESC LIMIT 1) AS t "
+            + "WHERE t.\"personUuid\" = \"peoplePositions\".\"personUuid\" AND"
+            + "      t.\"positionUuid\" = \"peoplePositions\".\"positionUuid\" AND"
+            + "      t.\"createdAt\" = \"peoplePositions\".\"createdAt\" AND"
+            + "      \"peoplePositions\".\"endedAt\" IS NULL";
     getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 
@@ -357,7 +330,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
 
   static class AssociatedPositionsBatcher extends ForeignKeyBatcher<Position> {
     private static final String sql = "/* batch.getAssociatedPositionsForPosition */ SELECT "
-        + POSITIONS_FIELDS
+        + POSITION_FIELDS
         + ", CASE WHEN positions.uuid = \"positionRelationships\".\"positionUuid_a\""
         + " THEN \"positionRelationships\".\"positionUuid_b\""
         + " ELSE \"positionRelationships\".\"positionUuid_a\" END AS \"associatedPositionUuid\" "
@@ -417,7 +390,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   @InTransaction
   public List<Position> getEmptyPositions(PositionType type) {
     return getDbHandle()
-        .createQuery("SELECT " + POSITIONS_FIELDS + " FROM positions "
+        .createQuery("SELECT " + POSITION_FIELDS + " FROM positions "
             + "WHERE \"currentPersonUuid\" IS NULL AND positions.type = :type")
         .bind("type", DaoUtils.getEnumId(type)).map(new PositionMapper()).list();
   }
@@ -450,7 +423,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   @InTransaction
   public Position getCurrentPositionForPerson(String personUuid) {
     List<Position> positions = getDbHandle()
-        .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS
+        .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITION_FIELDS
             + " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
         .bind("personUuid", personUuid).map(new PositionMapper()).list();
     if (positions.size() == 0) {

@@ -173,6 +173,10 @@ describe("When working with custom fields for different anet objects", () => {
         VALID_NUMBER_INPUT.toString()
       )
     })
+
+    it("Should logout", () => {
+      CreateReport.logout()
+    })
   })
   // ------------------------------ PERSON CUSTOM FIELDS -----------------------------------------
   describe("For person's custom fields", () => {
@@ -254,6 +258,10 @@ describe("When working with custom fields for different anet objects", () => {
       CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
+    })
+
+    it("Should logout", () => {
+      CreatePerson.logout()
     })
   })
 })

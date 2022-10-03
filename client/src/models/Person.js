@@ -31,6 +31,10 @@ export default class Person extends Model {
 
   static nameDelimiter = ","
 
+  static advisorAssessmentDictionaryPath = "fields.advisor.person.assessments"
+  static principalAssessmentDictionaryPath =
+    "fields.principal.person.assessments"
+
   static advisorAssessmentConfig = Settings.fields.advisor.person.assessments
 
   static principalAssessmentConfig =
@@ -182,6 +186,7 @@ export default class Person extends Model {
     emailAddress
     phoneNumber
     domainUsername
+    openIdSubject
     biography
     country
     gender
@@ -412,6 +417,17 @@ export default class Person extends Model {
       : Person.advisorShowPageOrderedFields
   }
 
+  /**
+   * @returns Keys of fields which should span over 2 columns
+   */
+  getFullWidthFields() {
+    return (
+      (this.isPrincipal()
+        ? Settings.fields.principal.person.showAsFullWidthFields
+        : Settings.fields.advisor.person.showAsFullWidthFields) || []
+    )
+  }
+
   static initShowPageFieldsOrdered(isPrincipal) {
     const fieldsArrayFromConfig = isPrincipal
       ? Settings.fields.principal.person.showPageOrderedFields
@@ -480,6 +496,12 @@ export default class Person extends Model {
           return accum
         }, {})
     )
+  }
+
+  getAssessmentDictionaryPath() {
+    return this.isAdvisor()
+      ? Person.advisorAssessmentDictionaryPath
+      : Person.principalAssessmentDictionaryPath
   }
 
   getAssessmentsConfig() {

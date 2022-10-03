@@ -4,14 +4,14 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
+import de.ahus1.keycloak.dropwizard.AbstractKeycloakAuthenticator;
+import de.ahus1.keycloak.dropwizard.KeycloakBundle;
+import de.ahus1.keycloak.dropwizard.KeycloakConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import io.dropwizard.Application;
-import io.dropwizard.auth.AuthDynamicFeature;
-import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
-import io.dropwizard.auth.chained.ChainedAuthFilter;
+import io.dropwizard.auth.Authorizer;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -22,21 +22,20 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
+import java.security.Principal;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import mil.dds.anet.auth.AnetAuthenticationFilter;
-import mil.dds.anet.auth.AnetDevAuthenticator;
-import mil.dds.anet.auth.TimedNegotiateSecurityFilter;
-import mil.dds.anet.auth.UrlParamsAuthFilter;
+import javax.servlet.http.HttpServletRequest;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.config.AnetConfiguration;
+import mil.dds.anet.config.AnetKeycloakConfiguration;
+import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.ApprovalStepResource;
@@ -63,17 +62,20 @@ import mil.dds.anet.threads.ReportApprovalWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.HttpsRedirectFilter;
+import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.RequestLoggingFilter;
+import mil.dds.anet.views.ViewRequestFilter;
 import mil.dds.anet.views.ViewResponseFilter;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 import ru.vyarus.guicey.jdbi3.JdbiBundle;
-import waffle.servlet.NegotiateSecurityFilter;
 
 public class AnetApplication extends Application<AnetConfiguration> {
 
@@ -140,6 +142,144 @@ public class AnetApplication extends Application<AnetConfiguration> {
       }
     });
 
+    // Add Dropwizard-Keycloak
+    bootstrap.addBundle(new KeycloakBundle<AnetConfiguration>() {
+      @Override
+      protected AnetKeycloakConfiguration getKeycloakConfiguration(
+          AnetConfiguration configuration) {
+        return configuration.getKeycloakConfiguration();
+      }
+
+      @Override
+      protected Class<? extends Principal> getUserClass() {
+        return Person.class;
+      }
+
+      @Override
+      protected AbstractKeycloakAuthenticator<Person> createAuthenticator(
+          KeycloakConfiguration configuration) {
+        return new AbstractKeycloakAuthenticator<Person>(configuration) {
+          @Override
+          protected Person prepareAuthentication(KeycloakSecurityContext securityContext,
+              HttpServletRequest request, KeycloakConfiguration keycloakConfiguration) {
+            final PersonDao dao = AnetObjectEngine.getInstance().getPersonDao();
+            final AccessToken token = securityContext.getToken();
+            // Call non-synchronized method first
+            Person person = findUser(dao, token);
+            if (person == null) {
+              // Call synchronized method
+              person = findOrCreateUser(dao, token);
+            }
+            return person;
+          }
+
+          // Non-synchronized method, safe to run multiple times in parallel
+          private Person findUser(final PersonDao dao, final AccessToken token) {
+            final String openIdSubject = token.getSubject();
+            final List<Person> p = dao.findByOpenIdSubject(openIdSubject);
+            if (!p.isEmpty()) {
+              final Person existingPerson = p.get(0);
+              logger.trace("found existing user={} by openIdSubject={}", existingPerson,
+                  openIdSubject);
+              return existingPerson;
+            }
+
+            return null;
+          }
+
+          // Synchronized method, so we create/update at most one user in the face of multiple
+          // simultaneous authentication requests
+          private synchronized Person findOrCreateUser(final PersonDao dao,
+              final AccessToken token) {
+            final Person person = findUser(dao, token);
+            if (person != null) {
+              return person;
+            }
+
+            // Might be user from before Keycloak integration, try username
+            final String username = token.getPreferredUsername();
+            final String openIdSubject = token.getSubject();
+            List<Person> p = dao.findByDomainUsername(username);
+            if (!p.isEmpty()) {
+              final Person existingPerson = p.get(0);
+              logger.trace(
+                  "found existing user={} by domainUsername={}; setting openIdSubject={} (was {})",
+                  existingPerson, username, openIdSubject, existingPerson.getOpenIdSubject());
+              existingPerson.setOpenIdSubject(openIdSubject);
+              dao.update(existingPerson);
+              return existingPerson;
+            }
+
+            // Fall back to email
+            final String email = token.getEmail();
+            p = dao.findByEmailAddress(email);
+            if (!p.isEmpty()) {
+              final Person existingPerson = p.get(0);
+              logger.trace(
+                  "found existing user={} by emailAddress={}; setting openIdSubject={} (was {})",
+                  existingPerson, email, openIdSubject, existingPerson.getOpenIdSubject());
+              existingPerson.setOpenIdSubject(openIdSubject);
+              dao.update(existingPerson);
+              return existingPerson;
+            }
+
+            // Not found, first time this user has ever logged in
+            final Person newPerson = new Person();
+            logger.trace("creating new user with domainUsername={}, email={} and openIdSubject={}",
+                username, email, openIdSubject);
+            newPerson.setRole(Role.ADVISOR);
+            newPerson.setPendingVerification(true);
+            // Copy some data from the authentication token
+            newPerson.setOpenIdSubject(openIdSubject);
+            newPerson.setDomainUsername(username);
+            newPerson.setEmailAddress(email);
+            newPerson.setName(getCombinedName(token));
+            /*
+             * Note: there's also token.getGender(), but that's not generally available in AD/LDAP,
+             * and token.getPhoneNumber(), but that requires scope="openid phone" on the
+             * authentication request, which is hard to accomplish with current Keycloak code.
+             */
+            return dao.insert(newPerson);
+          }
+        };
+      }
+
+      @Override
+      protected Authorizer<Person> createAuthorizer() {
+        return new Authorizer<Person>() {
+          @Override
+          public boolean authorize(Person principal, String role) {
+            // We don't use @RolesAllowed type authorizations
+            return false;
+          }
+        };
+      }
+
+      private String getCombinedName(AccessToken token) {
+        final StringBuilder combinedName = new StringBuilder();
+        // Try to combine FAMILYNAME, GivenName MiddleName
+        final String fn = Utils.trimStringReturnNull(token.getFamilyName());
+        if (!Utils.isEmptyOrNull(fn)) {
+          combinedName.append(fn.toUpperCase());
+          final String gn = Utils.trimStringReturnNull(token.getGivenName());
+          if (!Utils.isEmptyOrNull(gn)) {
+            combinedName.append(", ");
+            combinedName.append(gn);
+          }
+          final String mn = Utils.trimStringReturnNull(token.getMiddleName());
+          if (!Utils.isEmptyOrNull(mn)) {
+            combinedName.append(" ");
+            combinedName.append(mn);
+          }
+        }
+        // Fall back to just the name
+        if (combinedName.length() == 0) {
+          combinedName.append(token.getName());
+        }
+        return combinedName.toString();
+      }
+    });
+
     // Add Dropwizard-Guicey
     bootstrap.addBundle(GuiceBundle.builder()
         .bundles(
@@ -166,43 +306,14 @@ public class AnetApplication extends Application<AnetConfiguration> {
         new AnetObjectEngine(dbUrl, this, configuration, metricRegistry);
     environment.servlets().setSessionHandler(new SessionHandler());
 
-    if (configuration.isDevelopmentMode()) {
-      // In development mode chain URL params (used during testing) and basic HTTP Authentication
-      final UrlParamsAuthFilter<Person> urlParamsAuthFilter =
-          new UrlParamsAuthFilter.Builder<Person>()
-              .setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
-              // Acting only as Authz.
-              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)).setRealm("ANET")
-              .buildAuthFilter();
-      final BasicCredentialAuthFilter<Person> basicAuthFilter =
-          new BasicCredentialAuthFilter.Builder<Person>()
-              .setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
-              // Acting only as Authz.
-              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)).setRealm("ANET")
-              .buildAuthFilter();
-      environment.jersey().register(new AuthDynamicFeature(new ChainedAuthFilter<>(
-          Arrays.asList(new AuthFilter[] {urlParamsAuthFilter, basicAuthFilter}))));
-    } else {
-      // In Production require Windows AD Authentication.
-      final Filter nsf =
-          configuration.isTimeWaffleRequests() ? new TimedNegotiateSecurityFilter(metricRegistry)
-              : new NegotiateSecurityFilter();
-      final FilterRegistration nsfReg =
-          environment.servlets().addFilter("NegotiateSecurityFilter", nsf);
-      nsfReg.setInitParameters(configuration.getWaffleConfig());
-      nsfReg.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
-      environment.jersey()
-          .register(new AuthDynamicFeature(new AnetAuthenticationFilter(engine, metricRegistry)));
-    }
-
     if (configuration.getRedirectToHttps()) {
       forwardToHttps(environment.getApplicationContext());
     }
 
     // If you want to use @Auth to inject a custom Principal type into your resource
     environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Person.class));
-    // If you want to use @RolesAllowed to do authorization.
-    environment.jersey().register(RolesAllowedDynamicFeature.class);
+    // We no longer use @RolesAllowed to do authorization
+    // environment.jersey().register(RolesAllowedDynamicFeature.class);
     environment.jersey().register(new WebExceptionMapper());
 
     if (configuration.isTestMode()) {
@@ -287,8 +398,10 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(loggingResource);
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
-    environment.jersey().register(new ViewResponseFilter(configuration));
     environment.jersey().register(graphQlResource);
+    environment.jersey().register(new RequestLoggingFilter(engine));
+    environment.jersey().register(ViewRequestFilter.class);
+    environment.jersey().register(ViewResponseFilter.class);
   }
 
   private void runAccountDeactivationWorker(final AnetConfiguration configuration,
@@ -304,7 +417,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
 
-      // Run the email deactivation worker at the set interval
+      // Run the account deactivation worker at the set interval.
       scheduler.scheduleAtFixedRate(deactivationWarningWorker, accountDeactivationWarningInterval,
           accountDeactivationWarningInterval, TimeUnit.SECONDS);
 

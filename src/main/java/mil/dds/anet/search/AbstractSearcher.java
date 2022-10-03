@@ -15,7 +15,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 
-public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>> {
+public abstract class AbstractSearcher<B, T extends AbstractSearchQuery<?>> {
 
   private static final int MIN_UUID_PREFIX = 4;
 
@@ -97,14 +97,10 @@ public abstract class AbstractSearcher<B extends AbstractAnetBean, T extends Abs
     return String.format("(%1$s || %2$s)", tsQueryAnet, tsQuerySimple);
   }
 
-  protected List<String> getOrderBy(SortOrder sortOrder, String table, String... columns) {
+  protected List<String> getOrderBy(SortOrder sortOrder, String... columns) {
     final List<String> clauses = new ArrayList<>();
     for (final String column : columns) {
-      if (table == null) {
-        clauses.add(String.format("%1$s %2$s", column, sortOrder));
-      } else {
-        clauses.add(String.format("%1$s.%2$s %3$s", table, column, sortOrder));
-      }
+      clauses.add(String.format("\"%1$s\" %2$s", column, sortOrder));
     }
     return clauses;
   }

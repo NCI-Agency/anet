@@ -11,7 +11,7 @@ import React from "react"
 import Settings from "settings"
 
 const GQL_GET_TASK = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     task(uuid: $uuid) {
       uuid
       shortName

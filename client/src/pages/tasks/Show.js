@@ -185,14 +185,17 @@ const TaskShow = ({ pageDispatchers }) => {
   const cfe2Buttons = cfe2Button ? { [task.customFieldEnum2]: cfe2Button } : {}
 
   // Admins can edit tasks or users in positions related to the task
+  const isAdmin = currentUser && currentUser.isAdmin()
   const canEdit =
-    currentUser.isAdmin() ||
+    isAdmin ||
     (currentUser.position &&
       !_isEmpty(
         task.responsiblePositions.filter(
           position => currentUser.position.uuid === position.uuid
         )
       ))
+  const canAddPeriodicAssessment = canEdit
+  const canAddOndemandAssessment = isAdmin
   return (
     <Formik enableReinitialize initialValues={task}>
       {({ values }) => {
@@ -368,7 +371,8 @@ const TaskShow = ({ pageDispatchers }) => {
               entity={task}
               entityType={Task}
               subEntities={subTasks}
-              canAddAssessment={canEdit}
+              canAddPeriodicAssessment={canAddPeriodicAssessment}
+              canAddOndemandAssessment={canAddOndemandAssessment}
               onUpdateAssessment={() => {
                 loadAppData()
                 refetch()

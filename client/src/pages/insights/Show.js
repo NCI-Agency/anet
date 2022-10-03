@@ -10,7 +10,6 @@ import AppContext from "components/AppContext"
 import CancelledEngagementReports from "components/CancelledEngagementReports"
 import Fieldset from "components/Fieldset"
 import FutureEngagementsByLocation from "components/FutureEngagementsByLocation"
-import Messages from "components/Messages"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -25,7 +24,6 @@ import {
   getSearchQuery,
   SearchQueryPropType
 } from "components/SearchFilters"
-import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -194,28 +192,16 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     searchProps: insightConfig.searchProps,
     pageDispatchers
   })
-  const hasSearchCriteria =
-    _isEmpty(insightDefaultQueryParams[insight]) || !_isEmpty(queryParams)
 
   return (
     <div style={flexStyle}>
-      {hasSearchCriteria ? (
-        <Fieldset
-          id={insight}
-          title={insightConfig.title}
-          style={fieldsetStyle}
-        >
-          <InsightComponent
-            pageDispatchers={pageDispatchers}
-            style={mosaicLayoutStyle}
-            queryParams={queryParams}
-          />
-        </Fieldset>
-      ) : (
-        <Messages
-          error={{ message: "You did not enter any search criteria." }}
+      <Fieldset id={insight} title={insightConfig.title} style={fieldsetStyle}>
+        <InsightComponent
+          pageDispatchers={pageDispatchers}
+          style={mosaicLayoutStyle}
+          queryParams={queryParams}
         />
-      )}
+      </Fieldset>
     </div>
   )
 

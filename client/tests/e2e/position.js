@@ -109,10 +109,8 @@ test.serial("Move someone in and out of a position", async t => {
   await $changeAssignedPersonButton.click()
   await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
-  const $assignedPerson = await t.context.pageHelpers.chooseAdvancedSelectOption(
-    "#person",
-    person
-  )
+  const $assignedPerson =
+    await t.context.pageHelpers.chooseAdvancedSelectOption("#person", person)
   t.is(
     await $assignedPerson.getAttribute("value"),
     person,
@@ -176,6 +174,8 @@ test.serial("Move someone in and out of a position", async t => {
     foundCorrectRow,
     `Could not find ${positionName} and ${personName} in the supported positions table`
   )
+
+  await t.context.logout()
 })
 
 test.serial("Update permissions while changing positions", async t => {
@@ -485,4 +485,6 @@ test.serial("Update permissions while changing positions", async t => {
     testUsers[testUserMapper.super_user_1].positionName,
     "ANET User"
   )
+
+  await t.context.logout()
 })

@@ -15,11 +15,10 @@ import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
 
-public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>> {
+public abstract class AbstractSearchQueryBuilder<B, T extends AbstractSearchQuery<?>> {
 
   public enum Comparison {
     AFTER(">="), BEFORE("<=");
@@ -260,7 +259,7 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
       String[] foreignKeys, String withTableName, String recursiveTableName,
       String recursiveForeignKey, String paramName, List<String> fieldValues,
       boolean findChildren) {
-    createWithClause(outerQb, withTableName, recursiveTableName, recursiveForeignKey);
+    createWithClause(outerQb, withTableName, recursiveTableName, recursiveForeignKey, true);
     final List<String> orClauses = new ArrayList<>();
     for (final String foreignKey : foreignKeys) {
       orClauses.add(String.format("%1$s.%2$s = %3$s.%4$s", tableName, foreignKey, withTableName,
@@ -272,8 +271,8 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
     addListArg(paramName, fieldValues);
   }
 
-  private void createWithClause(AbstractSearchQueryBuilder<B, T> outerQb, String withTableName,
-      String recursiveTableName, String recursiveForeignKey) {
+  public void createWithClause(AbstractSearchQueryBuilder<B, T> outerQb, String withTableName,
+      String recursiveTableName, String recursiveForeignKey, boolean addFrom) {
     if (outerQb == null) {
       outerQb = this;
     }
@@ -282,7 +281,9 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
             + " SELECT pt.uuid, bt.%3$s FROM %2$s bt INNER JOIN"
             + " %1$s pt ON bt.uuid = pt.parent_uuid)",
         withTableName, recursiveTableName, recursiveForeignKey));
-    addAdditionalFromClause(withTableName);
+    if (addFrom) {
+      addAdditionalFromClause(withTableName);
+    }
   }
 
   private final String getLikeClause(String fieldName, String paramName) {
@@ -349,7 +350,8 @@ public abstract class AbstractSearchQueryBuilder<B extends AbstractAnetBean, T e
 
   protected void addOrderByClauses() {
     if (!orderByClauses.isEmpty()) {
-      sql.append(" ORDER BY ");
+      sql.insert(0, "SELECT * FROM (");
+      sql.append(") AS results ORDER BY ");
       sql.append(Joiner.on(", ").join(orderByClauses));
     }
   }

@@ -3,13 +3,10 @@ import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import React, { useState } from "react"
 
 const Mine = () => {
-  const [
-    forceRefetchSubscriptionUpdates,
-    setForceRefetchSubscriptionUpdates
-  ] = useState(false)
-  const [forceRefetchSubscriptions, setForceRefetchSubscriptions] = useState(
-    false
-  )
+  const [forceRefetchSubscriptionUpdates, setForceRefetchSubscriptionUpdates] =
+    useState(false)
+  const [forceRefetchSubscriptions, setForceRefetchSubscriptions] =
+    useState(false)
   return (
     <>
       <MySubscriptionUpdates

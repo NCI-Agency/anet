@@ -11,7 +11,7 @@ import {
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
+import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -41,7 +41,14 @@ import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _upperFirst from "lodash/upperFirst"
-import { AuthorizationGroup, Location, Person, Report, Task } from "models"
+import {
+  AuthorizationGroup,
+  Location,
+  Person,
+  Position,
+  Report,
+  Task
+} from "models"
 import moment from "moment"
 import { RECURRENCE_TYPE } from "periodUtils"
 import pluralize from "pluralize"
@@ -49,7 +56,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { Button, Collapse, Form as FormBS } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
@@ -111,7 +118,7 @@ const GQL_GET_RECENTS = gql`
   }
 `
 const GQL_CREATE_REPORT = gql`
-  mutation($report: ReportInput!) {
+  mutation ($report: ReportInput!) {
     createReport(report: $report) {
       uuid
       state
@@ -126,7 +133,7 @@ const GQL_CREATE_REPORT = gql`
   }
 `
 const GQL_UPDATE_REPORT = gql`
-  mutation($report: ReportInput!, $sendEditEmail: Boolean!) {
+  mutation ($report: ReportInput!, $sendEditEmail: Boolean!) {
     updateReport(report: $report, sendEditEmail: $sendEditEmail) {
       uuid
       state
@@ -141,13 +148,13 @@ const GQL_UPDATE_REPORT = gql`
   }
 `
 const GQL_DELETE_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteReport(uuid: $uuid)
   }
 `
 const GQL_UPDATE_REPORT_ASSESSMENTS = gql`
-  mutation($report: ReportInput!, $notes: [NoteInput]) {
-    updateReportAssessments(report: $report, assessments: $notes)
+  mutation ($uuid: String, $notes: [NoteInput]) {
+    updateReportAssessments(reportUuid: $uuid, assessments: $notes)
   }
 `
 
@@ -162,7 +169,7 @@ const ReportForm = ({
   notesComponent
 }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
@@ -170,6 +177,9 @@ const ReportForm = ({
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
   const [reportPeople, setReportPeople] = useState(initialValues.reportPeople)
+  const [showCustomFields, setShowCustomFields] = useState(
+    !!Settings.fields.report.customFields
+  )
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -246,29 +256,20 @@ const ReportForm = ({
     }
   }
 
-  // Update the report schema according to the selected report tasks and attendees
-  // instant assessments schema
-  const {
-    assessmentsConfig: tasksInstantAssessmentsConfig,
-    assessmentsSchema: tasksInstantAssessmentsSchema
-  } = Task.getInstantAssessmentsDetailsForEntities(
-    reportTasks,
-    Report.TASKS_ASSESSMENTS_PARENT_FIELD
+  const isAuthor = initialValues.reportPeople?.some(
+    a => a.author && Person.isEqual(currentUser, a)
   )
-  const {
-    assessmentsConfig: attendeesInstantAssessmentsConfig,
-    assessmentsSchema: attendeesInstantAssessmentsSchema
-  } = Person.getInstantAssessmentsDetailsForEntities(
-    reportPeople?.filter(rp => rp.attendee),
-    Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
-  )
-  let reportSchema = Report.yupSchema
-  if (!_isEmpty(tasksInstantAssessmentsConfig)) {
-    reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
-  }
-  if (!_isEmpty(attendeesInstantAssessmentsConfig)) {
-    reportSchema = reportSchema.concat(attendeesInstantAssessmentsSchema)
-  }
+  // User can approve if report is pending approval and user is one of the approvers in the current approval step
+  const canApprove =
+    Report.isPending(initialValues.state) &&
+    initialValues.approvalStep?.approvers?.some(member =>
+      Position.isEqual(member, currentUser?.position)
+    )
+  const canReadAssessments = isAuthor || canApprove
+  const canWriteAssessments =
+    canReadAssessments && !Report.isPublished(initialValues.state)
+
+  const reportSchema = Report.getReportSchema(reportTasks, reportPeople)
   let validateFieldDebounced
   return (
     <Formik
@@ -349,6 +350,12 @@ const ReportForm = ({
           }
         }
 
+        // Add attendee groups defined in the dictionary
+        const attendeeGroups = Settings.fields.report.attendeeGroups ?? []
+        attendeeGroups.forEach(({ label, filter: queryVars }) => {
+          reportPeopleFilters[label] = { label, queryVars }
+        })
+
         const tasksFilters = {}
 
         if (currentOrg) {
@@ -399,7 +406,7 @@ const ReportForm = ({
         const canDelete =
           !!values.uuid &&
           (Report.isDraft(values.state) || Report.isRejected(values.state)) &&
-          values.authors?.some(a => Person.isEqual(currentUser, a))
+          isAuthor
         // Skip validation on save!
         const action = (
           <div>
@@ -415,11 +422,11 @@ const ReportForm = ({
         )
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
-        const relatedObject = hasAssessments ? new Report(values) : {}
+        const relatedObject = hasAssessments ? values : {}
 
         return (
           <div className="report-form">
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={saveError} />
 
             {showAssignedPositionWarning && (
@@ -552,7 +559,9 @@ const ReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title="Recent Locations"
-                        shortcuts={recents.locations}
+                        shortcuts={recents.locations.filter(
+                          l => values.location?.uuid !== l.uuid
+                        )}
                         fieldName="location"
                         objectType={Location}
                         curValue={values.location}
@@ -709,7 +718,12 @@ const ReportForm = ({
                     <>
                       <FieldHelper.FieldShortcuts
                         title="Recent attendees"
-                        shortcuts={recents.persons}
+                        shortcuts={recents.persons.filter(
+                          ra =>
+                            !values.reportPeople?.find(
+                              person => person.uuid === ra.uuid
+                            )
+                        )}
                         fieldName="reportPeople"
                         objectType={Person}
                         curValue={values.reportPeople}
@@ -774,7 +788,10 @@ const ReportForm = ({
                       <>
                         <FieldHelper.FieldShortcuts
                           title={`Recent ${tasksLabel}`}
-                          shortcuts={recents.tasks}
+                          shortcuts={recents.tasks.filter(
+                            rt =>
+                              !values.tasks?.find(task => task.uuid === rt.uuid)
+                          )}
                           fieldName="tasks"
                           objectType={Task}
                           curValue={values.tasks}
@@ -792,7 +809,7 @@ const ReportForm = ({
                 </Fieldset>
               )}
 
-              {Settings.fields.report.customFields && (
+              {showCustomFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
                   <CustomFieldsContainer
                     fieldsConfig={Settings.fields.report.customFields}
@@ -802,6 +819,7 @@ const ReportForm = ({
                       values,
                       validateForm
                     }}
+                    setShowCustomFields={setShowCustomFields}
                   />
                 </Fieldset>
               )}
@@ -984,7 +1002,13 @@ const ReportForm = ({
                           <>
                             <FieldHelper.FieldShortcuts
                               title="Recent Authorization Groups"
-                              shortcuts={recents.authorizationGroups}
+                              shortcuts={recents.authorizationGroups.filter(
+                                ag =>
+                                  !values.authorizationGroups?.find(
+                                    authorizationGroup =>
+                                      authorizationGroup.uuid === ag.uuid
+                                  )
+                              )}
                               fieldName="authorizationGroups"
                               objectType={AuthorizationGroup}
                               curValue={values.authorizationGroups}
@@ -1032,6 +1056,8 @@ const ReportForm = ({
                         values,
                         validateForm
                       }}
+                      canRead={canReadAssessments}
+                      canWrite={canWriteAssessments}
                     />
                   </Fieldset>
 
@@ -1050,6 +1076,8 @@ const ReportForm = ({
                         values,
                         validateForm
                       }}
+                      canRead={canReadAssessments}
+                      canWrite={canWriteAssessments}
                     />
                   </Fieldset>
                 </>
@@ -1237,9 +1265,9 @@ const ReportForm = ({
     API.mutation(GQL_DELETE_REPORT, { uuid: values.uuid })
       .then(data => {
         // reset the form to latest values
-        // to avoid unsaved changes propmt if it somehow becomes dirty
+        // to avoid unsaved changes prompt if it somehow becomes dirty
         resetForm({ values, isSubmitting: true })
-        history.push("/", { success: "Report deleted" })
+        navigate("/", { state: { success: "Report deleted" } })
       })
       .catch(error => {
         setSaveError(error)
@@ -1248,7 +1276,7 @@ const ReportForm = ({
   }
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -1265,13 +1293,13 @@ const ReportForm = ({
   function onSubmitSuccess(report, values, resetForm) {
     const edit = isEditMode(values)
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     resetForm({ values, isSubmitting: true })
     if (!edit) {
-      history.replace(Report.pathForEdit(report))
+      navigate(Report.pathForEdit(report), { replace: true })
     }
-    history.push(Report.pathFor(report), {
-      success: `${getReportTypeUpperFirst(values)} saved`
+    navigate(Report.pathFor(report), {
+      state: { success: `${getReportTypeUpperFirst(values)} saved` }
     })
   }
 
@@ -1297,46 +1325,58 @@ const ReportForm = ({
   ) {
     const entitiesUuids = entities.map(e => e.uuid)
     const valuesCopy = _cloneDeep(values)
-    const entitiesAssessments = valuesCopy[asessmentsFieldName]
-    return Object.entries(entitiesAssessments)
-      .filter(
-        ([key, assessment]) =>
-          entitiesUuids.includes(key) && !isEmptyAssessment(assessment)
-      )
-      .map(([key, assessment]) => {
-        const entity = entities.find(e => e.uuid === key)
+    const assessmentNotes = []
+    const entitiesAssessments = Object.entries(
+      valuesCopy[asessmentsFieldName]
+    ).filter(([entityUuid, instantAssessments]) => {
+      Object.entries(instantAssessments).forEach(([ak, assessmentValues]) => {
+        if (isEmptyAssessment(assessmentValues)) {
+          delete instantAssessments[ak]
+        }
+      })
+      return entitiesUuids.includes(entityUuid)
+    })
+    entitiesAssessments.forEach(([entityUuid, instantAssessment]) => {
+      Object.entries(instantAssessment).forEach(([ak, assessmentValues]) => {
+        const entity = entities.find(e => e.uuid === entityUuid)
+        const dictionaryPath = entity.getAssessmentDictionaryPath()
         Model.clearInvalidAssessmentQuestions(
-          assessment,
+          assessmentValues,
           entity,
           new Report(values),
-          entity.getInstantAssessmentConfig()
+          entity.getInstantAssessmentConfig(ak)
         )
-        assessment.__recurrence = RECURRENCE_TYPE.ONCE
-        assessment.__relatedObjectType = ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
+        assessmentValues.__recurrence = RECURRENCE_TYPE.ONCE
+        assessmentValues.__relatedObjectType =
+          ASSESSMENTS_RELATED_OBJECT_TYPE.REPORT
         const noteObj = {
           type: NOTE_TYPE.ASSESSMENT,
           noteRelatedObjects: [
             {
               relatedObjectType: entityType.relatedObjectType,
-              relatedObjectUuid: key
+              relatedObjectUuid: entityUuid
             },
             {
               relatedObjectType: Report.relatedObjectType,
               relatedObjectUuid: reportUuid
             }
           ],
+          assessmentKey: `${dictionaryPath}.${ak}`,
           text: customFieldsJSONString(
             valuesCopy,
             true,
-            `${asessmentsFieldName}.${key}`
+            `${asessmentsFieldName}.${entityUuid}.${ak}`
           )
         }
-        const initialAssessmentUuid = values[assessmentsUuidsFieldName][key]
+        const initialAssessmentUuid =
+          values[assessmentsUuidsFieldName]?.[entityUuid]?.[ak]
         if (initialAssessmentUuid) {
           noteObj.uuid = initialAssessmentUuid
         }
-        return noteObj
+        assessmentNotes.push(noteObj)
       })
+    })
+    return assessmentNotes
   }
 
   function save(values, sendEmail) {
@@ -1379,7 +1419,11 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
-      const updateNotesVariables = { report: { uuid: report.uuid } }
+      if (!canWriteAssessments) {
+        // Skip updating assessments!
+        return report
+      }
+      // Update assessments
       const tasksNotes = createInstantAssessments(
         Task,
         values.tasks,
@@ -1396,7 +1440,10 @@ const ReportForm = ({
         Report.ATTENDEES_ASSESSMENTS_UUIDS_FIELD,
         report.uuid
       )
-      updateNotesVariables.notes = tasksNotes.concat(attendeesNotes)
+      const updateNotesVariables = {
+        uuid: report.uuid,
+        notes: tasksNotes.concat(attendeesNotes)
+      }
       return API.mutation(
         GQL_UPDATE_REPORT_ASSESSMENTS,
         updateNotesVariables

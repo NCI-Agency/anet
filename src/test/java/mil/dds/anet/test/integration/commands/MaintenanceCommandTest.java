@@ -32,6 +32,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.test.integration.utils.TestApp;
 import mil.dds.anet.test.resources.AbstractResourceTest;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -136,9 +137,9 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
   }
 
   private void checkCounterparts(Person principal, ImmutableSet<Person> advisors) {
-    final Position principalPosition = principal.loadPosition();
+    final Position principalPosition = DaoUtils.getPosition(principal);
     final Set<Position> advisorPositions =
-        advisors.stream().map(a -> a.loadPosition()).collect(Collectors.toSet());
+        advisors.stream().map(a -> DaoUtils.getPosition(a)).collect(Collectors.toSet());
     if (principalPosition == null) {
       assertThat(advisorPositions).isEmpty();
     } else {
@@ -210,7 +211,7 @@ public class MaintenanceCommandTest extends AbstractResourceTest {
   }
 
   private static void deleteCounterparts(Person advisor) {
-    final Position advisorPosition = advisor.loadPosition();
+    final Position advisorPosition = DaoUtils.getPosition(advisor);
     final List<Position> counterparts = advisorPosition.loadAssociatedPositions(context).join();
     for (final Position principalPosition : counterparts) {
       positionDao.deletePositionAssociation(advisorPosition.getUuid(), principalPosition.getUuid());

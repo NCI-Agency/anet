@@ -4092,4 +4092,52 @@
 			onDelete="CASCADE" onUpdate="NO ACTION" />
 	</changeSet>
 
+	<changeSet id="add-people-openIdSubject" author="gjvoosten">
+		<!-- Store the Subject returned by the OpenID Provider (Keycloak); from the OIDC spec:
+                     "It MUST NOT exceed 255 ASCII characters in length." -->
+		<addColumn tableName="people">
+			<column name="openIdSubject" type="nvarchar(255)" />
+		</addColumn>
+		<!-- Add some indexes to speed up queries used during authentication -->
+		<createIndex
+			tableName="people" indexName="IDX_people_openIdSubject">
+			<column name="openIdSubject" />
+		</createIndex>
+		<createIndex
+			tableName="people" indexName="IDX_people_domainUsername">
+			<column name="domainUsername" />
+		</createIndex>
+		<createIndex
+			tableName="people" indexName="IDX_people_emailAddress">
+			<column name="emailAddress" />
+		</createIndex>
+	</changeSet>
+
+	<!-- From this point on, mssql is no longer supported, so only postgresql migrations are needed -->
+
+	<changeSet id="add-assessmentKey-to-notes" author="gjvoosten">
+		<addColumn tableName="notes">
+			<column name="assessmentKey" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add-userActivities-table" author="gjvoosten">
+		<createTable tableName="userActivities">
+			<!-- Note: personUuid and organizationUuid are *not* a foreign key so they can still be deleted without deleting the activities -->
+			<column name="personUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints />
+			</column>
+			<column name="visitedAt" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+			tableName="userActivities"
+			columnNames="personUuid, organizationUuid, visitedAt"
+			constraintName="uniqueUserActivities" />
+	</changeSet>
+
 </databaseChangeLog>

@@ -20,7 +20,7 @@ import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const GQL_GET_MY_SUBSCRIPTION_UPDATES = gql`
-  query($subscriptionUpdatesQuery: SubscriptionUpdateSearchQueryInput) {
+  query ($subscriptionUpdatesQuery: SubscriptionUpdateSearchQueryInput) {
     mySubscriptionUpdates(query: $subscriptionUpdatesQuery) {
       pageNum
       pageSize

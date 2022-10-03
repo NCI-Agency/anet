@@ -10,7 +10,7 @@ import { Table } from "react-bootstrap"
 import Settings from "settings"
 
 const GQL_GET_POSITION = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     position(uuid: $uuid) {
       uuid
       name

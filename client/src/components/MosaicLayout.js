@@ -1,7 +1,8 @@
 import { Classes, Icon, IconSize } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
-import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
+// needed for the mosaic tile buttons (expand, close):
+import "@blueprintjs/icons/lib/css/blueprint-icons.css"
 import classNames from "classnames"
 import _cloneDeep from "lodash/cloneDeep"
 import _dropRight from "lodash/dropRight"
@@ -15,8 +16,8 @@ import {
   getNodeAtPath,
   getOtherDirection,
   getPathToCorner,
-  Mosaic,
   MosaicWindow,
+  MosaicWithoutDragDropContext,
   updateTree
 } from "react-mosaic-component"
 import "react-mosaic-component/react-mosaic-component.css"
@@ -28,7 +29,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
     <div className="mosaic-box" style={style}>
       <div className="mosaic-container">
         {renderNavBar()}
-        <Mosaic
+        <MosaicWithoutDragDropContext
           value={currentNode}
           onChange={updateCurrentNode}
           renderTile={(id, path) => {
@@ -141,7 +142,7 @@ MosaicLayout.propTypes = {
       renderer: PropTypes.func.isRequired
     })
   ).isRequired,
-  initialNode: PropTypes.object, // FIXME: actually MosaicNode
+  initialNode: PropTypes.oneOfType([PropTypes.object, PropTypes.string]), // FIXME: actually MosaicNode
   description: PropTypes.string,
   style: PropTypes.object
 }

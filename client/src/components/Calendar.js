@@ -1,6 +1,8 @@
-import FullCalendar from "@fullcalendar/react" // needs to be imported first, before plugins
+// needs to be imported first, before plugins:
+import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
-import interactionPlugin from "@fullcalendar/interaction" // needed for dayClick
+// needed for dayClick:
+import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list"
 import timeGridPlugin from "@fullcalendar/timegrid"
 import PropTypes from "prop-types"

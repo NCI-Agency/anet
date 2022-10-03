@@ -17,7 +17,7 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Form, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import utils from "utils"
 
 const GQL_GET_SAVED_SEARCHES = gql`
@@ -32,13 +32,13 @@ const GQL_GET_SAVED_SEARCHES = gql`
 `
 
 const GQL_DELETE_SAVED_SEARCH = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteSavedSearch(uuid: $uuid)
   }
 `
 
 const MySavedSearches = ({ setSearchQuery, pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [stateError, setStateError] = useState(null)
   const [selectedSearch, setSelectedSearch] = useState(null)
   const { loading, error, data, refetch } = API.useApiQuery(
@@ -131,7 +131,7 @@ const MySavedSearches = ({ setSearchQuery, pageDispatchers }) => {
       filters: filters,
       text: text
     })
-    history.push("/search")
+    navigate("/search")
   }
 
   function onConfirmDelete() {

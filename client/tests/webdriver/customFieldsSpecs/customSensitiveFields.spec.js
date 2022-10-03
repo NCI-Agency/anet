@@ -71,7 +71,12 @@ describe("Visibility of custom sensitive information", () => {
         COUNTERPART_PRINCIPLE.birthday
       )
     })
+    it("Should logout", () => {
+      // just call logout directly
+      browser.url("/api/logout")
+    })
   })
+
   describe("Superusers", () => {
     it("Should be able to find the principal with sensitive information", () => {
       Home.openAsSuperUser()
@@ -93,7 +98,12 @@ describe("Visibility of custom sensitive information", () => {
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
+    it("Should logout", () => {
+      // just call logout directly
+      browser.url("/api/logout")
+    })
   })
+
   describe("Admins", () => {
     it("Should be able to find the principal with sensitive information", () => {
       Home.openAsAdminUser()
@@ -114,6 +124,10 @@ describe("Visibility of custom sensitive information", () => {
       expect(ShowPerson.birthday.getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
+    })
+    it("Should logout", () => {
+      // just call logout directly
+      browser.url("/api/logout")
     })
   })
 })
@@ -154,7 +168,12 @@ describe("Creating and editing custom sensitive information", () => {
       CreatePerson.waitForAlertSuccessToLoad()
       expect(ShowPerson.birthday.getText()).to.equal("1 January 1956")
     })
+    it("Should logout", () => {
+      // just call logout directly
+      browser.url("/api/logout")
+    })
   })
+
   describe("Admins", () => {
     it("Should be able load a new person form and fill normal required fields", () => {
       CreatePerson.openAsAdmin()
@@ -187,6 +206,10 @@ describe("Creating and editing custom sensitive information", () => {
       CreatePerson.waitForAlertSuccessToLoad()
       expect(ShowPerson.birthday.getText()).to.equal("8 June 1963")
       expect(ShowPerson.politicalPosition.getText()).to.equal("Left")
+    })
+    it("Should logout", () => {
+      // just call logout directly
+      browser.url("/api/logout")
     })
   })
 })

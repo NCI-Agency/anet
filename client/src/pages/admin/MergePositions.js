@@ -43,14 +43,14 @@ import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
 import PreviousPeople from "../positions/PreviousPeople"
 
 const GQL_MERGE_POSITION = gql`
-  mutation($loserUuid: String!, $winnerPosition: PositionInput!) {
+  mutation ($loserUuid: String!, $winnerPosition: PositionInput!) {
     mergePositions(loserUuid: $loserUuid, winnerPosition: $winnerPosition) {
       uuid
     }
@@ -58,7 +58,7 @@ const GQL_MERGE_POSITION = gql`
 `
 
 const MergePositions = ({ pageDispatchers }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [saveError, setSaveError] = useState(null)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [mergeState, dispatchMergeActions] = useMergeObjects(
@@ -377,8 +377,10 @@ const MergePositions = ({ pageDispatchers }) => {
     })
       .then(res => {
         if (res.mergePositions) {
-          history.push(Position.pathFor({ uuid: res.mergePositions.uuid }), {
-            success: "Positions merged. Displaying merged Position below."
+          navigate(Position.pathFor({ uuid: res.mergePositions.uuid }), {
+            state: {
+              success: "Positions merged. Displaying merged Position below."
+            }
           })
         }
       })

@@ -51,7 +51,7 @@ import {
   Tooltip
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 
@@ -69,6 +69,7 @@ const GQL_GET_PERSON = gql`
       emailAddress
       phoneNumber
       domainUsername
+      openIdSubject
       biography
       country
       gender
@@ -117,24 +118,22 @@ const GQL_GET_PERSON = gql`
 `
 
 const GQL_UPDATE_PREVIOUS_POSITIONS = gql`
-  mutation($person: PersonInput!) {
+  mutation ($person: PersonInput!) {
     updatePersonHistory(person: $person)
   }
 `
 
 const PersonShow = ({ pageDispatchers }) => {
   const { currentUser, loadAppData } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
   const [showAssignPositionModal, setShowAssignPositionModal] = useState(false)
-  const [
-    showAssociatedPositionsModal,
-    setShowAssociatedPositionsModal
-  ] = useState(false)
+  const [showAssociatedPositionsModal, setShowAssociatedPositionsModal] =
+    useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_PERSON, {
@@ -187,7 +186,7 @@ const PersonShow = ({ pageDispatchers }) => {
     (!hasPosition && currentUser.isSuperUser()) ||
     (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-  const canAddAssessment =
+  const canAddPeriodicAssessment =
     Position.isAdvisor(position) ||
     (Position.isPrincipal(position) &&
       (isAdmin ||
@@ -195,6 +194,7 @@ const PersonShow = ({ pageDispatchers }) => {
           .filter(ap => ap.person)
           .map(ap => ap.person.uuid)
           .includes(person.uuid)))
+  const canAddOndemandAssessment = isAdmin
 
   const action = (
     <div>
@@ -228,10 +228,30 @@ const PersonShow = ({ pageDispatchers }) => {
     <a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
   )
 
+  const extraColElems = {
+    position: getPositionActions(),
+    prevPositions: getPreviousPositionsActions()
+  }
+
+  // Keys of fields which should span over 2 columns
+  const fullWidthFieldKeys = person.getFullWidthFields()
+
+  const fullWidthFields = []
   const orderedFields = orderPersonFields()
+    .filter(([el, key]) => {
+      if (fullWidthFieldKeys.includes(key)) {
+        fullWidthFields.push(cloneField([el, key], 2))
+        return false
+      }
+      return true
+    })
+    .map(field => cloneField(field, 4))
   const numberOfFieldsUnderAvatar = person.getNumberOfFieldsInLeftColumn() || 6
-  const leftColumUnderAvatar = orderedFields.slice(0, numberOfFieldsUnderAvatar)
-  const rightColum = orderedFields.slice(numberOfFieldsUnderAvatar)
+  const leftColumnUnderAvatar = orderedFields.slice(
+    0,
+    numberOfFieldsUnderAvatar
+  )
+  const rightColumn = orderedFields.slice(numberOfFieldsUnderAvatar)
 
   return (
     <Formik enableReinitialize initialValues={person}>
@@ -288,9 +308,12 @@ const PersonShow = ({ pageDispatchers }) => {
                           marginBottom: "10px"
                         }}
                       />
-                      {leftColumUnderAvatar}
+                      {leftColumnUnderAvatar}
                     </Col>
-                    <Col md={6}>{rightColum}</Col>
+                    <Col md={6}>{rightColumn}</Col>
+                  </Row>
+                  <Row>
+                    <Col md={12}>{fullWidthFields}</Col>
                   </Row>
                 </Container>
               </Fieldset>
@@ -370,7 +393,8 @@ const PersonShow = ({ pageDispatchers }) => {
             <AssessmentResultsContainer
               entity={person}
               entityType={Person}
-              canAddAssessment={canAddAssessment}
+              canAddPeriodicAssessment={canAddPeriodicAssessment}
+              canAddOndemandAssessment={canAddOndemandAssessment}
               onUpdateAssessment={() => {
                 loadAppData()
                 refetch()
@@ -397,12 +421,10 @@ const PersonShow = ({ pageDispatchers }) => {
     const privilegedAccessedFields = {
       domainUsername: {
         accessCond: isAdmin
+      },
+      openIdSubject: {
+        accessCond: isAdmin
       }
-    }
-
-    const extraColElems = {
-      position: getPositionActions(),
-      prevPositions: getPreviousPositionsActions()
     }
 
     return (
@@ -438,14 +460,15 @@ const PersonShow = ({ pageDispatchers }) => {
             mappedSensitiveFields[key],
           key
         ])
-        .map(([el, key]) =>
-          React.cloneElement(el, {
-            key,
-            extraColElem: extraColElems[key] || el.props.extraColElem || null,
-            labelColumnWidth: 4
-          })
-        )
     )
+  }
+
+  function cloneField([el, key], columnWidth) {
+    return React.cloneElement(el, {
+      key,
+      extraColElem: extraColElems[key] || el.props.extraColElem || null,
+      labelColumnWidth: columnWidth
+    })
   }
 
   function mapNonCustomFields() {
@@ -658,7 +681,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   function onCompactClick() {
     if (!_isEmpty(person)) {
-      history.push(`${person.uuid}/compact`)
+      navigate("compact")
     }
   }
 

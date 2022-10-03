@@ -7,12 +7,11 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.utils.Utils;
-import mil.dds.anet.views.AbstractAnetBean;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
 
-public class PostgresqlSearchQueryBuilder<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
+public class PostgresqlSearchQueryBuilder<B, T extends AbstractSearchQuery<?>>
     extends AbstractSearchQueryBuilder<B, T> {
 
   public PostgresqlSearchQueryBuilder(String queryName) {

@@ -1,5 +1,5 @@
 branches: 
-  - candidate
+  - main
 name-template: "ANET $NEXT_PATCH_VERSION"
 version-template: "$MAJOR.$MINOR.$PATCH"
 categories:
@@ -13,6 +13,7 @@ categories:
     labels:
       - debt
       - dependencies
+      - DevOps
 change-template: "* $TITLE (#$NUMBER)"
 template: |
   ## What’s changed in ANET

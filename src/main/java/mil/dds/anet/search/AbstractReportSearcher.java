@@ -389,21 +389,20 @@ public abstract class AbstractReportSearcher extends AbstractSearcher<Report, Re
     // query!
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports_createdAt"));
         break;
       case RELEASED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_releasedAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports_releasedAt"));
         break;
       case UPDATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), null, "\"reports_updatedAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports_updatedAt"));
         break;
       case ENGAGEMENT_DATE:
       default:
-        qb.addAllOrderByClauses(
-            getOrderBy(query.getSortOrder(), null, "\"reports_engagementDate\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "reports_engagementDate"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, null, "reports_uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "reports_uuid"));
   }
 
 }

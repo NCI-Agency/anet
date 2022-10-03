@@ -14,25 +14,25 @@ import { AuthorizationGroup, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 
 const GQL_CREATE_AUTHORIZATION_GROUP = gql`
-  mutation($authorizationGroup: AuthorizationGroupInput!) {
+  mutation ($authorizationGroup: AuthorizationGroupInput!) {
     createAuthorizationGroup(authorizationGroup: $authorizationGroup) {
       uuid
     }
   }
 `
 const GQL_UPDATE_AUTHORIZATION_GROUP = gql`
-  mutation($authorizationGroup: AuthorizationGroupInput!) {
+  mutation ($authorizationGroup: AuthorizationGroupInput!) {
     updateAuthorizationGroup(authorizationGroup: $authorizationGroup)
   }
 `
 
 const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
     {
@@ -92,7 +92,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
         )
         return (
           <div>
-            <NavigationWarning isBlocking={dirty} />
+            <NavigationWarning isBlocking={dirty && !isSubmitting} />
             <Messages error={error} />
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
@@ -195,7 +195,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
   }
 
   function onCancel() {
-    history.goBack()
+    navigate(-1)
   }
 
   function onSubmit(values, form) {
@@ -218,13 +218,13 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
         : initialValues.uuid
     })
     // reset the form to latest values
-    // to avoid unsaved changes propmt if it somehow becomes dirty
+    // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
     if (!edit) {
-      history.replace(AuthorizationGroup.pathForEdit(authGroup))
+      navigate(AuthorizationGroup.pathForEdit(authGroup), { replace: true })
     }
-    history.push(AuthorizationGroup.pathFor(authGroup), {
-      success: "Authorization Group saved"
+    navigate(AuthorizationGroup.pathFor(authGroup), {
+      state: { success: "Authorization Group saved" }
     })
   }
 

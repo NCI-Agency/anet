@@ -14,7 +14,7 @@ import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const GQL_GET_PERSON_LIST = gql`
-  query($personQuery: PersonSearchQueryInput) {
+  query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
       pageNum
       pageSize

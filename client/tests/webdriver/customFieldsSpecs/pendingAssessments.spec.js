@@ -13,9 +13,8 @@ describe("In my counterparts page", () => {
     it("Should see 1 counterpart in the table of pending my counterparts that has pending assessments", () => {
       MyCounterparts.open()
       MyCounterparts.myPendingCounterparts.waitForDisplayed()
-      const myPendingCounterpartsItems = MyCounterparts.myPendingCounterpartsContent.$$(
-        "tr"
-      )
+      const myPendingCounterpartsItems =
+        MyCounterparts.myPendingCounterpartsContent.$$("tr")
       expect(myPendingCounterpartsItems).to.have.length(1)
       MyCounterparts.getMyPendingCounterpart(
         "CIV TOPFERNESS, Christopf"
@@ -23,9 +22,8 @@ describe("In my counterparts page", () => {
     })
     it("Should be able to add a quarterly assessment with 4 questions for the counterpart", () => {
       AssessmentsSection.getAssessmentsSection("quarterly").waitForDisplayed()
-      const newAssessmentButton = AssessmentsSection.getNewAssessmentButton(
-        "quarterly"
-      )
+      const newAssessmentButton =
+        AssessmentsSection.getNewAssessmentButton("quarterly")
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -49,10 +47,11 @@ describe("In my counterparts page", () => {
         ).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
+      MyCounterparts.logout()
     })
   })
 
@@ -67,9 +66,8 @@ describe("In my counterparts page", () => {
     })
     it("Should be able to add a quarterly assessment with 1 question for the counterpart", () => {
       AssessmentsSection.getAssessmentsSection("quarterly").waitForDisplayed()
-      const newAssessmentButton = AssessmentsSection.getNewAssessmentButton(
-        "quarterly"
-      )
+      const newAssessmentButton =
+        AssessmentsSection.getNewAssessmentButton("quarterly")
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -93,10 +91,11 @@ describe("In my counterparts page", () => {
         ).isExisting()
       ).to.be.false
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
+      MyCounterparts.logout()
     })
   })
 })
@@ -108,6 +107,7 @@ describe("In my tasks page", () => {
       MyTasks.myPendingTasks.waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
       expect(MyTasks.myPendingTasksContent.isExisting()).to.be.false
+      MyTasks.logout()
     })
   })
 
@@ -121,9 +121,8 @@ describe("In my tasks page", () => {
     })
     it("Should be able to add a monthly assessment with 2 questions for the task", () => {
       AssessmentsSection.getAssessmentsSection("monthly").waitForDisplayed()
-      const newAssessmentButton = AssessmentsSection.getNewAssessmentButton(
-        "monthly"
-      )
+      const newAssessmentButton =
+        AssessmentsSection.getNewAssessmentButton("monthly")
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -138,16 +137,15 @@ describe("In my tasks page", () => {
         AssessmentsSection.getModalAssessmentQuestion("status").isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
     })
     it("Should be able to add a weekly assessment with 1 question for the task", () => {
       AssessmentsSection.getAssessmentsSection("weekly").waitForDisplayed()
-      const newAssessmentButton = AssessmentsSection.getNewAssessmentButton(
-        "weekly"
-      )
+      const newAssessmentButton =
+        AssessmentsSection.getNewAssessmentButton("weekly")
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
@@ -162,10 +160,11 @@ describe("In my tasks page", () => {
         AssessmentsSection.getModalAssessmentQuestion("status").isExisting()
       ).to.be.false
       /* eslint-enable no-unused-expressions */
-      const cancelButton = AssessmentsSection.modalCancelButton
-      cancelButton.waitForDisplayed()
-      cancelButton.click()
+      const closeButton = AssessmentsSection.modalCloseButton
+      closeButton.waitForDisplayed()
+      closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
+      MyTasks.logout()
     })
   })
 })

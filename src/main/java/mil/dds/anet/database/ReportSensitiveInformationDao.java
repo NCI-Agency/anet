@@ -25,7 +25,7 @@ public class ReportSensitiveInformationDao
 
   private static final String[] fields = {"uuid", "text", "reportUuid", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "reportsSensitiveInformation";
-  public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS =
+  public static final String REPORT_SENSITIVE_INFORMATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
@@ -42,7 +42,7 @@ public class ReportSensitiveInformationDao
       extends ForeignKeyBatcher<ReportSensitiveInformation> {
     private static final String sql =
         "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT "
-            + REPORTS_SENSITIVE_INFORMATION_FIELDS + " FROM \"" + TABLE_NAME + "\""
+            + REPORT_SENSITIVE_INFORMATION_FIELDS + " FROM \"" + TABLE_NAME + "\""
             + " WHERE \"reportUuid\" IN ( <foreignKeys> )";
 
     public ReportsSensitiveInformationBatcher() {

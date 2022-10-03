@@ -12,6 +12,7 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import * as d3 from "d3"
+import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import PropTypes from "prop-types"
 import React, { useMemo, useState } from "react"
@@ -19,7 +20,7 @@ import ContainerDimensions from "react-container-dimensions"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LIST_BY_ORG = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {
@@ -33,7 +34,7 @@ const GQL_GET_REPORT_LIST_BY_ORG = gql`
   }
 `
 const GQL_GET_REPORT_LIST_BY_REASON = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {
@@ -123,8 +124,8 @@ const ChartByOrg = ({
             xLabel="advisorOrg.shortName"
             onBarClick={goToSelection}
             tooltip={d => `
-              <h4>${d.advisorOrg.shortName}</h4>
-              <p>${d.cancelledByOrg}</p>
+              <h4>${_escape(d.advisorOrg.shortName)}</h4>
+              <p>${_escape(d.cancelledByOrg)}</p>
             `}
             selectedBarClass={selectedBarClass}
             selectedBar={
@@ -221,8 +222,8 @@ const ChartByReason = ({
             xLabel="reason"
             onBarClick={goToSelection}
             tooltip={d => `
-              <h4>${d.reason}</h4>
-              <p>${d.cancelledByReason}</p>
+              <h4>${_escape(d.reason)}</h4>
+              <p>${_escape(d.cancelledByReason)}</p>
             `}
             selectedBarClass={selectedBarClass}
             selectedBar={

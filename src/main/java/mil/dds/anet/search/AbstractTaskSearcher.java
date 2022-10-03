@@ -7,6 +7,7 @@ import mil.dds.anet.beans.search.AbstractBatchParams;
 import mil.dds.anet.beans.search.ISearchQuery.RecurseStrategy;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearchQueryBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
@@ -28,7 +29,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
   @Override
   protected void buildQuery(TaskSearchQuery query) {
-    qb.addSelectClause("tasks.*");
+    qb.addSelectClause(TaskDao.TASK_FIELDS);
     qb.addTotalCount();
     qb.addFromClause("tasks");
 
@@ -77,6 +78,7 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("
           + "  SELECT \"reportTasks\".\"taskUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
@@ -133,23 +135,23 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, TaskSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks_createdAt"));
         break;
       case CATEGORY:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "category"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks_category"));
         break;
       case RECENT:
         if (Boolean.TRUE.equals(query.isInMyReports())) {
           // Otherwise the JOIN won't exist
-          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "inMyReports_max"));
         }
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks", "\"shortName\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "tasks_shortName"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "tasks", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "tasks_uuid"));
   }
 
 }

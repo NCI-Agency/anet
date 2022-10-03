@@ -39,7 +39,6 @@ import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import { exportResults } from "exportUtils"
 import { Field, Form, Formik } from "formik"
 import _get from "lodash/get"
-import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import { Organization } from "models"
 import pluralize from "pluralize"
@@ -57,7 +56,7 @@ import {
   Table
 } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
@@ -69,14 +68,14 @@ import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 
 const GQL_CREATE_SAVED_SEARCH = gql`
-  mutation($savedSearch: SavedSearchInput!) {
+  mutation ($savedSearch: SavedSearchInput!) {
     createSavedSearch(savedSearch: $savedSearch) {
       uuid
     }
   }
 `
 const GQL_GET_ORGANIZATION_LIST = gql`
-  query($organizationQuery: OrganizationSearchQueryInput) {
+  query ($organizationQuery: OrganizationSearchQueryInput) {
     organizationList(query: $organizationQuery) {
       pageNum
       pageSize
@@ -92,7 +91,7 @@ const GQL_GET_ORGANIZATION_LIST = gql`
   }
 `
 const GQL_GET_PERSON_LIST = gql`
-  query($personQuery: PersonSearchQueryInput) {
+  query ($personQuery: PersonSearchQueryInput) {
     personList(query: $personQuery) {
       pageNum
       pageSize
@@ -123,7 +122,7 @@ const GQL_GET_PERSON_LIST = gql`
   }
 `
 const GQL_GET_POSITION_LIST = gql`
-  query($positionQuery: PositionSearchQueryInput) {
+  query ($positionQuery: PositionSearchQueryInput) {
     positionList(query: $positionQuery) {
       pageNum
       pageSize
@@ -154,7 +153,7 @@ const GQL_GET_POSITION_LIST = gql`
   }
 `
 const GQL_GET_TASK_LIST = gql`
-  query($taskQuery: TaskSearchQueryInput) {
+  query ($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       pageNum
       pageSize
@@ -168,7 +167,7 @@ const GQL_GET_TASK_LIST = gql`
   }
 `
 const GQL_GET_LOCATION_LIST = gql`
-  query($locationQuery: LocationSearchQueryInput) {
+  query ($locationQuery: LocationSearchQueryInput) {
     locationList(query: $locationQuery) {
       pageNum
       pageSize
@@ -223,10 +222,10 @@ const Organizations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.organizationList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -324,10 +323,10 @@ const People = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.personList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -398,10 +397,10 @@ const Positions = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.positionList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -472,10 +471,10 @@ export const Tasks = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.taskList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -546,10 +545,10 @@ const Locations = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.locationList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -593,7 +592,7 @@ const Search = ({
   pagination,
   setPagination
 }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [error, setError] = useState(null)
   const [showSaveSearch, setShowSaveSearch] = useState(false)
   const [numOrganizations, setNumOrganizations] = useState(null)
@@ -612,9 +611,10 @@ const Search = ({
   )
   const taskShortLabel = Settings.fields.task.shortLabel
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
-  const searchQueryParams = useMemo(() => getSearchQuery(searchQuery), [
-    searchQuery
-  ])
+  const searchQueryParams = useMemo(
+    () => getSearchQuery(searchQuery),
+    [searchQuery]
+  )
   const genericSearchQueryParams = useMemo(
     () =>
       Object.assign({}, searchQueryParams, {
@@ -631,11 +631,9 @@ const Search = ({
       }),
     [searchQueryParams]
   )
-  const queryTypes = _isEmpty(searchQueryParams)
-    ? []
-    : searchQuery.objectType
-      ? [searchQuery.objectType]
-      : Object.keys(SEARCH_OBJECT_TYPES)
+  const queryTypes = searchQuery.objectType
+    ? [searchQuery.objectType]
+    : Object.keys(SEARCH_OBJECT_TYPES)
   const hasOrganizationsResults =
     queryTypes.includes(SEARCH_OBJECT_TYPES.ORGANIZATIONS) &&
     numOrganizations > 0
@@ -661,7 +659,7 @@ const Search = ({
         <Container className="p-0">
           <Row style={{ paddingLeft: 0 }}>
             <div>
-              <Button onClick={history.goBack} variant="link" size="sm">
+              <Button onClick={() => navigate(-1)} variant="link" size="sm">
                 &lt; Return to previous page
               </Button>
             </div>
@@ -775,7 +773,7 @@ const Search = ({
             </Dropdown.Menu>
           </Dropdown>
         )}
-        {!_isEmpty(searchQueryParams) && numResults >= 0 && (
+        {numResults >= 0 && (
           <Button
             onClick={openSaveModal}
             id="saveSearchButton"
@@ -787,19 +785,12 @@ const Search = ({
         )}
       </div>
       <Messages error={error} /> {/* success is shown through toast */}
-      {!_isEmpty(searchQueryParams) && (
-        <h4 className="d-none d-print-block">
-          Search query: {searchQuery.text}
-          <br />
-          Filters: <SearchDescription searchQuery={searchQuery} />
-        </h4>
-      )}
-      {_isEmpty(searchQueryParams) && (
-        <Alert variant="warning">
-          <b>You did not enter any search criteria.</b>
-        </Alert>
-      )}
-      {!_isEmpty(searchQueryParams) && numResults === 0 && (
+      <h4 className="d-none d-print-block">
+        Search query: {searchQuery.text}
+        <br />
+        Filters: <SearchDescription searchQuery={searchQuery} />
+      </h4>
+      {numResults === 0 && (
         <Alert variant="warning">
           <b>No search results found!</b>
         </Alert>

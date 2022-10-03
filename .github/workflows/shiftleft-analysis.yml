@@ -4,14 +4,20 @@
 name: ShiftLeft Scan
 
 # This section configures the trigger for the workflow. Feel free to customize depending on your convention
-on: push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
   Scan-Build:
     # Scan runs on ubuntu, mac and windows
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     # Instructions
     # 1. Setup JDK, Node.js, Python etc depending on your project type
     # 2. Compile or build the project before invoking scan

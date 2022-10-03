@@ -22,7 +22,11 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class AuthorizationGroupDao
     extends AnetBaseDao<AuthorizationGroup, AuthorizationGroupSearchQuery> {
 
+  private static final String[] fields =
+      {"uuid", "name", "description", "status", "createdAt", "updatedAt"};
   public static final String TABLE_NAME = "authorizationGroups";
+  public static final String AUTHORIZATION_GROUP_FIELDS =
+      DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
   @Override
   public AuthorizationGroup getByUuid(String uuid) {
@@ -30,8 +34,8 @@ public class AuthorizationGroupDao
   }
 
   static class SelfIdBatcher extends IdBatcher<AuthorizationGroup> {
-    private static final String sql =
-        "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( <uuids> )";
+    private static final String sql = "/* batch.getAuthorizationGroupsByUuids */ SELECT "
+        + AUTHORIZATION_GROUP_FIELDS + " FROM \"authorizationGroups\" WHERE uuid IN ( <uuids> )";
 
     public SelfIdBatcher() {
       super(sql, "uuids", new AuthorizationGroupMapper());
@@ -48,7 +52,7 @@ public class AuthorizationGroupDao
   static class PositionsBatcher extends ForeignKeyBatcher<Position> {
     private static final String sql =
         "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupUuid\", "
-            + PositionDao.POSITIONS_FIELDS + " FROM positions, \"authorizationGroupPositions\" "
+            + PositionDao.POSITION_FIELDS + " FROM positions, \"authorizationGroupPositions\" "
             + "WHERE \"authorizationGroupPositions\".\"authorizationGroupUuid\" IN ( <foreignKeys> ) "
             + "AND \"authorizationGroupPositions\".\"positionUuid\" = positions.uuid";
 
@@ -124,13 +128,14 @@ public class AuthorizationGroupDao
   }
 
   static class AuthorizationGroupsBatcher extends ForeignKeyBatcher<AuthorizationGroup> {
-    private static final String sql =
-        "/* batch.getAuthorizationGroupsByPosition */ SELECT * FROM \"authorizationGroupPositions\""
-            + " INNER JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid"
-            + " = \"authorizationGroupPositions\".\"authorizationGroupUuid\""
-            + " WHERE \"authorizationGroupPositions\".\"positionUuid\" IN ( <foreignKeys> )"
-            + " ORDER BY \"authorizationGroupPositions\".\"positionUuid\","
-            + " \"authorizationGroups\".name, \"authorizationGroups\".uuid";
+    private static final String sql = "/* batch.getAuthorizationGroupsByPosition */ SELECT "
+        + AUTHORIZATION_GROUP_FIELDS
+        + ", \"authorizationGroupPositions\".\"positionUuid\" FROM \"authorizationGroupPositions\""
+        + " INNER JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid"
+        + " = \"authorizationGroupPositions\".\"authorizationGroupUuid\""
+        + " WHERE \"authorizationGroupPositions\".\"positionUuid\" IN ( <foreignKeys> )"
+        + " ORDER BY \"authorizationGroupPositions\".\"positionUuid\","
+        + " \"authorizationGroups\".name, \"authorizationGroups\".uuid";
 
     public AuthorizationGroupsBatcher() {
       super(sql, "foreignKeys", new AuthorizationGroupMapper(), "positionUuid");

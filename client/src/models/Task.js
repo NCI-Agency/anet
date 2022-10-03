@@ -36,6 +36,9 @@ export default class Task extends Model {
     REPORT_APPROVAL: "REPORT_APPROVAL"
   }
 
+  static topLevelAssessmentDictionaryPath = "fields.task.topLevel.assessments"
+  static subLevelAssessmentDictionaryPath = "fields.task.subLevel.assessments"
+
   // create yup schema for the customFields, based on the customFields config
   static customFieldsSchema = createCustomFieldsSchema(
     Settings.fields.task.customFields
@@ -168,6 +171,12 @@ export default class Task extends Model {
     return this.isTopLevelTask()
       ? Settings.fields.task.topLevel
       : Settings.fields.task.subLevel
+  }
+
+  getAssessmentDictionaryPath() {
+    return this.isTopLevelTask()
+      ? Task.topLevelAssessmentDictionaryPath
+      : Task.subLevelAssessmentDictionaryPath
   }
 
   iconUrl() {

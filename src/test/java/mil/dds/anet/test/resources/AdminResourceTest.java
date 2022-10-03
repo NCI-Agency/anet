@@ -72,21 +72,21 @@ public class AdminResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void userActivitiesSuperUserTest()
+  public void recentActivitiesSuperUserTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    userActivities(getSuperUser());
+    recentActivities(getSuperUser());
   }
 
   @Test
-  public void userActivitiesAdminTest()
+  public void recentActivitiesAdminTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    userActivities(admin);
+    recentActivities(admin);
   }
 
   @Test
-  public void userActivitiesRegularUserTest()
+  public void recentActivitiesRegularUserTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    userActivities(getRegularUser());
+    recentActivities(getRegularUser());
   }
 
   private void saveSettings(Person user)
@@ -123,7 +123,7 @@ public class AdminResourceTest extends AbstractResourceTest {
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     // Cache a person
-    engine.getPersonDao().findByDomainUsername(user.getDomainUsername());
+    engine.getPersonDao().findByOpenIdSubject(user.getOpenIdSubject());
 
     try {
       final String result = userMutationExecutor.clearCache("");
@@ -158,16 +158,16 @@ public class AdminResourceTest extends AbstractResourceTest {
     }
   }
 
-  private void userActivities(Person user)
+  private void recentActivities(Person user)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final GraphQLRequest graphQlRequest = getGraphQlRequest(user.getDomainUsername(),
-        "query { userActivities { byActivity { ...userActivity } byUser { ...userActivity } } }"
-            + " fragment userActivity on UserActivity {"
+        "query { recentActivities { byActivity { ...recentActivity } byUser { ...recentActivity } } }"
+            + " fragment recentActivity on RecentUserActivity {"
             + " user { uuid rank name domainUsername } activity { time ip request } }");
     final boolean isAdmin = user.getPosition().getType() == PositionType.ADMINISTRATOR;
 
     try {
-      final RecentActivities recentActivities = graphQlRequest.execQuery().getUserActivities();
+      final RecentActivities recentActivities = graphQlRequest.execQuery().getRecentActivities();
       if (isAdmin) {
         assertThat(recentActivities.getByUser()).isNotEmpty();
         assertThat(recentActivities.getByActivity()).isNotEmpty();

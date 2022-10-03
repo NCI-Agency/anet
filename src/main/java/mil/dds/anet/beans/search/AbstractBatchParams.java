@@ -4,7 +4,7 @@ import java.util.List;
 import mil.dds.anet.search.AbstractSearchQueryBuilder;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public abstract class AbstractBatchParams<B extends AbstractAnetBean, T extends AbstractSearchQuery<?>>
+public abstract class AbstractBatchParams<B, T extends AbstractSearchQuery<?>>
     implements Cloneable {
 
   private List<String> batchUuids;

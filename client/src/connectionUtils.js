@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import { useEffect, useRef } from "react"
 import { useLocation } from "react-router-dom"
-import { Version } from "settings"
+import Version from "version"
 
 const GQL_GET_VERSION_INFO = gql`
   query {
@@ -16,7 +16,14 @@ export const useConnectionInfo = () => {
   const { error, data, stopPolling } = API.useApiQuery(
     GQL_GET_VERSION_INFO,
     {},
-    { pollInterval: POLL_INTERVAL_IN_MS }
+    {
+      pollInterval: POLL_INTERVAL_IN_MS,
+      context: {
+        headers: {
+          "x-activity": "ignore"
+        }
+      }
+    }
   )
 
   const { pathname } = useLocation()

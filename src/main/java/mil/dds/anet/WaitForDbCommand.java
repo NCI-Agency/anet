@@ -33,7 +33,7 @@ public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
     final Environment environment = new Environment(bootstrap.getApplication().getName(),
         bootstrap.getObjectMapper(), bootstrap.getValidatorFactory(), bootstrap.getMetricRegistry(),
         bootstrap.getClassLoader(), bootstrap.getHealthCheckRegistry(), configuration);
-    final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
+    final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "psql");
 
     // We want to possibly wait for the database to be ready, and keep trying to connect
     int remainingTries = namespace.getInt("dbConnectionNbAttempts").intValue();

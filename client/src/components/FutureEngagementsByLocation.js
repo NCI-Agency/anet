@@ -12,6 +12,7 @@ import ReportCollection, {
   FORMAT_TABLE
 } from "components/ReportCollection"
 import * as d3 from "d3"
+import _escape from "lodash/escape"
 import _isEqual from "lodash/isEqual"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -20,7 +21,7 @@ import ContainerDimensions from "react-container-dimensions"
 import Settings from "settings"
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       totalCount
       list {
@@ -144,8 +145,10 @@ const Chart = ({
             data={graphData}
             onBarClick={goToSelection}
             tooltip={d => `
-              <h4>${graphData.categoryLabels[d.parentKey]}</h4>
-              <p>${graphData.leavesLabels[d.key]}: ${d.value}</p>
+              <h4>${_escape(graphData.categoryLabels[d.parentKey])}</h4>
+              <p>${_escape(graphData.leavesLabels[d.key])}: ${_escape(
+              d.value
+            )}</p>
             `}
             selectedBarClass={selectedBarClass}
             selectedBar={

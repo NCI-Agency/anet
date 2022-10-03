@@ -3,8 +3,8 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import Fieldset from "components/Fieldset"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import React from "react"
@@ -12,7 +12,7 @@ import { connect } from "react-redux"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 const GQL_GET_AUTHORIZATION_GROUP_LIST = gql`
-  query($query: AuthorizationGroupSearchQueryInput) {
+  query ($query: AuthorizationGroupSearchQueryInput) {
     authorizationGroupList(query: $query) {
       list {
         uuid

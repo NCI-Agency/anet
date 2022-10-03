@@ -386,11 +386,8 @@ export const CompactRowContentS = styled.td`
     margin-bottom: 0;
     padding-top: 0;
   }
-  & .bp3-popover2-target {
+  & .bp3-icon-info-sign {
     padding: 0 1rem;
-    svg {
-      height: 16px;
-    }
     @media print {
       display: none;
     }

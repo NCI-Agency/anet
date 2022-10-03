@@ -8,7 +8,7 @@ import PropTypes from "prop-types"
 import React from "react"
 
 const GQL_GET_LOCATION = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     location(uuid: $uuid) {
       uuid
       name

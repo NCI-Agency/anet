@@ -29,7 +29,7 @@ import { positionTour } from "pages/HopscotchTour"
 import React, { useContext, useState } from "react"
 import { Badge, Button } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useLocation, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 import utils from "utils"
 import PreviousPeople from "./PreviousPeople"
@@ -42,25 +42,23 @@ const GQL_GET_POSITION = gql`
   }
 `
 const GQL_DELETE_POSITION = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deletePosition(uuid: $uuid)
   }
 `
 
 const GQL_UPDATE_PREVIOUS_PEOPLE = gql`
-  mutation($position: PositionInput!) {
+  mutation ($position: PositionInput!) {
     updatePositionHistory(position: $position)
   }
 `
 
 const PositionShow = ({ pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [showAssignPersonModal, setShowAssignPersonModal] = useState(false)
-  const [
-    showAssociatedPositionsModal,
-    setShowAssociatedPositionsModal
-  ] = useState(false)
+  const [showAssociatedPositionsModal, setShowAssociatedPositionsModal] =
+    useState(false)
   const [showEditHistoryModal, setShowEditHistoryModal] = useState(false)
   const routerLocation = useLocation()
   const stateSuccess = routerLocation.state && routerLocation.state.success
@@ -409,7 +407,7 @@ const PositionShow = ({ pageDispatchers }) => {
     const { uuid } = position
     API.mutation(GQL_DELETE_POSITION, { uuid })
       .then(data => {
-        history.push("/", { success: "Position deleted" })
+        navigate("/", { state: { success: "Position deleted" } })
       })
       .catch(error => {
         setStateError(error)

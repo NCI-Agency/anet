@@ -1,4 +1,4 @@
-const uuidv4 = require("uuid/v4")
+const uuidv4 = require("uuid").v4
 const test = require("../util/test")
 
 test.serial("checking super user permissions", async t => {
@@ -37,7 +37,12 @@ test.serial("checking super user permissions", async t => {
     By.xpath('//button[text()="Cancel"]')
   )
   await $cancelButton.click()
-  await driver.switchTo().alert().accept()
+  const $alertOkButton = await driver.findElement(
+    By.xpath(
+      '//div[contains(@class, "triggerable-confirm-bootstrap-modal")]//button[text()="OK"]'
+    )
+  )
+  await $alertOkButton.click()
 
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
@@ -52,6 +57,8 @@ test.serial("checking super user permissions", async t => {
   // User is super user, he/she may edit position of type super user for
   // his/her own organization
   await editAndSavePositionFromCurrentUserPage(t, true)
+
+  await t.context.logout()
 
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMenuLinksButton()
@@ -102,6 +109,8 @@ test.serial("checking super user permissions", async t => {
   )
   await $locationLink.click()
   await validateSuperUserLocationPermissions(t)
+
+  await t.context.logout()
 })
 
 validateUserCannotEditOtherUser(
@@ -135,6 +144,8 @@ test.serial("checking regular user permissions", async t => {
     "Jack should not be able to edit his own position",
     shortWaitMs
   )
+
+  await t.context.logout()
 })
 
 validateUserCannotEditOtherUser(
@@ -188,7 +199,12 @@ test.serial("checking admin permissions", async t => {
     By.xpath('//button[text()="Cancel"]')
   )
   await $cancelButton.click()
-  await driver.switchTo().alert().accept()
+  const $alertOkButton = await driver.findElement(
+    By.xpath(
+      '//div[contains(@class, "triggerable-confirm-bootstrap-modal")]//button[text()="OK"]'
+    )
+  )
+  await $alertOkButton.click()
 
   await t.context.pageHelpers.clickMenuLinksButton()
   await t.context.pageHelpers.clickMyOrgLink()
@@ -217,6 +233,8 @@ test.serial("checking admin permissions", async t => {
   )
   await $locationLink.click()
   await validateAdminLocationPermissions(t)
+
+  await t.context.logout()
 })
 
 test.serial("admins can edit superusers and their positions", async t => {
@@ -236,6 +254,8 @@ test.serial("admins can edit superusers and their positions", async t => {
 
   // User is admin, and can therefore edit a super user position type
   await editAndSavePositionFromCurrentUserPage(t, true)
+
+  await t.context.logout()
 })
 
 function validateUserCannotEditOtherUser(
@@ -280,6 +300,8 @@ function validateUserCannotEditOtherUser(
       `${user} should not be able edit the "${otherUserPosition}" position`,
       shortWaitMs
     )
+
+    await t.context.logout()
   })
 }
 
@@ -304,13 +326,8 @@ async function findSuperUserLink(t, desiredSuperUserName) {
 }
 
 async function validateUserCanEditUserForCurrentPage(t) {
-  const {
-    $,
-    assertElementText,
-    shortWaitMs,
-    mediumWaitMs,
-    longWaitMs
-  } = t.context
+  const { $, assertElementText, shortWaitMs, mediumWaitMs, longWaitMs } =
+    t.context
 
   await t.context.driver.sleep(mediumWaitMs) // wait for transition
   const $editPersonButton = await $(".edit-person")

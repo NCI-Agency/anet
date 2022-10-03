@@ -11,7 +11,7 @@ import ORGANIZATIONS_ICON from "resources/organizations.png"
 import { RECURSE_STRATEGY } from "searchUtils"
 
 const GQL_GET_ORGANIZATION = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     organization(uuid: $uuid) {
       uuid
       shortName

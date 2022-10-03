@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import AggregationWidgetContainer, {
-  AGGREGATION_WIDGET_TYPE,
   AGGREGATION_TYPE,
+  AGGREGATION_WIDGET_TYPE,
   getAggregationWidget
 } from "components/aggregations/AggregationWidgetContainer"
 import { CALENDAR_OBJECT_TYPES } from "components/aggregations/utils"
@@ -75,7 +75,7 @@ const REPORT_FIELDS_FOR_STATISTICS = {
 }
 
 const GQL_GET_REPORT_LIST = gql`
-  query($reportQuery: ReportSearchQueryInput) {
+  query ($reportQuery: ReportSearchQueryInput) {
     reportList(query: $reportQuery) {
       pageNum
       pageSize
@@ -209,10 +209,10 @@ const ReportStatistics = ({
   })
   // Update the total count
   const totalCount = done ? null : data?.reportList?.totalCount
-  useEffect(() => setTotalCount && setTotalCount(totalCount), [
-    setTotalCount,
-    totalCount
-  ])
+  useEffect(
+    () => setTotalCount && setTotalCount(totalCount),
+    [setTotalCount, totalCount]
+  )
   if (done) {
     return result
   }
@@ -252,35 +252,35 @@ const ReportStatistics = ({
           <>
             {!hasStatistics && <NoStatisticsRow periods={periods} />}
             {hasStatistics &&
-              Object.entries(
-                REPORT_FIELDS_FOR_STATISTICS
-              ).map(([key, field], index) => (
-                <FieldStatisticsRow
-                  key={key}
-                  idSuffix={`${key}-${idSuffix}`}
-                  fieldName={key}
-                  fieldConfig={field}
-                  periods={periods}
-                  periodsData={dataPerPeriod}
-                  isFirstRow={index === 0}
-                />
-              ))}
+              Object.entries(REPORT_FIELDS_FOR_STATISTICS).map(
+                ([key, field], index) => (
+                  <FieldStatisticsRow
+                    key={key}
+                    idSuffix={`${key}-${idSuffix}`}
+                    fieldName={key}
+                    fieldConfig={field}
+                    periods={periods}
+                    periodsData={dataPerPeriod}
+                    isFirstRow={index === 0}
+                  />
+                )
+              )}
             {hasStatistics &&
-              Object.entries(
-                customFieldsConfig || {}
-              ).map(([key, field], index) => (
-                <FieldStatisticsRow
-                  key={key}
-                  idSuffix={`${key}-${idSuffix}`}
-                  fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
-                  fieldConfig={field}
-                  periods={periods}
-                  periodsData={dataPerPeriod}
-                  isFirstRow={
-                    _isEmpty(REPORT_FIELDS_FOR_STATISTICS) && index === 0
-                  }
-                />
-              ))}
+              Object.entries(customFieldsConfig || {}).map(
+                ([key, field], index) => (
+                  <FieldStatisticsRow
+                    key={key}
+                    idSuffix={`${key}-${idSuffix}`}
+                    fieldName={`${CUSTOM_FIELDS_KEY}.${key}`}
+                    fieldConfig={field}
+                    periods={periods}
+                    periodsData={dataPerPeriod}
+                    isFirstRow={
+                      _isEmpty(REPORT_FIELDS_FOR_STATISTICS) && index === 0
+                    }
+                  />
+                )
+              )}
           </>
         </tbody>
       </Table>

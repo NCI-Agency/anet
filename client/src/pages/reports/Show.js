@@ -7,7 +7,7 @@ import {
 } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
-import InstantAssessmentsContainerField from "components/assessments/InstantAssessmentsContainerField"
+import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
@@ -43,7 +43,7 @@ import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
 import { Alert, Button, Col, FormText, Modal } from "react-bootstrap"
 import { connect } from "react-redux"
-import { useHistory, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import Settings from "settings"
 import utils from "utils"
@@ -228,54 +228,57 @@ const GQL_GET_REPORT = gql`
   }
 `
 const GQL_DELETE_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     deleteReport(uuid: $uuid)
   }
 `
 const GQL_UNPUBLISH_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     unpublishReport(uuid: $uuid)
   }
 `
 const GQL_EMAIL_REPORT = gql`
-  mutation($uuid: String!, $email: AnetEmailInput!) {
+  mutation ($uuid: String!, $email: AnetEmailInput!) {
     emailReport(uuid: $uuid, email: $email)
   }
 `
 const GQL_SUBMIT_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     submitReport(uuid: $uuid)
   }
 `
 const GQL_PUBLISH_REPORT = gql`
-  mutation($uuid: String!) {
+  mutation ($uuid: String!) {
     publishReport(uuid: $uuid)
   }
 `
 const GQL_ADD_REPORT_COMMENT = gql`
-  mutation($uuid: String!, $comment: CommentInput!) {
+  mutation ($uuid: String!, $comment: CommentInput!) {
     addComment(uuid: $uuid, comment: $comment) {
       uuid
     }
   }
 `
 const GQL_REJECT_REPORT = gql`
-  mutation($uuid: String!, $comment: CommentInput!) {
+  mutation ($uuid: String!, $comment: CommentInput!) {
     rejectReport(uuid: $uuid, comment: $comment)
   }
 `
 const GQL_APPROVE_REPORT = gql`
-  mutation($uuid: String!, $comment: CommentInput!) {
+  mutation ($uuid: String!, $comment: CommentInput!) {
     approveReport(uuid: $uuid, comment: $comment)
   }
 `
 
 const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const { currentUser } = useContext(AppContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const [saveSuccess, setSaveSuccess] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [showEmailModal, setShowEmailModal] = useState(false)
+  const [showCustomFields, setShowCustomFields] = useState(
+    !!Settings.fields.report.customFields
+  )
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_REPORT, {
     uuid
@@ -293,7 +296,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     return result
   }
 
-  let report, validationErrors, validationWarnings
+  let hasAssessments
+  let report, validationErrors, validationWarnings, reportSchema
   if (!data) {
     report = new Report()
   } else {
@@ -305,8 +309,19 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       data.report.customFields
     )
     report = new Report(data.report)
+    // Get initial tasks/people instant assessments values
+    hasAssessments = report.engagementDate && !report.isFuture()
+    if (hasAssessments) {
+      report = Object.assign(report, report.getTasksEngagementAssessments())
+      report = Object.assign(report, report.getAttendeesEngagementAssessments())
+    }
+
+    reportSchema = Report.getReportSchema(
+      data.report.tasks,
+      data.report.reportPeople
+    )
     try {
-      Report.yupSchema.validateSync(report, { abortEarly: false })
+      reportSchema.validateSync(report, { abortEarly: false })
     } catch (e) {
       validationErrors = e.errors
     }
@@ -320,8 +335,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const reportTypeUpperFirst = _upperFirst(reportType)
   const isAdmin = currentUser && currentUser.isAdmin()
-  const isAuthor = report.authors?.find(a => Person.isEqual(currentUser, a))
-  const isAttending = report.reportPeople?.find(rp =>
+  const isAuthor = report.authors?.some(a => Person.isEqual(currentUser, a))
+  const isAttending = report.reportPeople?.some(rp =>
     Person.isEqual(currentUser, rp)
   )
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
@@ -329,10 +344,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   // User can approve if report is pending approval and user is one of the approvers in the current approval step
   const canApprove =
     report.isPending() &&
-    currentUser.position &&
-    report.approvalStep &&
-    report.approvalStep.approvers.find(member =>
-      Position.isEqual(member, currentUser.position)
+    report.approvalStep?.approvers?.some(member =>
+      Position.isEqual(member, currentUser?.position)
     )
   const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
   // Approved reports may be published by an admin user
@@ -346,6 +359,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     isAuthor && !report.isPublished() && (report.isFuture() || isAttending)
   // Approvers can edit
   canEdit = canEdit || canApprove
+  // Authors and approvers can always read assessments
+  const canReadAssessments = isAuthor || canApprove
 
   // Only an author can submit when report is in draft or rejected AND author has a position
   const hasActivePosition = currentUser.hasActivePosition()
@@ -359,17 +374,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   const hasAuthorizationGroups =
     report.authorizationGroups && report.authorizationGroups.length > 0
 
-  // Get initial tasks/people instant assessments values
-  const hasAssessments = report.engagementDate && !report.isFuture()
-  if (hasAssessments) {
-    report = Object.assign(report, report.getTasksEngagementAssessments())
-    report = Object.assign(report, report.getAttendeesEngagementAssessments())
-  }
-
   return (
     <Formik
       enableReinitialize
-      validationSchema={Report.yupSchema}
+      validationSchema={reportSchema}
       validateOnMount
       initialValues={report}
     >
@@ -659,7 +667,10 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 />
               </Fieldset>
               {report.reportText && (
-                <Fieldset title={Settings.fields.report.reportText}>
+                <Fieldset
+                  title={Settings.fields.report.reportText}
+                  id="report-text"
+                >
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
@@ -676,11 +687,12 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   )) || <h5>No groups are authorized!</h5>}
                 </Fieldset>
               )}
-              {Settings.fields.report.customFields && (
+              {showCustomFields && (
                 <Fieldset title="Engagement information" id="custom-fields">
                   <ReadonlyCustomFields
                     fieldsConfig={Settings.fields.report.customFields}
                     values={values}
+                    setShowCustomFields={setShowCustomFields}
                   />
                 </Fieldset>
               )}
@@ -700,6 +712,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       formikProps={{
                         values
                       }}
+                      canRead={canReadAssessments}
                       readonly
                     />
                   </Fieldset>
@@ -716,6 +729,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       formikProps={{
                         values
                       }}
+                      canRead={canReadAssessments}
                       readonly
                     />
                   </Fieldset>
@@ -882,8 +896,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   function onConfirmUnpublish() {
     API.mutation(GQL_UNPUBLISH_REPORT, { uuid })
       .then(data => {
-        history.push("/", {
-          success: `${reportTypeUpperFirst} unpublished`
+        navigate("/", {
+          state: { success: `${reportTypeUpperFirst} unpublished` }
         })
       })
       .catch(error => {
@@ -896,8 +910,8 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
   function onConfirmDelete() {
     API.mutation(GQL_DELETE_REPORT, { uuid })
       .then(data => {
-        history.push("/", {
-          success: `${reportTypeUpperFirst} deleted`
+        navigate("/", {
+          state: { success: `${reportTypeUpperFirst} deleted` }
         })
       })
       .catch(error => {
@@ -1008,7 +1022,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
 
   function onCompactClick() {
     if (!_isEmpty(report)) {
-      history.push(`${report.uuid}/compact`)
+      navigate("compact")
     }
   }
 
@@ -1129,7 +1143,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
       text: text
     })
     toast.success(message, { toastId: "success-message" })
-    history.push("/search")
+    navigate("/search")
   }
 
   function approveReport(text) {

@@ -3,8 +3,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import {
-  PageDispatchersPropType,
   mapPageDispatchersToProps,
+  PageDispatchersPropType,
   useBoilerplate
 } from "components/Page"
 import { Person } from "models"
@@ -14,7 +14,7 @@ import React, { useContext } from "react"
 import { connect } from "react-redux"
 
 const GQL_GET_PERSON = gql`
-  query($uuid: String!) {
+  query ($uuid: String!) {
     person(uuid: $uuid) {
       uuid
       name
@@ -29,6 +29,7 @@ const GQL_GET_PERSON = gql`
       gender
       endOfTourDate
       domainUsername
+      openIdSubject
       avatar(size: 256)
       code
       position {

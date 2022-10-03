@@ -95,6 +95,7 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("
           + "  SELECT \"reportPeople\".\"personUuid\" AS uuid, MAX(reports.\"createdAt\") AS max"
           + "  FROM reports"
@@ -114,23 +115,23 @@ public abstract class AbstractPersonSearcher extends AbstractSearcher<Person, Pe
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, PersonSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people_createdAt"));
         break;
       case RANK:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "rank"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people_rank"));
         break;
       case RECENT:
         if (Boolean.TRUE.equals(query.isInMyReports())) {
           // Otherwise the JOIN won't exist
-          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "inMyReports_max"));
         }
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "people_name"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "people", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "people_uuid"));
   }
 
 }

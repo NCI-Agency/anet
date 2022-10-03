@@ -5,6 +5,7 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
+import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
@@ -25,7 +26,7 @@ public abstract class AbstractLocationSearcher
 
   @Override
   protected void buildQuery(LocationSearchQuery query) {
-    qb.addSelectClause("locations.*");
+    qb.addSelectClause(LocationDao.LOCATION_FIELDS);
     qb.addTotalCount();
     qb.addFromClause("locations");
     qb.addEnumEqualsClause("status", "locations.status", query.getStatus());
@@ -41,6 +42,7 @@ public abstract class AbstractLocationSearcher
     }
 
     if (Boolean.TRUE.equals(query.isInMyReports())) {
+      qb.addSelectClause("\"inMyReports\".max AS \"inMyReports_max\"");
       qb.addFromClause("JOIN ("
           + "  SELECT reports.\"locationUuid\" AS uuid, MAX(reports.\"createdAt\") AS max FROM reports"
           + "  WHERE reports.uuid IN (SELECT \"reportUuid\" FROM \"reportPeople\""
@@ -57,20 +59,20 @@ public abstract class AbstractLocationSearcher
   protected void addOrderByClauses(AbstractSearchQueryBuilder<?, ?> qb, LocationSearchQuery query) {
     switch (query.getSortBy()) {
       case CREATED_AT:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations", "\"createdAt\""));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations_createdAt"));
         break;
       case RECENT:
         if (Boolean.TRUE.equals(query.isInMyReports())) {
           // Otherwise the JOIN won't exist
-          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "\"inMyReports\"", "max"));
+          qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "inMyReports_max"));
         }
         break;
       case NAME:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations", "name"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "locations_name"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "locations", "uuid"));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, "locations_uuid"));
   }
 
 }

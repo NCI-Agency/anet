@@ -15,7 +15,7 @@ import { Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
 const GQL_GET_TASK_LIST = gql`
-  query($taskQuery: TaskSearchQueryInput) {
+  query ($taskQuery: TaskSearchQueryInput) {
     taskList(query: $taskQuery) {
       pageNum
       pageSize
@@ -103,7 +103,6 @@ const BaseTaskTable = ({
           <thead>
             <tr>
               <th>Name</th>
-              <th />
             </tr>
           </thead>
           <tbody>
@@ -112,7 +111,7 @@ const BaseTaskTable = ({
                 <tr key={task.uuid}>
                   <td>
                     <LinkTo modelType="Task" model={task}>
-                      {task.shortName} {task.longName}
+                      {task.shortName}
                     </LinkTo>
                   </td>
                 </tr>

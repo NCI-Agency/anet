@@ -18,7 +18,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import { Alert, Button, Col, Container, Modal, Row } from "react-bootstrap"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from "uuid"
 import "./EditHistory.css"
 
 const PERSON_SINGLE_SELECT_PARAMETERS = {

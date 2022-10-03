@@ -71,6 +71,7 @@ export const getSearchQuery = searchQuery => {
 const StatusFilter = {
   component: SelectFilter,
   deserializer: deserializeSelectFilter,
+  isDefault: true,
   props: {
     queryKey: "status",
     options: [Model.STATUS.ACTIVE, Model.STATUS.INACTIVE]

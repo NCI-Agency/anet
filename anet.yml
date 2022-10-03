@@ -15,8 +15,7 @@
 ##############################################################
 
 # Flag to run the server in development mode
-# - Will use Basic authentication (rather than Windows Domain Auth)
-# - Will reload the GraphQL Graph on every request.
+# - Will run the account deactivation worker once on startup
 developmentMode: true
 
 # Flag to tell the server to redirect all HTTP traffic to HTTPS
@@ -55,28 +54,25 @@ emailFromAddr: "Anet Testing <hunter+anet@example.com>"
 # Should not include an ending slash!
 serverUrl: "http://localhost:3000"
 
-# Whether to time Waffle requests
-timeWaffleRequests: true
-
-# Configuration for Waffle. This is the system that ANET uses to perform windows authentication
-# See https://github.com/Waffle/waffle
-waffleConfig:
-  principalFormat: fqn
-  roleFormat: both
-  allowGuestLogin: false
-  impersonate: false
-  securityFilterProviders: waffle.servlet.spi.BasicSecurityFilterProvider
-  #securityFilterProviders: "waffle.servlet.spi.BasicSecurityFilterProvider waffle.servlet.spi.NegotiateSecurityFilterProvider"
-  #"waffle.servlet.spi.NegotiateSecurityFilterProvider/protocols": NTLM
-  "waffle.servlet.spi.BasicSecurityFilterProvider/realm": ANET
+keycloakConfiguration:
+  realm: ANET-Realm
+  auth-server-url: http://localhost:9080/auth
+  ssl-required: none
+  register-node-at-startup: true
+  register-node-period: 600
+  resource: ANET-Client
+  show-logout-link: true
+  enable-basic-auth: true
+  credentials:
+    secret: 12869b4c-74ac-43f9-b71e-ff74e07babf9
 
 ########################################################
 ### The below is the default Dropwizard Configuration
-### See http://www.dropwizard.io/1.0.6/docs/manual/configuration.html#man-configuration
+### See https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration
 ### For all of the possible configuration options.
 #########################################################
 # Configuration for the database Server
-# See http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html#configuration
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#database
 database:
   driverClass: ${ANET_DB_DRIVER}
   user: ${ANET_DB_USERNAME}
@@ -88,7 +84,7 @@ database:
 
 
 # Configuration for the web servers HTTP connectors.
-# See http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#connectors
 server:
   applicationConnectors:
     - type: http
@@ -150,8 +146,6 @@ logging:
           logFormat: '%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}\t%p\t%m%n'
     "io.dropwizard.assets.AssetsBundle": TRACE
     "io.dropwizard.assets.*": TRACE
-    "waffle.servlet.NegotiateSecurityFilter": TRACE
-    "mil.dds.anet.auth.AnetAuthenticationFilter": TRACE
     "mil.dds.anet": DEBUG
     "mil.dds.anet.utils.AnetAuditLogger":
       level: INFO

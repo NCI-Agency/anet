@@ -17,7 +17,7 @@ import { connect } from "react-redux"
 import Settings from "settings"
 
 const GQL_GET_ORGANIZATION_LIST = gql`
-  query($organizationQuery: OrganizationSearchQueryInput) {
+  query ($organizationQuery: OrganizationSearchQueryInput) {
     organizationList(query: $organizationQuery) {
       pageNum
       pageSize

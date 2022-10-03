@@ -18,7 +18,7 @@ import React from "react"
 import { Button } from "react-bootstrap"
 
 const GET_PERSON_WITH_REPORTS = gql`
-  query($uuid: String!, $attendedReportsQuery: ReportSearchQueryInput!) {
+  query ($uuid: String!, $attendedReportsQuery: ReportSearchQueryInput!) {
     person(uuid: $uuid) {
       uuid
       name
