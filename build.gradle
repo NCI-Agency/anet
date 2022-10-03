@@ -29,7 +29,9 @@ String logbackVersion = "1.2.11"
 String log4jVersion = "2.18.0"
 String keycloakVersion = "19.0.2"
 String psqlPushDataPath = "/var/tmp"
-String keycloakPushDataPath = "/opt/keycloak/data"
+String keycloakContainerPath = "/opt/keycloak"
+String keycloakPushDataPath = "${keycloakContainerPath}/data"
+String hostKeycloakPath = "${rootProject.projectDir}/keycloak"
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
@@ -467,25 +469,18 @@ task dockerStartKeycloak(type: DockerStartContainer) {
 	containerId = keycloakContainerName
 }
 
-task dockerCopyKeycloakExportCommand(type: DockerCopyFileToContainer) {
-	description = "Copy REALM export command to Keycloak"
-	containerId = keycloakContainerName
-	hostPath = "${rootProject.projectDir}/export-anet-realm.sh"
-	remotePath = keycloakPushDataPath
-}
-
-task dockerExportKeycloakRealm(dependsOn: dockerCopyKeycloakExportCommand, type: DockerExecContainer) {
+task dockerExportKeycloakRealm(type: DockerExecContainer) {
 	group = "keycloak container"
 	description = "Epxorts ANET-Realm from ${keycloakContainerName} container."
 	containerId = keycloakContainerName
-	commands = [ ["/bin/bash", "${keycloakPushDataPath}/export-anet-realm.sh", "100", "ANET-Realm", "${keycloakPushDataPath}/ANET-Realm-export.json"] as String[] ]
+	commands = [ ["/bin/bash", "${keycloakContainerPath}/bin/kc.sh", "export", "--dir", "${keycloakPushDataPath}/export", "--users", "realm_file"] as String[] ]
 }
 
 task dockerGetKeycloakConfiguration(dependsOn: dockerExportKeycloakRealm, type: DockerCopyFileFromContainer) {
 	description = "Pull REALM configuration from Keycloak"
 	containerId = keycloakContainerName
-	hostPath = "${rootProject.projectDir}"
-	remotePath = "${keycloakPushDataPath}/ANET-Realm-export.json"
+	hostPath = "${hostKeycloakPath}/import/ANET-realm.json"
+	remotePath = "${keycloakPushDataPath}/export/ANET-realm.json"
 }
 
 task dockerStopKeycloak(type: DockerStopContainer) {
