@@ -185,7 +185,7 @@
     "slate": "0.82.1",
     "slate-history": "0.66.0",
     "slate-hyperscript": "0.77.0",
-    "slate-react": "0.83.0",
+    "slate-react": "0.83.1",
     "use-debounce": "7.0.1",
     "yup": "0.32.11"
   },
