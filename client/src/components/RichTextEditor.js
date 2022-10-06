@@ -169,7 +169,7 @@ const deserialize = element => {
       return jsx("element", { type: "heading-three" }, children)
     case "P":
       return element.parentNode.nodeName === "LI"
-        ? jsx("text", {}, children)
+        ? jsx("fragment", {}, children)
         : jsx("element", { type: "paragraph" }, children)
     case "OL":
       return jsx("element", { type: "numbered-list" }, children)
