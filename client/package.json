@@ -187,6 +187,7 @@
     "slate-hyperscript": "0.77.0",
     "slate-react": "0.83.1",
     "use-debounce": "7.0.1",
+    "uuid": "9.0.0",
     "yup": "0.32.11"
   },
   "resolutions": {
