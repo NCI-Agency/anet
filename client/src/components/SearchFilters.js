@@ -472,10 +472,17 @@ export const searchFilters = function() {
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "type",
-          options: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
+          options: [
+            Position.TYPE.PRINCIPAL,
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ],
           labels: [
+            Settings.fields.principal.position.name,
             Settings.fields.advisor.position.name,
-            Settings.fields.principal.position.name
+            Settings.fields.superUser.position.name,
+            Settings.fields.administrator.position.name
           ],
           isPositionTypeFilter: true
         }
