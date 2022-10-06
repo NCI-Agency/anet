@@ -11258,19 +11258,19 @@ jws@^3.2.2:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
 
-keycloak-connect@19.0.2:
-  version "19.0.2"
-  resolved "https://registry.yarnpkg.com/keycloak-connect/-/keycloak-connect-19.0.2.tgz#3200e5419f38067a056e6615ec04813a22e1fa4e"
-  integrity sha512-lJC6x8uEpdXTgsOzg/1dAXEoYzZ/fmiPBOtekGQSRLHyeVi88T1sAsbBrLAdzjKZdqgK4PbZ1aK5Yvk/UmCoNw==
+keycloak-connect@19.0.3:
+  version "19.0.3"
+  resolved "https://registry.yarnpkg.com/keycloak-connect/-/keycloak-connect-19.0.3.tgz#9758024246c1c35e7f7d146299e3081a289a8bde"
+  integrity sha512-unZDlBHO9RJILM9hngJ7tLMK79pTLpLmQr18IFUtIrAQxfYatGm4tTP8zGaPaVwm48GZhOAl4dRpe0yw+Mlwcg==
   dependencies:
     jwk-to-pem "^2.0.0"
   optionalDependencies:
     chromedriver latest
 
-keycloak-js@19.0.2:
-  version "19.0.2"
-  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-19.0.2.tgz#df8d12138c3edf70d9880097204a943674c605ee"
-  integrity sha512-tQjkLVVIwaV1xf4Fri5u+d+Ttddrh0S5cv3ltG+uTUd7WNwt5LkOXsPnqWQjj9stpoBTFgTuzIqJ2C6vk0CcEQ==
+keycloak-js@19.0.3:
+  version "19.0.3"
+  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-19.0.3.tgz#f70e988b799054957e47c981b7e962c9874da00e"
+  integrity sha512-mzCBxrzfl+vB551Q7MB+T9+40IHU4i0a6g1eTatzeEGrQMis5m/BqvPC3kxTsI+/LxHbB9XYQE3u9SlWKDHQCw==
   dependencies:
     base64-js "^1.5.1"
     js-sha256 "^0.9.0"
