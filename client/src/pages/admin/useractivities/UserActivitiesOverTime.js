@@ -20,6 +20,7 @@ import {
 } from "components/Page"
 import _escape from "lodash/escape"
 import moment from "moment"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
@@ -56,7 +57,7 @@ const SEARCH_TYPES = {
   ORGANIZATION: "ORGANIZATION",
   TOP_LEVEL_ORGANIZATION: "TOP_LEVEL_ORGANIZATION"
 }
-const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.TOP_LEVEL_ORGANIZATION
+const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.PERSON
 
 const UserActivitiesOverTime = ({
   pageDispatchers,
@@ -67,13 +68,14 @@ const UserActivitiesOverTime = ({
   const [aggregationPeriod, setAggregationPeriod] = useState(
     userActivitiesState?.aggregationPeriod ?? DEFAULT_AGGREGATION_PERIOD
   )
+  const timeWindow = TIME_WINDOWS[aggregationPeriod]
   const [startDate, setStartDate] = useState(
     userActivitiesState?.startDateOverTime
       ? userActivitiesState?.startDateOverTime
       : startOfCurrentPeriod(aggregationPeriod)
   )
-  const timeWindow = TIME_WINDOWS[aggregationPeriod]
-  const endDate = moment(startDate)
+  const endDate = moment
+    .utc(startDate)
     .add(timeWindow, aggregationPeriod)
     .endOf(aggregationPeriod)
   const [searchType, setSearchType] = useState(
@@ -121,18 +123,24 @@ const UserActivitiesOverTime = ({
     : []
   const showDeletedLabel = `\u00A0incl.\u00A0${
     searchType === SEARCH_TYPES.PERSON ? "deleted" : "unknown"
-  }`
+  }\u00A0${searchType === SEARCH_TYPES.PERSON ? "people" : "organizations"}`
+  const searchTypePlural = pluralize(utils.noCase(searchType))
+  const tableHeader = `${searchTypePlural} active`
+  const tableTitle = `Activity per ${utils.noCase(aggregationPeriod)}`
+  const chartTitle = `Number of ${searchTypePlural} per ${utils.noCase(
+    aggregationPeriod
+  )}`
   const VISUALIZATIONS = [
     {
       id: "ua-table",
       icons: [IconNames.PANEL_TABLE],
-      title: `Activity by ${utils.noCase(searchType)}`,
+      title: tableTitle,
       renderer: renderTable
     },
     {
       id: "ua-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
-      title: `Chart by ${utils.noCase(searchType)}`,
+      title: chartTitle,
       renderer: renderChart
     }
   ]
@@ -169,13 +177,13 @@ const UserActivitiesOverTime = ({
           <div>
             <h2>
               User Activities over time from{" "}
-              {moment(userActivityQuery.startDate).format(
-                AGGREGATION_DATE_FORMATS[aggregationPeriod]
-              )}{" "}
+              {moment
+                .utc(userActivityQuery.startDate)
+                .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])}{" "}
               until{" "}
-              {moment(userActivityQuery.endDate).format(
-                AGGREGATION_DATE_FORMATS[aggregationPeriod]
-              )}
+              {moment
+                .utc(userActivityQuery.endDate)
+                .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])}
             </h2>
             <div className="clearfix">
               <div className="float-start">
@@ -298,7 +306,7 @@ const UserActivitiesOverTime = ({
           <thead>
             <tr>
               <th>Period</th>
-              <th>#total active</th>
+              <th>#{tableHeader}</th>
             </tr>
           </thead>
           <tbody>
@@ -324,11 +332,11 @@ const UserActivitiesOverTime = ({
   }
 
   function showNextPeriod(period) {
-    changeStartDate(moment(startDate).add(1, period).startOf(period))
+    changeStartDate(moment.utc(startDate).add(1, period).startOf(period))
   }
 
   function showPreviousPeriod(period) {
-    changeStartDate(moment(startDate).subtract(1, period).startOf(period))
+    changeStartDate(moment.utc(startDate).subtract(1, period).startOf(period))
   }
 
   function showToday(period) {
@@ -348,6 +356,7 @@ const UserActivitiesOverTime = ({
     const newTimeWindow = TIME_WINDOWS[newPeriod]
     changeStartDate(
       moment
+        .utc()
         .min(now, endDate)
         .subtract(newTimeWindow, newPeriod)
         .startOf(newPeriod)

@@ -57,7 +57,7 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
       final PostgresqlSearchQueryBuilder<UserActivity, UserActivitySearchQuery> withQb) {
     switch (query.getAggregationType()) {
       case BY_OBJECT:
-        withQb.addSelectClause("u.\"organizationUuid\", COUNT(*)");
+        withQb.addSelectClause("u.\"organizationUuid\", COUNT(DISTINCT u.\"personUuid\")");
         withQb.addGroupByClause("u.\"organizationUuid\"");
         break;
       case OVER_TIME:
@@ -81,7 +81,8 @@ public class PostgresqlUserActivitySearcher extends AbstractUserActivitySearcher
     withQb.createWithClause(null, "parent_orgs", "organizations", "\"parentOrgUuid\"", false);
     switch (query.getAggregationType()) {
       case BY_OBJECT:
-        withQb.addSelectClause("parent_orgs.parent_uuid AS \"organizationUuid\", COUNT(*)");
+        withQb.addSelectClause(
+            "parent_orgs.parent_uuid AS \"organizationUuid\", COUNT(DISTINCT u.\"personUuid\")");
         withQb.addGroupByClause("parent_orgs.parent_uuid");
         break;
       case OVER_TIME:

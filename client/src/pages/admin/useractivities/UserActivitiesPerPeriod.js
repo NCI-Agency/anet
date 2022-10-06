@@ -22,6 +22,7 @@ import {
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
 import moment from "moment"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, FormSelect, Table } from "react-bootstrap"
@@ -89,7 +90,7 @@ const SEARCH_TYPES = {
   ORGANIZATION: "ORGANIZATION",
   TOP_LEVEL_ORGANIZATION: "TOP_LEVEL_ORGANIZATION"
 }
-const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.TOP_LEVEL_ORGANIZATION
+const DEFAULT_SEARCH_TYPE = SEARCH_TYPES.PERSON
 const GQL_QUERIES = {
   [SEARCH_TYPES.PERSON]: GQL_GET_USER_ACTIVITY_LIST_BY_PERSON,
   [SEARCH_TYPES.ORGANIZATION]: GQL_GET_USER_ACTIVITY_LIST_BY_ORGANIZATION,
@@ -126,7 +127,7 @@ const UserActivitiesPerPeriod = ({
     pageNum,
     pageSize,
     startDate,
-    endDate: moment(startDate).endOf(aggregationPeriod),
+    endDate: moment.utc(startDate).endOf(aggregationPeriod),
     searchType,
     aggregationType: "BY_OBJECT",
     showDeleted
@@ -158,18 +159,24 @@ const UserActivitiesPerPeriod = ({
   const userActivitiesExist = totalCount > 0
   const showDeletedLabel = `\u00A0incl.\u00A0${
     searchType === SEARCH_TYPES.PERSON ? "deleted" : "unknown"
-  }`
+  }\u00A0${searchType === SEARCH_TYPES.PERSON ? "people" : "organizations"}`
+  const tableHeader = `${
+    searchType === SEARCH_TYPES.PERSON ? "minutes" : "people"
+  } active`
+  const searchTypePlural = pluralize(utils.noCase(searchType))
+  const tableTitle = `Activity per ${utils.noCase(searchType)}`
+  const chartTitle = `Number of ${tableHeader} per ${utils.noCase(searchType)}`
   const VISUALIZATIONS = [
     {
       id: "ua-table",
       icons: [IconNames.PANEL_TABLE],
-      title: `Activity by ${utils.noCase(searchType)}`,
+      title: tableTitle,
       renderer: renderTable
     },
     {
       id: "ua-chart",
       icons: [IconNames.GROUPED_BAR_CHART],
-      title: `Chart by ${utils.noCase(searchType)}`,
+      title: chartTitle,
       renderer: renderChart
     }
   ]
@@ -214,10 +221,10 @@ const UserActivitiesPerPeriod = ({
           <div>
             <h2>
               User Activities for{" "}
-              {moment(userActivityQuery.startDate).format(
-                AGGREGATION_DATE_FORMATS[aggregationPeriod]
-              )}
-              , total this period: {totalCount}
+              {moment
+                .utc(userActivityQuery.startDate)
+                .format(AGGREGATION_DATE_FORMATS[aggregationPeriod])}
+              , total {searchTypePlural} active this period: {totalCount}
             </h2>
             <div className="clearfix">
               <div className="float-start">
@@ -372,7 +379,7 @@ const UserActivitiesPerPeriod = ({
         <thead>
           <tr>
             <th>Organization</th>
-            <th>#minutes active</th>
+            <th>#{tableHeader}</th>
           </tr>
         </thead>
         <tbody>
@@ -399,7 +406,7 @@ const UserActivitiesPerPeriod = ({
         <thead>
           <tr>
             <th>Person</th>
-            <th>#minutes active</th>
+            <th>#{tableHeader}</th>
           </tr>
         </thead>
         <tbody>
@@ -427,12 +434,12 @@ const UserActivitiesPerPeriod = ({
 
   function showNextPeriod(period) {
     setPageNum(0)
-    changeStartDate(moment(startDate).add(1, period).startOf(period))
+    changeStartDate(moment.utc(startDate).add(1, period).startOf(period))
   }
 
   function showPreviousPeriod(period) {
     setPageNum(0)
-    changeStartDate(moment(startDate).subtract(1, period).startOf(period))
+    changeStartDate(moment.utc(startDate).subtract(1, period).startOf(period))
   }
 
   function showToday(period) {
@@ -450,7 +457,7 @@ const UserActivitiesPerPeriod = ({
 
   function changePeriod(period) {
     setPageNum(0)
-    changeStartDate(moment(startDate).startOf(period))
+    changeStartDate(moment.utc(startDate).startOf(period))
     setUserActivitiesState({
       ...userActivitiesState,
       aggregationPeriod: period
