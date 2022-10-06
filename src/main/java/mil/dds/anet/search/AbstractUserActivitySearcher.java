@@ -26,7 +26,7 @@ public abstract class AbstractUserActivitySearcher extends
 
   @Override
   protected void buildQuery(final UserActivitySearchQuery query) {
-    final String column = getColumn(query);
+    final String column = getColumn(query, false);
     switch (query.getAggregationType()) {
       case BY_OBJECT:
         qb.addSelectClause(column);
@@ -53,26 +53,34 @@ public abstract class AbstractUserActivitySearcher extends
         break;
       case COUNT:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), WITH_CLAUSE_NAME, "count"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "count"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, WITH_CLAUSE_NAME, getColumn(query)));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, getColumn(query, true)));
   }
 
-  private String getColumn(final UserActivitySearchQuery query) {
+  private String getColumn(final UserActivitySearchQuery query, boolean forOrderBy) {
+    String column = null;
     switch (query.getAggregationType()) {
       case BY_OBJECT:
         switch (query.getSearchType()) {
           case PERSON:
-            return "\"personUuid\"";
+            column = "personUuid";
+            break;
           case ORGANIZATION:
           case TOP_LEVEL_ORGANIZATION:
-            return "\"organizationUuid\"";
+            column = "organizationUuid";
+            break;
         }
         break;
       case OVER_TIME:
-        return "period";
+        column = forOrderBy ? "aggregatedDate" : "period";
+        break;
     }
-    return null;
+    if (!forOrderBy) {
+      // Order By quotes the column itself
+      column = String.format("\"%1$s\"", column);
+    }
+    return column;
   }
 }
