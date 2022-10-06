@@ -55,8 +55,8 @@ emailFromAddr: "Anet Testing <hunter+anet@example.com>"
 serverUrl: "http://localhost:3000"
 
 keycloakConfiguration:
-  realm: ANET-Realm
-  auth-server-url: http://localhost:9080/auth
+  realm: ANET
+  auth-server-url: http://localhost:9080
   ssl-required: none
   register-node-at-startup: true
   register-node-period: 600
