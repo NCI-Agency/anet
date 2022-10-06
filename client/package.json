@@ -140,7 +140,7 @@
     "escape-html": "1.0.3",
     "file-saver": "2.0.5",
     "formik": "2.2.9",
-    "graphiql": "1.9.11",
+    "graphiql": "2.0.8",
     "graphql": "16.5.0",
     "hopscotch": "0.3.1",
     "html-react-parser": "3.0.4",
