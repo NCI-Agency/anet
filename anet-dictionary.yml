@@ -1431,11 +1431,13 @@ fields:
   superUser:
 
     position:
+      name: Super User
       type: ANET Super User
 
   administrator:
 
     position:
+      name: Administrator
       type: ANET Administrator
 
 pinned_ORGs: [Key Leader Engagement]

@@ -74,8 +74,9 @@ public class HomeResource {
     // Redirect to Keycloak to log out
     // scan:ignore — false positive, we only let Keycloak redirect back to the original request URI
     response.sendRedirect(String.format(
-        "%s/realms/%s/protocol/openid-connect/logout?redirect_uri=%s",
-        keycloakConfiguration.getAuthServerUrl(), keycloakConfiguration.getRealm(), redirectUri));
+        "%s/realms/%s/protocol/openid-connect/logout?post_logout_redirect_uri=%s&client_id=%s",
+        keycloakConfiguration.getAuthServerUrl(), keycloakConfiguration.getRealm(), redirectUri,
+        keycloakConfiguration.getResource()));
   }
 
   // Define these constants here
