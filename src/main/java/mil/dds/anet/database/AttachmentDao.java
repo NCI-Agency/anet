@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Attachment;
+import mil.dds.anet.beans.AttachmentRelatedObject;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.database.mappers.AttachmentMapper;
@@ -72,7 +73,7 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
         relatedObjectUuid);
   }
 
-  public CompletableFuture<List<Attachment>> getAttachmentsForRelatedObject(
+  public CompletableFuture<List<AttachmentRelatedObject>> getAttachmentsForRelatedObject(
       @GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     return new ForeignKeyFetcher<Attachment>()

@@ -171,6 +171,37 @@ enum Atmosphere {
 }
 
 """"""
+type Attachment {
+  mimeType: String
+  content: String
+  fileName: String
+  description: String
+  classificationUuid: String
+  classification: AttachmentClassification
+  relatedObjectType: String
+  relatedObjectUuid: String
+  relatedObject: RelatableObject
+}
+
+""""""
+input AttachmentInput {
+  mimeType: String
+  content: String
+  fileName: String
+  description: String
+}
+
+""""""
+type AttachmentClassification {
+  classification: Classification
+}
+
+""""""
+input AttachmentClassificationInput {
+  classification: Classification
+}
+
+""""""
 type AuthorizationGroup {
   createdAt: Instant
   description: String
@@ -209,6 +240,18 @@ enum AuthorizationGroupSearchSortBy {
   CREATED_AT
   NAME
   RECENT
+}
+
+""""""
+enum Classification {
+  COSMIC_TOP_SECRET
+  NATO_SECRET
+  NATO_CONFIDENTIAL
+  NATO_RESTRICTED
+  COSMIC_TOP_SECRET_ATOMAL
+  NATO_SECRET_ATOMAL
+  NATO_CONFIDENTIAL_ATOMAL
+  NATO_UNCLASSIFIED
 }
 
 """"""

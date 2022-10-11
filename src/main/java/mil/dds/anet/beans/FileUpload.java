@@ -1,9 +1,23 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.leangen.graphql.annotations.GraphQLInputField;
+import io.leangen.graphql.annotations.GraphQLQuery;
+
+import java.io.File;
+
 public class FileUpload {
-  private final String contentType;
-  private final String name;
-  private final byte[] content;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String contentType;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String name;
+  @GraphQLQuery
+  @GraphQLInputField
+  private byte[] content;
+
+  public FileUpload(){}
 
   public FileUpload(String contentType, String name, byte[] content) {
     this.contentType = contentType;
@@ -22,4 +36,5 @@ public class FileUpload {
   public String getName() {
     return name;
   }
+
 }

@@ -2,20 +2,14 @@ package mil.dds.anet.utils;
 
 import java.util.HashMap;
 import java.util.Map;
-import mil.dds.anet.database.ApprovalStepDao;
-import mil.dds.anet.database.AuthorizationGroupDao;
-import mil.dds.anet.database.CommentDao;
-import mil.dds.anet.database.LocationDao;
-import mil.dds.anet.database.OrganizationDao;
-import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.database.ReportDao;
-import mil.dds.anet.database.SubscriptionDao;
-import mil.dds.anet.database.TaskDao;
+
+import mil.dds.anet.beans.AttachmentClassification;
+import mil.dds.anet.database.*;
 
 // ID batching data loaders
 public enum IdDataLoaderKey {
   APPROVAL_STEPS(ApprovalStepDao.TABLE_NAME), // -
+  ATTACHMENT_CLASSIFICATION(AttachmentClassificationDao.TABLE_NAME),
   AUTHORIZATION_GROUPS(AuthorizationGroupDao.TABLE_NAME), // -
   COMMENTS(CommentDao.TABLE_NAME), // -
   LOCATIONS(LocationDao.TABLE_NAME), // -
