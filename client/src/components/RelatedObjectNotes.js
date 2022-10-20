@@ -15,11 +15,10 @@ import Model, {
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import _isEmpty from "lodash/isEmpty"
-import _isEqualWith from "lodash/isEqualWith"
 import { Person } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, { useContext, useState } from "react"
 import { Button, Card, Col, Offcanvas, Row } from "react-bootstrap"
 import NotificationBadge from "react-notification-badge"
 import Settings from "settings"
@@ -50,33 +49,20 @@ const RelatedObjectNotes = ({
 }) => {
   const { currentUser } = useContext(AppContext)
   const { topbarOffset } = useContext(ResponsiveLayoutContext)
-  const notesFiltered = notesProp.filter(
-    note => !EXCLUDED_NOTE_TYPES.includes(note.type)
-  )
-  const latestNotesProp = useRef(notesFiltered)
-  const notesPropUnchanged = _isEqualWith(
-    latestNotesProp.current,
-    notesFiltered,
-    utils.treatFunctionsAsEqual
-  )
 
   const [error, setError] = useState(null)
   const [showRelatedObjectNoteModalKey, setShowRelatedObjectNoteModalKey] =
     useState(null)
   const [noteType, setNoteType] = useState(null)
-  const [notes, setNotes] = useState(notesFiltered)
+  const [notes, setNotes] = useState(notesProp)
   const [show, setShow] = useState(false)
 
-  useEffect(() => {
-    if (!notesPropUnchanged) {
-      latestNotesProp.current = notesFiltered
-      setError(null)
-      setNotes(notesFiltered)
-    }
-  }, [notesPropUnchanged, notesFiltered])
+  const notesFiltered = notes.filter(
+    note => !EXCLUDED_NOTE_TYPES.includes(note.type)
+  )
 
-  const noNotes = _isEmpty(notes)
-  const nrNotes = noNotes ? 0 : notes.length
+  const noNotes = _isEmpty(notesFiltered)
+  const nrNotes = noNotes ? 0 : notesFiltered.length
   const badgeLabel = nrNotes > 10 ? "10+" : null
 
   const handleClose = () => setShow(false)
@@ -149,7 +135,7 @@ const RelatedObjectNotes = ({
               flexDirection: "column"
             }}
           >
-            {notes.map(note => {
+            {notesFiltered.map(note => {
               const updatedAt = moment(note.updatedAt).format(
                 Settings.dateFormats.forms.displayShort.withTime
               )
