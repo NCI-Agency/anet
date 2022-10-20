@@ -23,7 +23,8 @@ const OrganizationLaydown = ({ organization, refetch }) => {
   ] = useState(false)
   const isAdmin = currentUser && currentUser.isAdmin()
   const isSuperUserForOrg =
-    currentUser && currentUser.isSuperUserForOrg(organization)
+    currentUser &&
+    currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isSuperUser = currentUser && currentUser.isSuperUser()
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const numInactivePos = organization.positions.filter(

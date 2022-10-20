@@ -116,7 +116,9 @@ const PositionShow = ({ pageDispatchers }) => {
     // Super users can edit positions within their own organization
     (position.organization &&
       position.organization.uuid &&
-      currentUser.isSuperUserForOrg(position.organization))
+      currentUser.hasAdministrativePermissionsForOrganization(
+        position.organization
+      ))
   const canDelete =
     currentUser.isAdmin() &&
     position.status === Model.STATUS.INACTIVE &&

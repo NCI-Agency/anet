@@ -314,22 +314,20 @@ export default class Person extends Model {
 
   // Checks if this user is a valid super user for a particular organization
   // Must be either
-  // - An Administrator
-  // - A super user for this organization
-  // - A super user for this orgs parents.
-  // - A super user administrating this org
-  // - A super user administrating this orgs parent
-  isSuperUserForOrg(org) {
+  // - an administrator
+  // - a super user administrating this organization
+  // - a super user administrating this organization's (transitive) parent
+  hasAdministrativePermissionsForOrganization(org) {
     if (!org) {
       return false
     }
-    if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) {
+    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
       return true
     }
-    if (this.position && this.position.type !== Position.TYPE.SUPER_USER) {
-      return false
-    }
-    if (!this.position || !this.position.organization) {
+    if (
+      this.position?.type !== Position.TYPE.SUPER_USER ||
+      !this.position?.organization
+    ) {
       return false
     }
     if (this.position.organizationsAdministrated) {

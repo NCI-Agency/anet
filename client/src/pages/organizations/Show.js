@@ -197,7 +197,8 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const LongNameWithLabel = DictionaryField(Field)
 
   const isSuperUserForOrg =
-    currentUser && currentUser.isSuperUserForOrg(organization)
+    currentUser &&
+    currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const orgSettings = isPrincipalOrg

@@ -99,9 +99,13 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
         const isSuperUserForParentOrg =
           _isEmpty(values.parentOrg) ||
-          (currentUser && currentUser.isSuperUserForOrg(values.parentOrg))
+          (currentUser &&
+            currentUser.hasAdministrativePermissionsForOrganization(
+              values.parentOrg
+            ))
         const isSuperUserForOrg = edit
-          ? currentUser && currentUser.isSuperUserForOrg(values)
+          ? currentUser &&
+            currentUser.hasAdministrativePermissionsForOrganization(values)
           : isSuperUserForParentOrg
         const orgSettings = isAdvisorOrg
           ? Settings.fields.advisor.org

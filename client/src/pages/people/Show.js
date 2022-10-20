@@ -180,13 +180,19 @@ const PersonShow = ({ pageDispatchers }) => {
   const canEdit =
     Person.isEqual(currentUser, person) ||
     isAdmin ||
-    (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
+    (hasPosition &&
+      currentUser.hasAdministrativePermissionsForOrganization(
+        position.organization
+      )) ||
     (!hasPosition && currentUser.isSuperUser()) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
   const canChangePosition =
     isAdmin ||
     (!hasPosition && currentUser.isSuperUser()) ||
-    (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
+    (hasPosition &&
+      currentUser.hasAdministrativePermissionsForOrganization(
+        position.organization
+      )) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
   const canAddPeriodicAssessment =
     Position.isAdvisor(position) ||
