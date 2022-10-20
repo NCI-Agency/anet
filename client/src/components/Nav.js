@@ -15,6 +15,17 @@ import { bindActionCreators } from "redux"
 import Settings from "settings"
 import utils from "utils"
 
+const MERGE_OPTIONS = [
+  { key: "people", label: "Merge people" },
+  { key: "positions", label: "Merge positions" },
+  { key: "locations", label: "Merge locations" }
+]
+
+const USER_ACTIVITY_OPTIONS = [
+  { key: "overTime", label: "Over time" },
+  { key: "perPeriod", label: "Per period" }
+]
+
 export const AnchorNavItem = ({ to, disabled, children }) => {
   const { showFloatingMenu, topbarOffset } = useContext(ResponsiveLayoutContext)
   const ScrollLinkNavItem = ScrollLink(Nav.Link)
@@ -89,6 +100,8 @@ const Navigation = ({
   const routerLocation = useLocation()
   const path = routerLocation.pathname
   const inAdmin = path.indexOf("/admin") === 0
+  const inMerge = path.indexOf("/admin/merge") === 0
+  const inUserActivities = path.indexOf("/admin/userActivities") === 0
 
   const [orgUuid, inOrg, myOrg, inMyOrg] = useMemo(() => {
     const inOrg = path.indexOf("/organizations") === 0
@@ -305,28 +318,18 @@ const Navigation = ({
 
           {inAdmin && (
             <Nav className="flex-column">
-              <span id="style-nav" style={{ lineHeight: "10px" }}>
-                <Nav.Item>
-                  <LinkContainer to="/admin/mergePeople" onClick={resetPages}>
-                    <Nav.Link>Merge people</Nav.Link>
-                  </LinkContainer>
-                </Nav.Item>
-                <Nav.Item>
-                  <LinkContainer
-                    to="/admin/mergePositions"
-                    onClick={resetPages}
-                  >
-                    <Nav.Link>Merge positions</Nav.Link>
-                  </LinkContainer>
-                </Nav.Item>
-                <Nav.Item>
-                  <LinkContainer
-                    to="/admin/mergeLocations"
-                    onClick={resetPages}
-                  >
-                    <Nav.Link>Merge locations</Nav.Link>
-                  </LinkContainer>
-                </Nav.Item>
+              <span id="style-nav" style={{ lineHeight: "10pt" }}>
+                <NavDropdown title="Merge" id="merge" active={inMerge}>
+                  {MERGE_OPTIONS.map(mergeOption => (
+                    <LinkContainer
+                      to={`/admin/merge/${mergeOption.key}`}
+                      key={mergeOption.key}
+                      onClick={resetPages}
+                    >
+                      <NavDropdown.Item>{mergeOption.label}</NavDropdown.Item>
+                    </LinkContainer>
+                  ))}
+                </NavDropdown>
                 <Nav.Item>
                   <LinkContainer
                     to="/admin/authorizationGroups"
@@ -335,14 +338,22 @@ const Navigation = ({
                     <Nav.Link>Authorization groups</Nav.Link>
                   </LinkContainer>
                 </Nav.Item>
-                <Nav.Item>
-                  <LinkContainer
-                    to="/admin/userActivities"
-                    onClick={resetPages}
-                  >
-                    <Nav.Link>User activities</Nav.Link>
-                  </LinkContainer>
-                </Nav.Item>
+                <NavDropdown
+                  title="User activities"
+                  id="user-activities"
+                  active={inUserActivities}
+                >
+                  {USER_ACTIVITY_OPTIONS.map(userActivityOption => (
+                    <LinkContainer
+                      to={`/admin/userActivities/${userActivityOption.key}`}
+                      key={userActivityOption.key}
+                    >
+                      <NavDropdown.Item>
+                        {userActivityOption.label}
+                      </NavDropdown.Item>
+                    </LinkContainer>
+                  ))}
+                </NavDropdown>
                 <SidebarLink
                   id="graphQL-nav"
                   linkTo="/admin/graphiql"
@@ -377,7 +388,7 @@ const Navigation = ({
         <NavDropdown title="Insights" id="insights" active={inInsights}>
           {INSIGHTS.map(insight => (
             <LinkContainer
-              to={"/insights/" + insight}
+              to={`/insights/${insight}`}
               key={insight}
               onClick={() => {
                 clearSearchQuery()

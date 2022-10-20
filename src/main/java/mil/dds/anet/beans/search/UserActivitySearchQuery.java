@@ -11,6 +11,14 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
     PERSON, ORGANIZATION, TOP_LEVEL_ORGANIZATION
   }
 
+  public enum AggregationType {
+    BY_OBJECT, OVER_TIME
+  }
+
+  public enum AggregationPeriod {
+    DAY, WEEK, MONTH
+  }
+
   @GraphQLQuery
   @GraphQLInputField
   private Instant startDate;
@@ -22,6 +30,14 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
   @GraphQLQuery
   @GraphQLInputField
   private SearchType searchType;
+
+  @GraphQLQuery
+  @GraphQLInputField
+  private AggregationType aggregationType;
+
+  @GraphQLQuery
+  @GraphQLInputField
+  private AggregationPeriod aggregationPeriod;
 
   @GraphQLQuery
   @GraphQLInputField
@@ -59,6 +75,22 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
     this.searchType = searchType;
   }
 
+  public AggregationType getAggregationType() {
+    return aggregationType;
+  }
+
+  public void setAggregationType(final AggregationType aggregationType) {
+    this.aggregationType = aggregationType;
+  }
+
+  public AggregationPeriod getAggregationPeriod() {
+    return aggregationPeriod;
+  }
+
+  public void setAggregationPeriod(AggregationPeriod aggregationPeriod) {
+    this.aggregationPeriod = aggregationPeriod;
+  }
+
   public boolean getShowDeleted() {
     return Boolean.TRUE.equals(showDeleted);
   }
@@ -69,7 +101,8 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), startDate, endDate, searchType, showDeleted);
+    return Objects.hash(super.hashCode(), startDate, endDate, searchType, aggregationType,
+        aggregationPeriod, showDeleted);
   }
 
   @Override
@@ -87,6 +120,8 @@ public class UserActivitySearchQuery extends AbstractSearchQuery<UserActivitySea
     return Objects.equals(getStartDate(), other.getStartDate())
         && Objects.equals(getEndDate(), other.getEndDate())
         && getSearchType() == other.getSearchType()
+        && getAggregationType() == other.getAggregationType()
+        && getAggregationPeriod() == other.getAggregationPeriod()
         && Objects.equals(getShowDeleted(), other.getShowDeleted());
   }
 

@@ -39,6 +39,7 @@ import useMergeObjects, {
   unassignedPerson
 } from "mergeUtils"
 import { Position } from "models"
+import PreviousPeople from "pages/positions/PreviousPeople"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import { Button, Col, Container, FormGroup, Row } from "react-bootstrap"
@@ -47,7 +48,6 @@ import { useNavigate } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 import Settings from "settings"
 import utils from "utils"
-import PreviousPeople from "../positions/PreviousPeople"
 
 const GQL_MERGE_POSITION = gql`
   mutation ($loserUuid: String!, $winnerPosition: PositionInput!) {

@@ -26,7 +26,15 @@ public abstract class AbstractUserActivitySearcher extends
 
   @Override
   protected void buildQuery(final UserActivitySearchQuery query) {
-    qb.addSelectClause(getColumn(query));
+    final String column = getColumn(query, false);
+    switch (query.getAggregationType()) {
+      case BY_OBJECT:
+        qb.addSelectClause(column);
+        break;
+      case OVER_TIME:
+        qb.addSelectClause(column + " AS \"aggregatedDate\"");
+        break;
+    }
     qb.addSelectClause("count");
     qb.addTotalCount();
     qb.addFromClause(WITH_CLAUSE_NAME);
@@ -41,22 +49,38 @@ public abstract class AbstractUserActivitySearcher extends
   protected void addOrderByClauses(final AbstractSearchQueryBuilder<?, ?> qb,
       final UserActivitySearchQuery query) {
     switch (query.getSortBy()) {
+      case NONE:
+        break;
       case COUNT:
       default:
-        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), WITH_CLAUSE_NAME, "count"));
+        qb.addAllOrderByClauses(getOrderBy(query.getSortOrder(), "count"));
         break;
     }
-    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, WITH_CLAUSE_NAME, getColumn(query)));
+    qb.addAllOrderByClauses(getOrderBy(SortOrder.ASC, getColumn(query, true)));
   }
 
-  private String getColumn(final UserActivitySearchQuery query) {
-    switch (query.getSearchType()) {
-      case PERSON:
-        return "\"personUuid\"";
-      case ORGANIZATION:
-      case TOP_LEVEL_ORGANIZATION:
-        return "\"organizationUuid\"";
+  private String getColumn(final UserActivitySearchQuery query, boolean forOrderBy) {
+    String column = null;
+    switch (query.getAggregationType()) {
+      case BY_OBJECT:
+        switch (query.getSearchType()) {
+          case PERSON:
+            column = "personUuid";
+            break;
+          case ORGANIZATION:
+          case TOP_LEVEL_ORGANIZATION:
+            column = "organizationUuid";
+            break;
+        }
+        break;
+      case OVER_TIME:
+        column = forOrderBy ? "aggregatedDate" : "period";
+        break;
     }
-    return null;
+    if (!forOrderBy) {
+      // Order By quotes the column itself
+      column = String.format("\"%1$s\"", column);
+    }
+    return column;
   }
 }

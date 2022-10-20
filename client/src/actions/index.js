@@ -80,6 +80,11 @@ export const clearSearchQuery = () => ({
   type: "CLEAR_SEARCH_QUERY"
 })
 
+export const setUserActivitiesState = userActivitiesState => ({
+  type: types.SET_USER_ACTIVITIES_STATE,
+  userActivitiesState
+})
+
 export const setPagination = (paginationKey, pageNum) => ({
   type: types.SET_PAGINATION,
   payload: {

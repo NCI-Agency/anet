@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const PATH = "/admin/mergePeople"
+const PATH = "/admin/merge/people"
 
 class MergePeople extends Page {
   open() {

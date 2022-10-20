@@ -5,13 +5,15 @@ import pageProps from "./pageProps"
 import pagination from "./pagination"
 import searchProps from "./searchProps"
 import searchQuery from "./searchQuery"
+import userActivitiesState from "./userActivitiesState"
 
 const allReducers = combineReducers({
   loadingBar: loadingBarReducer,
   pageProps,
   searchProps,
   searchQuery,
-  pagination
+  pagination,
+  userActivitiesState
 })
 
 const rootReducer = (state, action) => {
