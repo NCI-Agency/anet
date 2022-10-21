@@ -10,7 +10,8 @@ import {
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -74,6 +75,7 @@ const PersonEdit = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.person && `Edit | ${data.person.rank} ${data.person.name}`)
   if (done) {
     return result
   }

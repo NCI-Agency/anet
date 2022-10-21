@@ -8,7 +8,8 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import SavedSearchTable from "components/SavedSearchTable"
 import { deserializeQueryParams } from "components/SearchFilters"
@@ -49,6 +50,7 @@ const MySavedSearches = ({ setSearchQuery, pageDispatchers }) => {
     error,
     pageDispatchers
   })
+  usePageTitle("My Saved Searches")
   if (done) {
     return result
   }

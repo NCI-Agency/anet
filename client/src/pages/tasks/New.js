@@ -5,7 +5,8 @@ import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Organization, Task } from "models"
 import PropTypes from "prop-types"
@@ -30,6 +31,8 @@ const GQL_GET_ORGANIZATION = gql`
 
 const TaskNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
+  const taskShortLabel = Settings.fields.task.shortLabel
+  usePageTitle(`New ${taskShortLabel}`)
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.taskedOrgUuid) {
     return (

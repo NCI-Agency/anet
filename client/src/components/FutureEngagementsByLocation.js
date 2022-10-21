@@ -3,7 +3,11 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import HorizontalBarChart from "components/HorizontalBarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -222,6 +226,7 @@ const FutureEngagementsByLocation = ({
   style
 }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
+  usePageTitle("Future Engagements by Location")
 
   const chartId = "future_engagements_by_location"
   const selectedBarClass = "selected-bar"

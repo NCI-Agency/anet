@@ -6,7 +6,8 @@ import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { LAST_MONTH } from "dateUtils"
 import PropTypes from "prop-types"
@@ -59,6 +60,7 @@ const KanbanDashboard = ({ pageDispatchers }) => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dashboardData, setDashboardData] = useState({})
+  usePageTitle("Dashboard")
   useEffect(() => {
     async function fetchData() {
       await fetch(dashboardSettings.data)

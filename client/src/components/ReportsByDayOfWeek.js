@@ -3,7 +3,11 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -177,6 +181,7 @@ Map.propTypes = {
  */
 const ReportsByDayOfWeek = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
+  usePageTitle("Reports by Day of the Week")
 
   const chartId = "reports_by_day_of_week"
   const selectedBarClass = "selected-bar"

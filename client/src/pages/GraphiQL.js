@@ -4,7 +4,8 @@ import API from "api"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import GraphiQL from "graphiql"
 import "graphiql/graphiql.css"
@@ -17,7 +18,7 @@ const GraphiQLContainer = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-
+  usePageTitle("GraphQL")
   // TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
   return (
     <div style={{ height: "600px" }}>

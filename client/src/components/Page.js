@@ -208,3 +208,12 @@ const toggleSubscription = (
     .then(data => refetch())
     .catch(setError)
 }
+
+export const usePageTitle = title => {
+  useEffect(() => {
+    document.title = title || "ANET"
+    return () => {
+      document.title = "ANET"
+    }
+  }, [title])
+}

@@ -3,7 +3,8 @@ import NotFound from "components/NotFound"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
@@ -16,6 +17,7 @@ const PageMissing = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Page not found")
 
   return <NotFound text={`Page ${params[0]} not found.`} />
 }

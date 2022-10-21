@@ -5,7 +5,8 @@ import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
@@ -30,6 +31,7 @@ const GQL_GET_ORGANIZATION = gql`
 
 const PositionNew = ({ pageDispatchers }) => {
   const routerLocation = useLocation()
+  usePageTitle("New Position")
   const qs = utils.parseQueryString(routerLocation.search)
   if (qs.organizationUuid) {
     return (

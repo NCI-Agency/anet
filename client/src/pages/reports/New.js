@@ -5,7 +5,8 @@ import GuidedTour from "components/GuidedTour"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Person, Report } from "models"
 import { reportTour } from "pages/HopscotchTour"
@@ -21,6 +22,7 @@ const ReportNew = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("New Report")
 
   const report = new Report()
 

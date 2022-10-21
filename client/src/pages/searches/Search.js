@@ -17,7 +17,8 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PersonTable from "components/PersonTable"
 import PositionTable from "components/PositionTable"
@@ -601,6 +602,7 @@ const Search = ({
   const [numTasks, setNumTasks] = useState(null)
   const [numLocations, setNumLocations] = useState(null)
   const [numReports, setNumReports] = useState(null)
+  usePageTitle("Search")
   const numResults = sum(
     numOrganizations,
     numPeople,

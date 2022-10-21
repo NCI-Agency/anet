@@ -21,7 +21,8 @@ import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
@@ -339,7 +340,7 @@ const RollupShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     searchProps: REPORT_SEARCH_PROPS,
     pageDispatchers
   })
-
+  usePageTitle("Daily Rollup")
   const VISUALIZATIONS = [
     {
       id: "rbdow-collection",

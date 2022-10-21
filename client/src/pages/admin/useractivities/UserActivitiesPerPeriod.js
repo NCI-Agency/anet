@@ -17,7 +17,8 @@ import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _escape from "lodash/escape"
@@ -137,6 +138,7 @@ const UserActivitiesPerPeriod = ({
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("User activities per period")
   const { loading, error, data } = API.useApiQuery(GQL_QUERIES[searchType], {
     userActivityQuery
   })

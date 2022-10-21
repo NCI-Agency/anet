@@ -2,10 +2,15 @@ import { gql } from "@apollo/client"
 import API from "api"
 import OrganizationAdvisorsTable from "components/AdvisorReports/OrganizationAdvisorsTable"
 import Toolbar from "components/AdvisorReports/Toolbar"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import _debounce from "lodash/debounce"
 import moment from "moment"
 import React, { useState } from "react"
+import Settings from "settings"
 
 const GQL_GET_ADVISOR_REPORTS_INSIGHT = gql`
   query ($weeksAgo: Int) {
@@ -33,6 +38,7 @@ const FilterableAdvisorReportsTable = ({ pageDispatchers }) => {
       weeksAgo
     }
   )
+  usePageTitle(`${Settings.fields.advisor.person.name} Reports`)
   const { done, result } = useBoilerplate({
     loading,
     error,

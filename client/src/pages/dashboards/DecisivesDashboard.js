@@ -12,7 +12,8 @@ import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import {
   deserializeQueryParams,
@@ -99,6 +100,7 @@ const DecisivesDashboard = ({ pageDispatchers }) => {
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dashboardData, setDashboardData] = useState([])
+  usePageTitle("Decisives")
   useEffect(() => {
     async function fetchData() {
       await fetch(dashboardSettings.data)

@@ -3,7 +3,11 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -309,6 +313,7 @@ const CancelledEngagementReports = ({
   style
 }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
+  usePageTitle("Cancelled Engagement Reports")
 
   const advisorOrgLabel = Settings.fields.advisor.org.name
   const chartIdByOrg = "cancelled_reports_by_org"

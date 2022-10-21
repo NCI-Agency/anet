@@ -23,7 +23,8 @@ import LinkTo from "components/LinkTo"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import FileSaver from "file-saver"
 import * as Models from "models"
@@ -107,6 +108,7 @@ const BoardDashboard = ({ pageDispatchers }) => {
     pageProps: DEFAULT_PAGE_PROPS,
     pageDispatchers
   })
+  usePageTitle("Process Board")
   const { dashboard } = useParams()
   const dashboardSettings = Settings.dashboards.find(o => o.label === dashboard)
   const [dropEvent, setDropEvent] = useState(null)

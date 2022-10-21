@@ -23,7 +23,8 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
 import RelatedObjectNotes, {
@@ -292,6 +293,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.report?.intent || data?.report?.uuid)
   if (done) {
     return result
   }

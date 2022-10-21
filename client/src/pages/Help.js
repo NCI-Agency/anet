@@ -7,7 +7,8 @@ import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Person, Position } from "models"
 import PropTypes from "prop-types"
@@ -40,6 +41,7 @@ const screenshotCss = {
 
 const Help = ({ pageDispatchers }) => {
   const { appSettings, currentUser } = useContext(AppContext)
+  usePageTitle("Help")
   if (
     currentUser.uuid &&
     currentUser.position &&

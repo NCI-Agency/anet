@@ -2,7 +2,11 @@ import { gql } from "@apollo/client"
 import API from "api"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import UltimatePaginationTopDown from "components/UltimatePaginationTopDown"
 import _isEmpty from "lodash/isEmpty"
 import { Position, Task } from "models"
@@ -95,6 +99,7 @@ const PendingAssessmentsByPosition = ({
   const { loading, error, data } = API.useApiQuery(GQL_GET_POSITION_LIST, {
     positionQuery
   })
+  usePageTitle("Pending Assessments by Position")
   const { done, result } = useBoilerplate({
     loading,
     error,

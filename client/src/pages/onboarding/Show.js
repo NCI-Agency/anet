@@ -2,7 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_MIN_HEAD } from "actions"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import React from "react"
 import { Button } from "react-bootstrap"
@@ -15,6 +16,7 @@ const OnboardingShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Welcome to ANET")
   const navigate = useNavigate()
 
   return (

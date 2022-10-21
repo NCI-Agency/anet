@@ -26,7 +26,8 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
 import RelatedObjectNotes, {
@@ -148,6 +149,7 @@ const PersonShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.person && `${data.person.rank} ${data?.person.name}`)
   if (done) {
     return result
   }
