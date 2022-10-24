@@ -169,10 +169,8 @@ public class PositionResource {
   public int updatePositionHistory(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
-    final Position existing = dao.getByUuid(pos.getUuid());
-    assertCanUpdatePosition(user, existing);
 
-    final String existingPersonUuid = DaoUtils.getUuid(existing.getPerson());
+    final String existingPersonUuid = DaoUtils.getUuid(pos.getPerson());
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
         existingPersonUuid);
 
