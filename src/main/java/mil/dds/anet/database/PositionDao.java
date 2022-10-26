@@ -286,24 +286,27 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     getDbHandle().createUpdate(updateSql).bind("positionUuid", positionUuid)
         .bind("endedAt", DaoUtils.asLocalDateTime(now)).execute();
 
+    final int nr;
+
     if (position.getCurrentPersonUuid() != null) {
       // Update position history for this person
-      getDbHandle()
+      nr = getDbHandle()
           .createUpdate("/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
               + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
               + "VALUES(NULL, :personUuid, :createdAt)")
           .bind("personUuid", position.getCurrentPersonUuid())
           .bind("createdAt", DaoUtils.asLocalDateTime(now)).execute();
-    }
+    } else {
 
-    // Update position history for the position
-    final int nr = getDbHandle()
-        .createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
-            + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-            + "VALUES (:positionUuid, NULL, :createdAt)")
-        .bind("positionUuid", positionUuid)
-        // Need to ensure this timestamp is greater than previous INSERT.
-        .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+      // Update position history for the position
+      nr = getDbHandle()
+          .createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+              + "VALUES (:positionUuid, NULL, :createdAt)")
+          .bind("positionUuid", positionUuid)
+          // Need to ensure this timestamp is greater than previous INSERT.
+          .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
+    }
     // Evict the person (previously) holding this position from the domain users cache
     AnetObjectEngine.getInstance().getPersonDao().evictFromCacheByPositionUuid(positionUuid);
     return nr;
