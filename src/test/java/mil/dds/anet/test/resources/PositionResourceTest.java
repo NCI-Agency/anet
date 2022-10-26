@@ -643,15 +643,6 @@ public class PositionResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Organization ao = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
         TestData.createAdvisorOrganizationInput(true));
-    final PositionInput testInput1 = PositionInput.builder()
-        .withName("A Test Position for edittting history").withType(PositionType.ADVISOR)
-        .withStatus(Status.ACTIVE).withOrganization(getOrganizationInput(ao))
-        .withLocation(getLocationInput(getGeneralHospital())).build();
-
-    final Position createdPos = adminMutationExecutor.createPosition(FIELDS, testInput1);
-    assertThat(createdPos).isNotNull();
-    assertThat(createdPos.getUuid()).isNotNull();
-    assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
 
     final PersonInput persInput1 = PersonInput.builder().withRole(Role.ADVISOR)
         .withName("Test person for edit history").build();
@@ -672,12 +663,21 @@ public class PositionResourceTest extends AbstractResourceTest {
         .build();
     final PersonPositionHistoryInput histInput2 =
         PersonPositionHistoryInput.builder().withCreatedAt(Instant.now().minus(49, ChronoUnit.DAYS))
-            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(Instant.now())
+            .withStartTime(Instant.now().minus(49, ChronoUnit.DAYS)).withEndTime(null)
             .withPerson(getPersonInput(person2)).build();
     prevPersons.add(histInput1);
     prevPersons.add(histInput2);
-    final PositionInput inputForTest = PositionInput.builder().withUuid(createdPos.getUuid())
-        .withPreviousPeople(prevPersons).build();
+    final PositionInput testInput1 =
+        PositionInput.builder().withName("A Test Position for edittting history")
+            .withType(PositionType.ADVISOR).withStatus(Status.ACTIVE)
+            .withOrganization(getOrganizationInput(ao)).withPreviousPeople(prevPersons)
+            .withLocation(getLocationInput(getGeneralHospital())).build();
+    final Position createdPos = adminMutationExecutor.createPosition(FIELDS, testInput1);
+    assertThat(createdPos).isNotNull();
+    assertThat(createdPos.getUuid()).isNotNull();
+    assertThat(createdPos.getName()).isEqualTo(testInput1.getName());
+    final PositionInput inputForTest =
+        PositionInput.builder().withUuid(createdPos.getUuid()).build();
     adminMutationExecutor.updatePositionHistory("", inputForTest);
     final Position positionUpdated =
         adminQueryExecutor.position(FIELDS, getPositionInput(createdPos).getUuid());
