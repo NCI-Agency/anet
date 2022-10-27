@@ -103,8 +103,5 @@
     "labels": [
       "security"
     ]
-  },
-  "pipenv": {
-    "enabled": true
   }
 }
