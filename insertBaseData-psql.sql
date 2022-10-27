@@ -194,30 +194,27 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+henry@example.com') WHERE name = 'EF 2.1 SuperUser';
 
 -- Rotate an advisor through a billet ending up with Jack in the EF 2.1 Advisor B Billet
--- DECLARE :positionTimestamp DATETIME;
-SELECT ('''' || CURRENT_TIMESTAMP || '''') AS "positionTimestamp" \gset
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "emailAddress" = 'hunter+erin@example.com'), :positionTimestamp);
+	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "emailAddress" = 'hunter+erin@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+erin@example.com') WHERE name = 'EF 2.1 Advisor B';
-UPDATE "peoplePositions" SET "endedAt" = :positionTimestamp WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
+UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.1 Advisor B');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "emailAddress" = 'hunter+jack@example.com'), :positionTimestamp);
+	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Advisor B'), (SELECT uuid from people where "emailAddress" = 'hunter+jack@example.com'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+jack@example.com') WHERE name = 'EF 2.1 Advisor B';
 
 -- Rotate advisors through billets ending up with Dvisor in the EF 2.2 Advisor Sewing Facilities Billet and Selena in the EF 1.2 Advisor Billet
-SELECT ('''' || CURRENT_TIMESTAMP || '''') AS "positionTimestamp" \gset
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "emailAddress" = 'hunter+selena@example.com'), :positionTimestamp);
-UPDATE "peoplePositions" SET "endedAt" = :positionTimestamp WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
+	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "emailAddress" = 'hunter+selena@example.com'), CURRENT_TIMESTAMP);
+UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "emailAddress" = 'hunter+advisor@example.com'), :positionTimestamp);
+	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor Sewing Facilities'), (SELECT uuid from people where "emailAddress" = 'hunter+advisor@example.com'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+advisor@example.com') WHERE name = 'EF 2.2 Advisor Sewing Facilities';
 
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+advisor@example.com'), :positionTimestamp);
-UPDATE "peoplePositions" SET "endedAt" = :positionTimestamp WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
+	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+advisor@example.com'), CURRENT_TIMESTAMP);
+UPDATE "peoplePositions" SET "endedAt" = CURRENT_TIMESTAMP + INTERVAL '1 millisecond' WHERE "positionUuid" = (SELECT uuid from positions where name = 'EF 1.2 Advisor');
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+selena@example.com'), :positionTimestamp);
+	VALUES ((SELECT uuid from positions where name = 'EF 1.2 Advisor'), (SELECT uuid from people where "emailAddress" = 'hunter+selena@example.com'), CURRENT_TIMESTAMP + INTERVAL '1 millisecond');
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+selena@example.com') WHERE name = 'EF 1.2 Advisor';
 
 -- Put Elizabeth into the EF 1.1 Advisor A Billet
