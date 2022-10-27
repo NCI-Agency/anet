@@ -211,7 +211,7 @@ const toggleSubscription = (
 
 export const usePageTitle = title => {
   useEffect(() => {
-    document.title = title || "ANET"
+    document.title = title ? `${title} - ANET` : "ANET"
     return () => {
       document.title = "ANET"
     }

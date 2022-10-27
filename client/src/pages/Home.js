@@ -285,7 +285,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-  usePageTitle("ANET")
+  usePageTitle("Home")
   return (
     <div>
       <div style={{ width: "inherit" }} className="float-end">
