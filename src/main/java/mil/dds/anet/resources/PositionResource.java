@@ -172,9 +172,8 @@ public class PositionResource {
     final Position existing = dao.getByUuid(pos.getUuid());
     assertCanUpdatePosition(user, existing);
 
-    final String existingPersonUuid = DaoUtils.getUuid(existing.getPerson());
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
-        existingPersonUuid);
+        existing.getPersonUuid());
 
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
         pos.getPreviousPeople(), false)) {
