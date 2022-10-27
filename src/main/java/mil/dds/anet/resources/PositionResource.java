@@ -219,7 +219,7 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process delete person from position",
           Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Person removed from Position uuid#{} by {}", positionUuid, user);
+    AnetAuditLogger.log("Person removed from position {} by {}", pos, user);
     return numRows;
   }
 

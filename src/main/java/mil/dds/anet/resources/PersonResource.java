@@ -143,7 +143,7 @@ public class PersonResource {
         AuthUtils.assertSuperUser(user);
         AnetObjectEngine.getInstance().getPositionDao()
             .removePersonFromPosition(existingPos.getUuid());
-        AnetAuditLogger.log("Person {} removed from position by {}", p, user);
+        AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
       } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
         // Update the position for this person.
         AuthUtils.assertSuperUser(user);
