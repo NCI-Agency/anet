@@ -368,7 +368,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                       <CompactRow
                         label={Settings.fields.report.reportText}
                         content={parseHtmlWithLinkTo(report.reportText)}
-                        className="reportField"
+                        className="reportField rich-text-readonly"
                       />
                     ) : null}
                     {Settings.fields.report.customFields ? (

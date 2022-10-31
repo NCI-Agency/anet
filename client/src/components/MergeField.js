@@ -10,7 +10,8 @@ const MergeField = ({
   align,
   action,
   mergeState,
-  dispatchMergeActions
+  dispatchMergeActions,
+  className
 }) => {
   const fieldRef = useRef(null)
   const [height, setSetHeight] = useState("auto")
@@ -43,7 +44,9 @@ const MergeField = ({
     >
       <div style={{ flex: "1 1 auto" }}>
         <LabelBox align={align}>{label}</LabelBox>
-        <ValueBox align={align}>{value}</ValueBox>
+        <ValueBox className={className} align={align}>
+          {value}
+        </ValueBox>
       </div>
       {action}
     </MergeFieldBox>
@@ -95,7 +98,8 @@ MergeField.propTypes = {
   align: PropTypes.oneOf(Object.values(ALIGN_OPTIONS)).isRequired,
   action: PropTypes.node,
   mergeState: PropTypes.object,
-  dispatchMergeActions: PropTypes.func
+  dispatchMergeActions: PropTypes.func,
+  className: PropTypes.string
 }
 
 export default MergeField
