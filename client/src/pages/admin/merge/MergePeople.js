@@ -393,6 +393,7 @@ const MergePeople = ({ pageDispatchers }) => {
               <PersonField
                 label="Biography"
                 value={parseHtmlWithLinkTo(mergedPerson.biography)}
+                className="rich-text-readonly"
                 align={ALIGN_OPTIONS.CENTER}
                 action={getClearButton(() =>
                   dispatchMergeActions(setAMergedField("biography", "", null))
@@ -845,6 +846,7 @@ const PersonColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
           <PersonField
             label="Biography"
             fieldName="biography"
+            className="rich-text-readonly"
             value={parseHtmlWithLinkTo(person.biography)}
             align={align}
             action={getActionButton(

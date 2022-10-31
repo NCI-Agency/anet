@@ -672,12 +672,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 <Fieldset
                   title={Settings.fields.report.reportText}
                   id="report-text"
+                  className="rich-text-readonly"
                 >
                   {parseHtmlWithLinkTo(report.reportText)}
                 </Fieldset>
               )}
               {report.reportSensitiveInformation?.text && (
-                <Fieldset title="Sensitive information">
+                <Fieldset
+                  title="Sensitive information"
+                  className="rich-text-readonly"
+                >
                   {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
                   {(hasAuthorizationGroups && (
                     <div>
