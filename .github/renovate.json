@@ -24,7 +24,6 @@
     },
     {
       "matchPackageNames": [
-        "autoprefixer",
         "com.graphql-java:graphql-java-extended-scalars"
       ],
       "enabled": false
