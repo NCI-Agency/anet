@@ -469,6 +469,4 @@ NotificationBadge.propTypes = {
   children: PropTypes.node
 }
 
-export default connect(null, mapDispatchToProps, null, {
-  pure: false
-})(Navigation)
+export default connect(null, mapDispatchToProps)(Navigation)
