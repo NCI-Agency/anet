@@ -70,7 +70,7 @@ const TopBar = ({
     <div style={{ flex: "0 0 auto", zIndex: 1201 }} ref={topbarDiv}>
       <div id="topbar">
         <GeneralBanner options={bannerOptions} />
-        <SecurityBanner />
+        <SecurityBanner onLogout={resetPages} />
         {currentUser &&
           !currentUser.hasActivePosition() &&
           !currentUser.isPendingVerification() && <NoPositionBanner />}
