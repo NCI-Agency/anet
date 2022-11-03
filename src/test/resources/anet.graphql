@@ -184,6 +184,27 @@ enum Atmosphere {
 }
 
 """"""
+input AttachmentInput {
+  attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+  classification: Classification
+  classificationUuid: String
+  content: Base64String
+  createdAt: Instant
+  description: String
+  fileName: String
+  mimeType: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+input AttachmentRelatedObjectInput {
+  attachmentUuid: String
+  relatedObjectType: String
+  relatedObjectUuid: String
+}
+
+""""""
 type AuthorizationGroup {
   createdAt: Instant
   description: String
@@ -226,6 +247,12 @@ enum AuthorizationGroupSearchSortBy {
 
 """Base64-encoded binary"""
 scalar Base64String
+
+""""""
+enum Classification {
+  NATO_UNCLASSIFIED
+  NATO_UNCLASSIFIED_Releasable_to_EU
+}
 
 """"""
 type Comment {
@@ -353,6 +380,7 @@ type Mutation {
   addComment(comment: CommentInput, uuid: String): Comment
   approveReport(comment: CommentInput, uuid: String): Int!
   clearCache: String
+  createAttachment(attachment: AttachmentInput): String
   createAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): AuthorizationGroup
   createLocation(location: LocationInput): Location
   createNote(note: NoteInput): Note
@@ -363,6 +391,7 @@ type Mutation {
   createSavedSearch(savedSearch: SavedSearchInput): SavedSearch
   createSubscription(subscription: SubscriptionInput): Subscription
   createTask(task: TaskInput): Task
+  deleteAttachment(uuid: String): Int
   deleteNote(uuid: String): Int
   deleteObjectSubscription(uuid: String): Int
   deletePersonFromPosition(uuid: String): Int
@@ -383,6 +412,7 @@ type Mutation {
   submitReport(uuid: String): Int!
   unpublishReport(uuid: String): Int
   updateAssociatedPosition(position: PositionInput): Int
+  updateAttachment(attachment: AttachmentInput): String
   updateAuthorizationGroup(authorizationGroup: AuthorizationGroupInput): Int
   updateLocation(location: LocationInput): Int
   updateNote(note: NoteInput): Note

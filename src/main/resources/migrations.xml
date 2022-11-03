@@ -4471,4 +4471,33 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-attachments-table" author="cigdemers">
+		<createTable tableName="attachments">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="fileName" type="${long_text_type}" />
+			<column name="mimeType" type="${long_text_type}" />
+			<column name="content" type="${blob_type}" />
+			<column name="description" type="${long_text_type}" />
+			<column name="classificationUuid" type="${long_text_type}" />
+			<column name="classification" type="${long_text_type}" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<createTable tableName="attachmentRelatedObjects">
+			<column name="attachmentUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
 </databaseChangeLog>

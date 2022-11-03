@@ -39,6 +39,7 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.ApprovalStepResource;
+import mil.dds.anet.resources.AttachmentResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
@@ -386,12 +387,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
     final SubscriptionResource subscriptionResource = new SubscriptionResource(engine);
     final SubscriptionUpdateResource subscriptionUpdateResource =
         new SubscriptionUpdateResource(engine);
+    final AttachmentResource attachmentResource = new AttachmentResource(engine);
     final GraphQlResource graphQlResource = injector.getInstance(GraphQlResource.class);
     graphQlResource.initialise(engine, configuration,
         ImmutableList.of(reportResource, personResource, positionResource, locationResource,
             orgResource, taskResource, adminResource, savedSearchResource,
             authorizationGroupResource, noteResource, approvalStepResource, subscriptionResource,
-            subscriptionUpdateResource),
+            subscriptionUpdateResource, attachmentResource),
         metricRegistry);
 
     // Register all of the HTTP Resources
