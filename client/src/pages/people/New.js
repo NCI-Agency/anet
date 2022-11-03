@@ -3,7 +3,8 @@ import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Person } from "models"
 import React from "react"
@@ -17,6 +18,7 @@ const PersonNew = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("New Person")
 
   const person = new Person()
 

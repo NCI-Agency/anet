@@ -14,7 +14,8 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import RelatedObjectNotes, {
@@ -154,6 +155,7 @@ const TaskShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.task?.shortName)
 
   if (done) {
     return result

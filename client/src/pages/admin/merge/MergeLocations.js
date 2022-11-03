@@ -19,7 +19,8 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { convertLatLngToMGRS } from "geoUtils"
 import useMergeObjects, {
@@ -68,6 +69,7 @@ const MergeLocations = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Merge Locations")
 
   const location1 = mergeState[MERGE_SIDES.LEFT]
   const location2 = mergeState[MERGE_SIDES.RIGHT]

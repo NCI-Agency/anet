@@ -21,7 +21,8 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
 import useMergeObjects, {
@@ -68,6 +69,7 @@ const MergePeople = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Merge People")
 
   const person1 = mergeState[MERGE_SIDES.LEFT]
   const person2 = mergeState[MERGE_SIDES.RIGHT]

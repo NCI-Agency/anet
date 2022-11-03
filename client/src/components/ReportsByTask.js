@@ -4,7 +4,11 @@ import API from "api"
 import { getReportsByTasks } from "components/aggregations/utils"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -143,6 +147,7 @@ Map.propTypes = {
  */
 const ReportsByTask = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
+  usePageTitle(`Reports by ${Settings.fields.task.subLevel.shortLabel}`)
 
   const taskShortLabel = Settings.fields.task.subLevel.shortLabel
   const chartId = "reports_by_task"

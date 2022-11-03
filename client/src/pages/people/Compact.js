@@ -25,7 +25,8 @@ import {
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
@@ -198,6 +199,9 @@ const CompactPersonView = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(
+    data?.person && `Print | ${data.person.rank} ${data.person.name}`
+  )
   if (done) {
     return result
   }

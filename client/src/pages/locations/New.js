@@ -3,7 +3,8 @@ import { initInvisibleFields } from "components/CustomFields"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Location } from "models"
 import React from "react"
@@ -17,6 +18,7 @@ const LocationNew = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("New Location")
 
   const location = new Location()
   // mutates the object

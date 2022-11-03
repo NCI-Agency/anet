@@ -27,6 +27,7 @@ import { connect } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
 import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
+import { usePageTitle } from "../components/Page"
 
 const GQL_GET_REPORT_COUNT = gql`
   query ($reportQuery: ReportSearchQueryInput) {
@@ -284,7 +285,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
-
+  usePageTitle("Home")
   return (
     <div>
       <div style={{ width: "inherit" }} className="float-end">

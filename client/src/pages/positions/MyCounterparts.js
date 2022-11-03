@@ -4,7 +4,8 @@ import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import React, { useContext } from "react"
@@ -16,6 +17,7 @@ const MyCounterparts = ({ pageDispatchers }) => {
     pageProps: DEFAULT_PAGE_PROPS,
     pageDispatchers
   })
+  usePageTitle("My Counterparts")
   const {
     currentUser,
     notifications: { counterpartsWithPendingAssessments }

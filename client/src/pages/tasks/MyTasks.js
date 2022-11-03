@@ -6,7 +6,8 @@ import Model from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { getSearchQuery, SearchQueryPropType } from "components/SearchFilters"
 import TaskTable from "components/TaskTable"
@@ -24,6 +25,7 @@ const MyTasks = ({ pageDispatchers, searchQuery }) => {
   })
   const { currentUser, notifications } = useContext(AppContext)
   const taskShortLabel = Settings.fields.task.shortLabel
+  usePageTitle(`My ${pluralize(taskShortLabel)}`)
   // Memo'ize the search query parameters we use to prevent unnecessary re-renders
   const searchQueryParams = useMemo(
     () => getSearchQuery(searchQuery),

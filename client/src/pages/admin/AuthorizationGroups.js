@@ -5,7 +5,8 @@ import Fieldset from "components/Fieldset"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import React from "react"
 import { connect } from "react-redux"
@@ -46,6 +47,7 @@ const AuthorizationGroups = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Authorization Groups")
   if (done) {
     return result
   }

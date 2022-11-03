@@ -3,7 +3,11 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import BarChart from "components/BarChart"
 import MosaicLayout from "components/MosaicLayout"
-import { PageDispatchersPropType, useBoilerplate } from "components/Page"
+import {
+  PageDispatchersPropType,
+  useBoilerplate,
+  usePageTitle
+} from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
   FORMAT_MAP,
@@ -183,6 +187,7 @@ Map.propTypes = {
  */
 const PendingApprovalReports = ({ pageDispatchers, queryParams, style }) => {
   const [focusedSelection, setFocusedSelection] = useState(null)
+  usePageTitle("Pendig Approval Reports")
 
   const advisorOrgLabel = Settings.fields.advisor.org.name
   const chartId = "not_approved_reports_chart"

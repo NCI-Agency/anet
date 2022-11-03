@@ -6,7 +6,8 @@ import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -89,6 +90,9 @@ const OrganizationEdit = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(
+    data?.organization?.shortName && `Edit | ${data.organization.shortName}`
+  )
   if (done) {
     return result
   }

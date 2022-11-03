@@ -7,7 +7,8 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
 import _get from "lodash/get"
@@ -89,6 +90,7 @@ const MySubscriptions = ({
     error,
     pageDispatchers
   })
+  usePageTitle("My Subscriptions")
   if (done) {
     return result
   }

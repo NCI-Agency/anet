@@ -15,7 +15,8 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Field, Form, Formik } from "formik"
 import moment from "moment"
@@ -105,6 +106,7 @@ const AdminIndex = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Admin")
   if (done) {
     return result
   }

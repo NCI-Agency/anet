@@ -16,7 +16,8 @@ import MosaicLayout from "components/MosaicLayout"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import _escape from "lodash/escape"
 import moment from "moment"
@@ -100,6 +101,7 @@ const UserActivitiesOverTime = ({
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("User activities over time")
   const { loading, error, data } = API.useApiQuery(
     GQL_GET_USER_ACTIVITY_COUNT,
     {

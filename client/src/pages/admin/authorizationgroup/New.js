@@ -2,7 +2,8 @@ import { DEFAULT_SEARCH_PROPS, PAGE_PROPS_NO_NAV } from "actions"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { AuthorizationGroup } from "models"
 import React from "react"
@@ -15,6 +16,7 @@ const AuthorizationGroupNew = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("New Authorization Group")
 
   const authorizationGroup = new AuthorizationGroup()
 

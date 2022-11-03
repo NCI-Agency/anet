@@ -5,7 +5,8 @@ import { AnchorNavItem } from "components/Nav"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import ReportCollection, {
   FORMAT_CALENDAR,
@@ -27,6 +28,7 @@ const MyReports = ({ pageDispatchers, searchQuery }) => {
     pageProps: DEFAULT_PAGE_PROPS,
     pageDispatchers
   })
+  usePageTitle("My Reports")
   const {
     currentUser: { uuid }
   } = useContext(AppContext)

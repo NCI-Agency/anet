@@ -5,7 +5,8 @@ import AppContext from "components/AppContext"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { Person } from "models"
 import moment from "moment"
@@ -57,6 +58,7 @@ const OnboardingEdit = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Create your account")
   if (done) {
     return result
   }

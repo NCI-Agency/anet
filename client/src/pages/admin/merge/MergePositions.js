@@ -21,7 +21,8 @@ import {
   jumpToTop,
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import useMergeObjects, {
   ALIGN_OPTIONS,
@@ -70,6 +71,7 @@ const MergePositions = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle("Merge Positions")
 
   const position1 = mergeState[MERGE_SIDES.LEFT]
   const position2 = mergeState[MERGE_SIDES.RIGHT]

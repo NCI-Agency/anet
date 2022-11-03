@@ -16,7 +16,8 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
@@ -160,6 +161,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.organization?.shortName)
   if (done) {
     return result
   }

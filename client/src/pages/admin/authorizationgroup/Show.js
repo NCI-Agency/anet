@@ -9,7 +9,8 @@ import Messages from "components/Messages"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import PositionTable from "components/PositionTable"
 import ReportCollection, {
@@ -71,6 +72,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.authorizationGroup?.name)
   if (done) {
     return result
   }

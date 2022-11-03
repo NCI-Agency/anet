@@ -19,7 +19,8 @@ import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
   SubscriptionIcon,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import { Field, Form, Formik } from "formik"
@@ -78,6 +79,7 @@ const PositionShow = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(data?.position?.name)
   if (done) {
     return result
   }

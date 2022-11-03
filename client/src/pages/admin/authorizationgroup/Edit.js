@@ -4,7 +4,8 @@ import API from "api"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
-  useBoilerplate
+  useBoilerplate,
+  usePageTitle
 } from "components/Page"
 import { AuthorizationGroup } from "models"
 import React from "react"
@@ -56,6 +57,9 @@ const AuthorizationGroupEdit = ({ pageDispatchers }) => {
     searchProps: DEFAULT_SEARCH_PROPS,
     pageDispatchers
   })
+  usePageTitle(
+    data?.authorizationGroup?.name && `Edit | ${data.authorizationGroup.name}`
+  )
   if (done) {
     return result
   }
