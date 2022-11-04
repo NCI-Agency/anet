@@ -3,7 +3,7 @@ import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import LinkTo from "components/LinkTo"
 import PropTypes from "prop-types"
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { ButtonGroup, Dropdown } from "react-bootstrap"
 import Settings from "settings"
 import Version from "version"
@@ -16,10 +16,6 @@ const CONNECTION_INFO_COLORS = {
   error: "red"
 }
 
-const BANNER_STYLE = {
-  height: 40
-}
-
 const css = {
   zIndex: 101,
   display: "flex",
@@ -29,17 +25,22 @@ const css = {
 const SecurityBanner = ({ onLogout }) => {
   const { appSettings, currentUser, connection } = useContext(AppContext)
   const background = appSettings[SETTING_KEY_COLOR]
+  const securityTextRef = useRef(null)
+  const [bannerSideHeight, setBannerSideHeight] = useState(0)
+  const securityTextHeight = securityTextRef.current?.clientHeight || 0
+
+  useEffect(() => {
+    setBannerSideHeight(securityTextHeight)
+  }, [setBannerSideHeight, securityTextHeight])
 
   return (
     <>
-      <SecurityBannerContainer
-        className="bg-primary"
-        height={BANNER_STYLE.height}
-      >
+      <SecurityBannerContainer className="bg-primary">
         <VersionBox>Version : {Version}</VersionBox>
         <SecurityTextContainer
+          ref={securityTextRef}
           bgc={background}
-          height={BANNER_STYLE.height * 0.625}
+          sideHeight={bannerSideHeight}
         >
           {appSettings[SETTING_KEY_TEXT]}
         </SecurityTextContainer>
@@ -107,25 +108,28 @@ const UserBox = styled.h6`
 
 const SecurityTextContainer = styled.div`
   background: ${props => props.bgc};
-  height: ${props => `${props.height}px`};
   flex: 3 3 30%;
-  line-height: ${props => `${props.height}px`};
+  margin-bottom: 10px;
+  line-height: 25px;
+  font-weight: bold;
   align-self: start;
   text-align: center;
   position: relative;
   &:before {
     content: "";
     border-right: ${props => `20px solid ${props.bgc}`};
-    border-bottom: ${props => `${props.height}px solid transparent`};
+    border-bottom: ${props => `${props.sideHeight}px solid transparent`};
     position: absolute;
     left: -20px;
+    top: 0;
   }
   &:after {
     content: "";
     border-left: ${props => `20px solid ${props.bgc}`};
-    border-bottom: ${props => `${props.height}px solid transparent`};
+    border-bottom: ${props => `${props.sideHeight}px solid transparent`};
     position: absolute;
     right: -20px;
+    top: 0;
   }
 `
 
@@ -133,7 +137,6 @@ const SecurityBannerContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: ${props => `${props.height}px`};
   color: white;
 `
 
