@@ -2,6 +2,13 @@ import { expect } from "chai"
 import Home from "../pages/home.page"
 
 describe("Anet home page", function() {
+  it("should be able to logout using the dropdown in header", () => {
+    Home.open()
+    Home.bannerDropdown.click()
+    Home.logoutButton.waitForDisplayed()
+    Home.logoutButton.click()
+    Home.waitForLoginForm()
+  })
   it("should have the right title", function() {
     Home.open()
     const title = browser.getTitle()

@@ -28,6 +28,14 @@ class Home extends Page {
     return this.securityBanner.$("#bannerSecurityText")
   }
 
+  get bannerDropdown() {
+    return this.bannerUser.$('button[id="dropdown-split-basic"]')
+  }
+
+  get logoutButton() {
+    return this.bannerUser.$('//a[text()="Sign out"]')
+  }
+
   get searchBar() {
     return browser.$("#searchBarInput")
   }
