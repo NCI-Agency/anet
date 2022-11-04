@@ -79,7 +79,6 @@ describe("Onboard new user login", () => {
     OnboardPage.waitForAlertWarningToLoad()
     OnboardPage.onboardingPopover.waitForExist()
     OnboardPage.onboardingPopover.waitForDisplayed()
-    // No Logout link, so just call logout directly
-    browser.url("/api/logout")
+    OnboardPage.logout()
   })
 })

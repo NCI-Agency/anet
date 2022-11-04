@@ -36,15 +36,16 @@ const SecurityBanner = ({ onLogout }) => {
   return (
     <>
       <SecurityBannerContainer className="bg-primary">
-        <VersionBox>Version : {Version}</VersionBox>
+        <VersionBox id="bannerVersion">Version : {Version}</VersionBox>
         <SecurityTextContainer
+          id="bannerSecurityText"
           ref={securityTextRef}
           bgc={background}
           sideHeight={bannerSideHeight}
         >
           {appSettings[SETTING_KEY_TEXT]}
         </SecurityTextContainer>
-        <UserBox>
+        <UserBox id="bannerUser">
           <Dropdown as={ButtonGroup}>
             <LinkTo
               modelType="Person"

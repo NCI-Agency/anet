@@ -46,11 +46,11 @@ describe("Show print report page", () => {
       expect(printButtonText).to.equal("Print")
       expect(detailedViewButtonText).to.equal("Detailed View")
     })
-    it("Printable report banner should have part of the banner text", () => {
+    it("Printable report banner should be the same as security banner", () => {
       const compactBannerText = ShowReport.compactBanner.getText()
       Home.openAsAdminUser()
-      const bannerText = Home.securityBanner.getText()
-      expect(bannerText.includes(compactBannerText)).to.equal(true)
+      const bannerSecurityText = Home.bannerSecurityText.getText()
+      expect(compactBannerText).to.equal(bannerSecurityText)
     })
   })
 })

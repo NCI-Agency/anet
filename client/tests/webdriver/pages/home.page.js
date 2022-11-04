@@ -14,10 +14,18 @@ class Home extends Page {
   }
 
   get securityBanner() {
-    const banner = browser.$("#topbar .banner div:nth-child(2)")
+    const banner = browser.$("#topbar div:nth-child(1)")
     banner.waitForExist()
     banner.waitForDisplayed()
     return banner
+  }
+
+  get bannerUser() {
+    return this.securityBanner.$("#bannerUser")
+  }
+
+  get bannerSecurityText() {
+    return this.securityBanner.$("#bannerSecurityText")
   }
 
   get searchBar() {

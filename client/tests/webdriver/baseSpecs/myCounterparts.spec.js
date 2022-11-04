@@ -18,8 +18,7 @@ describe("Home page", () => {
       Home.openAsPositionlessUser()
       // eslint-disable-next-line no-unused-expressions
       expect(Home.myCounterpartsLink.isExisting()).to.be.false
-      // No Logout link, so just call logout directly
-      browser.url("/api/logout")
+      Home.logout()
     })
   })
 })
