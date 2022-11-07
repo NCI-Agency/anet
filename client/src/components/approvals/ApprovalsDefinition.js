@@ -106,6 +106,7 @@ const ApprovalsDefinition = ({
                 </Modal.Footer>
               </Modal>
               <Modal
+                centered
                 show={showRemoveApprovalStepAlert}
                 onHide={hideRemoveApprovalStepAlert}
               >
