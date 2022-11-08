@@ -244,7 +244,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should validate visible field", () => {
-      CreateReport.deleteInput(CreateReport.numberCustomField)
+      CreatePerson.deleteInput(CreatePerson.numberCustomField)
       CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
       CreatePerson.numberCustomFieldHelpText.waitForExist()
       expect(CreatePerson.numberCustomFieldHelpText.getText()).to.include(
