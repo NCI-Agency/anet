@@ -46,19 +46,19 @@
   z-index: 1300;
 }
 
-/* 
+/*
  * Rich text editor style overrides.
  * when making a change, change rich-text-readonly class accordingly.
 */
 
 .editable h1 {
-  font-size: 1.75rem;
-}
-
-.editable h2 {
   font-size: 1.5rem;
 }
 
-.editable h3 {
+.editable h2 {
   font-size: 1.25rem;
+}
+
+.editable h3 {
+  font-size: 1.0rem;
 }
