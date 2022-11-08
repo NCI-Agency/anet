@@ -123,9 +123,15 @@ const GQL_GET_REPORT = gql`
       }
       primaryAdvisor {
         uuid
+        name
+        rank
+        role
       }
       primaryPrincipal {
         uuid
+        name
+        rank
+        role
       }
       tasks {
         uuid
@@ -406,22 +412,14 @@ const CompactReportView = ({ pageDispatchers }) => {
   function getReportTitle() {
     return (
       <>
-        Engagement of{" "}
-        <LinkTo
-          modelType="Person"
-          model={Report.getPrimaryAttendee(
-            report.attendees,
-            Person.ROLE.PRINCIPAL
-          )}
-        />{" "}
-        by{" "}
-        <LinkTo
-          modelType="Person"
-          model={Report.getPrimaryAttendee(
-            report.attendees,
-            Person.ROLE.ADVISOR
-          )}
-        />
+        Engagement
+        {report.primaryPrincipal && (
+          <>
+            {" of "}
+            <LinkTo modelType="Person" model={report.primaryPrincipal} />
+          </>
+        )}{" "}
+        by <LinkTo modelType="Person" model={report.primaryAdvisor} />
         <br />
         on{" "}
         {moment(report.engagementDate).format(

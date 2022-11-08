@@ -177,18 +177,6 @@ export default class Report extends Model {
             ? schema.nullable()
             : schema // Only do validation warning when engagement not cancelled
               .test(
-                "primary-principal",
-                "primary principal error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkPrimaryAttendee(
-                    reportPeople,
-                    Person.ROLE.PRINCIPAL
-                  )
-                  return err ? this.createError({ message: err }) : true
-                }
-              )
-              .test(
                 "primary-advisor",
                 "primary advisor error",
                 // can't use arrow function here because of binding to 'this'
@@ -309,6 +297,26 @@ export default class Report extends Model {
     .concat(Model.yupSchema)
 
   static yupWarningSchema = yup.object().shape({
+    reportPeople: yup
+      .array()
+      .nullable()
+      .when("cancelled", (cancelled, schema) =>
+        cancelled
+          ? schema.nullable()
+          : schema // Only do validation warning when engagement not cancelled
+            .test(
+              "primary-principal",
+              "primary principal error",
+              // can't use arrow function here because of binding to 'this'
+              function(reportPeople) {
+                const err = Report.checkPrimaryAttendee(
+                  reportPeople,
+                  Person.ROLE.PRINCIPAL
+                )
+                return err ? this.createError({ message: err }) : true
+              }
+            )
+      ),
     reportSensitiveInformation: yup.object().nullable().default({}),
     authorizationGroups: yup
       .array()
@@ -411,8 +419,10 @@ export default class Report extends Model {
   static checkPrimaryAttendee(reportPeople, role) {
     const primaryAttendee = Report.getPrimaryAttendee(reportPeople, role)
     const roleName = Person.humanNameOfRole(role)
-    if (!primaryAttendee) {
+    if (!primaryAttendee && role === Person.ROLE.ADVISOR) {
       return `You must provide the primary ${roleName} for the Engagement`
+    } else if (!primaryAttendee && role === Person.ROLE.PRINCIPAL) {
+      return `You didn't provide the primary ${roleName} for the Engagement`
     } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
     } else if (
