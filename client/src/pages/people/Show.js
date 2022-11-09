@@ -475,7 +475,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   function mapNonCustomFields() {
     const classNameExceptions = {
-      biography: "biography"
+      biography: "biography rich-text-readonly"
     }
 
     // map fields that have specific human person

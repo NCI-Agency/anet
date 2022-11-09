@@ -1308,3 +1308,15 @@ div[id*='fg-entityAssessment'] {
     text-align: left;
   }
 }
+
+.rich-text-readonly h1 {
+  font-size: 1.5rem;
+}
+
+.rich-text-readonly h2 {
+  font-size: 1.25rem;
+}
+
+.rich-text-readonly h3 {
+  font-size: 1.0rem;
+}

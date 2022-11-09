@@ -180,7 +180,7 @@ const PersonPreview = ({ className, uuid }) => {
         </Row>
 
         <div className="preview-field-label">Biography</div>
-        <div className="preview-field-value">
+        <div className="preview-field-value rich-text-readonly">
           {parseHtmlWithLinkTo(person.biography)}
         </div>
       </div>

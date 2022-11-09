@@ -387,7 +387,7 @@ const CompactPersonView = ({ pageDispatchers }) => {
 
   function mapNonCustomFields() {
     const classNameExceptions = {
-      biography: "biography"
+      biography: "biography rich-text-readonly"
     }
 
     const idExceptions = {

@@ -89,6 +89,7 @@ const ReadonlySpecialField = ({
         name={name}
         isCompact={isCompact}
         component={FieldHelper.ReadonlyField}
+        className="rich-text-readonly"
         humanValue={parseHtmlWithLinkTo(fieldValue)}
         {...Object.without(otherFieldProps, "style")}
       />

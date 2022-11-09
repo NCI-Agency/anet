@@ -231,6 +231,7 @@ const RelatedObjectNotes = ({
                         ))}
                     </div>
                     <div
+                      className="rich-text-readonly"
                       style={{
                         overflowWrap: "break-word",
                         wordWrap: "break-word" // IE

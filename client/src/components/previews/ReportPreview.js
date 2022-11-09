@@ -276,7 +276,7 @@ const ReportPreview = ({ className, uuid }) => {
       {report.reportText && (
         <React.Fragment>
           <h4>{Settings.fields.report.reportText}</h4>
-          <div className="preview-section">
+          <div className="preview-section rich-text-readonly">
             {parseHtmlWithLinkTo(report.reportText)}
           </div>
         </React.Fragment>
