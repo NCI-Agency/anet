@@ -106,7 +106,9 @@ const ReportPreview = ({ className, uuid }) => {
 
   data.report.cancelled = !!data.report.cancelledReason
   data.report.tasks = Task.fromArray(data.report.tasks)
-  data.report.reportPeople = Person.fromArray(data.report.reportPeople)
+  data.report.reportPeople = Report.sortReportPeople(
+    Person.fromArray(data.report.reportPeople)
+  )
   report = new Report(data.report)
   const reportType = report.isFuture() ? "planned engagement" : "report"
   const tasksLabel = pluralize(Settings.fields.task.subLevel.shortLabel)
