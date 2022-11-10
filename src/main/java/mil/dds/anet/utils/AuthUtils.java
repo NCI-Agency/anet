@@ -30,7 +30,7 @@ public class AuthUtils {
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
   }
 
-  public static boolean isSuperUserForOrg(final Person user, final String organizationUuid,
+  public static boolean canAdministrateOrg(final Person user, final String organizationUuid,
       boolean allowPrincipalOrgs) {
     if (organizationUuid == null) {
       logger.error("Organization {} is null or has a null UUID in SuperUser check for {}",
@@ -82,7 +82,7 @@ public class AuthUtils {
       boolean allowPrincipalOrgs) {
     // log injection possibility here?
     logger.debug("Asserting superuser status for {} in {}", user, organizationUuid);
-    if (isSuperUserForOrg(user, organizationUuid, allowPrincipalOrgs)) {
+    if (canAdministrateOrg(user, organizationUuid, allowPrincipalOrgs)) {
       return;
     }
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
