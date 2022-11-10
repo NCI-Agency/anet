@@ -854,7 +854,7 @@ INSERT INTO reports (uuid, "createdAt", "updatedAt", "locationUuid", intent, tex
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
 	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+arthur@example.com'), :reportuuid, TRUE, TRUE);
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
-	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+jack@example.com'), :reportuuid, TRUE, TRUE);
+	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+jack@example.com'), :reportuuid, FALSE, FALSE);
 
 -- Release all of the reports right now, so they show up in the rollup.
 UPDATE reports SET "releasedAt" = reports."createdAt" WHERE state = 2 OR state = 4;
