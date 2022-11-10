@@ -124,8 +124,10 @@ public class AnetEmailWorker extends AbstractWorker {
     Map<String, Object> emailContext = new HashMap<String, Object>();
     emailContext.put("context", context);
     emailContext.put("serverUrl", serverUrl);
-    emailContext.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
+        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION));
+    emailContext.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
+        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
     emailContext.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     emailContext.put("SUPPORT_EMAIL_ADDR", config.getDictionaryEntry("SUPPORT_EMAIL_ADDR"));

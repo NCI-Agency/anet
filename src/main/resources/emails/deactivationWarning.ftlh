@@ -17,7 +17,7 @@ a {
 }
 </style>
 <body>
-<p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
+<p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_CLASSIFICATION}</i></p>
 
 <#assign rank = person.getRank()>
 <#assign name = person.getName()>

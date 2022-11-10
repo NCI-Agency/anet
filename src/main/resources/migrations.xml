@@ -4178,4 +4178,17 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="update-adminSettings" author="gjvoosten">
+		<!-- update text setting to classification -->
+		<update tableName="adminSettings">
+			<column name="key" value="SECURITY_BANNER_CLASSIFICATION" />
+			<where>key = 'SECURITY_BANNER_TEXT'</where>
+		</update>
+		<!-- add new releasability setting with an empty value -->
+		<insert tableName="adminSettings">
+			<column name="key" value="SECURITY_BANNER_RELEASABILITY" />
+			<column name="value" value="" />
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

@@ -6,9 +6,12 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { ButtonGroup, Dropdown } from "react-bootstrap"
 import Settings from "settings"
+import { upperCase } from "upper-case"
+import utils from "utils"
 import Version from "version"
 
-export const SETTING_KEY_TEXT = "SECURITY_BANNER_TEXT"
+export const SETTING_KEY_CLASSIFICATION = "SECURITY_BANNER_CLASSIFICATION"
+export const SETTING_KEY_RELEASABILITY = "SECURITY_BANNER_RELEASABILITY"
 export const SETTING_KEY_COLOR = "SECURITY_BANNER_COLOR"
 
 const CONNECTION_INFO_COLORS = {
@@ -43,7 +46,12 @@ const SecurityBanner = ({ onLogout }) => {
           bgc={background}
           sideHeight={bannerSideHeight}
         >
-          {appSettings[SETTING_KEY_TEXT]}
+          <span className="classificationText">
+            {upperCase(appSettings[SETTING_KEY_CLASSIFICATION])}
+          </span>{" "}
+          <span className="releasabilityText">
+            {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY])}
+          </span>
         </SecurityTextContainer>
         <UserBox id="bannerUser">
           <Dropdown as={ButtonGroup}>
@@ -112,10 +120,12 @@ const SecurityTextContainer = styled.div`
   flex: 3 3 30%;
   margin-bottom: 10px;
   line-height: 25px;
-  font-weight: bold;
   align-self: start;
   text-align: center;
   position: relative;
+  & > span.classificationText {
+    font-weight: bold;
+  }
   &:before {
     content: "";
     border-right: ${props => `20px solid ${props.bgc}`};
@@ -177,12 +187,19 @@ export const CompactSecurityBanner = () => {
   const { appSettings } = useContext(AppContext)
   return (
     <CompactBannerS className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
-      {appSettings[SETTING_KEY_TEXT]}
+      <span className="classificationText">
+        {upperCase(appSettings[SETTING_KEY_CLASSIFICATION])}
+      </span>{" "}
+      <span className="releasabilityText">
+        {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY])}
+      </span>
     </CompactBannerS>
   )
 }
 const CompactBannerS = styled.div`
-  ${css};
+  & > span.classificationText {
+    font-weight: bold;
+  }
 `
 
 export default SecurityBanner

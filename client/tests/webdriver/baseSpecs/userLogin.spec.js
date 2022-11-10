@@ -18,7 +18,7 @@ describe("Anet home page", function() {
   it("should have the right security marking", () => {
     Home.open()
     const securityMarking = Home.bannerSecurityText.getText()
-    const defaultSecurityMarking = "DEMO USE ONLY"
+    const defaultSecurityMarking = "DEMO USE ONLY Releasable to DEMO MISSION"
     expect(securityMarking).to.equal(defaultSecurityMarking)
     Home.logout()
   })

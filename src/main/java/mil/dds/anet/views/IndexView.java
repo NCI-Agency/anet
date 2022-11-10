@@ -8,7 +8,8 @@ import org.apache.commons.text.StringEscapeUtils;
 
 public class IndexView extends SimpleView {
   private Person currentUser;
-  private String securityBannerText;
+  private String securityBannerClassification;
+  private String securityBannerReleasability;
   private String securityBannerColor;
   private Map<String, Object> dictionary;
   private String projectVersion;
@@ -25,12 +26,20 @@ public class IndexView extends SimpleView {
     this.currentUser = currentUser;
   }
 
-  public String getSecurityBannerText() {
-    return securityBannerText;
+  public String getSecurityBannerClassification() {
+    return securityBannerClassification;
   }
 
-  public void setSecurityBannerText(String securityBannerText) {
-    this.securityBannerText = securityBannerText;
+  public void setSecurityBannerClassification(String securityBannerClassification) {
+    this.securityBannerClassification = securityBannerClassification;
+  }
+
+  public String getSecurityBannerReleasability() {
+    return securityBannerReleasability;
+  }
+
+  public void setSecurityBannerReleasability(String securityBannerReleasability) {
+    this.securityBannerReleasability = securityBannerReleasability;
   }
 
   public String getSecurityBannerColor() {

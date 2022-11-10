@@ -766,8 +766,10 @@ public class ReportResource {
     final Map<String, Object> context = new HashMap<String, Object>();
     context.put("context", engine.getContext());
     context.put("serverUrl", config.getServerUrl());
-    context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(),
-        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
+    context.put(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name(),
+        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION).toUpperCase());
+    context.put(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name(),
+        engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY));
     context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(),
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);

@@ -4,14 +4,16 @@ import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import AppContext from "../../src/components/AppContext"
 import SecurityBanner, {
+  SETTING_KEY_CLASSIFICATION,
   SETTING_KEY_COLOR,
-  SETTING_KEY_TEXT
+  SETTING_KEY_RELEASABILITY
 } from "../../src/components/SecurityBanner"
 
 const Wrapper = connection => {
   const appSettings = {}
   appSettings[SETTING_KEY_COLOR] = "green"
-  appSettings[SETTING_KEY_TEXT] = "DEMO USE ONLY"
+  appSettings[SETTING_KEY_CLASSIFICATION] = "DEMO USE ONLY"
+  appSettings[SETTING_KEY_RELEASABILITY] = "Releasable to DEMO MISSION"
   const currentUser = {}
   currentUser.name = "unit_test"
   currentUser.uuid = "unit_test_uuid"
