@@ -97,16 +97,16 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
-        const isSuperUserForParentOrg =
+        const canAdministrateParentOrg =
           _isEmpty(values.parentOrg) ||
           (currentUser &&
             currentUser.hasAdministrativePermissionsForOrganization(
               values.parentOrg
             ))
-        const isSuperUserForOrg = edit
+        const canAdministrateOrg = edit
           ? currentUser &&
             currentUser.hasAdministrativePermissionsForOrganization(values)
-          : isSuperUserForParentOrg
+          : canAdministrateParentOrg
         const orgSettings = isAdvisorOrg
           ? Settings.fields.advisor.org
           : Settings.fields.principal.org
@@ -132,7 +132,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         ) {
           values.parentOrg = {}
         }
-        const action = isSuperUserForOrg && (
+        const action = canAdministrateOrg && (
           <div>
             <Button
               key="submit"
@@ -197,7 +197,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                {!isSuperUserForOrg ? (
+                {!canAdministrateOrg ? (
                   <>
                     <FastField
                       name="type"
@@ -262,7 +262,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
                         setFieldValue("parentOrg", value)
                       }}
-                      disabled={!isSuperUserForParentOrg}
+                      disabled={!canAdministrateParentOrg}
                       widget={
                         <AdvancedSingleSelect
                           fieldName="parentOrg"
@@ -397,7 +397,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     Cancel
                   </Button>
                 </div>
-                {isSuperUserForOrg && (
+                {canAdministrateOrg && (
                   <div>
                     <Button
                       id="formBottomSubmit"

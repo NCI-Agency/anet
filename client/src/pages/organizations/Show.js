@@ -196,7 +196,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
-  const isSuperUserForOrg =
+  const canAdministrateOrg =
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
@@ -269,7 +269,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <div>
-            {isSuperUserForOrg && (
+            {canAdministrateOrg && (
               <LinkTo
                 modelType="Organization"
                 model={Organization.pathForNew({
@@ -281,7 +281,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
               </LinkTo>
             )}
 
-            {isSuperUserForOrg && (
+            {canAdministrateOrg && (
               <LinkTo
                 modelType="Organization"
                 model={organization}

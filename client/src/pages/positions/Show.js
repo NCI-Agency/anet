@@ -113,7 +113,7 @@ const PositionShow = ({ pageDispatchers }) => {
     (currentUser.isSuperUser() && isPrincipal) ||
     // Admins can edit anybody
     currentUser.isAdmin() ||
-    // Super users can edit positions within their own organization
+    // Super users can edit positions if they have administrative permissions for the organization of the position
     (position.organization &&
       position.organization.uuid &&
       currentUser.hasAdministrativePermissionsForOrganization(

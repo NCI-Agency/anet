@@ -22,7 +22,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
     setShowAdministratingPositionsModal
   ] = useState(false)
   const isAdmin = currentUser && currentUser.isAdmin()
-  const isSuperUserForOrg =
+  const canAdministrateOrg =
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isSuperUser = currentUser && currentUser.isSuperUser()
@@ -38,7 +38,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
     position => positionsNeedingAttention.indexOf(position) === -1
   )
   const canCreatePositions =
-    isSuperUserForOrg || (isSuperUser && isPrincipalOrg)
+    canAdministrateOrg || (isSuperUser && isPrincipalOrg)
 
   const orgSettings = isPrincipalOrg
     ? Settings.fields.principal.org
