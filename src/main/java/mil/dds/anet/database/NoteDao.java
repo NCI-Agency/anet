@@ -154,9 +154,15 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
           authorizationGroups.stream().map(ag -> ag.getUuid()).collect(Collectors.toSet());
       return new ForeignKeyFetcher<Note>()
           .load(context, FkDataLoaderKey.NOTE_RELATED_OBJECT_NOTES, relatedObjectUuid)
-          .thenApply(notes -> notes.stream().filter(note -> hasNotePermission(user,
-              authorizationGroupUuids, note, note.getAuthorUuid(), UpdateType.READ))
-              .collect(Collectors.toList()));
+          .thenApply(notes -> notes.stream().filter(note -> {
+            try {
+              return hasNotePermission(user, authorizationGroupUuids, note, note.getAuthorUuid(),
+                  UpdateType.READ);
+            } catch (Exception e) {
+              // something wrong with the note, just filter it out
+              return false;
+            }
+          }).collect(Collectors.toList()));
     });
   }
 
@@ -219,39 +225,55 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
   public void deleteDanglingNotes() {
     // 1. for report assessments, their noteRelatedObjects can be deleted
     // if the report they point to has been deleted
-    final int nrReportAssessmentsNroDeleted = getDbHandle().execute(
-        "/* deleteDanglingNoteRelatedObjectsForReportAssessments */"
-            + "DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" IN ("
-            + " SELECT n.uuid FROM notes n WHERE n.type = ? AND EXISTS ("
-            + "  SELECT nro_reports.\"noteUuid\" FROM \"noteRelatedObjects\" nro_reports"
-            + "  WHERE nro_reports.\"relatedObjectType\" = ?"
-            + "  AND nro_reports.\"noteUuid\" = n.uuid AND NOT EXISTS ("
-            + "    SELECT r.uuid FROM reports r"
-            + "    WHERE r.uuid = nro_reports.\"relatedObjectUuid\")))",
-        DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), ReportDao.TABLE_NAME);
+    final int nrReportAssessmentsNroDeleted = deleteAssessments(ReportDao.TABLE_NAME, null);
     logger.info("Deleted {} dangling noteRelatedObjects for assessments of deleted reports",
         nrReportAssessmentsNroDeleted);
 
     // 2. noteRelatedObjects can be deleted if the relatedObject they point to no longer exists;
     // since only positions and reports can be deleted and can have notes, just check these two
-    final int nrPositionsNroDeleted = getDbHandle().execute(
-        "/* deleteDanglingNoteRelatedObjectsForPositions */ DELETE FROM \"noteRelatedObjects\""
-            + " WHERE \"relatedObjectType\" = ?"
-            + " AND \"relatedObjectUuid\" NOT IN ( SELECT uuid FROM positions )",
-        PositionDao.TABLE_NAME);
+    final int nrPositionsNroDeleted = deleteNoteRelatedObjects(PositionDao.TABLE_NAME, null);
     logger.info("Deleted {} dangling noteRelatedObjects for deleted positions",
         nrPositionsNroDeleted);
-    final int nrReportsNroDeleted = getDbHandle().execute(
-        "/* deleteDanglingNoteRelatedObjectsForReports */ DELETE FROM \"noteRelatedObjects\""
-            + " WHERE \"relatedObjectType\" = ?"
-            + " AND \"relatedObjectUuid\" NOT IN ( SELECT uuid FROM reports )",
-        ReportDao.TABLE_NAME);
+    final int nrReportsNroDeleted = deleteNoteRelatedObjects(ReportDao.TABLE_NAME, null);
     logger.info("Deleted {} dangling noteRelatedObjects for deleted reports", nrReportsNroDeleted);
 
     // 3. a note can be deleted if there are no longer any noteRelatedObjects linking to it
-    final int nrNotesDeleted = getDbHandle().execute("/* deleteDanglingNotes */ DELETE FROM notes"
-        + " WHERE uuid NOT IN ( SELECT \"noteUuid\" FROM \"noteRelatedObjects\" )");
+    final int nrNotesDeleted = deleteOrphanNotes();
     logger.info("Deleted {} dangling notes", nrNotesDeleted);
+  }
+
+  public int deleteAssessments(String tableName, String uuid) {
+    final String notExists = String.format("NOT EXISTS (SELECT uuid FROM \"%1$s\""
+        + " WHERE uuid = \"nro_%1$s\".\"relatedObjectUuid\")", tableName);
+    final String equals = String.format("\"nro_%1$s\".\"relatedObjectUuid\" = ?", tableName);
+    final String sql = String.format(
+        "/* deleteDanglingNoteRelatedObjectsFor_%1$sAssessments */"
+            + "DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" IN ("
+            + " SELECT n.uuid FROM notes n WHERE n.type = ? AND EXISTS ("
+            + "  SELECT \"nro_%1$s\".\"noteUuid\" FROM \"noteRelatedObjects\" \"nro_%1$s\""
+            + "  WHERE \"nro_%1$s\".\"relatedObjectType\" = ?"
+            + "  AND \"nro_%1$s\".\"noteUuid\" = n.uuid AND %2$s))",
+        tableName, uuid == null ? notExists : equals);
+    return uuid == null
+        ? getDbHandle().execute(sql, DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), tableName)
+        : getDbHandle().execute(sql, DaoUtils.getEnumId(Note.NoteType.ASSESSMENT), tableName, uuid);
+  }
+
+  public int deleteNoteRelatedObjects(String tableName, String uuid) {
+    final String notIn =
+        String.format("\"relatedObjectUuid\" NOT IN ( SELECT uuid FROM \"%1$s\" )", tableName);
+    final String equals = "\"relatedObjectUuid\" = ?";
+    final String sql = String.format(
+        "/* deleteDanglingNoteRelatedObjectsFor_%1$s */ DELETE FROM \"noteRelatedObjects\""
+            + " WHERE \"relatedObjectType\" = ? AND %2$s",
+        tableName, uuid == null ? notIn : equals);
+    return uuid == null ? getDbHandle().execute(sql, tableName)
+        : getDbHandle().execute(sql, tableName, uuid);
+  }
+
+  public int deleteOrphanNotes() {
+    return getDbHandle().execute("/* deleteDanglingNotes */ DELETE FROM notes"
+        + " WHERE uuid NOT IN ( SELECT \"noteUuid\" FROM \"noteRelatedObjects\" )");
   }
 
   @InTransaction

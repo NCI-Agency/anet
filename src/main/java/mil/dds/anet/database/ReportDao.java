@@ -391,8 +391,17 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
         "/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?",
         reportUuid);
 
+    final AnetObjectEngine instance = AnetObjectEngine.getInstance();
     // Delete customSensitiveInformation
-    AnetObjectEngine.getInstance().getCustomSensitiveInformationDao().deleteFor(reportUuid);
+    instance.getCustomSensitiveInformationDao().deleteFor(reportUuid);
+
+    final NoteDao noteDao = instance.getNoteDao();
+    // Delete assessments
+    noteDao.deleteAssessments(TABLE_NAME, reportUuid);
+    // Delete other noteRelatedObjects
+    noteDao.deleteNoteRelatedObjects(TABLE_NAME, reportUuid);
+    // Delete orphan notes
+    noteDao.deleteOrphanNotes();
 
     // Delete report
     // GraphQL mutations *have* to return something, so we return the number of deleted report rows
