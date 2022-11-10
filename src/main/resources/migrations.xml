@@ -4140,4 +4140,16 @@
 			constraintName="uniqueUserActivities" />
 	</changeSet>
 
+	<changeSet id="delete-obsolete-peoplePositions" author="gjvoosten">
+		<!-- Rows with either a NULL positionUuid or a NULL personUuid are no longer needed -->
+		<sql>
+			DELETE FROM "peoplePositions"
+			WHERE "positionUuid" IS NULL
+			OR "personUuid" IS NULL;
+		</sql>
+		<!-- Make sure rows with a NULL positionUuid or a NULL personUuid are no longer allowed -->
+		<addNotNullConstraint tableName="peoplePositions" columnName="positionUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint tableName="peoplePositions" columnName="personUuid" columnDataType="${uuid_type}" />
+	</changeSet>
+
 </databaseChangeLog>

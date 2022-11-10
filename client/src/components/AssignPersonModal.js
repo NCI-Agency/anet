@@ -280,7 +280,7 @@ const AssignPersonModal = ({ position, showModal, onCancel, onSuccess }) => {
             if (removeUser || !person) {
               setPerson(null)
               setDoSave(true)
-            } else if (person.name !== latestPositionProp.current.person.name) {
+            } else if (person.uuid !== latestPositionProp.current.person.uuid) {
               setDoSave(true)
             } else {
               closeModal()

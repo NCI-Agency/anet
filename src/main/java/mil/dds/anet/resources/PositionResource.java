@@ -172,9 +172,8 @@ public class PositionResource {
     final Position existing = dao.getByUuid(pos.getUuid());
     assertCanUpdatePosition(user, existing);
 
-    final String existingPersonUuid = DaoUtils.getUuid(existing.getPerson());
     ResourceUtils.validateHistoryInput(pos.getUuid(), pos.getPreviousPeople(), false,
-        existingPersonUuid);
+        existing.getPersonUuid());
 
     if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(pos.getUuid(), null,
         pos.getPreviousPeople(), false)) {
@@ -219,7 +218,7 @@ public class PositionResource {
       throw new WebApplicationException("Couldn't process delete person from position",
           Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Person removed from Position uuid#{} by {}", positionUuid, user);
+    AnetAuditLogger.log("Person removed from position {} by {}", pos, user);
     return numRows;
   }
 

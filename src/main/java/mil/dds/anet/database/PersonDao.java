@@ -465,9 +465,8 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
   public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(
       Map<String, Object> context, String personUuid) {
-    return new ForeignKeyFetcher<PersonPositionHistory>()
-        .load(context, FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid)
-        .thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
+    return new ForeignKeyFetcher<PersonPositionHistory>().load(context,
+        FkDataLoaderKey.PERSON_PERSON_POSITION_HISTORY, personUuid);
   }
 
   @InTransaction
@@ -566,12 +565,14 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
   @InTransaction
   protected void updatePeoplePositions(final String positionUuid, final String personUuid,
       final Instant startTime, final Instant endTime) {
-    getDbHandle()
-        .createUpdate("INSERT INTO \"peoplePositions\" "
-            + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
-            + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
-        .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-        .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
-        .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    if (positionUuid != null && personUuid != null) {
+      getDbHandle()
+          .createUpdate("INSERT INTO \"peoplePositions\" "
+              + "(\"positionUuid\", \"personUuid\", \"createdAt\", \"endedAt\") "
+              + "VALUES (:positionUuid, :personUuid, :createdAt, :endedAt)")
+          .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
+          .bind("createdAt", DaoUtils.asLocalDateTime(startTime))
+          .bind("endedAt", DaoUtils.asLocalDateTime(endTime)).execute();
+    }
   }
 }

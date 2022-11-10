@@ -6,10 +6,8 @@ import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -122,13 +120,5 @@ public class PersonPositionHistory extends AbstractAnetBean {
 
   public void setEndTime(Instant endTime) {
     this.endTime = endTime;
-  }
-
-  public static List<PersonPositionHistory> getDerivedHistory(List<PersonPositionHistory> history) {
-    // Remove all null entries
-    return history.stream()
-        .filter(
-            pph -> (pph != null && pph.getPersonUuid() != null && pph.getPositionUuid() != null))
-        .collect(Collectors.toList());
   }
 }
