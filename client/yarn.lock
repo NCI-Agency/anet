@@ -15385,10 +15385,10 @@ slash@^4.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-4.0.0.tgz#2422372176c4c6c5addb5e2ada885af984b396a7"
   integrity sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==
 
-slate-history@0.66.0:
-  version "0.66.0"
-  resolved "https://registry.yarnpkg.com/slate-history/-/slate-history-0.66.0.tgz#ac63fddb903098ceb4c944433e3f75fe63acf940"
-  integrity sha512-6MWpxGQZiMvSINlCbMW43E2YBSVMCMCIwQfBzGssjWw4kb0qfvj0pIdblWNRQZD0hR6WHP+dHHgGSeVdMWzfng==
+slate-history@0.86.0:
+  version "0.86.0"
+  resolved "https://registry.yarnpkg.com/slate-history/-/slate-history-0.86.0.tgz#5554612271d2fc1018a7918be3961bb66e620c58"
+  integrity sha512-OxObL9tbhgwvSlnKSCpGIh7wnuaqvOj5jRExGjEyCU2Ke8ctf22HjT+jw7GEi9ttLzNTUmTEU3YIzqKGeqN+og==
   dependencies:
     is-plain-object "^5.0.0"
 
@@ -15399,10 +15399,10 @@ slate-hyperscript@0.77.0:
   dependencies:
     is-plain-object "^5.0.0"
 
-slate-react@0.83.2:
-  version "0.83.2"
-  resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.83.2.tgz#7099db1607b79c95cc2a41e2df1e04982b7e26a5"
-  integrity sha512-V5qtPsCOiDVCMU3ovj/CWndxx9/as5/wGJxnbJDRVzuazSh+NVw/YuGTlus1fCt+Nlt6UHOhFvM7C9pXYaftPA==
+slate-react@0.86.0:
+  version "0.86.0"
+  resolved "https://registry.yarnpkg.com/slate-react/-/slate-react-0.86.0.tgz#e1e0bfaf9a21f8e18d86b616538d11e81c0f8920"
+  integrity sha512-FlzG0CL1MtpZk7DRH6a101FdqdhTi+vZ23SbY5hQudIdgLo7QnUBv97BRe30VctqsL9L+Z2OsFHSCmWpIIxJAw==
   dependencies:
     "@types/is-hotkey" "^0.1.1"
     "@types/lodash" "^4.14.149"
@@ -15413,10 +15413,10 @@ slate-react@0.83.2:
     scroll-into-view-if-needed "^2.2.20"
     tiny-invariant "1.0.6"
 
-slate@0.84.0:
-  version "0.84.0"
-  resolved "https://registry.yarnpkg.com/slate/-/slate-0.84.0.tgz#dae3d86f16a4b97dbcd32c55acfcb78a57f8ed01"
-  integrity sha512-jAxK10V9nAtAFr6PpCfLdLi+VYNmAOMKC/PIaOWH2HGTrmZEY2XxJt4kbnRNVEbUHkQ1dqaBImVLsVzdoUL8/w==
+slate@0.86.0:
+  version "0.86.0"
+  resolved "https://registry.yarnpkg.com/slate/-/slate-0.86.0.tgz#9704a195a2fe56bcff497b278f0489f3a94b23fc"
+  integrity sha512-aexL720Tpqx6St5oz0jo0/wZWCT7z8lChKkVJo2eiFkSNmoSnCGR62d2itAvmse7dEXkl4DbfAxRQPj8JDuGTg==
   dependencies:
     immer "^9.0.6"
     is-plain-object "^5.0.0"
