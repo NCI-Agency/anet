@@ -2,6 +2,7 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import {
+  LocationOverlayRow,
   OrganizationOverlayRow,
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
@@ -22,12 +23,13 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
 import { FastField, Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
-import { Organization, Position, Task } from "models"
+import { Location, Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
-import { Button } from "react-bootstrap"
+import { Badge, Button } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
+import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import TASKS_ICON from "resources/tasks.png"
 import { RECURSE_STRATEGY } from "searchUtils"
@@ -243,6 +245,23 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       name="identificationCode"
                       component={FieldHelper.ReadonlyField}
                     />
+                    <FastField
+                      name="location"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        values.location && (
+                          <>
+                            <LinkTo
+                              modelType="Location"
+                              model={values.location}
+                            />{" "}
+                            <Badge>
+                              {Location.humanNameOfType(values.location.type)}
+                            </Badge>
+                          </>
+                        )
+                      }
+                    />
                   </>
                 ) : (
                   <>
@@ -305,6 +324,35 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                   </>
                 )}
               </Fieldset>
+
+              {isAdmin && (
+                <Fieldset title="Additional information">
+                  <Field
+                    name="location"
+                    label="Location"
+                    component={FieldHelper.SpecialField}
+                    onChange={value => {
+                      // validation will be done by setFieldValue
+                      setFieldTouched("location", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("location", value)
+                    }}
+                    widget={
+                      <AdvancedSingleSelect
+                        fieldName="location"
+                        placeholder="Search for the location where this Organization will operate from..."
+                        value={values.location}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={LocationOverlayRow}
+                        filterDefs={getLocationFilters(values)}
+                        objectType={Location}
+                        fields={Location.autocompleteQuery}
+                        valueKey="name"
+                        addon={LOCATIONS_ICON}
+                      />
+                    }
+                  />
+                </Fieldset>
+              )}
 
               {isAdvisorOrg && (
                 <div>
@@ -457,11 +505,24 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
     // strip tasks fields not in data model
     organization.tasks = values.tasks.map(t => utils.getReference(t))
     organization.parentOrg = utils.getReference(organization.parentOrg)
+    organization.location = utils.getReference(organization.location)
     organization.customFields = customFieldsJSONString(values)
     return API.mutation(
       edit ? GQL_UPDATE_ORGANIZATION : GQL_CREATE_ORGANIZATION,
       { organization }
     ).then()
+  }
+
+  function getLocationFilters(values) {
+    return Settings?.fields[
+      values.type === Organization.TYPE.ADVISOR_ORG ? "advisor" : "principal"
+    ]?.org?.location?.filter.reduce((accummulator, filter) => {
+      accummulator[filter] = {
+        label: Location.humanNameOfType(filter),
+        queryVars: { type: filter }
+      }
+      return accummulator
+    }, {})
   }
 }
 

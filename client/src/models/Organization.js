@@ -46,6 +46,7 @@ export default class Organization extends Model {
         .string()
         .required()
         .default(() => Organization.TYPE.ADVISOR_ORG),
+      location: yup.object().nullable().default(null).label("Location"),
       parentOrg: yup
         .object()
         .nullable()
