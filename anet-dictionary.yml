@@ -734,6 +734,7 @@ fields:
   organization:
     shortName: Name
     parentOrg: Parent Organization
+    biography: Overview
     customFields:
       multipleButtons:
         type: enumset

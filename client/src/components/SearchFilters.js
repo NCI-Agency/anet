@@ -470,6 +470,15 @@ export const searchFilters = function() {
           placeholder: "Filter by location...",
           queryKey: "locationUuid"
         })
+      },
+      "Has Biography?": {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "hasBiography",
+          options: ["true", "false"],
+          labels: ["Yes", "No"]
+        }
       }
     }
   }

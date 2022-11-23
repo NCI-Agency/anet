@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import { ReadonlyCustomFields } from "components/CustomFields"
+import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -64,6 +65,7 @@ const GQL_GET_ORGANIZATION = gql`
         lng
         type
       }
+      biography
       parentOrg {
         uuid
         shortName
@@ -480,6 +482,14 @@ const OrganizationShow = ({ pageDispatchers }) => {
                       </>
                     )
                   }
+                />
+
+                <Field
+                  name="biography"
+                  component={FieldHelper.ReadonlyField}
+                  label={Settings.fields.organization.biography}
+                  className="rich-text-readonly"
+                  humanValue={parseHtmlWithLinkTo(organization.biography)}
                 />
               </Fieldset>
 
