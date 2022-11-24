@@ -440,6 +440,7 @@ enum NoteType {
 
 """"""
 type Organization {
+  administratingPositions: [Position]
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
@@ -454,7 +455,6 @@ type Organization {
   parentOrg: Organization
   planningApprovalSteps: [ApprovalStep]
   positions(query: PositionSearchQueryInput): [Position]
-  administratingPositions: [Position]
   shortName: String
   status: Status
   tasks: [Task]
@@ -465,6 +465,7 @@ type Organization {
 
 """"""
 input OrganizationInput {
+  administratingPositions: [PositionInput]
   approvalSteps: [ApprovalStepInput]
   createdAt: Instant
   customFields: String
@@ -473,7 +474,6 @@ input OrganizationInput {
   longName: String
   parentOrg: OrganizationInput
   planningApprovalSteps: [ApprovalStepInput]
-  administratingPositions: [PositionInput]
   shortName: String
   status: Status
   tasks: [TaskInput]
@@ -632,9 +632,9 @@ type Position {
   name: String
   notes: [Note]
   organization: Organization
+  organizationsAdministrated: [Organization]
   person: Person
   previousPeople: [PersonPositionHistory]
-  responsibleOrganizations: [Organization]
   responsibleTasks(query: TaskSearchQueryInput): [Task]
   status: Status
   type: PositionType
@@ -652,6 +652,7 @@ input PositionInput {
   location: LocationInput
   name: String
   organization: OrganizationInput
+  organizationsAdministrated: [OrganizationInput]
   person: PersonInput
   previousPeople: [PersonPositionHistoryInput]
   status: Status
