@@ -96,7 +96,7 @@
     "moment-timezone": "0.5.39",
     "postcss": "8.4.19",
     "postcss-calc": "8.2.4",
-    "postcss-custom-properties": "12.1.10",
+    "postcss-custom-properties": "13.0.0",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "7.0.1",
     "prettier-eslint-cli": "7.1.0",
