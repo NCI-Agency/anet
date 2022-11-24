@@ -14,7 +14,6 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -55,9 +54,9 @@ public class OrganizationResource {
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
-    // Check if super user is authorized to create a sub organization
+    // Check if user is authorized to create a sub organization
     if (!AuthUtils.isAdmin(user)) {
-      AuthUtils.assertSuperUserForOrg(user, org.getParentOrgUuid(), false);
+      AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid(), false);
     }
     final Organization created;
     try {
@@ -104,7 +103,7 @@ public class OrganizationResource {
     org.checkAndFixCustomFields();
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
-    AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
+    AuthUtils.assertCanAdministrateOrg(user, DaoUtils.getUuid(org), false);
 
     // Load the existing organization, so we can check for differences.
     final Organization existing = dao.getByUuid(org.getUuid());
@@ -117,9 +116,8 @@ public class OrganizationResource {
     }
 
     if (!AuthUtils.isAdmin(user)) {
-      // Check if superuser has administrative permission for the organizations that will be
-      // modified with the
-      // parent organization update
+      // Check if user has administrative permission for the organizations that will be
+      // modified with the parent organization update
       if (!Objects.equals(org.getParentOrgUuid(), existing.getParentOrgUuid())) {
         if (org.getParentOrgUuid() != null) {
           final Organization parentOrg = dao.getByUuid(org.getParentOrgUuid());
@@ -128,13 +126,13 @@ public class OrganizationResource {
                 "You cannot assign a different type of organization as the parent",
                 Status.FORBIDDEN);
           }
-          AuthUtils.assertSuperUserForOrg(user, org.getParentOrgUuid(), false);
+          AuthUtils.assertCanAdministrateOrg(user, org.getParentOrgUuid(), false);
         }
         if (existing.getParentOrgUuid() != null) {
-          AuthUtils.assertSuperUserForOrg(user, existing.getParentOrgUuid(), false);
+          AuthUtils.assertCanAdministrateOrg(user, existing.getParentOrgUuid(), false);
         }
       }
-      // Super user is not authorized to change the organization type
+      // User is not authorized to change the organization type
       if (org.getType() != existing.getType()) {
         throw new WebApplicationException(
             "You do not have permissions to change the type of this organization",

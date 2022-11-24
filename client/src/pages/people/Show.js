@@ -174,7 +174,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   // User can always edit themselves
   // Admins can always edit anybody
-  // SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
+  // Super users can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser && currentUser.isAdmin()
   const hasPosition = position && position.uuid
   const canEdit =

@@ -96,18 +96,18 @@ public class PersonResource {
       return true;
     }
     if (editorPos.getType() == PositionType.SUPER_USER) {
-      // Super Users can edit any principal
+      // Super users can edit any principal
       if (subject.getRole().equals(Role.PRINCIPAL)) {
         return true;
       }
-      // Ensure that the editor is the Super User for the subject's organization.
+      // Ensure that the editor is the super user for the subject's organization.
       final Position subjectPos =
           create
               ? AnetObjectEngine.getInstance().getPositionDao()
                   .getByUuid(DaoUtils.getUuid(subject.getPosition()))
               : DaoUtils.getPosition(subject);
       if (subjectPos == null) {
-        // Super Users can edit position-less people.
+        // Super users can edit position-less people.
         return true;
       }
       return AuthUtils.canAdministrateOrg(editor, subjectPos.getOrganizationUuid(), true);

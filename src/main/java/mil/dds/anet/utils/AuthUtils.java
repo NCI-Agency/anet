@@ -33,8 +33,8 @@ public class AuthUtils {
   public static boolean canAdministrateOrg(final Person user, final String organizationUuid,
       boolean allowPrincipalOrgs) {
     if (organizationUuid == null) {
-      logger.error("Organization {} is null or has a null UUID in SuperUser check for {}",
-          organizationUuid, user); // DANGER: possible log injection vector here?
+      logger.error("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
+          organizationUuid, user);
       return false;
     }
     Position position = DaoUtils.getPosition(user);
@@ -43,7 +43,7 @@ public class AuthUtils {
       return false;
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
-      logger.debug("User {} is an administrator, automatically a superuser", user);
+      logger.debug("User {} is an administrator, can automatically administrate org", user);
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
@@ -78,10 +78,10 @@ public class AuthUtils {
     return false;
   }
 
-  public static void assertSuperUserForOrg(Person user, String organizationUuid,
+  public static void assertCanAdministrateOrg(Person user, String organizationUuid,
       boolean allowPrincipalOrgs) {
     // log injection possibility here?
-    logger.debug("Asserting superuser status for {} in {}", user, organizationUuid);
+    logger.debug("Asserting canAdministrateOrg status for {} in {}", user, organizationUuid);
     if (canAdministrateOrg(user, organizationUuid, allowPrincipalOrgs)) {
       return;
     }
@@ -89,7 +89,7 @@ public class AuthUtils {
   }
 
   public static void assertSuperUser(Person user) {
-    logger.debug("Asserting some superuser status for {}", user);
+    logger.debug("Asserting super user position for {}", user);
     Position position = DaoUtils.getPosition(user);
     if (position != null && (position.getType() == PositionType.SUPER_USER
         || position.getType() == PositionType.ADMINISTRATOR)) {
