@@ -86,11 +86,11 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.5.0'
-	implementation 'org.liquibase:liquibase-core:4.17.1'
+	implementation 'org.postgresql:postgresql:42.5.1'
+	implementation 'org.liquibase:liquibase-core:4.17.2'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
-	implementation('org.ehcache:ehcache:3.10.2') {
+	implementation('org.ehcache:ehcache:3.10.8') {
 		capabilities {
 			requireCapability('org.ehcache:ehcache-jakarta')
 		}
