@@ -100,6 +100,28 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      administratingPositions {
+        uuid
+        name
+        code
+        type
+        status
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
       planningApprovalSteps {
         uuid
         name
@@ -174,8 +196,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
   const IdentificationCodeFieldWithLabel = DictionaryField(Field)
   const LongNameWithLabel = DictionaryField(Field)
 
-  const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
-  const isAdmin = currentUser && currentUser.isAdmin()
+  const canAdministrateOrg =
+    currentUser &&
+    currentUser.hasAdministrativePermissionsForOrganization(organization)
   const isAdvisorOrg = organization.type === Organization.TYPE.ADVISOR_ORG
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const orgSettings = isPrincipalOrg
@@ -207,6 +230,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
         </Nav.Item>
         <Nav.Item>
           <AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
+        </Nav.Item>
+        <Nav.Item>
+          <AnchorNavItem to="administratingPositions">
+            {orgSettings.administratingPositions.label}
+          </AnchorNavItem>
         </Nav.Item>
         {!isPrincipalOrg && (
           <Nav.Item>
@@ -241,7 +269,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
       {({ values }) => {
         const action = (
           <div>
-            {isAdmin && (
+            {canAdministrateOrg && (
               <LinkTo
                 modelType="Organization"
                 model={Organization.pathForNew({
@@ -253,7 +281,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
               </LinkTo>
             )}
 
-            {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
+            {canAdministrateOrg && (
               <LinkTo
                 modelType="Organization"
                 model={organization}
@@ -429,7 +457,10 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 )}
               </Fieldset>
 
-              <OrganizationLaydown organization={organization} />
+              <OrganizationLaydown
+                organization={organization}
+                refetch={refetch}
+              />
               {!isPrincipalOrg && <Approvals relatedObject={organization} />}
               {organization.isTaskEnabled() && (
                 <OrganizationTasks

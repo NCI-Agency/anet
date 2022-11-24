@@ -12,7 +12,6 @@ import RS_ICON from "resources/rs_small.png"
 import Settings from "settings"
 import utils from "utils"
 import * as yup from "yup"
-import Organization from "./Organization"
 import Position from "./Position"
 
 export const advisorPerson = Settings.fields.advisor.person
@@ -315,32 +314,34 @@ export default class Person extends Model {
 
   // Checks if this user is a valid super user for a particular organization
   // Must be either
-  // - An Administrator
-  // - A super user and this org is a PRINCIPAL_ORG
-  // - A super user for this organization
-  // - A super user for this orgs parents.
-  isSuperUserForOrg(org) {
+  // - an administrator
+  // - a super user administrating this organization
+  // - a super user administrating this organization's (transitive) parent
+  hasAdministrativePermissionsForOrganization(org) {
     if (!org) {
       return false
     }
-    if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) {
+    if (this.position?.type === Position.TYPE.ADMINISTRATOR) {
       return true
     }
-    if (this.position && this.position.type !== Position.TYPE.SUPER_USER) {
+    if (
+      this.position?.type !== Position.TYPE.SUPER_USER ||
+      !this.position?.organization
+    ) {
       return false
     }
-    if (org.type === Organization.TYPE.PRINCIPAL_ORG) {
-      return true
+    if (this.position.organizationsAdministrated) {
+      const orgsAdministratedUuids =
+        this.position.organizationsAdministrated.reduce((acc, org) => {
+          acc.push(org.uuid)
+          org.descendantOrgs.forEach(descOrg => {
+            acc.push(descOrg.uuid)
+          })
+          return acc
+        }, [])
+      return orgsAdministratedUuids.includes(org.uuid)
     }
-
-    if (!this.position || !this.position.organization) {
-      return false
-    }
-    const orgs = this.position.organization.descendantOrgs || []
-    orgs.push(this.position.organization)
-    const orgUuids = orgs.map(o => o.uuid)
-
-    return orgUuids.includes(org.uuid)
+    return false
   }
 
   iconUrl() {

@@ -1,9 +1,8 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
@@ -31,11 +30,11 @@ public class AuthUtils {
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
   }
 
-  public static boolean isSuperUserForOrg(final Person user, final String organizationUuid,
+  public static boolean canAdministrateOrg(final Person user, final String organizationUuid,
       boolean allowPrincipalOrgs) {
     if (organizationUuid == null) {
-      logger.error("Organization {} is null or has a null UUID in SuperUser check for {}",
-          organizationUuid, user); // DANGER: possible log injection vector here?
+      logger.error("Organization {} is null or has a null UUID in canAdministrateOrg check for {}",
+          organizationUuid, user);
       return false;
     }
     Position position = DaoUtils.getPosition(user);
@@ -44,7 +43,7 @@ public class AuthUtils {
       return false;
     }
     if (position.getType() == PositionType.ADMINISTRATOR) {
-      logger.debug("User {} is an administrator, automatically a superuser", user);
+      logger.debug("User {} is an administrator, can automatically administrate org", user);
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
@@ -55,39 +54,42 @@ public class AuthUtils {
     // Given that we know it's a super-user position, does it actually match this organization?
     Organization loadedOrg =
         AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(organizationUuid);
-    if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG) {
-      return allowPrincipalOrgs;
-    }
-
-    if (position.getOrganizationUuid() == null) {
-      return false;
-    }
-    if (Objects.equals(organizationUuid, position.getOrganizationUuid())) {
+    if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG && allowPrincipalOrgs) {
       return true;
     }
 
-    // As a last check, load the descendant orgs.
+    // Check the responsible organizations.
     final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
-    final Organization posOrg = position.loadOrganization(context).join();
+    final List<Organization> administratedOrgs =
+        position.loadOrganizationsAdministrated(context).join();
+    if (administratedOrgs.stream().anyMatch(o -> o.getUuid().equals(organizationUuid))) {
+      return true;
+    }
+
+    // As a final resort, check the descendant orgs of the position's responsible orgs.
     final OrganizationSearchQuery osQuery = new OrganizationSearchQuery();
     osQuery.setPageSize(0);
-    final Optional<Organization> orgMatch = posOrg.loadDescendantOrgs(context, osQuery).join()
-        .stream().filter(o -> o.getUuid().equals(organizationUuid)).findFirst();
-    return orgMatch.isPresent();
+    for (final Organization administratedOrg : administratedOrgs) {
+      if (administratedOrg.loadDescendantOrgs(context, osQuery).join().stream()
+          .anyMatch(o -> o.getUuid().equals(organizationUuid))) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  public static void assertSuperUserForOrg(Person user, String organizationUuid,
+  public static void assertCanAdministrateOrg(Person user, String organizationUuid,
       boolean allowPrincipalOrgs) {
     // log injection possibility here?
-    logger.debug("Asserting superuser status for {} in {}", user, organizationUuid);
-    if (isSuperUserForOrg(user, organizationUuid, allowPrincipalOrgs)) {
+    logger.debug("Asserting canAdministrateOrg status for {} in {}", user, organizationUuid);
+    if (canAdministrateOrg(user, organizationUuid, allowPrincipalOrgs)) {
       return;
     }
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
   }
 
   public static void assertSuperUser(Person user) {
-    logger.debug("Asserting some superuser status for {}", user);
+    logger.debug("Asserting super user position for {}", user);
     Position position = DaoUtils.getPosition(user);
     if (position != null && (position.getType() == PositionType.SUPER_USER
         || position.getType() == PositionType.ADMINISTRATOR)) {

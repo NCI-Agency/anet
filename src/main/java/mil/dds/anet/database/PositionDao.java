@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -250,6 +252,22 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   }
 
   @InTransaction
+  public int addOrganizationToPosition(Position p, Organization o) {
+    return getDbHandle().createUpdate(
+        "/* addOrganizationToPosition */ INSERT INTO \"organizationAdministrativePositions\" (\"organizationUuid\", \"positionUuid\") "
+            + "VALUES (:organizationUuid, :positionUuid)")
+        .bind("organizationUuid", o.getUuid()).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int removeOrganizationFromPosition(String orgUuid, Position p) {
+    return getDbHandle().createUpdate(
+        "/* removeOrganizationToPosition*/ DELETE FROM \"organizationAdministrativePositions\" "
+            + "WHERE \"organizationUuid\" = :organizationUuid AND \"positionUuid\" = :positionUuid")
+        .bind("organizationUuid", orgUuid).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  @InTransaction
   public int removePersonFromPosition(String positionUuid) {
     // Get original position data from database (we need its type)
     final Position position = getByUuid(positionUuid);
@@ -475,10 +493,12 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
   public int mergePositions(Position winner, Position loser) {
     final String winnerUuid = winner.getUuid();
     final String loserUuid = loser.getUuid();
+    final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+    final Map<String, Object> context = engine.getContext();
     // Get some data related to the existing position in the database
     final Position existingPos = getByUuid(winnerUuid);
     final List<Position> existingAssociatedPositions =
-        existingPos.loadAssociatedPositions(AnetObjectEngine.getInstance().getContext()).join();
+        existingPos.loadAssociatedPositions(context).join();
 
     // Clear loser's code to prevent update conflicts (code must be unique)
     getDbHandle()
@@ -558,6 +578,14 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     updateM2mForMerge("authorizationGroupPositions", "authorizationGroupUuid", "positionUuid",
         winnerUuid, loserUuid);
 
+    // Update organizationAdministrativePositions
+    deleteForMerge("organizationAdministrativePositions", "positionUuid", loserUuid);
+
+    Utils.addRemoveElementsByUuid(existingPos.loadOrganizationsAdministrated(context).join(),
+        Utils.orIfNull(winner.getOrganizationsAdministrated(), new ArrayList<>()),
+        newOrg -> addOrganizationToPosition(winner, newOrg),
+        oldOrgUuid -> removeOrganizationFromPosition(oldOrgUuid, winner));
+
     // Update customSensitiveInformation for winner
     DaoUtils.saveCustomSensitiveInformation(null, PositionDao.TABLE_NAME, winnerUuid,
         winner.getCustomSensitiveInformation());
@@ -568,7 +596,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
     final int nr = deleteForMerge("positions", "uuid", loserUuid);
 
     // Evict the persons (previously) holding these positions from the domain users cache
-    final PersonDao personDao = AnetObjectEngine.getInstance().getPersonDao();
+    final PersonDao personDao = engine.getPersonDao();
     personDao.evictFromCacheByPositionUuid(loserUuid);
     personDao.evictFromCacheByPositionUuid(winnerUuid);
     return nr;

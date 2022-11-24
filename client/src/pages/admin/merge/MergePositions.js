@@ -40,6 +40,7 @@ import useMergeObjects, {
   unassignedPerson
 } from "mergeUtils"
 import { Position } from "models"
+import OrganizationsAdministrated from "pages/positions/OrganizationsAdministrated"
 import PreviousPeople from "pages/positions/PreviousPeople"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
@@ -285,6 +286,27 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
+              {mergeState?.merged?.type === Position.TYPE.SUPER_USER && (
+                <PositionField
+                  label="Organizations Administrated"
+                  fieldName="organizationsAdministrated"
+                  value={
+                    <OrganizationsAdministrated
+                      organizations={
+                        mergedPosition.organizationsAdministrated || []
+                      }
+                    />
+                  }
+                  align={ALIGN_OPTIONS.CENTER}
+                  action={getClearButton(() =>
+                    dispatchMergeActions(
+                      setAMergedField("organizationsAdministrated", [], null)
+                    )
+                  )}
+                  mergeState={mergeState}
+                  dispatchMergeActions={dispatchMergeActions}
+                />
+              )}
               {Settings.fields.position.customFields &&
                 Object.entries(Settings.fields.position.customFields).map(
                   ([fieldName, fieldConfig]) => {
@@ -413,7 +435,8 @@ function getPositionFilters(mergeState, align) {
       label: "All",
       queryVars: {
         status: Position.STATUS.ACTIVE,
-        organizationUuid: mergeState[getOtherSide(align)]?.organization?.uuid
+        organizationUuid: mergeState[getOtherSide(align)]?.organization?.uuid,
+        type: mergeState[getOtherSide(align)]?.type
       }
     }
   }
@@ -599,6 +622,33 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
+          {position.type === Position.TYPE.SUPER_USER && (
+            <PositionField
+              label="Organizations Administrated"
+              fieldName="organizationsAdministrated"
+              value={
+                <OrganizationsAdministrated
+                  organizations={position.organizationsAdministrated}
+                />
+              }
+              align={align}
+              action={getActionButton(
+                () =>
+                  dispatchMergeActions(
+                    setAMergedField(
+                      "organizationsAdministrated",
+                      position.organizationsAdministrated,
+                      align
+                    )
+                  ),
+                align,
+                mergeState,
+                "organizationsAdministrated"
+              )}
+              mergeState={mergeState}
+              dispatchMergeActions={dispatchMergeActions}
+            />
+          )}
           {Settings.fields.position.customFields &&
             Object.entries(Settings.fields.position.customFields).map(
               ([fieldName, fieldConfig]) => {

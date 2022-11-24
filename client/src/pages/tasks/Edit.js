@@ -49,6 +49,10 @@ const GQL_GET_TASK = gql`
         code
         type
         status
+        location {
+          uuid
+          name
+        }
         organization {
           uuid
           shortName

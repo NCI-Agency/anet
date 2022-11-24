@@ -42,6 +42,7 @@ TRUNCATE TABLE "reportAuthorizationGroups";
 TRUNCATE TABLE "noteRelatedObjects";
 TRUNCATE TABLE "taskTaskedOrganizations";
 TRUNCATE TABLE "taskResponsiblePositions";
+TRUNCATE TABLE "organizationAdministrativePositions";
 DELETE FROM positions;
 DELETE FROM tasks WHERE "customFieldRef1Uuid" IS NOT NULL;
 DELETE FROM tasks WHERE "customFieldRef1Uuid" IS NULL;
@@ -367,6 +368,12 @@ UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE 
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='EF 9') WHERE name LIKE 'EF 9%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='LNG') WHERE name LIKE 'LNG%';
 UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE "shortName" ='ANET Administrators') where name = 'ANET Administrator';
+
+-- Assign responsible positions for organizations
+INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid")
+	VALUES
+		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.1'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
+		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Final Reviewer'));
 
 
 -- Create the EF 1.1 approval process

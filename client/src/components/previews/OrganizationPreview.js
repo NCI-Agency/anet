@@ -62,6 +62,28 @@ const GQL_GET_ORGANIZATION = gql`
           }
         }
       }
+      administratingPositions {
+        uuid
+        name
+        code
+        type
+        status
+        location {
+          uuid
+          name
+        }
+        organization {
+          uuid
+          shortName
+        }
+        person {
+          uuid
+          name
+          rank
+          role
+          avatar(size: 32)
+        }
+      }
     }
   }
 `

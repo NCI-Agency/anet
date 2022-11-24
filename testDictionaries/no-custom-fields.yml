@@ -679,6 +679,9 @@ fields:
         placeholder: the CE post number for this position
       location:
         filter: [POINT_LOCATION]
+      organizationsAdministrated:
+        label: Responsible organizations
+        placeholder: Search for an organization...
 
     org:
       name: Advisor Organization
@@ -689,6 +692,9 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
+      administratingPositions:
+        label: Administrating positions
+        placeholder: Search for a position...
 
   principal:
     person:
@@ -901,6 +907,9 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
+      administratingPositions:
+        label: Administrating positions
+        placeholder: Search for a position...
 
   superUser:
 

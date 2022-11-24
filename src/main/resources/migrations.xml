@@ -4152,4 +4152,30 @@
 		<addNotNullConstraint tableName="peoplePositions" columnName="personUuid" columnDataType="${uuid_type}" />
 	</changeSet>
 
+	<changeSet id="add_organization_administrative_positions" author="nur.yilmaz">
+		<createTable tableName="organizationAdministrativePositions">
+			<column name="organizationUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+			<column name="positionUuid" type="${uuid_type}">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="organizationAdministrativePositions" columnNames="organizationUuid, positionUuid" constraintName="UQ_uniqueOrganizationAdministrativePositions" />
+		<addForeignKeyConstraint baseColumnNames="organizationUuid" baseTableName="organizationAdministrativePositions"
+								 constraintName="FK_organizationAdministrativePositions_organization" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="organizations" />
+		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="organizationAdministrativePositions"
+								 constraintName="FK_organizationAdministrativePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="positions" />
+		<createIndex
+				indexName="IDX_organizationAdministrativePositions_organizationUuid" tableName="organizationAdministrativePositions">
+			<column name="organizationUuid"/>
+		</createIndex>
+		<createIndex
+				indexName="IDX_organizationAdministrativePositions_positionUuid" tableName="organizationAdministrativePositions">
+			<column name="positionUuid"/>
+		</createIndex>
+	</changeSet>
+
 </databaseChangeLog>

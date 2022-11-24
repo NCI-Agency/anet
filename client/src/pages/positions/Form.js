@@ -22,6 +22,7 @@ import { jumpToTop } from "components/Page"
 import SimilarObjectsModal from "components/SimilarObjectsModal"
 import { FastField, Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
+import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -64,7 +65,20 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
       label: "Inactive"
     }
   ]
-  const typeButtons = [
+  const advisorDisabledTypeButtons = [
+    {
+      id: "typeAdvisorButton",
+      value: Position.TYPE.ADVISOR,
+      label: Settings.fields.advisor.position.name,
+      disabled: true
+    },
+    {
+      id: "typePrincipalButton",
+      value: Position.TYPE.PRINCIPAL,
+      label: Settings.fields.principal.position.name
+    }
+  ]
+  const regularTypeButtons = [
     {
       id: "typeAdvisorButton",
       value: Position.TYPE.ADVISOR,
@@ -136,20 +150,29 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
         const permissionsButtons = isAdmin
           ? adminPermissionsButtons
           : nonAdminPermissionsButtons
-
+        const administratingOrgUuids =
+          currentUser.position.organizationsAdministrated.map(org => org.uuid)
+        const isSuperUser =
+          currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()
+        const isSuperUserWithoutAdministratingOrgs =
+          isSuperUser && _isEmpty(administratingOrgUuids)
+        // Super users without organizations administrated cannot create advisor positions
+        const typeButtons = isSuperUserWithoutAdministratingOrgs
+          ? advisorDisabledTypeButtons
+          : regularTypeButtons
+        if (
+          isSuperUserWithoutAdministratingOrgs &&
+          values.type !== Position.TYPE.PRINCIPAL
+        ) {
+          setFieldValue("type", Position.TYPE.PRINCIPAL)
+        }
         const orgSearchQuery = { status: Model.STATUS.ACTIVE }
         if (isPrincipal) {
           orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
         } else {
           orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
-          if (
-            currentUser &&
-            currentUser.position &&
-            currentUser.position.type === Position.TYPE.SUPER_USER
-          ) {
-            orgSearchQuery.parentOrgUuid = [
-              currentUser.position.organization.uuid
-            ]
+          if (isSuperUser) {
+            orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
             orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
           }
         }

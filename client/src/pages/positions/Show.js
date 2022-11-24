@@ -8,12 +8,14 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
+import EditOrganizationsAdministratedModal from "components/EditOrganizationsAdministratedModal"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
+import OrganizationTable from "components/OrganizationTable"
 import {
   jumpToTop,
   mapPageDispatchersToProps,
@@ -66,6 +68,10 @@ const PositionShow = ({ pageDispatchers }) => {
   const [stateError, setStateError] = useState(
     routerLocation.state && routerLocation.state.error
   )
+  const [
+    showOrganizationsAdministratedModal,
+    setShowOrganizationsAdministratedModal
+  ] = useState(false)
   const { uuid } = useParams()
   const { loading, error, data, refetch } = API.useApiQuery(GQL_GET_POSITION, {
     uuid
@@ -94,6 +100,7 @@ const PositionShow = ({ pageDispatchers }) => {
   const CodeFieldWithLabel = DictionaryField(Field)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
+  const isSuperUser = position.type === Position.TYPE.SUPER_USER
   const assignedRole = isPrincipal
     ? Settings.fields.advisor.person.name
     : Settings.fields.principal.person.name
@@ -106,10 +113,12 @@ const PositionShow = ({ pageDispatchers }) => {
     (currentUser.isSuperUser() && isPrincipal) ||
     // Admins can edit anybody
     currentUser.isAdmin() ||
-    // Super users can edit positions within their own organization
+    // Super users can edit positions if they have administrative permissions for the organization of the position
     (position.organization &&
       position.organization.uuid &&
-      currentUser.isSuperUserForOrg(position.organization))
+      currentUser.hasAdministrativePermissionsForOrganization(
+        position.organization
+      ))
   const canDelete =
     currentUser.isAdmin() &&
     position.status === Model.STATUS.INACTIVE &&
@@ -361,6 +370,39 @@ const PositionShow = ({ pageDispatchers }) => {
               >
                 <PreviousPeople history={position.previousPeople} />
               </Fieldset>
+              {isSuperUser && (
+                <Fieldset
+                  id="organizationsAdministrated"
+                  title={utils.sentenceCase(
+                    positionSettings.organizationsAdministrated.label
+                  )}
+                  action={
+                    currentUser.isAdmin() && (
+                      <Button
+                        onClick={() =>
+                          setShowOrganizationsAdministratedModal(true)
+                        }
+                        variant="outline-secondary"
+                      >
+                        Edit{" "}
+                        {utils.noCase(
+                          positionSettings.organizationsAdministrated.label
+                        )}
+                      </Button>
+                    )
+                  }
+                >
+                  <OrganizationTable
+                    organizations={position.organizationsAdministrated}
+                  />
+                  <EditOrganizationsAdministratedModal
+                    position={position}
+                    showModal={showOrganizationsAdministratedModal}
+                    onCancel={() => hideOrganizationsAdministratedModal(false)}
+                    onSuccess={() => hideOrganizationsAdministratedModal(true)}
+                  />
+                </Fieldset>
+              )}
               {Settings.fields.position.customFields && (
                 <Fieldset title="Position information" id="custom-fields">
                   <ReadonlyCustomFields
@@ -400,6 +442,13 @@ const PositionShow = ({ pageDispatchers }) => {
 
   function hideAssociatedPositionsModal(success) {
     setShowAssociatedPositionsModal(false)
+    if (success) {
+      refetch()
+    }
+  }
+
+  function hideOrganizationsAdministratedModal(success) {
+    setShowOrganizationsAdministratedModal(false)
     if (success) {
       refetch()
     }

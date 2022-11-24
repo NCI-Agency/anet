@@ -1,8 +1,10 @@
 import AppContext from "components/AppContext"
+import EditAdministratingPositionsModal from "components/EditAdministratingPositionsModal"
 import Fieldset from "components/Fieldset"
 import OrganizationalChart from "components/graphs/OrganizationalChart"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
+import PositionTable from "components/PositionTable"
 import { Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -10,12 +12,21 @@ import { Button, Table } from "react-bootstrap"
 import ContainerDimensions from "react-container-dimensions"
 import { Element } from "react-scroll"
 import Settings from "settings"
+import utils from "utils"
 
-const OrganizationLaydown = ({ organization }) => {
+const OrganizationLaydown = ({ organization, refetch }) => {
   const { currentUser } = useContext(AppContext)
   const [showInactivePositions, setShowInactivePositions] = useState(false)
-  const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
-
+  const [
+    showAdministratingPositionsModal,
+    setShowAdministratingPositionsModal
+  ] = useState(false)
+  const isAdmin = currentUser && currentUser.isAdmin()
+  const canAdministrateOrg =
+    currentUser &&
+    currentUser.hasAdministrativePermissionsForOrganization(organization)
+  const isSuperUser = currentUser && currentUser.isSuperUser()
+  const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const numInactivePos = organization.positions.filter(
     p => p.status === Model.STATUS.INACTIVE
   ).length
@@ -26,6 +37,12 @@ const OrganizationLaydown = ({ organization }) => {
   const supportedPositions = organization.positions.filter(
     position => positionsNeedingAttention.indexOf(position) === -1
   )
+  const canCreatePositions =
+    canAdministrateOrg || (isSuperUser && isPrincipalOrg)
+
+  const orgSettings = isPrincipalOrg
+    ? Settings.fields.principal.org
+    : Settings.fields.advisor.org
 
   return (
     <Element name="laydown">
@@ -60,7 +77,7 @@ const OrganizationLaydown = ({ organization }) => {
         title="Supported positions"
         action={
           <div>
-            {isSuperUser && (
+            {canCreatePositions && (
               <LinkTo
                 modelType="Position"
                 model={Position.pathForNew({
@@ -99,6 +116,28 @@ const OrganizationLaydown = ({ organization }) => {
         {positionsNeedingAttention.length === 0 && (
           <em>There are no vacant positions</em>
         )}
+      </Fieldset>
+      <Fieldset
+        id="administratingPositions"
+        title={utils.sentenceCase(orgSettings.administratingPositions.label)}
+        action={
+          isAdmin && (
+            <Button
+              onClick={() => setShowAdministratingPositionsModal(true)}
+              variant="outline-secondary"
+            >
+              Edit {utils.noCase(orgSettings.administratingPositions.label)}
+            </Button>
+          )
+        }
+      >
+        <PositionTable positions={organization.administratingPositions} />
+        <EditAdministratingPositionsModal
+          organization={organization}
+          showModal={showAdministratingPositionsModal}
+          onCancel={() => hideAdministratingPositionsModal(false)}
+          onSuccess={() => hideAdministratingPositionsModal(true)}
+        />
       </Fieldset>
     </Element>
   )
@@ -222,10 +261,18 @@ const OrganizationLaydown = ({ organization }) => {
   function toggleShowInactive() {
     setShowInactivePositions(!showInactivePositions)
   }
+
+  function hideAdministratingPositionsModal(success) {
+    setShowAdministratingPositionsModal(false)
+    if (success) {
+      refetch()
+    }
+  }
 }
 
 OrganizationLaydown.propTypes = {
-  organization: PropTypes.instanceOf(Organization).isRequired
+  organization: PropTypes.instanceOf(Organization).isRequired,
+  refetch: PropTypes.func.isRequired
 }
 
 export default OrganizationLaydown

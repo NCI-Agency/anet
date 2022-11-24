@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
+import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
 import mil.dds.anet.utils.SqDataLoaderKey;
@@ -18,7 +20,10 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import mil.dds.anet.views.SearchQueryFetcher;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
@@ -95,6 +100,24 @@ public class OrganizationDao
         personUuid);
   }
 
+  static class AdministratingPositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String sql =
+        "/* batch.getAdministratingPositionsForOrganization */ SELECT \"organizationAdministrativePositions\".\"organizationUuid\", "
+            + PositionDao.POSITION_FIELDS + " FROM \"organizationAdministrativePositions\" "
+            + "INNER JOIN positions on positions.uuid = \"organizationAdministrativePositions\".\"positionUuid\" "
+            + "WHERE \"organizationAdministrativePositions\".\"organizationUuid\" IN ( <foreignKeys> ) ";
+
+    public AdministratingPositionsBatcher() {
+      super(sql, "foreignKeys", new PositionMapper(), "organizationUuid");
+    }
+  }
+
+  public List<List<Position>> getAdministratingPositions(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Position> administratingPositionsBatcher = AnetObjectEngine
+        .getInstance().getInjector().getInstance(AdministratingPositionsBatcher.class);
+    return administratingPositionsBatcher.getByForeignKeys(foreignKeys);
+  }
+
   public interface OrgListQueries {
     @RegisterRowMapper(OrganizationMapper.class)
     @SqlQuery("SELECT uuid AS organizations_uuid, uuid AS uuid"
@@ -130,7 +153,18 @@ public class OrganizationDao
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
         .bind("type", DaoUtils.getEnumId(org.getType()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg())).execute();
+    final OrganizationBatch ob = getDbHandle().attach(OrganizationBatch.class);
+    if (org.getAdministratingPositions() != null) {
+      ob.insertOrganizationAdministratingPositions(org.getUuid(), org.getAdministratingPositions());
+    }
     return org;
+  }
+
+  public interface OrganizationBatch {
+    @SqlBatch("INSERT INTO \"organizationAdministrativePositions\" (\"organizationUuid\", \"positionUuid\") VALUES (:organizationUuid, :uuid)")
+    void insertOrganizationAdministratingPositions(
+        @Bind("organizationUuid") String organizationUuid,
+        @BindBean List<Position> administratingPositions);
   }
 
   @Override
@@ -145,6 +179,28 @@ public class OrganizationDao
         .bind("status", DaoUtils.getEnumId(org.getStatus()))
         .bind("type", DaoUtils.getEnumId(org.getType()))
         .bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg())).execute();
+  }
+
+  @InTransaction
+  public int addPositionToOrganization(Position p, Organization o) {
+    return getDbHandle().createUpdate(
+        "/* addPositionToOrganization */ INSERT INTO \"organizationAdministrativePositions\" (\"organizationUuid\", \"positionUuid\") "
+            + "VALUES (:organizationUuid, :positionUuid)")
+        .bind("organizationUuid", o.getUuid()).bind("positionUuid", p.getUuid()).execute();
+  }
+
+  @InTransaction
+  public int removePositionFromOrganization(String positionUuid, Organization o) {
+    return getDbHandle().createUpdate(
+        "/* removePositionFromOrganization*/ DELETE FROM \"organizationAdministrativePositions\" "
+            + "WHERE \"organizationUuid\" = :organizationUuid AND \"positionUuid\" = :positionUuid")
+        .bind("organizationUuid", o.getUuid()).bind("positionUuid", positionUuid).execute();
+  }
+
+  public CompletableFuture<List<Position>> getAdministratingPositionsForOrganization(
+      Map<String, Object> context, String organizationUuid) {
+    return new ForeignKeyFetcher<Position>().load(context,
+        FkDataLoaderKey.ORGANIZATION_ADMINISTRATIVE_POSITIONS, organizationUuid);
   }
 
   @Override

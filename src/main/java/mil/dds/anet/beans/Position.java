@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -53,6 +54,8 @@ public class Position extends AbstractCustomizableAnetBean
   private List<Task> responsibleTasks;
   // annotated below
   private List<AuthorizationGroup> authorizationGroups;
+  // annotated below
+  private List<Organization> organizationsAdministrated;
 
   public String getName() {
     return name;
@@ -217,6 +220,15 @@ public class Position extends AbstractCustomizableAnetBean
     return location.getForeignObject();
   }
 
+  @GraphQLInputField(name = "organizationsAdministrated")
+  public void setOrganizationsAdministrated(List<Organization> organizationsAdministrated) {
+    this.organizationsAdministrated = organizationsAdministrated;
+  }
+
+  public List<Organization> getOrganizationsAdministrated() {
+    return organizationsAdministrated;
+  }
+
   @GraphQLQuery(name = "previousPeople")
   public CompletableFuture<List<PersonPositionHistory>> loadPreviousPeople(
       @GraphQLRootContext Map<String, Object> context) {
@@ -275,6 +287,22 @@ public class Position extends AbstractCustomizableAnetBean
     return AnetObjectEngine.getInstance().getAuthorizationGroupDao()
         .getAuthorizationGroupsForPosition(context, uuid).thenApply(o -> {
           authorizationGroups = o;
+          return o;
+        });
+  }
+
+  @GraphQLQuery(name = "organizationsAdministrated")
+  public CompletableFuture<List<Organization>> loadOrganizationsAdministrated(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (organizationsAdministrated != null) {
+      return CompletableFuture.completedFuture(organizationsAdministrated);
+    }
+    final OrganizationSearchQuery query = new OrganizationSearchQuery();
+    query.setBatchParams(new M2mBatchParams<Organization, OrganizationSearchQuery>("organizations",
+        "\"organizationAdministrativePositions\"", "\"organizationUuid\"", "\"positionUuid\""));
+    return AnetObjectEngine.getInstance().getOrganizationDao()
+        .getOrganizationsBySearch(context, uuid, query).thenApply(o -> {
+          organizationsAdministrated = o;
           return o;
         });
   }

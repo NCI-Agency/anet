@@ -106,6 +106,12 @@ const GQL_GET_APP_DATA = gql`
           }
           ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
         }
+        organizationsAdministrated {
+          uuid
+          descendantOrgs {
+            uuid
+          }
+        }
         authorizationGroups {
           uuid
           name

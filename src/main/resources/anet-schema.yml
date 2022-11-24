@@ -791,6 +791,8 @@ properties:
                       type: string
                       enum:
                         [VIRTUAL_LOCATION, PHYSICAL_LOCATION, GEOGRAPHICAL_AREA, POINT_LOCATION, ADVISOR_LOCATION, PRINCIPAL_LOCATION]
+              organizationsAdministrated:
+                "$ref": "#/$defs/inputField"
 
           org:
             type: object
@@ -808,6 +810,8 @@ properties:
               longName:
                 "$ref": "#/$defs/inputField"
               identificationCode:
+                "$ref": "#/$defs/inputField"
+              administratingPositions:
                 "$ref": "#/$defs/inputField"
 
       principal:
@@ -886,7 +890,7 @@ properties:
           org:
             type: object
             additionalProperties: false
-            required: [name, allOrgName, longName]
+            required: [name, allOrgName, longName, administratingPositions]
             properties:
               name:
                 type: string
@@ -899,6 +903,8 @@ properties:
               longName:
                 "$ref": "#/$defs/inputField"
               identificationCode:
+                "$ref": "#/$defs/inputField"
+              administratingPositions:
                 "$ref": "#/$defs/inputField"
 
       superUser:

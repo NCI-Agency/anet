@@ -53,7 +53,7 @@ public class PositionResource {
       final Position existingPos = dao.getByUuid(pos.getUuid());
       if (existingPos.getType() != PositionType.SUPER_USER) {
         throw new WebApplicationException(
-            "You are not allowed to change the position type to SUPER USER", Status.FORBIDDEN);
+            "You are not allowed to change the position type to SUPER_USER", Status.FORBIDDEN);
       }
     }
   }
@@ -66,7 +66,7 @@ public class PositionResource {
       throw new WebApplicationException("A Position must belong to an organization",
           Status.BAD_REQUEST);
     }
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
+    AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid(), true);
   }
 
   @GraphQLMutation(name = "createPosition")
@@ -94,7 +94,7 @@ public class PositionResource {
   public Integer updateAssociatedPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
+    AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid(), true);
 
     final Position current = dao.getByUuid(pos.getUuid());
     if (current == null) {
@@ -125,37 +125,46 @@ public class PositionResource {
     assertCanUpdatePosition(user, pos);
     validatePosition(user, pos);
 
+    final Position existing = dao.getByUuid(pos.getUuid());
+
     final int numRows = dao.update(pos);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
+    }
+
+    if (AuthUtils.isAdmin(user) && pos.getOrganizationsAdministrated() != null
+        && existing != null) {
+      Utils.addRemoveElementsByUuid(
+          existing.loadOrganizationsAdministrated(engine.getContext()).join(),
+          pos.getOrganizationsAdministrated(), newOrg -> dao.addOrganizationToPosition(pos, newOrg),
+          oldOrgUuid -> dao.removeOrganizationFromPosition(oldOrgUuid, pos));
     }
 
     DaoUtils.saveCustomSensitiveInformation(user, PositionDao.TABLE_NAME, pos.getUuid(),
         pos.getCustomSensitiveInformation());
 
     if (pos.getPersonUuid() != null || Position.Status.INACTIVE.equals(pos.getStatus())) {
-      final Position current = dao.getByUuid(pos.getUuid());
-      if (current != null) {
+      if (existing != null) {
         // Run the diff and see if anything changed and update.
         if (pos.getPerson() != null) {
           if (pos.getPersonUuid() == null) {
             // Intentionally remove the person
-            dao.removePersonFromPosition(current.getUuid());
+            dao.removePersonFromPosition(existing.getUuid());
             AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPersonUuid(),
-                current, user);
-          } else if (!Objects.equals(pos.getPersonUuid(), current.getPersonUuid())) {
+                existing, user);
+          } else if (!Objects.equals(pos.getPersonUuid(), existing.getPersonUuid())) {
             dao.setPersonInPosition(pos.getPersonUuid(), pos.getUuid());
-            AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), current,
+            AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPersonUuid(), existing,
                 user);
           }
         }
 
-        if (Position.Status.INACTIVE.equals(pos.getStatus()) && current.getPersonUuid() != null) {
+        if (Position.Status.INACTIVE.equals(pos.getStatus()) && existing.getPersonUuid() != null) {
           // Remove this person from this position.
           AnetAuditLogger.log(
               "Person {} removed from position {} by {} because the position is now inactive",
-              current.getPersonUuid(), current, user);
-          dao.removePersonFromPosition(current.getUuid());
+              existing.getPersonUuid(), existing, user);
+          dao.removePersonFromPosition(existing.getUuid());
         }
       }
     }
@@ -196,7 +205,7 @@ public class PositionResource {
     if (pos == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
+    AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid(), true);
 
     final int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
@@ -211,7 +220,7 @@ public class PositionResource {
     if (pos == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
+    AuthUtils.assertCanAdministrateOrg(user, pos.getOrganizationUuid(), true);
 
     final int numRows = dao.removePersonFromPosition(positionUuid);
     if (numRows == 0) {
@@ -265,7 +274,12 @@ public class PositionResource {
       @GraphQLArgument(name = "loserUuid") String loserUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
     final Position loserPosition = dao.getByUuid(loserUuid);
-    assertCanUpdatePosition(user, winnerPosition);
+    AuthUtils.assertAdministrator(user);
+
+    if (winnerPosition.getOrganizationUuid() == null) {
+      throw new WebApplicationException("A Position must belong to an organization",
+          Status.BAD_REQUEST);
+    }
 
     final String winnerPersonUuid = DaoUtils.getUuid(winnerPosition.getPerson());
     ResourceUtils.validateHistoryInput(winnerPosition.getUuid(), winnerPosition.getPreviousPeople(),

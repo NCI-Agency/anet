@@ -21,6 +21,7 @@ import NavigationWarning from "components/NavigationWarning"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEmpty from "lodash/isEmpty"
 import { Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -29,6 +30,7 @@ import { Button } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import TASKS_ICON from "resources/tasks.png"
+import { RECURSE_STRATEGY } from "searchUtils"
 import Settings from "settings"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
@@ -47,7 +49,7 @@ const GQL_UPDATE_ORGANIZATION = gql`
 `
 
 const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
-  const { currentUser } = useContext(AppContext)
+  const { loadAppData, currentUser } = useContext(AppContext)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
   const statusButtons = [
@@ -95,13 +97,32 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
       }) => {
         const isAdmin = currentUser && currentUser.isAdmin()
         const isAdvisorOrg = values.type === Organization.TYPE.ADVISOR_ORG
-        const isPrincipalOrg = values.type === Organization.TYPE.PRINCIPAL_ORG
-        const orgSettings = isPrincipalOrg
-          ? Settings.fields.principal.org
-          : Settings.fields.advisor.org
+        const canAdministrateParentOrg =
+          _isEmpty(values.parentOrg) ||
+          (currentUser &&
+            currentUser.hasAdministrativePermissionsForOrganization(
+              values.parentOrg
+            ))
+        const canAdministrateOrg = edit
+          ? currentUser &&
+            currentUser.hasAdministrativePermissionsForOrganization(values)
+          : canAdministrateParentOrg
+        const orgSettings = isAdvisorOrg
+          ? Settings.fields.advisor.org
+          : Settings.fields.principal.org
         const orgSearchQuery = {
           status: Model.STATUS.ACTIVE,
           type: values.type
+        }
+        // Super users can select parent organizations among the ones their position is administrating
+        if (!isAdmin) {
+          const orgsAdministratedUuids =
+            currentUser.position.organizationsAdministrated.map(org => org.uuid)
+          orgSearchQuery.parentOrgUuid = [
+            currentUser.position.organization.uuid,
+            ...orgsAdministratedUuids
+          ]
+          orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
         }
         // Reset the parentOrg property when changing the organization type
         if (
@@ -111,7 +132,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
         ) {
           values.parentOrg = {}
         }
-        const action = (isAdmin || !isPrincipalOrg) && (
+        const action = canAdministrateOrg && (
           <div>
             <Button
               key="submit"
@@ -176,7 +197,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                {!isAdmin ? (
+                {!canAdministrateOrg ? (
                   <>
                     <FastField
                       name="type"
@@ -230,6 +251,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={typeButtons}
                       onChange={value => setFieldValue("type", value)}
+                      disabled={!isAdmin}
                     />
                     <Field
                       name="parentOrg"
@@ -240,10 +262,12 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                         setFieldTouched("parentOrg", true, false) // onBlur doesn't work when selecting an option
                         setFieldValue("parentOrg", value)
                       }}
+                      disabled={!canAdministrateParentOrg}
                       widget={
                         <AdvancedSingleSelect
                           fieldName="parentOrg"
                           placeholder="Search for a higher level organization..."
+                          showRemoveButton={isAdmin}
                           value={values.parentOrg}
                           overlayColumns={["Name"]}
                           overlayRenderRow={OrganizationOverlayRow}
@@ -261,20 +285,17 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       component={FieldHelper.InputField}
                       label={Settings.fields.organization.shortName}
                       placeholder="e.g. EF1.1"
-                      disabled={!isAdmin}
                     />
                     <LongNameWithLabel
                       dictProps={orgSettings.longName}
                       name="longName"
                       component={FieldHelper.InputField}
-                      disabled={!isAdmin}
                     />
                     <FastField
                       name="status"
                       component={FieldHelper.RadioButtonToggleGroupField}
                       buttons={statusButtons}
                       onChange={value => setFieldValue("status", value)}
-                      disabled={!isAdmin}
                     />
                     <IdentificationCodeFieldWithLabel
                       dictProps={orgSettings.identificationCode}
@@ -376,7 +397,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                     Cancel
                   </Button>
                 </div>
-                {(isAdmin || !isPrincipalOrg) && (
+                {canAdministrateOrg && (
                   <div>
                     <Button
                       id="formBottomSubmit"
@@ -420,6 +441,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
     // reset the form to latest values
     // to avoid unsaved changes prompt if it somehow becomes dirty
     form.resetForm({ values, isSubmitting: true })
+    loadAppData()
     if (!edit) {
       navigate(Organization.pathForEdit(organization), { replace: true })
     }

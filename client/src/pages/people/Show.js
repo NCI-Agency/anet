@@ -174,19 +174,25 @@ const PersonShow = ({ pageDispatchers }) => {
 
   // User can always edit themselves
   // Admins can always edit anybody
-  // SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
+  // Super users can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser && currentUser.isAdmin()
   const hasPosition = position && position.uuid
   const canEdit =
     Person.isEqual(currentUser, person) ||
     isAdmin ||
-    (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
+    (hasPosition &&
+      currentUser.hasAdministrativePermissionsForOrganization(
+        position.organization
+      )) ||
     (!hasPosition && currentUser.isSuperUser()) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
   const canChangePosition =
     isAdmin ||
     (!hasPosition && currentUser.isSuperUser()) ||
-    (hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
+    (hasPosition &&
+      currentUser.hasAdministrativePermissionsForOrganization(
+        position.organization
+      )) ||
     (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
   const canAddPeriodicAssessment =
     Position.isAdvisor(position) ||
