@@ -450,6 +450,7 @@ type Organization {
   descendantOrgs(query: OrganizationSearchQueryInput): [Organization]
   identificationCode: String
   isSubscribed: Boolean
+  location: Location
   longName: String
   notes: [Note]
   parentOrg: Organization
@@ -471,6 +472,7 @@ input OrganizationInput {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   identificationCode: String
+  location: LocationInput
   longName: String
   parentOrg: OrganizationInput
   planningApprovalSteps: [ApprovalStepInput]
@@ -486,6 +488,7 @@ input OrganizationInput {
 input OrganizationSearchQueryInput {
   hasParentOrg: Boolean
   inMyReports: Boolean
+  locationUuid: String
   orgRecurseStrategy: RecurseStrategy
   pageNum: Int
   pageSize: Int

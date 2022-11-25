@@ -4191,4 +4191,18 @@
 		</insert>
 	</changeSet>
 
+	<changeSet id="add-locationUuid-to-organizations" author="hyesilAnka">
+		<addColumn tableName="organizations">
+			<column name="locationUuid" type="${uuid_type}" />
+		</addColumn>
+		<createIndex
+				tableName="organizations" indexName="IDX_organizations_locationUuid">
+			<column name="locationUuid" />
+		</createIndex>
+		<addForeignKeyConstraint
+				baseTableName="organizations" constraintName="FK_organizations_location" baseColumnNames="locationUuid"
+				referencedTableName="locations" referencedColumnNames="uuid"
+				onDelete="NO ACTION" onUpdate="NO ACTION" />
+	</changeSet>
+
 </databaseChangeLog>

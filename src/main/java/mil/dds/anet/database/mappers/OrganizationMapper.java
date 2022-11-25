@@ -19,6 +19,7 @@ public class OrganizationMapper implements RowMapper<Organization> {
     org.setIdentificationCode(r.getString("organizations_identificationCode"));
     org.setType(MapperUtils.getEnumIdx(r, "organizations_type", OrganizationType.class));
     org.setParentOrgUuid(r.getString("organizations_parentOrgUuid"));
+    org.setLocationUuid(r.getString("organizations_locationUuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {
       ctx.define("totalCount", r.getInt("totalCount"));

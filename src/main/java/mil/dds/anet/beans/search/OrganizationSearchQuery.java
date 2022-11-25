@@ -21,6 +21,10 @@ public class OrganizationSearchQuery
   @GraphQLQuery
   @GraphQLInputField
   private List<String> parentOrgUuid;
+  //
+  @GraphQLQuery
+  @GraphQLInputField
+  String locationUuid;
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
@@ -53,6 +57,15 @@ public class OrganizationSearchQuery
     this.parentOrgUuid = parentOrgUuid;
   }
 
+  public String getLocationUuid() {
+    return locationUuid;
+  }
+
+  public void setLocationUuid(String locationUuid) {
+    this.locationUuid = locationUuid;
+  }
+
+
   public RecurseStrategy getOrgRecurseStrategy() {
     return orgRecurseStrategy;
   }
@@ -63,7 +76,8 @@ public class OrganizationSearchQuery
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), type, hasParentOrg, parentOrgUuid, orgRecurseStrategy);
+    return Objects.hash(super.hashCode(), type, hasParentOrg, parentOrgUuid, locationUuid,
+        orgRecurseStrategy);
   }
 
   @Override
@@ -75,6 +89,7 @@ public class OrganizationSearchQuery
     return super.equals(obj) && Objects.equals(getType(), other.getType())
         && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
+        && Objects.equals(getLocationUuid(), other.getLocationUuid())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy());
   }
 
