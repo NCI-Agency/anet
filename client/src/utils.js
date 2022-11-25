@@ -9,13 +9,16 @@ import decodeQuery from "querystring/decode"
 import encodeQuery from "querystring/encode"
 import React, { useCallback, useEffect } from "react"
 import Settings from "settings"
+import { titleCase } from "title-case"
 
 const WILDCARD = "*"
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())
 const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
 
 // Support null input like change-case v3 did…
-const wrappedChangeCase = {}
+const wrappedChangeCase = {
+  titleCase: titleCase
+}
 Object.keys(changeCase)
   .filter(c => c.endsWith("Case"))
   .forEach(c => {

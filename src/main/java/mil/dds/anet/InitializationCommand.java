@@ -59,9 +59,17 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     // Set Classification String
     System.out.print("Classification String >>");
     AdminSetting classifString = new AdminSetting();
-    classifString.setKey(AdminSettingKeys.SECURITY_BANNER_TEXT.name());
+    classifString.setKey(AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION.name());
     classifString.setValue(scanner.nextLine());
     engine.getAdminDao().saveSetting(classifString);
+    System.out.println("... Saved!");
+
+    // Set Releasablility String
+    System.out.print("Releasability String >>");
+    AdminSetting releasabilityString = new AdminSetting();
+    releasabilityString.setKey(AdminSettingKeys.SECURITY_BANNER_RELEASABILITY.name());
+    releasabilityString.setValue(scanner.nextLine());
+    engine.getAdminDao().saveSetting(releasabilityString);
     System.out.println("... Saved!");
 
     // Set Classification Color

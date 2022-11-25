@@ -2,10 +2,24 @@ import { expect } from "chai"
 import Home from "../pages/home.page"
 
 describe("Anet home page", function() {
+  it("should be able to logout using the dropdown in header", () => {
+    Home.open()
+    Home.bannerDropdown.click()
+    Home.logoutButton.waitForDisplayed()
+    Home.logoutButton.click()
+    Home.waitForLoginForm()
+  })
   it("should have the right title", function() {
     Home.open()
     const title = browser.getTitle()
     expect(title).to.equal("ANET")
+    Home.logout()
+  })
+  it("should have the right security marking", () => {
+    Home.open()
+    const securityMarking = Home.bannerSecurityText.getText()
+    const defaultSecurityMarking = "DEMO USE ONLY Releasable to DEMO MISSION"
+    expect(securityMarking).to.equal(defaultSecurityMarking)
     Home.logout()
   })
 })
@@ -13,9 +27,9 @@ describe("Anet home page", function() {
 describe("Anet default user login", () => {
   it("Default user is logged in", () => {
     Home.open()
-    const securityText = Home.securityBanner.getText()
-    const defaultUserValue = "DEMO USE ONLY || ERINSON, Erin"
-    expect(securityText.startsWith(defaultUserValue)).to.equal(true)
+    const bannerUser = Home.bannerUser.getText()
+    const defaultUserValue = "ERINSON, Erin"
+    expect(bannerUser).to.equal(defaultUserValue)
     Home.logout()
   })
 })
@@ -23,9 +37,9 @@ describe("Anet default user login", () => {
 describe("Anet super user login", () => {
   it("Super user is logged in", () => {
     Home.openAsSuperUser()
-    const securityText = Home.securityBanner.getText()
-    const superUserValue = "DEMO USE ONLY || BECCABON, Rebecca"
-    expect(securityText.startsWith(superUserValue)).to.equal(true)
+    const bannerUser = Home.bannerUser.getText()
+    const superUserValue = "BECCABON, Rebecca"
+    expect(bannerUser).to.equal(superUserValue)
     Home.logout()
   })
 })
@@ -33,9 +47,9 @@ describe("Anet super user login", () => {
 describe("Anet admin user login", () => {
   it("Admin user is logged in", () => {
     Home.openAsAdminUser()
-    const securityText = Home.securityBanner.getText()
-    const adminUserValue = "DEMO USE ONLY || DMIN, Arthur"
-    expect(securityText.startsWith(adminUserValue)).to.equal(true)
+    const bannerUser = Home.bannerUser.getText()
+    const adminUserValue = "DMIN, Arthur"
+    expect(bannerUser).to.equal(adminUserValue)
     Home.logout()
   })
 })

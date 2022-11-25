@@ -27,10 +27,6 @@ class Page {
     this.loginFormSubmitButton.click()
   }
 
-  get logoutLink() {
-    return browser.$("=Logout")
-  }
-
   waitForLoginForm() {
     this.loginForm.waitForExist()
     this.loginForm.waitForDisplayed()
@@ -44,10 +40,7 @@ class Page {
   }
 
   logout() {
-    this.logoutLink.waitForExist()
-    this.logoutLink.waitForDisplayed()
-    this.logoutLink.click()
-    this.waitForLoginForm()
+    browser.url("/api/logout")
   }
 
   waitUntilLoaded() {

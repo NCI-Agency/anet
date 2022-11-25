@@ -126,7 +126,7 @@ export const CompactHeaderContent = ({ sensitiveInformation }) => {
       <img src={anetLogo} alt="logo" width="50" height="12" />
       <ClassificationBoxS>
         <ClassificationBanner />
-        {sensitiveInformation && <ReleasabilityInformation />}
+        {sensitiveInformation && <SensitivityInformation />}
       </ClassificationBoxS>
     </HeaderContentS>
   )
@@ -142,12 +142,20 @@ export const CompactFooterContent = ({ object }) => {
   return (
     <FooterContentS bgc={appSettings[SETTING_KEY_COLOR]}>
       <span style={{ fontSize: "10px" }}>
-        uuid: <Link to={location.pathname}>{object.uuid}</Link>
+        uuid:{" "}
+        <Link to={location.pathname} style={{ fontSize: "10px" }}>
+          {object.uuid}
+        </Link>
       </span>
       <ClassificationBanner />
       <PrintedByBoxS>
         <div>
-          printed by <LinkTo modelType="Person" model={currentUser} />
+          printed by{" "}
+          <LinkTo
+            style={{ fontSize: "10px" }}
+            modelType="Person"
+            model={currentUser}
+          />
         </div>
         <div>
           {moment().format(Settings.dateFormats.forms.displayLong.withTime)}
@@ -161,14 +169,14 @@ CompactFooterContent.propTypes = {
   object: PropTypes.object
 }
 
-const ReleasabilityInformation = () => {
+const SensitivityInformation = () => {
   return (
-    <ReleasabilityInformationS>
-      <span className="releasability-information">
+    <SensitivityInformationS>
+      <span className="sensitivity-information">
         {" "}
         - {Settings.printOptions.sensitiveInformationText}
       </span>
-      <span className="releasability-tooltip">
+      <span className="sensitivity-tooltip">
         <Tooltip2
           content={Settings.printOptions.sensitiveInformationTooltipText}
           intent={Intent.WARNING}
@@ -176,12 +184,12 @@ const ReleasabilityInformation = () => {
           <Icon icon={IconNames.INFO_SIGN} intent={Intent.PRIMARY} />
         </Tooltip2>
       </span>
-    </ReleasabilityInformationS>
+    </SensitivityInformationS>
   )
 }
 
-const ReleasabilityInformationS = styled.div`
-  .releasability-tooltip {
+const SensitivityInformationS = styled.div`
+  .sensitivity-tooltip {
     padding: 0 1rem;
     svg {
       height: 20px;
@@ -268,7 +276,6 @@ const ClassificationBanner = () => {
 
 const ClassificationBannerS = styled.div`
   width: auto;
-  max-width: 67%;
   text-align: center;
   display: inline-block;
   & > .banner {

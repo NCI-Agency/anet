@@ -72,8 +72,7 @@ describe("Visibility of custom sensitive information", () => {
       )
     })
     it("Should logout", () => {
-      // just call logout directly
-      browser.url("/api/logout")
+      ShowPerson.logout()
     })
   })
 
@@ -99,8 +98,7 @@ describe("Visibility of custom sensitive information", () => {
       )
     })
     it("Should logout", () => {
-      // just call logout directly
-      browser.url("/api/logout")
+      ShowPerson.logout()
     })
   })
 
@@ -126,8 +124,7 @@ describe("Visibility of custom sensitive information", () => {
       )
     })
     it("Should logout", () => {
-      // just call logout directly
-      browser.url("/api/logout")
+      ShowPerson.logout()
     })
   })
 })
@@ -169,8 +166,7 @@ describe("Creating and editing custom sensitive information", () => {
       expect(ShowPerson.birthday.getText()).to.equal("1 January 1956")
     })
     it("Should logout", () => {
-      // just call logout directly
-      browser.url("/api/logout")
+      CreatePerson.logout()
     })
   })
 
@@ -208,8 +204,7 @@ describe("Creating and editing custom sensitive information", () => {
       expect(ShowPerson.politicalPosition.getText()).to.equal("Left")
     })
     it("Should logout", () => {
-      // just call logout directly
-      browser.url("/api/logout")
+      CreatePerson.logout()
     })
   })
 })

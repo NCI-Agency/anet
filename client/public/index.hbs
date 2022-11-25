@@ -32,8 +32,9 @@
 				rank: "${currentUser.rank!}",
 			},
 			adminSettings: [
-				{key: "SECURITY_BANNER_TEXT", value: "${securityBannerText!\"Set SECURITY_BANNER_TEXT adminSetting\"}"},
-				{key: "SECURITY_BANNER_COLOR", value: "${securityBannerColor!\"green\"}"}
+				{ key: "SECURITY_BANNER_CLASSIFICATION", value: "${securityBannerClassification!\"Set SECURITY_BANNER_CLASSIFICATION adminSetting\"}" },
+				{ key: "SECURITY_BANNER_RELEASABILITY", value: "${securityBannerReleasability!\"Set SECURITY_BANNER_RELEASABILITY adminSetting\"}" },
+				{ key: "SECURITY_BANNER_COLOR", value: "${securityBannerColor!\"green\"}" }
 			],
 			dictionary : "${serializedDictionary?no_esc}"
 		}

@@ -67,10 +67,14 @@ const TopBar = ({
   }, [bannerVisibility, currentUser, visibilitySetting])
 
   return (
-    <div style={{ flex: "0 0 auto", zIndex: 1201 }} ref={topbarDiv}>
+    <div
+      style={{ flex: "0 0 auto", zIndex: 1201 }}
+      className="d-print-none"
+      ref={topbarDiv}
+    >
       <div id="topbar">
         <GeneralBanner options={bannerOptions} />
-        <SecurityBanner />
+        <SecurityBanner onLogout={resetPages} />
         {currentUser &&
           !currentUser.hasActivePosition() &&
           !currentUser.isPendingVerification() && <NoPositionBanner />}

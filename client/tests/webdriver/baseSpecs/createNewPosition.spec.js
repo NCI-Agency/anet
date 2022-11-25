@@ -156,8 +156,7 @@ describe("Create position page", () => {
       // prevents "unexpected alert open" errors on BrowserStack
       browser.acceptAlert()
 
-      // No Logout link, so just call logout directly
-      browser.url("/api/logout")
+      CreatePosition.logout()
     })
   })
 })

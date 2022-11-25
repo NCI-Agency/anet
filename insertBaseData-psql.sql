@@ -882,7 +882,9 @@ WHERE "approvalStepUuid" IS NULL AND reports.state = 1);
 
 --Set the Admin Settings
 INSERT INTO "adminSettings" (key, value)
-	VALUES ('SECURITY_BANNER_TEXT', 'DEMO USE ONLY');
+	VALUES ('SECURITY_BANNER_CLASSIFICATION', 'demo use only');
+INSERT INTO "adminSettings" (key, value)
+	VALUES ('SECURITY_BANNER_RELEASABILITY', 'releasable to DEMO MISSION');
 INSERT INTO "adminSettings" (key, value)
 	VALUES ('SECURITY_BANNER_COLOR', 'green');
 INSERT INTO "adminSettings" (key, value)
