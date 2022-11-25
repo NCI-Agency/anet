@@ -89,7 +89,7 @@ const GQL_GET_ORGANIZATION = gql`
 `
 
 const OrganizationPreview = ({ className, uuid }) => {
-  const { data, error } = API.useApiQuery(GQL_GET_ORGANIZATION, {
+  const { data, error, refetch } = API.useApiQuery(GQL_GET_ORGANIZATION, {
     uuid
   })
 
@@ -202,7 +202,7 @@ const OrganizationPreview = ({ className, uuid }) => {
         )}
       </div>
 
-      <OrganizationLaydown organization={organization} />
+      <OrganizationLaydown organization={organization} refetch={refetch} />
       {organization.isTaskEnabled() && (
         <OrganizationTasks
           organization={organization}
