@@ -23,6 +23,10 @@ class Page {
     return browser.$("#kc-login")
   }
 
+  get logo() {
+    return browser.$("#topbar .logo")
+  }
+
   loginFormSubmit() {
     this.loginFormSubmitButton.click()
   }
@@ -39,7 +43,12 @@ class Page {
     this.loginFormSubmit()
   }
 
-  logout() {
+  logout(resetRedux = false) {
+    // Reset redux state before logout
+    if (resetRedux) {
+      this.logo.click()
+      browser.pause(1000)
+    }
     browser.url("/api/logout")
   }
 

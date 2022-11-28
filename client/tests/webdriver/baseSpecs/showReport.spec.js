@@ -4,7 +4,7 @@ import ShowReport from "../pages/report/showReport.page"
 
 describe("Show report page", () => {
   beforeEach("Open the show report page", () => {
-    MyReports.open()
+    MyReports.open("arthur")
     MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
   })
   describe("When on the show page of a report with assessments", () => {

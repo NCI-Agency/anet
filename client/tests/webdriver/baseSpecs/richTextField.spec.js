@@ -43,7 +43,7 @@ const RICH_TEXT_CONTENT = [
 
 describe("When reports have rich text content", () => {
   it("Show report page should display content with correct tags", () => {
-    MyReports.open()
+    MyReports.open("arthur")
     MyReports.selectReport("Test report with rich text", REPORT_STATES.DRAFT)
     ShowReport.reportText.waitForDisplayed()
     RICH_TEXT_CONTENT.forEach(

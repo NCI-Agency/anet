@@ -5,7 +5,7 @@ import ShowTask from "../pages/showTask.page"
 
 describe("Show task page", () => {
   beforeEach("Open the show task page", () => {
-    MyReports.open()
+    MyReports.open("arthur")
     MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
     ShowTask.openAsAdminUser(ShowReport.task12BUrl)
   })

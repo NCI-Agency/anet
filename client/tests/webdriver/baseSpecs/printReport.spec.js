@@ -5,7 +5,7 @@ import ShowReport from "../pages/report/showReport.page"
 
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
-    MyReports.open()
+    MyReports.open("arthur")
     MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
     ShowReport.compactViewButton.click()
     ShowReport.compactView.waitForExist()

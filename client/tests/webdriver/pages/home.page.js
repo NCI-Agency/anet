@@ -78,6 +78,10 @@ class Home extends Page {
     return this.myTasksLink.$("span.badge")
   }
 
+  get reportsPendingMyApproval() {
+    return browser.$('//button[text()="Reports pending my approval"]')
+  }
+
   waitForSecurityBannerValue(value) {
     this.securityBanner.waitForExist()
     this.securityBanner.waitForDisplayed()
