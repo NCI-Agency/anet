@@ -59,6 +59,14 @@ public abstract class AbstractOrganizationSearcher extends
       }
     }
 
+    if (query.getHasBiography() != null) {
+      if (query.getHasBiography()) {
+        qb.addWhereClause("organizations.biography IS NOT NULL");
+      } else {
+        qb.addWhereClause("organizations.biography IS NULL");
+      }
+    }
+
     if (query.getParentOrgUuid() != null) {
       addParentOrgUuidQuery(query);
     }

@@ -31,7 +31,7 @@ public class OrganizationDao
     extends AnetSubscribableObjectDao<Organization, OrganizationSearchQuery> {
 
   private static final String[] fields =
-      {"uuid", "shortName", "longName", "status", "identificationCode", "type", "createdAt",
+      {"uuid", "shortName", "longName", "status", "identificationCode", "biography", "type", "createdAt",
           "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "organizations";
   public static final String ORGANIZATION_FIELDS =
@@ -145,9 +145,9 @@ public class OrganizationDao
   public Organization insertInternal(Organization org) {
     getDbHandle().createUpdate(
         "/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, "
-            + "\"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", "
+            + "\"identificationCode\", biography, type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\", "
             + "\"locationUuid\", \"customFields\") VALUES (:uuid, :shortName, :longName, :status, "
-            + ":identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid, :locationUuid, "
+            + ":identificationCode, :biography, :type, :createdAt, :updatedAt, :parentOrgUuid, :locationUuid, "
             + ":customFields)")
         .bindBean(org).bind("createdAt", DaoUtils.asLocalDateTime(org.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
@@ -174,7 +174,7 @@ public class OrganizationDao
     return getDbHandle()
         .createUpdate("/* updateOrg */ UPDATE organizations "
             + "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, "
-            + "\"identificationCode\" = :identificationCode, type = :type, "
+            + "\"identificationCode\" = :identificationCode, biography = :biography, type = :type, "
             + "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid, "
             + "\"locationUuid\" = :locationUuid, "
             + "\"customFields\" = :customFields WHERE uuid = :uuid")
