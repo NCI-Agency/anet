@@ -28,6 +28,7 @@ import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.Task;
 import mil.dds.anet.test.client.TaskInput;
 import mil.dds.anet.test.client.util.MutationExecutor;
+import mil.dds.anet.test.utils.UtilsTest;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -52,15 +53,33 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
     assertThat(aoInput.getLocation()).isEqualTo(created.getLocation());
+    assertThat(aoInput.getBiography()).isEqualTo(created.getBiography());
 
     // update name of the AO
     created.setLongName("Ao McAoFace");
     Integer nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(created));
     assertThat(nrUpdated).isEqualTo(1);
 
+    // update biography
+    created.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
+    nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(created));
+    assertThat(nrUpdated).isEqualTo(1);
+
     // Verify the AO name is updated.
     Organization updated = adminQueryExecutor.organization(FIELDS, created.getUuid());
     assertThat(updated.getLongName()).isEqualTo(created.getLongName());
+    // check that HTML of biography is sanitized after update
+    assertThat(updated.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+
+    // Add HTML to biography and ensure it gets stripped out.
+    created.setBiography(
+        "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
+    nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(created));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    updated = adminQueryExecutor.organization(FIELDS, created.getUuid());
+    assertThat(updated.getBiography()).contains("<b>Hello world</b>");
+    assertThat(updated.getBiography()).doesNotContain("<script>window.alert");
 
     // Create a position and put it in this AO
     final PositionInput b1Input = getPositionInput(TestData.getTestAdvisor());
@@ -171,6 +190,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
     assertThat(aoInput.getLocation()).isEqualTo(created.getLocation());
+    assertThat(aoInput.getBiography()).isEqualTo(created.getBiography());
 
     // Trying to create another AO with the same identificationCode should fail
     try {
@@ -192,6 +212,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
     assertThat(ao1Input.getLocation()).isEqualTo(created1.getLocation());
+    assertThat(ao1Input.getBiography()).isEqualTo(created1.getBiography());
 
     // Create another new AO
     final OrganizationInput ao2Input = TestData.createAdvisorOrganizationInput(true);
@@ -202,6 +223,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao2Input.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao2Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
     assertThat(ao2Input.getLocation()).isEqualTo(created2.getLocation());
+    assertThat(ao2Input.getBiography()).isEqualTo(created2.getBiography());
 
     // Trying to update AO2 with the same identificationCode as AO1 should fail
     created2.setIdentificationCode(created1.getIdentificationCode());
@@ -224,6 +246,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
     assertThat(ao1Input.getLocation()).isEqualTo(created1.getLocation());
+    assertThat(ao1Input.getBiography()).isEqualTo(created1.getBiography());
 
     // Creating another AO with NULL identificationCode should succeed
     final Organization created2 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
@@ -233,6 +256,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
     assertThat(ao1Input.getLocation()).isEqualTo(created2.getLocation());
+    assertThat(ao1Input.getBiography()).isEqualTo(created2.getBiography());
 
     // Creating an AO with empty identificationCode should succeed
     ao1Input.setIdentificationCode("");
@@ -243,6 +267,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getLongName()).isEqualTo(created3.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
     assertThat(ao1Input.getLocation()).isEqualTo(created3.getLocation());
+    assertThat(ao1Input.getBiography()).isEqualTo(created3.getBiography());
 
     // Creating another AO with empty identificationCode should succeed
     final Organization created4 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
@@ -252,6 +277,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getLongName()).isEqualTo(created4.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
     assertThat(ao1Input.getLocation()).isEqualTo(created4.getLocation());
+    assertThat(ao1Input.getBiography()).isEqualTo(created4.getBiography());
 
     // Create a new AO with non-NULL identificationCode
     final OrganizationInput ao5Input = TestData.createAdvisorOrganizationInput(true);
@@ -262,6 +288,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao5Input.getLongName()).isEqualTo(created5.getLongName());
     assertThat(ao5Input.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
     assertThat(ao5Input.getLocation()).isEqualTo(created5.getLocation());
+    assertThat(ao1Input.getBiography()).isEqualTo(created5.getBiography());
 
     // Updating this AO with empty identificationCode should succeed
     created5.setIdentificationCode("");
@@ -283,6 +310,16 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         OrganizationSearchQueryInput.builder().withText("Ministry").build();
     AnetBeanList_Organization orgs =
         jackQueryExecutor.organizationList(getListFields(FIELDS), query);
+    assertThat(orgs.getList()).isNotEmpty();
+
+    // Search for organizations with biography filled
+    query.setHasBiography(true);
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
+    assertThat(orgs.getList()).isEmpty(); // Should be empty
+
+    // Search for organizations with empty biography
+    query.setHasBiography(false);
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList()).isNotEmpty();
 
     // Search by name and type

@@ -443,6 +443,7 @@ type Organization {
   administratingPositions: [Position]
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  biography: String
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
   createdAt: Instant
   customFields: String
@@ -468,6 +469,7 @@ type Organization {
 input OrganizationInput {
   administratingPositions: [PositionInput]
   approvalSteps: [ApprovalStepInput]
+  biography: String
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
@@ -486,6 +488,7 @@ input OrganizationInput {
 
 """"""
 input OrganizationSearchQueryInput {
+  hasBiography: Boolean
   hasParentOrg: Boolean
   inMyReports: Boolean
   locationUuid: String
