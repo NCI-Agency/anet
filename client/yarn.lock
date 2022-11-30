@@ -1652,10 +1652,10 @@
     "@n1ru4l/push-pull-async-iterable-iterator" "^3.1.0"
     meros "^1.1.4"
 
-"@graphql-codegen/cli@2.14.0":
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/cli/-/cli-2.14.0.tgz#2087c9c05d45f482c53e67ef8e9c0c1f9a98b160"
-  integrity sha512-tiG8iJd2jklazcAkPC1yZ4THQZOBazHi4L8qtH212PydFfpZ3G+PQyilf9sOMqT6Fq/b6yirHvVi6Jy2b1smEw==
+"@graphql-codegen/cli@2.15.0":
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/cli/-/cli-2.15.0.tgz#e36dd8cdb32ce58aeeebd546266cd435732e796f"
+  integrity sha512-o4Wh99VJDX/z0fG3pkdOf0t0fu7SlYn6qlLnqzNhVpZByGPe548gu11GKiOPKVaQ76kkB3dzqzfINRl+v7EA4A==
   dependencies:
     "@babel/generator" "^7.18.13"
     "@babel/template" "^7.18.10"
@@ -1686,7 +1686,6 @@
     json-to-pretty-yaml "^1.2.2"
     listr2 "^4.0.5"
     log-symbols "^4.0.0"
-    mkdirp "^1.0.4"
     shell-quote "^1.7.3"
     string-env-interpolation "^1.0.1"
     ts-log "^2.2.3"
