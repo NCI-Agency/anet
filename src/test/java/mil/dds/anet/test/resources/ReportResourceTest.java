@@ -475,6 +475,369 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
+  public void createReportWithoutPrincipal()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    // Create a report writer
+    final Person author = getNickNicholson();
+    final QueryExecutor authorQueryExecutor = getQueryExecutor(author.getDomainUsername());
+    final MutationExecutor authorMutationExecutor = getMutationExecutor(author.getDomainUsername());
+
+    // Create a person for the report
+    final Person reportAttendeePerson = getJackJackson();
+    final ReportPerson reportAttendee = personToPrimaryReportPerson(reportAttendeePerson);
+    final Position reportAttendeePosition = reportAttendeePerson.getPosition();
+    assertThat(reportAttendeePosition).isNotNull();
+    final Organization reportAttendeeOrg = reportAttendeePosition.getOrganization();
+    assertThat(reportAttendeeOrg).isNotNull();
+
+    // Create an Advising Organization for the report writer
+    final Organization advisorOrg = adminMutationExecutor.createOrganization(ORGANIZATION_FIELDS,
+        TestData.createAdvisorOrganizationInput(true));
+    assertThat(advisorOrg).isNotNull();
+    assertThat(advisorOrg.getUuid()).isNotNull();
+
+    // Create leadership people in the AO who can approve this report
+    Person approver1 = Person.builder().withDomainUsername("testapprover1")
+        .withEmailAddress("hunter+testApprover1@example.com").withName("Test Approver 1")
+        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
+    approver1 = findOrPutPersonInDb(approver1);
+    Person approver2 = Person.builder().withDomainUsername("testapprover2")
+        .withEmailAddress("hunter+testApprover2@example.com").withName("Test Approver 2")
+        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).build();
+    approver2 = findOrPutPersonInDb(approver2);
+
+    final PositionInput approver1PosInput = PositionInput.builder()
+        .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withStatus(Status.ACTIVE).build();
+    Position approver1Pos =
+        adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
+    assertThat(approver1Pos).isNotNull();
+    assertThat(approver1Pos.getUuid()).isNotNull();
+    Integer nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(approver1),
+        approver1Pos.getUuid());
+    assertThat(nrUpdated).isEqualTo(1);
+
+    final PositionInput approver2PosInput = PositionInput.builder()
+        .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withStatus(Status.ACTIVE).build();
+    final Position approver2Pos =
+        adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
+    assertThat(approver2Pos).isNotNull();
+    assertThat(approver2Pos.getUuid()).isNotNull();
+    nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(approver2),
+        approver2Pos.getUuid());
+    assertThat(nrUpdated).isEqualTo(1);
+
+    // Create a billet for the author
+    final PositionInput authorBilletInput = PositionInput.builder().withName("A report writer")
+        .withType(PositionType.ADVISOR).withOrganization(getOrganizationInput(advisorOrg))
+        .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
+    final Position authorBillet =
+        adminMutationExecutor.createPosition(POSITION_FIELDS, authorBilletInput);
+    assertThat(authorBillet).isNotNull();
+    assertThat(authorBillet.getUuid()).isNotNull();
+
+    // Set this author in this billet
+    nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(author),
+        authorBillet.getUuid());
+    assertThat(nrUpdated).isEqualTo(1);
+    final Position checkit = adminQueryExecutor.position(POSITION_FIELDS, authorBillet.getUuid());
+    assertThat(checkit.getPerson()).isNotNull();
+    assertThat(checkit.getPerson().getUuid()).isEqualTo(author.getUuid());
+
+    // Create Approval workflow for Advising Organization
+    final List<ApprovalStepInput> approvalStepsInput = new ArrayList<>();
+    final ApprovalStepInput approvalStepInput =
+        ApprovalStepInput.builder().withName("Test Group for Approving")
+            .withType(ApprovalStepType.REPORT_APPROVAL).withRelatedObjectUuid(advisorOrg.getUuid())
+            .withApprovers(ImmutableList.of(getPositionInput(approver1Pos))).build();
+    approvalStepsInput.add(approvalStepInput);
+
+    // Adding a new approval step to an AO automatically puts it at the end of the approval process.
+    final ApprovalStepInput releaseApprovalStepInput =
+        ApprovalStepInput.builder().withName("Test Group of Releasers")
+            .withType(ApprovalStepType.REPORT_APPROVAL).withRelatedObjectUuid(advisorOrg.getUuid())
+            .withApprovers(ImmutableList.of(getPositionInput(approver2Pos))).build();
+    approvalStepsInput.add(releaseApprovalStepInput);
+    final OrganizationInput advisorOrgInput = getOrganizationInput(advisorOrg);
+    advisorOrgInput.setApprovalSteps(approvalStepsInput);
+
+    nrUpdated = adminMutationExecutor.updateOrganization("", advisorOrgInput);
+    assertThat(nrUpdated).isEqualTo(1);
+    // Pull the approval workflow for this AO
+    final Organization orgWithSteps =
+        adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
+    final List<ApprovalStep> steps = orgWithSteps.getApprovalSteps();
+    assertThat(steps.size()).isEqualTo(2);
+    final ApprovalStep approvalStep = steps.get(0);
+    assertThat(approvalStep.getName()).isEqualTo(approvalStepInput.getName());
+    final ApprovalStep releaseApprovalStep = steps.get(1);
+    assertThat(approvalStep.getNextStepUuid()).isEqualTo(releaseApprovalStep.getUuid());
+    assertThat(releaseApprovalStep.getName()).isEqualTo(releaseApprovalStepInput.getName());
+
+    // Ensure approver1 is now an approver
+    approver1Pos = adminQueryExecutor.position(POSITION_FIELDS, approver1Pos.getUuid());
+    assertThat(approver1Pos.getIsApprover()).isTrue();
+
+    // Create some tasks for this organization
+    final Task top = adminMutationExecutor.createTask(TASK_FIELDS,
+        TestData.createTaskInput("test-1-2", "Principal Test Top Task", "TOP", null,
+            Collections.singletonList(getOrganizationInput(advisorOrg)), Status.ACTIVE));
+    assertThat(top).isNotNull();
+    assertThat(top.getUuid()).isNotNull();
+    final Task action =
+        adminMutationExecutor.createTask(TASK_FIELDS, TestData.createTaskInput("test-1-3",
+            "Principal Test Task Action", "Action", getTaskInput(top), null, Status.ACTIVE));
+    assertThat(action).isNotNull();
+    assertThat(action.getUuid()).isNotNull();
+
+    // Create a Location that this Report was written at
+    final Location loc = adminMutationExecutor.createLocation(LOCATION_FIELDS,
+        TestData.createLocationInput("The Boat Dock", 1.23, 4.56));
+    assertThat(loc).isNotNull();
+    assertThat(loc.getUuid()).isNotNull();
+
+    // Write a Report
+    final ReportInput rInput = ReportInput.builder().withEngagementDate(Instant.now())
+        .withDuration(120)
+        .withReportPeople(
+            getReportPeopleInput(Lists.newArrayList(reportAttendee, personToReportAuthor(author))))
+        .withTasks(Lists.newArrayList(getTaskInput(action))).withLocation(getLocationInput(loc))
+        .withAtmosphere(Atmosphere.POSITIVE).withAtmosphereDetails("Everybody was super nice!")
+        .withIntent("A testing report to test that reporting reports")
+        // set HTML of report text
+        .withReportText(UtilsTest.getCombinedHtmlTestCase().getInput())
+        // set JSON of customFields
+        .withCustomFields(UtilsTest.getCombinedJsonTestCase().getInput())
+        .withNextSteps("This is the next steps on a report")
+        .withKeyOutcomes("These are the key outcomes of this engagement")
+        .withAdvisorOrg(getOrganizationInput(advisorOrg))
+        .withPrincipalOrg(getOrganizationInput(reportAttendeeOrg)).build();
+    final Report created = authorMutationExecutor.createReport(FIELDS, rInput);
+    assertThat(created).isNotNull();
+    assertThat(created.getUuid()).isNotNull();
+    assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
+    assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
+    assertThat(created.getPrincipalOrg().getUuid()).isEqualTo(reportAttendeeOrg.getUuid());
+    // check that HTML of report text is sanitized after create
+    assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
+    // check that JSON of customFields is sanitized after create
+    assertThat(created.getCustomFields())
+        .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+
+    // Have another regular user try to submit the report
+    try {
+      getMutationExecutor(getRegularUser().getDomainUsername()).submitReport("", created.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have a super-user of another AO try to submit the report
+    try {
+      getMutationExecutor(getSuperUser().getDomainUsername()).submitReport("", created.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Have the author submit the report
+    int numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
+
+    Report returned = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+    // Verify that author can still edit the report
+    returned.setAtmosphereDetails("Everybody was super nice! Again!");
+    final Report r2 = authorMutationExecutor.updateReport(FIELDS, getReportInput(returned), true);
+    assertThat(r2.getAtmosphereDetails()).isEqualTo(returned.getAtmosphereDetails());
+
+    // Have the author submit the report, again
+    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
+
+    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+    // The author should not be able to submit the report now
+    try {
+      authorMutationExecutor.submitReport("", returned.getUuid());
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
+    logger.debug("Expecting report {} in step {} because of org {} on author {}",
+        returned.getUuid(), approvalStep.getUuid(), advisorOrg.getUuid(), author);
+    assertThat(returned.getApprovalStep().getUuid()).isEqualTo(approvalStep.getUuid());
+
+    // verify the location on this report
+    assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
+
+    // verify the principals on this report
+    assertThat(returned.getAttendees().stream().map(a -> a.getUuid()).collect(Collectors.toSet()))
+        .contains(reportAttendee.getUuid());
+
+    // verify the tasks on this report
+    assertThat(returned.getTasks().stream().map(t -> t.getUuid()).collect(Collectors.toSet()))
+        .contains(action.getUuid());
+
+    // Verify this shows up on the approvers list of pending documents
+    final ReportSearchQueryInput pendingQuery =
+        ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
+    final QueryExecutor approver1QueryExecutor = getQueryExecutor(approver1.getDomainUsername());
+    final MutationExecutor approver1MutationExecutor =
+        getMutationExecutor(approver1.getDomainUsername());
+    AnetBeanList_Report pending =
+        approver1QueryExecutor.reportList(getListFields(FIELDS), pendingQuery);
+    assertThat(pending.getList().stream().map(r -> r.getUuid()).collect(Collectors.toSet()))
+        .contains(returned.getUuid());
+
+    // Run a search for this users pending approvals
+    final ReportSearchQueryInput searchQuery =
+        ReportSearchQueryInput.builder().withPendingApprovalOf(approver1.getUuid()).build();
+    pending = approver1QueryExecutor.reportList(getListFields(FIELDS), searchQuery);
+    assertThat(pending.getList().size()).isGreaterThan(0);
+
+    // Check on Report status for who needs to approve
+    List<ReportAction> workflow = returned.getWorkflow();
+    assertThat(workflow.size()).isEqualTo(3);
+    ReportAction reportAction = workflow.get(1);
+    assertThat(reportAction.getPerson()).isNull(); // Because this hasn't been approved yet.
+    assertThat(reportAction.getCreatedAt()).isNull();
+    assertThat(reportAction.getStep().getUuid()).isEqualTo(approvalStep.getUuid());
+    reportAction = workflow.get(2);
+    assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
+
+    // Reject the report
+    numRows = approver1MutationExecutor.rejectReport("",
+        TestData.createCommentInput("a test rejection"), created.getUuid());
+    assertThat(numRows).isOne();
+
+    // Check on report status to verify it was rejected
+    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(returned.getState()).isEqualTo(ReportState.REJECTED);
+    assertThat(returned.getApprovalStep()).isNull();
+
+    // Author needs to re-submit
+    numRows = authorMutationExecutor.submitReport("", created.getUuid());
+    assertThat(numRows).isOne();
+
+    // TODO: Approver modify the report *specifically change the attendees!*
+
+    // Approve the report
+    numRows = approver1MutationExecutor.approveReport("", null, created.getUuid());
+    assertThat(numRows).isOne();
+
+    // Check on Report status to verify it got moved forward
+    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+    assertThat(returned.getApprovalStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
+
+    // Verify that the wrong person cannot approve this report.
+    try {
+      approver1MutationExecutor.approveReport("", null, created.getUuid());
+      fail("Expected ForbiddenException");
+    } catch (ForbiddenException expectedException) {
+    }
+
+    // Approve the report
+    numRows = getMutationExecutor(approver2.getDomainUsername()).approveReport("", null,
+        created.getUuid());
+    assertThat(numRows).isOne();
+
+    // Check on Report status to verify it got moved forward
+    returned = authorQueryExecutor.report(FIELDS, created.getUuid());
+    assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
+    assertThat(returned.getApprovalStep()).isNull();
+
+    // The author should not be able to submit the report now
+    try {
+      authorMutationExecutor.submitReport("", returned.getUuid());
+      fail("Expected BadRequestException");
+    } catch (BadRequestException expectedException) {
+    }
+
+    // check on report status to see that it got approved.
+    workflow = returned.getWorkflow();
+    // there were 5 actions on the report: submit, reject, submit, approve, approve
+    assertThat(workflow.size()).isEqualTo(6);
+    reportAction = workflow.get(4);
+    assertThat(reportAction.getPerson().getUuid()).isEqualTo(approver1.getUuid());
+    assertThat(reportAction.getCreatedAt()).isNotNull();
+    assertThat(reportAction.getStep().getUuid()).isEqualTo(approvalStep.getUuid());
+    reportAction = workflow.get(5);
+    assertThat(reportAction.getStep().getUuid()).isEqualTo(releaseApprovalStep.getUuid());
+
+    // Admin can publish approved reports.
+    numRows = adminMutationExecutor.publishReport("", created.getUuid());
+    assertThat(numRows).isOne();
+
+    // Post a comment on the report because it's awesome
+    final Comment commentOne = authorMutationExecutor.addComment(COMMENT_FIELDS,
+        TestData.createCommentInput("This is a test comment one"), created.getUuid());
+    assertThat(commentOne.getUuid()).isNotNull();
+    assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
+
+    final Comment commentTwo = approver1MutationExecutor.addComment(COMMENT_FIELDS,
+        TestData.createCommentInput("This is a test comment two"), created.getUuid());
+    assertThat(commentTwo.getUuid()).isNotNull();
+
+    returned = approver1QueryExecutor.report(FIELDS, created.getUuid());
+    final List<Comment> commentsReturned = returned.getComments();
+    assertThat(commentsReturned).hasSize(3); // the rejection comment will be there as well.
+    // Assert order of comments!
+    assertThat(commentsReturned.stream().map(c -> c.getUuid()).collect(Collectors.toList()))
+        .containsSequence(commentOne.getUuid(), commentTwo.getUuid());
+
+    // Verify this report shows up in the daily rollup
+    final ReportSearchQueryInput query = ReportSearchQueryInput.builder()
+        .withReleasedAtStart(
+            Instant.now().atZone(DaoUtils.getServerNativeZoneId()).minusDays(1).toInstant())
+        .build();
+    AnetBeanList_Report rollup = adminQueryExecutor.reportList(getListFields(FIELDS), query);
+    assertThat(rollup.getTotalCount()).isGreaterThan(0);
+    assertThat(rollup.getList().stream().map(r -> r.getUuid()).collect(Collectors.toSet()))
+        .contains(returned.getUuid());
+
+    // Pull recent People, Tasks, and Locations and verify that the records from the last report are
+    // there.
+    final PersonSearchQueryInput queryPeople =
+        PersonSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
+            .withSortBy(PersonSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
+    final AnetBeanList_Person recentPeople =
+        authorQueryExecutor.personList(getListFields(PERSON_FIELDS), queryPeople);
+    assertThat(recentPeople.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet()))
+        .contains(reportAttendeePerson.getUuid());
+
+    final TaskSearchQueryInput queryTasks =
+        TaskSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
+            .withSortBy(TaskSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
+    final AnetBeanList_Task recentTasks =
+        authorQueryExecutor.taskList(getListFields(TASK_FIELDS), queryTasks);
+    assertThat(recentTasks.getList().stream().map(t -> t.getUuid()).collect(Collectors.toSet()))
+        .contains(action.getUuid());
+
+    final LocationSearchQueryInput queryLocations =
+        LocationSearchQueryInput.builder().withStatus(Status.ACTIVE).withInMyReports(true)
+            .withSortBy(LocationSearchSortBy.RECENT).withSortOrder(SortOrder.DESC).build();
+    final AnetBeanList_Location recentLocations =
+        authorQueryExecutor.locationList(getListFields(LOCATION_FIELDS), queryLocations);
+    assertThat(recentLocations.getList().stream().map(l -> l.getUuid()).collect(Collectors.toSet()))
+        .contains(loc.getUuid());
+
+    // Go and delete the entire approval chain!
+    advisorOrg.setApprovalSteps(ImmutableList.of());
+    nrUpdated = adminMutationExecutor.updateOrganization("", getOrganizationInput(advisorOrg));
+    assertThat(nrUpdated).isEqualTo(1);
+
+    Organization updatedOrg =
+        adminQueryExecutor.organization(ORGANIZATION_FIELDS, advisorOrg.getUuid());
+    assertThat(updatedOrg).isNotNull();
+    assertThat(updatedOrg.getApprovalSteps()).isEmpty();
+  }
+
+  @Test
   public void testDefaultApprovalFlow() throws NumberFormatException,
       GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Person jack = getJackJackson();
