@@ -44,7 +44,8 @@
     {
       "matchPackageNames": [
         "autoprefixer",
-        "com.graphql-java:graphql-java-extended-scalars"
+        "com.graphql-java:graphql-java-extended-scalars",
+        "io.leangen.graphql:spqr"
       ],
       "enabled": false
     },
