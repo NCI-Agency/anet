@@ -212,7 +212,7 @@
     "test-all-noCF": "yarn run test-wdio-noCF",
     "test-wdio-noCF": "env TEST_WDIO_SUITE=noCustomFields yarn run test-wdio",
     "generate-graphql-schema": "graphql-codegen -p anet",
-    "storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary.yml} ; start-storybook -p 6006",
+    "storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; start-storybook -p 6006",
     "build-storybook": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; build-storybook",
     "build-storybook-docs": "export STORYBOOK_ANET_DICTIONARY=/${ANET_DICTIONARY_NAME:-anet-dictionary-storybook.yml} ; build-storybook --docs",
     "chromatic": "chromatic --project-token ${CHROMATIC_PROJECT_TOKEN}",
