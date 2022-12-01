@@ -85,6 +85,9 @@ export default {
   },
 
   validateEmail: function(emailValue, domainNames, wildcardDomains) {
+    if (!emailValue) {
+      return true
+    }
     const email = emailValue.split("@")
     if (email.length < 2 || email[1].length === 0) {
       throw new Error("Please provide a valid email address")
