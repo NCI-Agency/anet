@@ -98,7 +98,7 @@
     "postcss-calc": "8.2.4",
     "postcss-custom-properties": "12.1.10",
     "postcss-flexbugs-fixes": "5.0.2",
-    "postcss-loader": "7.0.1",
+    "postcss-loader": "7.0.2",
     "prettier-eslint-cli": "7.1.0",
     "react-is": "18.2.0",
     "react-test-renderer": "18.2.0",
