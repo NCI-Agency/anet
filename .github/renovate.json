@@ -15,15 +15,6 @@
   ],
   "packageRules": [
     {
-      "matchManagers": ["gradle"],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "groupName": "most non-major Gradle dependencies",
-      "groupSlug": "most-minor-gradle-patch"
-    },
-    {
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": [
         "minor",
@@ -40,6 +31,15 @@
       ],
       "groupName": "most non-major dependencies",
       "groupSlug": "most-minor-patch"
+    },
+    {
+      "matchManagers": ["gradle"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "most non-major Gradle dependencies",
+      "groupSlug": "most-minor-gradle-patch"
     },
     {
       "matchPackageNames": [
