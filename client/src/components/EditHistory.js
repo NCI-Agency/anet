@@ -71,7 +71,7 @@ function EditHistory({
   parentEntityUuid1,
   parentEntityUuid2,
   historyComp: HistoryComp,
-  externalButton,
+  showEditButton,
   showModal,
   setShowModal,
   // currentlyOccupyingEntity used to assert the last item in the history and end time
@@ -101,7 +101,7 @@ function EditHistory({
       className="edit-history"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      {!externalButton && (
+      {showEditButton && (
         <Button
           variant="outline-secondary"
           disabled={_isEmpty(history1) && _isEmpty(history2) && !!history2}
@@ -420,7 +420,7 @@ EditHistory.propTypes = {
   parentEntityUuid1: PropTypes.string.isRequired,
   parentEntityUuid2: PropTypes.string,
   historyComp: PropTypes.func,
-  externalButton: PropTypes.bool,
+  showEditButton: PropTypes.bool,
   showModal: PropTypes.bool.isRequired,
   setShowModal: PropTypes.func.isRequired,
   currentlyOccupyingEntity: PropTypes.oneOfType([

@@ -265,6 +265,7 @@ const MergePeople = ({ pageDispatchers }) => {
                       currentlyOccupyingEntity={mergedPerson.position}
                       parentEntityUuid1={person1.uuid}
                       parentEntityUuid2={person2.uuid}
+                      showEditButton={matchingRoles}
                       historyEntityType="position"
                       parentEntityType="person"
                       midColTitle="Merged Person History"

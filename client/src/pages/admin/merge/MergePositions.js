@@ -251,6 +251,7 @@ const MergePositions = ({ pageDispatchers }) => {
                       showModal={showHistoryModal}
                       setShowModal={setShowHistoryModal}
                       currentlyOccupyingEntity={mergedPosition.person}
+                      showEditButton
                       parentEntityUuid1={position1.uuid}
                       parentEntityUuid2={position2.uuid}
                       midColTitle="Merged Position History"

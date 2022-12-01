@@ -365,7 +365,6 @@ const PersonShow = ({ pageDispatchers }) => {
                   history1={person.previousPositions}
                   initialHistory={person.previousPositions}
                   currentlyOccupyingEntity={person.position}
-                  externalButton
                   historyEntityType="position"
                   parentEntityType={person.role}
                   parentEntityUuid1={person.uuid}
