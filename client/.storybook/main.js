@@ -3,7 +3,8 @@ const paths = require("../config/paths")
 
 module.exports = {
   core: {
-    builder: "webpack5"
+    builder: "webpack5",
+    disableTelemetry: true
   },
   stories: [
     "../stories/**/*.stories.mdx",
