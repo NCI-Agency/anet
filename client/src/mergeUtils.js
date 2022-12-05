@@ -335,6 +335,7 @@ export function getActivationButton(isActive, onClickAction, instanceName) {
       <Button
         variant={isActive ? "outline-danger" : "outline-success"}
         onClick={onClickAction}
+        className="activate-field-button"
       >
         <Icon icon={isActive ? IconNames.STOP : IconNames.PLAY} />
       </Button>

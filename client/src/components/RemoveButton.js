@@ -12,7 +12,7 @@ const RemoveButton = ({
   disabled = false
 }) => (
   <Button
-    className="float-end"
+    className="float-end remove-button"
     variant={buttonStyle}
     title={title}
     onClick={onClick}
