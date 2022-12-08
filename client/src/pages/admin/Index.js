@@ -292,11 +292,13 @@ const AdminIndex = ({ pageDispatchers }) => {
   function reloadDictionary() {
     setActionLoading(true)
     return API.query(RELOAD_DICTIONARY, {})
-      .then(result =>
+      .then(result => {
         toast.success(result?.reloadDictionary, {
           toastId: "success-reload-dictionary"
         })
-      )
+        // Clear previous error message
+        handleError(null)
+      })
       .catch(handleError)
       .finally(() => setActionLoading(false))
   }
