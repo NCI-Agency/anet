@@ -1,3 +1,5 @@
+import { Icon, IconSize, Intent } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import PropTypes from "prop-types"
 import React from "react"
@@ -25,7 +27,17 @@ const LinkAnet = ({
     )
   } else {
     // Non ANET entity link
-    return <a href={urlLink}>{children}</a>
+    return (
+      <a href={urlLink}>
+        {children}{" "}
+        <Icon
+          icon={IconNames.SHARE}
+          intent={Intent.PRIMARY}
+          size={IconSize.STANDARD * 0.75}
+          style={{ paddingBottom: "5px" }}
+        />
+      </a>
+    )
   }
 }
 

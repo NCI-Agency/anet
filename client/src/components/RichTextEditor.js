@@ -41,7 +41,8 @@ const RichTextEditor = ({
   className,
   readOnly
 }) => {
-  const [showLinksModal, setShowLinksModal] = useState(false)
+  const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
+  const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
@@ -75,15 +76,24 @@ const RichTextEditor = ({
         <div className={!readOnly ? "editor-container" : null}>
           {!readOnly && (
             <Toolbar
-              showLinksModal={showLinksModal}
-              setShowLinksModal={setShowLinksModal}
+              showAnetLinksModal={showAnetLinksModal}
+              setShowAnetLinksModal={setShowAnetLinksModal}
+              showExternalLinksModal={showExternalLinksModal}
+              setShowExternalLinksModal={setShowExternalLinksModal}
             />
           )}
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onBlur={onHandleBlur}
-            onKeyDown={e => handleOnKeyDown(e, editor, setShowLinksModal)}
+            onKeyDown={e =>
+              handleOnKeyDown(
+                e,
+                editor,
+                setShowAnetLinksModal,
+                setShowExternalLinksModal
+              )
+            }
             className="editable"
             readOnly={readOnly}
           />
