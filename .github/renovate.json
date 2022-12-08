@@ -111,6 +111,12 @@
       "matchPackagePrefixes": ["slate"]
     },
     {
+      "groupName": "NPM, dependencies, Bootstrap",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchPackageNames": ["bootstrap", "react-bootstrap"]
+    },
+    {
       "groupName": "Gradle/NPM, dependencies, Keycloak",
       "matchManagers": ["gradle", "npm"],
       "matchSourceUrlPrefixes": ["https://github.com/keycloak/"]
