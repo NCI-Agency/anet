@@ -102,6 +102,34 @@ class ShowReport extends Page {
     return browser.$("div[name='authors']").getText()
   }
 
+  get submitButton() {
+    return browser.$('//button[text()="Submit report"]')
+  }
+
+  get reportModal() {
+    return browser.$(".modal-dialog")
+  }
+
+  get confirmSubmitButton() {
+    return this.reportModal.$('//button[text()="Submit anyway"]')
+  }
+
+  get modalWarning() {
+    return this.reportModal.$(".alert")
+  }
+
+  get approveButton() {
+    return browser.$('//button[text()="Approve"]')
+  }
+
+  get confirmApproveButton() {
+    return this.reportModal.$('//button[text()="Approve anyway"]')
+  }
+
+  get successfullApprovalToast() {
+    return browser.$('//div[text()="Successfully approved report."]')
+  }
+
   getReportTextContent(selector, multipleElements, index) {
     if (!selector) {
       return this.reportText

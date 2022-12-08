@@ -254,12 +254,16 @@ const ReportSummaryRow = ({ report }) => {
             {" "}
             (<LinkTo modelType="Organization" model={report.advisorOrg} />)
           </span>
-          <span className="people-separator">&#x25B6;</span>
-          <LinkTo modelType="Person" model={report.primaryPrincipal} />
-          <span>
-            {" "}
-            (<LinkTo modelType="Organization" model={report.principalOrg} />)
-          </span>
+          {report.primaryPrincipal && (
+            <>
+              <span className="people-separator">&#x25B6;</span>
+              <LinkTo modelType="Person" model={report.primaryPrincipal} />
+              <span>
+                {" "}
+                <LinkTo modelType="Organization" model={report.principalOrg} />
+              </span>
+            </>
+          )}
         </Col>
       </Row>
       {!_isEmpty(report.location) && (

@@ -31,6 +31,42 @@ class CreateReport extends cr.CreateReport {
     return browser.$("#reportPeople-popover .table-responsive table")
   }
 
+  get location() {
+    return browser.$('#fg-location input[id="location"]')
+  }
+
+  get locationTable() {
+    return browser.$("#location-popover .table-responsive table")
+  }
+
+  get atmosphere() {
+    return browser.$("#fg-atmosphere")
+  }
+
+  get atmospherePositive() {
+    return this.atmosphere.$('label[for="atmosphere_POSITIVE"]')
+  }
+
+  get atmosphereNeutral() {
+    return this.atmosphere.$('label[for="atmosphere_NEUTRAL"]')
+  }
+
+  get atmosphereNegative() {
+    return this.atmosphere.$('label[for="atmosphere_NEGATIVE"]')
+  }
+
+  get keyOutcomes() {
+    return browser.$('#fg-keyOutcomes textarea[id="keyOutcomes"]')
+  }
+
+  get nextSteps() {
+    return browser.$('#fg-nextSteps textarea[id="nextSteps"]')
+  }
+
+  get reportText() {
+    return browser.$("#fg-reportText .editable")
+  }
+
   getPersonByName(name) {
     const personRow = browser.$$(
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
@@ -91,6 +127,37 @@ class CreateReport extends cr.CreateReport {
     this.tasksTable.waitForExist({ reverse: true, timeout: 3000 })
   }
 
+  selectLocation(location) {
+    this.location.click()
+    browser.keys(location)
+    this.locationTable.waitForDisplayed()
+    const checkBox = this.locationTable.$(
+      "tbody tr:first-child td:first-child input.form-check-input"
+    )
+    if (!checkBox.isSelected()) {
+      checkBox.click()
+    }
+  }
+
+  selectAthosphere(option) {
+    switch (option) {
+      case "Positive":
+        this.atmospherePositive.click()
+        break
+
+      case "Neutral":
+        this.atmospherePositive.click()
+        break
+
+      case "Negative":
+        this.atmospherePositive.click()
+        break
+
+      default:
+        break
+    }
+  }
+
   fillForm(fields) {
     this.form.waitForClickable()
 
@@ -113,6 +180,14 @@ class CreateReport extends cr.CreateReport {
       this.duration.setValue(fields.duration)
     }
 
+    if (fields.location) {
+      this.selectLocation(fields.location)
+    }
+
+    if (fields.atmosphere) {
+      this.selectAthosphere(fields.atmosphere)
+    }
+
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
       fields.advisors.forEach(at => this.selectAttendeeByName(at))
     }
@@ -123,6 +198,19 @@ class CreateReport extends cr.CreateReport {
 
     if (Array.isArray(fields.tasks) && fields.tasks.length) {
       fields.tasks.forEach(t => this.selectTaskByName(t))
+    }
+
+    if (fields.keyOutcomes) {
+      this.keyOutcomes.setValue(fields.keyOutcomes)
+    }
+
+    if (fields.nextSteps) {
+      this.nextSteps.setValue(fields.nextSteps)
+    }
+
+    if (fields.reportText) {
+      this.reportText.click()
+      browser.keys(fields.reportText)
     }
   }
 }

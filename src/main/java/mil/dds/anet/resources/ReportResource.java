@@ -384,11 +384,10 @@ public class ReportResource {
     }
     if (r.getPrincipalOrgUuid() == null) {
       final ReportPerson principal = r.loadPrimaryPrincipal(engine.getContext()).join();
-      if (principal == null) {
-        throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+      if (principal != null) {
+        r.setPrincipalOrg(
+            engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).join());
       }
-      r.setPrincipalOrg(
-          engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).join());
     }
 
     if (r.getEngagementDate() == null) {

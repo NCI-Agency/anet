@@ -5,7 +5,7 @@ import ShowReport from "../pages/report/showReport.page"
 
 describe("When unpublishing a report", () => {
   beforeEach("Open the show report page", () => {
-    MyReports.open()
+    MyReports.open("arthur")
     MyReports.selectReport(
       "A test report to be unpublished from Arthur",
       REPORT_STATES.PUBLISHED

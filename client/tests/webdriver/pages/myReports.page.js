@@ -24,8 +24,8 @@ export const REPORT_STATES = {
 }
 
 class MyReports extends Page {
-  open() {
-    super.openAsAdminUser(PAGE_URL)
+  open(credentials) {
+    super.open(PAGE_URL, credentials)
   }
 
   selectReport(linkText, reportState) {
