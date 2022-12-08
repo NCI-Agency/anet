@@ -387,7 +387,7 @@ const OrganizationalChart = ({
     <SVGCanvas
       width={width}
       height={height}
-      exportTitle={`${data.shortName} organization chart`}
+      exportTitle={`${data.organization.shortName} organization chart`}
       zoomFn={increment =>
         setPersonnelDepth(Math.max(0, personnelDepth + increment))
       }
