@@ -471,11 +471,11 @@ export const searchFilters = function() {
           queryKey: "locationUuid"
         })
       },
-      "Has Biography?": {
+      [`Has ${Settings.fields.organization.profile}?`]: {
         component: SelectFilter,
         deserializer: deserializeSelectFilter,
         props: {
-          queryKey: "hasBiography",
+          queryKey: "hasProfile",
           options: ["true", "false"],
           labels: ["Yes", "No"]
         }

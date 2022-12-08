@@ -74,7 +74,6 @@
 			<column name="parentOrgId" type="int" />
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />
-			<column name="biography" type="text" />
 			<column name="type" type="int" >
 				<constraints nullable="false" />
 			</column>
@@ -4203,6 +4202,13 @@
 				baseTableName="organizations" constraintName="FK_organizations_location" baseColumnNames="locationUuid"
 				referencedTableName="locations" referencedColumnNames="uuid"
 				onDelete="NO ACTION" onUpdate="NO ACTION" />
+	</changeSet>
+
+	<changeSet id="add-profile-to-organizations" author="cigdem.ersepciler">
+		<!-- add profile field to organizations -->
+		<addColumn tableName="organizations">
+			<column name="profile" type="text"/>
+		</addColumn>
 	</changeSet>
 
 </databaseChangeLog>

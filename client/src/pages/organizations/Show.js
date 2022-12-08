@@ -65,7 +65,7 @@ const GQL_GET_ORGANIZATION = gql`
         lng
         type
       }
-      biography
+      profile
       parentOrg {
         uuid
         shortName
@@ -485,11 +485,11 @@ const OrganizationShow = ({ pageDispatchers }) => {
                 />
 
                 <Field
-                  name="biography"
+                  name="profile"
                   component={FieldHelper.ReadonlyField}
-                  label={Settings.fields.organization.biography}
+                  label={Settings.fields.organization.profile}
                   className="rich-text-readonly"
-                  humanValue={parseHtmlWithLinkTo(organization.biography)}
+                  humanValue={parseHtmlWithLinkTo(organization.profile)}
                 />
               </Fieldset>
 

@@ -53,9 +53,8 @@ public class OrganizationResource {
   public Organization createOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
-
-    org.setBiography(
-        Utils.isEmptyHtml(org.getBiography()) ? null : Utils.sanitizeHtml(org.getBiography()));
+    org.setProfile(
+        Utils.isEmptyHtml(org.getProfile()) ? null : Utils.sanitizeHtml(org.getProfile()));
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Check if user is authorized to create a sub organization
@@ -105,8 +104,8 @@ public class OrganizationResource {
   public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "organization") Organization org) {
     org.checkAndFixCustomFields();
-    org.setBiography(
-        Utils.isEmptyHtml(org.getBiography()) ? null : Utils.sanitizeHtml(org.getBiography()));
+    org.setProfile(
+        Utils.isEmptyHtml(org.getProfile()) ? null : Utils.sanitizeHtml(org.getProfile()));
 
     final Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization

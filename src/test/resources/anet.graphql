@@ -443,7 +443,6 @@ type Organization {
   administratingPositions: [Position]
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
-  biography: String
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
   createdAt: Instant
   customFields: String
@@ -457,6 +456,7 @@ type Organization {
   parentOrg: Organization
   planningApprovalSteps: [ApprovalStep]
   positions(query: PositionSearchQueryInput): [Position]
+  profile: String
   shortName: String
   status: Status
   tasks: [Task]
@@ -469,7 +469,6 @@ type Organization {
 input OrganizationInput {
   administratingPositions: [PositionInput]
   approvalSteps: [ApprovalStepInput]
-  biography: String
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
@@ -478,6 +477,7 @@ input OrganizationInput {
   longName: String
   parentOrg: OrganizationInput
   planningApprovalSteps: [ApprovalStepInput]
+  profile: String
   shortName: String
   status: Status
   tasks: [TaskInput]
@@ -488,8 +488,8 @@ input OrganizationInput {
 
 """"""
 input OrganizationSearchQueryInput {
-  hasBiography: Boolean
   hasParentOrg: Boolean
+  hasProfile: Boolean
   inMyReports: Boolean
   locationUuid: String
   orgRecurseStrategy: RecurseStrategy

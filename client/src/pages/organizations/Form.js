@@ -23,8 +23,9 @@ import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
-import _isEqual from "lodash/isEqual"
 import _isEmpty from "lodash/isEmpty"
+import _isEqual from "lodash/isEqual"
+import { Organization, Position, Task } from "models"
 import { Location, Organization, Position, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -324,20 +325,20 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                       component={FieldHelper.InputField}
                     />
                     <FastField
-                      name="biography"
+                      name="profile"
                       component={FieldHelper.SpecialField}
-                      label={Settings.fields.organization.biography}
+                      label={Settings.fields.organization.profile}
                       onChange={value => {
                         // prevent initial unnecessary render of RichTextEditor
-                        if (!_isEqual(values.biography, value)) {
-                          setFieldValue("biography", value, true)
+                        if (!_isEqual(values.profile, value)) {
+                          setFieldValue("profile", value, true)
                         }
                       }}
                       onHandleBlur={() => {
                         // validation will be done by setFieldValue
-                        setFieldTouched("biography", true, false)
+                        setFieldTouched("profile", true, false)
                       }}
-                      widget={<RichTextEditor className="biography" />}
+                      widget={<RichTextEditor className="profile" />}
                     />
                   </>
                 )}

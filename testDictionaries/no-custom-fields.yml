@@ -345,7 +345,7 @@ fields:
   organization:
     shortName: Name
     parentOrg: Parent Organization
-    biography: Overview
+    profile: Profile
 
   advisor:
 

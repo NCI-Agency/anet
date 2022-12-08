@@ -29,10 +29,10 @@ public class OrganizationSearchQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
 
-  // Find organizations who (don't) have the biography filled in
+  // Find organizations who (don't) have the profile filled in
   @GraphQLQuery
   @GraphQLInputField
-  Boolean hasBiography;
+  private Boolean hasProfile;
 
   public OrganizationSearchQuery() {
     super(OrganizationSearchSortBy.NAME);
@@ -79,12 +79,12 @@ public class OrganizationSearchQuery
     this.orgRecurseStrategy = orgRecurseStrategy;
   }
 
-  public Boolean getHasBiography() {
-    return hasBiography;
+  public Boolean getHasProfile() {
+    return hasProfile;
   }
 
-  public void setHasBiography(Boolean hasBiography) {
-    this.hasBiography = hasBiography;
+  public void setHasProfile(Boolean hasProfile) {
+    this.hasProfile = hasProfile;
   }
 
   @Override
@@ -102,7 +102,7 @@ public class OrganizationSearchQuery
     return super.equals(obj) && Objects.equals(getType(), other.getType())
         && Objects.equals(getHasParentOrg(), other.getHasParentOrg())
         && Objects.equals(getParentOrgUuid(), other.getParentOrgUuid())
-        && Objects.equals(getHasBiography(), other.getHasBiography())
+        && Objects.equals(getHasProfile(), other.getHasProfile())
         && Objects.equals(getOrgRecurseStrategy(), other.getOrgRecurseStrategy());
   }
 

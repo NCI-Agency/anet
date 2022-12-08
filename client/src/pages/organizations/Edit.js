@@ -36,7 +36,7 @@ const GQL_GET_ORGANIZATION = gql`
         lng
         type
       }
-      biography
+      profile
       parentOrg {
         uuid
         shortName

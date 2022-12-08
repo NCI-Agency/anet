@@ -97,7 +97,7 @@ export default class Organization extends Model {
         .default([]),
       positions: yup.array().nullable().default([]),
       tasks: yup.array().nullable().default([]),
-      biography: yup.string().nullable().default("")
+      profile: yup.string().nullable().default("")
     })
     // not actually in the database, the database contains the JSON customFields
     .concat(Organization.customFieldsSchema)
