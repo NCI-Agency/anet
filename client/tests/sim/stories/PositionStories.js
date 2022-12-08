@@ -1,5 +1,5 @@
+import { faker } from "@faker-js/faker"
 import Model from "components/Model"
-import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import { Location, Organization, Person, Position } from "models"
 import { fuzzy, identity, populate, runGQL, specialUser } from "../simutils"
@@ -124,7 +124,7 @@ async function listOrganizations(user) {
  */
 function randomPositionTemplate(organizations) {
   // ensure organization type and position type are in line
-  const orgType = faker.random.objectElement(Organization.TYPE)
+  const orgType = faker.datatype.objectValue(Organization.TYPE)
   return {
     type: () => {
       if (orgType === Organization.TYPE.ADVISOR_ORG) {
@@ -144,7 +144,7 @@ function randomPositionTemplate(organizations) {
       fuzzy.withProbability(0.9) ? Model.STATUS.ACTIVE : Model.STATUS.INACTIVE,
     person: identity,
     organization: () => {
-      return faker.random.arrayElement(
+      return faker.helpers.arrayElement(
         organizations.filter(o => o.type === orgType)
       )
     },
@@ -250,7 +250,7 @@ const _createPosition = async function(user) {
  */
 /* eslint-disable no-unused-vars */
 const _deletePosition = async function(user) {
-  const type = faker.random.arrayElement([
+  const type = faker.helpers.arrayElement([
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
@@ -287,7 +287,7 @@ const _deletePosition = async function(user) {
  * @param {*} user
  */
 const _deactivatePosition = async function(user) {
-  const type = faker.random.arrayElement([
+  const type = faker.helpers.arrayElement([
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
@@ -354,7 +354,7 @@ const _deactivatePosition = async function(user) {
 }
 
 const updatePosition = async function(user) {
-  const type = faker.random.arrayElement([
+  const type = faker.helpers.arrayElement([
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
@@ -433,7 +433,7 @@ const updatePosition = async function(user) {
  * @param {*} user  The user to do the assignment
  */
 const putPersonInPosition = async function(user) {
-  const role = faker.random.objectElement(Person.ROLE)
+  const role = faker.datatype.objectValue(Person.ROLE)
   const type =
     role === Person.ROLE.ADVISOR
       ? Position.TYPE.ADVISOR
@@ -466,7 +466,7 @@ const putPersonInPosition = async function(user) {
     isFilled: false,
     type: [type]
   })
-  const person = faker.random.arrayElement(persons)
+  const person = faker.helpers.arrayElement(persons)
 
   if (!position) {
     console.debug("No positions to fill available")
@@ -497,7 +497,7 @@ const putPersonInPosition = async function(user) {
 }
 
 const deletePersonFromPosition = async function(user) {
-  const type = faker.random.arrayElement([
+  const type = faker.helpers.arrayElement([
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
@@ -533,7 +533,7 @@ const deletePersonFromPosition = async function(user) {
       p.person.domainUsername !== specialUser.name &&
       p.type !== Position.TYPE.ADMINISTRATOR
   )
-  const position = faker.random.arrayElement(positions)
+  const position = faker.helpers.arrayElement(positions)
 
   if (position) {
     console.debug(
@@ -593,7 +593,7 @@ const updateAssociatedPosition = async function(user) {
           positionsQuery: {
             pageNum: 0,
             pageSize: 0,
-            isFilled: faker.random.boolean(),
+            isFilled: faker.datatype.boolean(),
             type: [type]
           }
         }
@@ -602,10 +602,10 @@ const updateAssociatedPosition = async function(user) {
   }
 
   // for now just take a random position and do not take the organization level into account
-  const principalPosition = faker.random.arrayElement(
+  const principalPosition = faker.helpers.arrayElement(
     listPositions(Position.TYPE.PRINCIPAL)
   )
-  const advisorPosition = faker.random.arrayElement(
+  const advisorPosition = faker.helpers.arrayElement(
     listPositions(Position.TYPE.ADVISOR)
   )
 
@@ -646,7 +646,7 @@ const updateAssociatedPosition = async function(user) {
  * @param {*} user The user to do the association
  */
 const removeAssociatedPosition = async function(user) {
-  const type = faker.random.arrayElement([
+  const type = faker.helpers.arrayElement([
     Position.TYPE.ADVISOR,
     Position.TYPE.PRINCIPAL
   ])
@@ -680,7 +680,7 @@ const removeAssociatedPosition = async function(user) {
         positionsQuery: {
           pageNum: 0,
           pageSize: 0,
-          isFilled: faker.random.boolean(),
+          isFilled: faker.datatype.boolean(),
           type: [type]
         }
       }
@@ -688,12 +688,12 @@ const removeAssociatedPosition = async function(user) {
   ).data.positionList.list
 
   // for now just take a random position and do not take the organization level into account
-  const position = faker.random.arrayElement(
+  const position = faker.helpers.arrayElement(
     positions.filter(p => p.associatedPositions && p.associatedPositions.length)
   )
 
   if (position) {
-    const associatedPosition = faker.random.arrayElement(
+    const associatedPosition = faker.helpers.arrayElement(
       position.associatedPositions
     )
     const index = position.associatedPositions.indexOf(associatedPosition)

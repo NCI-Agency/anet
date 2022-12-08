@@ -1,5 +1,5 @@
+import { faker } from "@faker-js/faker"
 import Model from "components/Model"
-import faker from "faker"
 import { Organization } from "models"
 import utils from "utils"
 import { identity, populate, runGQL } from "../simutils"
@@ -32,14 +32,14 @@ const services = [
  * @returns An organization template
  */
 function randomOrganization() {
-  const name = faker.company.companyName()
+  const name = faker.company.name()
   return {
     shortName: name,
     longName: name,
     identificationCode: () => faker.helpers.replaceSymbols("??????"),
     parentOrg: identity,
-    status: () => faker.random.objectElement(Organization.STATUS),
-    type: () => faker.random.objectElement(Organization.TYPE)
+    status: () => faker.helpers.objectValue(Organization.STATUS),
+    type: () => faker.helpers.objectValue(Organization.TYPE)
   }
 
   // approvalSteps: [],
@@ -63,10 +63,10 @@ async function createHierarchy(user, grow, args) {
     }
   }
 
-  const longName = faker.company.companyName()
+  const longName = faker.company.name()
   const shortName = abbreviateCompanyName(longName)
-  const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.random.objectElement(Organization.TYPE)
-  const status = args.status || Model.STATUS.ACTIVE // faker.random.objectElement(Model.STATUS)
+  const type = args.type || Organization.TYPE.PRINCIPAL_ORG // faker.helpers.objectValue(Organization.TYPE)
+  const status = args.status || Model.STATUS.ACTIVE // faker.helpers.objectValue(Model.STATUS)
   const usedServices = []
 
   return createSubOrg(undefined, [])
@@ -108,7 +108,7 @@ async function createHierarchy(user, grow, args) {
     if (level === 0) {
       org.longName = longName
     } else if (level === 1) {
-      org.longName = faker.random.arrayElement(
+      org.longName = faker.helpers.arrayElement(
         services.filter(d => usedServices.indexOf(d) < 0)
       )
       usedServices.push(org.longName)
@@ -163,7 +163,7 @@ const dryRun = false
 async function gqlCreateOrganization(user, org) {
   if (dryRun) {
     return {
-      uuid: faker.random.uuid()
+      uuid: faker.datatype.uuid()
     }
   } else {
     return (
@@ -183,7 +183,7 @@ const createOrganization = async function(user, parentOrg, path) {
 
   if (path.length > 1) {
     if (path.length === 2) {
-      randomOrg.longName = faker.random.arrayElement(services)
+      randomOrg.longName = faker.helpers.arrayElement(services)
     } else {
       randomOrg.longName = ""
     }
@@ -204,7 +204,7 @@ const createOrganization = async function(user, parentOrg, path) {
   }
 
   return {
-    uuid: faker.random.uuid()
+    uuid: faker.datatype.uuid()
   }
 
   // return (await runGQL(user,

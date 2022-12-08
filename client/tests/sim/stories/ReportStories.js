@@ -1,5 +1,5 @@
+import { faker } from "@faker-js/faker"
 import Model from "components/Model"
-import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
 import _uniqWith from "lodash/uniqWith"
@@ -114,7 +114,7 @@ async function populateReport(report, user, args) {
   const cancelledReason =
     state !== Report.STATE.CANCELLED
       ? null
-      : faker.random.arrayElement([
+      : faker.helpers.arrayElement([
         "CANCELLED_BY_ADVISOR",
         "CANCELLED_BY_PRINCIPAL",
         "CANCELLED_DUE_TO_TRANSPORTATION",
@@ -129,7 +129,7 @@ async function populateReport(report, user, args) {
     duration: () => faker.datatype.number({ min: 1, max: 480 }),
     cancelledReason,
     atmosphere: () =>
-      faker.random.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
+      faker.helpers.arrayElement(["POSITIVE", "NEUTRAL", "NEGATIVE"]),
     atmosphereDetails: () => faker.lorem.sentence(),
     location,
     reportPeople,
