@@ -422,7 +422,7 @@ export default class Report extends Model {
     if (!primaryAttendee && role === Person.ROLE.ADVISOR) {
       return `You must provide the primary ${roleName} for the Engagement`
     } else if (!primaryAttendee && role === Person.ROLE.PRINCIPAL) {
-      return `You didn't provide the primary ${roleName} for the Engagement`
+      return `No primary ${roleName} has been provided for the Engagement`
     } else if (primaryAttendee.status !== Model.STATUS.ACTIVE) {
       return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
     } else if (
