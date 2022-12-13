@@ -84,7 +84,7 @@ export const GRAPHQL_NOTES_FIELDS = /* GraphQL */ `
 
 // Entity type --> GQL query
 export const GRAPHQL_ENTITY_FIELDS = {
-  Report: "uuid intent",
+  Report: "uuid intent engagementDate",
   Person: "uuid name role avatar(size: 32)",
   Organization: "uuid shortName",
   Position: "uuid name",

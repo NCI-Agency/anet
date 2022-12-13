@@ -412,7 +412,12 @@ export default class Report extends Model {
     return REPORTS_ICON
   }
 
-  toString() {
+  toString(displayedField) {
+    if (displayedField === "engagementDate") {
+      return this.engagementDate
+        ? moment(this.engagementDate).format(Report.getEngagementDateFormat())
+        : "None"
+    }
     return this.intent || "None"
   }
 

@@ -4,7 +4,7 @@ import * as Models from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useState } from "react"
 
-const LinkAnetEntity = ({ type, uuid, children }) => {
+const LinkAnetEntity = ({ type, uuid, displayedFields, children }) => {
   const [entity, setEntity] = useState()
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
   }, [type, uuid])
 
   return (
-    <LinkTo modelType={type} model={entity}>
+    <LinkTo modelType={type} model={entity} displayedFields={displayedFields}>
       {children}
     </LinkTo>
   )
@@ -29,6 +29,7 @@ const LinkAnetEntity = ({ type, uuid, children }) => {
 LinkAnetEntity.propTypes = {
   type: PropTypes.string.isRequired,
   uuid: PropTypes.string.isRequired,
+  displayedFields: PropTypes.object,
   children: PropTypes.any
 }
 

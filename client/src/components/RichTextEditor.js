@@ -1,4 +1,4 @@
-import LinkAnet from "components/editor/LinkAnet"
+import LinkAnet, { RICH_TEXT_FIELDS } from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import "components/editor/RichTextEditor.css"
 import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
@@ -236,11 +236,12 @@ const Element = ({ attributes, children, element }) => {
           }}
         >
           {element.href ? (
-            <LinkAnet url={element.href} />
+            <LinkAnet url={element.href} displayedFields={RICH_TEXT_FIELDS} />
           ) : (
             <LinkAnetEntity
               type={element.entityType}
               uuid={element.entityUuid}
+              displayedFields={RICH_TEXT_FIELDS}
             />
           )}
           {children}
