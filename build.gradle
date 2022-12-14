@@ -191,6 +191,8 @@ runtime {
 		'java.xml',
 		'java.logging',
 		'java.management',
+		'jdk.crypto.cryptoki',
+		'jdk.crypto.ec',
 		'jdk.unsupported',
 		'java.security.jgss',
 		'java.naming',
