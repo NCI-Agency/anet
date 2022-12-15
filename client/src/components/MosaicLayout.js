@@ -30,6 +30,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
       <div className="mosaic-container">
         {renderNavBar()}
         <MosaicWithoutDragDropContext
+          blueprintNamespace="bp4"
           value={currentNode}
           onChange={updateCurrentNode}
           renderTile={(id, path) => {

@@ -86,7 +86,7 @@ export class CreatePerson extends Page {
   }
 
   get endOfTourToday() {
-    return browser.$(".bp3-datepicker-footer button.bp3-button:first-child")
+    return browser.$(".bp4-datepicker-footer button.bp4-button:first-child")
   }
 
   get customFieldsContainer() {

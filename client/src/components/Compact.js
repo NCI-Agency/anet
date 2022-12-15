@@ -393,7 +393,7 @@ export const CompactRowContentS = styled.td`
     margin-bottom: 0;
     padding-top: 0;
   }
-  & .bp3-icon-info-sign {
+  & .bp4-icon-info-sign {
     padding: 0 1rem;
     @media print {
       display: none;

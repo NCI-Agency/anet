@@ -20,7 +20,7 @@ class MergeLocations extends Page {
   }
 
   get advancedSelectPopover() {
-    return browser.$(".bp3-popover2-content")
+    return browser.$(".bp4-popover2-content")
   }
 
   get locationHeaderFromPopover() {

@@ -71,7 +71,7 @@ class CreateReport extends cr.CreateReport {
     const personRow = browser.$$(
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
     )
-    personRow[0].$("div.bp3-spinner").waitForExist({ reverse: true })
+    personRow[0].$("div.bp4-spinner").waitForExist({ reverse: true })
 
     return {
       name: personRow[1].getText(),

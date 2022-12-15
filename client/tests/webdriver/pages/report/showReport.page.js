@@ -151,7 +151,7 @@ class ShowReport extends Page {
 
     const row = td.$("..")
     // wait for conflict loader to disappear
-    row.$("td.conflictButton div.bp3-spinner").waitForExist({ reverse: true })
+    row.$("td.conflictButton div.bp4-spinner").waitForExist({ reverse: true })
 
     return {
       name: td.getText(),

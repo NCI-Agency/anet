@@ -299,7 +299,7 @@ const AdvancedSelect = ({
           >
             <InputGroup>
               <Popover2
-                popoverClassName="bp3-popover2-content-sizing"
+                popoverClassName="bp4-popover2-content-sizing"
                 content={
                   <Row className="border-between">
                     <FilterAsNav
