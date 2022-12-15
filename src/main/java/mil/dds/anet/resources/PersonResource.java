@@ -262,29 +262,35 @@ public class PersonResource {
     if (loser == null) {
       throw new WebApplicationException("Loser not found", Status.NOT_FOUND);
     }
-    if (!existingWinner.getRole().equals(loser.getRole())) {
-      throw new WebApplicationException("You can only merge people of the same role",
-          Status.NOT_ACCEPTABLE);
+
+    final Person winnerForMerge;
+    if (existingWinner.getRole() != loser.getRole()) {
+      // Take all fields from existing winner when roles are different!
+      winnerForMerge = existingWinner;
+      // Make sure we have the winner's current position pre-loaded before merging
+      DaoUtils.getPosition(existingWinner);
+    } else {
+      // Do some additional sanity checks
+      winnerForMerge = winner;
+      final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
+      ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
+          winnerPositionUuid);
+
+      if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerUuid, loserUuid,
+          winner.getPreviousPositions(), true)) {
+        throw new WebApplicationException(
+            "At least one of the positions in the history is occupied for the specified period.",
+            Status.CONFLICT);
+      }
     }
 
-    final String winnerPositionUuid = DaoUtils.getUuid(winner.getPosition());
-    ResourceUtils.validateHistoryInput(winnerUuid, winner.getPreviousPositions(), true,
-        winnerPositionUuid);
-
-    if (AnetObjectEngine.getInstance().getPersonDao().hasHistoryConflict(winnerUuid, loserUuid,
-        winner.getPreviousPositions(), true)) {
-      throw new WebApplicationException(
-          "At least one of the positions in the history is occupied for the specified period.",
-          Status.CONFLICT);
-    }
-
-    int numRows = dao.mergePeople(winner, loser);
+    int numRows = dao.mergePeople(winnerForMerge, loser);
     if (numRows == 0) {
       throw new WebApplicationException(
           "Couldn't process merge operation, error occurred while updating merged person relation information.",
           Status.NOT_FOUND);
     }
-    AnetAuditLogger.log("Person {} merged into {} by {}", loser, existingWinner, user);
+    AnetAuditLogger.log("Person {} merged into {} by {}", loser, winnerForMerge, user);
 
     // GraphQL mutations *have* to return something, so we return the number of updated rows
     return numRows;

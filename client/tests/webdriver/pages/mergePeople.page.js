@@ -59,6 +59,16 @@ class MergePeople extends Page {
     return browser.$$(".offcanvas .card")
   }
 
+  get clearValueButtons() {
+    return browser.$$(
+      "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'remove-button')]"
+    )
+  }
+
+  get editHistoryButton() {
+    return browser.$('//button[text()="Edit History Manually"]')
+  }
+
   getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
     return browser.$(`#mid-merge-per-col ${button} > button`)
@@ -148,6 +158,21 @@ class MergePeople extends Page {
       }
     })
     return areExist
+  }
+
+  waitForDifferentRolesAlert() {
+    browser.waitUntil(
+      () => {
+        return (
+          browser.$(".alert-warning").getText() ===
+          "People on each side has different roles."
+        )
+      },
+      {
+        timeout: 5000,
+        timeoutMsg: "Couldn't see the success alert in time"
+      }
+    )
   }
 }
 

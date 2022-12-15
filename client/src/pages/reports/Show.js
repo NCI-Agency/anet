@@ -1345,7 +1345,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     }
     return (
       <Alert variant="warning">
-        The following warnings should be addressed before {submitType} this{" "}
+        You may want to review the following warnings before {submitType} this{" "}
         {reportType}:
         <ul>
           {validationWarnings.map((warning, idx) => (

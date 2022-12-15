@@ -11,8 +11,9 @@ describe("Anet home page", function() {
   })
   it("should have the right title", function() {
     Home.open()
+    browser.pause(5000) // Wait until the title is set
     const title = browser.getTitle()
-    expect(title).to.equal("ANET")
+    expect(title).to.equal("Home - ANET")
     Home.logout()
   })
   it("should have the right security marking", () => {

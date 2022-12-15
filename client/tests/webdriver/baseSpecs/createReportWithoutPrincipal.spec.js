@@ -20,7 +20,7 @@ const REPORT_FIELDS = {
 }
 
 const NO_PRINCIPAL_WARNING =
-  "You didn't provide the primary Afghan Partner for the Engagement"
+  "No primary Afghan Partner has been provided for the Engagement"
 const REPORT_SUBMITTED_STATUS = "This report is PENDING approvals."
 const REPORT_APPROVED_STATUS = "This report is APPROVED."
 
