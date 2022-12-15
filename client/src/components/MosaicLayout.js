@@ -50,7 +50,7 @@ const MosaicLayout = ({ visualizations, initialNode, description, style }) => {
     return (
       <div className={classNames(Classes.NAVBAR)}>
         <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
-          <Icon iconSize={IconSize.LARGE} icon={IconNames.MENU} />
+          <Icon size={IconSize.LARGE} icon={IconNames.MENU} />
           <Button
             className={classNames(Classes.BUTTON)}
             onClick={autoArrange}

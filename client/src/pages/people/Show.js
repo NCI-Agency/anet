@@ -547,7 +547,7 @@ const PersonShow = ({ pageDispatchers }) => {
               showIcon={false}
               showAvatar={false}
             >
-              <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+              <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
             </LinkTo>
           </span>
         </OverlayTrigger>
@@ -566,7 +566,7 @@ const PersonShow = ({ pageDispatchers }) => {
             onClick={() => setShowAssignPositionModal(true)}
             className="change-assigned-position"
           >
-            <Icon iconSize={IconSize.LARGE} icon={IconNames.EXCHANGE} />
+            <Icon size={IconSize.LARGE} icon={IconNames.EXCHANGE} />
           </Button>
         </OverlayTrigger>
       ) : null
@@ -584,7 +584,7 @@ const PersonShow = ({ pageDispatchers }) => {
           }
         >
           <Button onClick={() => setShowAssignPositionModal(true)}>
-            <Icon iconSize={IconSize.LARGE} icon={IconNames.INSERT} />
+            <Icon size={IconSize.LARGE} icon={IconNames.INSERT} />
           </Button>
         </OverlayTrigger>
       ) : null
@@ -614,7 +614,7 @@ const PersonShow = ({ pageDispatchers }) => {
           onClick={() => setShowHistoryModal(true)}
           className="edit-history"
         >
-          <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+          <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
         </Button>
       </OverlayTrigger>
     ) : null

@@ -175,7 +175,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
                           <Icon
                             icon={IconNames.WARNING_SIGN}
                             intent={Intent.WARNING}
-                            iconSize={IconSize.STANDARD}
+                            size={IconSize.STANDARD}
                             style={{ margin: "0 6px" }}
                           />
                           Possible Duplicates

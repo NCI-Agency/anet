@@ -67,7 +67,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
         <Icon
           icon={IconNames.ERROR}
           intent={Intent.DANGER}
-          iconSize={IconSize.STANDARD}
+          size={IconSize.STANDARD}
         />
       </Tooltip2>
     )
@@ -105,7 +105,7 @@ const PlanningConflictForReport = ({ report, text, largeIcon }) => {
         <Icon
           icon={IconNames.WARNING_SIGN}
           intent={Intent.WARNING}
-          iconSize={largeIcon ? IconSize.LARGE : IconSize.STANDARD}
+          size={largeIcon ? IconSize.LARGE : IconSize.STANDARD}
           style={{ margin: "0 5px" }}
         />
       </Tooltip2>

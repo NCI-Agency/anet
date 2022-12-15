@@ -359,7 +359,7 @@ const ReportAuthorCheckbox = ({
   disabled ? (
     !!person.author && (
       <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
-        <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+        <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
       </OverlayTrigger>
     )
   ) : (
@@ -367,7 +367,7 @@ const ReportAuthorCheckbox = ({
       type="checkbox"
       label={
         <OverlayTrigger overlay={<Tooltip id="author-tooltip">Author</Tooltip>}>
-          <Icon iconSize={IconSize.LARGE} icon={IconNames.EDIT} />
+          <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
         </OverlayTrigger>
       }
       name={`authorAttendee${person.role}`}
@@ -392,7 +392,7 @@ const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) =>
       <OverlayTrigger
         overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
       >
-        <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
+        <Icon size={IconSize.LARGE} icon={IconNames.PEOPLE} />
       </OverlayTrigger>
     )
   ) : (
@@ -402,7 +402,7 @@ const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) =>
         <OverlayTrigger
           overlay={<Tooltip id="attendee-tooltip">Attendee</Tooltip>}
         >
-          <Icon iconSize={IconSize.LARGE} icon={IconNames.PEOPLE} />
+          <Icon size={IconSize.LARGE} icon={IconNames.PEOPLE} />
         </OverlayTrigger>
       }
       name={`authorAttendee${person.role}`}
