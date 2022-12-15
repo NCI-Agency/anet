@@ -31,8 +31,8 @@ public class OrganizationDao
     extends AnetSubscribableObjectDao<Organization, OrganizationSearchQuery> {
 
   private static final String[] fields =
-      {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "type", "createdAt",
-          "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
+      {"uuid", "shortName", "longName", "status", "identificationCode", "profile", "type",
+          "createdAt", "updatedAt", "parentOrgUuid", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "organizations";
   public static final String ORGANIZATION_FIELDS =
       DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);

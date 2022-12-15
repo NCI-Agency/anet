@@ -28,7 +28,6 @@ public class OrganizationSearchQuery
   @GraphQLQuery
   @GraphQLInputField
   private RecurseStrategy orgRecurseStrategy;
-
   // Find organizations who (don't) have the profile filled in
   @GraphQLQuery
   @GraphQLInputField

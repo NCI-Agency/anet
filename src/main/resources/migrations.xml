@@ -4211,4 +4211,87 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="alter-full_text-index-add-organizations_profile" author="gjvoosten" dbms="postgresql" runInTransaction="false" >
+		<sql>
+			<!-- Drop full-text materialized views (incl. indexes);
+			     copied from changeset alter-postgresql-fulltext -->
+			DROP MATERIALIZED VIEW mv_fts_organizations;
+			DROP MATERIALIZED VIEW mv_fts_people;
+			DROP MATERIALIZED VIEW mv_fts_positions;
+
+			<!-- Drop generated full-text column from organizations;
+			     copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE organizations DROP COLUMN full_text;
+
+			<!-- Re-add generated full-text column to organization, now including profile;
+			     use 'anet' config only for columns containing English text,
+			     use 'simple' config for all columns;
+			     copied mostly from changeset alter-postgresql-fulltext -->
+			ALTER TABLE organizations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector('simple', coalesce(organizations."identificationCode", '')), ${fts_high}) ||
+					setweight(to_tsvector('simple', coalesce(organizations."shortName", '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations."longName", ''))
+						  || to_tsvector('simple', coalesce(organizations."longName", '')), ${fts_low}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(organizations.profile, ''))
+						  || to_tsvector('simple', coalesce(organizations.profile, '')), ${fts_low})
+				) STORED;
+
+			<!-- Re-create full-text materialized views and indexes;
+			     copied from changeset alter-postgresql-fulltext -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_organizations(uuid, full_text) AS
+				SELECT
+					organizations.uuid,
+					organizations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM organizations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'organizations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = organizations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY organizations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_organizations_uuid" ON mv_fts_organizations(uuid);
+			CREATE INDEX "FT_mv_fts_organizations" ON mv_fts_organizations USING gin(full_text);
+			CREATE INDEX "TR_organizations_uuid" ON mv_fts_organizations USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_people(uuid, full_text) AS
+				SELECT
+					people.uuid,
+					people.full_text
+					|| coalesce(tsvector_agg(positions.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM people
+				LEFT JOIN positions ON positions."currentPersonUuid" = people.uuid
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'people'
+					AND "noteRelatedObjects"."relatedObjectUuid" = people.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY people.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_people_uuid" ON mv_fts_people(uuid);
+			CREATE INDEX "FT_mv_fts_people" ON mv_fts_people USING gin(full_text);
+			CREATE INDEX "TR_people_uuid" ON mv_fts_people USING gin(uuid gin_trgm_ops);
+
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_positions(uuid, full_text) AS
+				SELECT
+					positions.uuid,
+					positions.full_text
+					|| coalesce(tsvector_agg(people.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(organizations.full_text), ''::tsvector)
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM positions
+				LEFT JOIN people ON people.uuid = positions."currentPersonUuid"
+				LEFT JOIN organizations ON organizations.uuid = positions."organizationUuid"
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'positions'
+					AND "noteRelatedObjects"."relatedObjectUuid" = positions.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY positions.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_positions" ON mv_fts_positions(uuid);
+			CREATE INDEX "FT_mv_fts_positions" ON mv_fts_positions USING gin(full_text);
+			CREATE INDEX "TR_positions_uuid" ON mv_fts_positions USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
