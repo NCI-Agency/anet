@@ -1,6 +1,6 @@
+import { faker } from "@faker-js/faker"
 import Aigle from "aigle"
 import colors from "colors"
-import faker from "faker"
 import scenarioMapping from "./scenarios/scenarios"
 import { fuzzy, normalCDF, normalPPF, sleep } from "./simutils"
 
@@ -89,7 +89,7 @@ async function runBuildup(scenario) {
   console.log(colors.green("Sim buildup starting"))
 
   await Aigle.resolve(scenario.buildup).each(async buildup => {
-    const userTypeName = faker.random.arrayElement(buildup.userTypes)
+    const userTypeName = faker.helpers.arrayElement(buildup.userTypes)
     const userType = scenario.userTypes.find(d => d.name === userTypeName)
     if (userType) {
       const user = await userType.userFunction()
@@ -163,7 +163,7 @@ async function runStories(scenario, cycle, runningTime) {
     await Aigle.resolve(scenario.userTypes).each(async userType => {
       // delay some arbitrary time
       await Aigle.delay(10)
-      const run = faker.random.arrayElement(storyRuns)
+      const run = faker.helpers.arrayElement(storyRuns)
       const story = run.story
 
       if (story.userTypes.includes(userType.name)) {

@@ -1,5 +1,5 @@
+import { faker } from "@faker-js/faker"
 import Model from "components/Model"
-import faker from "faker"
 import _isEmpty from "lodash/isEmpty"
 import { Position } from "models"
 import { runGQL, specialUser } from "../../simutils"

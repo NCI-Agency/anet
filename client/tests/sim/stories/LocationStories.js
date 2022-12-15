@@ -1,5 +1,5 @@
+import { faker } from "@faker-js/faker"
 import Model from "components/Model"
-import faker from "faker"
 import { Location } from "models"
 import { fuzzy, populate, runGQL } from "../simutils"
 

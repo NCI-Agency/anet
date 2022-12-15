@@ -1,7 +1,6 @@
+import { faker } from "@faker-js/faker"
 import Model from "components/Model"
 import { countries } from "countries-list"
-import faker from "faker"
-import Faker from "faker/lib"
 import { getAlpha2Code } from "i18n-iso-countries"
 import { Person } from "models"
 import Settings from "settings"
@@ -15,33 +14,36 @@ const availableRanks = Settings.fields.person.ranks.map(r => r.value)
 function principalName(_gender) {
   const gender = _gender === "MALE" ? "m" : "f"
   const result = {
-    firstName: faker.random.arrayElement(
+    firstName: faker.helpers.arrayElement(
       afghanFirstNames.filter(d => d.gender === gender)
     ).name,
-    lastName: faker.random.arrayElement(afghanSurnames).name
+    lastName: faker.helpers.arrayElement(afghanSurnames).name
   }
   return result
 }
 
 function advisorName(gender, locale) {
-  const localizedFaker = new Faker({ locale: locale, locales: faker.locales })
+  const oldLocale = faker.locale
+  faker.locale = locale
   const genderInt = gender === "MALE" ? 0 : 1
-  return {
-    firstName: localizedFaker.name.firstName(genderInt),
-    lastName: localizedFaker.name.lastName(genderInt)
+  const name = {
+    firstName: faker.name.firstName(genderInt),
+    lastName: faker.name.lastName(genderInt)
   }
+  faker.locale = oldLocale
+  return name
 }
 
 function randomPerson(role, status) {
   const gender = fuzzy.withProbability(0.9) ? "MALE" : "FEMALE"
   if (!role) {
-    role = faker.random.arrayElement([
+    role = faker.helpers.arrayElement([
       Person.ROLE.PRINCIPAL,
       Person.ROLE.ADVISOR
     ])
   }
   const defaultLangCode = "en"
-  const country = faker.random.arrayElement(
+  const country = faker.helpers.arrayElement(
     role === Person.ROLE.PRINCIPAL
       ? Settings.fields.principal.person.countries
       : Settings.fields.advisor.person.countries
@@ -62,7 +64,7 @@ function randomPerson(role, status) {
   const langCode =
     fakerHacks[countryCode] ||
     (countryByCode
-      ? faker.random.arrayElement(countryByCode.languages)
+      ? faker.helpers.arrayElement(countryByCode.languages)
       : defaultLangCode)
   const locale = availableLocales.includes(langCode)
     ? langCode
@@ -71,10 +73,10 @@ function randomPerson(role, status) {
     gender,
     locale
   )
-  const rank = faker.random.arrayElement(availableRanks)
+  const rank = faker.helpers.arrayElement(availableRanks)
   let email = ""
   if (role === Person.ROLE.ADVISOR) {
-    let domainName = faker.random.arrayElement(Settings.domainNames)
+    let domainName = faker.helpers.arrayElement(Settings.domainNames)
     if (domainName.startsWith("*")) {
       domainName = faker.internet.domainWord() + domainName.slice(1)
     }
