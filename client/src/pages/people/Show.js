@@ -10,7 +10,6 @@ import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
 import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import EditHistory from "components/EditHistory"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -34,6 +33,7 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person, Position } from "models"
@@ -480,12 +480,12 @@ const PersonShow = ({ pageDispatchers }) => {
 
   function mapNonCustomFields() {
     const classNameExceptions = {
-      biography: "biography rich-text-readonly"
+      biography: "biography"
     }
 
-    // map fields that have specific human person
+    // map fields that have specific human value
     const humanValuesExceptions = {
-      biography: parseHtmlWithLinkTo(person.biography),
+      biography: <RichTextEditor readOnly value={person.biography} />,
       emailAddress: emailHumanValue,
       endOfTourDate:
         person.endOfTourDate &&

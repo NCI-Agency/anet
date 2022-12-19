@@ -1,4 +1,4 @@
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
+import RichTextEditor from "components/RichTextEditor"
 import _clone from "lodash/clone"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEmpty from "lodash/isEmpty"
@@ -6,6 +6,7 @@ import { Person, Report } from "models"
 import moment from "moment"
 import { AssessmentPeriodPropType, PeriodPropType } from "periodUtils"
 import PropTypes from "prop-types"
+import React from "react"
 import Settings from "settings"
 
 export const aggregationWidgetPropTypes = {
@@ -198,7 +199,7 @@ export const richTextAggregation = (fieldName, fieldConfig, data) => {
   return {
     values: data
       .map(item => Object.get(item, fieldName))
-      .map(htmlString => parseHtmlWithLinkTo(htmlString))
+      .map(htmlString => <RichTextEditor readOnly value={htmlString} />)
   }
 }
 

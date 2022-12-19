@@ -5,7 +5,6 @@ import { IconNames } from "@blueprintjs/icons"
 import API from "api"
 import AppContext from "components/AppContext"
 import ConfirmDestructive from "components/ConfirmDestructive"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import Model, {
@@ -14,6 +13,7 @@ import Model, {
 } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
+import RichTextEditor from "components/RichTextEditor"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
 import moment from "moment"
@@ -147,9 +147,7 @@ const RelatedObjectNotes = ({
               const isJson = note.type !== NOTE_TYPE.FREE_TEXT
               const jsonFields =
                 isJson && note.text ? utils.parseJsonSafe(note.text) : {}
-              const noteText = isJson
-                ? jsonFields.text
-                : parseHtmlWithLinkTo(note.text)
+              const noteText = isJson ? jsonFields.text : note.text
               return (
                 <Card
                   key={note.uuid}
@@ -230,15 +228,7 @@ const RelatedObjectNotes = ({
                           </span>
                         ))}
                     </div>
-                    <div
-                      className="rich-text-readonly"
-                      style={{
-                        overflowWrap: "break-word",
-                        wordWrap: "break-word" // IE
-                      }}
-                    >
-                      {noteText}
-                    </div>
+                    <RichTextEditor readOnly value={noteText} />
                   </Card.Body>
                 </Card>
               )

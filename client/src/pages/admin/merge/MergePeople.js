@@ -8,7 +8,6 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
 import { customFieldsJSONString } from "components/CustomFields"
 import EditHistory from "components/EditHistory"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkTo from "components/LinkTo"
 import PersonField from "components/MergeField"
 import Messages from "components/Messages"
@@ -25,6 +24,7 @@ import {
   usePageTitle
 } from "components/Page"
 import PreviousPositions from "components/PreviousPositions"
+import RichTextEditor from "components/RichTextEditor"
 import useMergeObjects, {
   ALIGN_OPTIONS,
   areAllSet,
@@ -423,8 +423,9 @@ const MergePeople = ({ pageDispatchers }) => {
               />
               <PersonField
                 label="Biography"
-                value={parseHtmlWithLinkTo(mergedPerson.biography)}
-                className="rich-text-readonly"
+                value={
+                  <RichTextEditor readOnly value={mergedPerson.biography} />
+                }
                 align={ALIGN_OPTIONS.CENTER}
                 action={
                   matchingRoles &&
@@ -939,8 +940,7 @@ const PersonColumn = ({
           <PersonField
             label="Biography"
             fieldName="biography"
-            className="rich-text-readonly"
-            value={parseHtmlWithLinkTo(person.biography)}
+            value={<RichTextEditor readOnly value={person.biography} />}
             align={align}
             action={
               actionButtons &&

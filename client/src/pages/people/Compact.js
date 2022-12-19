@@ -14,7 +14,6 @@ import CompactTable, {
   PAGE_SIZES
 } from "components/Compact"
 import { mapReadonlyCustomFieldsToComps } from "components/CustomFields"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import {
@@ -29,6 +28,7 @@ import {
   usePageTitle
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
+import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Field, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -387,15 +387,15 @@ const CompactPersonView = ({ pageDispatchers }) => {
 
   function mapNonCustomFields() {
     const classNameExceptions = {
-      biography: "biography rich-text-readonly"
+      biography: "biography"
     }
 
     const idExceptions = {
       position: "current-position"
     }
-    // map fields that have specific human person
+    // map fields that have specific human value
     const humanValuesExceptions = {
-      biography: parseHtmlWithLinkTo(person.biography),
+      biography: <RichTextEditor readOnly value={person.biography} />,
       emailAddress: emailHumanValue,
       endOfTourDate:
         person.endOfTourDate &&

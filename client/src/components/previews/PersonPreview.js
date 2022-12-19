@@ -2,11 +2,11 @@ import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
 import AvatarDisplayComponent from "components/AvatarDisplayComponent"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
 import PreviousPositions from "components/PreviousPositions"
+import RichTextEditor from "components/RichTextEditor"
 import { Person, Position } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -180,8 +180,8 @@ const PersonPreview = ({ className, uuid }) => {
         </Row>
 
         <div className="preview-field-label">Biography</div>
-        <div className="preview-field-value rich-text-readonly">
-          {parseHtmlWithLinkTo(person.biography)}
+        <div className="preview-field-value">
+          <RichTextEditor readOnly value={person.biography} />
         </div>
       </div>
       <br />

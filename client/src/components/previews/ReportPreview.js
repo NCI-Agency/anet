@@ -1,10 +1,10 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import NoPaginationTaskTable from "components/NoPaginationTaskTable"
 import PlanningConflictForReport from "components/PlanningConflictForReport"
+import RichTextEditor from "components/RichTextEditor"
 import { Person, Report, Task } from "models"
 import moment from "moment"
 import ReportPeople from "pages/reports/ReportPeople"
@@ -278,8 +278,8 @@ const ReportPreview = ({ className, uuid }) => {
       {report.reportText && (
         <React.Fragment>
           <h4>{Settings.fields.report.reportText}</h4>
-          <div className="preview-section rich-text-readonly">
-            {parseHtmlWithLinkTo(report.reportText)}
+          <div className="preview-section">
+            <RichTextEditor readOnly value={report.reportText} />
           </div>
         </React.Fragment>
       )}

@@ -3,7 +3,6 @@ import { IconNames } from "@blueprintjs/icons"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import CustomDateInput from "components/CustomDateInput"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -89,8 +88,7 @@ const ReadonlySpecialField = ({
         name={name}
         isCompact={isCompact}
         component={FieldHelper.ReadonlyField}
-        className="rich-text-readonly"
-        humanValue={parseHtmlWithLinkTo(fieldValue)}
+        humanValue={<RichTextEditor readOnly value={fieldValue} />}
         {...Object.without(otherFieldProps, "style")}
       />
     )
