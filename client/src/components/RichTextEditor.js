@@ -21,7 +21,13 @@ import {
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
 
-const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
+const RichTextEditor = ({
+  value,
+  onChange,
+  onHandleBlur,
+  className,
+  readOnly
+}) => {
   const [showLinksModal, setShowLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
@@ -47,16 +53,19 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
         }}
       >
         <div className="editor-container">
-          <Toolbar
-            showLinksModal={showLinksModal}
-            setShowLinksModal={setShowLinksModal}
-          />
+          {!readOnly && (
+            <Toolbar
+              showLinksModal={showLinksModal}
+              setShowLinksModal={setShowLinksModal}
+            />
+          )}
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onBlur={onHandleBlur}
             onKeyDown={e => handleOnKeyDown(e, editor, setShowLinksModal)}
             className="editable"
+            readOnly={readOnly}
           />
         </div>
       </Slate>
@@ -68,7 +77,8 @@ RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
+  readOnly: PropTypes.bool
 }
 
 const withHtml = editor => {
