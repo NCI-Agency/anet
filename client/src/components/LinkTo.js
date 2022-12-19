@@ -26,7 +26,7 @@ const LinkTo = ({
   modelType,
   model,
   style,
-  displayedFields,
+  displayCallback,
   ...componentProps
 }) => {
   const { level } = useContext(LinkToContext)
@@ -86,7 +86,7 @@ const LinkTo = ({
         >
           <span style={{ cursor: "help", ...style }}>
             {avatarComponent}
-            {modelInstance.toString(displayedFields?.[modelType])}
+            {modelInstance.toString(displayCallback)}
             {children}
           </span>
         </ModelTooltip>
@@ -111,7 +111,7 @@ const LinkTo = ({
       <>
         {iconComponent}
         {avatarComponent}
-        {children || modelInstance.toString(displayedFields?.[modelType])}
+        {children || modelInstance.toString(displayCallback)}
       </>
     </LinkToComponent>
   )
@@ -159,7 +159,7 @@ LinkTo.propTypes = {
   whenUnspecified: PropTypes.string,
   modelType: PropTypes.string.isRequired,
   model: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
-  displayedFields: PropTypes.object,
+  displayCallback: PropTypes.func,
   style: PropTypes.object
 }
 
@@ -172,7 +172,7 @@ LinkTo.defaultProps = {
   button: false,
   whenUnspecified: "Unspecified",
   modelType: null,
-  displayedFields: null,
+  displayCallback: null,
   model: null
 }
 

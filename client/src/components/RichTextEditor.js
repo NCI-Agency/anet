@@ -1,10 +1,12 @@
-import LinkAnet, { RICH_TEXT_FIELDS } from "components/editor/LinkAnet"
+import LinkAnet from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import "components/editor/RichTextEditor.css"
 import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
+import * as Models from "models"
+import moment from "moment/moment"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
@@ -205,6 +207,18 @@ const deserialize = element => {
   }
 }
 
+const displayCallback = modelInstance => {
+  if (modelInstance instanceof Models.Report) {
+    return modelInstance.engagementDate
+      ? moment(modelInstance.engagementDate).format(
+        Models.Report.getEngagementDateFormat()
+      )
+      : "None"
+  } else {
+    return modelInstance.toString()
+  }
+}
+
 const Element = ({ attributes, children, element }) => {
   const selected = useSelected()
   const focused = useFocused()
@@ -236,12 +250,12 @@ const Element = ({ attributes, children, element }) => {
           }}
         >
           {element.href ? (
-            <LinkAnet url={element.href} displayedFields={RICH_TEXT_FIELDS} />
+            <LinkAnet url={element.href} displayCallback={displayCallback} />
           ) : (
             <LinkAnetEntity
               type={element.entityType}
               uuid={element.entityUuid}
-              displayedFields={RICH_TEXT_FIELDS}
+              displayCallback={displayCallback}
             />
           )}
           {children}

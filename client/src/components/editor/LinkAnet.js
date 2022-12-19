@@ -4,10 +4,6 @@ import PropTypes from "prop-types"
 import React from "react"
 import { getEntityInfoFromUrl } from "utils_links"
 
-export const RICH_TEXT_FIELDS = {
-  Report: "engagementDate"
-}
-
 // Enhanced HTML so that links will be converted to link components
 export function parseHtmlWithLinkTo(html) {
   if (!html) {
@@ -16,18 +12,13 @@ export function parseHtmlWithLinkTo(html) {
   return parse(html, {
     replace: domNode => {
       if (domNode.attribs && domNode.attribs.href) {
-        return (
-          <LinkAnet
-            url={domNode.attribs.href}
-            displayedFields={RICH_TEXT_FIELDS}
-          />
-        )
+        return <LinkAnet url={domNode.attribs.href} />
       }
     }
   })
 }
 
-const LinkAnet = ({ entityKey, contentState, url, displayedFields }) => {
+const LinkAnet = ({ entityKey, contentState, url, displayCallback }) => {
   const urlLink =
     url || (contentState && contentState.getEntity(entityKey).getData().url)
 
@@ -38,7 +29,7 @@ const LinkAnet = ({ entityKey, contentState, url, displayedFields }) => {
       <LinkAnetEntity
         type={isAnetEntityLink.type}
         uuid={isAnetEntityLink.uuid}
-        displayedFields={displayedFields}
+        displayCallback={displayCallback}
       />
     )
   } else {
@@ -51,7 +42,11 @@ LinkAnet.propTypes = {
   entityKey: PropTypes.string,
   contentState: PropTypes.object,
   url: PropTypes.string,
-  displayedFields: PropTypes.string
+  displayCallback: PropTypes.func
+}
+
+LinkAnet.defaultProps = {
+  displayCallback: null
 }
 
 export default LinkAnet

@@ -412,11 +412,9 @@ export default class Report extends Model {
     return REPORTS_ICON
   }
 
-  toString(displayedField) {
-    if (displayedField === "engagementDate") {
-      return this.engagementDate
-        ? moment(this.engagementDate).format(Report.getEngagementDateFormat())
-        : "None"
+  toString(displayCallback) {
+    if (typeof displayCallback === "function") {
+      return displayCallback(this)
     }
     return this.intent || "None"
   }
