@@ -362,6 +362,7 @@ task pushPsqlBaseData(type: DockerCopyFileToContainer) {
 	hostPath = "${projectDir}/insertBaseData-psql.sql"
 	remotePath = psqlPushDataPath
 }
+
 pushPsqlBaseData.mustRunAfter('dockerStartDB')
 
 task dbLoad(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
@@ -370,7 +371,23 @@ task dbLoad(dependsOn: pushPsqlBaseData, type: DockerExecContainer) {
 	containerId = dbContainerName
 	commands = [ ["psql", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/insertBaseData-psql.sql"] as String[] ]
 }
+
 dbLoad.mustRunAfter('dbMigrate')
+
+task dbDump(type: DockerExecContainer) {
+	group = "database runtime"
+	description = "Dumps the ANET database in the container"
+	containerId = dbContainerName
+	commands = [ ["pg_dump", "-U", run.environment["ANET_DB_USERNAME"], "-d", run.environment["ANET_DB_NAME"], "-f", "${psqlPushDataPath}/anet-db-dump.sql"] as String[] ]
+}
+
+task extractDbDump(type: DockerCopyFileFromContainer, dependsOn: dbDump) {
+	group = "database runtime"
+	description = "Extracts the dumped database from the container"
+	containerId = dbContainerName
+	hostPath = "${buildDir}/db/anet-db-dump.sql"
+	remotePath = "${psqlPushDataPath}/anet-db-dump.sql"
+}
 
 task dockerBuildImage(dependsOn: installDist, type: DockerBuildImage) {
 	description = "Builds anet-app-server container image."
