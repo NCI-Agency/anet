@@ -1,22 +1,7 @@
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
-import parse from "html-react-parser"
 import PropTypes from "prop-types"
 import React from "react"
 import { getEntityInfoFromUrl } from "utils_links"
-
-// Enhanced HTML so that links will be converted to link components
-export function parseHtmlWithLinkTo(html) {
-  if (!html) {
-    return null
-  }
-  return parse(html, {
-    replace: domNode => {
-      if (domNode.attribs && domNode.attribs.href) {
-        return <LinkAnet url={domNode.attribs.href} />
-      }
-    }
-  })
-}
 
 const LinkAnet = ({ entityKey, contentState, url, displayCallback }) => {
   const urlLink =
