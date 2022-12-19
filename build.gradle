@@ -20,8 +20,8 @@ apply plugin: 'jacoco'
 apply plugin: 'checkstyle'
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 17
+targetCompatibility = 17
 
 boolean isTestEnv = project.hasProperty("testEnv")
 String dropwizardVersion = "2.1.4"
