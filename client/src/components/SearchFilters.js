@@ -461,6 +461,15 @@ export const searchFilters = function() {
             Settings.fields.principal.org.name
           ]
         }
+      },
+      Location: {
+        component: AdvancedSelectFilter,
+        deserializer: deserializeAdvancedSelectFilter,
+        props: Object.assign({}, advancedSelectFilterLocationProps, {
+          filterDefs: locationWidgetFilters,
+          placeholder: "Filter by location...",
+          queryKey: "locationUuid"
+        })
       }
     }
   }

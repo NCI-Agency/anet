@@ -29,6 +29,13 @@ const GQL_GET_ORGANIZATION = gql`
       status
       identificationCode
       type
+      location {
+        uuid
+        name
+        lat
+        lng
+        type
+      }
       parentOrg {
         uuid
         shortName

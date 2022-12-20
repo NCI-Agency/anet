@@ -33,9 +33,10 @@ import org.junit.jupiter.api.Test;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
-  protected static final String FIELDS = "{ uuid shortName longName status identificationCode type"
-      + " customFields tasks { uuid } parentOrg { uuid }"
-      + " approvalSteps { uuid name approvers { uuid } } }";
+  protected static final String FIELDS =
+      "{ uuid shortName longName status identificationCode type location"
+          + " customFields tasks { uuid } parentOrg { uuid }"
+          + " approvalSteps { uuid name approvers { uuid } } }";
   private static final String POSITION_FIELDS =
       "{ uuid name code type status organization { uuid } location { uuid } }";
 
@@ -50,6 +51,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getShortName()).isEqualTo(created.getShortName());
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
+    assertThat(aoInput.getLocation()).isEqualTo(created.getLocation());
 
     // update name of the AO
     created.setLongName("Ao McAoFace");
@@ -84,6 +86,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final OrganizationInput childInput =
         OrganizationInput.builder().withParentOrg(getOrganizationInput(created))
             .withShortName("AO McChild").withLongName("Child McAo").withStatus(Status.ACTIVE)
+            .withLocation(getLocationInput(getGeneralHospital()))
             .withType(OrganizationType.ADVISOR_ORG).build();
     final Organization child = adminMutationExecutor.createOrganization(FIELDS, childInput);
     assertThat(child).isNotNull();
@@ -167,6 +170,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(aoInput.getShortName()).isEqualTo(created.getShortName());
     assertThat(aoInput.getLongName()).isEqualTo(created.getLongName());
     assertThat(aoInput.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
+    assertThat(aoInput.getLocation()).isEqualTo(created.getLocation());
 
     // Trying to create another AO with the same identificationCode should fail
     try {
@@ -187,6 +191,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created1.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
+    assertThat(ao1Input.getLocation()).isEqualTo(created1.getLocation());
 
     // Create another new AO
     final OrganizationInput ao2Input = TestData.createAdvisorOrganizationInput(true);
@@ -196,6 +201,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao2Input.getShortName()).isEqualTo(created2.getShortName());
     assertThat(ao2Input.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao2Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
+    assertThat(ao2Input.getLocation()).isEqualTo(created2.getLocation());
 
     // Trying to update AO2 with the same identificationCode as AO1 should fail
     created2.setIdentificationCode(created1.getIdentificationCode());
@@ -217,6 +223,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created1.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created1.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
+    assertThat(ao1Input.getLocation()).isEqualTo(created1.getLocation());
 
     // Creating another AO with NULL identificationCode should succeed
     final Organization created2 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
@@ -225,6 +232,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created2.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created2.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
+    assertThat(ao1Input.getLocation()).isEqualTo(created2.getLocation());
 
     // Creating an AO with empty identificationCode should succeed
     ao1Input.setIdentificationCode("");
@@ -234,6 +242,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created3.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created3.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
+    assertThat(ao1Input.getLocation()).isEqualTo(created3.getLocation());
 
     // Creating another AO with empty identificationCode should succeed
     final Organization created4 = adminMutationExecutor.createOrganization(FIELDS, ao1Input);
@@ -242,6 +251,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao1Input.getShortName()).isEqualTo(created4.getShortName());
     assertThat(ao1Input.getLongName()).isEqualTo(created4.getLongName());
     assertThat(ao1Input.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
+    assertThat(ao1Input.getLocation()).isEqualTo(created4.getLocation());
 
     // Create a new AO with non-NULL identificationCode
     final OrganizationInput ao5Input = TestData.createAdvisorOrganizationInput(true);
@@ -251,6 +261,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     assertThat(ao5Input.getShortName()).isEqualTo(created5.getShortName());
     assertThat(ao5Input.getLongName()).isEqualTo(created5.getLongName());
     assertThat(ao5Input.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
+    assertThat(ao5Input.getLocation()).isEqualTo(created5.getLocation());
 
     // Updating this AO with empty identificationCode should succeed
     created5.setIdentificationCode("");
@@ -304,6 +315,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
     assertThat(orgs.getList().stream().filter(o -> o.getShortName().equals("MOD-F")).count())
         .isEqualTo(1);
+
+    // Search by location
+    query.setLocationUuid(getGeneralHospital().getUuid());
+    orgs = jackQueryExecutor.organizationList(getListFields(FIELDS), query);
+    assertThat(orgs.getList()).isEmpty(); // Should be empty!
   }
 
   @Test
@@ -337,7 +353,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final OrganizationInput orgInput = OrganizationInput.builder().withShortName("Type Test")
         .withLongName("Advisor Organization for Type Update Test").withStatus(Status.ACTIVE)
         .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
-        .build();
+        .withLocation(getLocationInput(getGeneralHospital())).build();
     final Organization org = succeedCreateOrganization(adminMutationExecutor, orgInput);
 
     org.setType(OrganizationType.PRINCIPAL_ORG);
@@ -355,11 +371,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final MutationExecutor superUserMutationExecutor =
         getMutationExecutor(superUser.getDomainUsername());
 
-    final OrganizationInput orgInput =
-        OrganizationInput.builder().withShortName("Parent Organization")
-            .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
-            .withIdentificationCode(UUID.randomUUID().toString())
-            .withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationInput orgInput = OrganizationInput.builder()
+        .withShortName("Parent Organization")
+        .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
+        .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
+        .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization(superUserMutationExecutor, orgInput);
     final Organization parentOrg = succeedCreateOrganization(adminMutationExecutor, orgInput);
 
@@ -367,7 +383,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .withShortName("Child Organization").withLongName("Child Organization of Test Organization")
         .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
         .withParentOrg(getOrganizationInput(parentOrg)).withType(OrganizationType.ADVISOR_ORG)
-        .build();
+        .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization(superUserMutationExecutor, childOrgInput);
 
     // Set super-user as responsible for the parent organization
@@ -408,11 +424,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     final MutationExecutor superUserMutationExecutor =
         getMutationExecutor(superUser.getDomainUsername());
 
-    final OrganizationInput orgInput =
-        OrganizationInput.builder().withShortName("Parent Organization")
-            .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
-            .withIdentificationCode(UUID.randomUUID().toString())
-            .withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationInput orgInput = OrganizationInput.builder()
+        .withShortName("Parent Organization")
+        .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
+        .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
+        .withLocation(getLocationInput(getGeneralHospital())).build();
     final Organization createdParentOrg =
         succeedCreateOrganization(adminMutationExecutor, orgInput);
 
@@ -420,7 +436,8 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .withShortName("Child Organization").withLongName("Child Organization of Test Organization")
         .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
         .withParentOrg(getOrganizationInput(createdParentOrg))
-        .withType(OrganizationType.ADVISOR_ORG).build();
+        .withType(OrganizationType.ADVISOR_ORG).withLocation(getLocationInput(getGeneralHospital()))
+        .build();
     final Organization createdChildOrg =
         succeedCreateOrganization(adminMutationExecutor, childOrgInput);
 
@@ -443,11 +460,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     createdChildOrg.setParentOrg(null);
     succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
 
-    final OrganizationInput newParentOrg =
-        OrganizationInput.builder().withShortName("New Parent Organization")
-            .withLongName("New Parent Organization for Testing Super Users")
-            .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
-            .withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationInput newParentOrg = OrganizationInput.builder()
+        .withShortName("New Parent Organization")
+        .withLongName("New Parent Organization for Testing Super Users").withStatus(Status.ACTIVE)
+        .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
+        .withLocation(getLocationInput(getGeneralHospital())).build();
 
     final Organization createdNewParentOrg =
         succeedCreateOrganization(adminMutationExecutor, newParentOrg);
@@ -479,11 +496,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final MutationExecutor regularUserExecutor =
         getMutationExecutor(getRegularUser().getDomainUsername());
-    final OrganizationInput orgInput =
-        OrganizationInput.builder().withShortName("Regular User Test")
-            .withLongName("Advisor Organization for Regular User Test").withStatus(Status.ACTIVE)
-            .withIdentificationCode(UUID.randomUUID().toString())
-            .withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationInput orgInput = OrganizationInput.builder()
+        .withShortName("Regular User Test")
+        .withLongName("Advisor Organization for Regular User Test").withStatus(Status.ACTIVE)
+        .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
+        .withLocation(getLocationInput(getGeneralHospital())).build();
     failCreateOrganization(regularUserExecutor, orgInput);
     failUpdateOrganization(regularUserExecutor, orgInput);
   }

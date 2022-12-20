@@ -25,11 +25,12 @@ import RelatedObjectNotes, {
 import ReportCollection from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Organization, Position, Report } from "models"
+import { Location, Organization, Position, Report } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
 import {
+  Badge,
   Button,
   FormCheck,
   ListGroup,
@@ -56,6 +57,13 @@ const GQL_GET_ORGANIZATION = gql`
       updatedAt
       identificationCode
       type
+      location {
+        uuid
+        name
+        lat
+        lng
+        type
+      }
       parentOrg {
         uuid
         shortName
@@ -455,6 +463,24 @@ const OrganizationShow = ({ pageDispatchers }) => {
                       }
                     />
                 )}
+
+                <Field
+                  name="location"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    organization.location && (
+                      <>
+                        <LinkTo
+                          modelType="Location"
+                          model={organization.location}
+                        />{" "}
+                        <Badge>
+                          {Location.humanNameOfType(organization.location.type)}
+                        </Badge>
+                      </>
+                    )
+                  }
+                />
               </Fieldset>
 
               <OrganizationLaydown

@@ -11,6 +11,36 @@ class CreateOrganization extends Page {
     return browser.$(".alert-success")
   }
 
+  get submitButton() {
+    return browser.$("#formBottomSubmit")
+  }
+
+  get organizationShortNameHelpBlock() {
+    return browser.$("#fg-shortName div.invalid-feedback")
+  }
+
+  get typeAdvisorButton() {
+    return browser.$('label[for="type_ADVISOR_ORG"]')
+  }
+
+  get shortNameInput() {
+    return browser.$("#shortName")
+  }
+
+  get longNameInput() {
+    return browser.$("#longName")
+  }
+
+  get locationInput() {
+    return browser.$("#location")
+  }
+
+  get locationAdvancedSelectFirstItem() {
+    return browser.$(
+      "#location-popover tbody tr:first-child td:nth-child(2) span"
+    )
+  }
+
   openAsSuperUser() {
     super.openAsSuperUser(PAGE_URL)
   }
@@ -21,6 +51,22 @@ class CreateOrganization extends Page {
 
   submitForm() {
     this.submitButton.click()
+  }
+
+  waitForLocationAdvancedSelectToChange(value) {
+    this.locationAdvancedSelectFirstItem.waitForExist()
+    return browser.waitUntil(
+      () => {
+        return this.locationAdvancedSelectFirstItem.getText() === value
+      },
+      {
+        timeout: 5000,
+        timeoutMsg:
+          'Expected location advanced select input to contain "' +
+          value +
+          '" after 5s'
+      }
+    )
   }
 }
 

@@ -1207,6 +1207,8 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
+      location:
+        filter: [ADVISOR_LOCATION]
       administratingPositions:
         label: Administrating positions
         placeholder: Search for a position...
@@ -1433,6 +1435,8 @@ fields:
       identificationCode:
         label: UIC
         placeholder: the six character code
+      location:
+        filter: [PRINCIPAL_LOCATION]
       administratingPositions:
         label: Administrating positions
         placeholder: Search for a position...

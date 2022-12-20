@@ -48,6 +48,9 @@ public abstract class AbstractOrganizationSearcher extends
     qb.addEnumEqualsClause("status", "organizations.status", query.getStatus());
     qb.addEnumEqualsClause("type", "organizations.type", query.getType());
 
+    qb.addStringEqualsClause("locationUuid", "organizations.\"locationUuid\"",
+        query.getLocationUuid());
+
     if (query.getHasParentOrg() != null) {
       if (query.getHasParentOrg()) {
         qb.addWhereClause("organizations.\"parentOrgUuid\" IS NOT NULL");

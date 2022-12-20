@@ -49,7 +49,8 @@ public class Organization extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   OrganizationType type;
-
+  // annotated below
+  private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
   /* The following are all Lazy Loaded */
   // annotated below
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Org */
@@ -59,6 +60,37 @@ public class Organization extends AbstractCustomizableAnetBean
   List<Task> tasks;
   // annotated below
   List<Position> administratingPositions;
+
+  @GraphQLQuery(name = "location")
+  public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
+    if (location.hasForeignObject()) {
+      return CompletableFuture.completedFuture(location.getForeignObject());
+    }
+    return new UuidFetcher<Location>()
+        .load(context, IdDataLoaderKey.LOCATIONS, location.getForeignUuid()).thenApply(o -> {
+          location.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setLocationUuid(String locationUuid) {
+    this.location = new ForeignObjectHolder<>(locationUuid);
+  }
+
+  @JsonIgnore
+  public String getLocationUuid() {
+    return location.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "location")
+  public void setLocation(Location location) {
+    this.location = new ForeignObjectHolder<>(location);
+  }
+
+  public Location getLocation() {
+    return location.getForeignObject();
+  }
 
   public String getShortName() {
     return shortName;
