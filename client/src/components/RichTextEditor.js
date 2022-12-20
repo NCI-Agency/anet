@@ -8,7 +8,7 @@ import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment/moment"
 import PropTypes from "prop-types"
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
@@ -20,6 +20,19 @@ import {
   withReact
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
+
+const createSlateValue = value => {
+  const document = new DOMParser().parseFromString(value || "", "text/html")
+  return deserialize(document.body)
+}
+
+const usePrevious = value => {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  }, [value])
+  return ref.current
+}
 
 const RichTextEditor = ({
   value,
@@ -34,10 +47,17 @@ const RichTextEditor = ({
     []
   )
 
-  const [slateValue, setSlateValue] = useState(() => {
-    const document = new DOMParser().parseFromString(value || "", "text/html")
-    return deserialize(document.body)
-  })
+  const [slateValue, setSlateValue] = useState(createSlateValue(value))
+  const previousValue = usePrevious(value)
+
+  useEffect(() => {
+    if (previousValue !== undefined && previousValue !== value) {
+      // Only update editor when a new value comes in
+      // (different from the one used for slateValue above)
+      editor.children = createSlateValue(value)
+      editor.onChange()
+    }
+  }, [editor, previousValue, value])
 
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
@@ -155,7 +175,7 @@ const serialize = node => {
 
 const serializeDebounced = debounce((node, onChange) => {
   const serialized = serialize(node)
-  onChange(serialized)
+  onChange?.(serialized)
   return serialized
 }, 100)
 
