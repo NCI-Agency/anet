@@ -2,6 +2,7 @@ import { expect } from "chai"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import EditReport from "../pages/report/editReport.page"
 import ShowReport from "../pages/report/showReport.page"
+import { getRichTextContent } from "./richTextUtils"
 
 const RICH_TEXT_CONTENT = [
   { selector: "h1", content: "Heading 1" },
@@ -49,7 +50,8 @@ describe("When reports have rich text content", () => {
     RICH_TEXT_CONTENT.forEach(
       ({ selector, multipleElements, index, content }) => {
         expect(
-          ShowReport.getReportTextContent(
+          getRichTextContent(
+            ShowReport.reportText,
             selector,
             multipleElements,
             index
@@ -63,7 +65,8 @@ describe("When reports have rich text content", () => {
     RICH_TEXT_CONTENT.forEach(
       ({ selector, multipleElements, index, content }) => {
         expect(
-          EditReport.getReportTextContent(
+          getRichTextContent(
+            EditReport.reportText,
             selector,
             multipleElements,
             index

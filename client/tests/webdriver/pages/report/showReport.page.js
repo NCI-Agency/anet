@@ -130,16 +130,6 @@ class ShowReport extends Page {
     return browser.$('//div[text()="Successfully approved report."]')
   }
 
-  getReportTextContent(selector, multipleElements, index) {
-    if (!selector) {
-      return this.reportText
-    }
-    if (multipleElements) {
-      return this.reportText.$(selector).$$(multipleElements)[index]
-    }
-    return this.reportText.$(selector)
-  }
-
   getAttendeeByName(name) {
     const td = browser
       .$("#reportPeopleContainer")
