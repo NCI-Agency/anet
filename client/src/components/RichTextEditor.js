@@ -72,7 +72,7 @@ const RichTextEditor = ({
           serializeDebounced(editor, onChange)
         }}
       >
-        <div className="editor-container">
+        <div className={!readOnly ? "editor-container" : null}>
           {!readOnly && (
             <Toolbar
               showLinksModal={showLinksModal}

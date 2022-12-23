@@ -9,7 +9,7 @@
   flex-wrap: wrap;
 }
 
-.editable {
+.editor-container .editable {
   min-height: 10rem;
   max-height: 50rem;
   overflow: auto;
