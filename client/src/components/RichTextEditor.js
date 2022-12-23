@@ -51,13 +51,13 @@ const RichTextEditor = ({
   const previousValue = usePrevious(value)
 
   useEffect(() => {
-    if (previousValue !== undefined && previousValue !== value) {
+    if (readOnly && previousValue !== undefined && previousValue !== value) {
       // Only update editor when a new value comes in
       // (different from the one used for slateValue above)
       editor.children = createSlateValue(value)
       editor.onChange()
     }
-  }, [editor, previousValue, value])
+  }, [editor, previousValue, readOnly, value])
 
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
