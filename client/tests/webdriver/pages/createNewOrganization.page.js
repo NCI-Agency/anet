@@ -41,6 +41,10 @@ class CreateOrganization extends Page {
     )
   }
 
+  get profileInput() {
+    return browser.$("#fg-profile .editable")
+  }
+
   openAsSuperUser() {
     super.openAsSuperUser(PAGE_URL)
   }
@@ -67,6 +71,12 @@ class CreateOrganization extends Page {
           '" after 5s'
       }
     )
+  }
+
+  fillOrganizationProfile(profile) {
+    this.profileInput.click()
+    browser.keys(profile)
+    browser.pause(300)
   }
 }
 
