@@ -6,7 +6,6 @@ import PropTypes from "prop-types"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { ButtonGroup, Dropdown } from "react-bootstrap"
 import Settings from "settings"
-import { upperCase } from "upper-case"
 import utils from "utils"
 import Version from "version"
 
@@ -47,10 +46,10 @@ const SecurityBanner = ({ onLogout }) => {
           sideHeight={bannerSideHeight}
         >
           <span className="classificationText">
-            {upperCase(appSettings[SETTING_KEY_CLASSIFICATION])}
+            {appSettings[SETTING_KEY_CLASSIFICATION]?.toUpperCase() || ""}
           </span>{" "}
           <span className="releasabilityText">
-            {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY])}
+            {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY] || "")}
           </span>
         </SecurityTextContainer>
         <UserBox id="bannerUser">
@@ -188,10 +187,10 @@ export const CompactSecurityBanner = () => {
   return (
     <CompactBannerS className="banner" bgc={appSettings[SETTING_KEY_COLOR]}>
       <span className="classificationText">
-        {upperCase(appSettings[SETTING_KEY_CLASSIFICATION])}
+        {appSettings[SETTING_KEY_CLASSIFICATION]?.toUpperCase() || ""}
       </span>{" "}
       <span className="releasabilityText">
-        {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY])}
+        {utils.titleCase(appSettings[SETTING_KEY_RELEASABILITY] || "")}
       </span>
     </CompactBannerS>
   )
