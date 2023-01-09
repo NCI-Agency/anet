@@ -31,10 +31,7 @@ public class Attachment extends AbstractAnetBean {
   @GraphQLInputField
   private String description;
 
-  @GraphQLQuery
-  @GraphQLInputField
-  private String classificationUuid;
-
+  // annotated below
   @GraphQLQuery
   @GraphQLInputField
   private Classification classification;
@@ -74,14 +71,6 @@ public class Attachment extends AbstractAnetBean {
     this.description = description;
   }
 
-  public String getClassificationUuid() {
-    return classificationUuid;
-  }
-
-  public void setClassificationUuid(String classificationUuid) {
-    this.classificationUuid = classificationUuid;
-  }
-
   public void setClassification(Classification classification) {
     this.classification = classification;
   }
@@ -114,7 +103,8 @@ public class Attachment extends AbstractAnetBean {
 
   @Override
   public String toString() {
-    return attachmentRelatedObjects.toString();
+    return String.format("[uuid:%s, file name:%s, mime type:%s]", uuid, getFileName(),
+        getMimeType());
   }
 
 }

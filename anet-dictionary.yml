@@ -288,7 +288,17 @@ fields:
             label: Red
             color: '#ff8279'
 
+  attachment:
+    shortLabel: Attachment
+    shortName:
+      label: Attachment Name
+      placeholder: Enter an attachment name, example....
+    description: Attachment description
+
   report:
+    attachments:
+      label: Attachment
+      classification: [NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU]
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

@@ -4480,8 +4480,7 @@
 			<column name="mimeType" type="${long_text_type}" />
 			<column name="content" type="${blob_type}" />
 			<column name="description" type="${long_text_type}" />
-			<column name="classificationUuid" type="${long_text_type}" />
-			<column name="classification" type="${long_text_type}" />
+			<column name="classification" type="int" />
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />
 		</createTable>
