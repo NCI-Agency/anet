@@ -1,0 +1,14 @@
+/* Styling for the D3Tooltip component */
+.tooltip-top {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+    background: black;
+    color: white;
+    padding: 1rem;
+}
+
+.tooltip-top h4 {
+    width: 100%;
+    border-bottom: 1px solid white;
+}

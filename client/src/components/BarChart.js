@@ -3,9 +3,9 @@ import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
-import ReactTooltip from "react-tooltip"
 import utils from "utils"
 import "./BarChart.css"
+import { addD3Tooltip } from "./D3Tooltip"
 
 /*
  * Given an object and a property of the type prop1.prop2.prop3,
@@ -168,14 +168,10 @@ const BarChart = ({
       .attr("height", function(d) {
         return yHeight - yScale(getPropValue(d, yProp))
       })
-      .attr("data-for", "tooltip-top")
-      .attr("data-html", true)
-      .attr("data-tip", d => tooltip && tooltip(d))
+    addD3Tooltip(bar, tooltip)
     if (onBarClick) {
       bar.on("click", (event, d) => onBarClick(d))
     }
-
-    ReactTooltip.rebuild()
   }, [
     node,
     width,
