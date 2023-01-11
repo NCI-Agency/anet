@@ -11,3 +11,6 @@
   color: var(--fc-button-disabled-text-color);
   background-color: var(--fc-button-disabled-bg-color);
 }
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+  min-height: 1em;
+}
