@@ -15,10 +15,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@apollo/client@3.7.1":
-  version "3.7.1"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.7.1.tgz#86ce47c18a0714e229231148b0306562550c2248"
-  integrity sha512-xu5M/l7p9gT9Fx7nF3AQivp0XukjB7TM7tOd5wifIpI8RskYveL4I+rpTijzWrnqCPZabkbzJKH7WEAKdctt9w==
+"@apollo/client@3.7.3":
+  version "3.7.3"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.7.3.tgz#ab3fe31046e74bc1a3762363a185ba5bcfffc58b"
+  integrity sha512-nzZ6d6a4flLpm3pZOGpuAUxLlp9heob7QcCkyIqZlCLvciUibgufRfYTwfkWCc4NaGHGSZyodzvfr79H6oUwGQ==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.1"
     "@wry/context" "^0.7.0"
@@ -1629,10 +1629,10 @@
   dependencies:
     fast-deep-equal "^3.1.3"
 
-"@graphiql/react@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@graphiql/react/-/react-0.14.0.tgz#a3beb5bf2967d5085f306c8fcb953a1a95b4e41b"
-  integrity sha512-BBkbl35akar4/+4P6ggZ99jSmU0D1qV70A2OegkuJ4t/knAis/R713faOs9xKyjkUj8hv6+KcAqBOp48LnP6lA==
+"@graphiql/react@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@graphiql/react/-/react-0.15.0.tgz#b10fc40c5a85e7b5b845907d57bfd8be92753037"
+  integrity sha512-kJqkdf6d4Cck05Wt5yCDZXWfs7HZgcpuoWq/v8nOa698qVaNMM3qdG4CpRsZEexku0DSSJzWWuanxd5x+sRcFg==
   dependencies:
     "@graphiql/toolkit" "^0.8.0"
     "@reach/combobox" "^0.17.0"
@@ -6853,10 +6853,10 @@ core-js-pure@^3.23.3, core-js-pure@^3.25.1:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.26.1.tgz#653f4d7130c427820dcecd3168b594e8bb095a33"
   integrity sha512-VVXcDpp/xJ21KdULRq/lXdLzQAtX7+37LzpyfFM973il0tWSsDEoyzG38G14AjTpK9VTfiNM9jnFauq/CpaWGQ==
 
-core-js@3, core-js@3.26.1, core-js@^3.0.4, core-js@^3.24.1, core-js@^3.6.5, core-js@^3.8.2:
-  version "3.26.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.26.1.tgz#7a9816dabd9ee846c1c0fe0e8fcad68f3709134e"
-  integrity sha512-21491RRQVzUn0GGM9Z1Jrpr6PNPxPi+Za8OM9q4tksTSnlbXXGKK1nXNg/QvwFYettXvSX6zWKCtHHfjN4puyA==
+core-js@3, core-js@3.27.1, core-js@^3.0.4, core-js@^3.24.1, core-js@^3.6.5, core-js@^3.8.2:
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.27.1.tgz#23cc909b315a6bb4e418bf40a52758af2103ba46"
+  integrity sha512-GutwJLBChfGCpwwhbYoqfv03LAfmiz7e7D/BNxzeMxwQf10GRSzqiOjx7AmtEk+heiD/JWmBuyBPgFtx0Sg1ww==
 
 core-util-is@~1.0.0:
   version "1.0.3"
@@ -7323,10 +7323,10 @@ d3-zoom@3:
     d3-selection "2 - 3"
     d3-transition "2 - 3"
 
-d3@7.6.1:
-  version "7.6.1"
-  resolved "https://registry.yarnpkg.com/d3/-/d3-7.6.1.tgz#b21af9563485ed472802f8c611cc43be6c37c40c"
-  integrity sha512-txMTdIHFbcpLx+8a0IFhZsbp+PfBBPt8yfbmukZTQFroKuFqIwqswF0qE5JXWefylaAVpSXFoKm3yP+jpNLFLw==
+d3@7.8.1:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/d3/-/d3-7.8.1.tgz#f8c3a5843da027ea87c6b6faaf6d8648b70c0e02"
+  integrity sha512-fdipulGWUYTZTxxU9gDJ2P4mpZL2u7Oqe6n2FI95Q8UY0AjbKNYjPHvhLOsvR+HcSao4vo3YYy4Bk9CWOrt1Vw==
   dependencies:
     d3-array "3"
     d3-axis "3"
@@ -9567,12 +9567,12 @@ grapheme-splitter@^1.0.2, grapheme-splitter@^1.0.4:
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
-graphiql@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-2.1.0.tgz#2c67dd5121e120e30fc4e37ce2b776b7a12d2a76"
-  integrity sha512-b58o/o7y5x/C4WzH7YTeSWbINE6tcfzZN4TxgvoSZxhE9X6MulXXbXLRiGEl5+FuajIN0LxaoleHTJUHb9H2wg==
+graphiql@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-2.2.0.tgz#406b9b28bca130ae9ece892826c1d60958c1ac13"
+  integrity sha512-w1ujpCKMlkwkoUjeg0HpRiBBTm1WHAjHNkFv1TbMu6trjzz63mQ48GLZlmyQY1yhwmc+diCcvmmAt+AyvKLWWA==
   dependencies:
-    "@graphiql/react" "^0.14.0"
+    "@graphiql/react" "^0.15.0"
     "@graphiql/toolkit" "^0.8.0"
     entities "^2.0.0"
     graphql-language-service "^5.1.0"
@@ -14276,10 +14276,10 @@ react-router@6.3.0:
   dependencies:
     history "^5.2.0"
 
-react-scroll@1.8.8:
-  version "1.8.8"
-  resolved "https://registry.yarnpkg.com/react-scroll/-/react-scroll-1.8.8.tgz#445c6137174d6f2ed02352af408a48d160959e22"
-  integrity sha512-RnU0wLaLozKIhLNAfoz6yxMus+PMypk7eBRfOitalYd2+qCiHrZdJ0MSDBs1Y23IFSfqSCdCEmENMJeSh0KoHA==
+react-scroll@1.8.9:
+  version "1.8.9"
+  resolved "https://registry.yarnpkg.com/react-scroll/-/react-scroll-1.8.9.tgz#96f8a82f882b187970c2338759225c7e619d915b"
+  integrity sha512-9m7ztraiX/l6L7erzYAD3fhnveNckei6/NkWfqwN2e0FRdoE2W6Pk4oi2Nah7mWpPCPAeIgegfaqZACTimPOwg==
   dependencies:
     lodash.throttle "^4.1.1"
     prop-types "^15.7.2"
