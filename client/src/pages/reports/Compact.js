@@ -17,7 +17,6 @@ import CompactTable, {
   PAGE_SIZES
 } from "components/Compact"
 import { ReadonlyCustomFields } from "components/CustomFields"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import { DEFAULT_CUSTOM_FIELDS_PARENT } from "components/Model"
@@ -29,6 +28,7 @@ import {
 } from "components/Page"
 import { GRAPHQL_NOTES_FIELDS } from "components/RelatedObjectNotes"
 import { ActionButton, ActionStatus } from "components/ReportWorkflow"
+import RichTextEditor from "components/RichTextEditor"
 import SimpleMultiCheckboxDropdown from "components/SimpleMultiCheckboxDropdown"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -373,8 +373,10 @@ const CompactReportView = ({ pageDispatchers }) => {
                     {report.reportText ? (
                       <CompactRow
                         label={Settings.fields.report.reportText}
-                        content={parseHtmlWithLinkTo(report.reportText)}
-                        className="reportField rich-text-readonly"
+                        content={
+                          <RichTextEditor readOnly value={report.reportText} />
+                        }
+                        className="reportField"
                       />
                     ) : null}
                     {Settings.fields.report.customFields ? (

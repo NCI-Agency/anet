@@ -10,7 +10,6 @@ import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -31,6 +30,7 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import { ReportFullWorkflow } from "components/ReportWorkflow"
+import RichTextEditor from "components/RichTextEditor"
 import { deserializeQueryParams } from "components/SearchFilters"
 import TriggerableConfirm from "components/TriggerableConfirm"
 import { Field, Form, Formik } from "formik"
@@ -674,17 +674,16 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                 <Fieldset
                   title={Settings.fields.report.reportText}
                   id="report-text"
-                  className="rich-text-readonly"
                 >
-                  {parseHtmlWithLinkTo(report.reportText)}
+                  <RichTextEditor readOnly value={report.reportText} />
                 </Fieldset>
               )}
               {report.reportSensitiveInformation?.text && (
-                <Fieldset
-                  title="Sensitive information"
-                  className="rich-text-readonly"
-                >
-                  {parseHtmlWithLinkTo(report.reportSensitiveInformation.text)}
+                <Fieldset title="Sensitive information">
+                  <RichTextEditor
+                    readOnly
+                    value={report.reportSensitiveInformation.text}
+                  />
                   {(hasAuthorizationGroups && (
                     <div>
                       <h5>Authorized groups:</h5>

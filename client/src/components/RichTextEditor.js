@@ -5,8 +5,10 @@ import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
+import * as Models from "models"
+import moment from "moment/moment"
 import PropTypes from "prop-types"
-import React, { useCallback, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
@@ -19,17 +21,43 @@ import {
 } from "slate-react"
 import { getUrlFromEntityInfo } from "utils_links"
 
-const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
+const createSlateValue = value => {
+  const document = new DOMParser().parseFromString(value || "", "text/html")
+  return deserialize(document.body)
+}
+
+const usePrevious = value => {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  }, [value])
+  return ref.current
+}
+
+const RichTextEditor = ({
+  value,
+  onChange,
+  onHandleBlur,
+  className,
+  readOnly
+}) => {
   const [showLinksModal, setShowLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
   )
 
-  const [slateValue, setSlateValue] = useState(() => {
-    const document = new DOMParser().parseFromString(value || "", "text/html")
-    return deserialize(document.body)
-  })
+  const [slateValue, setSlateValue] = useState(createSlateValue(value))
+  const previousValue = usePrevious(value)
+
+  useEffect(() => {
+    if (readOnly && previousValue !== undefined && previousValue !== value) {
+      // Only update editor when a new value comes in
+      // (different from the one used for slateValue above)
+      editor.children = createSlateValue(value)
+      editor.onChange()
+    }
+  }, [editor, previousValue, readOnly, value])
 
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
@@ -44,17 +72,20 @@ const RichTextEditor = ({ value, onChange, onHandleBlur, className }) => {
           serializeDebounced(editor, onChange)
         }}
       >
-        <div className="editor-container">
-          <Toolbar
-            showLinksModal={showLinksModal}
-            setShowLinksModal={setShowLinksModal}
-          />
+        <div className={!readOnly ? "editor-container" : null}>
+          {!readOnly && (
+            <Toolbar
+              showLinksModal={showLinksModal}
+              setShowLinksModal={setShowLinksModal}
+            />
+          )}
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onBlur={onHandleBlur}
             onKeyDown={e => handleOnKeyDown(e, editor, setShowLinksModal)}
             className="editable"
+            readOnly={readOnly}
           />
         </div>
       </Slate>
@@ -66,7 +97,8 @@ RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
-  className: PropTypes.string
+  className: PropTypes.string,
+  readOnly: PropTypes.bool
 }
 
 const withHtml = editor => {
@@ -143,7 +175,7 @@ const serialize = node => {
 
 const serializeDebounced = debounce((node, onChange) => {
   const serialized = serialize(node)
-  onChange(serialized)
+  onChange?.(serialized)
   return serialized
 }, 100)
 
@@ -205,6 +237,18 @@ const deserialize = element => {
   }
 }
 
+const displayCallback = modelInstance => {
+  if (modelInstance instanceof Models.Report) {
+    return modelInstance.engagementDate
+      ? moment(modelInstance.engagementDate).format(
+        Models.Report.getEngagementDateFormat()
+      )
+      : "None"
+  } else {
+    return modelInstance.toString()
+  }
+}
+
 const Element = ({ attributes, children, element }) => {
   const selected = useSelected()
   const focused = useFocused()
@@ -236,11 +280,12 @@ const Element = ({ attributes, children, element }) => {
           }}
         >
           {element.href ? (
-            <LinkAnet url={element.href} />
+            <LinkAnet url={element.href} displayCallback={displayCallback} />
           ) : (
             <LinkAnetEntity
               type={element.entityType}
               uuid={element.entityUuid}
+              displayCallback={displayCallback}
             />
           )}
           {children}

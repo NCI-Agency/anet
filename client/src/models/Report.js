@@ -412,7 +412,10 @@ export default class Report extends Model {
     return REPORTS_ICON
   }
 
-  toString() {
+  toString(displayCallback) {
+    if (typeof displayCallback === "function") {
+      return displayCallback(this)
+    }
     return this.intent || "None"
   }
 
