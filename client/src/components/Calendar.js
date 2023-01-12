@@ -47,7 +47,7 @@ const Calendar = ({ events, eventClick, calendarComponentRef }) => (
     height="auto" // assume a natural height, no scrollbars will be used
     aspectRatio={3} // ratio of width-to-height
     ref={calendarComponentRef}
-    dayMaxEvents={3} // workaround for https://github.com/fullcalendar/fullcalendar/issues/5595
+    dayMaxEvents={2} // workaround for https://github.com/fullcalendar/fullcalendar/issues/5595
     eventMaxStack={3}
     events={events}
     eventOverlap
