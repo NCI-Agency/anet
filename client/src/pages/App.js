@@ -22,7 +22,8 @@ import { connect } from "react-redux"
 import { Navigate, useLocation, useNavigate } from "react-router-dom"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import ReactTooltip from "react-tooltip"
+import { D3Tooltip } from "../components/D3Tooltip"
+import "../components/D3Tooltip.css"
 import "../components/reactToastify.css"
 
 const GQL_GET_APP_DATA = gql`
@@ -205,7 +206,7 @@ const App = ({ pageDispatchers, pageProps }) => {
         }}
       >
         <ToastContainer theme="colored" />
-        <ReactTooltip id="tooltip-top" place="top" className="tooltip-top" />
+        <D3Tooltip />
         <Routing />
       </ResponsiveLayout>
     </AppContext.Provider>

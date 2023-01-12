@@ -2,9 +2,9 @@ import * as d3 from "d3"
 import _isEmpty from "lodash/isEmpty"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
-import ReactTooltip from "react-tooltip"
 import utils from "utils"
 import "./BarChart.css"
+import { addD3Tooltip } from "./D3Tooltip"
 
 /*
  * A bar chart component displaying horizontal bars, grouped per category
@@ -251,9 +251,7 @@ const HorizontalBarChart = ({
       .attr("y", yCategoryScale(BAR_PADDING))
       .attr("width", d => xScale(d.value))
       .attr("height", BAR_HEIGHT)
-      .attr("data-for", "tooltip-top")
-      .attr("data-html", true)
-      .attr("data-tip", d => tooltip && tooltip(d))
+    addD3Tooltip(barsGroup, tooltip)
 
     barsGroup
       .selectAll(".bar-label")
@@ -272,8 +270,6 @@ const HorizontalBarChart = ({
       .attr("text-anchor", "start")
 
     bindElementOnClick(barsGroup, onBarClick)
-
-    ReactTooltip.rebuild()
   }, [
     node,
     width,

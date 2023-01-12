@@ -1,9 +1,9 @@
 import * as d3 from "d3"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef } from "react"
-import ReactTooltip from "react-tooltip"
 import utils from "utils"
 import "./BarChart.css"
+import { addD3Tooltip } from "./D3Tooltip"
 
 const DailyRollupChart = ({
   width,
@@ -126,9 +126,7 @@ const DailyRollupChart = ({
       .attr("id", function(d, i) {
         return `bar_${d.org.uuid}`
       })
-      .attr("data-for", "tooltip-top")
-      .attr("data-html", true)
-      .attr("data-tip", d => tooltip && tooltip(d))
+    addD3Tooltip(bar, tooltip)
     if (onBarClick) {
       bar.on("click", (event, d) => onBarClick(d.org))
     }
@@ -161,8 +159,6 @@ const DailyRollupChart = ({
       .attr("dy", ".35em")
       .style("text-anchor", "end")
       .text(d => d.cancelled || "")
-
-    ReactTooltip.rebuild()
   }, [node, width, height, data, onBarClick, tooltip, barColors])
 
   return <svg id={chartId} ref={node} width={width} height={height} />
