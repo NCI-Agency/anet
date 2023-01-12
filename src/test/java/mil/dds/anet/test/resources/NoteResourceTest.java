@@ -17,8 +17,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
@@ -304,22 +302,86 @@ public class NoteResourceTest extends AbstractResourceTest {
   @Test
   public void testFreeTextNotes()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // TODO: FREE_TEXT note tests:
+    // Note: future DIAGRAM note tests can be the same as these
+    final Person principalPerson = getSteveSteveson();
+    final String principalPersonUuid = principalPerson.getUuid();
+
+    final NoteInput freeTextNoteInput =
+        NoteInput.builder().withType(NoteType.FREE_TEXT).withText("Free text test").build();
     // - F: create without relatedObjects
+    failNoteCreate(jackMutationExecutor, freeTextNoteInput);
+
     // - S: create with self
-    // - S: read it as admin
+    final NoteRelatedObjectInput testPrincipalNroInput =
+        createNoteRelatedObject(PersonDao.TABLE_NAME, principalPersonUuid);
+    freeTextNoteInput.setNoteRelatedObjects(Collections.singletonList(testPrincipalNroInput));
+
+    final Note freeTextNote = succeedNoteCreate(jackMutationExecutor, freeTextNoteInput);
+    final List<Note> principalNotes = Lists.newArrayList(freeTextNote);
+    final List<NoteInput> testNoteInputs = Lists.newArrayList(freeTextNoteInput);
+
+    // - S: create as admin
+    final NoteInput freeTextNoteInputAdmin = NoteInput.builder().withType(NoteType.FREE_TEXT)
+        .withText("Free text test as admin").build();
+    freeTextNoteInputAdmin.setNoteRelatedObjects(Collections.singletonList(testPrincipalNroInput));
+    final Note freeTextNoteAdmin = succeedNoteCreate(adminMutationExecutor, freeTextNoteInputAdmin);
+    principalNotes.add(freeTextNoteAdmin);
+    principalPerson.setNotes(principalNotes);
+    testNoteInputs.add(freeTextNoteInputAdmin);
+
     // - S: read it
+    Collections.reverse(principalPerson.getNotes());
+    assertFreeTextNotes(principalPerson.getNotes(), testNoteInputs, 1);
+
     // - S: read it as someone else
+    final QueryExecutor bobQueryExecutor = getQueryExecutor(getBobBobtown().getDomainUsername());
+    final Person bobPerson = bobQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    assertFreeTextNotes(bobPerson.getNotes(), testNoteInputs, 1);
+
     // - S: read it as admin
+    final Person adminPerson = adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid);
+    assertFreeTextNotes(adminPerson.getNotes(), testNoteInputs, 1);
+
     // - S: update it
+    final NoteInput updatedNoteInputJack = getNoteInput(freeTextNote);
+    updatedNoteInputJack.setText("Updated by jack");
+    final List<NoteInput> updatedNotesInput = Lists.newArrayList(updatedNoteInputJack);
+    final Note updatedNoteJack = succeedNoteUpdate(jackMutationExecutor, updatedNoteInputJack);
+
     // - F: update it as someone else
+    final MutationExecutor erinMutationExecutor =
+        getMutationExecutor(getRegularUser().getDomainUsername());
+    final NoteInput failedUpdateNoteInput = getNoteInput(freeTextNote);
+    failedUpdateNoteInput.setText("Updated by erin");
+    failNoteUpdate(erinMutationExecutor, failedUpdateNoteInput);
+
     // - F: update it as someone else by faking the note author
+    final NoteInput failedFakeAuthorNoteInput = getNoteInput(freeTextNote);
+    failedFakeAuthorNoteInput.setAuthor(getPersonInput(getRegularUser()));
+    failNoteUpdate(erinMutationExecutor, failedFakeAuthorNoteInput);
+
     // - S: update it as admin
+    final NoteInput updatedNoteInputAdmin = getNoteInput(freeTextNoteAdmin);
+    updatedNoteInputAdmin.setText("Updated by admin");
+    updatedNotesInput.add(updatedNoteInputAdmin);
+    final Note updatedNoteAdmin = succeedNoteUpdate(adminMutationExecutor, updatedNoteInputAdmin);
+
     // - F: delete it as someone else
+    failNoteDelete(erinMutationExecutor, updatedNoteJack);
+
     // - S: delete it
+    succeedNoteDelete(jackMutationExecutor, updatedNoteJack);
+    assertThat(updatedNotesInput.remove(updatedNoteInputJack)).isTrue();
+    Collections.reverse(jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes());
+    assertFreeTextNotes(jackQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+        updatedNotesInput, 1);
+
     // - S: delete it as admin
-    //
-    // Note: future DIAGRAM note tests can be the same
+    succeedNoteDelete(adminMutationExecutor, updatedNoteAdmin);
+    assertThat(updatedNotesInput.remove(updatedNoteInputAdmin)).isTrue();
+    Collections.reverse(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes());
+    assertFreeTextNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
+        updatedNotesInput, 1);
   }
 
   @Test
@@ -1491,6 +1553,20 @@ public class NoteResourceTest extends AbstractResourceTest {
     for (int i = 0; i < filteredNotes.size(); i++) {
       final NoteInput ni = testNoteInputs.get(i);
       assertThat(filteredNotes.get(i))
+          .matches(n -> n.getText().equals(ni.getText()), "has correct text")
+          .matches(n -> n.getNoteRelatedObjects().size() == nrRelatedObjects,
+              "has correct related objects");
+    }
+  }
+
+  private void assertFreeTextNotes(final List<Note> testNotes, final List<NoteInput> testNoteInputs,
+      final int nrRelatedObjects) {
+    assertThat(testNotes).isNotNull();
+    assertThat(testNotes).hasSameSizeAs(testNoteInputs);
+    Collections.reverse(testNotes);
+    for (int i = 0; i < testNotes.size(); i++) {
+      final NoteInput ni = testNoteInputs.get(i);
+      assertThat(testNotes.get(i))
           .matches(n -> n.getText().equals(ni.getText()), "has correct text")
           .matches(n -> n.getNoteRelatedObjects().size() == nrRelatedObjects,
               "has correct related objects");
