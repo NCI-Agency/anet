@@ -44,6 +44,7 @@
     {
       "matchPackageNames": [
         "autoprefixer",
+        "react-router-dom",
         "com.graphql-java:graphql-java-extended-scalars",
         "io.leangen.graphql:spqr"
       ],
