@@ -112,7 +112,7 @@ describe("For the periodic person assessments", () => {
       )
     })
 
-    it("Should allow admins to successfully edit existing assesment", () => {
+    it("Should allow admins to successfully edit existing assessment", () => {
       ShowPerson.editAssessmentButton.waitForExist()
       ShowPerson.editAssessmentButton.waitForDisplayed()
 
