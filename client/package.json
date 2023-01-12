@@ -105,6 +105,7 @@
     "selenium-webdriver": "4.7.1",
     "style-loader": "3.3.1",
     "thread-loader": "3.0.4",
+    "ts-node": "10.9.1",
     "wdio-chromedriver-service": "7.3.2",
     "webdriverio": "7.27.0",
     "webpack": "5.75.0",
