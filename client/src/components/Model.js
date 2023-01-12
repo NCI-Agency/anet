@@ -782,6 +782,13 @@ export default class Model {
       questions: {},
       questionSets: {}
     }
+    if (
+      assessmentConfig?.test &&
+      _isEmpty(JSONPath({ path: assessmentConfig.test, json: testValue }))
+    ) {
+      // Assessment config does not apply
+      return null
+    }
     if (!_isEmpty(assessmentConfig?.questions)) {
       Object.entries(assessmentConfig.questions)
         .filter(
@@ -850,7 +857,7 @@ export default class Model {
       // Clear invalid questions on the current level
       currentLevelQuestions.forEach(
         question =>
-          !filtered.questions[question] &&
+          !filtered?.questions?.[question] &&
           delete currentLevelAssessment.questions[question]
       )
     }
