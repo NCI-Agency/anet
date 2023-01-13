@@ -3,7 +3,7 @@ import * as FieldHelper from "components/FieldHelper"
 import { FastField, Form, Formik } from "formik"
 import PropTypes from "prop-types"
 import React, { useCallback } from "react"
-import { Button, Modal } from "react-bootstrap"
+import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { Transforms } from "slate"
 import * as yup from "yup"
 
@@ -96,7 +96,11 @@ const ExternalLinkForm = ({ onConfirm, onCancel }) => {
       {({ submitForm, isSubmitting, isValid }) => {
         return (
           <Form>
-            <FastField name="url" component={FieldHelper.InputField} />
+            <FastField name="url" component={FieldHelper.InputField}>
+              <FormBS.Text as="div">
+                Specify a valid URL like: https://www.example.com/path
+              </FormBS.Text>
+            </FastField>
             <FastField name="text" component={FieldHelper.InputField} />
             <div className="submit-buttons">
               <div>
