@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Update release notes'
 
 jobs:
   update_release_draft:
