@@ -350,7 +350,7 @@ const EmptySpaceTdS = styled.td`
 `
 
 export const CompactRow = ({ label, content, ...otherProps }) => {
-  const { style, className } = otherProps
+  const { id, style, className } = otherProps
   // merge custom style
   const CustomStyled = styled(CompactRowS)`
     ${style};
@@ -360,7 +360,7 @@ export const CompactRow = ({ label, content, ...otherProps }) => {
   const isHeaderRow = className === "reportField"
 
   return (
-    <CustomStyled className={className || null}>
+    <CustomStyled id={id} className={className}>
       {label && <RowLabelS isHeaderRow={isHeaderRow}>{label}</RowLabelS>}
       <CompactRowContentS colSpan={label ? 1 : 2}>{content}</CompactRowContentS>
     </CustomStyled>

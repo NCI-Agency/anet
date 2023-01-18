@@ -9,7 +9,7 @@ import { useOutsideClick } from "utils"
  *  @param {object} options {key1: { text: string, active: boolean}, ...}
  *  @param {function} setOptions
  */
-const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
+const SimpleMultiCheckboxDropdown = ({ id, label, options, setOptions }) => {
   const [active, setActive] = useState(false)
   const dropDownRef = useRef(null)
   useOutsideClick(dropDownRef, () => setActive(false))
@@ -23,7 +23,7 @@ const SimpleMultiCheckboxDropdown = ({ label, options, setOptions }) => {
         {label}
       </Button>
       <div>
-        <div>
+        <div id={id}>
           {Object.entries(options).map(([optionKey, option]) => (
             <label htmlFor={optionKey} key={optionKey}>
               {option.text}
@@ -134,6 +134,7 @@ const DropdownButton = styled.span`
 `
 
 SimpleMultiCheckboxDropdown.propTypes = {
+  id: PropTypes.string,
   label: PropTypes.string,
   options: PropTypes.objectOf(
     PropTypes.shape({
