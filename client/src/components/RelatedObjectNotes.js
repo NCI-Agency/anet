@@ -40,7 +40,7 @@ export const EXCLUDED_ASSESSMENT_FIELDS = [
   INVISIBLE_CUSTOM_FIELDS_FIELD
 ]
 
-const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT, NOTE_TYPE.PARTNER_ASSESSMENT]
+const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT]
 
 const RelatedObjectNotes = ({
   notesElemId,
@@ -141,7 +141,6 @@ const RelatedObjectNotes = ({
               )
               const byMe = Person.isEqual(currentUser, note.author)
               const canEdit =
-                note.type !== NOTE_TYPE.PARTNER_ASSESSMENT &&
                 note.type !== NOTE_TYPE.ASSESSMENT &&
                 (byMe || currentUser.isAdmin())
               const isJson = note.type !== NOTE_TYPE.FREE_TEXT
