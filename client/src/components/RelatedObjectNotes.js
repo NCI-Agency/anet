@@ -40,7 +40,7 @@ export const EXCLUDED_ASSESSMENT_FIELDS = [
   INVISIBLE_CUSTOM_FIELDS_FIELD
 ]
 
-const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT, NOTE_TYPE.PARTNER_ASSESSMENT]
+const EXCLUDED_NOTE_TYPES = [NOTE_TYPE.ASSESSMENT]
 
 const RelatedObjectNotes = ({
   notesElemId,
@@ -141,7 +141,6 @@ const RelatedObjectNotes = ({
               )
               const byMe = Person.isEqual(currentUser, note.author)
               const canEdit =
-                note.type !== NOTE_TYPE.PARTNER_ASSESSMENT &&
                 note.type !== NOTE_TYPE.ASSESSMENT &&
                 (byMe || currentUser.isAdmin())
               const isJson = note.type !== NOTE_TYPE.FREE_TEXT
@@ -208,26 +207,6 @@ const RelatedObjectNotes = ({
                     </Row>
                   </Card.Header>
                   <Card.Body>
-                    <div
-                      style={{
-                        overflowWrap: "break-word",
-                        /* IE: */ wordWrap: "break-word"
-                      }}
-                    >
-                      {note.type === NOTE_TYPE.CHANGE_RECORD &&
-                        (jsonFields.oldValue === jsonFields.newValue ? (
-                          <span>
-                            Field <b>{jsonFields.changedField}</b> was unchanged
-                            (<em>'{jsonFields.oldValue}'</em>):
-                          </span>
-                        ) : (
-                          <span>
-                            Field <b>{jsonFields.changedField}</b> was changed
-                            from <em>'{jsonFields.oldValue}'</em> to{" "}
-                            <em>'{jsonFields.newValue}'</em>:
-                          </span>
-                        ))}
-                    </div>
                     <RichTextEditor readOnly value={noteText} />
                   </Card.Body>
                 </Card>

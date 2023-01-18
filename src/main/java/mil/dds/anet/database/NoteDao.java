@@ -295,8 +295,6 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
       case FREE_TEXT:
         // case DIAGRAM: — can be added here
         return hasFreeTextPermission(user, authorUuid, updateType);
-      case CHANGE_RECORD:
-        return hasChangeRecordPermission(user, note, updateType);
       case ASSESSMENT:
         return hasAssessmentPermission(user, authorizationGroupUuids, note, updateType);
       default:
@@ -317,6 +315,7 @@ public class NoteDao extends AnetBaseDao<Note, AbstractSearchQuery<?>> {
     return false;
   }
 
+  @Deprecated
   private boolean hasChangeRecordPermission(final Person user, final Note note,
       final UpdateType updateType) {
     switch (updateType) {

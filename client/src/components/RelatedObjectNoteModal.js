@@ -76,10 +76,7 @@ const RelatedObjectNoteModal = ({
             isJson && note.text ? utils.parseJsonSafe(note.text) : {}
           const noteText = isJson ? jsonFields.text : note.text
           const typeName =
-            note.type === NOTE_TYPE.PARTNER_ASSESSMENT ||
-            note.type === NOTE_TYPE.ASSESSMENT
-              ? "assessment"
-              : "note"
+            note.type === NOTE_TYPE.ASSESSMENT ? "assessment" : "note"
           return (
             <Form>
               <Modal.Header closeButton>

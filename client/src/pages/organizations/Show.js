@@ -488,7 +488,9 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   name="profile"
                   component={FieldHelper.ReadonlyField}
                   label={Settings.fields.organization.profile}
-                  humanValue={<RichTextEditor readOnly value={organization.profile} />}
+                  humanValue={
+                    <RichTextEditor readOnly value={organization.profile} />
+                  }
                 />
               </Fieldset>
 

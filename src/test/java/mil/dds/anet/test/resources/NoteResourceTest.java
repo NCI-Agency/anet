@@ -276,14 +276,8 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Completely empty note
     final NoteInput invalidNoteInput = NoteInput.builder().build();
     failNoteCreate(jackMutationExecutor, invalidNoteInput);
-    // Deprecated type
-    invalidNoteInput.setType(NoteType.PARTNER_ASSESSMENT);
-    failNoteCreate(jackMutationExecutor, invalidNoteInput);
     // Free text without text
     invalidNoteInput.setType(NoteType.FREE_TEXT);
-    failNoteCreate(jackMutationExecutor, invalidNoteInput);
-    // Change record without text
-    invalidNoteInput.setType(NoteType.CHANGE_RECORD);
     failNoteCreate(jackMutationExecutor, invalidNoteInput);
     // Assessment without key
     invalidNoteInput.setType(NoteType.ASSESSMENT);
@@ -382,31 +376,6 @@ public class NoteResourceTest extends AbstractResourceTest {
     Collections.reverse(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes());
     assertFreeTextNotes(adminQueryExecutor.person(PERSON_FIELDS, principalPersonUuid).getNotes(),
         updatedNotesInput, 1);
-  }
-
-  @Test
-  public void testChangeRecords()
-      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    // TODO: CHANGE_RECORD note tests:
-    // Note: task permission for changing project status (resulting in a CHANGE_RECORD) is currently
-    // restricted to admins, see commit a74e8abe9!
-    // - F: create without relatedObjects
-    // - F: create with relatedObject which is not a task
-    // - F: create with task without task permission
-    // - F: create with task with task permission and another relatedObject
-    // - S: create with task with task permission
-    // - S: create as admin
-    // - S: read it
-    // - F: read it as someone else without task permission
-    // - S: read it as someone else with task permission
-    // - S: read it as admin
-    // - F: update it
-    // - F: update it as someone else
-    // - F: update it as someone else by faking the note author
-    // - S: update it as admin
-    // - F: delete it as someone else
-    // - F: delete it
-    // - S: delete it as admin
   }
 
   @Test

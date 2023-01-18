@@ -17,9 +17,11 @@ import mil.dds.anet.views.UuidFetcher;
 public class Note extends AbstractAnetBean {
 
   public static enum NoteType {
-    FREE_TEXT, CHANGE_RECORD, // -
+    FREE_TEXT, // -
     @Deprecated
-    PARTNER_ASSESSMENT, // Should no longer be used but remain in place to keep the correct values
+    CHANGE_RECORD, // No longer used; remain in place to keep the correct values
+    @Deprecated
+    PARTNER_ASSESSMENT, // No longer used; remain in place to keep the correct values
     ASSESSMENT
   }
 
