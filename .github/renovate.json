@@ -15,6 +15,7 @@
   ],
   "packageRules": [
     {
+      "labels": ["devDependencies"],
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": [
         "minor",
@@ -34,12 +35,24 @@
     },
     {
       "matchManagers": ["gradle"],
+      "matchDepTypes": ["dependencies"],
       "matchUpdateTypes": [
         "minor",
         "patch"
       ],
       "groupName": "most non-major Gradle dependencies",
       "groupSlug": "most-minor-gradle-patch"
+    },
+    {
+      "labels": ["devDependencies"],
+      "matchManagers": ["gradle"],
+      "matchDepTypes": ["devDependencies", "plugin"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "most non-major Gradle devDependencies",
+      "groupSlug": "most-minor-gradle-dev-patch"
     },
     {
       "matchPackageNames": [
@@ -58,18 +71,21 @@
       "enabled": false
     },
     {
+      "labels": ["devDependencies"],
       "groupName": "NPM, dev-dependencies, Babel",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
       "matchPackagePrefixes": ["@babel/"]
     },
     {
+      "labels": ["devDependencies"],
       "groupName": "NPM, dev-dependencies, GraphQL Code Generator",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
       "matchPackagePrefixes": ["@graphql-codegen/"]
     },
     {
+      "labels": ["devDependencies"],
       "groupName": "NPM, dev-dependencies, Storybook",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
