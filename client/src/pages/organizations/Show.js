@@ -4,7 +4,6 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import { ReadonlyCustomFields } from "components/CustomFields"
-import { parseHtmlWithLinkTo } from "components/editor/LinkAnet"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import GuidedTour from "components/GuidedTour"
@@ -24,6 +23,7 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
+import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import { Location, Organization, Position, Report } from "models"
@@ -488,8 +488,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
                   name="profile"
                   component={FieldHelper.ReadonlyField}
                   label={Settings.fields.organization.profile}
-                  className="rich-text-readonly"
-                  humanValue={parseHtmlWithLinkTo(organization.profile)}
+                  humanValue={<RichTextEditor readOnly value={organization.profile} />}
                 />
               </Fieldset>
 
