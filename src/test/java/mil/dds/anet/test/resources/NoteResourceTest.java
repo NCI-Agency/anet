@@ -276,9 +276,6 @@ public class NoteResourceTest extends AbstractResourceTest {
     // Completely empty note
     final NoteInput invalidNoteInput = NoteInput.builder().build();
     failNoteCreate(jackMutationExecutor, invalidNoteInput);
-    // Deprecated type
-    invalidNoteInput.setType(NoteType.PARTNER_ASSESSMENT);
-    failNoteCreate(jackMutationExecutor, invalidNoteInput);
     // Free text without text
     invalidNoteInput.setType(NoteType.FREE_TEXT);
     failNoteCreate(jackMutationExecutor, invalidNoteInput);

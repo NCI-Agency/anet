@@ -21,7 +21,7 @@ public class Note extends AbstractAnetBean {
     @Deprecated
     CHANGE_RECORD, // No longer used; remain in place to keep the correct values
     @Deprecated
-    PARTNER_ASSESSMENT, // Should no longer be used but remain in place to keep the correct values
+    PARTNER_ASSESSMENT, // No longer used; remain in place to keep the correct values
     ASSESSMENT
   }
 
