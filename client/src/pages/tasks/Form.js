@@ -17,7 +17,7 @@ import {
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
+import Model from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
@@ -44,11 +44,8 @@ const GQL_CREATE_TASK = gql`
   }
 `
 const GQL_UPDATE_TASK = gql`
-  mutation($task: TaskInput!, $withNote: Boolean!, $note: NoteInput) {
+  mutation ($task: TaskInput!) {
     updateTask(task: $task)
-    createNote(note: $note) @include(if: $withNote) {
-      ${GRAPHQL_NOTE_FIELDS}
-    }
   }
 `
 
@@ -492,36 +489,11 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
     const task = Task.filterClientSideFields(new Task(values))
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     task.customFields = customFieldsJSONString(values)
-    const variables = { task: task }
-
-    variables.task.taskedOrganizations = variables.task.taskedOrganizations.map(
-      a => utils.getReference(a)
+    task.taskedOrganizations = task.taskedOrganizations.map(a =>
+      utils.getReference(a)
     )
 
-    if (
-      edit &&
-      (initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
-        !utils.isEmptyHtml(values.assessment_customFieldEnum1))
-    ) {
-      // Add an additional mutation to create a change record
-      variables.note = {
-        type: NOTE_TYPE.CHANGE_RECORD,
-        noteRelatedObjects: [
-          {
-            relatedObjectType: Task.relatedObjectType,
-            relatedObjectUuid: initialValues.uuid
-          }
-        ],
-        text: JSON.stringify({
-          text: values.assessment_customFieldEnum1,
-          changedField: "customFieldEnum1",
-          oldValue: initialValues.customFieldEnum1,
-          newValue: values.customFieldEnum1
-        })
-      }
-    }
-    variables.withNote = !!variables.note
-    return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, variables)
+    return API.mutation(edit ? GQL_UPDATE_TASK : GQL_CREATE_TASK, { task })
   }
 }
 

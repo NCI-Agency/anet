@@ -208,26 +208,6 @@ const RelatedObjectNotes = ({
                     </Row>
                   </Card.Header>
                   <Card.Body>
-                    <div
-                      style={{
-                        overflowWrap: "break-word",
-                        /* IE: */ wordWrap: "break-word"
-                      }}
-                    >
-                      {note.type === NOTE_TYPE.CHANGE_RECORD &&
-                        (jsonFields.oldValue === jsonFields.newValue ? (
-                          <span>
-                            Field <b>{jsonFields.changedField}</b> was unchanged
-                            (<em>'{jsonFields.oldValue}'</em>):
-                          </span>
-                        ) : (
-                          <span>
-                            Field <b>{jsonFields.changedField}</b> was changed
-                            from <em>'{jsonFields.oldValue}'</em> to{" "}
-                            <em>'{jsonFields.newValue}'</em>:
-                          </span>
-                        ))}
-                    </div>
                     <RichTextEditor readOnly value={noteText} />
                   </Card.Body>
                 </Card>

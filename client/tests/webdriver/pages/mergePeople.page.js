@@ -150,7 +150,7 @@ class MergePeople extends Page {
   areNotesExist(notes) {
     let areExist = true
     const allNoteTexts = this.noteCards.map(card =>
-      card.$$(".card-body > div")[1].getText()
+      card.$(".card-body > div").getText()
     )
     notes.forEach(note => {
       if (!allNoteTexts.includes(note)) {
