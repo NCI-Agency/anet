@@ -44,6 +44,9 @@ public class Organization extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String identificationCode;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String profile;
   // annotated below
   private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
   @GraphQLQuery
@@ -124,6 +127,14 @@ public class Organization extends AbstractCustomizableAnetBean
 
   public void setIdentificationCode(String identificationCode) {
     this.identificationCode = Utils.trimStringReturnNull(identificationCode);
+  }
+
+  public String getProfile() {
+    return profile;
+  }
+
+  public void setProfile(String profile) {
+    this.profile = Utils.trimStringReturnNull(profile);
   }
 
   @GraphQLQuery(name = "parentOrg")
@@ -324,13 +335,13 @@ public class Organization extends AbstractCustomizableAnetBean
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getIdentificationCode(), identificationCode)
-        && Objects.equals(other.getType(), type);
+        && Objects.equals(other.getProfile(), profile) && Objects.equals(other.getType(), type);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(super.hashCode(), uuid, shortName, longName, status, identificationCode,
-        type, createdAt, updatedAt);
+        profile, type, createdAt, updatedAt);
   }
 
   @Override

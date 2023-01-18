@@ -456,6 +456,7 @@ type Organization {
   parentOrg: Organization
   planningApprovalSteps: [ApprovalStep]
   positions(query: PositionSearchQueryInput): [Position]
+  profile: String
   shortName: String
   status: Status
   tasks: [Task]
@@ -476,6 +477,7 @@ input OrganizationInput {
   longName: String
   parentOrg: OrganizationInput
   planningApprovalSteps: [ApprovalStepInput]
+  profile: String
   shortName: String
   status: Status
   tasks: [TaskInput]
@@ -487,6 +489,7 @@ input OrganizationInput {
 """"""
 input OrganizationSearchQueryInput {
   hasParentOrg: Boolean
+  hasProfile: Boolean
   inMyReports: Boolean
   locationUuid: String
   orgRecurseStrategy: RecurseStrategy

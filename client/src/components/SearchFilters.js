@@ -470,6 +470,15 @@ export const searchFilters = function() {
           placeholder: "Filter by location...",
           queryKey: "locationUuid"
         })
+      },
+      [`Has ${Settings.fields.organization.profile}?`]: {
+        component: SelectFilter,
+        deserializer: deserializeSelectFilter,
+        props: {
+          queryKey: "hasProfile",
+          options: ["true", "false"],
+          labels: ["Yes", "No"]
+        }
       }
     }
   }

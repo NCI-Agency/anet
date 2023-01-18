@@ -17,6 +17,7 @@ public class OrganizationMapper implements RowMapper<Organization> {
     org.setLongName(r.getString("organizations_longName"));
     org.setStatus(MapperUtils.getEnumIdx(r, "organizations_status", Organization.Status.class));
     org.setIdentificationCode(r.getString("organizations_identificationCode"));
+    org.setProfile(MapperUtils.getOptionalString(r, "organizations_profile"));
     org.setType(MapperUtils.getEnumIdx(r, "organizations_type", OrganizationType.class));
     org.setParentOrgUuid(r.getString("organizations_parentOrgUuid"));
     org.setLocationUuid(r.getString("organizations_locationUuid"));
@@ -27,6 +28,5 @@ public class OrganizationMapper implements RowMapper<Organization> {
 
     return org;
   }
-
 
 }

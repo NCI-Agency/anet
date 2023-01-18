@@ -13,6 +13,10 @@ class ShowOrganization extends Page {
     return browser.$('div[id="location"')
   }
 
+  get profile() {
+    return browser.$('div[id="profile"')
+  }
+
   waitForAlertSuccessToLoad() {
     if (!this.alertSuccess.isDisplayed()) {
       this.alertSuccess.waitForExist()

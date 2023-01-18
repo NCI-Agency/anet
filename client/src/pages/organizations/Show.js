@@ -23,6 +23,7 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
+import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
 import { Location, Organization, Position, Report } from "models"
@@ -64,6 +65,7 @@ const GQL_GET_ORGANIZATION = gql`
         lng
         type
       }
+      profile
       parentOrg {
         uuid
         shortName
@@ -480,6 +482,13 @@ const OrganizationShow = ({ pageDispatchers }) => {
                       </>
                     )
                   }
+                />
+
+                <Field
+                  name="profile"
+                  component={FieldHelper.ReadonlyField}
+                  label={Settings.fields.organization.profile}
+                  humanValue={<RichTextEditor readOnly value={organization.profile} />}
                 />
               </Fieldset>
 
