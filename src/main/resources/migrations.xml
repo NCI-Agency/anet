@@ -4294,4 +4294,16 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="remove_change_records" author="cigdemers">
+		<sql>
+			DELETE FROM "noteRelatedObjects" nro
+			USING notes n
+			WHERE n.uuid = nro."noteUuid"
+			AND n.type = 1;
+
+			DELETE FROM notes n
+			WHERE n.type = 1;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>

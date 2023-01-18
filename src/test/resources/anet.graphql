@@ -433,7 +433,7 @@ input NoteRelatedObjectInput {
 """"""
 enum NoteType {
   ASSESSMENT
-  CHANGE_RECORD
+  CHANGE_RECORD @deprecated(reason: "Deprecated")
   FREE_TEXT
   PARTNER_ASSESSMENT @deprecated(reason: "Deprecated")
 }
