@@ -654,7 +654,8 @@ test.serial("Verify that validations work", async t => {
   $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
   t.is(
     $advisorAttendeesRows.length + $principalAttendeesRows.length,
-    5,
+    // should match the number of shortcut buttons plus the initial advisor and principal
+    nrAttendees + 2,
     "Clicking the shortcut buttons adds rows to the table"
   )
 
