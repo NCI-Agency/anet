@@ -41,7 +41,8 @@ const RichTextEditor = ({
   className,
   readOnly
 }) => {
-  const [showLinksModal, setShowLinksModal] = useState(false)
+  const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
+  const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
   const editor = useMemo(
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
@@ -75,15 +76,24 @@ const RichTextEditor = ({
         <div className={!readOnly ? "editor-container" : null}>
           {!readOnly && (
             <Toolbar
-              showLinksModal={showLinksModal}
-              setShowLinksModal={setShowLinksModal}
+              showAnetLinksModal={showAnetLinksModal}
+              setShowAnetLinksModal={setShowAnetLinksModal}
+              showExternalLinksModal={showExternalLinksModal}
+              setShowExternalLinksModal={setShowExternalLinksModal}
             />
           )}
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             onBlur={onHandleBlur}
-            onKeyDown={e => handleOnKeyDown(e, editor, setShowLinksModal)}
+            onKeyDown={e =>
+              handleOnKeyDown(
+                e,
+                editor,
+                setShowAnetLinksModal,
+                setShowExternalLinksModal
+              )
+            }
             className="editable"
             readOnly={readOnly}
           />
@@ -148,7 +158,12 @@ const serialize = node => {
     }
     return string
   }
-  const children = node.children.map(n => serialize(n)).join("")
+  const children =
+    node.type !== "anet-link"
+      ? node.children.map(n => serialize(n)).join("")
+      : node.children.reduce((acc, child) => {
+        return acc + child.text
+      }, "")
   switch (node.type) {
     case "heading-one":
       return `<h1>${children}</h1>`
@@ -167,7 +182,7 @@ const serialize = node => {
     case "block-quote":
       return `<blockquote>${children}</blockquote>`
     case "anet-link":
-      return `<a href="${getUrlFromEntityInfo(node)}">${node.children.text}</a>`
+      return `<a href="${getUrlFromEntityInfo(node)}">${children}</a>`
     default:
       return children
   }
@@ -280,7 +295,13 @@ const Element = ({ attributes, children, element }) => {
           }}
         >
           {element.href ? (
-            <LinkAnet url={element.href} displayCallback={displayCallback} />
+            <LinkAnet
+              url={element.href}
+              displayCallback={displayCallback}
+              children={element.children.reduce((acc, child) => {
+                return acc + child.text
+              }, "")}
+            />
           ) : (
             <LinkAnetEntity
               type={element.entityType}

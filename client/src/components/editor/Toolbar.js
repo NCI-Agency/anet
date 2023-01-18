@@ -14,7 +14,12 @@ const BUTTON_TYPES = {
   MODAL: "modal"
 }
 
-const Toolbar = ({ showLinksModal, setShowLinksModal }) => {
+const Toolbar = ({
+  showAnetLinksModal,
+  setShowAnetLinksModal,
+  showExternalLinksModal,
+  setShowExternalLinksModal
+}) => {
   const editor = useSlate()
   const selectionRef = useRef(editor.selection)
 
@@ -97,10 +102,20 @@ const Toolbar = ({ showLinksModal, setShowLinksModal }) => {
           format="anet-link"
           icon="link"
           text="ANET Link"
-          showModal={showLinksModal}
-          setShowModal={setShowLinksModal}
+          showModal={showAnetLinksModal}
+          setShowModal={setShowAnetLinksModal}
           selectionRef={selectionRef}
           tooltipText="ANET link (Ctrl + ⇧ + k)"
+        />
+        <EditorToggleButton
+          type={BUTTON_TYPES.MODAL}
+          editor={editor}
+          format="anet-link"
+          icon="link"
+          showModal={showExternalLinksModal}
+          setShowModal={setShowExternalLinksModal}
+          selectionRef={selectionRef}
+          tooltipText="External link (Ctrl + ⇧ + a)"
         />
         <EditorToggleButton
           icon="undo"
@@ -115,17 +130,26 @@ const Toolbar = ({ showLinksModal, setShowLinksModal }) => {
       </div>
       <LinkSourceAnet
         editor={editor}
-        showModal={showLinksModal}
-        setShowModal={setShowLinksModal}
+        showModal={showAnetLinksModal}
+        setShowModal={setShowAnetLinksModal}
         selection={selectionRef.current}
+      />
+      <LinkSourceAnet
+        editor={editor}
+        showModal={showExternalLinksModal}
+        setShowModal={setShowExternalLinksModal}
+        selection={selectionRef.current}
+        external
       />
     </>
   )
 }
 
 Toolbar.propTypes = {
-  showLinksModal: PropTypes.bool.isRequired,
-  setShowLinksModal: PropTypes.func.isRequired
+  showAnetLinksModal: PropTypes.bool.isRequired,
+  setShowAnetLinksModal: PropTypes.func.isRequired,
+  showExternalLinksModal: PropTypes.bool.isRequired,
+  setShowExternalLinksModal: PropTypes.func.isRequired
 }
 
 function toggleBlock(editor, format, event) {
@@ -240,7 +264,12 @@ EditorToggleButton.propTypes = {
   onClick: PropTypes.func
 }
 
-export const handleOnKeyDown = (event, editor, setShowLinksModal) => {
+export const handleOnKeyDown = (
+  event,
+  editor,
+  setShowAnetLinksModal,
+  setShowExternalLinksModal
+) => {
   // Ignore the state of CapsLock
   const key = event.shiftKey ? event.key.toUpperCase() : event.key.toLowerCase()
   if (event.altKey) {
@@ -283,7 +312,11 @@ export const handleOnKeyDown = (event, editor, setShowLinksModal) => {
         break
       case "K":
         event.preventDefault()
-        setShowLinksModal(true)
+        setShowAnetLinksModal(true)
+        break
+      case "A":
+        event.preventDefault()
+        setShowExternalLinksModal(true)
         break
       case "y":
       case "Z":
