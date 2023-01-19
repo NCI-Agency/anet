@@ -13,8 +13,11 @@ categories:
     labels:
       - debt
       - dependencies
-      - DevOps
 change-template: "* $TITLE (#$NUMBER)"
+exclude-labels:
+  - devDependencies
+  - internal
+  - DevOps
 template: |
   ## What’s changed in ANET
 
