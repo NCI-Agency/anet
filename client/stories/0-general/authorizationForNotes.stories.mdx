@@ -4,14 +4,10 @@ import { Meta } from "@storybook/addon-docs"
 
 ## Authorization for notes
 
-In ANET, there can be four basic types of notes:
+In ANET, there can be two basic types of notes:
 
 -   _FREE_TEXT_
--   _DIAGRAM_ (future)
--   _CHANGE_RECORD_
 -   _ASSESSMENT_
-
-There's also a deprecated type _PARTNER_ASSESSMENT_ that was only used in RSM.
 
 There are two main GraphQL endpoints to manipulate notes, through:
 
@@ -33,31 +29,6 @@ objects.
 -   any user can create _FREE_TEXT_ notes
 -   user can update a _FREE_TEXT_ note if they are the original author
 -   user can delete a _FREE_TEXT_ note if they are the original author
-
-## _DIAGRAM_
-
-These are the (future) notes that will hold the new diagrams. A _DIAGRAM_ note can be linked to any
-number of related objects.
-
--   admin can read, create, update and delete any _DIAGRAM_ note
--   user can read all _DIAGRAM_ notes for objects they are allowed to see
--   any user can create _DIAGRAM_ notes
--   user can update a _DIAGRAM_ note if they are the original author
--   user can delete a _DIAGRAM_ note if they are the original author
-
-## _CHANGE_RECORD_
-
-Only used when tasks are updated, to record changes in `customFieldEnum1` ("Project status"), which
-requires the user to fill in a reason for the change as well. A _CHANGE_RECORD_ note must be linked
-to exactly one related object: the task it refers to.
-
--   admin can read, create, update and delete any _CHANGE_RECORD_
--   user can read all _CHANGE_RECORD_ notes for objects they are allowed to see
--   user can create a new _CHANGE_RECORD_, with authorization the same as for the task that is
-    updated; note: task permission for changing project status (resulting in a CHANGE_RECORD) is
-    currently restricted to admins, see commit a74e8abe9!
--   user can not update a _CHANGE_RECORD_
--   user can not delete a _CHANGE_RECORD_
 
 ## _ASSESSMENT_
 
