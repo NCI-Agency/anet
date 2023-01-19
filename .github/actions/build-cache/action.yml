@@ -45,6 +45,4 @@ runs:
     uses: actions/cache@v3
     with:
       path: ./build
-      key: ${{ runner.os }}-build
-      restore-keys: |
-        ${{ runner.os }}-build
+      key: ${{ runner.os }}-build-${{ github.ref }}
