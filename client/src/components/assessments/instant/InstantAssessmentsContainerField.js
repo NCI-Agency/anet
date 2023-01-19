@@ -109,37 +109,34 @@ const InstantAssessmentsContainerField = ({
   showEntitiesWithoutAssessments
 }) => {
   const { values } = formikProps
+
+  function hasFilteredAssessments(ac, e) {
+    const filteredAssessment = Model.filterAssessmentConfig(
+      ac,
+      e,
+      relatedObject
+    )
+    return (
+      !_isEmpty(filteredAssessment.questions) ||
+      !_isEmpty(filteredAssessment.questionSets)
+    )
+  }
+  // Sort entities to display the ones without any assessment at the beginning,
+  // then the ones with assessments. Keep the original sort order within each section.
   function sortEntries(e1, e2) {
-    const e1entityInstantAssessments = e1.getInstantAssessments()
-    return e1entityInstantAssessments.some(([ak, ac]) => {
-      const filteredAssessment = Model.filterAssessmentConfig(
-        ac,
-        e1,
-        relatedObject
-      )
-      return (
-        !_isEmpty(filteredAssessment.questions) ||
-        !_isEmpty(filteredAssessment.questionSets)
-      )
-    })
-      ? 1
-      : -1
+    const e1hasAssessments = e1
+      .getInstantAssessments()
+      .some(([, ac]) => hasFilteredAssessments(ac, e1))
+    const e2hasAssessments = e2
+      .getInstantAssessments()
+      .some(([, ac]) => hasFilteredAssessments(ac, e2))
+    return Number(e1hasAssessments) - Number(e2hasAssessments)
   }
   function getEntitiesWithAssessments(entity) {
-    const entityInstantAssessments = entity.getInstantAssessments()
-    return entityInstantAssessments.some(([ak, ac]) => {
-      const filteredAssessment = Model.filterAssessmentConfig(
-        ac,
-        entity,
-        relatedObject
-      )
-      return (
-        !_isEmpty(filteredAssessment.questions) ||
-        !_isEmpty(filteredAssessment.questionSets)
-      )
-    })
+    return entity
+      .getInstantAssessments()
+      .some(([, ac]) => hasFilteredAssessments(ac, entity))
   }
-  // Sort entities to display the ones without any assessment at the beginning
   const filteredEntities = showEntitiesWithoutAssessments
     ? entities.sort(sortEntries)
     : entities.filter(getEntitiesWithAssessments)
