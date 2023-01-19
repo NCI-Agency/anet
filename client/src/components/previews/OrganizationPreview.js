@@ -139,7 +139,7 @@ const OrganizationPreview = ({ className, uuid }) => {
         />
 
         <PreviewField
-          label={orgSettings.identificationCode.label}
+          label={orgSettings.identificationCode?.label}
           value={organization.identificationCode}
         />
 
