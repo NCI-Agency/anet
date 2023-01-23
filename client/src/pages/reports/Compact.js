@@ -340,6 +340,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                       className="reportField"
                     />
                     <CompactRow
+                      id="principals"
                       label="principals"
                       content={getAttendeesAndAssessments(
                         Person.ROLE.PRINCIPAL
@@ -347,6 +348,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                       className="reportField"
                     />
                     <CompactRow
+                      id="advisors"
                       label="advisors"
                       content={getAttendeesAndAssessments(Person.ROLE.ADVISOR)}
                       className="reportField"
@@ -484,6 +486,7 @@ const CompactReportView = ({ pageDispatchers }) => {
         }}
         canRead={canReadAssessments}
         readonly
+        showEntitiesWithoutAssessments
       />
     ) : (
       attendees.map(attendee => (
@@ -534,6 +537,7 @@ const CompactReportViewHeader = ({
       ))}
     </DropdownButton>
     <SimpleMultiCheckboxDropdown
+      id="optionalFields"
       label="Optional Fields ⇓"
       options={optionalFields}
       setOptions={setOptionalFields}

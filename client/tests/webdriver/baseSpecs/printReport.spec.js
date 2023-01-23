@@ -3,6 +3,14 @@ import Home from "../pages/home.page"
 import MyReports, { REPORT_STATES } from "../pages/myReports.page"
 import ShowReport from "../pages/report/showReport.page"
 
+const PRINCIPALS = [
+  "Maj CHRISVILLE, Chris",
+  "CIV KYLESON, Kyle",
+  "CIV SHARTON, Shardul"
+]
+
+const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
+
 describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open("arthur")
@@ -51,6 +59,34 @@ describe("Show print report page", () => {
       Home.openAsAdminUser()
       const bannerSecurityText = Home.bannerSecurityText.getText()
       expect(compactBannerText).to.equal(bannerSecurityText)
+    })
+    it("Should display all attendees", () => {
+      const displayedPrincipals =
+        ShowReport.getCompactViewAttendees("principals")
+      const displayedAdvisors = ShowReport.getCompactViewAttendees("advisors")
+      PRINCIPALS.forEach(principal => {
+        expect(displayedPrincipals).to.contain(principal)
+      })
+      ADVISORS.forEach(advisor => {
+        expect(displayedAdvisors).to.contain(advisor)
+      })
+    })
+    it("Should display all attendees when assessments are shown", () => {
+      ShowReport.selectOptionalField("assessments")
+      const displayedPrincipals = ShowReport.getCompactViewAttendees(
+        "principals",
+        true
+      )
+      PRINCIPALS.forEach(principal => {
+        expect(displayedPrincipals).to.contain(principal)
+      })
+      const displayedAdvisors = ShowReport.getCompactViewAttendees(
+        "advisors",
+        true
+      )
+      ADVISORS.forEach(advisor => {
+        expect(displayedAdvisors).to.contain(advisor)
+      })
     })
   })
 })

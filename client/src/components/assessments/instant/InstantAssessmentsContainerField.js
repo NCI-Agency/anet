@@ -105,31 +105,46 @@ const InstantAssessmentsContainerField = ({
   formikProps,
   canRead,
   canWrite,
-  readonly
+  readonly,
+  showEntitiesWithoutAssessments
 }) => {
   const { values } = formikProps
+
+  function hasFilteredAssessments(ac, e) {
+    const filteredAssessment = Model.filterAssessmentConfig(
+      ac,
+      e,
+      relatedObject
+    )
+    return (
+      !_isEmpty(filteredAssessment.questions) ||
+      !_isEmpty(filteredAssessment.questionSets)
+    )
+  }
+  // Sort entities to display the ones without any assessment at the beginning,
+  // then the ones with assessments. Keep the original sort order within each section.
+  function sortEntries(e1, e2) {
+    const e1hasAssessments = e1
+      .getInstantAssessments()
+      .some(([, ac]) => hasFilteredAssessments(ac, e1))
+    const e2hasAssessments = e2
+      .getInstantAssessments()
+      .some(([, ac]) => hasFilteredAssessments(ac, e2))
+    return Number(e1hasAssessments) - Number(e2hasAssessments)
+  }
+  function getEntitiesWithAssessments(entity) {
+    return entity
+      .getInstantAssessments()
+      .some(([, ac]) => hasFilteredAssessments(ac, entity))
+  }
+  const filteredEntities = showEntitiesWithoutAssessments
+    ? entities.sort(sortEntries)
+    : entities.filter(getEntitiesWithAssessments)
   return (
     <Table>
       <tbody>
-        {entities.map(entity => {
+        {filteredEntities.map(entity => {
           const entityInstantAssessments = entity.getInstantAssessments()
-          let hasAssessments = false
-          entityInstantAssessments.forEach(([ak, ac]) => {
-            const filteredAssessment = Model.filterAssessmentConfig(
-              ac,
-              entity,
-              relatedObject
-            )
-            if (
-              !_isEmpty(filteredAssessment.questions) ||
-              !_isEmpty(filteredAssessment.questionSets)
-            ) {
-              hasAssessments = true
-            }
-          })
-          if (!hasAssessments) {
-            return null
-          }
 
           return (
             <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
@@ -172,7 +187,8 @@ InstantAssessmentsContainerField.propTypes = {
   }),
   canRead: PropTypes.bool,
   canWrite: PropTypes.bool,
-  readonly: PropTypes.bool
+  readonly: PropTypes.bool,
+  showEntitiesWithoutAssessments: PropTypes.bool
 }
 InstantAssessmentsContainerField.defaultProps = {
   entities: [],

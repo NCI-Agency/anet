@@ -830,6 +830,12 @@ INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary", "isAuthor")
 	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+arthur@example.com'), :reportuuid, TRUE, TRUE);
 INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary")
 	VALUES ((SELECT uuid FROM people where "emailAddress"='hunter+shardul@example.com'), :reportuuid, TRUE);
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='lin+guist@example.com'), :reportuuid, FALSE);
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='kyleson+kyle@example.com'), :reportuuid, FALSE);
+INSERT INTO "reportPeople" ("personUuid", "reportUuid", "isPrimary")
+	VALUES ((SELECT uuid FROM people where "emailAddress"='chrisville+chris@example.com'), :reportuuid, FALSE);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid")
 	VALUES ((SELECT uuid from tasks where "shortName" = '1.2.A'), :reportuuid);
 INSERT INTO "reportTasks" ("taskUuid", "reportUuid")

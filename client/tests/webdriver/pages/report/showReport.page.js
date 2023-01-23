@@ -160,6 +160,35 @@ class ShowReport extends Page {
     this.reportStatus.waitForExist()
     this.reportStatus.waitForDisplayed()
   }
+
+  getCompactViewAttendees(type, withAssessments) {
+    return withAssessments
+      ? browser
+        .$$(`#${type} > td > table > tbody > tr > td`)
+      // Filter out the assessment rows to get the attendees
+        .filter(row => {
+          return row.$("span > a").isExisting()
+        })
+        .map(row => {
+          return row.$("span > a").getText()
+        })
+      : browser
+        .$$(`#${type} > td > span > a`)
+        .map(attendeeLink => attendeeLink.getText())
+  }
+
+  selectOptionalField(field) {
+    const optionalFieldsButton = browser.$(
+      '//button[text()="Optional Fields ⇓"]'
+    )
+    const optionalFields = browser.$("#optionalFields")
+    const fieldCheckbox = browser.$(`input[id="${field}"]`)
+    optionalFieldsButton.click()
+    optionalFields.waitForDisplayed()
+    if (!fieldCheckbox.isSelected()) {
+      fieldCheckbox.click()
+    }
+  }
 }
 
 export default new ShowReport()
