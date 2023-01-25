@@ -67,7 +67,7 @@ const Column = ({ name, tasks }) => {
           label={`${tasks.length}`}
           segmentFill={entity => {
             const matching = Object.entries(
-              Settings.fields.task.customFieldEnum1.enum
+              Settings.fields.task.customFieldEnum1?.enum || {}
             ).filter(([key, val]) => {
               return key === entity.data.key
             })
@@ -124,7 +124,7 @@ Column.propTypes = {
 const CardView = ({ task }) => {
   const [open, setOpen] = useState(false)
   const { customFieldEnum1 } = task
-  const enumSettings = Settings.fields.task.customFieldEnum1.enum
+  const enumSettings = Settings.fields.task.customFieldEnum1?.enum
   return (
     <Card
       onClick={() => setOpen(!open)}
