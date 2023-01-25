@@ -20,7 +20,9 @@ const Kanban = ({ columns, allTasks }) => (
   >
     {columns.map(column => {
       const name =
-        column.name || allTasks.find(task => task.uuid === column)?.shortName
+        column.name ||
+        allTasks.find(task => task.uuid === column)?.shortName ||
+        column
       const tasks =
         (column.tasks &&
           allTasks.filter(task => column.tasks.includes(task.uuid))) ||
@@ -56,7 +58,7 @@ const Column = ({ name, tasks }) => {
     <Card style={{ flex: "1 1 0%", margin: "4px" }}>
       <Card.Header>
         <strong>
-          <em>{name} </em>
+          <em>{name}</em>
         </strong>
       </Card.Header>
       <Card.Body>
