@@ -280,14 +280,29 @@ task dbWait(dependsOn: 'compileJava', type: JavaExec) {
 }
 dbWait.mustRunAfter('dockerStartDB')
 
+// Create the task that runs the initialization command. Run with:
+//   ./gradlew dbInit -Pargs="--adminOrgName <adminOrgName> --adminPosName <adminPosName>
+//                            --adminFullName <LASTNAME, Firstname> --adminDomainName <adminDomainName>"
+// e.g. (take care to escape spaces in argument values with a backslash):
+//   ./gradlew dbInit -Pargs="--adminOrgName ANET\ Administrators --adminPosName ANET\ Administrator
+//                            --adminFullName DMIN,\ Arthur --adminDomainName arthur"
+// To see all options, run just:
+//   ./gradlew dbInit
+// which will print the help.
 task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database runtime"
 	description = "Runs the ANET database initialization command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	mainClass = mainClassName
-	args = ["init", anetConfig]
-	standardInput = System.in
+	def cmdline = ["init"]
+	if (project.hasProperty("args")) {
+		cmdline.addAll(project.args.split("(?<!\\\\)\\s+").collect { a -> a.replace("\\ ", " ")})
+	} else {
+		cmdline << "--help"
+	}
+	cmdline << anetConfig
+	args cmdline
 }
 
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
