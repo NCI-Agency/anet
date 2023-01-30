@@ -340,7 +340,7 @@ enum LocationType {
   VIRTUAL_LOCATION
 }
 
-"""Long type"""
+"""A 64-bit signed integer"""
 scalar Long
 
 """Mutation root"""
@@ -1198,9 +1198,6 @@ enum TaskSearchSortBy {
   NAME
   RECENT
 }
-
-"""Use SPQR's SchemaPrinter to remove this from SDL"""
-scalar UNREPRESENTABLE
 
 """"""
 type UserActivity {
