@@ -95,6 +95,7 @@ fields:
               label: Instant assessment Question 3
         topTaskSemiannually:
           recurrence: semiannually
+          test: $.subject[?(@property === "shortName" && @.match(/^EF/i))]
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
@@ -852,12 +853,12 @@ fields:
         advisorOnceReportLinguist:
           recurrence: once
           relatedObjectType: report
+          test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
           authorizationGroupUuids:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
             preparedDocuments:
-              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
               type: enum
               helpText: "Did the linguist prepare any written documents used for the engagement meeting?"
               label: Prepared documents
@@ -888,7 +889,6 @@ fields:
                   label: Bad
                   color: "#fc5a03"
             linguistRole:
-              test: $.subject.position.organization[?(@property === "shortName" && @.match(/^LNG/i))]
               type: enum
               helpText: "What was the linguist's role?"
               label: "Linguist Role"
@@ -1344,6 +1344,7 @@ fields:
                   color: '#0000ff'
         principalOndemandScreeningAndVetting:
           recurrence: ondemand
+          test: $.subject.position.organization[?(@property === "shortName" && @.match(/^MoD/i))]
           onDemandAssessmentExpirationDays: 108
           label: "Screening & Vetting"
           authorizationGroupUuids:

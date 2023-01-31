@@ -43,8 +43,8 @@ const InstantAssessmentRow = ({
   const readOnlyAccess = readonly || !hasWriteAccess
   const { values } = formikProps
   if (
-    _isEmpty(entityInstantAssessmentConfig.questions) &&
-    _isEmpty(entityInstantAssessmentConfig.questionSets)
+    _isEmpty(entityInstantAssessmentConfig?.questions) &&
+    _isEmpty(entityInstantAssessmentConfig?.questionSets)
   ) {
     return null
   }
@@ -52,7 +52,7 @@ const InstantAssessmentRow = ({
   return (
     <tr>
       <td>
-        {!_isEmpty(entityInstantAssessmentConfig.questions) &&
+        {!_isEmpty(entityInstantAssessmentConfig?.questions) &&
           (readOnlyAccess ? (
             <ReadonlyCustomFields
               parentFieldName={parentFieldName}
@@ -66,7 +66,7 @@ const InstantAssessmentRow = ({
               formikProps={formikProps}
             />
           ))}
-        {!_isEmpty(entityInstantAssessmentConfig.questionSets) && (
+        {!_isEmpty(entityInstantAssessmentConfig?.questionSets) && (
           <QuestionSet
             entity={entity}
             relatedObject={relatedObject}
@@ -117,8 +117,8 @@ const InstantAssessmentsContainerField = ({
       relatedObject
     )
     return (
-      !_isEmpty(filteredAssessment.questions) ||
-      !_isEmpty(filteredAssessment.questionSets)
+      !_isEmpty(filteredAssessment?.questions) ||
+      !_isEmpty(filteredAssessment?.questionSets)
     )
   }
   // Sort entities to display the ones without any assessment at the beginning,

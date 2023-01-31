@@ -77,8 +77,8 @@ const OnDemandAssessment = ({
   )
 
   if (
-    filteredAssessmentConfig.questions[ENTITY_ON_DEMAND_EXPIRATION_DATE] &&
-    filteredAssessmentConfig.onDemandAssessmentExpirationDays
+    filteredAssessmentConfig?.questions[ENTITY_ON_DEMAND_EXPIRATION_DATE] &&
+    filteredAssessmentConfig?.onDemandAssessmentExpirationDays
   ) {
     filteredAssessmentConfig.questions[
       ENTITY_ON_DEMAND_EXPIRATION_DATE
@@ -118,7 +118,7 @@ const OnDemandAssessment = ({
         <React.Fragment>
           <ValidationBar
             assessmentExpirationDays={
-              filteredAssessmentConfig.onDemandAssessmentExpirationDays
+              filteredAssessmentConfig?.onDemandAssessmentExpirationDays
             }
             index={index}
             assessmentFieldsObject={assessmentFieldsObject}
@@ -191,7 +191,7 @@ const OnDemandAssessment = ({
                   {() => {
                     return (
                       <>
-                        {!_isEmpty(filteredAssessmentConfig.questions) && (
+                        {!_isEmpty(filteredAssessmentConfig?.questions) && (
                           <ReadonlyCustomFields
                             parentFieldName={parentFieldName}
                             fieldsConfig={filteredAssessmentConfig.questions}
@@ -201,12 +201,10 @@ const OnDemandAssessment = ({
                             vertical
                           />
                         )}
-                        {!_isEmpty(filteredAssessmentConfig.questionSets) && (
+                        {!_isEmpty(filteredAssessmentConfig?.questionSets) && (
                           <QuestionSet
                             parentFieldName={`${parentFieldName}.questionSets`}
-                            questionSets={
-                              filteredAssessmentConfig?.questionSets
-                            }
+                            questionSets={filteredAssessmentConfig.questionSets}
                             formikProps={{
                               values: {
                                 [parentFieldName]: assessmentFieldsObject
@@ -287,6 +285,9 @@ const OnDemandAssessment = ({
     console.error(
       `Recurrence type is not ${RECURRENCE_TYPE.ON_DEMAND}. Component will not be rendered!`
     )
+    return null
+  } else if (!filteredAssessmentConfig) {
+    return null
   } else {
     return (
       <div style={{ ...style }}>

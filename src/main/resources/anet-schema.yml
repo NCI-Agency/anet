@@ -241,6 +241,9 @@ $defs:
         title: object type context in which the assessment will be made
         type: string
         enum: [report]
+      test:
+        type: string
+        title: optional test condition for showing this assessment
       onDemandAssessmentExpirationDays:
         type: integer
         minimum: 1

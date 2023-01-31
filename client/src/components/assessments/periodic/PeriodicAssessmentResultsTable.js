@@ -139,57 +139,56 @@ const PeriodicAssessmentResultsTable = ({
     assessmentConfig,
     entity
   )
-  const showAssessmentResults =
-    !_isEmpty(entityInstantAssessmentConfig) ||
-    !_isEmpty(subEntitiesInstantAssessmentConfig) ||
-    !_isEmpty(filteredAssessmentConfig)
+  if (
+    _isEmpty(entityInstantAssessmentConfig) &&
+    _isEmpty(subEntitiesInstantAssessmentConfig) &&
+    _isEmpty(filteredAssessmentConfig)
+  ) {
+    return null
+  }
   return (
     <>
-      {showAssessmentResults && (
-        <div style={{ ...style }}>
-          <Fieldset
-            title={`Assessment results - ${
-              assessmentConfig.label || recurrence
-            }`}
-            id={`entity-assessments-results-${recurrence}`}
+      <div style={{ ...style }}>
+        <Fieldset
+          title={`Assessment results - ${assessmentConfig.label || recurrence}`}
+          id={`entity-assessments-results-${recurrence}`}
+        >
+          <PeriodsNavigation offset={offset} onChange={setOffset} />
+          <Table
+            borderless
+            responsive
+            className="assessments-table"
+            style={{ tableLayout: "fixed" }}
           >
-            <PeriodsNavigation offset={offset} onChange={setOffset} />
-            <Table
-              borderless
-              responsive
-              className="assessments-table"
-              style={{ tableLayout: "fixed" }}
-            >
-              <PeriodsTableHeader periodsConfig={periodsConfig} />
-              <tbody>
-                <>
-                  {subEntities?.map(subEntity => (
-                    <EntityPeriodicAssessmentResults
-                      key={`subassessment-${subEntity.uuid}`}
-                      assessmentKey={assessmentKey}
-                      idSuffix={`subassessment-${subEntity.uuid}`}
-                      entity={subEntity}
-                      entityType={entityType}
-                      periodsConfig={periodsConfig}
-                      canAddAssessment={false}
-                      onUpdateAssessment={onUpdateAssessment}
-                    />
-                  ))}
-                </>
-                <EntityPeriodicAssessmentResults
-                  assessmentKey={assessmentKey}
-                  idSuffix={`assessment-${entity.uuid}`}
-                  entity={entity}
-                  entityType={entityType}
-                  periodsConfig={periodsConfig}
-                  canAddAssessment={canAddAssessment}
-                  onUpdateAssessment={onUpdateAssessment}
-                />
-              </tbody>
-            </Table>
-          </Fieldset>
-        </div>
-      )}
+            <PeriodsTableHeader periodsConfig={periodsConfig} />
+            <tbody>
+              <>
+                {subEntities?.map(subEntity => (
+                  <EntityPeriodicAssessmentResults
+                    key={`subassessment-${subEntity.uuid}`}
+                    assessmentKey={assessmentKey}
+                    idSuffix={`subassessment-${subEntity.uuid}`}
+                    entity={subEntity}
+                    entityType={entityType}
+                    periodsConfig={periodsConfig}
+                    canAddAssessment={false}
+                    onUpdateAssessment={onUpdateAssessment}
+                  />
+                ))}
+              </>
+              <EntityPeriodicAssessmentResults
+                assessmentKey={assessmentKey}
+                idSuffix={`assessment-${entity.uuid}`}
+                entity={entity}
+                entityType={entityType}
+                periodsConfig={periodsConfig}
+                canAddAssessment={canAddAssessment}
+                onUpdateAssessment={onUpdateAssessment}
+              />
+            </tbody>
+          </Table>
+        </Fieldset>
+      </div>
     </>
   )
 }

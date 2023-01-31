@@ -95,7 +95,7 @@ describe("For the periodic task assessments", () => {
       expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assesment", () => {
+    it("Should allow admins to successfully edit existing assessment", () => {
       ShowTask.monthlyAssessmentsTable.waitForExist()
       ShowTask.monthlyAssessmentsTable.waitForDisplayed()
       ShowTask.editMonthlyAssessmentButton.click()
@@ -136,7 +136,7 @@ describe("For the periodic task assessments", () => {
       expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
     })
 
-    it("Should allow the other advisor to successfully edit existing assesment", () => {
+    it("Should allow the other advisor to successfully edit existing assessment", () => {
       ShowTask.monthlyAssessmentsTable.waitForExist()
       ShowTask.monthlyAssessmentsTable.waitForDisplayed()
       ShowTask.editMonthlyAssessmentButton.click()
