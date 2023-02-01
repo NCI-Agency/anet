@@ -29,19 +29,17 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Disabled("Introspection query currently fails with graphql-java-generator")
 public class GraphQlResourceTest extends AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Test
+  @Disabled("Introspection query currently fails with graphql-java-generator")
   public void testIntrospection() {
     // only admin can do introspection query
     try {
-      final int openBrace = IntrospectionQuery.INTROSPECTION_QUERY.indexOf("{");
-      final Query resp =
-          adminQueryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY.substring(openBrace));
+      final Query resp = adminQueryExecutor.exec(IntrospectionQuery.INTROSPECTION_QUERY);
       assertThat(resp).isNotNull(); // we could check a million things here
     } catch (Exception e) {
       fail("Unexpected exception", e);
