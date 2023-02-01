@@ -271,7 +271,8 @@
     <module name="VariableDeclarationUsageDistance"/>
     <module name="CustomImportOrder">
       <property name="sortImportsInGroupAlphabetically" value="true"/>
-      <property name="separateLineBetweenGroups" value="true"/>
+      <!-- Non-Google: no blank lines between import statements -->
+      <property name="separateLineBetweenGroups" value="false"/>
       <property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
       <property name="tokens" value="IMPORT, STATIC_IMPORT, PACKAGE_DEF"/>
     </module>
@@ -333,6 +334,8 @@
       <property name="allowedAnnotations" value="Override, Test"/>
       <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, COMPACT_CTOR_DEF"/>
     </module>
+    <!-- Non-Google: allow missing Javadoc -->
+    <!--
     <module name="MissingJavadocMethod">
       <property name="scope" value="public"/>
       <property name="minLineCount" value="2"/>
@@ -347,6 +350,7 @@
                       RECORD_DEF, ANNOTATION_DEF"/>
       <property name="excludeScope" value="nothing"/>
     </module>
+    -->
     <module name="MethodName">
       <property name="format" value="^[a-z][a-z0-9]\w*$"/>
       <message key="name.invalidPattern"
