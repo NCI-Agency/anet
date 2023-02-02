@@ -87,6 +87,16 @@ export class DiagramNodeModel extends NodeModel {
     modelClass &&
       modelClass
         .fetchByUuid(event.data.anetObjectUuid, ENTITY_GQL_FIELDS)
+        .catch(error =>
+          console.error(
+            "Error fetching",
+            event.data.anetObjectType,
+            "with uuid",
+            event.data.anetObjectUuid,
+            ":",
+            error
+          )
+        )
         .then(function(entity) {
           options.anetObject = entity
           // TODO: fire an event instead
