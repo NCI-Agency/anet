@@ -6,30 +6,18 @@ This document covers the steps required to deploy ANET to a server environment.
 ## Environment
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
-	- 1x RHEL (7.6 or newer) Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
-	- 1x Microsoft SQL Server (2016 or greater) or Postgres (9.5 or greater, preferably 12 or greater) Database Server. 
-- **Software**: Software requirements: 
-	- Administration Privileges
-	- Optional: A valid SSL certificate for the domain name of the application server.
-	- Microsoft SQL Server 2016 or greater. The MS SQL database should be configured to:
-		- allow connections on a static TCP/IP port `1433`
-		- fulltext module should be installed. This can be done by:
-			1. Open the Programs and Features control panel.
-			2. Select `Microsoft SQL Server 2016` and click `Change`.
-			3. When prompted to `Add/Repair/Remove`, select `Add` and provide installation media.
-			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
-and Semantic Extractions for Search`.
-	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported although performance may degrade and support will be discontinued beyond Q3 2019
-	- A service manager, such as [NSSM](https://nssm.cc/) , can be used to install ANET as a service on Windows
+    - 1x RHEL (8 or newer) Application Server (50 GB HDD, 16 GB RAM, 4x CPU Cores)
+    - 1x Postgres (12 or greater) Database Server
+- **Software**: Software requirements:
+    - Administration Privileges
+    - Optional: A valid SSL certificate for the domain name of the application server
+    - Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support);
+      IE11 is no longer supported
 - **Network Accessibility**
-	- Users will access the Application Server over HTTPS (`443`)
-	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
-	- The Application Server will need to access an Active Directory server for authentication
-	- The Application Server will need to access an SMTP server for email sending. 
-- **Service Accounts**
-	- It is recommended to have a single service account with the following privileges:
-		- Administrator of the Application Server VMs. All scheduled tasks are to be performed under this account.
-		- DB owner of the ANET database. It is recommended to use Windows Authentication for this access.
+    - Users will access the Application Server over HTTPS (`443`)
+    - The Application Server will access the PostgreSQL server over port `5432` (or whatever port you have it configured to)
+    - The Application Server will need to access an Active Directory server for authentication
+    - The Application Server will need to access an SMTP server for email sending
 
 ## Installation Prerequisites
 
@@ -37,47 +25,41 @@ There is no software to install on client computers, only a modern web browser (
 
 You should have the following information on hand for the installation:
 
-- **A Build of ANET**. This comes in the form of a `anet-<version>.rpm` file. See BUILD.md for details on how to create this file.
-- **Microsoft SQL Server**: Your Database Administrator should be able to provide you with these settings. Just ask for an empty database. If you have access to your SQL Server directly, the command to create an empty database is `CREATE DATABASE database_name_here`. Alternatively, a database can be created using the SQL Management tool. 300Mb can be used as an initial database and logs size
-	- hostname
-	- username / password
-	- database name
-- **Postgres**:
+- **A Build of ANET**. This comes in the form of a `anet-<version>.rpm` file. See [BUILD.md](BUILD.md) for details on how to create this file.
+- **PostgreSQL**:
   - if you have just created a fresh postgres database, apply the content of `/opt/anet/doc/prepare-psql.sql`
 - **SMTP Server**
-	- hostname
-	- username / password (if necessary)
-	- TLS settings (yes/no)
-- **Fully Qualified Domain Name** of your server. 
-- **Information about who will Administer** your ANET instance. 
+    - hostname
+    - username / password (if necessary)
+    - TLS settings (yes/no)
+- **Fully Qualified Domain Name** of your server.
+- **Information about who will Administer** your ANET instance.
 
 ## Server Installation Procedures
 1. run `sudo yum localinstall anet-<version>.rpm`. This will create the following structure in `/opt/anet`:
-	* _bin_: This contains the startup scripts to start/stop the ANET server. 
-	* _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
-	* _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
+    * _bin_: This contains the startup scripts to start/stop the ANET server.
+    * _lib_: This contains all of the dependencies and compiled resources. All ANET specific files are bundled in `lib/anet.jar`.
+    * _docs_: This is a copy of the [docs folder](../) from the git repository, so you'll have a copy of these documents during installation!
 2. Add an anet.yml and anet-dictionary.yml file with appropriate settings to the application folder (i.e. `/opt/anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section.
 4. Verify that your configuration file is valid with ```bin/anet check anet.yml```
 5. Install Database Schema: Run ```bin/anet db migrate anet.yml```
-6. Seed the Database: Run ```bin/anet init anet.yml```. This will ask you the following questions:
-	* _Classification String_: This is the message that will appear in the top security banner on the screen. For demo instances you should use `FOR DEMO USE ONLY`.
-	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
-	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
-	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
-	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
-	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumably are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
-7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
+6. Seed the Database: Run ```bin/anet init anet.yml```. This will show you which options this command expects; there are four values you need to supply:
+    * `--adminOrgName ADMINORGNAME` i.e. _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
+    * `--adminPosName ADMINPOSNAME` i.e. _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
+    * `--adminFullName ADMINFULLNAME` i.e. _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
+    * `--adminDomainName ADMINDOMAINNAME` i.e. _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumably are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
+7. If imagery/maps are needed, install them according to the "How to configure imagery" section
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
-11. If you have opted to install ANET as a service:
-	* `sudo systemctl enable anet`
-	* anet can be now started/stopped with `sudo systemctl start anet` and `sudo systemctl stop anet`
+10. If you have opted to install ANET as a service:
+    * `sudo systemctl enable anet`
+    * anet can be now started/stopped with `sudo systemctl start anet` and `sudo systemctl stop anet`
 
 # ANET Upgrade Documentation
-On the ANET server: 
-- Stop the anet with `sudo systemctl stop anet`. 
-- Take a complete backup of your SQL Database
+On the ANET server:
+- Stop the anet with `sudo systemctl stop anet`.
+- Take a complete backup of your SQL database
 - install the new rpm with `sudo yum localinstall anet-<version>.rpm`
 - Make any required changes or upgrades to your `anet.yml` file
 - Run `bin/anet check anet.yml` to verify that anet is configured correctly
@@ -85,42 +67,30 @@ On the ANET server:
 - Start the server, if it has been installed as a service, run `sudo systemctl start anet`
 - Run through verification testing to ensure there are no issues
 
-Alternatively, an experimental service update script is available in the `doc` folder. 
+Alternatively, an experimental service update script is available in the `doc` folder.
 
 # ANET Configuration
 ANET is configured primarily through the `anet.yml` file. This file follows the [Dropwizard configuration format](https://www.dropwizard.io/en/latest/manual/configuration.html#man-configuration). If you want to run ANET behind a reverse proxy, also read [Running ANET and Keycloak behind a reverse proxy](reverse-proxy.md). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
-	- account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
-- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). 
+    - account deactivation worker: When development mode is `true`, the account deactivation worker is run directly at start-up (as well as at the set interval).
+- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80).
 - **smtp**: This section controls the configuration for how ANET sends emails.
-	- **hostname**: The Fully Qualified Domain Name of your SMTP Server
-	- **port**: The port to connect to your SMTP server on (default: 25)
-	- **username**: If your SMTP server requires authentication, provide the username here. Otherwise leave blank.
-	- **password**: Your password to your SMTP server.
-	- **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
-	- **disabled**: Set to true to disable sending email completely; most useful in development context.
-	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
+    - **hostname**: The Fully Qualified Domain Name of your SMTP Server
+    - **port**: The port to connect to your SMTP server on (default: 25)
+    - **username**: If your SMTP server requires authentication, provide the username here. Otherwise leave blank.
+    - **password**: Your password to your SMTP server.
+    - **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
+    - **disabled**: Set to true to disable sending email completely; most useful in development context.
+    - **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treated as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, e.g.: `"https://anet.example.com"`.
 - **keycloakConfiguration**: The configuration for [Keycloak](keycloak.md), i.e. the (federated) user authentication server for ANET.
-- **database**: The configuration for your database. ANET supports either [PostgreSQL](https://www.postgresql.org/) or Microsoft SQL Server.  Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
-	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
-	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
-	- **password**: The password to the database. Not needed when Windows Authentication is used.
-	- **url**: the url to the database in the following format: `jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]`. When Windows Authentication is used, the following parameters can be appended: `integratedSecurity=true;authenticationScheme=nativeAuthentication`
-	
-The following configuration can be used for MS SQL databases:
-```yaml
-database:
-  driverClass: com.microsoft.sqlserver.jdbc.SQLServerDriver
-  user: [ANET_DB_USERNAME]
-  password: [ANET_DB_PASSWORD]
-  url: jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]
-#  properties:
-#   date_string_format: 
-#   date_class:
-```
+- **database**: The configuration for your database. ANET only supports [PostgreSQL](https://www.postgresql.org/). Additional instructions can be found [here](https://www.dropwizard.io/en/latest/manual/configuration.html#database) for avaiable configuration options for the database connection.
+    - **driverClass**: the java driver for the database. Use `org.postgresql.Driver` for PostgreSQL.
+    - **user**: The username with access to the database. Not needed when using a local database.
+    - **password**: The password to the database. Not needed when using a local database.
+    - **url**: the url to the database in the following format: `jdbc:postgresql://[server hostname]:5432/[database name]`.
 
 - **keycloakConfiguration**: ANET uses the open source Keycloak server to perform Authentication ( https://www.keycloak.org/ ). It can be configured to authenticate via Keycloak in the following manner:
 
@@ -142,942 +112,16 @@ keycloakConfiguration:
 
 ANET needs *two* clients under the Keycloak realm with the name given under the **realm** property, a *confidential* one with the name given under the **resource** property (and you should copy the **secret** from the *Credentials* tab under the client in the Keycloak realm) and a *public* one with the `-public` added at the end of the name (so for the `ANET-Client` given in the example above, it would be `ANET-Client-public`). See [Keycloak authentication server](keycloak.md) for some guidance.
 
-- **server**: See the Dropwizard documentation for all the details of how to use this section.  This controls the protocols (http/https) and ports that ANET will use for client web traffic.  Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
+- **server**: See the Dropwizard documentation for all the details of how to use this section. This controls the protocols (http/https) and ports that ANET will use for client web traffic. Additionally if you configure SSL, you will provide the server private key in this section. The `adminConnector` section is used for performance checks and health testing, this endpoint does not need to be available to users.
 
-- **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` parameters to the location that you want the logs to appear.
+- **logging**: See the Dropwizard documentation for all the details of how to use this section. This controls the classes that you want to collect logs from and where to send them. Set the `currentLogFilename` parameters to the location that you want the logs to appear.
 
 Finally, you can define a deployment-specific dictionary inside the `anet-dictionary.yml` file.
-Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
-```yaml
-# Do not forget to also edit testDictionaries/*.yml files if dictionary change can break stuff
-CONNECTION_ERROR_MSG: Connection to the server is lost
-VERSION_CHANGED_MSG: "There is a new version of ANET, click here to load the new version (CAUTION: save any unsaved changes first)"
-SUPPORT_EMAIL_ADDR: support@example.com
+Currently, the recognized entries in the dictionary (and suggested values for each of them) are available in the example dictionary:
 
-engagementsIncludeTimeAndDuration: true
+[Example Dictionary](../anet-dictionary.yml)
 
-dateFormats:
-  email:
-    date: d MMMM yyyy Z
-    withTime: d MMMM yyyy @ HH:mm Z
-  excel: d MMMM yyyy
-  forms:
-    input:
-      date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
-              DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
-      withTime: [DD-MM-YYYY HH:mm, DD-MM-YY HH:mm, DD/MM/YYYY HH:mm, DD/MM/YY HH:mm, DD MM YYYY HH:mm, DD MM YY HH:mm,
-                  DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
-    displayShort:
-      date: D MMMM YYYY
-      withTime: D MMMM YYYY @ HH:mm
-    displayLong:
-      date: dddd, D MMMM YYYY
-      withTime: dddd, D MMMM YYYY @ HH:mm
-
-reportWorkflow:
-  nbOfHoursQuarantineApproved: 24
-  nbOfHoursApprovalTimeout: 48
-
-maxTextFieldLength: 250
-
-fields:
-
-  task:
-    shortLabel: Objective / Effort
-    shortName:
-      label: Objective / Effort number
-      placeholder: Enter an objective / effort name, example....
-    longLabel: Objectives and Efforts
-    longName:
-      label: Objective / Effort description
-      placeholder: Enter an objective / effort description, example ....
-      as: textarea
-      style:
-        height: 400px
-    topLevel:
-      shortLabel: Objective
-      shortName:
-        label: Name of this Objective
-        placeholder: Enter a Name for this Objective name, example ....
-      longLabel: Objectives
-      longName:
-        label: Description of this Objective
-        placeholder: Enter a description for this Objective, example ....
-        as: textarea
-        style:
-          height: 400px
-      assessments:
-        - recurrence: semiannually
-          questions:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-
-    subLevel:
-      shortLabel: Effort
-      shortName:
-        label: Effort name
-        placeholder: Enter an effort name, example....
-      longLabel: Efforts
-      longName:
-        label: Effort description
-        placeholder: Enter an effort description, example ....
-        as: textarea
-        style:
-          height: 400px
-      assessments:
-        - recurrence: monthly
-          questions:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-            status:
-              type: enum
-              label: Project status
-              helpText: Select an assessment status for objective
-              choices:
-                GREEN:
-                  label: Green
-                  color: '#c2ffb3'
-                AMBER:
-                  label: Amber
-                  color: '#ffe396'
-                RED:
-                  label: Red
-                  color: '#ff8279'
-              validations:
-                - type: required
-                  params: [You must provide the assessment status]
-        - recurrence: weekly
-          questions:
-            issues:
-              type: special_field
-              label: Top 3 issues
-              placeholder:  Enter the top 3 issues
-              widget: richTextEditor
-              style:
-                height: 300px
-              validations:
-                - type: required
-                  params: [You must provide the top 3 issues]
-    customFieldRef1:
-      label: Parent task
-      placeholder: Start typing to search for a higher level task
-    customField:
-      label: Custom field
-      placeholder: Fill in the custom field
-    customFieldEnum1:
-      label: Project status
-      enum:
-        GREEN:
-          label: Green
-          color: '#c2ffb3'
-        AMBER:
-          label: Amber
-          color: '#ffe396'
-        RED:
-          label: Red
-          color: '#ff8279'
-    taskedOrganizations:
-      label: Tasked organizations
-      placeholder: Search for an organization...
-    responsiblePositions:
-      label: Responsible positions
-      placeholder: Search for a position...
-    customFields:
-      assessments:
-        type: array_of_objects
-        label: Assessments definition
-        helpText: Here you can add as many assessments as needed
-        addButtonLabel: Add an assessment
-        objectLabel: Assessment
-        objectFields:
-          recurrence:
-            type: enum
-            label: Recurrence
-            helpText: Select a recurrence for this periodic assessment
-            choices:
-              once:
-                label: once
-              daily:
-                label: daily
-              weekly:
-                label: weekly
-              biweekly:
-                label: biweekly
-              semimonthly:
-                label: semimonthly
-              monthly:
-                label: monthly
-              quarterly:
-                label: quarterly
-              semiannualy:
-                label: semiannually
-              annually:
-                label: annually
-          relatedObjectType:
-            type: enum
-            label: Related object type
-            helpText: object type context in which the assessment will be made
-            choices:
-              report:
-                label: Report
-              null:
-                label: None
-          questions:
-            type: json
-            label: Questions
-            helpText: JSON that defines the assessment (you need to know what you are doing)
-            placeholder: Fill in valid JSON
-            as: textarea
-            style:
-              height: 200px
-
-  report:
-    intent: Engagement purpose
-    atmosphere: Atmospherics
-    atmosphereDetails: Atmospherics details
-    cancelled: ''
-    nextSteps:
-      label: Next steps
-      maxTextFieldLength: 1000
-    keyOutcomes: Key outcomes
-    reportText: Key details
-    customFields:
-      relatedReport:
-        type: anet_object
-        label: Related report
-        helpText: Here you can link to a related report
-        types:
-          - Report
-      additionalEngagementNeeded:
-        type: array_of_anet_objects
-        label: Additional engagement needed for
-        helpText: Here you can link to people, positions and organizations that need an additional engagement
-        types:
-          - Person
-          - Position
-          - Organization
-      multipleButtons:
-        type: enumset
-        label: Engagement types
-        helpText: Choose one or more of the engagement purposes
-        choices:
-          train:
-            label: Train
-          advise:
-            label: Advise
-          assist:
-            label: Assist
-          other:
-            label: Other
-      trainingEvent:
-        type: enum
-        label: Training event
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-        choices:
-          YES:
-            label: "Yes"
-          NO:
-            label: "No"
-      numberTrained:
-        type: number
-        typeError: Number trained must be a number
-        label: Number trained
-        placeholder: Number of trainees
-        validations:
-          - type: integer
-          - type: min
-            params: [1]
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-      levelTrained:
-        type: special_field
-        widget: likertScale
-        label: Level trained
-        helpText: Basic / Intermediate / Advanced
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-        levels:
-          - color: lightGray
-            endValue: 3
-            label: beginner beginner beginner beginner beginner beginner beginner beginner beginner beginner
-          - color: lightGray
-            endValue: 7
-            label: intermediate
-          - color: lightGray
-            endValue: 10
-            label: advanced advanced advanced advanced
-      trainingDate:
-        type: date
-        label: Training date
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('train') != -1)]
-      systemProcess:
-        type: enum
-        label: System / process
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-        choices:
-          YES:
-            label: System
-          NO:
-            label: Process
-      echelons:
-        type: text
-        label: Issue echelon to fix
-        placeholder:  Enter the issue echelon to fix
-        validations:
-          - type: required
-            params: [You must provide the text field]
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('advise') != -1 || @.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-      itemsAgreed:
-        type: array_of_objects
-        label: Items Agreed To
-        helpText: Here you can add as many agreed-to items as needed
-        addButtonLabel: Add an item
-        objectLabel: Item agreed
-        objectFields:
-          item:
-            type: text
-            label: Item
-            placeholder: Enter description of the item that has been agreed to
-            validations:
-              - type: required
-                params: [You must provide the text field]
-          dueDate:
-            type: date
-            label: Due date
-        visibleWhen: $[?(@.multipleButtons && @.multipleButtons.indexOf('advise') != -1)]
-      assetsUsed:
-        type: array_of_objects
-        label: Assets used to assist
-        helpText: Here you can add all assets that were used
-        addButtonLabel: Add an asset
-        objectLabel: Asset used
-        objectFields:
-          asset:
-            type: text
-            label: Item
-            placeholder: Enter description of the asset
-          quantity:
-            type: number
-            typeError: Qty must be a number
-            label: Qty
-        visibleWhen: $[?(@.multipleButtons && (@.multipleButtons.indexOf('assist') != -1 || @.multipleButtons.indexOf('other') != -1))]
-
-  person:
-    firstName: First name
-    lastName: Last name
-    domainUsername: Domain username
-    emailAddress:
-      label: Email
-      placeholder: Only the following email domain names are allowed. ( example.com, cmil.mil, mission.ita, nato.int, *.isaf.nato.int )
-    phoneNumber: Phone
-    country: Nationality
-    code: ID card number
-    rank: Rank
-    ranks:
-      - value: CIV
-        description: the rank of CIV
-      - value: CTR
-        description: the rank of CTR
-      - value: OR-1
-        description: the rank of OR-1
-      - value: OR-2
-        description: the rank of OR-2
-      - value: OR-3
-        description: the rank of OR-3
-      - value: OR-4
-        description: the rank of OR-4
-      - value: OR-5
-        description: the rank of OR-5
-      - value: OR-6
-        description: the rank of OR-6
-      - value: OR-7
-        description: the rank of OR-7
-      - value: OR-8
-        description: the rank of OR-8
-      - value: OR-9
-        description: the rank of OR-9
-      - value: WO-1
-        description: the rank of WO-1
-      - value: WO-2
-        description: the rank of WO-2
-      - value: WO-3
-        description: the rank of WO-3
-      - value: WO-4
-        description: the rank of WO-4
-      - value: WO-5
-        description: the rank of WO-5
-      - value: OF-1
-        description: the rank of OF-1
-        app6Modifier: E
-      - value: OF-2
-        description: the rank of OF-2
-        app6Modifier: E
-      - value: OF-3
-        description: the rank of OF-3
-        app6Modifier: E
-      - value: OF-4
-        description: the rank of OF-4
-        app6Modifier: F
-      - value: OF-5
-        description: the rank of OF-5
-        app6Modifier: G
-      - value: OF-6
-        description: the rank of OF-6
-        app6Modifier: H
-      - value: OF-7
-        description: the rank of OF-7
-        app6Modifier: I
-      - value: OF-8
-        description: the rank of OF-8
-        app6Modifier: J
-      - value: OF-9
-        description: the rank of OF-9
-        app6Modifier: K
-    gender: Gender
-    endOfTourDate: End of tour
-    customFields:
-      multipleButtons:
-        type: enumset
-        label: Choose one or more of the options
-        helpText: Help text for choosing multiple values
-        choices:
-          opt1:
-            label: Option 1
-          opt2:
-            label: Option 2
-          opt3:
-            label: Option 3
-      inputFieldName:
-        type: text
-        label: Text field
-        placeholder: Placeholder text for input field
-        helpText: Help text for text field
-      colourOptions:
-        type: enum
-        label: Choose one of the colours
-        helpText: Help text for choosing colours
-        choices:
-          GREEN:
-            label: Green
-            color: '#c2ffb3'
-          AMBER:
-            label: Amber
-            color: '#ffe396'
-          RED:
-            label: Red
-            color: '#ff8279'
-      textareaFieldName:
-        type: text
-        label: Textarea field
-        placeholder: Placeholder text for textarea field
-        helpText: Help text for textarea field
-        as: textarea
-        style:
-          height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
-      numberFieldName:
-        type: number
-        typeError: Number field must be a number
-        label: Number field
-        placeholder: Placeholder text for number field
-        helpText: Help text for number field
-        validations:
-          - type: integer
-          - type: min
-            params: [5]
-          - type: max
-            params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
-      nlt:
-        type: date
-        label: Not later than date
-        helpText: Help text for date field
-      nlt_dt:
-        type: datetime
-        label: Not later than datetime
-        helpText: Help text for datetime field
-      arrayFieldName:
-        type: array_of_objects
-        label: Array of objects
-        helpText: Here you can add as many objects as needed
-        addButtonLabel: Add an object
-        objectLabel: Object
-        objectFields:
-          textF:
-            type: text
-            label: Object text
-            placeholder: Placeholder text for object text field
-            helpText: Help text for object text field
-          dateF:
-            type: date
-            label: Object date
-            helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
-
-  location:
-    format: LAT_LON
-    customFields:
-      multipleButtons:
-        type: enumset
-        label: Choose one or more of the options
-        helpText: Help text for choosing multiple values
-        choices:
-          opt1:
-            label: Option 1
-          opt2:
-            label: Option 2
-          opt3:
-            label: Option 3
-      inputFieldName:
-        type: text
-        label: Text field
-        placeholder: Placeholder text for input field
-        helpText: Help text for text field
-      colourOptions:
-        type: enum
-        label: Choose one of the colours
-        helpText: Help text for choosing colours
-        choices:
-          GREEN:
-            label: Green
-            color: '#c2ffb3'
-          AMBER:
-            label: Amber
-            color: '#ffe396'
-          RED:
-            label: Red
-            color: '#ff8279'
-      textareaFieldName:
-        type: text
-        label: Textarea field
-        placeholder: Placeholder text for textarea field
-        helpText: Help text for textarea field
-        as: textarea
-        style:
-          height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
-      numberFieldName:
-        type: number
-        typeError: Number field must be a number
-        label: Number field
-        placeholder: Placeholder text for number field
-        helpText: Help text for number field
-        validations:
-          - type: integer
-          - type: min
-            params: [5]
-          - type: max
-            params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
-      nlt:
-        type: date
-        label: Not later than date
-        helpText: Help text for date field
-      nlt_dt:
-        type: datetime
-        label: Not later than datetime
-        helpText: Help text for datetime field
-      arrayFieldName:
-        type: array_of_objects
-        label: Array of objects
-        helpText: Here you can add as many objects as needed
-        addButtonLabel: Add an object
-        objectLabel: Object
-        objectFields:
-          textF:
-            type: text
-            label: Object text
-            placeholder: Placeholder text for object text field
-            helpText: Help text for object text field
-          dateF:
-            type: date
-            label: Object date
-            helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
-
-  position:
-    name: 'Position Name'
-    customFields:
-      multipleButtons:
-        type: enumset
-        label: Choose one or more of the options
-        helpText: Help text for choosing multiple values
-        choices:
-          opt1:
-            label: Option 1
-          opt2:
-            label: Option 2
-          opt3:
-            label: Option 3
-      inputFieldName:
-        type: text
-        label: Text field
-        placeholder: Placeholder text for input field
-        helpText: Help text for text field
-      colourOptions:
-        type: enum
-        label: Choose one of the colours
-        helpText: Help text for choosing colours
-        choices:
-          GREEN:
-            label: Green
-            color: '#c2ffb3'
-          AMBER:
-            label: Amber
-            color: '#ffe396'
-          RED:
-            label: Red
-            color: '#ff8279'
-      textareaFieldName:
-        type: text
-        label: Textarea field
-        placeholder: Placeholder text for textarea field
-        helpText: Help text for textarea field
-        as: textarea
-        style:
-          height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
-      numberFieldName:
-        type: number
-        typeError: Number field must be a number
-        label: Number field
-        placeholder: Placeholder text for number field
-        helpText: Help text for number field
-        validations:
-          - type: integer
-          - type: min
-            params: [5]
-          - type: max
-            params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
-      nlt:
-        type: date
-        label: Not later than date
-        helpText: Help text for date field
-      nlt_dt:
-        type: datetime
-        label: Not later than datetime
-        helpText: Help text for datetime field
-      arrayFieldName:
-        type: array_of_objects
-        label: Array of objects
-        helpText: Here you can add as many objects as needed
-        addButtonLabel: Add an object
-        objectLabel: Object
-        objectFields:
-          textF:
-            type: text
-            label: Object text
-            placeholder: Placeholder text for object text field
-            helpText: Help text for object text field
-          dateF:
-            type: date
-            label: Object date
-            helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
-
-  organization:
-    shortName: Name
-    parentOrg: Parent Organization
-    customFields:
-      multipleButtons:
-        type: enumset
-        label: Choose one or more of the options
-        helpText: Help text for choosing multiple values
-        choices:
-          opt1:
-            label: Option 1
-          opt2:
-            label: Option 2
-          opt3:
-            label: Option 3
-      inputFieldName:
-        type: text
-        label: Text field
-        placeholder: Placeholder text for input field
-        helpText: Help text for text field
-      colourOptions:
-        type: enum
-        label: Choose one of the colours
-        helpText: Help text for choosing colours
-        choices:
-          GREEN:
-            label: Green
-            color: '#c2ffb3'
-          AMBER:
-            label: Amber
-            color: '#ffe396'
-          RED:
-            label: Red
-            color: '#ff8279'
-      textareaFieldName:
-        type: text
-        label: Textarea field
-        placeholder: Placeholder text for textarea field
-        helpText: Help text for textarea field
-        as: textarea
-        style:
-          height: 200px
-        visibleWhen: $[?(@.colourOptions === 'GREEN')]
-      numberFieldName:
-        type: number
-        typeError: Number field must be a number
-        label: Number field
-        placeholder: Placeholder text for number field
-        helpText: Help text for number field
-        validations:
-          - type: integer
-          - type: min
-            params: [5]
-          - type: max
-            params: [100]
-        visibleWhen: $[?((@.colourOptions === 'GREEN')||(@.colourOptions === 'RED'))]
-      nlt:
-        type: date
-        label: Not later than date
-        helpText: Help text for date field
-      nlt_dt:
-        type: datetime
-        label: Not later than datetime
-        helpText: Help text for datetime field
-      arrayFieldName:
-        type: array_of_objects
-        label: Array of objects
-        helpText: Here you can add as many objects as needed
-        addButtonLabel: Add an object
-        objectLabel: Object
-        objectFields:
-          textF:
-            type: text
-            label: Object text
-            placeholder: Placeholder text for object text field
-            helpText: Help text for object text field
-          dateF:
-            type: date
-            label: Object date
-            helpText: Help text for object date field
-            visibleWhen: $[?(@.colourOptions === 'GREEN')]
-
-  advisor:
-
-    person:
-      name: NATO Member
-      countries: [Albania , Armenia, Australia, Austria, Azerbaijan, Belgium, Bosnia-Herzegovina, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland,
-                  Georgia, Germany, Greece, Hungary, Iceland, Italy, Latvia, Lithuania, Luxembourg, Macedonia, Mongolia, Montenegro, Netherlands, New Zealand,
-                  Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Turkey, Ukraine, United Kingdom, United States of America]
-
-    position:
-      name: NATO Billet
-      type: ANET User
-      code:
-        label: CE Post Number
-        placeholder: the CE post number for this position
-
-    org:
-      name: Advisor Organization
-      allOrgName: Advisor Organizations
-      longName:
-        label: Description
-        placeholder: e.g. Force Sustainment
-      identificationCode:
-        label: UIC
-        placeholder: the six character code
-
-  principal:
-
-    person:
-      name: Afghan Partner
-      countries: [Afghanistan]
-      assessments:
-        - recurrence: quarterly
-          questions:
-            test1:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 1
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ffe396'
-                "3":
-                  label: three
-                  color: '#ff8279'
-            test2:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 2
-              choices:
-                "3":
-                  label: three
-                  color: '#ff8279'
-                "4":
-                  label: four
-                  color: '#ffe396'
-                "5":
-                  label: five
-                  color: '#c2ffb3'
-            test3:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enum
-              label: Test question 3
-              choices:
-                "1":
-                  label: one
-                  color: '#c2ffb3'
-                "2":
-                  label: two
-                  color: '#ff8279'
-                "3":
-                  label: three
-                  color: '#ff8279'
-            text:
-              type: special_field
-              label: Text
-              widget: richTextEditor
-              style:
-                height: 100px
-        - recurrence: once
-          relatedObjectType: report
-          questions:
-            question1:
-              type: enum
-              label: Attendee involvement
-              choices:
-                "1":
-                  label: low
-                  color: '#c2ffb3'
-                "2":
-                  label: medium
-                  color: '#ffe396'
-                "3":
-                  label: high
-                  color: '#ff8279'
-            question2:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^P/i))]
-              type: enumset
-              label: Attendee from P org
-              choices:
-                yes:
-                  label: P
-                  color: '#ff0000'
-            question3:
-              test: $.subject.position.organization[?(@property === "identificationCode" && @.match(/^Z/i))]
-              type: enumset
-              label: Attendee from Z org
-              choices:
-                yes:
-                  label: Z
-                  color: '#00ff00'
-            question4:
-              test: $.relatedObject[?(@property === "atmosphere" && @ === "POSITIVE")]
-              type: enumset
-              label: Report had POSITIVE atmosphere
-              choices:
-                yes:
-                  label: 👍
-                  color: '#0000ff'
-
-    position:
-      name: Afghan Tashkil
-      type: Afghan Partner
-      code:
-        label: Tashkil
-        placeholder: the Afghan taskhil ID for this position
-
-    org:
-      name: Afghan Government Organization
-      allOrgName: Principal Organizations
-      longName:
-        label: Official Organization Name
-        placeholder: e.g. Afghan Ministry of Defense
-      identificationCode:
-        label: UIC
-        placeholder: the six character code
-
-  superUser:
-
-    position:
-      type: ANET Super User
-
-  administrator:
-
-    position:
-      type: ANET Administrator
-
-pinned_ORGs: [Key Leader Engagement]
-non_reporting_ORGs: [ANET Administrators]
-tasking_ORGs: [EF 2.2]
-domainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
-activeDomainNames: [example.com, cmil.mil, mission.ita, nato.int, "*.isaf.nato.int"]
-imagery:
-  mapOptions:
-    crs: EPSG3857
-    homeView:
-      location: [34.52, 69.16]
-      zoomLevel: 10
-    leafletOptions:
-      attributionControl: false
-  geoSearcher:
-    provider: ESRI
-    url: "geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/find"
-  baseLayers:
-    - name: OSM
-      default: true
-      type: tile
-      url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
-    - name: OSM - local
-      default: false
-      type: tile
-      url: "/imagery/street/{z}/{x}/{y}.png"
-    - name: World Imagery Tiles
-      default: false
-      type: tile
-      url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-      options:
-        tms: false
-    - name: World WMS
-      default: false
-      type: wms
-      url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
-      options:
-        layers: GEBCO_LATEST
-        format: "image/png"
-
-automaticallyInactivateUsers:
-  emailRemindersDaysPrior: [15, 30, 45]
-  ignoredDomainNames: []
-  checkIntervalInSecs: 86400  # 60 * 60 * 24
-
-dashboards:
-  - label: dashboard0
-    data: /data/dashboards/dashboard0.json
-    type: kanban
-  - label: decisives
-    data: /data/dashboards/decisives.json
-    type: decisives
-  - label: process board
-    type: board
-    data: /data/dashboards/process.json
-
-```
-As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
+As can be seen from the example above, some entries are lists of values and others are simple key/value pairs.
 
 # How to enable SSL
 Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/en/latest/manual/configuration.html#https
@@ -1095,9 +139,7 @@ server:
       validateCerts: false
 ```
 
-Administrator should request certificates. 
-
-## 
+Administrator should request certificates.
 
 ## Self signed certificates
 If needed, self-signed certificates can be created and used as follows:
@@ -1108,11 +150,11 @@ If needed, self-signed certificates can be created and used as follows:
 4. cd to the directory with cacerts, usually `/opt/anet`
 5. run `/opt/anet/lib/runtime/bin/keytool -import -trustcacerts -alias selfsigned -file /opt/anet/anetkey.crt -keystore cacerts`
 6. update `anet.yml` with keyStore and trustStore information
- 
+
 
 # How to configure imagery.
 
-ANET uses [Leaflet](https://leafletjs.com/) as a map viewer.  You can use any map sources that work with Leaflet in ANET. You can start by specifying the coordinate system to use in the `crs` option below:
+ANET uses [Leaflet](https://leafletjs.com/) as a map viewer. You can use any map sources that work with Leaflet in ANET. You can start by specifying the coordinate system to use in the `crs` option below:
 ```yaml
   imagery:
     mapOptions:
@@ -1121,11 +163,11 @@ ANET uses [Leaflet](https://leafletjs.com/) as a map viewer.  You can use any ma
         location: [34.52, 69.16]
         zoomLevel: 10
 
-```      
+```     
 Typically this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult. `homeView` defines the default starting location and zoom level of the map.
 _hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of `https://wmsURL?request=GetCapabilities&service=WMS` to determine the desired coordinate system
 
-CRS	Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
+CRS Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
 
 | CRS        |  Description|
 | ---------: |-------------|
@@ -1135,7 +177,7 @@ CRS	Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
 | Earth      | Serves as the base for CRS that are global such that they cover the earth. Can only be used as the base for other CRS and cannot be used directly, since it does not have a code, projection or transformation. distance() returns meters. |
 | Simple     | A simple CRS that maps longitude and latitude into x and y directly. May be used for maps of flat surfaces (e.g. game maps). Note that the y axis should still be inverted (going from bottom to top). distance() returns simple euclidean distance. |
 
-You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml` 
+You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml`
 
 for OSM-type providers:
 ```yaml
@@ -1167,15 +209,15 @@ and for WMTS-type providers:
           tms: false
 ```
 
-If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
+If desired, you can also configure a local tiled imagery cache with a downloaded tile set. Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar. If you download tiles from OpenStreetMaps, this is the format you'll get them in.
 
-1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`. 
+1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `imagery`.
 ```yaml
 assets:
   overrides:
     /imagery: imagery
 ```
-2. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
+2. Copy your imagery set into the `imagery` directory. You should end up with a file structure that looks like `imagery/street/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
 3. To use this new tile source, add under `baseLayers`:
 ```yaml
       - name: OSM
