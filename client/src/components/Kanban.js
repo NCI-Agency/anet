@@ -20,7 +20,9 @@ const Kanban = ({ columns, allTasks }) => (
   >
     {columns.map(column => {
       const name =
-        column.name || allTasks.find(task => task.uuid === column)?.shortName
+        column.name ||
+        allTasks.find(task => task.uuid === column)?.shortName ||
+        column
       const tasks =
         (column.tasks &&
           allTasks.filter(task => column.tasks.includes(task.uuid))) ||
@@ -56,7 +58,7 @@ const Column = ({ name, tasks }) => {
     <Card style={{ flex: "1 1 0%", margin: "4px" }}>
       <Card.Header>
         <strong>
-          <em>{name} </em>
+          <em>{name}</em>
         </strong>
       </Card.Header>
       <Card.Body>
@@ -67,7 +69,7 @@ const Column = ({ name, tasks }) => {
           label={`${tasks.length}`}
           segmentFill={entity => {
             const matching = Object.entries(
-              Settings.fields.task.customFieldEnum1.enum
+              Settings.fields.task.customFieldEnum1?.enum || {}
             ).filter(([key, val]) => {
               return key === entity.data.key
             })
@@ -124,7 +126,7 @@ Column.propTypes = {
 const CardView = ({ task }) => {
   const [open, setOpen] = useState(false)
   const { customFieldEnum1 } = task
-  const enumSettings = Settings.fields.task.customFieldEnum1.enum
+  const enumSettings = Settings.fields.task.customFieldEnum1?.enum
   return (
     <Card
       onClick={() => setOpen(!open)}

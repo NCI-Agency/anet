@@ -173,17 +173,24 @@ const BoardDashboard = ({ pageDispatchers }) => {
   }, [model, edit])
 
   useEffect(() => {
-    async function fetchData() {
-      await fetch(dashboardSettings.data)
-        .then(response => response.json())
-        .then(data => {
-          const model = new DiagramModel()
-          model.deserializeModel(data, engineRef.current)
-          setModel(model)
-        })
-    }
-    fetchData()
-  }, [dashboardSettings.data])
+    fetch(dashboardSettings.data)
+      .then(response => response.json())
+      .then(data => {
+        const model = new DiagramModel()
+        model.deserializeModel(data, engineRef.current)
+        setModel(model)
+      })
+      .catch(error =>
+        console.error(
+          "Error fetching",
+          dashboardSettings.type,
+          "dashboard",
+          dashboardSettings.data,
+          ":",
+          error
+        )
+      )
+  }, [dashboardSettings.data, dashboardSettings.type])
 
   useEffect(() => {
     if (dropEvent) {

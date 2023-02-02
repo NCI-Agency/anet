@@ -62,13 +62,20 @@ const KanbanDashboard = ({ pageDispatchers }) => {
   const [dashboardData, setDashboardData] = useState({})
   usePageTitle("Dashboard")
   useEffect(() => {
-    async function fetchData() {
-      await fetch(dashboardSettings.data)
-        .then(response => response.json())
-        .then(setDashboardData)
-    }
-    fetchData()
-  }, [dashboardSettings.data])
+    fetch(dashboardSettings.data)
+      .then(response => response.json())
+      .then(setDashboardData)
+      .catch(error =>
+        console.error(
+          "Error fetching",
+          dashboardSettings.type,
+          "dashboard",
+          dashboardSettings.data,
+          ":",
+          error
+        )
+      )
+  }, [dashboardSettings.data, dashboardSettings.type])
 
   return (
     <KanbanDashboardImpl
