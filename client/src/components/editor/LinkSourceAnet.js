@@ -5,6 +5,7 @@ import PropTypes from "prop-types"
 import React, { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { Transforms } from "slate"
+import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
 import * as yup from "yup"
 
 const LinkSourceAnet = ({
@@ -133,17 +134,17 @@ ExternalLinkForm.propTypes = {
 
 function createAnetLinkNode(entityType, entityUuid) {
   return {
-    type: "anet-link",
-    entityType: entityType,
-    entityUuid: entityUuid,
+    type: ANET_LINK,
+    entityType,
+    entityUuid,
     children: [{ text: "" }]
   }
 }
 
 function createExternalLinkNode(url, text) {
   return {
-    type: "anet-link",
-    href: url,
+    type: EXTERNAL_LINK,
+    url,
     children: [{ text: text }]
   }
 }

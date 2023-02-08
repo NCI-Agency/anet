@@ -4,6 +4,7 @@ import PropTypes from "prop-types"
 import React, { useRef } from "react"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
+import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
 import LinkSourceAnet from "./LinkSourceAnet"
 import "./RichTextEditor.css"
 
@@ -99,7 +100,7 @@ const Toolbar = ({
         <EditorToggleButton
           type={BUTTON_TYPES.MODAL}
           editor={editor}
-          format="anet-link"
+          format={ANET_LINK}
           icon="link"
           text="ANET Link"
           showModal={showAnetLinksModal}
@@ -110,7 +111,7 @@ const Toolbar = ({
         <EditorToggleButton
           type={BUTTON_TYPES.MODAL}
           editor={editor}
-          format="anet-link"
+          format={EXTERNAL_LINK}
           icon="link"
           showModal={showExternalLinksModal}
           setShowModal={setShowExternalLinksModal}

@@ -1,5 +1,5 @@
-import LinkAnet from "components/editor/LinkAnet"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
+import LinkExternalHref from "components/editor/LinkExternalHref"
 import "components/editor/RichTextEditor.css"
 import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
 import escapeHtml from "escape-html"
@@ -19,7 +19,13 @@ import {
   useSelected,
   withReact
 } from "slate-react"
-import { getUrlFromEntityInfo } from "utils_links"
+import {
+  ANET_LINK,
+  EXTERNAL_LINK,
+  getEntityInfoFromUrl,
+  getUrlFromEntityInfo,
+  LINK_TYPES
+} from "utils_links"
 
 const createSlateValue = value => {
   const document = new DOMParser().parseFromString(value || "", "text/html")
@@ -135,9 +141,9 @@ const withHtml = editor => {
 const withAnetLink = editor => {
   const { isVoid, isInline } = editor
   editor.isVoid = element =>
-    element.type === "anet-link" ? true : isVoid(element)
+    LINK_TYPES.includes(element.type) ? true : isVoid(element)
   editor.isInline = element =>
-    element.type === "anet-link" ? true : isInline(element)
+    LINK_TYPES.includes(element.type) ? true : isInline(element)
   return editor
 }
 
@@ -158,12 +164,9 @@ const serialize = node => {
     }
     return string
   }
-  const children =
-    node.type !== "anet-link"
-      ? node.children.map(n => serialize(n)).join("")
-      : node.children.reduce((acc, child) => {
-        return acc + child.text
-      }, "")
+  const children = LINK_TYPES.includes(node.type)
+    ? node.children.reduce((acc, child) => acc + child.text, "")
+    : node.children.map(n => serialize(n)).join("")
   switch (node.type) {
     case "heading-one":
       return `<h1>${children}</h1>`
@@ -181,7 +184,8 @@ const serialize = node => {
       return `<li>${children}</li>`
     case "block-quote":
       return `<blockquote>${children}</blockquote>`
-    case "anet-link":
+    case ANET_LINK:
+    case EXTERNAL_LINK:
       return `<a href="${getUrlFromEntityInfo(node)}">${children}</a>`
     default:
       return children
@@ -230,7 +234,7 @@ const deserialize = element => {
     case "A":
       return jsx(
         "element",
-        { type: "anet-link", href: element.getAttribute("href") },
+        getEntityInfoFromUrl(element.getAttribute("href")),
         children
       )
     case "STRONG":
@@ -282,7 +286,12 @@ const Element = ({ attributes, children, element }) => {
       return <li {...attributes}>{children}</li>
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
-    case "anet-link":
+    case ANET_LINK:
+    case EXTERNAL_LINK: {
+      const reducedChildren = element.children.reduce(
+        (acc, child) => acc + child.text,
+        ""
+      )
       return (
         <span
           {...attributes}
@@ -294,24 +303,20 @@ const Element = ({ attributes, children, element }) => {
             boxShadow: selected && focused ? "0 0 0 2px #B4D5FF" : "none"
           }}
         >
-          {element.href ? (
-            <LinkAnet
-              url={element.href}
-              displayCallback={displayCallback}
-              children={element.children.reduce((acc, child) => {
-                return acc + child.text
-              }, "")}
-            />
-          ) : (
+          {element.type === ANET_LINK ? (
             <LinkAnetEntity
               type={element.entityType}
               uuid={element.entityUuid}
               displayCallback={displayCallback}
+              children={reducedChildren}
             />
+          ) : (
+            <LinkExternalHref url={element.url} children={reducedChildren} />
           )}
           {children}
         </span>
       )
+    }
     default:
       return <p {...attributes}>{children}</p>
   }

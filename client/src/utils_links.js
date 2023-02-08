@@ -1,6 +1,10 @@
 import * as Models from "models"
 import { PAGE_URLS } from "pages/util"
 
+export const ANET_LINK = "anet-link"
+export const EXTERNAL_LINK = "external-link"
+export const LINK_TYPES = [ANET_LINK, EXTERNAL_LINK]
+
 const UUID_REGEX =
   "^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$"
 
@@ -38,11 +42,13 @@ export function getEntityInfoFromUrl(url) {
 
   if (splittedUrl.length > 1) {
     const typeRaw = "/" + splittedUrl[splittedUrl.length - 2]
-    const uuid = splittedUrl[splittedUrl.length - 1]
-    const type = ENTITY_URL_TYPES[typeRaw]
+    const entityType = ENTITY_URL_TYPES[typeRaw]
+    const entityUuid = splittedUrl[splittedUrl.length - 1]
 
-    if (type && new RegExp(UUID_REGEX).test(uuid)) {
-      return { type: type, uuid: uuid }
+    if (entityType && new RegExp(UUID_REGEX).test(entityUuid)) {
+      return { type: ANET_LINK, entityType, entityUuid }
+    } else {
+      return { type: EXTERNAL_LINK, url }
     }
   }
 
@@ -50,9 +56,9 @@ export function getEntityInfoFromUrl(url) {
 }
 
 export function getUrlFromEntityInfo(node) {
-  const { href, entityType, entityUuid } = node
-  if (href) {
-    return href
+  const { url, entityType, entityUuid } = node
+  if (url) {
+    return url
   }
   const baseUrl = window.location.origin
   const type = ENTITY_TYPE_URLS[entityType]
