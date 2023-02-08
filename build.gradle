@@ -86,7 +86,7 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.5.2'
+	implementation 'org.postgresql:postgresql:42.5.3'
 	implementation 'org.liquibase:liquibase-core:4.19.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
