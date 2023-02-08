@@ -22,7 +22,6 @@ import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
-import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
 import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
@@ -76,8 +75,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const TaskCustomFieldEnum2 = DictionaryField(FastField)
   const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
   const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
-
-  initialValues.assessment_customFieldEnum1 = ""
 
   const taskedOrganizationsFilters = {
     allAdvisorOrganizations: {
@@ -351,25 +348,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                         setFieldValue("customFieldEnum1", value)
                       }
                     />
-                    {edit && !disabled && (
-                      <FastField
-                        name="assessment_customFieldEnum1"
-                        label={`Assessment of ${Settings.fields.task.customFieldEnum1.label}`}
-                        component={FieldHelper.SpecialField}
-                        onChange={value => {
-                          setFieldValue("assessment_customFieldEnum1", value)
-                        }}
-                        onHandleBlur={() => {
-                          // validation will be done by setFieldValue
-                          setFieldTouched(
-                            "assessment_customFieldEnum1",
-                            true,
-                            false
-                          )
-                        }}
-                        widget={<RichTextEditor className="textField" />}
-                      />
-                    )}
                   </>
                 )}
 
