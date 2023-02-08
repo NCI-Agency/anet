@@ -74,13 +74,16 @@ public class UtilsTest {
     addTestCase(testCases, "<p>test</p>");
     // <h7> tag is not allowed
     addTestCase(testCases, "<h7>test</h7>", "test");
-    // href's are allowed to http, https and mailto, but nofollow is added
+    // href's are allowed to http, https, mailto and ANET objects, but nofollow is added
     addTestCase(testCases, "<a href=\"http://www.example.com/\">test</a>",
         "<a href=\"http://www.example.com/\" rel=\"nofollow\">test</a>");
     addTestCase(testCases, "<a href=\"https://www.example.com/\">test</a>",
         "<a href=\"https://www.example.com/\" rel=\"nofollow\">test</a>");
     addTestCase(testCases, "<a href=\"mailto:nobody@example.com/\">test</a>",
         "<a href=\"mailto:nobody&#64;example.com/\" rel=\"nofollow\">test</a>");
+    addTestCase(testCases,
+        "<a href=\"urn:anet:people:00000000-0000-0000-0000-000000000000\">test</a>",
+        "<a href=\"urn:anet:people:00000000-0000-0000-0000-000000000000\" rel=\"nofollow\">test</a>");
     // href's to ftp and data are not allowed
     addTestCase(testCases, "<a href=\"ftp://ftp.example.com/\">test</a>", "test");
     addTestCase(testCases, "<a href=\"data:MMM\">test</a>", "test");

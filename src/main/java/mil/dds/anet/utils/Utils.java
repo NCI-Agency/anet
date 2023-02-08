@@ -208,6 +208,8 @@ public class Utils {
 
   public static final PolicyFactory HTML_POLICY_DEFINITION = new HtmlPolicyBuilder()
       .allowStandardUrlProtocols()
+      // Allow ANET links like "urn:anet:people:uuid"
+      .allowUrlProtocols("urn")
       // Allow in-line image data
       .allowUrlProtocols("data").allowAttributes("src").matching(Pattern.compile("^data:image/.*$"))
       .onElements("img")
