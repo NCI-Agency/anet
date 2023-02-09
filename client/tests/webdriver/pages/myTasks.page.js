@@ -15,24 +15,24 @@ class MyTasks extends Page {
     super.openAsOnboardUser(PAGE_URL)
   }
 
-  get myOrgAssignedTasks() {
+  getMyOrgAssignedTasks() {
     return browser.$("#my-org-assigned-tasks")
   }
 
-  get myResponsibleTasks() {
+  getMyResponsibleTasks() {
     return browser.$("#my-responsible-tasks")
   }
 
-  get myPendingTasks() {
+  getMyPendingTasks() {
     return browser.$("#my-tasks-with-pending-assessments")
   }
 
-  get myPendingTasksContent() {
+  getMyPendingTasksContent() {
     return browser.$("#my-tasks-with-pending-assessments").$("tbody")
   }
 
   getMyPendingTask(name) {
-    return this.myPendingTasksContent.$(`//a[contains(text(), "${name}")]`)
+    return this.getMyPendingTasksContent().$(`//a[contains(text(), "${name}")]`)
   }
 }
 

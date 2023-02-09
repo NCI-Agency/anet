@@ -22,17 +22,17 @@ describe("For the periodic task assessments", () => {
   describe("As an advisor who has tasks he is responsible for", () => {
     it("Should first search, find and open the task page", () => {
       Home.open("/", ADVISOR1_CREDENTIALS)
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
+      Home.getSearchBar().setValue(TASK_SEARCH_STRING)
+      Home.getSubmitSearch().click()
+      Search.getFoundTaskTable().waitForExist({ timeout: 20000 })
+      Search.getFoundTaskTable().waitForDisplayed()
       Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
     })
 
     it("Should allow advisor to successfully add an assessment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-      ShowTask.addMonthlyAssessmentButton.click()
+      ShowTask.getMonthlyAssessmentsTable().waitForExist()
+      ShowTask.getMonthlyAssessmentsTable().waitForDisplayed()
+      ShowTask.getAddMonthlyAssessmentButton().click()
       ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
@@ -43,7 +43,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just created", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
+      ShowTask.getShownAssessmentDetails().forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
             // Only some values are mapped, others are same
@@ -54,9 +54,9 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should allow the author of the assessment to successfully edit it", () => {
-      ShowTask.editMonthlyAssessmentButton.waitForExist()
-      ShowTask.editMonthlyAssessmentButton.waitForDisplayed()
-      ShowTask.editMonthlyAssessmentButton.click()
+      ShowTask.getEditMonthlyAssessmentButton().waitForExist()
+      ShowTask.getEditMonthlyAssessmentButton().waitForDisplayed()
+      ShowTask.getEditMonthlyAssessmentButton().click()
       ShowTask.waitForAssessmentModalForm()
 
       ShowTask.fillAssessmentQuestion(
@@ -69,7 +69,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
+      ShowTask.getShownAssessmentDetails().forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
             // Only some values are mapped, others are same
@@ -84,21 +84,23 @@ describe("For the periodic task assessments", () => {
   describe("As an admin", () => {
     it("Should first search, find and open the task's page", () => {
       Home.openAsAdminUser()
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
+      Home.getSearchBar().setValue(TASK_SEARCH_STRING)
+      Home.getSubmitSearch().click()
+      Search.getFoundTaskTable().waitForExist({ timeout: 20000 })
+      Search.getFoundTaskTable().waitForDisplayed()
       Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
     })
 
     it("Should not show make assessment button when there is an assessment on that period", () => {
-      expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
+      expect(ShowTask.getAddMonthlyAssessmentButton().isExisting()).to.equal(
+        false
+      )
     })
 
     it("Should allow admins to successfully edit existing assessment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-      ShowTask.editMonthlyAssessmentButton.click()
+      ShowTask.getMonthlyAssessmentsTable().waitForExist()
+      ShowTask.getMonthlyAssessmentsTable().waitForDisplayed()
+      ShowTask.getEditMonthlyAssessmentButton().click()
       ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
@@ -110,7 +112,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
+      ShowTask.getShownAssessmentDetails().forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
             // Only some values are mapped, others are same
@@ -125,21 +127,23 @@ describe("For the periodic task assessments", () => {
   describe("As a different advisor responsible from same task", () => {
     it("Should first search, find and open the task's page", () => {
       Home.open("/", ADVISOR2_CREDENTIALS)
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
+      Home.getSearchBar().setValue(TASK_SEARCH_STRING)
+      Home.getSubmitSearch().click()
+      Search.getFoundTaskTable().waitForExist({ timeout: 20000 })
+      Search.getFoundTaskTable().waitForDisplayed()
       Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
     })
 
     it("Should not show make assessment button when there is an assessment on that period", () => {
-      expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
+      expect(ShowTask.getAddMonthlyAssessmentButton().isExisting()).to.equal(
+        false
+      )
     })
 
     it("Should allow the other advisor to successfully edit existing assessment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-      ShowTask.editMonthlyAssessmentButton.click()
+      ShowTask.getMonthlyAssessmentsTable().waitForExist()
+      ShowTask.getMonthlyAssessmentsTable().waitForDisplayed()
+      ShowTask.getEditMonthlyAssessmentButton().click()
       ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
@@ -153,7 +157,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
+      ShowTask.getShownAssessmentDetails().forEach((detail, index) => {
         expect(prefix(index) + detail.getText()).to.equal(
           prefix(index) +
             // Only some values are mapped, others are same
@@ -164,7 +168,7 @@ describe("For the periodic task assessments", () => {
     })
 
     it("Should allow the other advisor to delete the assessment", () => {
-      ShowTask.deleteMonthlyAssessmentButton.click()
+      ShowTask.getDeleteMonthlyAssessmentButton().click()
       ShowTask.confirmDelete()
       ShowTask.waitForDeletedAssessmentToDisappear()
       ShowTask.logout()

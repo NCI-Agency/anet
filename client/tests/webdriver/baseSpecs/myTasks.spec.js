@@ -6,10 +6,10 @@ describe("Home page", () => {
   describe("When checking the navigation items", () => {
     it("Should see a link to my tasks page when the user is an advisor", () => {
       Home.open()
-      Home.linksMenuButton.click()
-      Home.myTasksLink.waitForDisplayed()
+      Home.getLinksMenuButton().click()
+      Home.getMyTasksLink().waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(Home.myTasksLink.isExisting()).to.be.true
+      expect(Home.getMyTasksLink().isExisting()).to.be.true
       Home.logout()
     })
   })
@@ -17,7 +17,7 @@ describe("Home page", () => {
     it("Should NOT see a link to my tasks page when the user does not have a position", () => {
       Home.openAsPositionlessUser()
       // eslint-disable-next-line no-unused-expressions
-      expect(Home.myTasksLink.isExisting()).to.be.false
+      expect(Home.getMyTasksLink().isExisting()).to.be.false
       Home.logout()
     })
   })
@@ -34,14 +34,14 @@ describe("My tasks page", () => {
 
   describe("When checking the content of the page", () => {
     it("Should see a table of the tasks being tasked for the user's organization", () => {
-      MyTasks.myOrgAssignedTasks.waitForDisplayed()
-      const myOrgAssignedTasksItems = MyTasks.myOrgAssignedTasks.$$("tr")
+      MyTasks.getMyOrgAssignedTasks().waitForDisplayed()
+      const myOrgAssignedTasksItems = MyTasks.getMyOrgAssignedTasks().$$("tr")
       // table has a header and 5 task rows
       expect(myOrgAssignedTasksItems).to.have.length(6)
     })
     it("Should see a table of the tasks being the responsibility of the current user", () => {
-      MyTasks.myResponsibleTasks.waitForDisplayed()
-      const myResponsibleTasksItems = MyTasks.myResponsibleTasks.$$("tr")
+      MyTasks.getMyResponsibleTasks().waitForDisplayed()
+      const myResponsibleTasksItems = MyTasks.getMyResponsibleTasks().$$("tr")
       expect(myResponsibleTasksItems).to.have.length(0)
     })
   })

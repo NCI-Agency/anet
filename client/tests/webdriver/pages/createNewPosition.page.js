@@ -2,79 +2,79 @@ import Page from "./page"
 
 const PAGE_URL = "/positions/new"
 class CreatePosition extends Page {
-  get form() {
+  getForm() {
     return browser.$("form")
   }
 
-  get positionNameInput() {
+  getPositionNameInput() {
     return browser.$("#name")
   }
 
-  get duplicatesButton() {
+  getDuplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
 
-  get modalContent() {
+  getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  get modalCloseButton() {
-    return this.modalContent.$("button.btn-close")
+  getModalCloseButton() {
+    return this.getModalContent().$("button.btn-close")
   }
 
-  get similarPosition() {
-    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  getSimilarPosition() {
+    return this.getModalContent().$("tbody tr:first-child td:first-child a")
   }
 
-  get positionNameHelpBlock() {
+  getPositionNameHelpBlock() {
     return browser.$("#fg-name div.invalid-feedback")
   }
 
-  get typeAdvisorButton() {
+  getTypeAdvisorButton() {
     return browser.$('label[for="type_ADVISOR"]')
   }
 
-  get typePrincipalButton() {
+  getTypePrincipalButton() {
     return browser.$('label[for="type_PRINCIPAL"]')
   }
 
-  get organizationInput() {
+  getOrganizationInput() {
     return browser.$("#organization")
   }
 
-  get organizationHelpBlock() {
+  getOrganizationHelpBlock() {
     return browser.$("#fg-organization div.invalid-feedback")
   }
 
-  get orgAdvancedSelectFirstItem() {
+  getOrgAdvancedSelectFirstItem() {
     return browser.$(
       "#organization-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  get locationInput() {
+  getLocationInput() {
     return browser.$("#location")
   }
 
-  get locationHelpBlock() {
+  getLocationHelpBlock() {
     return browser.$("#fg-location div.invalid-feedback")
   }
 
-  get locAdvancedSelectFirstItem() {
+  getLocAdvancedSelectFirstItem() {
     return browser.$(
       "#location-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  get alertSuccess() {
+  getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get cancelButton() {
+  getCancelButton() {
     return browser.$("div.submit-buttons").$("button=Cancel")
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
@@ -87,10 +87,10 @@ class CreatePosition extends Page {
   }
 
   waitForOrgAdvancedSelectToChange(value) {
-    this.orgAdvancedSelectFirstItem.waitForExist()
+    this.getOrgAdvancedSelectFirstItem().waitForExist()
     return browser.waitUntil(
       () => {
-        return this.orgAdvancedSelectFirstItem.getText() === value
+        return this.getOrgAdvancedSelectFirstItem().getText() === value
       },
       {
         timeout: 5000,
@@ -103,7 +103,7 @@ class CreatePosition extends Page {
   }
 
   submitForm() {
-    this.submitButton.click()
+    this.getSubmitButton().click()
   }
 }
 

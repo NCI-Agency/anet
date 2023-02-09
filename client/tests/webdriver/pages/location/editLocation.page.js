@@ -3,29 +3,29 @@ import Page from "../page"
 const PAGE_URL = "/locations/:uuid/edit"
 
 class EditLocation extends Page {
-  get saveLocationButton() {
+  getSaveLocationButton() {
     return browser.$('//button[text()="Save Location"]')
   }
 
-  get locationTypeLabel() {
+  getLocationTypeLabel() {
     return browser.$("label*=Type")
   }
 
-  get latLngLabel() {
+  getLatLngLabel() {
     return browser.$("label*=Latitude")
   }
 
   // Can't edit anet.yml to change location format, so can't test this for now
-  get mgrsLabel() {
+  getMgrsLabel() {
     return browser.$("label*=MGRS")
   }
 
-  get allFormatsPopover() {
+  getAllFormatsPopover() {
     return browser.$("button#gloc-info-btn")
   }
 
   // parent of MGRS table data => tr
-  get allFormatsPopoverLat() {
+  getAllFormatsPopoverLat() {
     return browser
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
@@ -33,7 +33,7 @@ class EditLocation extends Page {
       .$("span:first-child")
   }
 
-  get allFormatsPopoverLng() {
+  getAllFormatsPopoverLng() {
     return browser
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
@@ -41,7 +41,7 @@ class EditLocation extends Page {
       .$("span:nth-child(3)")
   }
 
-  get allFormatsPopoverMGRS() {
+  getAllFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
     return browser
       .$(".bp4-popover2-content table")
@@ -50,15 +50,15 @@ class EditLocation extends Page {
       .$("span:first-child")
   }
 
-  get locationTypeField() {
+  getLocationTypeField() {
     return browser.$("select.location-type-form-group")
   }
 
-  get latInputField() {
+  getLatInputField() {
     return browser.$("input#lat")
   }
 
-  get lngInputField() {
+  getLngInputField() {
     return browser.$("input#lng")
   }
 
@@ -68,9 +68,9 @@ class EditLocation extends Page {
   }
 
   waitForEditLocationPageToLoad() {
-    if (!this.saveLocationButton.isDisplayed()) {
-      this.saveLocationButton.waitForExist()
-      this.saveLocationButton.waitForDisplayed()
+    if (!this.getSaveLocationButton().isDisplayed()) {
+      this.getSaveLocationButton().waitForExist()
+      this.getSaveLocationButton().waitForDisplayed()
     }
   }
 }

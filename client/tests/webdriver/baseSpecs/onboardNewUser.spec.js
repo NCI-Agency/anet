@@ -22,39 +22,41 @@ describe("Onboard new user login", () => {
     const welcomeText = "Welcome to ANET"
     OnboardPage.waitForWelcomeMessage(welcomeText)
 
-    const securityText = OnboardPage.welcomeText.getText()
+    const securityText = OnboardPage.getWelcomeText().getText()
     expect(securityText).to.equal(welcomeText)
   })
 
   it("Should click on create your account", () => {
-    OnboardPage.createYourAccountBtn.scrollIntoView()
-    OnboardPage.createYourAccountBtn.click()
+    OnboardPage.getCreateYourAccountBtn().scrollIntoView()
+    OnboardPage.getCreateYourAccountBtn().click()
     browser.pause(500) // wait for the page transition and rendering of custom fields
 
     // Check that these are properly copied from the authentication server
-    OnboardPage.lastName.waitForDisplayed()
-    OnboardPage.lastName.waitForExist()
-    expect(OnboardPage.lastName.getValue()).to.equal(ONBOARD_USER.lastName)
-    OnboardPage.firstName.waitForDisplayed()
-    OnboardPage.firstName.waitForExist()
-    expect(OnboardPage.firstName.getValue()).to.equal(ONBOARD_USER.firstName)
-    OnboardPage.emailAddress.waitForDisplayed()
-    OnboardPage.emailAddress.waitForExist()
-    expect(OnboardPage.emailAddress.getValue()).to.equal(
+    OnboardPage.getLastName().waitForDisplayed()
+    OnboardPage.getLastName().waitForExist()
+    expect(OnboardPage.getLastName().getValue()).to.equal(ONBOARD_USER.lastName)
+    OnboardPage.getFirstName().waitForDisplayed()
+    OnboardPage.getFirstName().waitForExist()
+    expect(OnboardPage.getFirstName().getValue()).to.equal(
+      ONBOARD_USER.firstName
+    )
+    OnboardPage.getEmailAddress().waitForDisplayed()
+    OnboardPage.getEmailAddress().waitForExist()
+    expect(OnboardPage.getEmailAddress().getValue()).to.equal(
       ONBOARD_USER.emailAddress
     )
   })
 
   it("Should not save if endOfTourDate is not in the future", () => {
-    OnboardPage.endOfTourDate.waitForExist()
-    OnboardPage.endOfTourDate.click()
+    OnboardPage.getEndOfTourDate().waitForExist()
+    OnboardPage.getEndOfTourDate().click()
 
-    OnboardPage.endOfTourToday.waitForDisplayed()
-    OnboardPage.endOfTourToday.waitForExist()
+    OnboardPage.getEndOfTourToday().waitForDisplayed()
+    OnboardPage.getEndOfTourToday().waitForExist()
     // select a date
-    OnboardPage.endOfTourToday.click()
-    OnboardPage.lastName.click()
-    const errorMessage = OnboardPage.endOfTourDate
+    OnboardPage.getEndOfTourToday().click()
+    OnboardPage.getLastName().click()
+    const errorMessage = OnboardPage.getEndOfTourDate()
       .$("..")
       .$("..")
       .$("..")
@@ -68,17 +70,17 @@ describe("Onboard new user login", () => {
   })
 
   it("Should save if all fields properly filled", () => {
-    OnboardPage.rank.selectByAttribute("value", personDetails.rank)
-    OnboardPage.gender.selectByAttribute("value", personDetails.gender)
-    OnboardPage.country.selectByAttribute("value", personDetails.country)
-    OnboardPage.endOfTourDate.setValue(personDetails.endOfTourDate)
-    OnboardPage.lastName.click()
+    OnboardPage.getRank().selectByAttribute("value", personDetails.rank)
+    OnboardPage.getGender().selectByAttribute("value", personDetails.gender)
+    OnboardPage.getCountry().selectByAttribute("value", personDetails.country)
+    OnboardPage.getEndOfTourDate().setValue(personDetails.endOfTourDate)
+    OnboardPage.getLastName().click()
     browser.pause(500) // wait for the error message to disappear
     OnboardPage.submitForm()
 
     OnboardPage.waitForAlertWarningToLoad()
-    OnboardPage.onboardingPopover.waitForExist()
-    OnboardPage.onboardingPopover.waitForDisplayed()
+    OnboardPage.getOnboardingPopover().waitForExist()
+    OnboardPage.getOnboardingPopover().waitForDisplayed()
     OnboardPage.logout()
   })
 })

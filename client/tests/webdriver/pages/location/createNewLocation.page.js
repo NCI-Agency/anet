@@ -3,87 +3,87 @@ import Page from "../page"
 const PAGE_URL = "/locations/new"
 
 class CreateNewLocation extends Page {
-  get form() {
+  getForm() {
     return browser.$(".form-horizontal")
   }
 
-  get createButton() {
+  getCreateButton() {
     return browser.$('//button[contains(text(),"Save Location")]')
   }
 
-  get nameRequiredError() {
+  getNameRequiredError() {
     return browser.$('//div[contains(text(),"name is a required field")]')
   }
 
-  get nameField() {
-    return this.form.$("input#name")
+  getNameField() {
+    return this.getForm().$("input#name")
   }
 
-  get typeRequiredError() {
+  getTypeRequiredError() {
     return browser.$('//div[contains(text(),"type is a required field")]')
   }
 
-  get typeField() {
-    return this.form.$("select.location-type-form-group")
+  getTypeField() {
+    return this.getForm().$("select.location-type-form-group")
   }
 
-  get duplicatesButton() {
+  getDuplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
 
-  get modalContent() {
+  getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  get modalCloseButton() {
-    return this.modalContent.$(".btn-close")
+  getModalCloseButton() {
+    return this.getModalContent().$(".btn-close")
   }
 
-  get similarLocation() {
-    return this.modalContent.$(
+  getSimilarLocation() {
+    return this.getModalContent().$(
       ".modal-content tbody tr:first-child td:first-child a"
     )
   }
 
-  get latField() {
-    return this.form.$("input#lat")
+  getLatField() {
+    return this.getForm().$("input#lat")
   }
 
-  get lngField() {
-    return this.form.$("input#lng")
+  getLngField() {
+    return this.getForm().$("input#lng")
   }
 
-  get allFormatsPopover() {
-    return this.form.$("button#gloc-info-btn")
+  getAllFormatsPopover() {
+    return this.getForm().$("button#gloc-info-btn")
   }
 
   // parent of MGRS table data => tr
-  get allFormatsPopoverLat() {
-    return this.form
+  getAllFormatsPopoverLat() {
+    return this.getForm()
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
       .$("..")
       .$("span:first-child")
   }
 
-  get allFormatsPopoverLng() {
-    return this.form
+  getAllFormatsPopoverLng() {
+    return this.getForm()
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
       .$("..")
       .$("span:nth-child(3)")
   }
 
-  get allFormatsPopoverMGRS() {
+  getAllFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
-    return this.form
+    return this.getForm()
       .$(".bp4-popover2-content table")
       .$("td*=MGRS")
       .$("..")
       .$("span:first-child")
   }
 
-  get successMsg() {
+  getSuccessMsg() {
     return browser.$('//div[text()="Location saved"]')
   }
 
@@ -102,8 +102,8 @@ class CreateNewLocation extends Page {
   }
 
   waitForPageToLoad() {
-    this.form.waitForExist()
-    this.form.waitForDisplayed()
+    this.getForm().waitForExist()
+    this.getForm().waitForDisplayed()
   }
 }
 

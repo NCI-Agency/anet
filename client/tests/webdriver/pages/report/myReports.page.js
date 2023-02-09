@@ -17,7 +17,7 @@ class MyReports extends Page {
 
   // TODO Calendar and Map tabs
 
-  get reportConflictTooltipTitle() {
+  getReportConflictTooltipTitle() {
     browser.pause(200)
     return browser.$(".reportConflictTooltipContainer > div").getText()
   }

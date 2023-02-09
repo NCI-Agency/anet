@@ -11,20 +11,20 @@ class AssessmentsSection extends Page {
     )
   }
 
-  get modalContent() {
+  getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  get modalTitle() {
-    return this.modalContent.$("div.modal-title")
+  getModalTitle() {
+    return this.getModalContent().$("div.modal-title")
   }
 
-  get modalCloseButton() {
-    return this.modalContent.$(".btn-close")
+  getModalCloseButton() {
+    return this.getModalContent().$(".btn-close")
   }
 
   getModalAssessmentQuestion(key) {
-    return this.modalContent.$(`[id="fg-entityAssessment.${key}"]`)
+    return this.getModalContent().$(`[id="fg-entityAssessment.${key}"]`)
   }
 }
 

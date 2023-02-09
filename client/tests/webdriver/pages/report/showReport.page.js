@@ -3,63 +3,63 @@ import Page from "../page"
 const PAGE_URL = "/reports/:uuid"
 
 class ShowReport extends Page {
-  get editReportButton() {
+  getEditReportButton() {
     return browser.$("//a[text()='Edit']")
   }
 
-  get tasksEngagementAssessments() {
+  getTasksEngagementAssessments() {
     return browser.$("#tasks-engagement-assessments")
   }
 
-  get task12BUrl() {
+  getTask12BUrl() {
     return browser.$("*=1.2.B").getAttribute("href")
   }
 
-  get defaultReportView() {
+  getDefaultReportView() {
     return browser.$(".report-show")
   }
 
-  get compactView() {
+  getCompactView() {
     return browser.$(".compact-view")
   }
 
-  get compactViewButton() {
+  getCompactViewButton() {
     return browser.$("button[value='compactView']")
   }
 
-  get compactBanner() {
+  getCompactBanner() {
     return browser.$(".compact-view .banner")
   }
 
-  get compactTitle() {
+  getCompactTitle() {
     return browser.$("header *[value='title']")
   }
 
-  get printButton() {
+  getPrintButton() {
     return browser.$("button[value='print']")
   }
 
-  get compactReportFields() {
+  getCompactReportFields() {
     return browser.$$(".compact-view .reportField > th")
   }
 
-  get detailedViewButton() {
+  getDetailedViewButton() {
     return browser.$("button[value='detailedView']")
   }
 
-  get reportText() {
+  getReportText() {
     return browser.$("#report-text")
   }
 
-  get reportStatus() {
+  getReportStatus() {
     return browser.$("h4.text-danger")
   }
 
-  get reportStatusText() {
-    return this.reportStatus.getText()
+  getReportStatusText() {
+    return this.getReportStatus().getText()
   }
 
-  get uuid() {
+  getUuid() {
     const title =
       browser
         .$("//span[@class='title-text'][contains(.,'Report #')]")
@@ -67,16 +67,16 @@ class ShowReport extends Page {
     return title.slice(title.lastIndexOf("#") + 1)
   }
 
-  get intent() {
+  getIntent() {
     const text = browser.$("#intent > p:first-child").getText() || ""
     return text.slice(text.indexOf(": ") + 2)
   }
 
-  get engagementDate() {
+  getEngagementDate() {
     return browser.$("div[name='engagementDate']").getText()
   }
 
-  get reportConflictIcon() {
+  getReportConflictIcon() {
     // wait for conflict loader to disappear
     browser
       .$("div[name='engagementDate'] > span.reportConflictLoadingIcon")
@@ -85,48 +85,48 @@ class ShowReport extends Page {
     return browser.$("div[name='engagementDate'] > span.reportConflictIcon")
   }
 
-  get reportConflictTooltipTitle() {
+  getReportConflictTooltipTitle() {
     browser.pause(200)
     return browser.$(".reportConflictTooltipContainer > div").getText()
   }
 
-  get duration() {
+  getDuration() {
     return browser.$("div[name='duration']").getText()
   }
 
-  get location() {
+  getLocation() {
     return browser.$("div[name='location']").getText()
   }
 
-  get authors() {
+  getAuthors() {
     return browser.$("div[name='authors']").getText()
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$('//button[text()="Submit report"]')
   }
 
-  get reportModal() {
+  getReportModal() {
     return browser.$(".modal-dialog")
   }
 
-  get confirmSubmitButton() {
-    return this.reportModal.$('//button[text()="Submit anyway"]')
+  getConfirmSubmitButton() {
+    return this.getReportModal().$('//button[text()="Submit anyway"]')
   }
 
-  get modalWarning() {
-    return this.reportModal.$(".alert")
+  getModalWarning() {
+    return this.getReportModal().$(".alert")
   }
 
-  get approveButton() {
+  getApproveButton() {
     return browser.$('//button[text()="Approve"]')
   }
 
-  get confirmApproveButton() {
-    return this.reportModal.$('//button[text()="Approve anyway"]')
+  getConfirmApproveButton() {
+    return this.getReportModal().$('//button[text()="Approve anyway"]')
   }
 
-  get successfullApprovalToast() {
+  getSuccessfullApprovalToast() {
     return browser.$('//div[text()="Successfully approved report."]')
   }
 
@@ -157,8 +157,8 @@ class ShowReport extends Page {
     browser.waitUntil(() =>
       /^.*\/reports\/[a-z0-9-]{36}/.test(browser.getUrl())
     )
-    this.reportStatus.waitForExist()
-    this.reportStatus.waitForDisplayed()
+    this.getReportStatus().waitForExist()
+    this.getReportStatus().waitForDisplayed()
   }
 
   getCompactViewAttendees(type, withAssessments) {

@@ -3,15 +3,15 @@ import Page from "./page"
 const PAGE_URL = "/rollup"
 
 class Rollup extends Page {
-  get rollup() {
+  getRollup() {
     return browser.$("div#daily-rollup")
   }
 
-  get emailButton() {
+  getEmailButton() {
     return browser.$("button#email-rollup")
   }
 
-  get emailPreviewButton() {
+  getEmailPreviewButton() {
     return browser.$("a#preview-rollup-email")
   }
 

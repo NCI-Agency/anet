@@ -3,25 +3,25 @@ import Page from "../page"
 const PAGE_URL = "/reports/:uuid/edit"
 
 class EditReport extends Page {
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get deleteButton() {
+  getDeleteButton() {
     return browser.$(
       "//div[@class='submit-buttons']//button[text()='Delete this planned engagement']"
     )
   }
 
-  get unpublishButton() {
+  getUnpublishButton() {
     return browser.$('//button[text()="Unpublish report"]')
   }
 
-  get confirmModal() {
+  getConfirmModal() {
     return browser.$("div.triggerable-confirm-bootstrap-modal")
   }
 
-  get reportText() {
+  getReportText() {
     return browser.$(".reportTextField")
   }
 
@@ -34,7 +34,7 @@ class EditReport extends Page {
   }
 
   deleteReport(uuid) {
-    this.deleteButton.click()
+    this.getDeleteButton().click()
     browser.pause(300) // wait for modal animation to finish
     this.confirmDeleteButton(uuid).waitForExist()
     this.confirmDeleteButton(uuid).waitForDisplayed()
@@ -45,7 +45,7 @@ class EditReport extends Page {
   }
 
   unpublishReport(uuid) {
-    this.unpublishButton.click()
+    this.getUnpublishButton().click()
     browser.pause(300) // wait for modal animation to finish
     this.confirmUnpublishButton(uuid).waitForExist()
     this.confirmUnpublishButton(uuid).waitForDisplayed()
@@ -61,9 +61,9 @@ class EditReport extends Page {
   }
 
   waitForEditReportToLoad() {
-    if (!this.submitButton.isDisplayed()) {
-      this.submitButton.waitForExist()
-      this.submitButton.waitForDisplayed()
+    if (!this.getSubmitButton().isDisplayed()) {
+      this.getSubmitButton().waitForExist()
+      this.getSubmitButton().waitForDisplayed()
     }
   }
 }

@@ -3,52 +3,52 @@ import Page from "./page"
 const PAGE_URL = "/tasks/new"
 
 class CreateTask extends Page {
-  get form() {
+  getForm() {
     return browser.$("form")
   }
 
-  get alertSuccess() {
+  getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get shortName() {
+  getShortName() {
     return browser.$('input[id="shortName"]')
   }
 
-  get customFieldsContainer() {
+  getCustomFieldsContainer() {
     return browser.$("#custom-fields")
   }
 
-  get assessmentFields() {
+  getAssessmentFields() {
     // since only custom field is assessments
-    return this.customFieldsContainer.$$(
+    return this.getCustomFieldsContainer().$$(
       '//div[starts-with(@id,"fg-formCustomFields")]'
     )
   }
 
-  get firstQuestionsFieldContainer() {
-    return this.customFieldsContainer.$(
+  getFirstQuestionsFieldContainer() {
+    return this.getCustomFieldsContainer().$(
       'div[id="fg-formCustomFields.assessments.0.questions"]'
     )
   }
 
-  get questionsField() {
-    return this.firstQuestionsFieldContainer.$(
+  getQuestionsField() {
+    return this.getFirstQuestionsFieldContainer().$(
       'textarea[id="formCustomFields.assessments.0.questions"]'
     )
   }
 
-  get questionsFieldWarningText() {
-    return this.firstQuestionsFieldContainer.$(
+  getQuestionsFieldWarningText() {
+    return this.getFirstQuestionsFieldContainer().$(
       '//div[contains(text(), "Invalid")]'
     )
   }
 
-  get addAssessmentButton() {
+  getAddAssessmentButton() {
     return browser.$('button[id="add-formCustomFields.assessments"]')
   }
 
@@ -61,7 +61,7 @@ class CreateTask extends Page {
   }
 
   submitForm() {
-    this.submitButton.click()
+    this.getSubmitButton().click()
   }
 }
 

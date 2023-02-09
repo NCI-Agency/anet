@@ -1,67 +1,69 @@
 import Page from "./page"
 
 class ShowTask extends Page {
-  get assessmentResultsMonthly() {
+  getAssessmentResultsMonthly() {
     return browser.$("#entity-assessments-results-monthly")
   }
 
-  get assessmentResultsWeekly() {
+  getAssessmentResultsWeekly() {
     return browser.$("#entity-assessments-results-weekly")
   }
 
-  get monthlyAssessmentsTable() {
-    return this.assessmentResultsMonthly.$("table.assessments-table")
+  getMonthlyAssessmentsTable() {
+    return this.getAssessmentResultsMonthly().$("table.assessments-table")
   }
 
-  get addMonthlyAssessmentButton() {
+  getAddMonthlyAssessmentButton() {
     // get the add assessment button for first period on the table
-    return this.monthlyAssessmentsTable.$(
+    return this.getMonthlyAssessmentsTable().$(
       "tbody > tr > td:first-child > button"
     )
   }
 
-  get editMonthlyAssessmentButton() {
-    return this.monthlyAssessmentsTable.$(
+  getEditMonthlyAssessmentButton() {
+    return this.getMonthlyAssessmentsTable().$(
       'div.card button[title="Edit assessment"]'
     )
   }
 
-  get deleteMonthlyAssessmentButton() {
+  getDeleteMonthlyAssessmentButton() {
     return browser.$("div.card button.btn.btn-outline-danger.btn-xs")
   }
 
-  get deleteConfirmButton() {
+  getDeleteConfirmButton() {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  get assessmentModalForm() {
+  getAssessmentModalForm() {
     return browser.$(".modal-content form")
   }
 
-  get saveAssessmentButton() {
-    return this.assessmentModalForm.$('//button[text()="Save"]')
+  getSaveAssessmentButton() {
+    return this.getAssessmentModalForm().$('//button[text()="Save"]')
   }
 
-  get shownAssessmentPanel() {
-    return this.monthlyAssessmentsTable.$(
+  getShownAssessmentPanel() {
+    return this.getMonthlyAssessmentsTable().$(
       "tbody tr:last-child td:first-child .card"
     )
   }
 
-  get shownAssessmentDetails() {
-    return this.shownAssessmentPanel.$$("div.card-body .form-control-plaintext")
+  getShownAssessmentDetails() {
+    return this.getShownAssessmentPanel().$$(
+      "div.card-body .form-control-plaintext"
+    )
   }
 
   waitForAssessmentModalForm(reverse = false) {
     browser.pause(300) // wait for modal animation to finish
-    this.assessmentModalForm.waitForExist({ reverse, timeout: 20000 })
-    this.assessmentModalForm.waitForDisplayed()
+    this.getAssessmentModalForm().waitForExist({ reverse, timeout: 20000 })
+    this.getAssessmentModalForm().waitForDisplayed()
   }
 
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
     // NOTE: assuming assessment content, 2 questions
     // first focus on the text editor input
-    this.assessmentModalForm.$(".editor-container > .editable").click()
+    this.getAssessmentModalForm().$(".editor-container > .editable").click()
     // Wait for the editor to be focused
     browser.pause(300)
     if (prevTextToClear) {
@@ -71,7 +73,7 @@ class ShowTask extends Page {
     }
     browser.keys(valuesArr[0])
 
-    const button = this.assessmentModalForm
+    const button = this.getAssessmentModalForm()
       .$(".btn-group")
       .$(`label[for="entityAssessment.status_${valuesArr[1]}"]`)
     // wait for a bit, clicks and do double click, sometimes it does not go through
@@ -82,14 +84,19 @@ class ShowTask extends Page {
   }
 
   saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
-    this.saveAssessmentButton.click()
+    this.getSaveAssessmentButton().click()
     browser.pause(300) // wait for modal animation to finish
 
-    this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
+    this.getAssessmentModalForm().waitForExist({
+      reverse: true,
+      timeout: 20000
+    })
     // wait until details to change, can take some time to update show page
     browser.waitUntil(
       () => {
-        return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
+        return (
+          this.getShownAssessmentDetails()[0].getText() === detail0ToWaitFor
+        )
       },
       {
         timeout: 5000,
@@ -100,14 +107,14 @@ class ShowTask extends Page {
 
   confirmDelete() {
     browser.pause(500)
-    this.deleteConfirmButton.waitForExist()
-    this.deleteConfirmButton.waitForDisplayed()
-    this.deleteConfirmButton.click()
+    this.getDeleteConfirmButton().waitForExist()
+    this.getDeleteConfirmButton().waitForDisplayed()
+    this.getDeleteConfirmButton().click()
   }
 
   waitForDeletedAssessmentToDisappear() {
     browser.pause(500)
-    this.shownAssessmentPanel.waitForExist({
+    this.getShownAssessmentPanel().waitForExist({
       reverse: true,
       timeout: 20000
     })

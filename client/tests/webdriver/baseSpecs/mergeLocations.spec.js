@@ -17,12 +17,14 @@ const EXAMPLE_LOCATIONS = {
 describe("Merge locations page", () => {
   it("Should be able to select to locations to merge", () => {
     MergeLocations.open()
-    MergeLocations.title.waitForExist()
-    MergeLocations.title.waitForDisplayed()
+    MergeLocations.getTitle().waitForExist()
+    MergeLocations.getTitle().waitForDisplayed()
 
-    MergeLocations.leftLocationField.setValue(EXAMPLE_LOCATIONS.left.search)
+    MergeLocations.getLeftLocationField().setValue(
+      EXAMPLE_LOCATIONS.left.search
+    )
     MergeLocations.waitForAdvancedSelectLoading(EXAMPLE_LOCATIONS.left.fullName)
-    MergeLocations.firstItemFromAdvancedSelect.click()
+    MergeLocations.getFirstItemFromAdvancedSelect().click()
     browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "left")
 
@@ -30,11 +32,13 @@ describe("Merge locations page", () => {
       EXAMPLE_LOCATIONS.left.name
     )
 
-    MergeLocations.rightLocationField.setValue(EXAMPLE_LOCATIONS.right.search)
+    MergeLocations.getRightLocationField().setValue(
+      EXAMPLE_LOCATIONS.right.search
+    )
     MergeLocations.waitForAdvancedSelectLoading(
       EXAMPLE_LOCATIONS.right.fullName
     )
-    MergeLocations.firstItemFromAdvancedSelect.click()
+    MergeLocations.getFirstItemFromAdvancedSelect().click()
     browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.right.name, "right")
 
@@ -68,7 +72,7 @@ describe("Merge locations page", () => {
     browser.pause(500) // wait for the rendering of custom fields
     MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "mid")
 
-    MergeLocations.mergeLocationsButton.click()
+    MergeLocations.getMergeLocationsButton().click()
 
     MergeLocations.waitForSuccessAlert()
   })

@@ -19,7 +19,7 @@ export const INSIGHTS = [
 ]
 
 class Insights extends Page {
-  get insightsMenu() {
+  getInsightsMenu() {
     return browser.$("#insights")
   }
 
@@ -27,7 +27,7 @@ class Insights extends Page {
     return browser.$(`a[href="/insights/${insight}"]`)
   }
 
-  get alert() {
+  getAlert() {
     return browser.$(".alert")
   }
 

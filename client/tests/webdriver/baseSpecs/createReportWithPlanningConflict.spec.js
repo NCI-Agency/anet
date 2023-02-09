@@ -37,11 +37,11 @@ describe("When creating a Report with conflicts", () => {
     browser.pause(500) // wait for the page transition and rendering of custom fields
     CreateReport.fillForm(report01)
 
-    expect(CreateReport.intent.getValue()).to.equal(report01.intent)
-    expect(CreateReport.engagementDate.getValue()).to.equal(
+    expect(CreateReport.getIntent().getValue()).to.equal(report01.intent)
+    expect(CreateReport.getEngagementDate().getValue()).to.equal(
       report01.engagementDate.format("DD-MM-YYYY HH:mm")
     )
-    expect(CreateReport.duration.getValue()).to.equal(report01.duration)
+    expect(CreateReport.getDuration().getValue()).to.equal(report01.duration)
     const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
     expect(advisor01.conflictButton.isExisting()).to.equal(false)
@@ -58,10 +58,10 @@ describe("When creating a Report with conflicts", () => {
     ShowReport.waitForShowReportToLoad()
 
     const text = "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.reportStatusText).to.equal(text)
-    expect(ShowReport.intent).to.equal(report01.intent)
+    expect(ShowReport.getReportStatusText()).to.equal(text)
+    expect(ShowReport.getIntent()).to.equal(report01.intent)
 
-    firstReportUUID = ShowReport.uuid
+    firstReportUUID = ShowReport.getUuid()
     expect(firstReportUUID.length).to.equal(36)
   })
 
@@ -70,11 +70,11 @@ describe("When creating a Report with conflicts", () => {
     browser.pause(500) // wait for the page transition and rendering of custom fields
     CreateReport.fillForm(report02)
 
-    expect(CreateReport.intent.getValue()).to.equal(report02.intent)
-    expect(CreateReport.engagementDate.getValue()).to.equal(
+    expect(CreateReport.getIntent().getValue()).to.equal(report02.intent)
+    expect(CreateReport.getEngagementDate().getValue()).to.equal(
       report02.engagementDate.format("DD-MM-YYYY HH:mm")
     )
-    expect(CreateReport.duration.getValue()).to.equal(report02.duration)
+    expect(CreateReport.getDuration().getValue()).to.equal(report02.duration)
     const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
     expect(advisor01.conflictButton.isExisting()).to.equal(true)
@@ -99,10 +99,10 @@ describe("When creating a Report with conflicts", () => {
     ShowReport.waitForShowReportToLoad()
 
     const text = "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.reportStatusText).to.equal(text)
-    expect(ShowReport.intent).to.equal(report02.intent)
+    expect(ShowReport.getReportStatusText()).to.equal(text)
+    expect(ShowReport.getIntent()).to.equal(report02.intent)
 
-    secondReportUUID = ShowReport.uuid
+    secondReportUUID = ShowReport.getUuid()
     expect(secondReportUUID.length).to.equal(36)
   })
 
@@ -110,26 +110,26 @@ describe("When creating a Report with conflicts", () => {
     ShowReport.open(firstReportUUID)
     ShowReport.waitForShowReportToLoad()
 
-    expect(ShowReport.uuid.length).to.equal(36)
+    expect(ShowReport.getUuid().length).to.equal(36)
 
     const statusText =
       "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.reportStatusText).to.equal(statusText)
+    expect(ShowReport.getReportStatusText()).to.equal(statusText)
 
-    expect(ShowReport.intent).to.equal(report01.intent)
-    expect(ShowReport.engagementDate).to.equal(
+    expect(ShowReport.getIntent()).to.equal(report01.intent)
+    expect(ShowReport.getEngagementDate()).to.equal(
       report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
     )
-    expect(ShowReport.reportConflictIcon.isExisting()).to.equal(true)
+    expect(ShowReport.getReportConflictIcon().isExisting()).to.equal(true)
 
-    ShowReport.reportConflictIcon.moveTo()
-    expect(ShowReport.reportConflictTooltipTitle).to.equal(
+    ShowReport.getReportConflictIcon().moveTo()
+    expect(ShowReport.getReportConflictTooltipTitle()).to.equal(
       "3 of 3 attendees are busy at the selected time!"
     )
 
-    expect(ShowReport.duration).to.equal(report01.duration)
-    expect(ShowReport.location).to.equal("Unspecified")
-    expect(ShowReport.authors).to.match(/CIV ERINSON, Erin/)
+    expect(ShowReport.getDuration()).to.equal(report01.duration)
+    expect(ShowReport.getLocation()).to.equal("Unspecified")
+    expect(ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
 
     const advisor01 = ShowReport.getAttendeeByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
@@ -151,27 +151,27 @@ describe("When creating a Report with conflicts", () => {
     ShowReport.open(secondReportUUID)
     ShowReport.waitForShowReportToLoad()
 
-    expect(ShowReport.uuid.length).to.equal(36)
+    expect(ShowReport.getUuid().length).to.equal(36)
 
     const statusText =
       "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.reportStatusText).to.equal(statusText)
+    expect(ShowReport.getReportStatusText()).to.equal(statusText)
 
-    expect(ShowReport.intent).to.equal(report02.intent)
-    expect(ShowReport.engagementDate).to.equal(
+    expect(ShowReport.getIntent()).to.equal(report02.intent)
+    expect(ShowReport.getEngagementDate()).to.equal(
       report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
     )
-    expect(ShowReport.reportConflictIcon.isExisting()).to.equal(true)
+    expect(ShowReport.getReportConflictIcon().isExisting()).to.equal(true)
 
-    ShowReport.reportConflictIcon.moveTo()
+    ShowReport.getReportConflictIcon().moveTo()
     // Depending on the order of the tests, the number of conflicts may vary
-    expect(ShowReport.reportConflictTooltipTitle).to.match(
+    expect(ShowReport.getReportConflictTooltipTitle()).to.match(
       /(3|5) of 5 attendees are busy at the selected time!/
     )
 
-    expect(ShowReport.duration).to.equal(report02.duration)
-    expect(ShowReport.location).to.equal("Unspecified")
-    expect(ShowReport.authors).to.match(/CIV ERINSON, Erin/)
+    expect(ShowReport.getDuration()).to.equal(report02.duration)
+    expect(ShowReport.getLocation()).to.equal("Unspecified")
+    expect(ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
 
     const advisor01 = ShowReport.getAttendeeByName("CIV ERINSON, Erin")
     expect(advisor01.name).to.equal("CIV ERINSON, Erin")
@@ -197,13 +197,13 @@ describe("When creating a Report with conflicts", () => {
     EditReport.open(firstReportUUID)
     EditReport.deleteReport(firstReportUUID)
 
-    expect(EditReport.alertSuccess.getText()).to.equal("Report deleted")
+    expect(EditReport.getAlertSuccess().getText()).to.equal("Report deleted")
   })
 
   it("Should delete the second report", () => {
     EditReport.open(secondReportUUID)
     EditReport.deleteReport(secondReportUUID)
 
-    expect(EditReport.alertSuccess.getText()).to.equal("Report deleted")
+    expect(EditReport.getAlertSuccess().getText()).to.equal("Report deleted")
   })
 })

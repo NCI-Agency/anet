@@ -76,13 +76,13 @@ describe("Merge people of the same role", () => {
   it("Should display fields values of the left person", () => {
     // Open merge people page.
     MergePeople.open()
-    MergePeople.title.waitForExist()
-    MergePeople.title.waitForDisplayed()
+    MergePeople.getTitle().waitForExist()
+    MergePeople.getTitle().waitForDisplayed()
 
     // Search and select a person from left person field.
-    MergePeople.leftPersonField.setValue(EXAMPLE_PEOPLE.validLeft.search)
+    MergePeople.getLeftPersonField().setValue(EXAMPLE_PEOPLE.validLeft.search)
     MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validLeft.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
+    MergePeople.getFirstItemFromAdvancedSelect().click()
     browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a person from left side.
     MergePeople.waitForColumnToChange(
@@ -126,17 +126,17 @@ describe("Merge people of the same role", () => {
     )
   })
   it("Should not allow to select the same people", () => {
-    MergePeople.rightPersonField.setValue(EXAMPLE_PEOPLE.validLeft.search)
+    MergePeople.getRightPersonField().setValue(EXAMPLE_PEOPLE.validLeft.search)
     MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validLeft.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
+    MergePeople.getFirstItemFromAdvancedSelect().click()
 
-    MergePeople.samePositionsToast.waitForDisplayed()
+    MergePeople.getSamePositionsToast().waitForDisplayed()
   })
   it("Should display fields values of the right person", () => {
     // Search and select a person from right person field.
-    MergePeople.rightPersonField.setValue(EXAMPLE_PEOPLE.validRight.search)
+    MergePeople.getRightPersonField().setValue(EXAMPLE_PEOPLE.validRight.search)
     MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validRight.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
+    MergePeople.getFirstItemFromAdvancedSelect().click()
     browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a person from left side.
     MergePeople.waitForColumnToChange(
@@ -382,11 +382,11 @@ describe("Merge people of the same role", () => {
     )
   })
   it("Should be able to merge both people when winner is left person", () => {
-    MergePeople.mergePeopleButton.click()
+    MergePeople.getMergePeopleButton().click()
     MergePeople.waitForSuccessAlert()
   })
   it("Should merge notes of the both people", () => {
-    MergePeople.showNotesButton.click()
+    MergePeople.getShowNotesButton().click()
     // Wait for offcanvas to open
     browser.pause(100)
     expect(
@@ -398,14 +398,14 @@ describe("Merge people of the same role", () => {
   })
   it("Should be able to delete the loser person", () => {
     MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
-    MergePeople.errorTitle.waitForExist()
-    expect(MergePeople.errorTitle.getText()).to.equal(
+    MergePeople.getErrorTitle().waitForExist()
+    expect(MergePeople.getErrorTitle().getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validRight.perUuid} not found.`
     )
   })
   it("Should remove the loser from its position and position history", () => {
     MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`)
-    expect(MergePeople.unoccupiedPositionPersonMessage.getText()).to.equal(
+    expect(MergePeople.getUnoccupiedPositionPersonMessage().getText()).to.equal(
       "Chief of Merge People Test 2 is currently empty."
     )
   })
@@ -415,12 +415,12 @@ describe("Merge people of different roles", () => {
   it("Should select a principal for the left side", () => {
     // Open merge people page.
     MergePeople.open()
-    MergePeople.title.waitForExist()
-    MergePeople.title.waitForDisplayed()
+    MergePeople.getTitle().waitForExist()
+    MergePeople.getTitle().waitForDisplayed()
     // Search and select a person from left person field.
-    MergePeople.leftPersonField.setValue(EXAMPLE_PEOPLE.validLeft.search)
+    MergePeople.getLeftPersonField().setValue(EXAMPLE_PEOPLE.validLeft.search)
     MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validLeft.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
+    MergePeople.getFirstItemFromAdvancedSelect().click()
     // Check if the fields displayed properly after selecting a person from left side.
     MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
@@ -429,11 +429,13 @@ describe("Merge people of different roles", () => {
     )
   })
   it("Sould select an advisor for the right side", () => {
-    MergePeople.rightPersonField.setValue(EXAMPLE_PEOPLE.advisorRight.search)
+    MergePeople.getRightPersonField().setValue(
+      EXAMPLE_PEOPLE.advisorRight.search
+    )
     MergePeople.waitForAdvancedSelectLoading(
       EXAMPLE_PEOPLE.advisorRight.fullName
     )
-    MergePeople.firstItemFromAdvancedSelect.click()
+    MergePeople.getFirstItemFromAdvancedSelect().click()
     // Check if the fields displayed properly after selecting a person from left side.
     MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.advisorRight.name,
@@ -537,17 +539,17 @@ describe("Merge people of different roles", () => {
     )
   })
   it("Should not display clear field buttons on the middle column", () => {
-    expect(MergePeople.clearValueButtons.length).to.eq(0)
+    expect(MergePeople.getClearValueButtons().length).to.eq(0)
   })
   it("Should not display edit history button on the middle column", () => {
-    MergePeople.editHistoryButton.waitForDisplayed({ reverse: true })
+    MergePeople.getEditHistoryButton().waitForDisplayed({ reverse: true })
   })
   it("Should be able to merge both people when winner is right person", () => {
-    MergePeople.mergePeopleButton.click()
+    MergePeople.getMergePeopleButton().click()
     MergePeople.waitForSuccessAlert()
   })
   it("Should merge notes of the both people", () => {
-    MergePeople.showNotesButton.click()
+    MergePeople.getShowNotesButton().click()
     // Wait for offcanvas to open
     browser.pause(100)
     // As validRight and validLeft merged before, notes should include notes from three people
@@ -561,8 +563,8 @@ describe("Merge people of different roles", () => {
   })
   it("Should be able to delete the loser person", () => {
     MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
-    MergePeople.errorTitle.waitForExist()
-    expect(MergePeople.errorTitle.getText()).to.equal(
+    MergePeople.getErrorTitle().waitForExist()
+    expect(MergePeople.getErrorTitle().getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validLeft.perUuid} not found.`
     )
   })

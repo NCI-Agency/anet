@@ -13,170 +13,170 @@ const SENSITIVE_CUSTOM_FIELDS = {
 }
 
 export class CreatePerson extends Page {
-  get form() {
+  getForm() {
     return browser.$("form.form-horizontal")
   }
 
-  get alertSuccess() {
+  getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get lastName() {
-    return this.form.$("#lastName")
+  getLastName() {
+    return this.getForm().$("#lastName")
   }
 
-  get firstName() {
+  getFirstName() {
     return browser.$("#firstName")
   }
 
-  get duplicatesButton() {
+  getDuplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
 
-  get modalContent() {
+  getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  get modalCloseButton() {
-    return this.modalContent.$("button.btn-close")
+  getModalCloseButton() {
+    return this.getModalContent().$("button.btn-close")
   }
 
-  get similarPerson() {
-    return this.modalContent.$("tbody tr:first-child td:first-child a")
+  getSimilarPerson() {
+    return this.getModalContent().$("tbody tr:first-child td:first-child a")
   }
 
-  get rolePrincipalButton() {
+  getRolePrincipalButton() {
     return browser.$('label[for="role_PRINCIPAL"]')
   }
 
-  get roleAdvisorButton() {
+  getRoleAdvisorButton() {
     return browser.$('label[for="role_ADVISOR"]')
   }
 
-  get emailAddress() {
+  getEmailAddress() {
     return browser.$("#emailAddress")
   }
 
-  get phoneNumber() {
+  getPhoneNumber() {
     return browser.$("#phoneNumber")
   }
 
-  get rank() {
+  getRank() {
     return browser.$('select[name="rank"]')
   }
 
-  get gender() {
+  getGender() {
     return browser.$('select[name="gender"]')
   }
 
-  get country() {
+  getCountry() {
     return browser.$('select[name="country"]')
   }
 
-  get endOfTourDate() {
+  getEndOfTourDate() {
     return browser.$("#endOfTourDate")
   }
 
-  get biography() {
+  getBiography() {
     return browser.$(".biography .editable")
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get endOfTourToday() {
+  getEndOfTourToday() {
     return browser.$(".bp4-datepicker-footer button.bp4-button:first-child")
   }
 
-  get customFieldsContainer() {
+  getCustomFieldsContainer() {
     return browser.$("#custom-fields")
   }
 
-  get numberCustomFieldContainer() {
+  getNumberCustomFieldContainer() {
     return this.getCustomFieldContainerByName(INVISIBLE_CUSTOM_FIELDS.number)
   }
 
-  get numberCustomField() {
-    return this.numberCustomFieldContainer.$('input[type="number"]')
+  getNumberCustomField() {
+    return this.getNumberCustomFieldContainer().$('input[type="number"]')
   }
 
-  get numberCustomFieldHelpText() {
-    return this.numberCustomFieldContainer.$(
+  getNumberCustomFieldHelpText() {
+    return this.getNumberCustomFieldContainer().$(
       '//div[contains(text(), "greater than")]'
     )
   }
 
-  get defaultInvisibleCustomFields() {
+  getDefaultInvisibleCustomFields() {
     return Object.keys(INVISIBLE_CUSTOM_FIELDS).map(field =>
       this.getCustomFieldContainerByName(INVISIBLE_CUSTOM_FIELDS[field])
     )
   }
 
-  get greenButton() {
-    return this.customFieldsContainer.$(
+  getGreenButton() {
+    return this.getCustomFieldsContainer().$(
       'label[for="formCustomFields.colourOptions_GREEN"]'
     )
   }
 
-  get amberButton() {
-    return this.customFieldsContainer.$(
+  getAmberButton() {
+    return this.getCustomFieldsContainer().$(
       'label[for="formCustomFields.colourOptions_AMBER"]'
     )
   }
 
-  get addArrayObjectButton() {
-    return this.customFieldsContainer.$(
+  getAddArrayObjectButton() {
+    return this.getCustomFieldsContainer().$(
       'button[id="add-formCustomFields.arrayFieldName"]'
     )
   }
 
-  get objectDateField() {
-    return this.customFieldsContainer.$(
+  getObjectDateField() {
+    return this.getCustomFieldsContainer().$(
       'input[id="formCustomFields.arrayFieldName.0.dateF"]'
     )
   }
 
-  get sensitiveFieldsContainer() {
+  getSensitiveFieldsContainer() {
     return browser.$("#sensitive-fields")
   }
 
-  get birthdaySensitiveFieldContainer() {
+  getBirthdaySensitiveFieldContainer() {
     return this.getSensitiveFieldContainerByName(
       SENSITIVE_CUSTOM_FIELDS.birthday
     )
   }
 
-  get politicalPositionSensitiveFieldContainer() {
+  getPoliticalPositionSensitiveFieldContainer() {
     return this.getSensitiveFieldContainerByName(
       SENSITIVE_CUSTOM_FIELDS.politicalPosition
     )
   }
 
-  get birthday() {
-    return this.sensitiveFieldsContainer.$(
+  getBirthday() {
+    return this.getSensitiveFieldsContainer().$(
       'input[id="formSensitiveFields.birthday'
     )
   }
 
-  get leftButton() {
-    return this.sensitiveFieldsContainer.$(
+  getLeftButton() {
+    return this.getSensitiveFieldsContainer().$(
       'label[for="formSensitiveFields.politicalPosition_LEFT"]'
     )
   }
 
-  get middleButton() {
-    return this.sensitiveFieldsContainer.$(
+  getMiddleButton() {
+    return this.getSensitiveFieldsContainer().$(
       'label[for="formSensitiveFields.politicalPosition_MIDDLE"]'
     )
   }
 
   getCustomFieldContainerByName(name) {
-    return this.customFieldsContainer.$(`div[id="fg-${name}"]`)
+    return this.getCustomFieldsContainer().$(`div[id="fg-${name}"]`)
   }
 
   getSensitiveFieldContainerByName(name) {
-    return this.sensitiveFieldsContainer.$(`div[id="fg-${name}"]`)
+    return this.getSensitiveFieldsContainer().$(`div[id="fg-${name}"]`)
   }
 
   openAsSuperUser() {
@@ -188,8 +188,8 @@ export class CreatePerson extends Page {
   }
 
   submitForm() {
-    this.submitButton.scrollIntoView()
-    this.submitButton.click()
+    this.getSubmitButton().scrollIntoView()
+    this.getSubmitButton().click()
   }
 }
 

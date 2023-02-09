@@ -10,34 +10,34 @@ const PROFILE = "Test Organization 1 profile"
 describe("When creating an organization", () => {
   it("Should show name to be required when submitting empty form", () => {
     CreateOrganization.openAsAdmin()
-    CreateOrganization.form.waitForExist()
-    CreateOrganization.form.waitForDisplayed()
+    CreateOrganization.getForm().waitForExist()
+    CreateOrganization.getForm().waitForDisplayed()
     CreateOrganization.submitForm()
-    CreateOrganization.organizationShortNameHelpBlock.waitForExist()
-    CreateOrganization.organizationShortNameHelpBlock.waitForDisplayed()
+    CreateOrganization.getOrganizationShortNameHelpBlock().waitForExist()
+    CreateOrganization.getOrganizationShortNameHelpBlock().waitForDisplayed()
   })
 
   it("Should successfully create an advisor organization with location and profile", () => {
-    CreateOrganization.typeAdvisorButton.click()
-    CreateOrganization.shortNameInput.setValue(SHORT_NAME)
-    CreateOrganization.longNameInput.setValue(DESCRIPTION)
-    CreateOrganization.locationInput.click()
-    CreateOrganization.locationInput.setValue(LOCATION)
+    CreateOrganization.getTypeAdvisorButton().click()
+    CreateOrganization.getShortNameInput().setValue(SHORT_NAME)
+    CreateOrganization.getLongNameInput().setValue(DESCRIPTION)
+    CreateOrganization.getLocationInput().click()
+    CreateOrganization.getLocationInput().setValue(LOCATION)
     CreateOrganization.waitForLocationAdvancedSelectToChange(LOCATION)
     expect(
-      CreateOrganization.locationAdvancedSelectFirstItem.getText()
+      CreateOrganization.getLocationAdvancedSelectFirstItem().getText()
     ).to.include(LOCATION)
-    CreateOrganization.locationAdvancedSelectFirstItem.click()
+    CreateOrganization.getLocationAdvancedSelectFirstItem().click()
     CreateOrganization.fillOrganizationProfile(PROFILE)
     CreateOrganization.submitForm()
     ShowOrganization.waitForAlertSuccessToLoad()
-    expect(ShowOrganization.alertSuccess.getText()).to.equal(
+    expect(ShowOrganization.getAlertSuccess().getText()).to.equal(
       "Organization saved"
     )
   })
   it("Should display the newly created organization", () => {
-    expect(ShowOrganization.longName.getText()).to.equal(DESCRIPTION)
-    expect(ShowOrganization.location.getText()).to.include(LOCATION)
-    expect(ShowOrganization.profile.getText()).to.include(PROFILE)
+    expect(ShowOrganization.getLongName().getText()).to.equal(DESCRIPTION)
+    expect(ShowOrganization.getLocation().getText()).to.include(LOCATION)
+    expect(ShowOrganization.getProfile().getText()).to.include(PROFILE)
   })
 })

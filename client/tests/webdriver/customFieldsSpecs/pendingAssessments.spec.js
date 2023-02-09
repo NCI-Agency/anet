@@ -12,9 +12,9 @@ describe("In my counterparts page", () => {
   describe("When Erin is checking the contents of the page", () => {
     it("Should see 1 counterpart in the table of pending my counterparts that has pending assessments", () => {
       MyCounterparts.open()
-      MyCounterparts.myPendingCounterparts.waitForDisplayed()
+      MyCounterparts.getMyPendingCounterparts().waitForDisplayed()
       const myPendingCounterpartsItems =
-        MyCounterparts.myPendingCounterpartsContent.$$("tr")
+        MyCounterparts.getMyPendingCounterpartsContent().$$("tr")
       expect(myPendingCounterpartsItems).to.have.length(1)
       MyCounterparts.getMyPendingCounterpart(
         "CIV TOPFERNESS, Christopf"
@@ -27,9 +27,9 @@ describe("In my counterparts page", () => {
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-      const modalContent = AssessmentsSection.modalContent
+      const modalContent = AssessmentsSection.getModalContent()
       modalContent.waitForDisplayed()
-      AssessmentsSection.modalTitle.waitForDisplayed()
+      AssessmentsSection.getModalTitle().waitForDisplayed()
       /* eslint-disable no-unused-expressions */
       expect(
         AssessmentsSection.getModalAssessmentQuestion("test1").isExisting()
@@ -47,7 +47,7 @@ describe("In my counterparts page", () => {
         ).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      const closeButton = AssessmentsSection.modalCloseButton
+      const closeButton = AssessmentsSection.getModalCloseButton()
       closeButton.waitForDisplayed()
       closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
@@ -58,10 +58,10 @@ describe("In my counterparts page", () => {
   describe("When Jack is checking the contents of the page", () => {
     it("Should see no counterparts in the table of pending my counterparts that has pending assessments", () => {
       MyCounterparts.openAs("jack")
-      MyCounterparts.myPendingCounterparts.waitForDisplayed()
+      MyCounterparts.getMyPendingCounterparts().waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(MyCounterparts.myPendingCounterpartsContent.isExisting()).to.be
-        .false
+      expect(MyCounterparts.getMyPendingCounterpartsContent().isExisting()).to
+        .be.false
       MyCounterparts.getMyCounterpart("Maj ROGWELL, Roger").click()
     })
     it("Should be able to add a quarterly assessment with 1 question for the counterpart", () => {
@@ -71,9 +71,9 @@ describe("In my counterparts page", () => {
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-      const modalContent = AssessmentsSection.modalContent
+      const modalContent = AssessmentsSection.getModalContent()
       modalContent.waitForDisplayed()
-      AssessmentsSection.modalTitle.waitForDisplayed()
+      AssessmentsSection.getModalTitle().waitForDisplayed()
       /* eslint-disable no-unused-expressions */
       expect(
         AssessmentsSection.getModalAssessmentQuestion("test1").isExisting()
@@ -91,7 +91,7 @@ describe("In my counterparts page", () => {
         ).isExisting()
       ).to.be.false
       /* eslint-enable no-unused-expressions */
-      const closeButton = AssessmentsSection.modalCloseButton
+      const closeButton = AssessmentsSection.getModalCloseButton()
       closeButton.waitForDisplayed()
       closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
@@ -104,9 +104,9 @@ describe("In my tasks page", () => {
   describe("When Erin is checking the contents of the page", () => {
     it("Should see an empty table of my tasks that have pending assessments", () => {
       MyTasks.open()
-      MyTasks.myPendingTasks.waitForDisplayed()
+      MyTasks.getMyPendingTasks().waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(MyTasks.myPendingTasksContent.isExisting()).to.be.false
+      expect(MyTasks.getMyPendingTasksContent().isExisting()).to.be.false
       MyTasks.logout()
     })
   })
@@ -114,8 +114,8 @@ describe("In my tasks page", () => {
   describe("When Jack is checking the contents of the page", () => {
     it("Should see 1 task in the table of my tasks that has pending assessments", () => {
       MyTasks.openAs("jack")
-      MyTasks.myPendingTasks.waitForDisplayed()
-      const myPendingTasks = MyTasks.myPendingTasksContent.$$("tr")
+      MyTasks.getMyPendingTasks().waitForDisplayed()
+      const myPendingTasks = MyTasks.getMyPendingTasksContent().$$("tr")
       expect(myPendingTasks).to.have.length(1)
       MyTasks.getMyPendingTask("2.B").click()
     })
@@ -126,9 +126,9 @@ describe("In my tasks page", () => {
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-      const modalContent = AssessmentsSection.modalContent
+      const modalContent = AssessmentsSection.getModalContent()
       modalContent.waitForDisplayed()
-      AssessmentsSection.modalTitle.waitForDisplayed()
+      AssessmentsSection.getModalTitle().waitForDisplayed()
       /* eslint-disable no-unused-expressions */
       expect(
         AssessmentsSection.getModalAssessmentQuestion("issues").isExisting()
@@ -137,7 +137,7 @@ describe("In my tasks page", () => {
         AssessmentsSection.getModalAssessmentQuestion("status").isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
-      const closeButton = AssessmentsSection.modalCloseButton
+      const closeButton = AssessmentsSection.getModalCloseButton()
       closeButton.waitForDisplayed()
       closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
@@ -149,9 +149,9 @@ describe("In my tasks page", () => {
       newAssessmentButton.waitForDisplayed()
       newAssessmentButton.click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-      const modalContent = AssessmentsSection.modalContent
+      const modalContent = AssessmentsSection.getModalContent()
       modalContent.waitForDisplayed()
-      AssessmentsSection.modalTitle.waitForDisplayed()
+      AssessmentsSection.getModalTitle().waitForDisplayed()
       /* eslint-disable no-unused-expressions */
       expect(
         AssessmentsSection.getModalAssessmentQuestion("issues").isExisting()
@@ -160,7 +160,7 @@ describe("In my tasks page", () => {
         AssessmentsSection.getModalAssessmentQuestion("status").isExisting()
       ).to.be.false
       /* eslint-enable no-unused-expressions */
-      const closeButton = AssessmentsSection.modalCloseButton
+      const closeButton = AssessmentsSection.getModalCloseButton()
       closeButton.waitForDisplayed()
       closeButton.click()
       modalContent.waitForDisplayed({ reverse: true, timeout: SHORT_WAIT_MS })
@@ -178,11 +178,11 @@ describe("In new report page", () => {
       }
       CreateReport.openAs("selena")
       /* eslint-disable no-unused-expressions */
-      expect(CreateReport.attendeesAssessments.isExisting()).to.be.false
-      expect(CreateReport.tasksAssessments.isExisting()).to.be.false
+      expect(CreateReport.getAttendeesAssessments().isExisting()).to.be.false
+      expect(CreateReport.getTasksAssessments().isExisting()).to.be.false
       CreateReport.fillForm(report)
-      expect(CreateReport.attendeesAssessments.isExisting()).to.be.true
-      expect(CreateReport.tasksAssessments.isExisting()).to.be.true
+      expect(CreateReport.getAttendeesAssessments().isExisting()).to.be.true
+      expect(CreateReport.getTasksAssessments().isExisting()).to.be.true
       /* eslint-enable no-unused-expressions */
     })
     it("Should be able to add instant assessments for tasks", () => {
@@ -191,8 +191,8 @@ describe("In new report page", () => {
       }
       CreateReport.fillForm(report)
       browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
-      CreateReport.tasksAssessments.scrollIntoView()
-      const taskAssessmentRows = CreateReport.taskAssessmentRows
+      CreateReport.getTasksAssessments().scrollIntoView()
+      const taskAssessmentRows = CreateReport.getTaskAssessmentRows()
       expect(taskAssessmentRows).to.have.length(2)
       for (let i = 0; i < 2; i += 2) {
         const task = taskAssessmentRows[i]
@@ -221,8 +221,8 @@ describe("In new report page", () => {
       }
       CreateReport.fillForm(report)
       browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
-      CreateReport.attendeesAssessments.scrollIntoView()
-      const attendeeAssessmentRows = CreateReport.attendeeAssessmentRows
+      CreateReport.getAttendeesAssessments().scrollIntoView()
+      const attendeeAssessmentRows = CreateReport.getAttendeeAssessmentRows()
       expect(attendeeAssessmentRows).to.have.length(6)
       for (let i = 0; i < 6; i += 2) {
         const attendee = attendeeAssessmentRows[i]
@@ -248,10 +248,10 @@ describe("In new report page", () => {
       }
     })
     it("Should have an additional question for positive atmosphere", () => {
-      CreateReport.positiveAtmosphere.click()
+      CreateReport.getPositiveAtmosphere().click()
       browser.pause(SHORT_WAIT_MS) // wait for assessment questions to be updated
-      CreateReport.attendeesAssessments.scrollIntoView()
-      const attendeeAssessmentRows = CreateReport.attendeeAssessmentRows
+      CreateReport.getAttendeesAssessments().scrollIntoView()
+      const attendeeAssessmentRows = CreateReport.getAttendeeAssessmentRows()
       expect(attendeeAssessmentRows).to.have.length(6)
       for (let i = 0; i < 6; i += 2) {
         const attendee = attendeeAssessmentRows[i]
@@ -277,23 +277,23 @@ describe("In new report page", () => {
       }
     })
     it("Should be able to cancel/delete the report", () => {
-      if (!CreateReport.deleteButton.isExisting()) {
+      if (!CreateReport.getDeleteButton().isExisting()) {
         // Cancel the report
-        CreateReport.cancelButton.click()
+        CreateReport.getCancelButton().click()
       } else {
         // Delete it
-        CreateReport.deleteButton.waitForExist()
-        CreateReport.deleteButton.waitForDisplayed()
-        CreateReport.deleteButton.click()
+        CreateReport.getDeleteButton().waitForExist()
+        CreateReport.getDeleteButton().waitForDisplayed()
+        CreateReport.getDeleteButton().click()
         // Confirm delete
         browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-        CreateReport.confirmButton.waitForExist()
-        CreateReport.confirmButton.waitForDisplayed()
-        CreateReport.confirmButton.click()
+        CreateReport.getConfirmButton().waitForExist()
+        CreateReport.getConfirmButton().waitForDisplayed()
+        CreateReport.getConfirmButton().click()
         browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
         // Report should be deleted
         CreateReport.waitForAlertToLoad()
-        expect(CreateReport.alert.getText()).to.include("Report deleted")
+        expect(CreateReport.getAlert().getText()).to.include("Report deleted")
       }
     })
   })

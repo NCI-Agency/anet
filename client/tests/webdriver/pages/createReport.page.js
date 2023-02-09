@@ -24,19 +24,19 @@ const OTHER_FIELDS = {
 }
 
 export class CreateReport extends Page {
-  get form() {
+  getForm() {
     return browser.$("form")
   }
 
-  get alert() {
+  getAlert() {
     return browser.$(".alert")
   }
 
-  get duration() {
+  getDuration() {
     return browser.$("#duration")
   }
 
-  get positiveAtmosphere() {
+  getPositiveAtmosphere() {
     return browser.$('label[for="atmosphere_POSITIVE"]')
   }
 
@@ -44,91 +44,91 @@ export class CreateReport extends Page {
     return browser.$(`div[id="fg-${id}"]`)
   }
 
-  get engagementInformationTitle() {
+  getEngagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
 
-  get testReferenceFieldFormGroup() {
+  getTestReferenceFieldFormGroup() {
     return this.getCustomFieldFormGroup(RELATED_REPORT_ID)
   }
 
-  get testReferenceFieldLabel() {
-    return this.testReferenceFieldFormGroup.$(
+  getTestReferenceFieldLabel() {
+    return this.getTestReferenceFieldFormGroup().$(
       `label[for="${RELATED_REPORT_ID}"]`
     )
   }
 
-  get testReferenceFieldHelpText() {
-    return this.testReferenceFieldFormGroup.$("div.form-text")
+  getTestReferenceFieldHelpText() {
+    return this.getTestReferenceFieldFormGroup().$("div.form-text")
   }
 
-  get testReferenceField() {
-    return this.testReferenceFieldFormGroup.$(
+  getTestReferenceField() {
+    return this.getTestReferenceFieldFormGroup().$(
       `input[id="${RELATED_REPORT_ID}"]`
     )
   }
 
-  get testReferenceFieldAdvancedSelectFirstItem() {
-    return this.testReferenceFieldFormGroup.$(
+  getTestReferenceFieldAdvancedSelectFirstItem() {
+    return this.getTestReferenceFieldFormGroup().$(
       `div[id="${RELATED_REPORT_ID}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
 
-  get testReferenceFieldValue() {
-    return this.testReferenceFieldFormGroup.$(
+  getTestReferenceFieldValue() {
+    return this.getTestReferenceFieldFormGroup().$(
       `table[id="${RELATED_REPORT_ID}-value"] tbody tr:first-child`
     )
   }
 
-  get testMultiReferenceFieldFormGroup() {
+  getTestMultiReferenceFieldFormGroup() {
     return this.getCustomFieldFormGroup(ADDITIONAL_ENGAGEMENTS_ID)
   }
 
-  get testMultiReferenceFieldLabel() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  getTestMultiReferenceFieldLabel() {
+    return this.getTestMultiReferenceFieldFormGroup().$(
       `label[for="${ADDITIONAL_ENGAGEMENTS_ID}"]`
     )
   }
 
-  get testMultiReferenceFieldHelpText() {
-    return this.testMultiReferenceFieldFormGroup.$("div.form-text")
+  getTestMultiReferenceFieldHelpText() {
+    return this.getTestMultiReferenceFieldFormGroup().$("div.form-text")
   }
 
-  get testMultiReferenceField() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  getTestMultiReferenceField() {
+    return this.getTestMultiReferenceFieldFormGroup().$(
       `input[id="${ADDITIONAL_ENGAGEMENTS_ID}"]`
     )
   }
 
-  get testMultiReferenceFieldAdvancedSelect() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  getTestMultiReferenceFieldAdvancedSelect() {
+    return this.getTestMultiReferenceFieldFormGroup().$(
       `div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`
     )
   }
 
-  get engagementTypesFieldFormGroup() {
+  getEngagementTypesFieldFormGroup() {
     return this.getCustomFieldFormGroup(ENGAGEMENT_TYPES_ID)
   }
 
-  get engagementTypesFieldLabel() {
-    return this.engagementTypesFieldFormGroup.$(
+  getEngagementTypesFieldLabel() {
+    return this.getEngagementTypesFieldFormGroup().$(
       `label[for="${ENGAGEMENT_TYPES_ID}"]`
     )
   }
 
   getEngagementTypesButtonByName(name) {
-    return this.engagementTypesFieldFormGroup.$(
+    return this.getEngagementTypesFieldFormGroup().$(
       `label[for="formCustomFields.multipleButtons_${name}"]`
     )
   }
 
-  get fieldsToggledVisibilityByTrainButton() {
+  getFieldsToggledVisibilityByTrainButton() {
     return Object.keys(TRAINING_TOGGLED_FIELDS).map(fieldId => {
       return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS[fieldId])
     })
   }
 
-  get fieldsNotToggledVisibilityByTrainButton() {
+  getFieldsNotToggledVisibilityByTrainButton() {
     return Object.keys(ADVISE_FIELDS)
       .map(fieldId => {
         return this.getCustomFieldFormGroup(ADVISE_FIELDS[fieldId])
@@ -141,26 +141,26 @@ export class CreateReport extends Page {
       )
   }
 
-  get numberTrainedFormGroup() {
+  getNumberTrainedFormGroup() {
     return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS.numberTrained)
   }
 
-  get numberTrainedField() {
-    return this.numberTrainedFormGroup.$(
+  getNumberTrainedField() {
+    return this.getNumberTrainedFormGroup().$(
       `input[id="${TRAINING_TOGGLED_FIELDS.numberTrained}"]`
     )
   }
 
-  get numberTrainedFieldShowed() {
-    return this.numberTrainedFormGroup.$("div.form-control-plaintext")
+  getNumberTrainedFieldShowed() {
+    return this.getNumberTrainedFormGroup().$("div.form-control-plaintext")
   }
 
-  get numberTrainedErrorText() {
-    return this.numberTrainedFormGroup.$("div.invalid-feedback")
+  getNumberTrainedErrorText() {
+    return this.getNumberTrainedFormGroup().$("div.invalid-feedback")
   }
 
   getTestMultiReferenceFieldAdvancedSelectItem(n) {
-    return this.testMultiReferenceFieldAdvancedSelect.$(
+    return this.getTestMultiReferenceFieldAdvancedSelect().$(
       `tr:nth-child(${n}) td:nth-child(2)`
     )
   }
@@ -169,61 +169,61 @@ export class CreateReport extends Page {
     return this.getTestMultiReferenceFieldAdvancedSelectItem(n).$("span")
   }
 
-  get testMultiReferenceFieldValue() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  getTestMultiReferenceFieldValue() {
+    return this.getTestMultiReferenceFieldFormGroup().$(
       `table[id="${ADDITIONAL_ENGAGEMENTS_ID}-value"]`
     )
   }
 
-  get testMultiReferenceFieldValueRows() {
-    return this.testMultiReferenceFieldValue.$$("tbody tr")
+  getTestMultiReferenceFieldValueRows() {
+    return this.getTestMultiReferenceFieldValue().$$("tbody tr")
   }
 
   getTestMultiReferenceFieldValueRow(n) {
-    return this.testMultiReferenceFieldValue.$(`tbody tr:nth-child(${n})`)
+    return this.getTestMultiReferenceFieldValue().$(`tbody tr:nth-child(${n})`)
   }
 
-  get attendeesAssessments() {
+  getAttendeesAssessments() {
     return browser.$("#attendees-engagement-assessments")
   }
 
-  get attendeeAssessmentRows() {
-    return this.attendeesAssessments.$$("tr")
+  getAttendeeAssessmentRows() {
+    return this.getAttendeesAssessments().$$("tr")
   }
 
   getAttendeeAssessment(name) {
-    return this.attendeesAssessments.$(`//td/a[text()="${name}"]`)
+    return this.getAttendeesAssessments().$(`//td/a[text()="${name}"]`)
   }
 
-  get tasksAssessments() {
+  getTasksAssessments() {
     return browser.$("#tasks-engagement-assessments")
   }
 
-  get taskAssessmentRows() {
-    return this.tasksAssessments.$$("tr")
+  getTaskAssessmentRows() {
+    return this.getTasksAssessments().$$("tr")
   }
 
   getTaskAssessment(shortName) {
-    return this.tasksAssessments.$(`//td/a[text()="${shortName}"]`)
+    return this.getTasksAssessments().$(`//td/a[text()="${shortName}"]`)
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get editButton() {
+  getEditButton() {
     return browser.$('//a[text()="Edit"]')
   }
 
-  get cancelButton() {
+  getCancelButton() {
     return browser.$('//button[text()="Cancel"]')
   }
 
-  get deleteButton() {
+  getDeleteButton() {
     return browser.$('//button[text()="Delete this report"]')
   }
 
-  get confirmButton() {
+  getConfirmButton() {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
@@ -240,8 +240,8 @@ export class CreateReport extends Page {
   }
 
   waitForAlertToLoad() {
-    this.alert.waitForExist()
-    this.alert.waitForDisplayed()
+    this.getAlert().waitForExist()
+    this.getAlert().waitForDisplayed()
   }
 
   waitForAdvancedSelectToChange(item, value) {
@@ -258,9 +258,9 @@ export class CreateReport extends Page {
   }
 
   submitForm() {
-    this.submitButton.waitForClickable()
-    this.submitButton.click()
-    this.submitButton.waitForExist({ reverse: true })
+    this.getSubmitButton().waitForClickable()
+    this.getSubmitButton().click()
+    this.getSubmitButton().waitForExist({ reverse: true })
   }
 }
 

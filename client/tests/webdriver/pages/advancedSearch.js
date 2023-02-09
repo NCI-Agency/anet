@@ -1,48 +1,48 @@
 class AdvancedSearch {
-  get advancedSearchForm() {
+  getAdvancedSearchForm() {
     return browser.$(".advanced-search-form")
   }
 
-  get advancedSearchPopoverTrigger() {
+  getAdvancedSearchPopoverTrigger() {
     return browser.$(".advanced-search-form ~ span .asLink")
   }
 
-  get advancedSearchPopover() {
+  getAdvancedSearchPopover() {
     return browser.$(".advanced-search")
   }
 
-  get anetObjectSearchToggleButtons() {
-    return this.advancedSearchPopover.$$(".btn-group > .btn")
+  getAnetObjectSearchToggleButtons() {
+    return this.getAdvancedSearchPopover().$$(".btn-group > .btn")
   }
 
-  get commonSearchFilter() {
-    return this.advancedSearchPopover.$(
+  getCommonSearchFilter() {
+    return this.getAdvancedSearchPopover().$(
       '.advanced-search-content label[for="status"]'
     )
   }
 
-  get pendingVerificationFilter() {
-    return this.advancedSearchPopover.$(
+  getPendingVerificationFilter() {
+    return this.getAdvancedSearchPopover().$(
       '.advanced-search-content label[for="pendingVerification"]'
     )
   }
 
-  get addFilterButtonText() {
-    return this.advancedSearchPopover.$(
+  getAddFilterButtonText() {
+    return this.getAdvancedSearchPopover().$(
       "form > div:nth-child(3) > div:first-child button"
     )
   }
 
-  get addFilterButton() {
-    return this.advancedSearchPopover.$("#addFilterDropdown")
+  getAddFilterButton() {
+    return this.getAdvancedSearchPopover().$("#addFilterDropdown")
   }
 
-  get addFilterPopover() {
-    return this.advancedSearchPopover.$(".bp4-popover2-content")
+  getAddFilterPopover() {
+    return this.getAdvancedSearchPopover().$(".bp4-popover2-content")
   }
 
   getSearchFilter(filter) {
-    return this.advancedSearchPopover.$(`//div/a[text()='${filter}']`)
+    return this.getAdvancedSearchPopover().$(`//div/a[text()='${filter}']`)
   }
 }
 

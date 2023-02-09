@@ -7,19 +7,19 @@ class ShowLocation extends Page {
     super.open(PAGE_URL.replace(":uuid", uuid))
   }
 
-  get editButton() {
+  getEditButton() {
     return browser.$('//a[text()="Edit"]')
   }
 
-  get successMsg() {
+  getSuccessMsg() {
     return browser.$('//div[text()="Location saved"]')
   }
 
-  get latField() {
+  getLatField() {
     return browser.$('div[name="location"] span:first-child')
   }
 
-  get lngField() {
+  getLngField() {
     return browser.$('div[name="location"] span:nth-child(3)')
   }
 }

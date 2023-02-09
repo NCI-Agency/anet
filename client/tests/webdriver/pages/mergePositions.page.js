@@ -11,65 +11,65 @@ class MergePositions extends Page {
     super.openAsAdminUser(path)
   }
 
-  get errorTitle() {
+  getErrorTitle() {
     return browser.$("//h1")
   }
 
-  get title() {
+  getTitle() {
     return browser.$('//h4[contains(text(),"Merge Positions")]')
   }
 
-  get leftPositionField() {
+  getLeftPositionField() {
     return browser.$("#Position1")
   }
 
-  get rightPositionField() {
+  getRightPositionField() {
     return browser.$("#Position2")
   }
 
-  get advancedSelectPopover() {
+  getAdvancedSelectPopover() {
     return browser.$(".bp4-popover2-content")
   }
 
-  get positionHeaderFromPopover() {
+  getPositionHeaderFromPopover() {
     return browser.$('//table//th[contains(text(), "Position")]')
   }
 
-  get firstItemFromAdvancedSelect() {
+  getFirstItemFromAdvancedSelect() {
     return browser.$(
       ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
     )
   }
 
-  get editAssociatedPositionsButton() {
+  getEditAssociatedPositionsButton() {
     return browser.$('//button[text()="Edit Associated Positions"]')
   }
 
-  get editAssociatedPositionsModal() {
+  getEditAssociatedPositionsModal() {
     return browser.$(
       "//div[contains(@class, 'edit-associated-positions-dialog')]"
     )
   }
 
-  get saveAssociatedPositionsButton() {
-    return this.editAssociatedPositionsModal.$('//button[text()="Save"]')
+  getSaveAssociatedPositionsButton() {
+    return this.getEditAssociatedPositionsModal().$('//button[text()="Save"]')
   }
 
-  get mergePositionsButton() {
+  getMergePositionsButton() {
     return browser.$('//button[text()="Merge Positions"]')
   }
 
-  get samePositionsToast() {
+  getSamePositionsToast() {
     return browser.$('//div[text()="Please select different positions"]')
   }
 
-  get occupiedPositionsToast() {
+  getOccupiedPositionsToast() {
     return browser.$(
       '//div[text()="Please select at least one unoccupied position"]'
     )
   }
 
-  get winnerAssociatedPositions() {
+  getWinnerAssociatedPositions() {
     const associatedPositionRows = browser.$$("#assigned-principal tbody tr")
     const winnerAps = associatedPositionRows.map(elem => {
       return {
@@ -80,11 +80,11 @@ class MergePositions extends Page {
     return winnerAps
   }
 
-  get showNotesButton() {
+  getShowNotesButton() {
     return browser.$('button[title="Show notes"]')
   }
 
-  get noteCards() {
+  getNoteCards() {
     return browser.$$(".offcanvas .card")
   }
 
@@ -134,14 +134,14 @@ class MergePositions extends Page {
   }
 
   waitForAdvancedSelectLoading(compareStr) {
-    this.advancedSelectPopover.waitForExist()
-    this.advancedSelectPopover.waitForDisplayed()
-    this.positionHeaderFromPopover.waitForExist()
-    this.positionHeaderFromPopover.waitForDisplayed()
+    this.getAdvancedSelectPopover().waitForExist()
+    this.getAdvancedSelectPopover().waitForDisplayed()
+    this.getPositionHeaderFromPopover().waitForExist()
+    this.getPositionHeaderFromPopover().waitForDisplayed()
 
     browser.waitUntil(
       () => {
-        return this.firstItemFromAdvancedSelect.getText() === compareStr
+        return this.getFirstItemFromAdvancedSelect().getText() === compareStr
       },
       {
         timeout: 5000,
@@ -198,7 +198,7 @@ class MergePositions extends Page {
 
   areNotesExist(notes) {
     let areExist = true
-    const allNoteTexts = this.noteCards.map(card =>
+    const allNoteTexts = this.getNoteCards().map(card =>
       card.$(".card-body > div").getText()
     )
     notes.forEach(note => {

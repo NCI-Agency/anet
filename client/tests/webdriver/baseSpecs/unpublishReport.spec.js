@@ -15,7 +15,9 @@ describe("When unpublishing a report", () => {
     it("Should unpublish the report successfully", () => {
       const unpublishedReportUuid = ShowReport.uuid
       EditReport.unpublishReport(unpublishedReportUuid)
-      expect(EditReport.alertSuccess.getText()).to.equal("Report unpublished")
+      expect(EditReport.getAlertSuccess().getText()).to.equal(
+        "Report unpublished"
+      )
     })
   })
 })

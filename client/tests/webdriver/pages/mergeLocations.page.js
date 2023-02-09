@@ -7,33 +7,33 @@ class MergeLocations extends Page {
     super.openAsAdminUser(PATH)
   }
 
-  get title() {
+  getTitle() {
     return browser.$('//h4[contains(text(),"Merge Locations")]')
   }
 
-  get leftLocationField() {
+  getLeftLocationField() {
     return browser.$("#Location1")
   }
 
-  get rightLocationField() {
+  getRightLocationField() {
     return browser.$("#Location2")
   }
 
-  get advancedSelectPopover() {
+  getAdvancedSelectPopover() {
     return browser.$(".bp4-popover2-content")
   }
 
-  get locationHeaderFromPopover() {
+  getLocationHeaderFromPopover() {
     return browser.$('//table//th[contains(text(), "Name")]')
   }
 
-  get firstItemFromAdvancedSelect() {
+  getFirstItemFromAdvancedSelect() {
     return browser.$(
       ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
     )
   }
 
-  get mergeLocationsButton() {
+  getMergeLocationsButton() {
     return browser.$('//button[text()="Merge Locations"]')
   }
 
@@ -49,13 +49,13 @@ class MergeLocations extends Page {
   }
 
   waitForAdvancedSelectLoading(compareStr) {
-    this.advancedSelectPopover.waitForExist()
-    this.advancedSelectPopover.waitForDisplayed()
-    this.locationHeaderFromPopover.waitForExist()
-    this.locationHeaderFromPopover.waitForDisplayed()
+    this.getAdvancedSelectPopover().waitForExist()
+    this.getAdvancedSelectPopover().waitForDisplayed()
+    this.getLocationHeaderFromPopover().waitForExist()
+    this.getLocationHeaderFromPopover().waitForDisplayed()
 
     browser.waitUntil(
-      () => this.firstItemFromAdvancedSelect.getText() === compareStr,
+      () => this.getFirstItemFromAdvancedSelect().getText() === compareStr,
       {
         timeout: 5000,
         timeoutMsg: "Couldn't find the searched location in time"

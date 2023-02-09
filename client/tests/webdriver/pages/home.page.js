@@ -1,93 +1,93 @@
 import Page from "./page"
 
 class Home extends Page {
-  get topbar() {
+  getTopbar() {
     return browser.$("#topbar")
   }
 
-  get ieBanner() {
+  getIeBanner() {
     return browser.$("#ieBanner")
   }
 
-  get ieBannerText() {
-    return this.ieBanner.$("div:nth-child(2)").getText()
+  getIeBannerText() {
+    return this.getIeBanner().$("div:nth-child(2)").getText()
   }
 
-  get securityBanner() {
+  getSecurityBanner() {
     const banner = browser.$("#topbar div:nth-child(1)")
     banner.waitForExist()
     banner.waitForDisplayed()
     return banner
   }
 
-  get bannerUser() {
-    return this.securityBanner.$("#bannerUser")
+  getBannerUser() {
+    return this.getSecurityBanner().$("#bannerUser")
   }
 
-  get bannerSecurityText() {
-    return this.securityBanner.$("#bannerSecurityText")
+  getBannerSecurityText() {
+    return this.getSecurityBanner().$("#bannerSecurityText")
   }
 
-  get bannerDropdown() {
-    return this.bannerUser.$('button[id="dropdown-split-basic"]')
+  getBannerDropdown() {
+    return this.getBannerUser().$('button[id="dropdown-split-basic"]')
   }
 
-  get logoutButton() {
-    return this.bannerUser.$('//a[text()="Sign out"]')
+  getLogoutButton() {
+    return this.getBannerUser().$('//a[text()="Sign out"]')
   }
 
-  get searchBar() {
+  getSearchBar() {
     return browser.$("#searchBarInput")
   }
 
-  get homeTilesContainer() {
+  getHomeTilesContainer() {
     return browser.$("fieldset.home-tile-row")
   }
 
-  get pendingMyApprovalOfCount() {
+  getPendingMyApprovalOfCount() {
     return browser
       .$('//button[contains(text(), "Reports pending my approval")]')
       .$("h1")
   }
 
-  get submitSearch() {
+  getSubmitSearch() {
     return browser.$("#topbar #searchBarSubmit")
   }
 
-  get linksMenuButton() {
+  getLinksMenuButton() {
     return browser.$('//a[text()="My Work"]')
   }
 
-  get myOrgLink() {
+  getMyOrgLink() {
     return browser.$('//a//span[contains(text(), "My Organization")]')
   }
 
-  get myTasksLink() {
+  getMyTasksLink() {
     return browser.$('//a//span[text()="My Objective / Efforts"]')
   }
 
-  get myCounterpartsLink() {
+  getMyCounterpartsLink() {
     return browser.$('//a//span[text()="My Counterparts"]')
   }
 
-  get myCounterpartsNotifications() {
-    return this.myCounterpartsLink.$("span.badge")
+  getMyCounterpartsNotifications() {
+    return this.getMyCounterpartsLink().$("span.badge")
   }
 
-  get myTasksNotifications() {
-    return this.myTasksLink.$("span.badge")
+  getMyTasksNotifications() {
+    return this.getMyTasksLink().$("span.badge")
   }
 
-  get reportsPendingMyApproval() {
+  getReportsPendingMyApproval() {
     return browser.$('//button[text()="Reports pending my approval"]')
   }
 
   waitForSecurityBannerValue(value) {
-    this.securityBanner.waitForExist()
-    this.securityBanner.waitForDisplayed()
+    this.getSecurityBanner().waitForExist()
+    this.getSecurityBanner().waitForDisplayed()
     return browser.waitUntil(
       () => {
-        return this.securityBanner.getText() === value
+        return this.getSecurityBanner().getText() === value
       },
       { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
     )

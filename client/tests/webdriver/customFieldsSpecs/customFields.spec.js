@@ -17,16 +17,18 @@ describe("When working with custom fields for different anet objects", () => {
   describe("For report's custom fields", () => {
     it("Should be able load a new report form", () => {
       CreateReport.openAsAdminUser()
-      CreateReport.form.waitForExist()
-      CreateReport.form.waitForDisplayed()
+      CreateReport.getForm().waitForExist()
+      CreateReport.getForm().waitForDisplayed()
     })
 
     it("When the engagement type is not defined, it should not display fields only visible when a certain engagement type is selected", () => {
-      CreateReport.fieldsToggledVisibilityByTrainButton.forEach(invisField => {
-        expect(invisField.isExisting()).to.equal(false)
-      })
+      CreateReport.getFieldsToggledVisibilityByTrainButton().forEach(
+        invisField => {
+          expect(invisField.isExisting()).to.equal(false)
+        }
+      )
 
-      CreateReport.fieldsNotToggledVisibilityByTrainButton.forEach(
+      CreateReport.getFieldsNotToggledVisibilityByTrainButton().forEach(
         invisField => {
           expect(invisField.isExisting()).to.equal(false)
         }
@@ -40,7 +42,7 @@ describe("When working with custom fields for different anet objects", () => {
       trainButton.waitForExist()
       trainButton.waitForDisplayed()
       trainButton.click()
-      CreateReport.fieldsToggledVisibilityByTrainButton.forEach(
+      CreateReport.getFieldsToggledVisibilityByTrainButton().forEach(
         nowVisibleField => {
           nowVisibleField.waitForExist()
           nowVisibleField.waitForDisplayed()
@@ -48,7 +50,7 @@ describe("When working with custom fields for different anet objects", () => {
       )
       // train button active here so numberField will be visible
 
-      CreateReport.fieldsNotToggledVisibilityByTrainButton.forEach(
+      CreateReport.getFieldsNotToggledVisibilityByTrainButton().forEach(
         stillInvisField => {
           expect(stillInvisField.isExisting()).to.equal(false)
         }
@@ -56,28 +58,28 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous valid data when toggling field's visibility", () => {
-      CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
+      CreateReport.getNumberTrainedField().setValue(VALID_NUMBER_INPUT)
       const trainButton = CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
       )
       // turn off train option to make numberField invisible
       trainButton.click()
-      CreateReport.numberTrainedFormGroup.waitForExist({ reverse: true })
+      CreateReport.getNumberTrainedFormGroup().waitForExist({ reverse: true })
       // turn on train option to make numberField visible
       trainButton.click()
-      CreateReport.numberTrainedFormGroup.waitForExist()
+      CreateReport.getNumberTrainedFormGroup().waitForExist()
 
-      expect(CreateReport.numberTrainedField.getValue()).to.equal(
+      expect(CreateReport.getNumberTrainedField().getValue()).to.equal(
         VALID_NUMBER_INPUT
       )
     })
 
     it("Should persist previous invalid data when toggling field's visibility", () => {
-      CreateReport.deleteInput(CreateReport.numberTrainedField)
-      CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
-      CreateReport.numberTrainedErrorText.waitForExist()
+      CreateReport.deleteInput(CreateReport.getNumberTrainedField())
+      CreateReport.getNumberTrainedField().setValue(INVALID_NUMBER_INPUT)
+      CreateReport.getNumberTrainedErrorText().waitForExist()
       // Actually see the validation warning
-      expect(CreateReport.numberTrainedErrorText.getText()).to.equal(
+      expect(CreateReport.getNumberTrainedErrorText().getText()).to.equal(
         "Number trained must be greater than or equal to 1"
       )
       const trainButton = CreateReport.getEngagementTypesButtonByName(
@@ -85,35 +87,35 @@ describe("When working with custom fields for different anet objects", () => {
       )
       // turn off train option to make numberField invisible
       trainButton.click()
-      CreateReport.numberTrainedFormGroup.waitForExist({ reverse: true })
+      CreateReport.getNumberTrainedFormGroup().waitForExist({ reverse: true })
       // turn on train option to make numberField visible
       trainButton.click()
-      CreateReport.numberTrainedFormGroup.waitForExist()
+      CreateReport.getNumberTrainedFormGroup().waitForExist()
 
-      expect(CreateReport.numberTrainedField.getValue()).to.equal(
+      expect(CreateReport.getNumberTrainedField().getValue()).to.equal(
         INVALID_NUMBER_INPUT
       )
     })
 
     it("Should validate visible field", () => {
-      CreateReport.deleteInput(CreateReport.numberTrainedField)
-      CreateReport.numberTrainedField.setValue(INVALID_NUMBER_INPUT)
-      CreateReport.numberTrainedErrorText.waitForExist()
-      expect(CreateReport.numberTrainedErrorText.getText()).to.include(
+      CreateReport.deleteInput(CreateReport.getNumberTrainedField())
+      CreateReport.getNumberTrainedField().setValue(INVALID_NUMBER_INPUT)
+      CreateReport.getNumberTrainedErrorText().waitForExist()
+      expect(CreateReport.getNumberTrainedErrorText().getText()).to.include(
         "Number trained must be greater than or equal to 1"
       )
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
 
-      expect(CreateReport.alert.getText()).to.include(
+      expect(CreateReport.getAlert().getText()).to.include(
         "Number trained must be greater than or equal to 1"
       )
     })
 
     it("Should not validate invisible field", () => {
-      CreateReport.editButton.click()
-      CreateReport.form.waitForExist()
-      CreateReport.form.waitForDisplayed()
+      CreateReport.getEditButton().click()
+      CreateReport.getForm().waitForExist()
+      CreateReport.getForm().waitForDisplayed()
 
       const trainButton = CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
@@ -125,53 +127,53 @@ describe("When working with custom fields for different anet objects", () => {
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
 
-      expect(CreateReport.alert.getText()).to.not.include(
+      expect(CreateReport.getAlert().getText()).to.not.include(
         "Number trained must be greater than or equal to 1"
       )
     })
 
     it("Should show valid visible field after saving", () => {
       // we are on show page after submitting
-      CreateReport.editButton.click()
-      CreateReport.form.waitForExist()
-      CreateReport.form.waitForDisplayed()
+      CreateReport.getEditButton().click()
+      CreateReport.getForm().waitForExist()
+      CreateReport.getForm().waitForDisplayed()
 
       const trainButton = CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
       )
       // turn on train option to make numberField visible
       trainButton.click()
-      CreateReport.numberTrainedFormGroup.waitForExist()
-      CreateReport.deleteInput(CreateReport.numberTrainedField)
-      CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
+      CreateReport.getNumberTrainedFormGroup().waitForExist()
+      CreateReport.deleteInput(CreateReport.getNumberTrainedField())
+      CreateReport.getNumberTrainedField().setValue(VALID_NUMBER_INPUT)
 
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
 
-      expect(CreateReport.numberTrainedFieldShowed.getText()).to.include(
+      expect(CreateReport.getNumberTrainedFieldShowed().getText()).to.include(
         VALID_NUMBER_INPUT.toString()
       )
     })
 
     it("Should discard invisible fields after saving even if it is valid", () => {
-      CreateReport.editButton.click()
-      CreateReport.form.waitForExist()
-      CreateReport.form.waitForDisplayed()
+      CreateReport.getEditButton().click()
+      CreateReport.getForm().waitForExist()
+      CreateReport.getForm().waitForDisplayed()
 
       const trainButton = CreateReport.getEngagementTypesButtonByName(
         TRAIN_ENGAGEMENT_BUTTON
       )
       // give valid input before making invisible
-      CreateReport.deleteInput(CreateReport.numberTrainedField)
-      CreateReport.numberTrainedField.setValue(VALID_NUMBER_INPUT)
+      CreateReport.deleteInput(CreateReport.getNumberTrainedField())
+      CreateReport.getNumberTrainedField().setValue(VALID_NUMBER_INPUT)
       // goes invisible
       trainButton.click()
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
 
-      expect(CreateReport.numberTrainedFieldShowed.getText()).to.not.include(
-        VALID_NUMBER_INPUT.toString()
-      )
+      expect(
+        CreateReport.getNumberTrainedFieldShowed().getText()
+      ).to.not.include(VALID_NUMBER_INPUT.toString())
     })
 
     it("Should logout", () => {
@@ -182,80 +184,89 @@ describe("When working with custom fields for different anet objects", () => {
   describe("For person's custom fields", () => {
     it("Should be able load a new person form and fill normal required fields", () => {
       CreatePerson.openAsAdmin()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
       // fill other required fields at the beginning
-      CreatePerson.lastName.setValue(REQUIRED_PERSON_FIELDS.lastname)
-      CreatePerson.rank.selectByAttribute("value", REQUIRED_PERSON_FIELDS.rank)
-      CreatePerson.gender.selectByAttribute(
+      CreatePerson.getLastName().setValue(REQUIRED_PERSON_FIELDS.lastname)
+      CreatePerson.getRank().selectByAttribute(
+        "value",
+        REQUIRED_PERSON_FIELDS.rank
+      )
+      CreatePerson.getGender().selectByAttribute(
         "value",
         REQUIRED_PERSON_FIELDS.gender
       )
     })
 
     it("Should not show default invisible fields", () => {
-      CreatePerson.defaultInvisibleCustomFields.forEach(field => {
+      CreatePerson.getDefaultInvisibleCustomFields().forEach(field => {
         expect(field.isExisting()).to.eq(false)
       })
       // Date field is invisible by default
-      CreatePerson.addArrayObjectButton.click()
-      CreatePerson.objectDateField.waitForExist({ reverse: true })
+      CreatePerson.getAddArrayObjectButton().click()
+      CreatePerson.getObjectDateField().waitForExist({ reverse: true })
     })
 
     it("Should toggle correct invisible fields", () => {
       // green toggles every invisible field to visible
-      CreatePerson.greenButton.click()
-      CreatePerson.defaultInvisibleCustomFields.forEach(field => {
+      CreatePerson.getGreenButton().click()
+      CreatePerson.getDefaultInvisibleCustomFields().forEach(field => {
         field.waitForExist()
       })
       // Also it toggles array_of_objects date field
-      CreatePerson.objectDateField.waitForExist()
+      CreatePerson.getObjectDateField().waitForExist()
     })
 
     it("Should persist previous valid data when toggling field's visibility", () => {
-      CreatePerson.numberCustomField.setValue(VALID_NUMBER_INPUT)
+      CreatePerson.getNumberCustomField().setValue(VALID_NUMBER_INPUT)
       // make default invisible fields invisible again, amber color does that
-      CreatePerson.amberButton.click()
-      CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
+      CreatePerson.getAmberButton().click()
+      CreatePerson.getNumberCustomFieldContainer().waitForExist({
+        reverse: true
+      })
       // make visible
-      CreatePerson.greenButton.click()
-      CreatePerson.numberCustomFieldContainer.waitForExist()
+      CreatePerson.getGreenButton().click()
+      CreatePerson.getNumberCustomFieldContainer().waitForExist()
 
-      expect(CreatePerson.numberCustomField.getValue()).be.equal(
+      expect(CreatePerson.getNumberCustomField().getValue()).be.equal(
         VALID_NUMBER_INPUT
       )
     })
 
     it("Should persist previous invalid data when toggling field's visibility", () => {
-      CreateReport.deleteInput(CreateReport.numberCustomField)
-      CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
+      CreateReport.deleteInput(CreateReport.getNumberCustomField())
+      CreatePerson.getNumberCustomField().setValue(INVALID_NUMBER_INPUT)
       // Actually see the validation warning
-      CreatePerson.numberCustomFieldHelpText.waitForExist()
+      CreatePerson.getNumberCustomFieldHelpText().waitForExist()
       // make invisible
-      CreatePerson.amberButton.click()
-      CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
+      CreatePerson.getAmberButton().click()
+      CreatePerson.getNumberCustomFieldContainer().waitForExist({
+        reverse: true
+      })
       // make visible
-      CreatePerson.greenButton.click()
-      CreatePerson.numberCustomFieldContainer.waitForExist()
+      CreatePerson.getGreenButton().click()
+      CreatePerson.getNumberCustomFieldContainer().waitForExist()
 
-      expect(CreatePerson.numberCustomField.getValue()).to.equal(
+      expect(CreatePerson.getNumberCustomField().getValue()).to.equal(
         INVALID_NUMBER_INPUT
       )
     })
 
     it("Should validate visible field", () => {
-      CreatePerson.deleteInput(CreatePerson.numberCustomField)
-      CreatePerson.numberCustomField.setValue(INVALID_NUMBER_INPUT)
-      CreatePerson.numberCustomFieldHelpText.waitForExist()
-      expect(CreatePerson.numberCustomFieldHelpText.getText()).to.include(
+      CreatePerson.deleteInput(CreatePerson.getNumberCustomField())
+      CreatePerson.getNumberCustomField().setValue(INVALID_NUMBER_INPUT)
+      CreatePerson.getNumberCustomFieldHelpText().waitForExist()
+      expect(CreatePerson.getNumberCustomFieldHelpText().getText()).to.include(
         "greater than"
       )
     })
 
     it("Should not validate invisible field so we can submit the form", () => {
       // make invisible
-      CreatePerson.amberButton.click()
-      CreatePerson.numberCustomFieldContainer.waitForExist({ reverse: true })
+      CreatePerson.getAmberButton().click()
+      CreatePerson.getNumberCustomFieldContainer().waitForExist({
+        reverse: true
+      })
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
     })

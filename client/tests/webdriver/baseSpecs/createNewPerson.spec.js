@@ -20,8 +20,8 @@ describe("Create new Person form page", () => {
   describe("When creating a Principle user", () => {
     beforeEach("On the create person page...", () => {
       CreatePerson.openAsSuperUser()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
     })
 
     afterEach("On the create person page...", () => {
@@ -29,10 +29,10 @@ describe("Create new Person form page", () => {
     })
 
     it("Should not save a principle without gender being filled in", () => {
-      CreatePerson.lastName.waitForDisplayed()
-      CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
-      CreatePerson.gender.click()
-      CreatePerson.lastName.click()
+      CreatePerson.getLastName().waitForDisplayed()
+      CreatePerson.getLastName().setValue(VALID_PERSON_PRINCIPAL.lastName)
+      CreatePerson.getGender().click()
+      CreatePerson.getLastName().click()
       const errorMessage = browser.$(
         'select[name="gender"] + div.invalid-feedback'
       )
@@ -40,48 +40,48 @@ describe("Create new Person form page", () => {
       errorMessage.waitForDisplayed()
       expect(errorMessage.getText()).to.equal("You must provide the Gender")
 
-      CreatePerson.gender.selectByAttribute(
+      CreatePerson.getGender().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.gender)
+        CreatePerson.getRandomOption(CreatePerson.getGender())
       )
-      CreatePerson.rank.selectByAttribute(
+      CreatePerson.getRank().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.rank)
+        CreatePerson.getRandomOption(CreatePerson.getRank())
       )
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      const alertMessage = CreatePerson.alertSuccess.getText()
+      const alertMessage = CreatePerson.getAlertSuccess().getText()
       expect(alertMessage).to.equal("Person saved")
     })
     it("Should save a principle without first name", () => {
-      CreatePerson.lastName.waitForDisplayed()
-      CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
-      CreatePerson.rank.selectByAttribute(
+      CreatePerson.getLastName().waitForDisplayed()
+      CreatePerson.getLastName().setValue(VALID_PERSON_PRINCIPAL.lastName)
+      CreatePerson.getRank().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.rank)
+        CreatePerson.getRandomOption(CreatePerson.getRank())
       )
-      CreatePerson.gender.selectByAttribute(
+      CreatePerson.getGender().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.gender)
+        CreatePerson.getRandomOption(CreatePerson.getGender())
       )
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      const alertMessage = CreatePerson.alertSuccess.getText()
+      const alertMessage = CreatePerson.getAlertSuccess().getText()
       expect(alertMessage).to.equal("Person saved")
     })
     it("Should not save a principle without a valid email address", () => {
-      CreatePerson.lastName.waitForDisplayed()
-      CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
-      CreatePerson.rank.selectByAttribute(
+      CreatePerson.getLastName().waitForDisplayed()
+      CreatePerson.getLastName().setValue(VALID_PERSON_PRINCIPAL.lastName)
+      CreatePerson.getRank().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.rank)
+        CreatePerson.getRandomOption(CreatePerson.getRank())
       )
-      CreatePerson.gender.selectByAttribute(
+      CreatePerson.getGender().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.gender)
+        CreatePerson.getRandomOption(CreatePerson.getGender())
       )
-      CreatePerson.emailAddress.setValue("notValidEmail@")
-      CreatePerson.lastName.click()
+      CreatePerson.getEmailAddress().setValue("notValidEmail@")
+      CreatePerson.getLastName().click()
       const errorMessage = browser.$(
         "input#emailAddress + div.invalid-feedback"
       )
@@ -90,12 +90,12 @@ describe("Create new Person form page", () => {
       expect(errorMessage.getText()).to.equal("Email must be a valid email")
 
       // perform submit form to prevent warning dialog
-      CreatePerson.deleteInput(CreatePerson.emailAddress)
-      CreatePerson.emailAddress.setValue("test@example.com")
-      CreatePerson.lastName.click()
+      CreatePerson.deleteInput(CreatePerson.getEmailAddress())
+      CreatePerson.getEmailAddress().setValue("test@example.com")
+      CreatePerson.getLastName().click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      const alertMessage = CreatePerson.alertSuccess.getText()
+      const alertMessage = CreatePerson.getAlertSuccess().getText()
       expect(alertMessage).to.equal("Person saved")
     })
   })
@@ -103,29 +103,29 @@ describe("Create new Person form page", () => {
   describe("When creating an Advisor user", () => {
     it("Should display possible duplicates with similar names", () => {
       CreatePerson.openAsAdmin()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
-      CreatePerson.lastName.waitForDisplayed()
-      CreatePerson.lastName.setValue(SIMILAR_PERSON_ADVISOR.lastName)
-      CreatePerson.firstName.waitForDisplayed()
-      CreatePerson.firstName.setValue(SIMILAR_PERSON_ADVISOR.firstName)
-      CreatePerson.duplicatesButton.waitForDisplayed()
-      CreatePerson.duplicatesButton.click()
-      CreatePerson.modalContent.waitForDisplayed()
-      CreatePerson.similarPerson.waitForDisplayed()
-      const similar = CreatePerson.similarPerson.getText()
-      CreatePerson.modalCloseButton.waitForDisplayed()
-      CreatePerson.modalCloseButton.click()
-      CreatePerson.modalContent.waitForDisplayed({ reverse: true })
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
+      CreatePerson.getLastName().waitForDisplayed()
+      CreatePerson.getLastName().setValue(SIMILAR_PERSON_ADVISOR.lastName)
+      CreatePerson.getFirstName().waitForDisplayed()
+      CreatePerson.getFirstName().setValue(SIMILAR_PERSON_ADVISOR.firstName)
+      CreatePerson.getDuplicatesButton().waitForDisplayed()
+      CreatePerson.getDuplicatesButton().click()
+      CreatePerson.getModalContent().waitForDisplayed()
+      CreatePerson.getSimilarPerson().waitForDisplayed()
+      const similar = CreatePerson.getSimilarPerson().getText()
+      CreatePerson.getModalCloseButton().waitForDisplayed()
+      CreatePerson.getModalCloseButton().click()
+      CreatePerson.getModalContent().waitForDisplayed({ reverse: true })
       expect(similar).to.equal("CIV ERINSON, Erin")
     })
     it("Should display a warning message specific for duplicate accounts", () => {
       // Only admin users can create an advisor user
       CreatePerson.openAsAdmin()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
-      CreatePerson.roleAdvisorButton.waitForExist()
-      CreatePerson.roleAdvisorButton.click()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
+      CreatePerson.getRoleAdvisorButton().waitForExist()
+      CreatePerson.getRoleAdvisorButton().click()
       const warningMessage = browser.$(".alert.alert-warning")
       warningMessage.waitForExist()
       warningMessage.waitForDisplayed()
@@ -136,31 +136,31 @@ describe("Create new Person form page", () => {
     })
     it("Should not save if endOfTourDate is not filled in", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
-      CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
-      CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
-      CreatePerson.roleAdvisorButton.waitForExist()
-      CreatePerson.roleAdvisorButton.click()
-      CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
-      CreatePerson.lastName.click()
+      CreatePerson.getLastName().setValue(VALID_PERSON_ADVISOR.lastName)
+      CreatePerson.getFirstName().setValue(VALID_PERSON_ADVISOR.firstName)
+      CreatePerson.getRoleAdvisorButton().waitForExist()
+      CreatePerson.getRoleAdvisorButton().click()
+      CreatePerson.getEmailAddress().setValue(VALID_PERSON_ADVISOR.emailAddress)
+      CreatePerson.getLastName().click()
       let errorMessage = browser.$("input#emailAddress + div.invalid-feedback")
       // element should *not* be visible!
       errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
-      CreatePerson.rank.selectByAttribute(
+      CreatePerson.getRank().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.rank)
+        CreatePerson.getRandomOption(CreatePerson.getRank())
       )
-      CreatePerson.gender.selectByAttribute(
+      CreatePerson.getGender().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.gender)
+        CreatePerson.getRandomOption(CreatePerson.getGender())
       )
-      CreatePerson.country.selectByAttribute(
+      CreatePerson.getCountry().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.country)
+        CreatePerson.getRandomOption(CreatePerson.getCountry())
       )
       // This makes sure the help-block is displayed after form submit
-      CreatePerson.endOfTourDate.setValue("")
-      CreatePerson.lastName.click()
-      errorMessage = CreatePerson.endOfTourDate
+      CreatePerson.getEndOfTourDate().setValue("")
+      CreatePerson.getLastName().click()
+      errorMessage = CreatePerson.getEndOfTourDate()
         .$("..")
         .$("..")
         .$("..")
@@ -176,38 +176,38 @@ describe("Create new Person form page", () => {
 
     it("Should save with a valid email address in uppercase", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
-      CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
-      CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
-      CreatePerson.roleAdvisorButton.waitForExist()
-      CreatePerson.roleAdvisorButton.click()
-      CreatePerson.deleteInput(CreatePerson.emailAddress)
-      CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
-      CreatePerson.lastName.click()
+      CreatePerson.getLastName().setValue(VALID_PERSON_ADVISOR.lastName)
+      CreatePerson.getFirstName().setValue(VALID_PERSON_ADVISOR.firstName)
+      CreatePerson.getRoleAdvisorButton().waitForExist()
+      CreatePerson.getRoleAdvisorButton().click()
+      CreatePerson.deleteInput(CreatePerson.getEmailAddress())
+      CreatePerson.getEmailAddress().setValue(VALID_PERSON_ADVISOR.emailAddress)
+      CreatePerson.getLastName().click()
       const errorMessage = browser.$(
         "input#emailAddress + div.invalid-feedback"
       )
       // element should *not* be visible!
       errorMessage.waitForDisplayed({ timeout: 1000, reverse: true })
-      CreatePerson.rank.selectByAttribute(
+      CreatePerson.getRank().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.rank)
+        CreatePerson.getRandomOption(CreatePerson.getRank())
       )
-      CreatePerson.gender.selectByAttribute(
+      CreatePerson.getGender().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.gender)
+        CreatePerson.getRandomOption(CreatePerson.getGender())
       )
-      CreatePerson.country.selectByAttribute(
+      CreatePerson.getCountry().selectByAttribute(
         "value",
-        CreatePerson.getRandomOption(CreatePerson.country)
+        CreatePerson.getRandomOption(CreatePerson.getCountry())
       )
       const tomorrow = moment().add(1, "days").format("DD-MM-YYYY")
 
-      CreatePerson.deleteInput(CreatePerson.endOfTourDate)
-      CreatePerson.endOfTourDate.setValue(tomorrow)
-      CreatePerson.lastName.click()
+      CreatePerson.deleteInput(CreatePerson.getEndOfTourDate())
+      CreatePerson.getEndOfTourDate().setValue(tomorrow)
+      CreatePerson.getLastName().click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      const alertMessage = CreatePerson.alertSuccess.getText()
+      const alertMessage = CreatePerson.getAlertSuccess().getText()
       expect(alertMessage).to.equal("Person saved")
       CreatePerson.logout()
     })

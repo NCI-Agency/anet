@@ -1,27 +1,27 @@
 import Page from "./page"
 
 class MyOrg extends Page {
-  get engagementDateStatistics() {
+  getEngagementDateStatistics() {
     return browser.$("[id^=engagementDate-statistics]").$(".fc")
   }
 
-  get locationStatistics() {
+  getLocationStatistics() {
     return browser.$("[id^=map-location-statistics]")
   }
 
-  get engagementStatus() {
+  getEngagementStatus() {
     return browser.$("[id^=engagementStatus-statistics]")
   }
 
-  get tasks() {
+  getTasks() {
     return browser.$("[id^=tasks-statistics]")
   }
 
-  get trainingEvent() {
+  getTrainingEvent() {
     return browser.$("[id*=trainingEvent-statistics]")
   }
 
-  get numberTrained() {
+  getNumberTrained() {
     return browser.$("[id*=numberTrained-statistics]")
   }
 }

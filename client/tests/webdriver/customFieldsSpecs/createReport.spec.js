@@ -32,16 +32,17 @@ describe("Create report form page", () => {
     it("Should be able to load the form", () => {
       CreateReport.open()
       browser.pause(500) // wait for the page transition and rendering of custom fields
-      CreateReport.form.waitForExist()
-      CreateReport.form.waitForDisplayed()
+      CreateReport.getForm().waitForExist()
+      CreateReport.getForm().waitForDisplayed()
     })
 
     it("Should be able to prevent invalid duration values", () => {
-      CreateReport.duration.setValue(INVALID_ENGAGEMENT_DURATION_1)
+      CreateReport.getDuration().setValue(INVALID_ENGAGEMENT_DURATION_1)
       browser.waitUntil(
         () => {
           return (
-            CreateReport.duration.getValue() === VALID_ENGAGEMENT_DURATION_1
+            CreateReport.getDuration().getValue() ===
+            VALID_ENGAGEMENT_DURATION_1
           )
         },
         {
@@ -49,11 +50,12 @@ describe("Create report form page", () => {
           timeoutMsg: "Large positive duration value was not sliced "
         }
       )
-      CreateReport.duration.setValue(INVALID_ENGAGEMENT_DURATION_2)
+      CreateReport.getDuration().setValue(INVALID_ENGAGEMENT_DURATION_2)
       browser.waitUntil(
         () => {
           return (
-            CreateReport.duration.getValue() === VALID_ENGAGEMENT_DURATION_2
+            CreateReport.getDuration().getValue() ===
+            VALID_ENGAGEMENT_DURATION_2
           )
         },
         {
@@ -64,80 +66,82 @@ describe("Create report form page", () => {
     })
 
     it("Should be able to select an ANET object reference", () => {
-      CreateReport.testReferenceFieldLabel.waitForExist()
-      CreateReport.testReferenceFieldLabel.waitForDisplayed()
-      expect(CreateReport.testReferenceFieldLabel.getText()).to.equal(
+      CreateReport.getTestReferenceFieldLabel().waitForExist()
+      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
+      expect(CreateReport.getTestReferenceFieldLabel().getText()).to.equal(
         "Related report"
       )
-      CreateReport.testReferenceFieldHelpText.waitForExist()
-      CreateReport.testReferenceFieldHelpText.waitForDisplayed()
-      expect(CreateReport.testReferenceFieldHelpText.getText()).to.equal(
+      CreateReport.getTestReferenceFieldHelpText().waitForExist()
+      CreateReport.getTestReferenceFieldHelpText().waitForDisplayed()
+      expect(CreateReport.getTestReferenceFieldHelpText().getText()).to.equal(
         "Here you can link to a related report"
       )
 
       // Only input type is Reports, so there should be no button to select a type
       expect(
-        CreateReport.testReferenceField.getAttribute("placeholder")
+        CreateReport.getTestReferenceField().getAttribute("placeholder")
       ).to.equal("Find reports")
       // eslint-disable-next-line no-unused-expressions
       expect(
-        CreateReport.testReferenceFieldFormGroup
+        CreateReport.getTestReferenceFieldFormGroup()
           .$('//button[text()="Reports"]')
           .isExisting()
       ).to.be.false
-      CreateReport.testReferenceFieldLabel.click()
-      CreateReport.testReferenceField.setValue(REPORT)
+      CreateReport.getTestReferenceFieldLabel().click()
+      CreateReport.getTestReferenceField().setValue(REPORT)
       CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.testReferenceFieldAdvancedSelectFirstItem,
+        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
         REPORT_COMPLETE
       )
       expect(
-        CreateReport.testReferenceFieldAdvancedSelectFirstItem.getText()
+        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem().getText()
       ).to.include(REPORT_COMPLETE)
-      CreateReport.testReferenceFieldAdvancedSelectFirstItem.click()
+      CreateReport.getTestReferenceFieldAdvancedSelectFirstItem().click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testReferenceField.getValue()).to.be.empty
+      expect(CreateReport.getTestReferenceField().getValue()).to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testReferenceFieldValue.isExisting()).to.be.true
-      expect(CreateReport.testReferenceFieldValue.getText()).to.include(
+      expect(CreateReport.getTestReferenceFieldValue().isExisting()).to.be.true
+      expect(CreateReport.getTestReferenceFieldValue().getText()).to.include(
         REPORT_VALUE
       )
 
       // Delete selected value
-      CreateReport.testReferenceFieldValue.$("button").click()
+      CreateReport.getTestReferenceFieldValue().$("button").click()
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testReferenceFieldValue.isExisting()).to.be.false
+      expect(CreateReport.getTestReferenceFieldValue().isExisting()).to.be.false
 
       // Select it again
-      CreateReport.testReferenceFieldLabel.click()
-      CreateReport.testReferenceField.setValue(REPORT)
+      CreateReport.getTestReferenceFieldLabel().click()
+      CreateReport.getTestReferenceField().setValue(REPORT)
       CreateReport.waitForAdvancedSelectToChange(
-        CreateReport.testReferenceFieldAdvancedSelectFirstItem,
+        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
         REPORT_COMPLETE
       )
-      CreateReport.testReferenceFieldAdvancedSelectFirstItem.click()
+      CreateReport.getTestReferenceFieldAdvancedSelectFirstItem().click()
     })
 
     it("Should be able to select multiple ANET object references", () => {
-      CreateReport.testMultiReferenceFieldLabel.waitForExist()
-      CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
-      expect(CreateReport.testMultiReferenceFieldLabel.getText()).to.equal(
+      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
+      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
+      expect(CreateReport.getTestMultiReferenceFieldLabel().getText()).to.equal(
         "Additional engagement needed for"
       )
-      CreateReport.testMultiReferenceFieldHelpText.waitForExist()
-      CreateReport.testMultiReferenceFieldHelpText.waitForDisplayed()
-      expect(CreateReport.testMultiReferenceFieldHelpText.getText()).to.equal(
+      CreateReport.getTestMultiReferenceFieldHelpText().waitForExist()
+      CreateReport.getTestMultiReferenceFieldHelpText().waitForDisplayed()
+      expect(
+        CreateReport.getTestMultiReferenceFieldHelpText().getText()
+      ).to.equal(
         "Here you can link to people, positions and organizations that need an additional engagement"
       )
 
       // Default input type is People
       expect(
-        CreateReport.testMultiReferenceField.getAttribute("placeholder")
+        CreateReport.getTestMultiReferenceField().getAttribute("placeholder")
       ).to.equal("Find people")
-      CreateReport.testMultiReferenceFieldLabel.click()
-      CreateReport.testMultiReferenceField.setValue(PERSON)
+      CreateReport.getTestMultiReferenceFieldLabel().click()
+      CreateReport.getTestMultiReferenceField().setValue(PERSON)
       CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         PERSON_COMPLETE_1
@@ -155,13 +159,14 @@ describe("Create report form page", () => {
       ).to.include(PERSON_COMPLETE_2)
       CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2).click()
       // Click outside the overlay
-      CreateReport.engagementInformationTitle.click()
+      CreateReport.getEngagementInformationTitle().click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceField.getValue()).to.be.empty
+      expect(CreateReport.getTestMultiReferenceField().getValue()).to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceFieldValue.isExisting()).to.be.true
+      expect(CreateReport.getTestMultiReferenceFieldValue().isExisting()).to.be
+        .true
       expect(
         CreateReport.getTestMultiReferenceFieldValueRow(1).getText()
       ).to.include(PERSON_VALUE_1)
@@ -170,14 +175,14 @@ describe("Create report form page", () => {
       ).to.include(PERSON_VALUE_2)
 
       // Change input type to Positions
-      CreateReport.testMultiReferenceFieldFormGroup
+      CreateReport.getTestMultiReferenceFieldFormGroup()
         .$('//button[text()="Positions"]')
         .click()
       expect(
-        CreateReport.testMultiReferenceField.getAttribute("placeholder")
+        CreateReport.getTestMultiReferenceField().getAttribute("placeholder")
       ).to.equal("Find positions")
-      CreateReport.testMultiReferenceFieldLabel.click()
-      CreateReport.testMultiReferenceField.setValue(POSITION)
+      CreateReport.getTestMultiReferenceFieldLabel().click()
+      CreateReport.getTestMultiReferenceField().setValue(POSITION)
       CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         POSITION_COMPLETE_1
@@ -201,13 +206,14 @@ describe("Create report form page", () => {
       ).to.include(POSITION_COMPLETE_3)
       CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(3).click()
       // Click outside the overlay
-      CreateReport.engagementInformationTitle.click()
+      CreateReport.getEngagementInformationTitle().click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceField.getValue()).to.be.empty
+      expect(CreateReport.getTestMultiReferenceField().getValue()).to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceFieldValue.isExisting()).to.be.true
+      expect(CreateReport.getTestMultiReferenceFieldValue().isExisting()).to.be
+        .true
       expect(
         CreateReport.getTestMultiReferenceFieldValueRow(3).getText()
       ).to.include(POSITION_VALUE_1)
@@ -219,11 +225,15 @@ describe("Create report form page", () => {
       ).to.include(POSITION_VALUE_3)
 
       // Should have 5 values
-      expect(CreateReport.testMultiReferenceFieldValueRows).to.have.lengthOf(5)
+      expect(
+        CreateReport.getTestMultiReferenceFieldValueRows()
+      ).to.have.lengthOf(5)
       // Delete one of the selected values
       CreateReport.getTestMultiReferenceFieldValueRow(3).$("button").click()
       // Should have only 4 values left
-      expect(CreateReport.testMultiReferenceFieldValueRows).to.have.lengthOf(4)
+      expect(
+        CreateReport.getTestMultiReferenceFieldValueRows()
+      ).to.have.lengthOf(4)
       // 3rd value should have changed
       expect(
         CreateReport.getTestMultiReferenceFieldValueRow(3).getText()
@@ -234,21 +244,23 @@ describe("Create report form page", () => {
       // Submit the report
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
-      expect(CreateReport.alert.getText()).to.include(
+      expect(CreateReport.getAlert().getText()).to.include(
         "The following errors must be fixed"
       )
 
       // Check ANET object reference
-      CreateReport.testReferenceFieldLabel.waitForExist()
-      CreateReport.testReferenceFieldLabel.waitForDisplayed()
-      expect(CreateReport.testReferenceFieldValue.getText()).to.include(
+      CreateReport.getTestReferenceFieldLabel().waitForExist()
+      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
+      expect(CreateReport.getTestReferenceFieldValue().getText()).to.include(
         REPORT_VALUE
       )
 
       // Check ANET object multi-references
-      CreateReport.testMultiReferenceFieldLabel.waitForExist()
-      CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
-      expect(CreateReport.testMultiReferenceFieldValueRows).to.have.lengthOf(4)
+      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
+      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
+      expect(
+        CreateReport.getTestMultiReferenceFieldValueRows()
+      ).to.have.lengthOf(4)
       expect(
         CreateReport.getTestMultiReferenceFieldValueRow(1).getText()
       ).to.include(PERSON_VALUE_1)
@@ -265,31 +277,33 @@ describe("Create report form page", () => {
 
     it("Should be able to edit a report with ANET object references", () => {
       // Edit the report
-      CreateReport.editButton.click()
+      CreateReport.getEditButton().click()
 
-      CreateReport.testReferenceFieldLabel.waitForExist()
-      CreateReport.testReferenceFieldLabel.waitForDisplayed()
+      CreateReport.getTestReferenceFieldLabel().waitForExist()
+      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
       // Default input type is People
       expect(
-        CreateReport.testReferenceField.getAttribute("placeholder")
+        CreateReport.getTestReferenceField().getAttribute("placeholder")
       ).to.equal("Find reports")
       // Check ANET object reference
-      expect(CreateReport.testReferenceFieldValue.getText()).to.include(
+      expect(CreateReport.getTestReferenceFieldValue().getText()).to.include(
         REPORT_VALUE
       )
       // Delete selected value
-      CreateReport.testReferenceFieldValue.scrollIntoView()
-      CreateReport.testReferenceFieldValue.$("button").click()
+      CreateReport.getTestReferenceFieldValue().scrollIntoView()
+      CreateReport.getTestReferenceFieldValue().$("button").click()
 
-      CreateReport.testMultiReferenceFieldLabel.waitForExist()
-      CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
-      CreateReport.testMultiReferenceFieldLabel.scrollIntoView()
+      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
+      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
+      CreateReport.getTestMultiReferenceFieldLabel().scrollIntoView()
       // Default input type is People
       expect(
-        CreateReport.testMultiReferenceField.getAttribute("placeholder")
+        CreateReport.getTestMultiReferenceField().getAttribute("placeholder")
       ).to.equal("Find people")
       // Check ANET object multi-references
-      expect(CreateReport.testMultiReferenceFieldValueRows).to.have.lengthOf(4)
+      expect(
+        CreateReport.getTestMultiReferenceFieldValueRows()
+      ).to.have.lengthOf(4)
       expect(
         CreateReport.getTestMultiReferenceFieldValueRow(1).getText()
       ).to.include(PERSON_VALUE_1)
@@ -303,7 +317,7 @@ describe("Create report form page", () => {
         CreateReport.getTestMultiReferenceFieldValueRow(4).getText()
       ).to.include(POSITION_VALUE_3)
       // Delete selected values
-      CreateReport.testMultiReferenceFieldValueRows.forEach(r => {
+      CreateReport.getTestMultiReferenceFieldValueRows().forEach(r => {
         const button = r.$("button")
         button.scrollIntoView()
         button.click()
@@ -314,41 +328,42 @@ describe("Create report form page", () => {
       // Submit the report
       CreateReport.submitForm()
       CreateReport.waitForAlertToLoad()
-      const alertMessage = CreateReport.alert.getText()
+      const alertMessage = CreateReport.getAlert().getText()
       expect(alertMessage).to.include("The following errors must be fixed")
 
       // Check ANET object reference
-      CreateReport.testReferenceFieldLabel.waitForExist()
-      CreateReport.testReferenceFieldLabel.waitForDisplayed()
+      CreateReport.getTestReferenceFieldLabel().waitForExist()
+      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testReferenceFieldValue.isExisting()).to.be.false
+      expect(CreateReport.getTestReferenceFieldValue().isExisting()).to.be.false
 
       // Check ANET object multi-references
-      CreateReport.testMultiReferenceFieldLabel.waitForExist()
-      CreateReport.testMultiReferenceFieldLabel.waitForDisplayed()
+      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
+      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.testMultiReferenceFieldValue.isExisting()).to.be.false
+      expect(CreateReport.getTestMultiReferenceFieldValue().isExisting()).to.be
+        .false
     })
 
     it("Should be able to delete the report", () => {
       // Edit the report
-      CreateReport.editButton.click()
+      CreateReport.getEditButton().click()
 
-      CreateReport.testReferenceFieldLabel.waitForExist()
-      CreateReport.testReferenceFieldLabel.waitForDisplayed()
+      CreateReport.getTestReferenceFieldLabel().waitForExist()
+      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
       // Delete it
-      CreateReport.deleteButton.waitForExist()
-      CreateReport.deleteButton.waitForDisplayed()
-      CreateReport.deleteButton.click()
+      CreateReport.getDeleteButton().waitForExist()
+      CreateReport.getDeleteButton().waitForDisplayed()
+      CreateReport.getDeleteButton().click()
       // Confirm delete
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-      CreateReport.confirmButton.waitForExist()
-      CreateReport.confirmButton.waitForDisplayed()
-      CreateReport.confirmButton.click()
+      CreateReport.getConfirmButton().waitForExist()
+      CreateReport.getConfirmButton().waitForDisplayed()
+      CreateReport.getConfirmButton().click()
       browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
       CreateReport.waitForAlertToLoad()
-      expect(CreateReport.alert.getText()).to.include("Report deleted")
+      expect(CreateReport.getAlert().getText()).to.include("Report deleted")
     })
   })
 })

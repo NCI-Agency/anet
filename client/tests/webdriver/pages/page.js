@@ -7,46 +7,46 @@ class Page {
     noPositionUser: "nopos"
   }
 
-  get loginForm() {
+  getLoginForm() {
     return browser.$("#kc-form-login")
   }
 
-  get loginFormUsername() {
+  getLoginFormUsername() {
     return browser.$("#username")
   }
 
-  get loginFormPassword() {
+  getLoginFormPassword() {
     return browser.$("#password")
   }
 
-  get loginFormSubmitButton() {
+  getLoginFormSubmitButton() {
     return browser.$("#kc-login")
   }
 
-  get logo() {
+  getLogo() {
     return browser.$("#topbar .logo")
   }
 
   loginFormSubmit() {
-    this.loginFormSubmitButton.click()
+    this.getLoginFormSubmitButton().click()
   }
 
   waitForLoginForm() {
-    this.loginForm.waitForExist()
-    this.loginForm.waitForDisplayed()
+    this.getLoginForm().waitForExist()
+    this.getLoginForm().waitForDisplayed()
   }
 
   login(credentials) {
     this.waitForLoginForm()
-    this.loginFormUsername.setValue(credentials)
-    this.loginFormPassword.setValue(credentials)
+    this.getLoginFormUsername().setValue(credentials)
+    this.getLoginFormPassword().setValue(credentials)
     this.loginFormSubmit()
   }
 
   logout(resetRedux = false) {
     // Reset redux state before logout
     if (resetRedux) {
-      this.logo.click()
+      this.getLogo().click()
       browser.pause(1000)
     }
     browser.url("/api/logout")
@@ -62,7 +62,7 @@ class Page {
 
   _open(pathName, credentials) {
     browser.url(pathName)
-    if (this.loginForm.isExisting()) {
+    if (this.getLoginForm().isExisting()) {
       this.login(credentials)
     }
     this.waitUntilLoaded()
@@ -73,7 +73,7 @@ class Page {
     credentials = Page.DEFAULT_CREDENTIALS.user
   ) {
     browser.url(pathName)
-    if (this.loginForm.isExisting()) {
+    if (this.getLoginForm().isExisting()) {
       this.login(credentials)
     }
   }
@@ -101,25 +101,25 @@ class Page {
     this._open(pathName, uniqueName)
   }
 
-  get alertSuccess() {
+  getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
   waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
+    if (!this.getAlertSuccess().isDisplayed()) {
+      this.getAlertSuccess().waitForExist()
+      this.getAlertSuccess().waitForDisplayed()
     }
   }
 
-  get alertWarning() {
+  getAlertWarning() {
     return browser.$(".alert-warning")
   }
 
   waitForAlertWarningToLoad() {
-    if (!this.alertWarning.isDisplayed()) {
-      this.alertWarning.waitForExist()
-      this.alertWarning.waitForDisplayed()
+    if (!this.getAlertWarning().isDisplayed()) {
+      this.getAlertWarning().waitForExist()
+      this.getAlertWarning().waitForDisplayed()
     }
   }
 

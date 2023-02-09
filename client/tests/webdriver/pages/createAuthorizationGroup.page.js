@@ -3,51 +3,51 @@ import Page from "./page"
 const PAGE_URL = "/admin/authorizationGroups/new"
 
 class CreateAuthorizationGroup extends Page {
-  get form() {
+  getForm() {
     return browser.$("form")
   }
 
-  get alertSuccess() {
+  getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get name() {
+  getName() {
     return browser.$("#name")
   }
 
-  get description() {
+  getDescription() {
     return browser.$("#description")
   }
 
   /* React Bootstrap v2 hides the input and styles the label. Input is not clickable.
         In order to click toggleButtonGroup, label needs to be grabbed */
-  get statusActiveInput() {
+  getStatusActiveInput() {
     return browser.$("input#status_ACTIVE")
   }
 
-  get statusInactiveInput() {
+  getStatusInactiveInput() {
     return browser.$("input#status_INACTIVE")
   }
 
-  get statusActiveButton() {
+  getStatusActiveButton() {
     return browser.$('label[for="status_ACTIVE"]')
   }
 
-  get statusInactiveButton() {
+  getStatusInactiveButton() {
     return browser.$('label[for="status_INACTIVE"]')
   }
 
-  get positionsInput() {
+  getPositionsInput() {
     return browser.$("#positions")
   }
 
-  get positionsAdvancedSelectFirstItem() {
+  getPositionsAdvancedSelectFirstItem() {
     return browser.$(
       "#positions-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
@@ -57,10 +57,10 @@ class CreateAuthorizationGroup extends Page {
   }
 
   waitForPositionsAdvancedSelectToChange(value) {
-    this.positionsAdvancedSelectFirstItem.waitForExist()
+    this.getPositionsAdvancedSelectFirstItem().waitForExist()
     return browser.waitUntil(
       () => {
-        return this.positionsAdvancedSelectFirstItem.getText() === value
+        return this.getPositionsAdvancedSelectFirstItem().getText() === value
       },
       {
         timeout: 5000,
@@ -73,7 +73,7 @@ class CreateAuthorizationGroup extends Page {
   }
 
   submitForm() {
-    this.submitButton.click()
+    this.getSubmitButton().click()
   }
 }
 

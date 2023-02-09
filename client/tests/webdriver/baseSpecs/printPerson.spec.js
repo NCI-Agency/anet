@@ -55,40 +55,40 @@ const PRESET_WITHOUT_SENSITIVE_LABELS = [
 describe("Show person page", () => {
   beforeEach("Should have print button", () => {
     Home.openAsAdminUser()
-    Home.searchBar.setValue("Roger")
-    Home.submitSearch.click()
-    Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-    Search.foundPeopleTable.waitForDisplayed()
+    Home.getSearchBar().setValue("Roger")
+    Home.getSubmitSearch().click()
+    Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
+    Search.getFoundPeopleTable().waitForDisplayed()
     Search.linkOfPersonFound("Roger").click()
-    ShowPerson.compactViewButton.waitForExist()
-    ShowPerson.compactViewButton.waitForDisplayed()
-    ShowPerson.compactViewButton.click()
-    ShowPerson.compactView.waitForExist()
-    ShowPerson.compactView.waitForDisplayed()
+    ShowPerson.getCompactViewButton().waitForExist()
+    ShowPerson.getCompactViewButton().waitForDisplayed()
+    ShowPerson.getCompactViewButton().click()
+    ShowPerson.getCompactView().waitForExist()
+    ShowPerson.getCompactView().waitForDisplayed()
   })
   describe("When on the print person page", () => {
     it("All fields can be selected using the optional fields dropdown", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.selectAllButton.waitForDisplayed()
-      ShowPerson.selectAllButton.click()
+      ShowPerson.getOptionalFieldsButton().click()
+      ShowPerson.getSelectAllButton().waitForDisplayed()
+      ShowPerson.getSelectAllButton().click()
       ShowPerson.waitForCompactField(
         false,
         ...Object.values(SOME_FIELDS).map(field => field.fieldLabel)
       )
     })
     it("All fields can be cleared using the optional fields dropdown", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.clearAllButton.waitForDisplayed()
-      ShowPerson.clearAllButton.click()
+      ShowPerson.getOptionalFieldsButton().click()
+      ShowPerson.getClearAllButton().waitForDisplayed()
+      ShowPerson.getClearAllButton().click()
       ShowPerson.waitForCompactField(
         true,
         ...Object.values(SOME_FIELDS).map(field => field.fieldLabel)
       )
     })
     it("Individual fields can be selected using optional fields dropdown", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.clearAllButton.waitForDisplayed()
-      ShowPerson.clearAllButton.click()
+      ShowPerson.getOptionalFieldsButton().click()
+      ShowPerson.getClearAllButton().waitForDisplayed()
+      ShowPerson.getClearAllButton().click()
       ShowPerson.pickACompactField(SOME_FIELDS.currentPosition.id)
       ShowPerson.waitForCompactField(
         false,
@@ -98,31 +98,33 @@ describe("Show person page", () => {
       ShowPerson.waitForCompactField(false, SOME_FIELDS.birthday.fieldLabel)
     })
     it("Default preset should select correct fields and display sensitive information warning", () => {
-      ShowPerson.presetsButton.click()
-      ShowPerson.defaultPreset.waitForDisplayed()
-      ShowPerson.defaultPreset.click()
+      ShowPerson.getPresetsButton().click()
+      ShowPerson.getDefaultPreset().waitForDisplayed()
+      ShowPerson.getDefaultPreset().click()
       ShowPerson.waitForCompactField(false, ...PRESET_DEFAULT_LABELS)
-      ShowPerson.sensitiveInformationWarning.waitForDisplayed()
+      ShowPerson.getSensitiveInformationWarning().waitForDisplayed()
     })
     it("Exclude sensitive fields preset should select correct fields", () => {
-      ShowPerson.presetsButton.click()
-      ShowPerson.withoutSensitivePreset.waitForDisplayed()
-      ShowPerson.withoutSensitivePreset.click()
+      ShowPerson.getPresetsButton().click()
+      ShowPerson.getWithoutSensitivePreset().waitForDisplayed()
+      ShowPerson.getWithoutSensitivePreset().click()
       ShowPerson.waitForCompactField(false, ...PRESET_WITHOUT_SENSITIVE_LABELS)
-      ShowPerson.sensitiveInformationWarning.waitForDisplayed({ reverse: true })
+      ShowPerson.getSensitiveInformationWarning().waitForDisplayed({
+        reverse: true
+      })
     })
     it("Should select the number of fields on the left", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.selectAllButton.waitForDisplayed()
-      ShowPerson.selectAllButton.click()
-      ShowPerson.leftColumnNumber.setValue(4)
+      ShowPerson.getOptionalFieldsButton().click()
+      ShowPerson.getSelectAllButton().waitForDisplayed()
+      ShowPerson.getSelectAllButton().click()
+      ShowPerson.getLeftColumnNumber().setValue(4)
       // Left column contains 2 additional fields name and avatar
-      expect(ShowPerson.leftTableFields.length).to.equal(6)
+      expect(ShowPerson.getLeftTableFields().length).to.equal(6)
     })
     it("Should return to the show person page when detailed view button clicked", () => {
-      ShowPerson.detailedViewButton.click()
-      ShowPerson.compactViewButton.waitForExist()
-      ShowPerson.compactViewButton.waitForDisplayed()
+      ShowPerson.getDetailedViewButton().click()
+      ShowPerson.getCompactViewButton().waitForExist()
+      ShowPerson.getCompactViewButton().waitForDisplayed()
     })
   })
 })

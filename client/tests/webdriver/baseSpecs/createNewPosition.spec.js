@@ -13,65 +13,67 @@ describe("Create position page", () => {
   describe("When creating a position", () => {
     it("Should show name, organization and location to be required when submitting empty form", () => {
       CreatePosition.openAsAdminUser()
-      CreatePosition.form.waitForExist()
-      CreatePosition.form.waitForDisplayed()
+      CreatePosition.getForm().waitForExist()
+      CreatePosition.getForm().waitForDisplayed()
       CreatePosition.submitForm()
-      CreatePosition.positionNameHelpBlock.waitForExist()
-      CreatePosition.positionNameHelpBlock.waitForDisplayed()
+      CreatePosition.getPositionNameHelpBlock().waitForExist()
+      CreatePosition.getPositionNameHelpBlock().waitForDisplayed()
 
-      CreatePosition.organizationHelpBlock.waitForExist()
-      CreatePosition.organizationHelpBlock.waitForDisplayed()
+      CreatePosition.getOrganizationHelpBlock().waitForExist()
+      CreatePosition.getOrganizationHelpBlock().waitForDisplayed()
 
-      CreatePosition.typeAdvisorButton.click()
+      CreatePosition.getTypeAdvisorButton().click()
 
-      expect(CreatePosition.positionNameHelpBlock.getText()).to.equal(
+      expect(CreatePosition.getPositionNameHelpBlock().getText()).to.equal(
         "Position name is required"
       )
-      expect(CreatePosition.organizationHelpBlock.getText()).to.equal(
+      expect(CreatePosition.getOrganizationHelpBlock().getText()).to.equal(
         "Organization is required"
       )
-      expect(CreatePosition.locationHelpBlock.getText()).to.equal(
+      expect(CreatePosition.getLocationHelpBlock().getText()).to.equal(
         "Location is required for NATO Billet"
       )
 
-      CreatePosition.typePrincipalButton.click()
+      CreatePosition.getTypePrincipalButton().click()
 
-      expect(CreatePosition.positionNameHelpBlock.getText()).to.equal(
+      expect(CreatePosition.getPositionNameHelpBlock().getText()).to.equal(
         "Position name is required"
       )
-      expect(CreatePosition.organizationHelpBlock.getText()).to.equal(
+      expect(CreatePosition.getOrganizationHelpBlock().getText()).to.equal(
         "Organization is required"
       )
     })
 
     it("Should display possible duplicates with similar names", () => {
-      CreatePosition.typeAdvisorButton.click()
-      CreatePosition.positionNameInput.setValue(SIMILAR_ADVISOR_POSITION_NAME)
-      CreatePosition.duplicatesButton.waitForDisplayed()
-      CreatePosition.duplicatesButton.click()
-      CreatePosition.modalContent.waitForDisplayed()
-      const similar = CreatePosition.similarPosition.getText()
-      CreatePosition.modalCloseButton.waitForDisplayed()
-      CreatePosition.modalCloseButton.click()
-      CreatePosition.modalContent.waitForDisplayed({ reverse: true })
+      CreatePosition.getTypeAdvisorButton().click()
+      CreatePosition.getPositionNameInput().setValue(
+        SIMILAR_ADVISOR_POSITION_NAME
+      )
+      CreatePosition.getDuplicatesButton().waitForDisplayed()
+      CreatePosition.getDuplicatesButton().click()
+      CreatePosition.getModalContent().waitForDisplayed()
+      const similar = CreatePosition.getSimilarPosition().getText()
+      CreatePosition.getModalCloseButton().waitForDisplayed()
+      CreatePosition.getModalCloseButton().click()
+      CreatePosition.getModalContent().waitForDisplayed({ reverse: true })
       expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
     })
 
     it("Should successfully create an advisor position when required fields are filled", () => {
-      CreatePosition.typeAdvisorButton.click()
-      CreatePosition.positionNameInput.setValue("Test Position")
+      CreatePosition.getTypeAdvisorButton().click()
+      CreatePosition.getPositionNameInput().setValue("Test Position")
 
-      CreatePosition.organizationInput.click()
-      CreatePosition.organizationInput.setValue(ADMIN_ORG)
+      CreatePosition.getOrganizationInput().click()
+      CreatePosition.getOrganizationInput().setValue(ADMIN_ORG)
       CreatePosition.waitForOrgAdvancedSelectToChange(ADMIN_ORG_COMPLETE)
-      expect(CreatePosition.orgAdvancedSelectFirstItem.getText()).to.include(
-        ADMIN_ORG_COMPLETE
-      )
+      expect(
+        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      ).to.include(ADMIN_ORG_COMPLETE)
 
-      CreatePosition.orgAdvancedSelectFirstItem.click()
+      CreatePosition.getOrgAdvancedSelectFirstItem().click()
 
-      CreatePosition.locationInput.click()
-      CreatePosition.locAdvancedSelectFirstItem.click()
+      CreatePosition.getLocationInput().click()
+      CreatePosition.getLocAdvancedSelectFirstItem().click()
 
       CreatePosition.submitForm()
       CreatePosition.waitForAlertSuccessToLoad()
@@ -79,20 +81,20 @@ describe("Create position page", () => {
 
     it("Should successfully create a principle position when required fields are filled", () => {
       CreatePosition.openAsAdminUser()
-      CreatePosition.form.waitForExist()
-      CreatePosition.form.waitForDisplayed()
+      CreatePosition.getForm().waitForExist()
+      CreatePosition.getForm().waitForDisplayed()
 
-      CreatePosition.typePrincipalButton.click()
-      CreatePosition.positionNameInput.setValue("Test Position")
+      CreatePosition.getTypePrincipalButton().click()
+      CreatePosition.getPositionNameInput().setValue("Test Position")
 
-      CreatePosition.organizationInput.click()
-      CreatePosition.organizationInput.setValue(PRINCIPAL_ORG)
+      CreatePosition.getOrganizationInput().click()
+      CreatePosition.getOrganizationInput().setValue(PRINCIPAL_ORG)
       CreatePosition.waitForOrgAdvancedSelectToChange(PRINCIPAL_ORG_COMPLETE)
-      expect(CreatePosition.orgAdvancedSelectFirstItem.getText()).to.include(
-        PRINCIPAL_ORG_COMPLETE
-      )
+      expect(
+        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      ).to.include(PRINCIPAL_ORG_COMPLETE)
 
-      CreatePosition.orgAdvancedSelectFirstItem.click()
+      CreatePosition.getOrgAdvancedSelectFirstItem().click()
 
       CreatePosition.submitForm()
       CreatePosition.waitForAlertSuccessToLoad()
@@ -103,55 +105,57 @@ describe("Create position page", () => {
   describe("When changing the position type from principal to advisor and putting back", () => {
     it("Should update the position type to advisor and back to principal", () => {
       CreatePosition.open()
-      CreatePosition.form.waitForExist()
-      CreatePosition.form.waitForDisplayed()
+      CreatePosition.getForm().waitForExist()
+      CreatePosition.getForm().waitForDisplayed()
 
-      CreatePosition.typePrincipalButton.waitForDisplayed()
+      CreatePosition.getTypePrincipalButton().waitForDisplayed()
       expect(
-        CreatePosition.typePrincipalButton.getAttribute("class")
+        CreatePosition.getTypePrincipalButton().getAttribute("class")
       ).to.not.include("active")
       // NOTE: The ButtonGroup component does not specify it's active selection
-      // expect(CreatePosition.typeAdvisorButton.getAttribute("class")).to.include(
+      // expect(CreatePosition.getTypeAdvisorButton().getAttribute("class")).to.include(
       //   "active"
       // )
-      expect(CreatePosition.organizationInput.getValue()).to.equal("")
+      expect(CreatePosition.getOrganizationInput().getValue()).to.equal("")
 
-      CreatePosition.organizationInput.click()
-      CreatePosition.organizationInput.setValue(PRINCIPAL_ORG)
+      CreatePosition.getOrganizationInput().click()
+      CreatePosition.getOrganizationInput().setValue(PRINCIPAL_ORG)
       // element should *not* exist as no suggestion found
-      CreatePosition.orgAdvancedSelectFirstItem.waitForExist({
+      CreatePosition.getOrgAdvancedSelectFirstItem().waitForExist({
         timeout: 2000,
         reverse: true
       })
 
       // Click outside the organization overlay to close the overlay
-      CreatePosition.typeAdvisorButton.click()
+      CreatePosition.getTypeAdvisorButton().click()
 
-      CreatePosition.organizationInput.click()
-      CreatePosition.organizationInput.setValue(ADVISOR_ORG)
+      CreatePosition.getOrganizationInput().click()
+      CreatePosition.getOrganizationInput().setValue(ADVISOR_ORG)
       CreatePosition.waitForOrgAdvancedSelectToChange(ADVISOR_ORG_COMPLETE)
-      expect(CreatePosition.orgAdvancedSelectFirstItem.getText()).to.include(
-        ADVISOR_ORG_COMPLETE
+      expect(
+        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      ).to.include(ADVISOR_ORG_COMPLETE)
+
+      CreatePosition.getOrgAdvancedSelectFirstItem().click()
+      expect(CreatePosition.getOrganizationInput().getValue()).to.equal(
+        ADVISOR_ORG
       )
 
-      CreatePosition.orgAdvancedSelectFirstItem.click()
-      expect(CreatePosition.organizationInput.getValue()).to.equal(ADVISOR_ORG)
+      CreatePosition.getTypePrincipalButton().click()
+      expect(CreatePosition.getOrganizationInput().getValue()).to.equal("")
 
-      CreatePosition.typePrincipalButton.click()
-      expect(CreatePosition.organizationInput.getValue()).to.equal("")
-
-      CreatePosition.organizationInput.click()
-      CreatePosition.organizationInput.setValue(PRINCIPAL_ORG)
+      CreatePosition.getOrganizationInput().click()
+      CreatePosition.getOrganizationInput().setValue(PRINCIPAL_ORG)
       CreatePosition.waitForOrgAdvancedSelectToChange(PRINCIPAL_ORG_COMPLETE)
-      expect(CreatePosition.orgAdvancedSelectFirstItem.getText()).to.include(
-        PRINCIPAL_ORG_COMPLETE
-      )
+      expect(
+        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      ).to.include(PRINCIPAL_ORG_COMPLETE)
 
-      CreatePosition.orgAdvancedSelectFirstItem.click()
-      expect(CreatePosition.organizationInput.getValue()).to.equal(
+      CreatePosition.getOrgAdvancedSelectFirstItem().click()
+      expect(CreatePosition.getOrganizationInput().getValue()).to.equal(
         PRINCIPAL_ORG
       )
-      CreatePosition.cancelButton.click()
+      CreatePosition.getCancelButton().click()
 
       // prevents "unexpected alert open" errors on BrowserStack
       browser.acceptAlert()

@@ -32,39 +32,39 @@ const ADD_FILTER_BUTTON_TEXT = "+ Add another filter"
 describe("When using advanced search", () => {
   it("Should show a link like button with correct text under search bar that opens a popover", () => {
     Home.open()
-    AdvancedSearch.advancedSearchForm.waitForExist()
-    AdvancedSearch.advancedSearchForm.waitForDisplayed()
-    AdvancedSearch.advancedSearchPopoverTrigger.waitForExist()
+    AdvancedSearch.getAdvancedSearchForm().waitForExist()
+    AdvancedSearch.getAdvancedSearchForm().waitForDisplayed()
+    AdvancedSearch.getAdvancedSearchPopoverTrigger().waitForExist()
 
-    AdvancedSearch.advancedSearchPopoverTrigger.waitForDisplayed()
+    AdvancedSearch.getAdvancedSearchPopoverTrigger().waitForDisplayed()
 
-    expect(AdvancedSearch.advancedSearchPopoverTrigger.getText()).to.equal(
+    expect(AdvancedSearch.getAdvancedSearchPopoverTrigger().getText()).to.equal(
       "Everything filtered on Status: Active"
     )
   })
   it("Should open the popover when clicked to the text", () => {
-    AdvancedSearch.advancedSearchPopoverTrigger.click()
-    AdvancedSearch.advancedSearchPopover.waitForExist()
-    AdvancedSearch.advancedSearchPopover.waitForDisplayed()
+    AdvancedSearch.getAdvancedSearchPopoverTrigger().click()
+    AdvancedSearch.getAdvancedSearchPopover().waitForExist()
+    AdvancedSearch.getAdvancedSearchPopover().waitForDisplayed()
   })
   it("Should show a list of anet object types on toggle buttons in the popover", () => {
-    AdvancedSearch.anetObjectSearchToggleButtons.forEach((button, i) => {
+    AdvancedSearch.getAnetObjectSearchToggleButtons().forEach((button, i) => {
       expect(button.getText()).to.equal(getObjectType(i))
     })
   })
   it("Should show the common filter even when no object type selected", () => {
-    expect(AdvancedSearch.commonSearchFilter.getText()).to.equal(
+    expect(AdvancedSearch.getCommonSearchFilter().getText()).to.equal(
       COMMON_FILTER_TEXT
     )
   })
   it("Should show the additional common filters when no object type selected", () => {
-    expect(AdvancedSearch.addFilterButtonText.getText()).to.equal(
+    expect(AdvancedSearch.getAddFilterButtonText().getText()).to.equal(
       ADD_FILTER_BUTTON_TEXT
     )
-    AdvancedSearch.addFilterButton.click()
-    AdvancedSearch.addFilterPopover.waitForExist()
-    AdvancedSearch.addFilterPopover.waitForDisplayed()
-    expect(AdvancedSearch.addFilterPopover.getText()).to.match(
+    AdvancedSearch.getAddFilterButton().click()
+    AdvancedSearch.getAddFilterPopover().waitForExist()
+    AdvancedSearch.getAddFilterPopover().waitForDisplayed()
+    expect(AdvancedSearch.getAddFilterPopover().getText()).to.match(
       new RegExp(ALL_COMMON_FILTERS.join("\n"))
     )
     // Select all common filters now
@@ -75,38 +75,38 @@ describe("When using advanced search", () => {
     })
   })
   it("Should show the common filter and default filters for each anet object type", () => {
-    AdvancedSearch.anetObjectSearchToggleButtons.forEach((button, i) => {
+    AdvancedSearch.getAnetObjectSearchToggleButtons().forEach((button, i) => {
       button.click()
-      expect(AdvancedSearch.commonSearchFilter.isExisting()).to.equal(true)
+      expect(AdvancedSearch.getCommonSearchFilter().isExisting()).to.equal(true)
       if (i === PERSON_INDEX) {
-        AdvancedSearch.pendingVerificationFilter.waitForExist()
-        AdvancedSearch.pendingVerificationFilter.waitForDisplayed()
-        expect(AdvancedSearch.pendingVerificationFilter.getText()).to.equal(
-          PERSON_DEFAULT_FILTER
-        )
+        AdvancedSearch.getPendingVerificationFilter().waitForExist()
+        AdvancedSearch.getPendingVerificationFilter().waitForDisplayed()
+        expect(
+          AdvancedSearch.getPendingVerificationFilter().getText()
+        ).to.equal(PERSON_DEFAULT_FILTER)
       }
     })
   })
   it("Should show add another filter button with correct text", () => {
-    AdvancedSearch.anetObjectSearchToggleButtons.forEach((button, i) => {
+    AdvancedSearch.getAnetObjectSearchToggleButtons().forEach((button, i) => {
       button.click()
-      AdvancedSearch.addFilterButtonText.waitForExist()
-      AdvancedSearch.addFilterButtonText.waitForDisplayed()
-      expect(AdvancedSearch.addFilterButtonText.getText()).to.equal(
+      AdvancedSearch.getAddFilterButtonText().waitForExist()
+      AdvancedSearch.getAddFilterButtonText().waitForDisplayed()
+      expect(AdvancedSearch.getAddFilterButtonText().getText()).to.equal(
         ADD_FILTER_BUTTON_TEXT
       )
     })
   })
 
   it("Should show correct sample filters in the additional filters popover", () => {
-    AdvancedSearch.anetObjectSearchToggleButtons.forEach((button, i) => {
+    AdvancedSearch.getAnetObjectSearchToggleButtons().forEach((button, i) => {
       button.click()
-      AdvancedSearch.addFilterButtonText.waitForExist()
-      AdvancedSearch.addFilterButtonText.waitForDisplayed()
-      AdvancedSearch.addFilterButton.click()
-      AdvancedSearch.addFilterPopover.waitForExist()
-      AdvancedSearch.addFilterPopover.waitForDisplayed()
-      expect(AdvancedSearch.addFilterPopover.getText()).to.match(
+      AdvancedSearch.getAddFilterButtonText().waitForExist()
+      AdvancedSearch.getAddFilterButtonText().waitForDisplayed()
+      AdvancedSearch.getAddFilterButton().click()
+      AdvancedSearch.getAddFilterPopover().waitForExist()
+      AdvancedSearch.getAddFilterPopover().waitForDisplayed()
+      expect(AdvancedSearch.getAddFilterPopover().getText()).to.match(
         new RegExp(ANET_OBJECT_TYPES[getObjectType(i)].sampleFilter)
       )
     })

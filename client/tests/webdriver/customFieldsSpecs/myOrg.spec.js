@@ -5,9 +5,9 @@ import MyOrg from "../pages/myOrg.page"
 describe("My Organization page", () => {
   beforeEach("Open the My Organization page", () => {
     Home.openAsAdminUser()
-    Home.linksMenuButton.click()
-    Home.myOrgLink.waitForExist()
-    const myOrgUrl = Home.myOrgLink.parentElement().getAttribute("href")
+    Home.getLinksMenuButton().click()
+    Home.getMyOrgLink().waitForExist()
+    const myOrgUrl = Home.getMyOrgLink().parentElement().getAttribute("href")
     MyOrg.openAsAdminUser(myOrgUrl)
   })
 
@@ -20,26 +20,26 @@ describe("My Organization page", () => {
       // Note: checks like length.above are being made because the wdio tests
       // might also be run after the jacocoTestReport, without resetting the
       // database, and in that case we have more reports in the statistics
-      MyOrg.engagementDateStatistics.waitForDisplayed()
-      const daysWithEvent = MyOrg.engagementDateStatistics.$$(
+      MyOrg.getEngagementDateStatistics().waitForDisplayed()
+      const daysWithEvent = MyOrg.getEngagementDateStatistics().$$(
         ".fc-event-title-container"
       )
       // There is at least one date with events in the calendar
       expect(daysWithEvent).to.have.length.above(0)
 
       // Location statistics map is being loaded
-      MyOrg.locationStatistics.waitForDisplayed()
+      MyOrg.getLocationStatistics().waitForDisplayed()
 
-      MyOrg.engagementStatus.waitForDisplayed()
+      MyOrg.getEngagementStatus().waitForDisplayed()
       // There are 4 engagement status options
-      const engagementStatusLegend = MyOrg.engagementStatus
+      const engagementStatusLegend = MyOrg.getEngagementStatus()
         .$(".pieLegend")
         .$$("span")
       expect(engagementStatusLegend).to.have.length(4)
 
-      MyOrg.tasks.waitForDisplayed()
+      MyOrg.getTasks().waitForDisplayed()
       // There are 3 tasks on the x-axis
-      const tasks = MyOrg.tasks.$("svg g").$$(".bars-group")
+      const tasks = MyOrg.getTasks().$("svg g").$$(".bars-group")
       expect(tasks).to.have.length(3)
       let countTasksBars = 0
       tasks.forEach(bar => {
@@ -50,16 +50,18 @@ describe("My Organization page", () => {
       // There is at least one bar
       expect(countTasksBars).to.be.above(0)
 
-      MyOrg.trainingEvent.waitForDisplayed()
+      MyOrg.getTrainingEvent().waitForDisplayed()
       // There are 3 training event options
-      const trainingEventLegend = MyOrg.trainingEvent.$(".pieLegend").$$("span")
+      const trainingEventLegend = MyOrg.getTrainingEvent()
+        .$(".pieLegend")
+        .$$("span")
       expect(trainingEventLegend).to.have.length(3)
       // Total number of reports is bigger than 0
-      const trainignEventTotal = MyOrg.trainingEvent.$("svg g text")
+      const trainignEventTotal = MyOrg.getTrainingEvent().$("svg g text")
       expect(+trainignEventTotal.getText()).to.be.above(0)
 
-      MyOrg.numberTrained.waitForDisplayed()
-      const numberTrained = MyOrg.numberTrained.$("div em")
+      MyOrg.getNumberTrained().waitForDisplayed()
+      const numberTrained = MyOrg.getNumberTrained().$("div em")
       expect(numberTrained.getText()).to.equal("Not specified")
     })
   })

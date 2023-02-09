@@ -33,41 +33,41 @@ describe("Visibility of custom sensitive information", () => {
   describe("Users", () => {
     it("Should be able to find the non counterpart principal with sensitive information", () => {
       Home.open("/", DEFAULT_USERNAME)
-      Home.searchBar.setValue(NON_COUNTERPART_PRINCIPLE.name)
-      Home.submitSearch.click()
-      Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-      Search.foundPeopleTable.waitForDisplayed()
+      Home.getSearchBar().setValue(NON_COUNTERPART_PRINCIPLE.name)
+      Home.getSubmitSearch().click()
+      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
+      Search.getFoundPeopleTable().waitForDisplayed()
       Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name).click()
     })
     it("Should not be able to see political position field if not authorized", () => {
-      ShowPerson.politicalPosition.waitForDisplayed({
+      ShowPerson.getPoliticalPosition().waitForDisplayed({
         timeout: 1000,
         reverse: true
       })
     })
     it("Should be able to see birthday field with the correct value if authorized", () => {
-      ShowPerson.birthday.waitForDisplayed()
-      expect(ShowPerson.birthday.getText()).to.equal(
+      ShowPerson.getBirthday().waitForDisplayed()
+      expect(ShowPerson.getBirthday().getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
     it("Should be able to find the counterpart principal with sensitive information", () => {
       Home.open("/", DEFAULT_USERNAME)
-      Home.searchBar.setValue(COUNTERPART_PRINCIPLE.name)
-      Home.submitSearch.click()
-      Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-      Search.foundPeopleTable.waitForDisplayed()
+      Home.getSearchBar().setValue(COUNTERPART_PRINCIPLE.name)
+      Home.getSubmitSearch().click()
+      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
+      Search.getFoundPeopleTable().waitForDisplayed()
       Search.linkOfPersonFound(COUNTERPART_PRINCIPLE.name).click()
     })
     it("Should be able to see political position field with the correct value if counterpart", () => {
-      ShowPerson.politicalPosition.waitForDisplayed()
-      expect(ShowPerson.politicalPosition.getText()).to.equal(
+      ShowPerson.getPoliticalPosition().waitForDisplayed()
+      expect(ShowPerson.getPoliticalPosition().getText()).to.equal(
         COUNTERPART_PRINCIPLE.politicalPosition
       )
     })
     it("Should be able to see birthday field with the correct value if counterpart", () => {
-      ShowPerson.birthday.waitForDisplayed()
-      expect(ShowPerson.birthday.getText()).to.equal(
+      ShowPerson.getBirthday().waitForDisplayed()
+      expect(ShowPerson.getBirthday().getText()).to.equal(
         COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -79,21 +79,21 @@ describe("Visibility of custom sensitive information", () => {
   describe("Superusers", () => {
     it("Should be able to find the principal with sensitive information", () => {
       Home.openAsSuperUser()
-      Home.searchBar.setValue(NON_COUNTERPART_PRINCIPLE.name)
-      Home.submitSearch.click()
-      Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-      Search.foundPeopleTable.waitForDisplayed()
+      Home.getSearchBar().setValue(NON_COUNTERPART_PRINCIPLE.name)
+      Home.getSubmitSearch().click()
+      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
+      Search.getFoundPeopleTable().waitForDisplayed()
       Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name).click()
     })
     it("Should not be able to see political position field if not authorized", () => {
-      ShowPerson.politicalPosition.waitForDisplayed({
+      ShowPerson.getPoliticalPosition().waitForDisplayed({
         timeout: 1000,
         reverse: true
       })
     })
     it("Should be able to see birthday field with the correct value if authorized", () => {
-      ShowPerson.birthday.waitForDisplayed()
-      expect(ShowPerson.birthday.getText()).to.equal(
+      ShowPerson.getBirthday().waitForDisplayed()
+      expect(ShowPerson.getBirthday().getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -105,21 +105,21 @@ describe("Visibility of custom sensitive information", () => {
   describe("Admins", () => {
     it("Should be able to find the principal with sensitive information", () => {
       Home.openAsAdminUser()
-      Home.searchBar.setValue(NON_COUNTERPART_PRINCIPLE.name)
-      Home.submitSearch.click()
-      Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-      Search.foundPeopleTable.waitForDisplayed()
+      Home.getSearchBar().setValue(NON_COUNTERPART_PRINCIPLE.name)
+      Home.getSubmitSearch().click()
+      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
+      Search.getFoundPeopleTable().waitForDisplayed()
       Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name).click()
     })
     it("Should be able to see political position field with the correct value", () => {
-      ShowPerson.politicalPosition.waitForDisplayed()
-      expect(ShowPerson.politicalPosition.getText()).to.equal(
+      ShowPerson.getPoliticalPosition().waitForDisplayed()
+      expect(ShowPerson.getPoliticalPosition().getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.politicalPosition
       )
     })
     it("Should be able to see birthday field with the correct value", () => {
-      ShowPerson.birthday.waitForDisplayed()
-      expect(ShowPerson.birthday.getText()).to.equal(
+      ShowPerson.getBirthday().waitForDisplayed()
+      expect(ShowPerson.getBirthday().getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
@@ -133,37 +133,45 @@ describe("Creating and editing custom sensitive information", () => {
   describe("Superusers", () => {
     it("Should be able load a new person form and fill normal required fields", () => {
       CreatePerson.openAsSuperUser()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
       // fill other required fields at the beginning
-      CreatePerson.lastName.setValue(NEW_PERSON_FIELDS_1.lastname)
-      CreatePerson.rank.selectByAttribute("value", NEW_PERSON_FIELDS_1.rank)
-      CreatePerson.gender.selectByAttribute("value", NEW_PERSON_FIELDS_1.gender)
+      CreatePerson.getLastName().setValue(NEW_PERSON_FIELDS_1.lastname)
+      CreatePerson.getRank().selectByAttribute(
+        "value",
+        NEW_PERSON_FIELDS_1.rank
+      )
+      CreatePerson.getGender().selectByAttribute(
+        "value",
+        NEW_PERSON_FIELDS_1.gender
+      )
     })
     it("Should not be able to edit sensitive fields if not authorized", () => {
-      CreatePerson.politicalPositionSensitiveFieldContainer.waitForDisplayed({
-        timeout: 1000,
-        reverse: true
-      })
+      CreatePerson.getPoliticalPositionSensitiveFieldContainer().waitForDisplayed(
+        {
+          timeout: 1000,
+          reverse: true
+        }
+      )
     })
     it("Should be able to create a new person with sensitive information", () => {
-      CreatePerson.deleteInput(CreatePerson.birthday)
-      CreatePerson.birthday.setValue("08-06-1963")
-      CreatePerson.lastName.click()
+      CreatePerson.deleteInput(CreatePerson.getBirthday())
+      CreatePerson.getBirthday().setValue("08-06-1963")
+      CreatePerson.getLastName().click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.birthday.getText()).to.equal("8 June 1963")
+      expect(ShowPerson.getBirthday().getText()).to.equal("8 June 1963")
     })
     it("Should be able to edit sensitive information if authorized", () => {
-      ShowPerson.editButton.click()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
-      CreatePerson.deleteInput(CreatePerson.birthday)
-      CreatePerson.birthday.setValue("01-01-1956")
-      CreatePerson.lastName.click()
+      ShowPerson.getEditButton().click()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
+      CreatePerson.deleteInput(CreatePerson.getBirthday())
+      CreatePerson.getBirthday().setValue("01-01-1956")
+      CreatePerson.getLastName().click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.birthday.getText()).to.equal("1 January 1956")
+      expect(ShowPerson.getBirthday().getText()).to.equal("1 January 1956")
     })
     it("Should logout", () => {
       CreatePerson.logout()
@@ -173,35 +181,41 @@ describe("Creating and editing custom sensitive information", () => {
   describe("Admins", () => {
     it("Should be able load a new person form and fill normal required fields", () => {
       CreatePerson.openAsAdmin()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
       // fill other required fields at the beginning
-      CreatePerson.lastName.setValue(NEW_PERSON_FIELDS_2.lastname)
-      CreatePerson.rank.selectByAttribute("value", NEW_PERSON_FIELDS_1.rank)
-      CreatePerson.gender.selectByAttribute("value", NEW_PERSON_FIELDS_2.gender)
+      CreatePerson.getLastName().setValue(NEW_PERSON_FIELDS_2.lastname)
+      CreatePerson.getRank().selectByAttribute(
+        "value",
+        NEW_PERSON_FIELDS_1.rank
+      )
+      CreatePerson.getGender().selectByAttribute(
+        "value",
+        NEW_PERSON_FIELDS_2.gender
+      )
     })
     it("Should be able to create a new person with sensitive information", () => {
-      CreatePerson.deleteInput(CreatePerson.birthday)
-      CreatePerson.birthday.setValue("01-01-1956")
-      CreatePerson.lastName.click()
-      CreatePerson.middleButton.click()
+      CreatePerson.deleteInput(CreatePerson.getBirthday())
+      CreatePerson.getBirthday().setValue("01-01-1956")
+      CreatePerson.getLastName().click()
+      CreatePerson.getMiddleButton().click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.birthday.getText()).to.equal("1 January 1956")
-      expect(ShowPerson.politicalPosition.getText()).to.equal("Middle")
+      expect(ShowPerson.getBirthday().getText()).to.equal("1 January 1956")
+      expect(ShowPerson.getPoliticalPosition().getText()).to.equal("Middle")
     })
     it("Should be able to edit sensitive information", () => {
-      ShowPerson.editButton.click()
-      CreatePerson.form.waitForExist()
-      CreatePerson.form.waitForDisplayed()
-      CreatePerson.deleteInput(CreatePerson.birthday)
-      CreatePerson.birthday.setValue("08-06-1963")
-      CreatePerson.lastName.click()
-      CreatePerson.leftButton.click()
+      ShowPerson.getEditButton().click()
+      CreatePerson.getForm().waitForExist()
+      CreatePerson.getForm().waitForDisplayed()
+      CreatePerson.deleteInput(CreatePerson.getBirthday())
+      CreatePerson.getBirthday().setValue("08-06-1963")
+      CreatePerson.getLastName().click()
+      CreatePerson.getLeftButton().click()
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.birthday.getText()).to.equal("8 June 1963")
-      expect(ShowPerson.politicalPosition.getText()).to.equal("Left")
+      expect(ShowPerson.getBirthday().getText()).to.equal("8 June 1963")
+      expect(ShowPerson.getPoliticalPosition().getText()).to.equal("Left")
     })
     it("Should logout", () => {
       CreatePerson.logout()

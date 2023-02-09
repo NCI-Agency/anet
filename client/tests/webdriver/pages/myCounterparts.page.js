@@ -19,24 +19,24 @@ class MyTasks extends Page {
     super.openAsOnboardUser(PAGE_URL)
   }
 
-  get myCounterparts() {
+  getMyCounterparts() {
     return browser.$("#my-counterparts")
   }
 
-  get myPendingCounterparts() {
+  getMyPendingCounterparts() {
     return browser.$("#my-counterparts-with-pending-assessments")
   }
 
-  get myPendingCounterpartsContent() {
+  getMyPendingCounterpartsContent() {
     return browser.$("#my-counterparts-with-pending-assessments").$("tbody")
   }
 
   getMyPendingCounterpart(name) {
-    return this.myPendingCounterpartsContent.$(`//a[text()="${name}"]`)
+    return this.getMyPendingCounterpartsContent().$(`//a[text()="${name}"]`)
   }
 
   getMyCounterpart(name) {
-    return this.myCounterparts.$(`//a[text()="${name}"]`)
+    return this.getMyCounterparts().$(`//a[text()="${name}"]`)
   }
 }
 

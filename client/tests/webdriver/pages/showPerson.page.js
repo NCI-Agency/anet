@@ -1,122 +1,124 @@
 import Page from "./page"
 
 class ShowPerson extends Page {
-  get editButton() {
+  getEditButton() {
     return browser.$("div a.edit-person")
   }
 
-  get compactView() {
+  getCompactView() {
     return browser.$(".compact-view")
   }
 
-  get compactViewButton() {
+  getCompactViewButton() {
     return browser.$("button[value='compactView']")
   }
 
-  get printButton() {
+  getPrintButton() {
     return browser.$("button[value='print']")
   }
 
-  get detailedViewButton() {
+  getDetailedViewButton() {
     return browser.$("button[value='detailedView']")
   }
 
-  get optionalFieldsButton() {
+  getOptionalFieldsButton() {
     return browser.$('//button[text()="Optional Fields ⇓"]')
   }
 
-  get clearAllButton() {
+  getClearAllButton() {
     return browser.$('//button[text()="Clear All"]')
   }
 
-  get selectAllButton() {
+  getSelectAllButton() {
     return browser.$('//button[text()="Select All"]')
   }
 
-  get presetsButton() {
+  getPresetsButton() {
     return browser.$("#presetsButton")
   }
 
-  get defaultPreset() {
+  getDefaultPreset() {
     return browser.$('//a[text()="Default"]')
   }
 
-  get withoutSensitivePreset() {
+  getWithoutSensitivePreset() {
     return browser.$('//a[text()="Exclude sensitive fields"]')
   }
 
-  get sensitiveInformationWarning() {
-    return this.compactView.$('//span[text()="Sensitive Information"]')
+  getSensitiveInformationWarning() {
+    return this.getCompactView().$('//span[text()="Sensitive Information"]')
   }
 
-  get leftColumnNumber() {
+  getLeftColumnNumber() {
     return browser.$("#leftColumnNumber")
   }
 
-  get leftTableFields() {
-    return this.compactView.$$(".left-table > tr")
+  getLeftTableFields() {
+    return this.getCompactView().$$(".left-table > tr")
   }
 
-  get assessmentsTable() {
-    return this.quarterlyAssessmentContainer.$("table.assessments-table")
+  getAssessmentsTable() {
+    return this.getQuarterlyAssessmentContainer().$("table.assessments-table")
   }
 
-  get addPeriodicAssessmentButton() {
+  getAddPeriodicAssessmentButton() {
     // get the add assessment button for latest assessable period (previous period)
-    return this.assessmentsTable.$(
+    return this.getAssessmentsTable().$(
       "tbody > tr:last-child > td:nth-child(2) > button"
     )
   }
 
-  get editAssessmentButton() {
+  getEditAssessmentButton() {
     return browser.$('div.card button[title="Edit assessment"]')
   }
 
-  get deleteAssessmentButton() {
+  getDeleteAssessmentButton() {
     return browser.$("div.card button.btn.btn-outline-danger.btn-xs")
   }
 
-  get deleteConfirmButton() {
+  getDeleteConfirmButton() {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  get assessmentModalForm() {
+  getAssessmentModalForm() {
     return browser.$(".modal-content form")
   }
 
-  get saveAssessmentButton() {
-    return this.assessmentModalForm.$('//button[text()="Save"]')
+  getSaveAssessmentButton() {
+    return this.getAssessmentModalForm().$('//button[text()="Save"]')
   }
 
-  get shownAssessmentPanel() {
-    return this.assessmentsTable.$("td:nth-child(2) .card")
+  getShownAssessmentPanel() {
+    return this.getAssessmentsTable().$("td:nth-child(2) .card")
   }
 
-  get shownAssessmentDetails() {
-    return this.shownAssessmentPanel.$$("div.card-body .form-control-plaintext")
+  getShownAssessmentDetails() {
+    return this.getShownAssessmentPanel().$$(
+      "div.card-body .form-control-plaintext"
+    )
   }
 
-  get quarterlyAssessmentContainer() {
+  getQuarterlyAssessmentContainer() {
     return browser.$("#entity-assessments-results-quarterly")
   }
 
-  get politicalPosition() {
+  getPoliticalPosition() {
     return browser.$('div[name="formSensitiveFields.politicalPosition"]')
   }
 
-  get birthday() {
+  getBirthday() {
     return browser.$('div[name="formSensitiveFields.birthday"]')
   }
 
-  get invalidFeedback() {
+  getInvalidFeedback() {
     return browser.$$('//div[@class="invalid-feedback"]')
   }
 
-  get topLevelQuestionSetTitle() {
+  getTopLevelQuestionSetTitle() {
     return browser.$('//h4/span[contains(text(),"Top Level Question Set")]')
   }
 
-  get bottomLevelQuestionSetTitle() {
+  getBottomLevelQuestionSetTitle() {
     return browser.$('//h4/span[contains(text(),"Bottom Level Question Set")]')
   }
 
@@ -126,7 +128,7 @@ class ShowPerson extends Page {
 
   waitForCompactField(reverse, ...fields) {
     fields.forEach(field => {
-      this.compactView
+      this.getCompactView()
         .$(`//th[text()="${field}"]`)
         .waitForDisplayed({ reverse: reverse })
     })
@@ -134,15 +136,15 @@ class ShowPerson extends Page {
 
   waitForAssessmentModalForm(reverse = false) {
     browser.pause(300) // wait for modal animation to finish
-    this.assessmentModalForm.waitForExist({ reverse, timeout: 20000 })
-    this.assessmentModalForm.waitForDisplayed()
+    this.getAssessmentModalForm().waitForExist({ reverse, timeout: 20000 })
+    this.getAssessmentModalForm().waitForDisplayed()
   }
 
   fillAssessmentQuestion(valuesArr, prevTextToClear) {
     // Second value in the valuesArr is the text editor value
     const buttonGroupValues = valuesArr.filter((value, index) => index !== 1)
     const textInputValue = valuesArr[1]
-    this.assessmentModalForm
+    this.getAssessmentModalForm()
       .$$(".modal-content .btn-group")
       .forEach((btnGroup, index) => {
         const button = btnGroup.$(
@@ -156,7 +158,7 @@ class ShowPerson extends Page {
       })
 
     // first focus on the text editor input
-    this.assessmentModalForm.$(".editor-container > .editable").click()
+    this.getAssessmentModalForm().$(".editor-container > .editable").click()
     // Wait for the editor to be focused
     browser.pause(300)
     if (prevTextToClear) {
@@ -170,13 +172,18 @@ class ShowPerson extends Page {
   }
 
   saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
-    this.saveAssessmentButton.click()
+    this.getSaveAssessmentButton().click()
     browser.pause(300) // wait for modal animation to finish
-    this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
+    this.getAssessmentModalForm().waitForExist({
+      reverse: true,
+      timeout: 20000
+    })
     // wait until details to change, can take some time to update show page
     browser.waitUntil(
       () => {
-        return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
+        return (
+          this.getShownAssessmentDetails()[0].getText() === detail0ToWaitFor
+        )
       },
       {
         timeout: 20000,
@@ -187,21 +194,21 @@ class ShowPerson extends Page {
 
   confirmDelete() {
     browser.pause(500)
-    this.deleteConfirmButton.waitForExist()
-    this.deleteConfirmButton.waitForDisplayed()
-    this.deleteConfirmButton.click()
+    this.getDeleteConfirmButton().waitForExist()
+    this.getDeleteConfirmButton().waitForDisplayed()
+    this.getDeleteConfirmButton().click()
   }
 
   waitForDeletedAssessmentToDisappear() {
     browser.pause(500)
-    this.shownAssessmentPanel.waitForExist({
+    this.getShownAssessmentPanel().waitForExist({
       reverse: true,
       timeout: 20000
     })
   }
 
   getValidationErrorMessages() {
-    return this.invalidFeedback.map(errorDiv => errorDiv.getText())
+    return this.getInvalidFeedback().map(errorDiv => errorDiv.getText())
   }
 }
 

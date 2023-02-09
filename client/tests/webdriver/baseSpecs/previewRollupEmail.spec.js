@@ -3,8 +3,8 @@ import Rollup from "../pages/rollup.page"
 describe("Preview rollup page", () => {
   beforeEach("Open the rollup page", () => {
     Rollup.open()
-    Rollup.rollup.waitForExist()
-    Rollup.rollup.waitForDisplayed()
+    Rollup.getRollup().waitForExist()
+    Rollup.getRollup().waitForDisplayed()
   })
 
   afterEach("On the rollup page...", () => {
@@ -13,14 +13,14 @@ describe("Preview rollup page", () => {
 
   describe("When clicking the email preview button, the daily rollup should be generated", () => {
     it("Should show the correct header for the rollup", () => {
-      Rollup.emailButton.waitForDisplayed()
-      Rollup.emailButton.click()
+      Rollup.getEmailButton().waitForDisplayed()
+      Rollup.getEmailButton().click()
 
       const currentHandle = browser.getWindowHandle()
-      Rollup.emailPreviewButton.waitForExist()
-      Rollup.emailPreviewButton.waitForDisplayed()
+      Rollup.getEmailPreviewButton().waitForExist()
+      Rollup.getEmailPreviewButton().waitForDisplayed()
       browser.pause(500)
-      Rollup.emailPreviewButton.click()
+      Rollup.getEmailPreviewButton().click()
 
       browser.pause(500)
       const handles = browser.getWindowHandles()

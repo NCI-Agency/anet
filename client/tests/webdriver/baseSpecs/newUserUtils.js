@@ -19,19 +19,19 @@ export const examplePersonDetails = {
 export function createOnboardingNewPerson(
   personDetails = examplePersonDetails
 ) {
-  OnboardPage.createYourAccountBtn.waitForExist()
-  OnboardPage.createYourAccountBtn.waitForDisplayed()
-  OnboardPage.createYourAccountBtn.click()
-  CreatePerson.lastName.setValue(personDetails.lastName)
-  CreatePerson.firstName.setValue(personDetails.firstName)
-  CreatePerson.emailAddress.setValue(personDetails.emailAddress)
-  CreatePerson.rank.selectByAttribute("value", personDetails.rank)
-  CreatePerson.gender.selectByAttribute("value", personDetails.gender)
-  CreatePerson.country.selectByAttribute("value", personDetails.country)
-  CreatePerson.endOfTourDate.setValue(personDetails.endOfTourDate)
+  OnboardPage.getCreateYourAccountBtn().waitForExist()
+  OnboardPage.getCreateYourAccountBtn().waitForDisplayed()
+  OnboardPage.getCreateYourAccountBtn().click()
+  CreatePerson.getLastName().setValue(personDetails.lastName)
+  CreatePerson.getFirstName().setValue(personDetails.firstName)
+  CreatePerson.getEmailAddress().setValue(personDetails.emailAddress)
+  CreatePerson.getRank().selectByAttribute("value", personDetails.rank)
+  CreatePerson.getGender().selectByAttribute("value", personDetails.gender)
+  CreatePerson.getCountry().selectByAttribute("value", personDetails.country)
+  CreatePerson.getEndOfTourDate().setValue(personDetails.endOfTourDate)
 
   CreatePerson.submitForm()
   Home.waitForAlertWarningToLoad()
-  Home.onboardingPopover.waitForExist()
-  Home.onboardingPopover.waitForDisplayed()
+  Home.getOnboardingPopover().waitForExist()
+  Home.getOnboardingPopover().waitForDisplayed()
 }

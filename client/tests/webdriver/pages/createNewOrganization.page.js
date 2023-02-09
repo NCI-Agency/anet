@@ -3,45 +3,45 @@ import Page from "./page"
 const PAGE_URL = "/organizations/new"
 
 class CreateOrganization extends Page {
-  get form() {
+  getForm() {
     return browser.$("form.form-horizontal")
   }
 
-  get alertSuccess() {
+  getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get submitButton() {
+  getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get organizationShortNameHelpBlock() {
+  getOrganizationShortNameHelpBlock() {
     return browser.$("#fg-shortName div.invalid-feedback")
   }
 
-  get typeAdvisorButton() {
+  getTypeAdvisorButton() {
     return browser.$('label[for="type_ADVISOR_ORG"]')
   }
 
-  get shortNameInput() {
+  getShortNameInput() {
     return browser.$("#shortName")
   }
 
-  get longNameInput() {
+  getLongNameInput() {
     return browser.$("#longName")
   }
 
-  get locationInput() {
+  getLocationInput() {
     return browser.$("#location")
   }
 
-  get locationAdvancedSelectFirstItem() {
+  getLocationAdvancedSelectFirstItem() {
     return browser.$(
       "#location-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  get profileInput() {
+  getProfileInput() {
     return browser.$("#fg-profile .editable")
   }
 
@@ -54,14 +54,14 @@ class CreateOrganization extends Page {
   }
 
   submitForm() {
-    this.submitButton.click()
+    this.getSubmitButton().click()
   }
 
   waitForLocationAdvancedSelectToChange(value) {
-    this.locationAdvancedSelectFirstItem.waitForExist()
+    this.getLocationAdvancedSelectFirstItem().waitForExist()
     return browser.waitUntil(
       () => {
-        return this.locationAdvancedSelectFirstItem.getText() === value
+        return this.getLocationAdvancedSelectFirstItem().getText() === value
       },
       {
         timeout: 5000,
@@ -74,7 +74,7 @@ class CreateOrganization extends Page {
   }
 
   fillOrganizationProfile(profile) {
-    this.profileInput.click()
+    this.getProfileInput().click()
     browser.keys(profile)
     browser.pause(300)
   }

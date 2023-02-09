@@ -46,12 +46,12 @@ describe("When reports have rich text content", () => {
   it("Show report page should display content with correct tags", () => {
     MyReports.open("arthur")
     MyReports.selectReport("Test report with rich text", REPORT_STATES.DRAFT)
-    ShowReport.reportText.waitForDisplayed()
+    ShowReport.getReportText().waitForDisplayed()
     RICH_TEXT_CONTENT.forEach(
       ({ selector, multipleElements, index, content }) => {
         expect(
           getRichTextContent(
-            ShowReport.reportText,
+            ShowReport.getReportText(),
             selector,
             multipleElements,
             index
@@ -61,12 +61,12 @@ describe("When reports have rich text content", () => {
     )
   })
   it("Edit report page should display content with correct tags", () => {
-    ShowReport.editReportButton.click()
+    ShowReport.getEditReportButton().click()
     RICH_TEXT_CONTENT.forEach(
       ({ selector, multipleElements, index, content }) => {
         expect(
           getRichTextContent(
-            EditReport.reportText,
+            EditReport.getReportText(),
             selector,
             multipleElements,
             index

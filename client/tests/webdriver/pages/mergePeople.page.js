@@ -11,61 +11,61 @@ class MergePeople extends Page {
     super.openAsAdminUser(path)
   }
 
-  get errorTitle() {
+  getErrorTitle() {
     return browser.$("//h1")
   }
 
-  get title() {
+  getTitle() {
     return browser.$('//h4[contains(text(),"Merge People")]')
   }
 
-  get leftPersonField() {
+  getLeftPersonField() {
     return browser.$("#Person1")
   }
 
-  get rightPersonField() {
+  getRightPersonField() {
     return browser.$("#Person2")
   }
 
-  get advancedSelectPopover() {
+  getAdvancedSelectPopover() {
     return browser.$(".bp4-popover2-content")
   }
 
-  get personHeaderFromPopover() {
+  getPersonHeaderFromPopover() {
     return browser.$('//table//th[contains(text(), "name")]')
   }
 
-  get firstItemFromAdvancedSelect() {
+  getFirstItemFromAdvancedSelect() {
     return browser.$("table > tbody > tr:first-child > td:nth-child(2) > span")
   }
 
-  get samePositionsToast() {
+  getSamePositionsToast() {
     return browser.$('//div[text()="Please select different people"]')
   }
 
-  get mergePeopleButton() {
+  getMergePeopleButton() {
     return browser.$('//button[text()="Merge People"]')
   }
 
-  get showNotesButton() {
+  getShowNotesButton() {
     return browser.$('button[title="Show notes"]')
   }
 
-  get unoccupiedPositionPersonMessage() {
+  getUnoccupiedPositionPersonMessage() {
     return browser.$("p.position-empty-message")
   }
 
-  get noteCards() {
+  getNoteCards() {
     return browser.$$(".offcanvas .card")
   }
 
-  get clearValueButtons() {
+  getClearValueButtons() {
     return browser.$$(
       "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'remove-button')]"
     )
   }
 
-  get editHistoryButton() {
+  getEditHistoryButton() {
     return browser.$('//button[text()="Edit History Manually"]')
   }
 
@@ -102,14 +102,14 @@ class MergePeople extends Page {
   }
 
   waitForAdvancedSelectLoading(compareStr) {
-    this.advancedSelectPopover.waitForExist()
-    this.advancedSelectPopover.waitForDisplayed()
-    this.personHeaderFromPopover.waitForExist()
-    this.personHeaderFromPopover.waitForDisplayed()
+    this.getAdvancedSelectPopover().waitForExist()
+    this.getAdvancedSelectPopover().waitForDisplayed()
+    this.getPersonHeaderFromPopover().waitForExist()
+    this.getPersonHeaderFromPopover().waitForDisplayed()
 
     browser.waitUntil(
       () => {
-        return this.firstItemFromAdvancedSelect.getText() === compareStr
+        return this.getFirstItemFromAdvancedSelect().getText() === compareStr
       },
       {
         timeout: 5000,
@@ -149,7 +149,7 @@ class MergePeople extends Page {
 
   areNotesExist(notes) {
     let areExist = true
-    const allNoteTexts = this.noteCards.map(card =>
+    const allNoteTexts = this.getNoteCards().map(card =>
       card.$(".card-body > div").getText()
     )
     notes.forEach(note => {

@@ -7,8 +7,8 @@ const POSITION_COMPLETE = "ANET Administrator"
 describe("Create authorization group form page", () => {
   beforeEach("On the create authorization group page...", () => {
     CreateAuthorizationGroup.open()
-    CreateAuthorizationGroup.form.waitForExist()
-    CreateAuthorizationGroup.form.waitForDisplayed()
+    CreateAuthorizationGroup.getForm().waitForExist()
+    CreateAuthorizationGroup.getForm().waitForDisplayed()
   })
 
   afterEach("On the create authorization group page...", () => {
@@ -17,41 +17,43 @@ describe("Create authorization group form page", () => {
 
   describe("When creating an authorization group", () => {
     it("Should save an authorization group with only a name", () => {
-      CreateAuthorizationGroup.name.waitForDisplayed()
-      CreateAuthorizationGroup.name.setValue("authorization group 1")
-      CreateAuthorizationGroup.description.setValue(
+      CreateAuthorizationGroup.getName().waitForDisplayed()
+      CreateAuthorizationGroup.getName().setValue("authorization group 1")
+      CreateAuthorizationGroup.getDescription().setValue(
         "this is just a test authorization group"
       )
-      CreateAuthorizationGroup.statusActiveButton.waitForDisplayed()
-      expect(CreateAuthorizationGroup.statusActiveInput.getValue()).to.be.equal(
-        "ACTIVE"
-      )
-      CreateAuthorizationGroup.statusInactiveButton.waitForDisplayed()
+      CreateAuthorizationGroup.getStatusActiveButton().waitForDisplayed()
       expect(
-        CreateAuthorizationGroup.statusInactiveInput.getValue()
+        CreateAuthorizationGroup.getStatusActiveInput().getValue()
+      ).to.be.equal("ACTIVE")
+      CreateAuthorizationGroup.getStatusInactiveButton().waitForDisplayed()
+      expect(
+        CreateAuthorizationGroup.getStatusInactiveInput().getValue()
       ).to.not.equal("ACTIVE")
-      CreateAuthorizationGroup.statusInactiveButton.click()
+      CreateAuthorizationGroup.getStatusInactiveButton().click()
       // eslint-disable-next-line no-unused-expressions
       expect($(".positions_table").isExisting()).to.be.false
-      CreateAuthorizationGroup.positionsInput.click()
-      CreateAuthorizationGroup.positionsInput.setValue(POSITION)
+      CreateAuthorizationGroup.getPositionsInput().click()
+      CreateAuthorizationGroup.getPositionsInput().setValue(POSITION)
       CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(
         POSITION_COMPLETE
       )
       expect(
-        CreateAuthorizationGroup.positionsAdvancedSelectFirstItem.getText()
+        CreateAuthorizationGroup.getPositionsAdvancedSelectFirstItem().getText()
       ).to.include(POSITION_COMPLETE)
-      CreateAuthorizationGroup.positionsAdvancedSelectFirstItem.click()
+      CreateAuthorizationGroup.getPositionsAdvancedSelectFirstItem().click()
       // Click outside the positions overlay
-      CreateAuthorizationGroup.name.click()
+      CreateAuthorizationGroup.getName().click()
       // Advanced select input gets empty, the position is added to a table underneath
-      expect(CreateAuthorizationGroup.positionsInput.getValue()).to.equal("")
+      expect(CreateAuthorizationGroup.getPositionsInput().getValue()).to.equal(
+        ""
+      )
       // positions table exists now
       // eslint-disable-next-line no-unused-expressions
       expect($(".positions_table").isExisting()).to.be.true
       CreateAuthorizationGroup.submitForm()
       CreateAuthorizationGroup.waitForAlertSuccessToLoad()
-      const alertMessage = CreateAuthorizationGroup.alertSuccess.getText()
+      const alertMessage = CreateAuthorizationGroup.getAlertSuccess().getText()
       expect(alertMessage).to.equal("Authorization Group saved")
     })
   })

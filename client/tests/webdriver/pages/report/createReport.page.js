@@ -2,68 +2,68 @@ import moment from "moment"
 import * as cr from "../createReport.page"
 
 class CreateReport extends cr.CreateReport {
-  get title() {
+  getTitle() {
     return browser.$("h4.legend")
   }
 
-  get intent() {
+  getIntent() {
     return browser.$("#intent")
   }
 
-  get intentHelpBlock() {
+  getIntentHelpBlock() {
     return browser.$("#fg-intent div.invalid-feedback")
   }
 
-  get engagementDate() {
+  getEngagementDate() {
     return browser.$("#engagementDate")
   }
 
-  get tomorrow() {
+  getTomorrow() {
     const tomorrow = moment().add(1, "day").format("ddd MMM DD YYYY")
     return browser.$(`div[aria-label="${tomorrow}"]`)
   }
 
-  get reportPeople() {
+  getReportPeople() {
     return browser.$("#reportPeople")
   }
 
-  get reportPeopleTable() {
+  getReportPeopleTable() {
     return browser.$("#reportPeople-popover .table-responsive table")
   }
 
-  get location() {
+  getLocation() {
     return browser.$('#fg-location input[id="location"]')
   }
 
-  get locationTable() {
+  getLocationTable() {
     return browser.$("#location-popover .table-responsive table")
   }
 
-  get atmosphere() {
+  getAtmosphere() {
     return browser.$("#fg-atmosphere")
   }
 
-  get atmospherePositive() {
-    return this.atmosphere.$('label[for="atmosphere_POSITIVE"]')
+  getAtmospherePositive() {
+    return this.getAtmosphere().$('label[for="atmosphere_POSITIVE"]')
   }
 
-  get atmosphereNeutral() {
-    return this.atmosphere.$('label[for="atmosphere_NEUTRAL"]')
+  getAtmosphereNeutral() {
+    return this.getAtmosphere().$('label[for="atmosphere_NEUTRAL"]')
   }
 
-  get atmosphereNegative() {
-    return this.atmosphere.$('label[for="atmosphere_NEGATIVE"]')
+  getAtmosphereNegative() {
+    return this.getAtmosphere().$('label[for="atmosphere_NEGATIVE"]')
   }
 
-  get keyOutcomes() {
+  getKeyOutcomes() {
     return browser.$('#fg-keyOutcomes textarea[id="keyOutcomes"]')
   }
 
-  get nextSteps() {
+  getNextSteps() {
     return browser.$('#fg-nextSteps textarea[id="nextSteps"]')
   }
 
-  get reportText() {
+  getReportText() {
     return browser.$("#fg-reportText .editable")
   }
 
@@ -80,9 +80,9 @@ class CreateReport extends cr.CreateReport {
   }
 
   selectAttendeeByName(name) {
-    this.reportPeople.click()
+    this.getReportPeople().click()
     // wait for reportPeople table loader to disappear
-    this.reportPeopleTable.waitForDisplayed()
+    this.getReportPeopleTable().waitForDisplayed()
     let searchTerm = name
     if (
       searchTerm.startsWith("CIV") ||
@@ -92,46 +92,46 @@ class CreateReport extends cr.CreateReport {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
     browser.keys(searchTerm)
-    this.reportPeopleTable.waitForDisplayed()
-    const checkBox = this.reportPeopleTable.$(
+    this.getReportPeopleTable().waitForDisplayed()
+    const checkBox = this.getReportPeopleTable().$(
       "tbody tr:first-child td:first-child input.checkbox"
     )
     if (!checkBox.isSelected()) {
       checkBox.click()
     }
-    this.title.click()
-    this.reportPeopleTable.waitForExist({ reverse: true, timeout: 3000 })
+    this.getTitle().click()
+    this.getReportPeopleTable().waitForExist({ reverse: true, timeout: 3000 })
   }
 
-  get tasks() {
+  getTasks() {
     return browser.$("#tasks")
   }
 
-  get tasksTable() {
+  getTasksTable() {
     return browser.$("#tasks-popover .table-responsive table")
   }
 
   selectTaskByName(name) {
-    this.tasks.click()
+    this.getTasks().click()
     // wait for tasks table loader to disappear
-    this.tasksTable.waitForDisplayed()
+    this.getTasksTable().waitForDisplayed()
     browser.keys(name)
-    this.tasksTable.waitForDisplayed()
-    const checkBox = this.tasksTable.$(
+    this.getTasksTable().waitForDisplayed()
+    const checkBox = this.getTasksTable().$(
       "tbody tr:first-child td:first-child input.checkbox"
     )
     if (!checkBox.isSelected()) {
       checkBox.click()
     }
-    this.title.click()
-    this.tasksTable.waitForExist({ reverse: true, timeout: 3000 })
+    this.getTitle().click()
+    this.getTasksTable().waitForExist({ reverse: true, timeout: 3000 })
   }
 
   selectLocation(location) {
-    this.location.click()
+    this.getLocation().click()
     browser.keys(location)
-    this.locationTable.waitForDisplayed()
-    const checkBox = this.locationTable.$(
+    this.getLocationTable().waitForDisplayed()
+    const checkBox = this.getLocationTable().$(
       "tbody tr:first-child td:first-child input.form-check-input"
     )
     if (!checkBox.isSelected()) {
@@ -142,15 +142,15 @@ class CreateReport extends cr.CreateReport {
   selectAthosphere(option) {
     switch (option) {
       case "Positive":
-        this.atmospherePositive.click()
+        this.getAtmospherePositive().click()
         break
 
       case "Neutral":
-        this.atmospherePositive.click()
+        this.getAtmospherePositive().click()
         break
 
       case "Negative":
-        this.atmospherePositive.click()
+        this.getAtmospherePositive().click()
         break
 
       default:
@@ -159,25 +159,25 @@ class CreateReport extends cr.CreateReport {
   }
 
   fillForm(fields) {
-    this.form.waitForClickable()
+    this.getForm().waitForClickable()
 
     if (fields.intent !== undefined) {
-      this.intent.setValue(fields.intent)
-      this.intentHelpBlock.waitForExist({ reverse: true })
+      this.getIntent().setValue(fields.intent)
+      this.getIntentHelpBlock().waitForExist({ reverse: true })
     }
 
     if (moment.isMoment(fields.engagementDate)) {
-      this.engagementDate.waitForClickable()
-      this.engagementDate.click()
-      this.tomorrow.waitForDisplayed()
+      this.getEngagementDate().waitForClickable()
+      this.getEngagementDate().click()
+      this.getTomorrow().waitForDisplayed()
       browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
 
-      this.title.click()
-      this.tomorrow.waitForExist({ reverse: true, timeout: 3000 })
+      this.getTitle().click()
+      this.getTomorrow().waitForExist({ reverse: true, timeout: 3000 })
     }
 
     if (fields.duration !== undefined) {
-      this.duration.setValue(fields.duration)
+      this.getDuration().setValue(fields.duration)
     }
 
     if (fields.location) {
@@ -201,15 +201,15 @@ class CreateReport extends cr.CreateReport {
     }
 
     if (fields.keyOutcomes) {
-      this.keyOutcomes.setValue(fields.keyOutcomes)
+      this.getKeyOutcomes().setValue(fields.keyOutcomes)
     }
 
     if (fields.nextSteps) {
-      this.nextSteps.setValue(fields.nextSteps)
+      this.getNextSteps().setValue(fields.nextSteps)
     }
 
     if (fields.reportText) {
-      this.reportText.click()
+      this.getReportText().click()
       browser.keys(fields.reportText)
     }
   }

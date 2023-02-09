@@ -1,20 +1,24 @@
 import Page from "./page"
 
 class Search extends Page {
-  get foundPeopleTable() {
+  getFoundPeopleTable() {
     return browser.$("div#people #people-search-results")
   }
 
-  get foundTaskTable() {
+  getFoundTaskTable() {
     return browser.$("div#tasks #tasks-search-results")
   }
 
   linkOfPersonFound(name) {
-    return this.foundPeopleTable.$(`//tbody/tr//a[contains(text(), "${name}")]`)
+    return this.getFoundPeopleTable().$(
+      `//tbody/tr//a[contains(text(), "${name}")]`
+    )
   }
 
   linkOfTaskFound(name) {
-    return this.foundTaskTable.$(`//tbody/tr//a[contains(text(), "${name}")]`)
+    return this.getFoundTaskTable().$(
+      `//tbody/tr//a[contains(text(), "${name}")]`
+    )
   }
 
   selectReport(linkText) {

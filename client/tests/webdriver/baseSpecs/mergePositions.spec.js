@@ -51,17 +51,17 @@ describe("Merge positions page", () => {
   it("Should display fields values of the left position", () => {
     // Open merge positions page.
     MergePositions.open()
-    MergePositions.title.waitForExist()
-    MergePositions.title.waitForDisplayed()
+    MergePositions.getTitle().waitForExist()
+    MergePositions.getTitle().waitForDisplayed()
 
     // Search and select a position from left position field.
-    MergePositions.leftPositionField.setValue(
+    MergePositions.getLeftPositionField().setValue(
       EXAMPLE_POSITIONS.validLeft.search
     )
     MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.validLeft.fullName
     )
-    MergePositions.firstItemFromAdvancedSelect.click()
+    MergePositions.getFirstItemFromAdvancedSelect().click()
     browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     MergePositions.waitForColumnToChange(
@@ -95,36 +95,36 @@ describe("Merge positions page", () => {
     )
   })
   it("Should not allow to select the same positions", () => {
-    MergePositions.rightPositionField.setValue(
+    MergePositions.getRightPositionField().setValue(
       EXAMPLE_POSITIONS.validLeft.search
     )
     MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.validLeft.fullName
     )
-    MergePositions.firstItemFromAdvancedSelect.click()
+    MergePositions.getFirstItemFromAdvancedSelect().click()
 
-    MergePositions.samePositionsToast.waitForDisplayed()
+    MergePositions.getSamePositionsToast().waitForDisplayed()
   })
   it("Should not allow to select two occupied positions", () => {
-    MergePositions.rightPositionField.setValue(
+    MergePositions.getRightPositionField().setValue(
       EXAMPLE_POSITIONS.occupiedRight.search
     )
     MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.occupiedRight.fullName
     )
-    MergePositions.firstItemFromAdvancedSelect.click()
+    MergePositions.getFirstItemFromAdvancedSelect().click()
 
-    MergePositions.occupiedPositionsToast.waitForDisplayed()
+    MergePositions.getOccupiedPositionsToast().waitForDisplayed()
   })
   it("Should display fields values of the right position", () => {
     // Search and select a position from right position field.
-    MergePositions.rightPositionField.setValue(
+    MergePositions.getRightPositionField().setValue(
       EXAMPLE_POSITIONS.validRight.search
     )
     MergePositions.waitForAdvancedSelectLoading(
       EXAMPLE_POSITIONS.validRight.fullName
     )
-    MergePositions.firstItemFromAdvancedSelect.click()
+    MergePositions.getFirstItemFromAdvancedSelect().click()
     browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a position from left side.
     MergePositions.waitForColumnToChange(
@@ -270,8 +270,8 @@ describe("Merge positions page", () => {
       "mid",
       "Name"
     )
-    MergePositions.editAssociatedPositionsButton.click()
-    MergePositions.editAssociatedPositionsModal.waitForDisplayed()
+    MergePositions.getEditAssociatedPositionsButton().click()
+    MergePositions.getEditAssociatedPositionsModal().waitForDisplayed()
     expect(MergePositions.getAssociatedPositionsInModal("left")).to.eql(
       EXAMPLE_POSITIONS.validLeft.associatedPositions
     )
@@ -327,11 +327,11 @@ describe("Merge positions page", () => {
     expect(MergePositions.getAssociatedPositionsInModal("mid")).to.eql(
       afterPicked
     )
-    MergePositions.saveAssociatedPositionsButton.click()
+    MergePositions.getSaveAssociatedPositionsButton().click()
     expect(MergePositions.getAssociatedPositions("mid")).to.eql(afterPicked)
   })
   it("Should be able to merge both positions when winner is left position", () => {
-    MergePositions.mergePositionsButton.click()
+    MergePositions.getMergePositionsButton().click()
     MergePositions.waitForSuccessAlert()
   })
   it("Should merge positions when winner's associated positions are a combination from both positions", () => {
@@ -339,10 +339,12 @@ describe("Merge positions page", () => {
       { person: "Unfilled", position: "EF 1.1 Advisor B" },
       { person: "Unfilled", position: "EF 1.1 Advisor D" }
     ]
-    expect(MergePositions.winnerAssociatedPositions).to.eql(winnerApsAfterMerge)
+    expect(MergePositions.getWinnerAssociatedPositions()).to.eql(
+      winnerApsAfterMerge
+    )
   })
   it("Should merge notes of the both positions", () => {
-    MergePositions.showNotesButton.click()
+    MergePositions.getShowNotesButton().click()
     // Wait for offcanvas to open
     browser.pause(100)
     expect(
@@ -356,8 +358,8 @@ describe("Merge positions page", () => {
     MergePositions.openPage(
       `/positions/${EXAMPLE_POSITIONS.validRight.posUuid}`
     )
-    MergePositions.errorTitle.waitForExist()
-    expect(MergePositions.errorTitle.getText()).to.equal(
+    MergePositions.getErrorTitle().waitForExist()
+    expect(MergePositions.getErrorTitle().getText()).to.equal(
       `Position #${EXAMPLE_POSITIONS.validRight.posUuid} not found.`
     )
   })

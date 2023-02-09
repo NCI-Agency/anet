@@ -13,65 +13,65 @@ const SHORT_WAIT_MS = 1000
 describe("When creating a new Location", () => {
   it("Should not create a location without name & type input", () => {
     CreateNewLocation.open()
-    CreateNewLocation.createButton.click()
-    CreateNewLocation.nameRequiredError.waitForExist()
-    CreateNewLocation.nameRequiredError.waitForDisplayed()
-    CreateNewLocation.typeRequiredError.waitForExist()
-    CreateNewLocation.typeRequiredError.waitForDisplayed()
+    CreateNewLocation.getCreateButton().click()
+    CreateNewLocation.getNameRequiredError().waitForExist()
+    CreateNewLocation.getNameRequiredError().waitForDisplayed()
+    CreateNewLocation.getTypeRequiredError().waitForExist()
+    CreateNewLocation.getTypeRequiredError().waitForDisplayed()
   })
 
   it("Should display possible duplicates with similar names", () => {
-    CreateNewLocation.nameField.setValue(SIMILAR_LOCATION.name)
-    CreateNewLocation.typeField.selectByIndex(LOCATION_TYPE.index)
-    CreateNewLocation.duplicatesButton.waitForDisplayed()
-    CreateNewLocation.duplicatesButton.click()
+    CreateNewLocation.getNameField().setValue(SIMILAR_LOCATION.name)
+    CreateNewLocation.getTypeField().selectByIndex(LOCATION_TYPE.index)
+    CreateNewLocation.getDuplicatesButton().waitForDisplayed()
+    CreateNewLocation.getDuplicatesButton().click()
     browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-    CreateNewLocation.modalContent.waitForDisplayed()
-    const similar = CreateNewLocation.similarLocation.getText()
-    CreateNewLocation.modalCloseButton.waitForDisplayed()
-    CreateNewLocation.modalCloseButton.click()
+    CreateNewLocation.getModalContent().waitForDisplayed()
+    const similar = CreateNewLocation.getSimilarLocation().getText()
+    CreateNewLocation.getModalCloseButton().waitForDisplayed()
+    CreateNewLocation.getModalCloseButton().click()
     browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
-    CreateNewLocation.modalContent.waitForDisplayed({ reverse: true })
+    CreateNewLocation.getModalContent().waitForDisplayed({ reverse: true })
     expect(similar).to.equal("Kabul Hospital")
   })
 
   it("Should not accept invalid latitude-longitude inputs", () => {
-    CreateNewLocation.nameField.setValue(LOCATION_NAME)
-    CreateNewLocation.latField.setValue(BAD_LAT_LNG_VAL)
-    CreateNewLocation.lngField.setValue(BAD_LAT_LNG_VAL)
+    CreateNewLocation.getNameField().setValue(LOCATION_NAME)
+    CreateNewLocation.getLatField().setValue(BAD_LAT_LNG_VAL)
+    CreateNewLocation.getLngField().setValue(BAD_LAT_LNG_VAL)
     // trigger onblur effect
-    CreateNewLocation.nameField.click()
+    CreateNewLocation.getNameField().click()
 
     CreateNewLocation.latLngErrorsDisplayed()
   })
 
   it("Should have a location with correct MGRS in popover", () => {
-    CreateNewLocation.deleteInput(CreateNewLocation.latField)
-    CreateNewLocation.latField.setValue(LOCATION_COORDS.lat)
-    CreateNewLocation.deleteInput(CreateNewLocation.lngField)
-    CreateNewLocation.lngField.setValue(LOCATION_COORDS.lng)
+    CreateNewLocation.deleteInput(CreateNewLocation.getLatField())
+    CreateNewLocation.getLatField().setValue(LOCATION_COORDS.lat)
+    CreateNewLocation.deleteInput(CreateNewLocation.getLngField())
+    CreateNewLocation.getLngField().setValue(LOCATION_COORDS.lng)
     // trigger onblur effect
-    CreateNewLocation.nameField.click()
-    CreateNewLocation.allFormatsPopover.click()
-    CreateNewLocation.allFormatsPopoverLat.waitForExist()
-    CreateNewLocation.allFormatsPopoverMGRS.waitForExist()
+    CreateNewLocation.getNameField().click()
+    CreateNewLocation.getAllFormatsPopover().click()
+    CreateNewLocation.getAllFormatsPopoverLat().waitForExist()
+    CreateNewLocation.getAllFormatsPopoverMGRS().waitForExist()
 
-    expect(CreateNewLocation.allFormatsPopoverLat.getText()).to.equal(
+    expect(CreateNewLocation.getAllFormatsPopoverLat().getText()).to.equal(
       LOCATION_COORDS.lat
     )
 
-    expect(CreateNewLocation.allFormatsPopoverLng.getText()).to.equal(
+    expect(CreateNewLocation.getAllFormatsPopoverLng().getText()).to.equal(
       LOCATION_COORDS.lng
     )
 
-    expect(CreateNewLocation.allFormatsPopoverMGRS.getText()).to.equal(
+    expect(CreateNewLocation.getAllFormatsPopoverMGRS().getText()).to.equal(
       LOCATION_COORDS.mgrs
     )
   })
 
   it("Should create a location successfully", () => {
-    CreateNewLocation.createButton.click()
-    CreateNewLocation.successMsg.waitForExist()
-    CreateNewLocation.successMsg.waitForDisplayed()
+    CreateNewLocation.getCreateButton().click()
+    CreateNewLocation.getSuccessMsg().waitForExist()
+    CreateNewLocation.getSuccessMsg().waitForDisplayed()
   })
 })

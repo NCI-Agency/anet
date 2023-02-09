@@ -15,18 +15,18 @@ describe("Show print report page", () => {
   beforeEach("Open the show report page", () => {
     MyReports.open("arthur")
     MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
-    ShowReport.compactViewButton.click()
-    ShowReport.compactView.waitForExist()
-    ShowReport.compactView.waitForDisplayed()
+    ShowReport.getCompactViewButton().click()
+    ShowReport.getCompactView().waitForExist()
+    ShowReport.getCompactView().waitForDisplayed()
   })
   describe("When on the print report page", () => {
     it("Detailed View button should remove compact view to detailed view", () => {
-      const detailedViewButton = ShowReport.detailedViewButton
+      const detailedViewButton = ShowReport.getDetailedViewButton()
       detailedViewButton.click()
-      ShowReport.defaultReportView.waitForExist()
-      ShowReport.defaultReportView.waitForDisplayed()
-      expect(ShowReport.compactView.isDisplayed()).to.equal(false)
-      expect(ShowReport.compactViewButton.isDisplayed()).to.equal(true)
+      ShowReport.getDefaultReportView().waitForExist()
+      ShowReport.getDefaultReportView().waitForDisplayed()
+      expect(ShowReport.getCompactView().isDisplayed()).to.equal(false)
+      expect(ShowReport.getCompactViewButton().isDisplayed()).to.equal(true)
     })
     it("We should see the correct report fields", () => {
       const mustHaveFieldTexts = [
@@ -38,26 +38,27 @@ describe("Show print report page", () => {
         "Atmospherics",
         "Efforts"
       ]
-      const fields = ShowReport.compactReportFields
+      const fields = ShowReport.getCompactReportFields()
       const fieldTexts = Array.from(fields).map(field => field.getText())
       mustHaveFieldTexts.forEach(mustHave => {
         expect(fieldTexts).to.contain(mustHave)
       })
     })
     it("We should see a title with the correct text", () => {
-      const title = ShowReport.compactTitle.getText()
+      const title = ShowReport.getCompactTitle().getText()
       expect(title).to.equal("Summary / Print")
     })
     it("We should see buttons with the correct text", () => {
-      const printButtonText = ShowReport.printButton.getText()
-      const detailedViewButtonText = ShowReport.detailedViewButton.getText()
+      const printButtonText = ShowReport.getPrintButton().getText()
+      const detailedViewButtonText =
+        ShowReport.getDetailedViewButton().getText()
       expect(printButtonText).to.equal("Print")
       expect(detailedViewButtonText).to.equal("Detailed View")
     })
     it("Printable report banner should be the same as security banner", () => {
-      const compactBannerText = ShowReport.compactBanner.getText()
+      const compactBannerText = ShowReport.getCompactBanner().getText()
       Home.openAsAdminUser()
-      const bannerSecurityText = Home.bannerSecurityText.getText()
+      const bannerSecurityText = Home.getBannerSecurityText().getText()
       expect(compactBannerText).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", () => {
