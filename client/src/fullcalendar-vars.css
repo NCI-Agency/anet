@@ -7,7 +7,7 @@
   --fc-button-disabled-text-color: #fff;
   --fc-button-hover-text-color: #fff;
 
-  /* Vars from https://github.com/fullcalendar/fullcalendar/blob/master/packages/common/src/styles/vars.css: */
+  /* Vars from https://github.com/fullcalendar/fullcalendar/blob/main/packages/core/src/styles/vars.css: */
   --fc-button-text-color: #6c757d;
   --fc-button-bg-color: #fff;
   --fc-button-border-color: #6c757d;
