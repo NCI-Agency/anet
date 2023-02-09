@@ -234,7 +234,7 @@ describe("When working with custom fields for different anet objects", () => {
     })
 
     it("Should persist previous invalid data when toggling field's visibility", () => {
-      CreateReport.deleteInput(CreateReport.getNumberCustomField())
+      CreatePerson.deleteInput(CreatePerson.getNumberCustomField())
       CreatePerson.getNumberCustomField().setValue(INVALID_NUMBER_INPUT)
       // Actually see the validation warning
       CreatePerson.getNumberCustomFieldHelpText().waitForExist()
