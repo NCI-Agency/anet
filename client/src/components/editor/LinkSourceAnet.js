@@ -15,7 +15,7 @@ const LinkSourceAnet = ({
   selection,
   external
 }) => {
-  const instertAnetLink = useCallback(
+  const insertAnetLink = useCallback(
     node => {
       if (selection) {
         Transforms.insertNodes(editor, node, {
@@ -53,7 +53,7 @@ const LinkSourceAnet = ({
                 values.url,
                 values.text
               )
-              instertAnetLink(externalLinkNode)
+              insertAnetLink(externalLinkNode)
             }}
             onCancel={() => setShowModal(false)}
           />
@@ -61,7 +61,7 @@ const LinkSourceAnet = ({
           <MultiTypeAdvancedSelectComponent
             onConfirm={(value, objectType) => {
               const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
-              instertAnetLink(anetLinkNode)
+              insertAnetLink(anetLinkNode)
             }}
           />
         )}
