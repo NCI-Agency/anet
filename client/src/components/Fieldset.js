@@ -33,7 +33,7 @@ const Fieldset = ({
       id={id}
       name={id}
       className="scroll-anchor-container"
-      style={style}
+      style={{ style }}
     >
       {(title || action) && (
         <h4 className="legend">
