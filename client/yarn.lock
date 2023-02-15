@@ -3945,11 +3945,6 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/fibers@^3.1.0":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@types/fibers/-/fibers-3.1.1.tgz#b714d357eebf6aec0bc5d70512e573b89bc84f20"
-  integrity sha512-yHoUi46uika0snoTpNcVqUSvgbRndaIps4TUCotrXjtc0DHDoPQckmyXEZ2bX3e4mpJmyEW3hRhCwQa/ISCPaA==
-
 "@types/fs-extra@^9.0.4":
   version "9.0.13"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-9.0.13.tgz#7594fbae04fe7f1918ce8b3d213f74ff44ac1f45"
@@ -4214,13 +4209,6 @@
   version "15.7.5"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.5.tgz#5f19d2b85a98e9558036f6a3cacc8819420f05cf"
   integrity sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==
-
-"@types/puppeteer@^5.4.0":
-  version "5.4.7"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-5.4.7.tgz#b8804737c62c6e236de0c03fa74f91c174bf96b6"
-  integrity sha512-JdGWZZYL0vKapXF4oQTC5hLVNfOgdPrqeZ1BiQnGk5cB7HeE91EWUiTdVSdQPobRN8rIcdffjiOgCYJ/S8QrnQ==
-  dependencies:
-    "@types/node" "*"
 
 "@types/qs@*", "@types/qs@^6.9.5":
   version "6.9.7"
@@ -4664,18 +4652,6 @@
     chalk "^4.0.0"
     easy-table "^1.1.1"
     pretty-ms "^7.0.0"
-
-"@wdio/sync@7.27.0":
-  version "7.27.0"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-7.27.0.tgz#9598b1bed824cb8512a36fa5a2673e033edf1643"
-  integrity sha512-ZWfuVvE2nfmfvlaEWBmpm3EWId3F1bKb6W5DCRQ8y0l/qoy7/AC3iSXvLK6VPHyLhIyYeYXYUrGxmMNTGqyI/g==
-  dependencies:
-    "@types/fibers" "^3.1.0"
-    "@types/puppeteer" "^5.4.0"
-    "@wdio/logger" "7.26.0"
-    "@wdio/types" "7.26.0"
-    fibers "5.0.3"
-    webdriverio "7.27.0"
 
 "@wdio/types@7.25.4":
   version "7.25.4"
@@ -7784,11 +7760,6 @@ detect-indent@^6.0.0:
   resolved "https://registry.yarnpkg.com/detect-indent/-/detect-indent-6.1.0.tgz#592485ebbbf6b3b1ab2be175c8393d04ca0d57e6"
   integrity sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==
 
-detect-libc@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
-  integrity sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==
-
 detect-newline@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
@@ -7824,34 +7795,10 @@ devtools-protocol@0.0.981744:
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.981744.tgz#9960da0370284577d46c28979a0b32651022bacf"
   integrity sha512-0cuGS8+jhR67Fy7qG3i3Pc7Aw494sb9yG9QgpG97SFVWwolgYjlhJg7n+UaHxOQT30d1TYu/EYe9k01ivLErIg==
 
-devtools-protocol@^0.0.1075032:
-  version "0.0.1075032"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1075032.tgz#4bbe8489177bee0af81f99d5f4fd60b91f971b53"
-  integrity sha512-Np2EaEFlSOev03f5ySurGi3/z8YWOwsfSPPSDTbf7zlBY77SxBWfkFf41IUmkvfkeckX8XVW9hes1jVwALNAaA==
-
 devtools-protocol@^0.0.1085790:
   version "0.0.1085790"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1085790.tgz#315e4700eb960cf111cc908b9be2caca2257cb13"
   integrity sha512-f5kfwdOTxPqX5v8ZfAAl9xBgoEVazBYtIONDWIRqYbb7yjOIcnk6vpzCgBCQvav5AuBRLzyUGG0V74OAx93LoA==
-
-devtools@7.27.0:
-  version "7.27.0"
-  resolved "https://registry.yarnpkg.com/devtools/-/devtools-7.27.0.tgz#3806416cc158eb45e10669c34978366c64ecc6bb"
-  integrity sha512-3zKwVXtmKjewqXF1rwkuBaRNKexEpAIvAp2K5sXTuF5YsIo9GqOrEDYNskQ0DMM0bQzxE0mxRle9ZVjlpghr3A==
-  dependencies:
-    "@types/node" "^18.0.0"
-    "@types/ua-parser-js" "^0.7.33"
-    "@wdio/config" "7.26.0"
-    "@wdio/logger" "7.26.0"
-    "@wdio/protocols" "7.27.0"
-    "@wdio/types" "7.26.0"
-    "@wdio/utils" "7.26.0"
-    chrome-launcher "^0.15.0"
-    edge-paths "^2.1.0"
-    puppeteer-core "^13.1.3"
-    query-selector-shadow-dom "^1.0.0"
-    ua-parser-js "^1.0.1"
-    uuid "^9.0.0"
 
 devtools@7.28.1:
   version "7.28.1"
@@ -9089,13 +9036,6 @@ fetch-retry@^5.0.2:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/fetch-retry/-/fetch-retry-5.0.3.tgz#edfa3641892995f9afee94f25b168827aa97fe3d"
   integrity sha512-uJQyMrX5IJZkhoEUBQ3EjxkeiZkppBd5jS/fMTJmfZxLSiaQjv2zD0kTvuvkSH89uFvgSlB6ueGpjD3HWN7Bxw==
-
-fibers@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/fibers/-/fibers-5.0.3.tgz#2fd03acb255db66fe693d15beafbf5ae92193fd7"
-  integrity sha512-/qYTSoZydQkM21qZpGLDLuCq8c+B8KhuCQ1kLPvnRNhxhVbvrpmH9l2+Lblf5neDuEsY4bfT7LeO553TXQDvJw==
-  dependencies:
-    detect-libc "^1.0.3"
 
 figures@^3.0.0:
   version "3.2.0"
@@ -17128,39 +17068,6 @@ webdriver@7.27.0:
     got "^11.0.2"
     ky "0.30.0"
     lodash.merge "^4.6.1"
-
-webdriverio@7.27.0:
-  version "7.27.0"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-7.27.0.tgz#33adbd8b377aec79eb40a7873da9fc02bdab1b40"
-  integrity sha512-xEcpWdbDLTFVP57kxEVniXWL6SNq2hxEMwaXbRck9EiFlhNvVca00oMzYjCVm8jmlL6JYnbfv/u7XyhvkktMIg==
-  dependencies:
-    "@types/aria-query" "^5.0.0"
-    "@types/node" "^18.0.0"
-    "@wdio/config" "7.26.0"
-    "@wdio/logger" "7.26.0"
-    "@wdio/protocols" "7.27.0"
-    "@wdio/repl" "7.26.0"
-    "@wdio/types" "7.26.0"
-    "@wdio/utils" "7.26.0"
-    archiver "^5.0.0"
-    aria-query "^5.0.0"
-    css-shorthand-properties "^1.1.1"
-    css-value "^0.0.1"
-    devtools "7.27.0"
-    devtools-protocol "^0.0.1075032"
-    fs-extra "^10.0.0"
-    grapheme-splitter "^1.0.2"
-    lodash.clonedeep "^4.5.0"
-    lodash.isobject "^3.0.2"
-    lodash.isplainobject "^4.0.6"
-    lodash.zip "^4.2.0"
-    minimatch "^5.0.0"
-    puppeteer-core "^13.1.3"
-    query-selector-shadow-dom "^1.0.0"
-    resq "^1.9.1"
-    rgb2hex "0.2.5"
-    serialize-error "^8.0.0"
-    webdriver "7.27.0"
 
 webdriverio@7.29.1:
   version "7.29.1"
