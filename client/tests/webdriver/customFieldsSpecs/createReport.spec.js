@@ -29,19 +29,21 @@ const SHORT_WAIT_MS = 1000
 
 describe("Create report form page", () => {
   describe("When creating a report", () => {
-    it("Should be able to load the form", () => {
-      CreateReport.open()
-      browser.pause(500) // wait for the page transition and rendering of custom fields
-      CreateReport.getForm().waitForExist()
-      CreateReport.getForm().waitForDisplayed()
+    it("Should be able to load the form", async() => {
+      await CreateReport.open()
+      await browser.pause(500) // wait for the page transition and rendering of custom fields
+      await (await CreateReport.getForm()).waitForExist()
+      await (await CreateReport.getForm()).waitForDisplayed()
     })
 
-    it("Should be able to prevent invalid duration values", () => {
-      CreateReport.getDuration().setValue(INVALID_ENGAGEMENT_DURATION_1)
-      browser.waitUntil(
-        () => {
+    it("Should be able to prevent invalid duration values", async() => {
+      await (
+        await CreateReport.getDuration()
+      ).setValue(INVALID_ENGAGEMENT_DURATION_1)
+      await browser.waitUntil(
+        async() => {
           return (
-            CreateReport.getDuration().getValue() ===
+            (await (await CreateReport.getDuration()).getValue()) ===
             VALID_ENGAGEMENT_DURATION_1
           )
         },
@@ -50,11 +52,13 @@ describe("Create report form page", () => {
           timeoutMsg: "Large positive duration value was not sliced "
         }
       )
-      CreateReport.getDuration().setValue(INVALID_ENGAGEMENT_DURATION_2)
-      browser.waitUntil(
-        () => {
+      await (
+        await CreateReport.getDuration()
+      ).setValue(INVALID_ENGAGEMENT_DURATION_2)
+      await browser.waitUntil(
+        async() => {
           return (
-            CreateReport.getDuration().getValue() ===
+            (await (await CreateReport.getDuration()).getValue()) ===
             VALID_ENGAGEMENT_DURATION_2
           )
         },
@@ -65,305 +69,430 @@ describe("Create report form page", () => {
       )
     })
 
-    it("Should be able to select an ANET object reference", () => {
-      CreateReport.getTestReferenceFieldLabel().waitForExist()
-      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
-      expect(CreateReport.getTestReferenceFieldLabel().getText()).to.equal(
-        "Related report"
-      )
-      CreateReport.getTestReferenceFieldHelpText().waitForExist()
-      CreateReport.getTestReferenceFieldHelpText().waitForDisplayed()
-      expect(CreateReport.getTestReferenceFieldHelpText().getText()).to.equal(
-        "Here you can link to a related report"
-      )
+    it("Should be able to select an ANET object reference", async() => {
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
+      await expect(
+        await (await CreateReport.getTestReferenceFieldLabel()).getText()
+      ).to.equal("Related report")
+      await (await CreateReport.getTestReferenceFieldHelpText()).waitForExist()
+      await (
+        await CreateReport.getTestReferenceFieldHelpText()
+      ).waitForDisplayed()
+      await expect(
+        await (await CreateReport.getTestReferenceFieldHelpText()).getText()
+      ).to.equal("Here you can link to a related report")
 
       // Only input type is Reports, so there should be no button to select a type
-      expect(
-        CreateReport.getTestReferenceField().getAttribute("placeholder")
+      await expect(
+        await (
+          await CreateReport.getTestReferenceField()
+        ).getAttribute("placeholder")
       ).to.equal("Find reports")
       // eslint-disable-next-line no-unused-expressions
       expect(
-        CreateReport.getTestReferenceFieldFormGroup()
-          .$('//button[text()="Reports"]')
-          .isExisting()
+        await (
+          await (
+            await CreateReport.getTestReferenceFieldFormGroup()
+          ).$('//button[text()="Reports"]')
+        ).isExisting()
       ).to.be.false
-      CreateReport.getTestReferenceFieldLabel().click()
-      CreateReport.getTestReferenceField().setValue(REPORT)
-      CreateReport.waitForAdvancedSelectToChange(
+      await (await CreateReport.getTestReferenceFieldLabel()).click()
+      await (await CreateReport.getTestReferenceField()).setValue(REPORT)
+      await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
         REPORT_COMPLETE
       )
-      expect(
-        CreateReport.getTestReferenceFieldAdvancedSelectFirstItem().getText()
+      await expect(
+        await (
+          await CreateReport.getTestReferenceFieldAdvancedSelectFirstItem()
+        ).getText()
       ).to.include(REPORT_COMPLETE)
-      CreateReport.getTestReferenceFieldAdvancedSelectFirstItem().click()
+      await (
+        await CreateReport.getTestReferenceFieldAdvancedSelectFirstItem()
+      ).click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestReferenceField().getValue()).to.be.empty
+      expect(await (await CreateReport.getTestReferenceField()).getValue()).to
+        .be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestReferenceFieldValue().isExisting()).to.be.true
-      expect(CreateReport.getTestReferenceFieldValue().getText()).to.include(
-        REPORT_VALUE
-      )
+      expect(
+        await (await CreateReport.getTestReferenceFieldValue()).isExisting()
+      ).to.be.true
+      await expect(
+        await (await CreateReport.getTestReferenceFieldValue()).getText()
+      ).to.include(REPORT_VALUE)
 
       // Delete selected value
-      CreateReport.getTestReferenceFieldValue().$("button").click()
+      await (
+        await (await CreateReport.getTestReferenceFieldValue()).$("button")
+      ).click()
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestReferenceFieldValue().isExisting()).to.be.false
+      expect(
+        await (await CreateReport.getTestReferenceFieldValue()).isExisting()
+      ).to.be.false
 
       // Select it again
-      CreateReport.getTestReferenceFieldLabel().click()
-      CreateReport.getTestReferenceField().setValue(REPORT)
-      CreateReport.waitForAdvancedSelectToChange(
+      await (await CreateReport.getTestReferenceFieldLabel()).click()
+      await (await CreateReport.getTestReferenceField()).setValue(REPORT)
+      await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestReferenceFieldAdvancedSelectFirstItem(),
         REPORT_COMPLETE
       )
-      CreateReport.getTestReferenceFieldAdvancedSelectFirstItem().click()
+      await (
+        await CreateReport.getTestReferenceFieldAdvancedSelectFirstItem()
+      ).click()
     })
 
-    it("Should be able to select multiple ANET object references", () => {
-      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
-      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
-      expect(CreateReport.getTestMultiReferenceFieldLabel().getText()).to.equal(
-        "Additional engagement needed for"
-      )
-      CreateReport.getTestMultiReferenceFieldHelpText().waitForExist()
-      CreateReport.getTestMultiReferenceFieldHelpText().waitForDisplayed()
-      expect(
-        CreateReport.getTestMultiReferenceFieldHelpText().getText()
+    it("Should be able to select multiple ANET object references", async() => {
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForExist()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForDisplayed()
+      await expect(
+        await (await CreateReport.getTestMultiReferenceFieldLabel()).getText()
+      ).to.equal("Additional engagement needed for")
+      await (
+        await CreateReport.getTestMultiReferenceFieldHelpText()
+      ).waitForExist()
+      await (
+        await CreateReport.getTestMultiReferenceFieldHelpText()
+      ).waitForDisplayed()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldHelpText()
+        ).getText()
       ).to.equal(
         "Here you can link to people, positions and organizations that need an additional engagement"
       )
 
       // Default input type is People
-      expect(
-        CreateReport.getTestMultiReferenceField().getAttribute("placeholder")
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceField()
+        ).getAttribute("placeholder")
       ).to.equal("Find people")
-      CreateReport.getTestMultiReferenceFieldLabel().click()
-      CreateReport.getTestMultiReferenceField().setValue(PERSON)
-      CreateReport.waitForAdvancedSelectToChange(
+      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).setValue(PERSON)
+      await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         PERSON_COMPLETE_1
       )
-      expect(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
-          1
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            1
+          )
         ).getText()
       ).to.include(PERSON_COMPLETE_1)
-      CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1).click()
-      expect(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
-          2
+      await (
+        await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1)
+      ).click()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            2
+          )
         ).getText()
       ).to.include(PERSON_COMPLETE_2)
-      CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2).click()
+      await (
+        await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2)
+      ).click()
       // Click outside the overlay
-      CreateReport.getEngagementInformationTitle().click()
+      await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestMultiReferenceField().getValue()).to.be.empty
+      expect(await (await CreateReport.getTestMultiReferenceField()).getValue())
+        .to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestMultiReferenceFieldValue().isExisting()).to.be
-        .true
       expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(1).getText()
+        await (
+          await CreateReport.getTestMultiReferenceFieldValue()
+        ).isExisting()
+      ).to.be.true
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(1)
+        ).getText()
       ).to.include(PERSON_VALUE_1)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(2).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(2)
+        ).getText()
       ).to.include(PERSON_VALUE_2)
 
       // Change input type to Positions
-      CreateReport.getTestMultiReferenceFieldFormGroup()
-        .$('//button[text()="Positions"]')
-        .click()
-      expect(
-        CreateReport.getTestMultiReferenceField().getAttribute("placeholder")
+      await (
+        await (
+          await CreateReport.getTestMultiReferenceFieldFormGroup()
+        ).$('//button[text()="Positions"]')
+      ).click()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceField()
+        ).getAttribute("placeholder")
       ).to.equal("Find positions")
-      CreateReport.getTestMultiReferenceFieldLabel().click()
-      CreateReport.getTestMultiReferenceField().setValue(POSITION)
-      CreateReport.waitForAdvancedSelectToChange(
+      await (await CreateReport.getTestMultiReferenceFieldLabel()).click()
+      await (await CreateReport.getTestMultiReferenceField()).setValue(POSITION)
+      await CreateReport.waitForAdvancedSelectToChange(
         CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(1),
         POSITION_COMPLETE_1
       )
-      expect(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
-          1
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            1
+          )
         ).getText()
       ).to.include(POSITION_COMPLETE_1)
-      CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1).click()
-      expect(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
-          2
+      await (
+        await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(1)
+      ).click()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            2
+          )
         ).getText()
       ).to.include(POSITION_COMPLETE_2)
-      CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2).click()
-      expect(
-        CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
-          3
+      await (
+        await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(2)
+      ).click()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldAdvancedSelectItemLabel(
+            3
+          )
         ).getText()
       ).to.include(POSITION_COMPLETE_3)
-      CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(3).click()
+      await (
+        await CreateReport.getTestMultiReferenceFieldAdvancedSelectItem(3)
+      ).click()
       // Click outside the overlay
-      CreateReport.getEngagementInformationTitle().click()
+      await (await CreateReport.getEngagementInformationTitle()).click()
       // Advanced select input gets empty, the selected element shown below the input
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestMultiReferenceField().getValue()).to.be.empty
+      expect(await (await CreateReport.getTestMultiReferenceField()).getValue())
+        .to.be.empty
       // Value should exist now
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestMultiReferenceFieldValue().isExisting()).to.be
-        .true
       expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(3).getText()
+        await (
+          await CreateReport.getTestMultiReferenceFieldValue()
+        ).isExisting()
+      ).to.be.true
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(3)
+        ).getText()
       ).to.include(POSITION_VALUE_1)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(4).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(4)
+        ).getText()
       ).to.include(POSITION_VALUE_2)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(5).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(5)
+        ).getText()
       ).to.include(POSITION_VALUE_3)
 
       // Should have 5 values
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRows()
+      await expect(
+        await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(5)
       // Delete one of the selected values
-      CreateReport.getTestMultiReferenceFieldValueRow(3).$("button").click()
+      await (
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(3)
+        ).$("button")
+      ).click()
       // Should have only 4 values left
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRows()
+      await expect(
+        await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(4)
       // 3rd value should have changed
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(3).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(3)
+        ).getText()
       ).to.include(POSITION_VALUE_2)
     })
 
-    it("Should be able to save a report with ANET object references", () => {
+    it("Should be able to save a report with ANET object references", async() => {
       // Submit the report
-      CreateReport.submitForm()
-      CreateReport.waitForAlertToLoad()
-      expect(CreateReport.getAlert().getText()).to.include(
+      await CreateReport.submitForm()
+      await CreateReport.waitForAlertToLoad()
+      await expect(await (await CreateReport.getAlert()).getText()).to.include(
         "The following errors must be fixed"
       )
 
       // Check ANET object reference
-      CreateReport.getTestReferenceFieldLabel().waitForExist()
-      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
-      expect(CreateReport.getTestReferenceFieldValue().getText()).to.include(
-        REPORT_VALUE
-      )
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
+      await expect(
+        await (await CreateReport.getTestReferenceFieldValue()).getText()
+      ).to.include(REPORT_VALUE)
 
       // Check ANET object multi-references
-      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
-      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRows()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForExist()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForDisplayed()
+      await expect(
+        await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(4)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(1).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(1)
+        ).getText()
       ).to.include(PERSON_VALUE_1)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(2).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(2)
+        ).getText()
       ).to.include(PERSON_VALUE_2)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(3).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(3)
+        ).getText()
       ).to.include(POSITION_VALUE_2)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(4).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(4)
+        ).getText()
       ).to.include(POSITION_VALUE_3)
     })
 
-    it("Should be able to edit a report with ANET object references", () => {
+    it("Should be able to edit a report with ANET object references", async() => {
       // Edit the report
-      CreateReport.getEditButton().click()
+      await (await CreateReport.getEditButton()).click()
 
-      CreateReport.getTestReferenceFieldLabel().waitForExist()
-      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
       // Default input type is People
-      expect(
-        CreateReport.getTestReferenceField().getAttribute("placeholder")
+      await expect(
+        await (
+          await CreateReport.getTestReferenceField()
+        ).getAttribute("placeholder")
       ).to.equal("Find reports")
       // Check ANET object reference
-      expect(CreateReport.getTestReferenceFieldValue().getText()).to.include(
-        REPORT_VALUE
-      )
+      await expect(
+        await (await CreateReport.getTestReferenceFieldValue()).getText()
+      ).to.include(REPORT_VALUE)
       // Delete selected value
-      CreateReport.getTestReferenceFieldValue().scrollIntoView()
-      CreateReport.getTestReferenceFieldValue().$("button").click()
+      await (await CreateReport.getTestReferenceFieldValue()).scrollIntoView()
+      await (
+        await (await CreateReport.getTestReferenceFieldValue()).$("button")
+      ).click()
 
-      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
-      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
-      CreateReport.getTestMultiReferenceFieldLabel().scrollIntoView()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForExist()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForDisplayed()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).scrollIntoView()
       // Default input type is People
-      expect(
-        CreateReport.getTestMultiReferenceField().getAttribute("placeholder")
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceField()
+        ).getAttribute("placeholder")
       ).to.equal("Find people")
       // Check ANET object multi-references
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRows()
+      await expect(
+        await CreateReport.getTestMultiReferenceFieldValueRows()
       ).to.have.lengthOf(4)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(1).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(1)
+        ).getText()
       ).to.include(PERSON_VALUE_1)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(2).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(2)
+        ).getText()
       ).to.include(PERSON_VALUE_2)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(3).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(3)
+        ).getText()
       ).to.include(POSITION_VALUE_2)
-      expect(
-        CreateReport.getTestMultiReferenceFieldValueRow(4).getText()
+      await expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValueRow(4)
+        ).getText()
       ).to.include(POSITION_VALUE_3)
       // Delete selected values
-      CreateReport.getTestMultiReferenceFieldValueRows().forEach(r => {
-        const button = r.$("button")
-        button.scrollIntoView()
-        button.click()
-      })
+      const rows = await CreateReport.getTestMultiReferenceFieldValueRows()
+      for (const r of rows) {
+        const button = await r.$("button")
+        await button.scrollIntoView()
+        await button.click()
+      }
     })
 
-    it("Should be able to save a report without any ANET object references", () => {
+    it("Should be able to save a report without any ANET object references", async() => {
       // Submit the report
-      CreateReport.submitForm()
-      CreateReport.waitForAlertToLoad()
-      const alertMessage = CreateReport.getAlert().getText()
-      expect(alertMessage).to.include("The following errors must be fixed")
+      await CreateReport.submitForm()
+      await CreateReport.waitForAlertToLoad()
+      const alertMessage = await (await CreateReport.getAlert()).getText()
+      await expect(alertMessage).to.include(
+        "The following errors must be fixed"
+      )
 
       // Check ANET object reference
-      CreateReport.getTestReferenceFieldLabel().waitForExist()
-      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestReferenceFieldValue().isExisting()).to.be.false
+      expect(
+        await (await CreateReport.getTestReferenceFieldValue()).isExisting()
+      ).to.be.false
 
       // Check ANET object multi-references
-      CreateReport.getTestMultiReferenceFieldLabel().waitForExist()
-      CreateReport.getTestMultiReferenceFieldLabel().waitForDisplayed()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForExist()
+      await (
+        await CreateReport.getTestMultiReferenceFieldLabel()
+      ).waitForDisplayed()
       // eslint-disable-next-line no-unused-expressions
-      expect(CreateReport.getTestMultiReferenceFieldValue().isExisting()).to.be
-        .false
+      expect(
+        await (
+          await CreateReport.getTestMultiReferenceFieldValue()
+        ).isExisting()
+      ).to.be.false
     })
 
-    it("Should be able to delete the report", () => {
+    it("Should be able to delete the report", async() => {
       // Edit the report
-      CreateReport.getEditButton().click()
+      await (await CreateReport.getEditButton()).click()
 
-      CreateReport.getTestReferenceFieldLabel().waitForExist()
-      CreateReport.getTestReferenceFieldLabel().waitForDisplayed()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForExist()
+      await (await CreateReport.getTestReferenceFieldLabel()).waitForDisplayed()
       // Delete it
-      CreateReport.getDeleteButton().waitForExist()
-      CreateReport.getDeleteButton().waitForDisplayed()
-      CreateReport.getDeleteButton().click()
+      await (await CreateReport.getDeleteButton()).waitForExist()
+      await (await CreateReport.getDeleteButton()).waitForDisplayed()
+      await (await CreateReport.getDeleteButton()).click()
       // Confirm delete
-      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-      CreateReport.getConfirmButton().waitForExist()
-      CreateReport.getConfirmButton().waitForDisplayed()
-      CreateReport.getConfirmButton().click()
-      browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
+      await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
+      await (await CreateReport.getConfirmButton()).waitForExist()
+      await (await CreateReport.getConfirmButton()).waitForDisplayed()
+      await (await CreateReport.getConfirmButton()).click()
+      await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
       // Report should be deleted
-      CreateReport.waitForAlertToLoad()
-      expect(CreateReport.getAlert().getText()).to.include("Report deleted")
+      await CreateReport.waitForAlertToLoad()
+      await expect(await (await CreateReport.getAlert()).getText()).to.include(
+        "Report deleted"
+      )
     })
   })
 })

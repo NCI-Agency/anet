@@ -32,178 +32,204 @@ describe("When creating a Report with conflicts", () => {
     principals: ["CIV KYLESON, Kyle", "Maj CHRISVILLE, Chris"]
   }
 
-  it("Should create first draft report without any conflicts", () => {
-    CreateReport.open()
-    browser.pause(500) // wait for the page transition and rendering of custom fields
-    CreateReport.fillForm(report01)
+  it("Should create first draft report without any conflicts", async() => {
+    await CreateReport.open()
+    await browser.pause(500) // wait for the page transition and rendering of custom fields
+    await CreateReport.fillForm(report01)
 
-    expect(CreateReport.getIntent().getValue()).to.equal(report01.intent)
-    expect(CreateReport.getEngagementDate().getValue()).to.equal(
-      report01.engagementDate.format("DD-MM-YYYY HH:mm")
+    await expect(await (await CreateReport.getIntent()).getValue()).to.equal(
+      report01.intent
     )
-    expect(CreateReport.getDuration().getValue()).to.equal(report01.duration)
-    const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
-    expect(advisor01.conflictButton.isExisting()).to.equal(false)
+    await expect(
+      await (await CreateReport.getEngagementDate()).getValue()
+    ).to.equal(report01.engagementDate.format("DD-MM-YYYY HH:mm"))
+    await expect(await (await CreateReport.getDuration()).getValue()).to.equal(
+      report01.duration
+    )
+    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
+    await expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    await expect(await advisor01.conflictButton.isExisting()).to.equal(false)
 
-    const advisor02 = CreateReport.getPersonByName(report01.advisors[0])
-    expect(advisor02.name).to.equal(report01.advisors[0])
-    expect(advisor02.conflictButton.isExisting()).to.equal(false)
+    const advisor02 = await CreateReport.getPersonByName(report01.advisors[0])
+    await expect(advisor02.name).to.equal(report01.advisors[0])
+    await expect(await advisor02.conflictButton.isExisting()).to.equal(false)
 
-    const principal01 = CreateReport.getPersonByName(report01.principals[0])
-    expect(principal01.name).to.equal(report01.principals[0])
-    expect(principal01.conflictButton.isExisting()).to.equal(false)
+    const principal01 = await CreateReport.getPersonByName(
+      report01.principals[0]
+    )
+    await expect(principal01.name).to.equal(report01.principals[0])
+    await expect(await principal01.conflictButton.isExisting()).to.equal(false)
 
-    CreateReport.submitForm()
-    ShowReport.waitForShowReportToLoad()
+    await CreateReport.submitForm()
+    await ShowReport.waitForShowReportToLoad()
 
     const text = "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.getReportStatusText()).to.equal(text)
-    expect(ShowReport.getIntent()).to.equal(report01.intent)
+    await expect(await ShowReport.getReportStatusText()).to.equal(text)
+    await expect(await ShowReport.getIntent()).to.equal(report01.intent)
 
-    firstReportUUID = ShowReport.getUuid()
-    expect(firstReportUUID.length).to.equal(36)
+    firstReportUUID = await ShowReport.getUuid()
+    await expect(firstReportUUID.length).to.equal(36)
   })
 
-  it("Should create second draft report with conflicts", () => {
-    CreateReport.open()
-    browser.pause(500) // wait for the page transition and rendering of custom fields
-    CreateReport.fillForm(report02)
+  it("Should create second draft report with conflicts", async() => {
+    await CreateReport.open()
+    await browser.pause(500) // wait for the page transition and rendering of custom fields
+    await CreateReport.fillForm(report02)
 
-    expect(CreateReport.getIntent().getValue()).to.equal(report02.intent)
-    expect(CreateReport.getEngagementDate().getValue()).to.equal(
-      report02.engagementDate.format("DD-MM-YYYY HH:mm")
+    await expect(await (await CreateReport.getIntent()).getValue()).to.equal(
+      report02.intent
     )
-    expect(CreateReport.getDuration().getValue()).to.equal(report02.duration)
-    const advisor01 = CreateReport.getPersonByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
-    expect(advisor01.conflictButton.isExisting()).to.equal(true)
+    await expect(
+      await (await CreateReport.getEngagementDate()).getValue()
+    ).to.equal(report02.engagementDate.format("DD-MM-YYYY HH:mm"))
+    await expect(await (await CreateReport.getDuration()).getValue()).to.equal(
+      report02.duration
+    )
+    const advisor01 = await CreateReport.getPersonByName("CIV ERINSON, Erin")
+    await expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    await expect(await advisor01.conflictButton.isExisting()).to.equal(true)
 
-    const advisor02 = CreateReport.getPersonByName(report02.advisors[0])
-    expect(advisor02.name).to.equal(report02.advisors[0])
-    expect(advisor02.conflictButton.isExisting()).to.equal(true)
+    const advisor02 = await CreateReport.getPersonByName(report02.advisors[0])
+    await expect(advisor02.name).to.equal(report02.advisors[0])
+    await expect(await advisor02.conflictButton.isExisting()).to.equal(true)
 
-    const advisor03 = CreateReport.getPersonByName(report02.advisors[1])
-    expect(advisor03.name).to.equal(report02.advisors[1])
-    expect(advisor03.conflictButton.isExisting()).to.equal(false)
+    const advisor03 = await CreateReport.getPersonByName(report02.advisors[1])
+    await expect(advisor03.name).to.equal(report02.advisors[1])
+    await expect(await advisor03.conflictButton.isExisting()).to.equal(false)
 
-    const principal01 = CreateReport.getPersonByName(report02.principals[0])
-    expect(principal01.name).to.equal(report02.principals[0])
-    expect(principal01.conflictButton.isExisting()).to.equal(true)
+    const principal01 = await CreateReport.getPersonByName(
+      report02.principals[0]
+    )
+    await expect(principal01.name).to.equal(report02.principals[0])
+    await expect(await principal01.conflictButton.isExisting()).to.equal(true)
 
-    const principal02 = CreateReport.getPersonByName(report02.principals[1])
-    expect(principal02.name).to.equal(report02.principals[1])
-    expect(principal02.conflictButton.isExisting()).to.equal(false)
+    const principal02 = await CreateReport.getPersonByName(
+      report02.principals[1]
+    )
+    await expect(principal02.name).to.equal(report02.principals[1])
+    await expect(await principal02.conflictButton.isExisting()).to.equal(false)
 
-    CreateReport.submitForm()
-    ShowReport.waitForShowReportToLoad()
+    await CreateReport.submitForm()
+    await ShowReport.waitForShowReportToLoad()
 
     const text = "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.getReportStatusText()).to.equal(text)
-    expect(ShowReport.getIntent()).to.equal(report02.intent)
+    await expect(await ShowReport.getReportStatusText()).to.equal(text)
+    await expect(await ShowReport.getIntent()).to.equal(report02.intent)
 
-    secondReportUUID = ShowReport.getUuid()
-    expect(secondReportUUID.length).to.equal(36)
+    secondReportUUID = await ShowReport.getUuid()
+    await expect(secondReportUUID.length).to.equal(36)
   })
 
-  it("Should display first report with conflicts", () => {
-    ShowReport.open(firstReportUUID)
-    ShowReport.waitForShowReportToLoad()
+  it("Should display first report with conflicts", async() => {
+    await ShowReport.open(firstReportUUID)
+    await ShowReport.waitForShowReportToLoad()
 
-    expect(ShowReport.getUuid().length).to.equal(36)
+    await expect((await ShowReport.getUuid()).length).to.equal(36)
 
     const statusText =
       "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.getReportStatusText()).to.equal(statusText)
+    await expect(await ShowReport.getReportStatusText()).to.equal(statusText)
 
-    expect(ShowReport.getIntent()).to.equal(report01.intent)
-    expect(ShowReport.getEngagementDate()).to.equal(
+    await expect(await ShowReport.getIntent()).to.equal(report01.intent)
+    await expect(await ShowReport.getEngagementDate()).to.equal(
       report01.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
     )
-    expect(ShowReport.getReportConflictIcon().isExisting()).to.equal(true)
+    await expect(
+      await (await ShowReport.getReportConflictIcon()).isExisting()
+    ).to.equal(true)
 
-    ShowReport.getReportConflictIcon().moveTo()
-    expect(ShowReport.getReportConflictTooltipTitle()).to.equal(
+    await (await ShowReport.getReportConflictIcon()).moveTo()
+    await expect(await ShowReport.getReportConflictTooltipTitle()).to.equal(
       "3 of 3 attendees are busy at the selected time!"
     )
 
-    expect(ShowReport.getDuration()).to.equal(report01.duration)
-    expect(ShowReport.getLocation()).to.equal("Unspecified")
-    expect(ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
+    await expect(await ShowReport.getDuration()).to.equal(report01.duration)
+    await expect(await ShowReport.getLocation()).to.equal("Unspecified")
+    expect(await ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
 
-    const advisor01 = ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
-    expect(advisor01.conflictButton.isExisting()).to.equal(true)
-    expect(advisor01.conflictButton.getText()).to.match(/conflict/)
+    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
+    await expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    await expect(await advisor01.conflictButton.isExisting()).to.equal(true)
+    expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 
-    const advisor02 = ShowReport.getAttendeeByName(report01.advisors[0])
-    expect(advisor02.name).to.equal(report01.advisors[0])
-    expect(advisor02.conflictButton.isExisting()).to.equal(true)
-    expect(advisor02.conflictButton.getText()).to.match(/conflict/)
+    const advisor02 = await ShowReport.getAttendeeByName(report01.advisors[0])
+    await expect(advisor02.name).to.equal(report01.advisors[0])
+    await expect(await advisor02.conflictButton.isExisting()).to.equal(true)
+    expect(await advisor02.conflictButton.getText()).to.match(/conflict/)
 
-    const principal01 = ShowReport.getAttendeeByName(report01.principals[0])
-    expect(principal01.name).to.equal(report01.principals[0])
-    expect(principal01.conflictButton.isExisting()).to.equal(true)
-    expect(principal01.conflictButton.getText()).to.match(/conflict/)
+    const principal01 = await ShowReport.getAttendeeByName(
+      report01.principals[0]
+    )
+    await expect(principal01.name).to.equal(report01.principals[0])
+    await expect(await principal01.conflictButton.isExisting()).to.equal(true)
+    expect(await principal01.conflictButton.getText()).to.match(/conflict/)
   })
 
-  it("Should display second report with conflicts", () => {
-    ShowReport.open(secondReportUUID)
-    ShowReport.waitForShowReportToLoad()
+  it("Should display second report with conflicts", async() => {
+    await ShowReport.open(secondReportUUID)
+    await ShowReport.waitForShowReportToLoad()
 
-    expect(ShowReport.getUuid().length).to.equal(36)
+    await expect((await ShowReport.getUuid()).length).to.equal(36)
 
     const statusText =
       "This is a DRAFT planned engagement and hasn't been submitted."
-    expect(ShowReport.getReportStatusText()).to.equal(statusText)
+    await expect(await ShowReport.getReportStatusText()).to.equal(statusText)
 
-    expect(ShowReport.getIntent()).to.equal(report02.intent)
-    expect(ShowReport.getEngagementDate()).to.equal(
+    await expect(await ShowReport.getIntent()).to.equal(report02.intent)
+    await expect(await ShowReport.getEngagementDate()).to.equal(
       report02.engagementDate.format("dddd, D MMMM YYYY @ HH:mm")
     )
-    expect(ShowReport.getReportConflictIcon().isExisting()).to.equal(true)
+    await expect(
+      await (await ShowReport.getReportConflictIcon()).isExisting()
+    ).to.equal(true)
 
-    ShowReport.getReportConflictIcon().moveTo()
+    await (await ShowReport.getReportConflictIcon()).moveTo()
     // Depending on the order of the tests, the number of conflicts may vary
-    expect(ShowReport.getReportConflictTooltipTitle()).to.match(
+    expect(await ShowReport.getReportConflictTooltipTitle()).to.match(
       /(3|5) of 5 attendees are busy at the selected time!/
     )
 
-    expect(ShowReport.getDuration()).to.equal(report02.duration)
-    expect(ShowReport.getLocation()).to.equal("Unspecified")
-    expect(ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
+    await expect(await ShowReport.getDuration()).to.equal(report02.duration)
+    await expect(await ShowReport.getLocation()).to.equal("Unspecified")
+    expect(await ShowReport.getAuthors()).to.match(/CIV ERINSON, Erin/)
 
-    const advisor01 = ShowReport.getAttendeeByName("CIV ERINSON, Erin")
-    expect(advisor01.name).to.equal("CIV ERINSON, Erin")
-    expect(advisor01.conflictButton.isExisting()).to.equal(true)
-    expect(advisor01.conflictButton.getText()).to.match(/conflict/)
+    const advisor01 = await ShowReport.getAttendeeByName("CIV ERINSON, Erin")
+    await expect(advisor01.name).to.equal("CIV ERINSON, Erin")
+    await expect(await advisor01.conflictButton.isExisting()).to.equal(true)
+    expect(await advisor01.conflictButton.getText()).to.match(/conflict/)
 
-    const advisor02 = ShowReport.getAttendeeByName("CIV REPORTGIRL, Ima")
-    expect(advisor02.conflictButton.isExisting()).to.equal(false)
+    const advisor02 = await ShowReport.getAttendeeByName("CIV REPORTGIRL, Ima")
+    await expect(await advisor02.conflictButton.isExisting()).to.equal(false)
 
-    const advisor03 = ShowReport.getAttendeeByName("CIV REPORTGUY, Ima")
-    expect(advisor03.conflictButton.isExisting()).to.equal(true)
-    expect(advisor03.conflictButton.getText()).to.match(/conflict/)
+    const advisor03 = await ShowReport.getAttendeeByName("CIV REPORTGUY, Ima")
+    await expect(await advisor03.conflictButton.isExisting()).to.equal(true)
+    expect(await advisor03.conflictButton.getText()).to.match(/conflict/)
 
-    const principal01 = ShowReport.getAttendeeByName("CIV KYLESON, Kyle")
-    expect(principal01.conflictButton.isExisting()).to.equal(true)
-    expect(principal01.conflictButton.getText()).to.match(/conflict/)
+    const principal01 = await ShowReport.getAttendeeByName("CIV KYLESON, Kyle")
+    await expect(await principal01.conflictButton.isExisting()).to.equal(true)
+    expect(await principal01.conflictButton.getText()).to.match(/conflict/)
 
-    const principal02 = ShowReport.getAttendeeByName("Maj CHRISVILLE, Chris")
-    expect(principal02.conflictButton.isExisting()).to.equal(false)
+    const principal02 = await ShowReport.getAttendeeByName(
+      "Maj CHRISVILLE, Chris"
+    )
+    await expect(await principal02.conflictButton.isExisting()).to.equal(false)
   })
 
-  it("Should delete the first report", () => {
-    EditReport.open(firstReportUUID)
-    EditReport.deleteReport(firstReportUUID)
+  it("Should delete the first report", async() => {
+    await EditReport.open(firstReportUUID)
+    await EditReport.deleteReport(firstReportUUID)
 
-    expect(EditReport.getAlertSuccess().getText()).to.equal("Report deleted")
+    await expect(await (await EditReport.getAlertSuccess()).getText()).to.equal(
+      "Report deleted"
+    )
   })
 
-  it("Should delete the second report", () => {
-    EditReport.open(secondReportUUID)
-    EditReport.deleteReport(secondReportUUID)
+  it("Should delete the second report", async() => {
+    await EditReport.open(secondReportUUID)
+    await EditReport.deleteReport(secondReportUUID)
 
-    expect(EditReport.getAlertSuccess().getText()).to.equal("Report deleted")
+    await expect(await (await EditReport.getAlertSuccess()).getText()).to.equal(
+      "Report deleted"
+    )
   })
 })

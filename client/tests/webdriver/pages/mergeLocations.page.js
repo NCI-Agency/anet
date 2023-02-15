@@ -3,59 +3,61 @@ import Page from "./page"
 const PATH = "/admin/merge/locations"
 
 class MergeLocations extends Page {
-  open() {
-    super.openAsAdminUser(PATH)
+  async open() {
+    await super.openAsAdminUser(PATH)
   }
 
-  getTitle() {
+  async getTitle() {
     return browser.$('//h4[contains(text(),"Merge Locations")]')
   }
 
-  getLeftLocationField() {
+  async getLeftLocationField() {
     return browser.$("#Location1")
   }
 
-  getRightLocationField() {
+  async getRightLocationField() {
     return browser.$("#Location2")
   }
 
-  getAdvancedSelectPopover() {
+  async getAdvancedSelectPopover() {
     return browser.$(".bp4-popover2-content")
   }
 
-  getLocationHeaderFromPopover() {
+  async getLocationHeaderFromPopover() {
     return browser.$('//table//th[contains(text(), "Name")]')
   }
 
-  getFirstItemFromAdvancedSelect() {
+  async getFirstItemFromAdvancedSelect() {
     return browser.$(
       ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
     )
   }
 
-  getMergeLocationsButton() {
+  async getMergeLocationsButton() {
     return browser.$('//button[text()="Merge Locations"]')
   }
 
-  getUseAllButton(side) {
+  async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
     return browser.$(`#mid-merge-loc-col ${button} > button`)
   }
 
-  getColumnLocationName(side) {
+  async getColumnLocationName(side) {
     return browser.$(
       `//div[@id="${side}-merge-loc-col"]//div[text()="Name"]/following-sibling::div`
     )
   }
 
-  waitForAdvancedSelectLoading(compareStr) {
-    this.getAdvancedSelectPopover().waitForExist()
-    this.getAdvancedSelectPopover().waitForDisplayed()
-    this.getLocationHeaderFromPopover().waitForExist()
-    this.getLocationHeaderFromPopover().waitForDisplayed()
+  async waitForAdvancedSelectLoading(compareStr) {
+    await (await this.getAdvancedSelectPopover()).waitForExist()
+    await (await this.getAdvancedSelectPopover()).waitForDisplayed()
+    await (await this.getLocationHeaderFromPopover()).waitForExist()
+    await (await this.getLocationHeaderFromPopover()).waitForDisplayed()
 
-    browser.waitUntil(
-      () => this.getFirstItemFromAdvancedSelect().getText() === compareStr,
+    await browser.waitUntil(
+      async() =>
+        (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
+        compareStr,
       {
         timeout: 5000,
         timeoutMsg: "Couldn't find the searched location in time"
@@ -63,12 +65,12 @@ class MergeLocations extends Page {
     )
   }
 
-  waitForColumnToChange(compareStr, side) {
-    const field = this.getColumnLocationName(side)
+  async waitForColumnToChange(compareStr, side) {
+    const field = await this.getColumnLocationName(side)
 
-    browser.waitUntil(
-      () => {
-        return field.getText() === compareStr
+    await browser.waitUntil(
+      async() => {
+        return (await field.getText()) === compareStr
       },
       {
         timeout: 5000,
@@ -77,11 +79,11 @@ class MergeLocations extends Page {
     )
   }
 
-  waitForSuccessAlert() {
-    browser.waitUntil(
-      () => {
+  async waitForSuccessAlert() {
+    await browser.waitUntil(
+      async() => {
         return (
-          browser.$(".alert-success").getText() ===
+          (await (await browser.$(".alert-success")).getText()) ===
           "Locations merged. Displaying merged Location below."
         )
       },

@@ -43,36 +43,49 @@ const RICH_TEXT_CONTENT = [
 ]
 
 describe("When reports have rich text content", () => {
-  it("Show report page should display content with correct tags", () => {
-    MyReports.open("arthur")
-    MyReports.selectReport("Test report with rich text", REPORT_STATES.DRAFT)
-    ShowReport.getReportText().waitForDisplayed()
-    RICH_TEXT_CONTENT.forEach(
-      ({ selector, multipleElements, index, content }) => {
-        expect(
-          getRichTextContent(
-            ShowReport.getReportText(),
+  it("Show report page should display content with correct tags", async() => {
+    await MyReports.open("arthur")
+    await MyReports.selectReport(
+      "Test report with rich text",
+      REPORT_STATES.DRAFT
+    )
+    await (await ShowReport.getReportText()).waitForDisplayed()
+    for (const {
+      selector,
+      multipleElements,
+      index,
+      content
+    } of RICH_TEXT_CONTENT) {
+      await expect(
+        await (
+          await getRichTextContent(
+            await ShowReport.getReportText(),
             selector,
             multipleElements,
             index
-          ).getText()
-        ).to.contain(content)
-      }
-    )
+          )
+        ).getText()
+      ).to.contain(content)
+    }
   })
-  it("Edit report page should display content with correct tags", () => {
-    ShowReport.getEditReportButton().click()
-    RICH_TEXT_CONTENT.forEach(
-      ({ selector, multipleElements, index, content }) => {
-        expect(
-          getRichTextContent(
-            EditReport.getReportText(),
+  it("Edit report page should display content with correct tags", async() => {
+    await (await ShowReport.getEditReportButton()).click()
+    for (const {
+      selector,
+      multipleElements,
+      index,
+      content
+    } of RICH_TEXT_CONTENT) {
+      await expect(
+        await (
+          await getRichTextContent(
+            await EditReport.getReportText(),
             selector,
             multipleElements,
             index
-          ).getText()
-        ).to.contain(content)
-      }
-    )
+          )
+        ).getText()
+      ).to.contain(content)
+    }
   })
 })

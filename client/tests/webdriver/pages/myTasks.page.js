@@ -3,36 +3,38 @@ import Page from "./page"
 const PAGE_URL = "/tasks/mine"
 
 class MyTasks extends Page {
-  open() {
-    super.open(PAGE_URL)
+  async open() {
+    await super.open(PAGE_URL)
   }
 
-  openAs(user) {
-    super.open(PAGE_URL, user)
+  async openAs(user) {
+    await super.open(PAGE_URL, user)
   }
 
-  openAsOnboardUser() {
-    super.openAsOnboardUser(PAGE_URL)
+  async openAsOnboardUser() {
+    await super.openAsOnboardUser(PAGE_URL)
   }
 
-  getMyOrgAssignedTasks() {
+  async getMyOrgAssignedTasks() {
     return browser.$("#my-org-assigned-tasks")
   }
 
-  getMyResponsibleTasks() {
+  async getMyResponsibleTasks() {
     return browser.$("#my-responsible-tasks")
   }
 
-  getMyPendingTasks() {
+  async getMyPendingTasks() {
     return browser.$("#my-tasks-with-pending-assessments")
   }
 
-  getMyPendingTasksContent() {
-    return browser.$("#my-tasks-with-pending-assessments").$("tbody")
+  async getMyPendingTasksContent() {
+    return (await browser.$("#my-tasks-with-pending-assessments")).$("tbody")
   }
 
-  getMyPendingTask(name) {
-    return this.getMyPendingTasksContent().$(`//a[contains(text(), "${name}")]`)
+  async getMyPendingTask(name) {
+    return (await this.getMyPendingTasksContent()).$(
+      `//a[contains(text(), "${name}")]`
+    )
   }
 }
 

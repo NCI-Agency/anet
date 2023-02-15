@@ -2,95 +2,100 @@ import Page from "./page"
 
 const PAGE_URL = "/positions/new"
 class CreatePosition extends Page {
-  getForm() {
+  async getForm() {
     return browser.$("form")
   }
 
-  getPositionNameInput() {
+  async getPositionNameInput() {
     return browser.$("#name")
   }
 
-  getDuplicatesButton() {
+  async getDuplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
 
-  getModalContent() {
+  async getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  getModalCloseButton() {
-    return this.getModalContent().$("button.btn-close")
+  async getModalCloseButton() {
+    return (await this.getModalContent()).$("button.btn-close")
   }
 
-  getSimilarPosition() {
-    return this.getModalContent().$("tbody tr:first-child td:first-child a")
+  async getSimilarPosition() {
+    return (await this.getModalContent()).$(
+      "tbody tr:first-child td:first-child a"
+    )
   }
 
-  getPositionNameHelpBlock() {
+  async getPositionNameHelpBlock() {
     return browser.$("#fg-name div.invalid-feedback")
   }
 
-  getTypeAdvisorButton() {
+  async getTypeAdvisorButton() {
     return browser.$('label[for="type_ADVISOR"]')
   }
 
-  getTypePrincipalButton() {
+  async getTypePrincipalButton() {
     return browser.$('label[for="type_PRINCIPAL"]')
   }
 
-  getOrganizationInput() {
+  async getOrganizationInput() {
     return browser.$("#organization")
   }
 
-  getOrganizationHelpBlock() {
+  async getOrganizationHelpBlock() {
     return browser.$("#fg-organization div.invalid-feedback")
   }
 
-  getOrgAdvancedSelectFirstItem() {
+  async getOrgAdvancedSelectFirstItem() {
     return browser.$(
       "#organization-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  getLocationInput() {
+  async getLocationInput() {
     return browser.$("#location")
   }
 
-  getLocationHelpBlock() {
+  async getLocationHelpBlock() {
     return browser.$("#fg-location div.invalid-feedback")
   }
 
-  getLocAdvancedSelectFirstItem() {
+  async getLocAdvancedSelectFirstItem() {
     return browser.$(
       "#location-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  getAlertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  getCancelButton() {
-    return browser.$("div.submit-buttons").$("button=Cancel")
+  async getCancelButton() {
+    return (await browser.$("div.submit-buttons")).$("button=Cancel")
   }
 
-  getSubmitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  open() {
-    super.openAsSuperUser(PAGE_URL)
+  async open() {
+    await super.openAsSuperUser(PAGE_URL)
   }
 
-  openAsAdminUser() {
-    super.openAsAdminUser(PAGE_URL)
+  async openAsAdminUser() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  waitForOrgAdvancedSelectToChange(value) {
-    this.getOrgAdvancedSelectFirstItem().waitForExist()
+  async waitForOrgAdvancedSelectToChange(value) {
+    await (await this.getOrgAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      () => {
-        return this.getOrgAdvancedSelectFirstItem().getText() === value
+      async() => {
+        return (
+          (await (await this.getOrgAdvancedSelectFirstItem()).getText()) ===
+          value
+        )
       },
       {
         timeout: 5000,
@@ -102,8 +107,8 @@ class CreatePosition extends Page {
     )
   }
 
-  submitForm() {
-    this.getSubmitButton().click()
+  async submitForm() {
+    await (await this.getSubmitButton()).click()
   }
 }
 

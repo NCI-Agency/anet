@@ -13,183 +13,192 @@ const SENSITIVE_CUSTOM_FIELDS = {
 }
 
 export class CreatePerson extends Page {
-  getForm() {
+  async getForm() {
     return browser.$("form.form-horizontal")
   }
 
-  getAlertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  getLastName() {
-    return this.getForm().$("#lastName")
+  async getLastName() {
+    return (await this.getForm()).$("#lastName")
   }
 
-  getFirstName() {
+  async getFirstName() {
     return browser.$("#firstName")
   }
 
-  getDuplicatesButton() {
+  async getDuplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
 
-  getModalContent() {
+  async getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  getModalCloseButton() {
-    return this.getModalContent().$("button.btn-close")
+  async getModalCloseButton() {
+    return (await this.getModalContent()).$("button.btn-close")
   }
 
-  getSimilarPerson() {
-    return this.getModalContent().$("tbody tr:first-child td:first-child a")
+  async getSimilarPerson() {
+    return (await this.getModalContent()).$(
+      "tbody tr:first-child td:first-child a"
+    )
   }
 
-  getRolePrincipalButton() {
+  async getRolePrincipalButton() {
     return browser.$('label[for="role_PRINCIPAL"]')
   }
 
-  getRoleAdvisorButton() {
+  async getRoleAdvisorButton() {
     return browser.$('label[for="role_ADVISOR"]')
   }
 
-  getEmailAddress() {
+  async getEmailAddress() {
     return browser.$("#emailAddress")
   }
 
-  getPhoneNumber() {
+  async getPhoneNumber() {
     return browser.$("#phoneNumber")
   }
 
-  getRank() {
+  async getRank() {
     return browser.$('select[name="rank"]')
   }
 
-  getGender() {
+  async getGender() {
     return browser.$('select[name="gender"]')
   }
 
-  getCountry() {
+  async getCountry() {
     return browser.$('select[name="country"]')
   }
 
-  getEndOfTourDate() {
+  async getEndOfTourDate() {
     return browser.$("#endOfTourDate")
   }
 
-  getBiography() {
+  async getBiography() {
     return browser.$(".biography .editable")
   }
 
-  getSubmitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  getEndOfTourToday() {
+  async getEndOfTourToday() {
     return browser.$(".bp4-datepicker-footer button.bp4-button:first-child")
   }
 
-  getCustomFieldsContainer() {
+  async getCustomFieldsContainer() {
     return browser.$("#custom-fields")
   }
 
-  getNumberCustomFieldContainer() {
+  async getNumberCustomFieldContainer() {
     return this.getCustomFieldContainerByName(INVISIBLE_CUSTOM_FIELDS.number)
   }
 
-  getNumberCustomField() {
-    return this.getNumberCustomFieldContainer().$('input[type="number"]')
+  async getNumberCustomField() {
+    return (await this.getNumberCustomFieldContainer()).$(
+      'input[type="number"]'
+    )
   }
 
-  getNumberCustomFieldHelpText() {
-    return this.getNumberCustomFieldContainer().$(
+  async getNumberCustomFieldHelpText() {
+    return (await this.getNumberCustomFieldContainer()).$(
       '//div[contains(text(), "greater than")]'
     )
   }
 
-  getDefaultInvisibleCustomFields() {
-    return Object.keys(INVISIBLE_CUSTOM_FIELDS).map(field =>
-      this.getCustomFieldContainerByName(INVISIBLE_CUSTOM_FIELDS[field])
+  async getDefaultInvisibleCustomFields() {
+    return Promise.all(
+      Object.keys(INVISIBLE_CUSTOM_FIELDS).map(
+        async field =>
+          await this.getCustomFieldContainerByName(
+            INVISIBLE_CUSTOM_FIELDS[field]
+          )
+      )
     )
   }
 
-  getGreenButton() {
-    return this.getCustomFieldsContainer().$(
+  async getGreenButton() {
+    return (await this.getCustomFieldsContainer()).$(
       'label[for="formCustomFields.colourOptions_GREEN"]'
     )
   }
 
-  getAmberButton() {
-    return this.getCustomFieldsContainer().$(
+  async getAmberButton() {
+    return (await this.getCustomFieldsContainer()).$(
       'label[for="formCustomFields.colourOptions_AMBER"]'
     )
   }
 
-  getAddArrayObjectButton() {
-    return this.getCustomFieldsContainer().$(
+  async getAddArrayObjectButton() {
+    return (await this.getCustomFieldsContainer()).$(
       'button[id="add-formCustomFields.arrayFieldName"]'
     )
   }
 
-  getObjectDateField() {
-    return this.getCustomFieldsContainer().$(
+  async getObjectDateField() {
+    return (await this.getCustomFieldsContainer()).$(
       'input[id="formCustomFields.arrayFieldName.0.dateF"]'
     )
   }
 
-  getSensitiveFieldsContainer() {
+  async getSensitiveFieldsContainer() {
     return browser.$("#sensitive-fields")
   }
 
-  getBirthdaySensitiveFieldContainer() {
+  async getBirthdaySensitiveFieldContainer() {
     return this.getSensitiveFieldContainerByName(
       SENSITIVE_CUSTOM_FIELDS.birthday
     )
   }
 
-  getPoliticalPositionSensitiveFieldContainer() {
+  async getPoliticalPositionSensitiveFieldContainer() {
     return this.getSensitiveFieldContainerByName(
       SENSITIVE_CUSTOM_FIELDS.politicalPosition
     )
   }
 
-  getBirthday() {
-    return this.getSensitiveFieldsContainer().$(
+  async getBirthday() {
+    return (await this.getSensitiveFieldsContainer()).$(
       'input[id="formSensitiveFields.birthday'
     )
   }
 
-  getLeftButton() {
-    return this.getSensitiveFieldsContainer().$(
+  async getLeftButton() {
+    return (await this.getSensitiveFieldsContainer()).$(
       'label[for="formSensitiveFields.politicalPosition_LEFT"]'
     )
   }
 
-  getMiddleButton() {
-    return this.getSensitiveFieldsContainer().$(
+  async getMiddleButton() {
+    return (await this.getSensitiveFieldsContainer()).$(
       'label[for="formSensitiveFields.politicalPosition_MIDDLE"]'
     )
   }
 
-  getCustomFieldContainerByName(name) {
-    return this.getCustomFieldsContainer().$(`div[id="fg-${name}"]`)
+  async getCustomFieldContainerByName(name) {
+    return (await this.getCustomFieldsContainer()).$(`div[id="fg-${name}"]`)
   }
 
-  getSensitiveFieldContainerByName(name) {
-    return this.getSensitiveFieldsContainer().$(`div[id="fg-${name}"]`)
+  async getSensitiveFieldContainerByName(name) {
+    return (await this.getSensitiveFieldsContainer()).$(`div[id="fg-${name}"]`)
   }
 
-  openAsSuperUser() {
-    super.openAsSuperUser(PAGE_URL)
+  async openAsSuperUser() {
+    await super.openAsSuperUser(PAGE_URL)
   }
 
-  openAsAdmin() {
-    super.openAsAdminUser(PAGE_URL)
+  async openAsAdmin() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  submitForm() {
-    this.getSubmitButton().scrollIntoView()
-    this.getSubmitButton().click()
+  async submitForm() {
+    await (await this.getSubmitButton()).scrollIntoView()
+    await (await this.getSubmitButton()).click()
   }
 }
 

@@ -3,145 +3,158 @@ import Page from "./page"
 const PATH = "/admin/merge/positions"
 
 class MergePositions extends Page {
-  open() {
-    super.openAsAdminUser(PATH)
+  async open() {
+    await super.openAsAdminUser(PATH)
   }
 
-  openPage(path) {
-    super.openAsAdminUser(path)
+  async openPage(path) {
+    await super.openAsAdminUser(path)
   }
 
-  getErrorTitle() {
+  async getErrorTitle() {
     return browser.$("//h1")
   }
 
-  getTitle() {
+  async getTitle() {
     return browser.$('//h4[contains(text(),"Merge Positions")]')
   }
 
-  getLeftPositionField() {
+  async getLeftPositionField() {
     return browser.$("#Position1")
   }
 
-  getRightPositionField() {
+  async getRightPositionField() {
     return browser.$("#Position2")
   }
 
-  getAdvancedSelectPopover() {
+  async getAdvancedSelectPopover() {
     return browser.$(".bp4-popover2-content")
   }
 
-  getPositionHeaderFromPopover() {
+  async getPositionHeaderFromPopover() {
     return browser.$('//table//th[contains(text(), "Position")]')
   }
 
-  getFirstItemFromAdvancedSelect() {
+  async getFirstItemFromAdvancedSelect() {
     return browser.$(
       ".advanced-select-popover table > tbody > tr:first-child > td:nth-child(2) > span"
     )
   }
 
-  getEditAssociatedPositionsButton() {
+  async getEditAssociatedPositionsButton() {
     return browser.$('//button[text()="Edit Associated Positions"]')
   }
 
-  getEditAssociatedPositionsModal() {
+  async getEditAssociatedPositionsModal() {
     return browser.$(
       "//div[contains(@class, 'edit-associated-positions-dialog')]"
     )
   }
 
-  getSaveAssociatedPositionsButton() {
-    return this.getEditAssociatedPositionsModal().$('//button[text()="Save"]')
+  async getSaveAssociatedPositionsButton() {
+    return (await this.getEditAssociatedPositionsModal()).$(
+      '//button[text()="Save"]'
+    )
   }
 
-  getMergePositionsButton() {
+  async getMergePositionsButton() {
     return browser.$('//button[text()="Merge Positions"]')
   }
 
-  getSamePositionsToast() {
+  async getSamePositionsToast() {
     return browser.$('//div[text()="Please select different positions"]')
   }
 
-  getOccupiedPositionsToast() {
+  async getOccupiedPositionsToast() {
     return browser.$(
       '//div[text()="Please select at least one unoccupied position"]'
     )
   }
 
-  getWinnerAssociatedPositions() {
-    const associatedPositionRows = browser.$$("#assigned-principal tbody tr")
-    const winnerAps = associatedPositionRows.map(elem => {
-      return {
-        person: elem.$$("td")[0].getText(),
-        position: elem.$$("td")[1].getText()
-      }
-    })
+  async getWinnerAssociatedPositions() {
+    const associatedPositionRows = await browser.$$(
+      "#assigned-principal tbody tr"
+    )
+    const winnerAps = await Promise.all(
+      associatedPositionRows.map(async elem => {
+        return {
+          person: await (await elem.$$("td"))[0].getText(),
+          position: await (await elem.$$("td"))[1].getText()
+        }
+      })
+    )
     return winnerAps
   }
 
-  getShowNotesButton() {
+  async getShowNotesButton() {
     return browser.$('button[title="Show notes"]')
   }
 
-  getNoteCards() {
+  async getNoteCards() {
     return browser.$$(".offcanvas .card")
   }
 
-  getUseAllButton(side) {
+  async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
     return browser.$(`#mid-merge-pos-col ${button} > button`)
   }
 
-  getSelectButton(side, text) {
-    const buttonDiv = browser.$(
+  async getSelectButton(side, text) {
+    const buttonDiv = await browser.$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]`
     )
-    const button = buttonDiv.$("..").$("..")
+    const button = await (await buttonDiv.$("..")).$("..")
     return button.$("small > button")
   }
 
-  getColumnContent(side, text) {
+  async getColumnContent(side, text) {
     return browser.$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="${text}"]/following-sibling::div`
     )
   }
 
-  getAssociatedPositions(side) {
-    const associatedPositionElements = browser.$$(
+  async getAssociatedPositions(side) {
+    const associatedPositionElements = await browser.$$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="Associated Positions"]//following-sibling::div//table//tbody//tr`
     )
-    const associatedPositions = associatedPositionElements.map(elem => {
-      return {
-        person: elem.$$("td")[0].getText(),
-        position: elem.$$("td")[1].getText()
-      }
-    })
+    const associatedPositions = await Promise.all(
+      associatedPositionElements.map(async elem => {
+        return {
+          person: await (await elem.$$("td"))[0].getText(),
+          position: await (await elem.$$("td"))[1].getText()
+        }
+      })
+    )
     return associatedPositions
   }
 
-  getPreviousPeople(side) {
-    const previousPeopleElements = browser.$$(
+  async getPreviousPeople(side) {
+    const previousPeopleElements = await browser.$$(
       `//div[@id="${side}-merge-pos-col"]//div[text()="Previous People"]/following-sibling::div//table//tbody//tr`
     )
-    const previousPeople = previousPeopleElements.map(elem => {
-      return {
-        name: elem.$$("td")[0].getText(),
-        date: elem.$$("td")[1].getText()
-      }
-    })
+    const previousPeople = await Promise.all(
+      previousPeopleElements.map(async elem => {
+        return {
+          name: await (await elem.$$("td"))[0].getText(),
+          date: await (await elem.$$("td"))[1].getText()
+        }
+      })
+    )
     return previousPeople
   }
 
-  waitForAdvancedSelectLoading(compareStr) {
-    this.getAdvancedSelectPopover().waitForExist()
-    this.getAdvancedSelectPopover().waitForDisplayed()
-    this.getPositionHeaderFromPopover().waitForExist()
-    this.getPositionHeaderFromPopover().waitForDisplayed()
+  async waitForAdvancedSelectLoading(compareStr) {
+    await (await this.getAdvancedSelectPopover()).waitForExist()
+    await (await this.getAdvancedSelectPopover()).waitForDisplayed()
+    await (await this.getPositionHeaderFromPopover()).waitForExist()
+    await (await this.getPositionHeaderFromPopover()).waitForDisplayed()
 
-    browser.waitUntil(
-      () => {
-        return this.getFirstItemFromAdvancedSelect().getText() === compareStr
+    await browser.waitUntil(
+      async() => {
+        return (
+          (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
+          compareStr
+        )
       },
       {
         timeout: 5000,
@@ -150,12 +163,12 @@ class MergePositions extends Page {
     )
   }
 
-  waitForColumnToChange(compareStr, side, text) {
-    const field = this.getColumnContent(side, text)
+  async waitForColumnToChange(compareStr, side, text) {
+    const field = await this.getColumnContent(side, text)
 
-    browser.waitUntil(
-      () => {
-        return field.getText() === compareStr
+    await browser.waitUntil(
+      async() => {
+        return (await field.getText()) === compareStr
       },
       {
         timeout: 5000,
@@ -164,11 +177,11 @@ class MergePositions extends Page {
     )
   }
 
-  waitForSuccessAlert() {
-    browser.waitUntil(
-      () => {
+  async waitForSuccessAlert() {
+    await browser.waitUntil(
+      async() => {
         return (
-          browser.$(".alert-success").getText() ===
+          (await (await browser.$(".alert-success")).getText()) ===
           "Positions merged. Displaying merged Position below."
         )
       },
@@ -179,33 +192,41 @@ class MergePositions extends Page {
     )
   }
 
-  getAssociatedPositionsInModal(side) {
-    const selectedSide = browser.$$(`#edit-ap-${side} tbody tr`)
-    const associatedPositions = selectedSide.map(elem => {
-      return {
-        // On the right column first td is button while on the other columns last td is the button
-        person: elem.$$("td")[side === "right" ? 1 : 0].getText(),
-        position: elem.$$("td")[side === "right" ? 2 : 1].getText()
-      }
-    })
+  async getAssociatedPositionsInModal(side) {
+    const selectedSide = await browser.$$(`#edit-ap-${side} tbody tr`)
+    const associatedPositions = await Promise.all(
+      selectedSide.map(async elem => {
+        return {
+          // On the right column first td is button while on the other columns last td is the button
+          person: await (
+            await elem.$$("td")
+          )[side === "right" ? 1 : 0].getText(),
+          position: await (
+            await elem.$$("td")
+          )[side === "right" ? 2 : 1].getText()
+        }
+      })
+    )
     return associatedPositions
   }
 
-  getAssociatedPositionActionButton(side, index) {
-    const selectedRow = browser.$$(`#edit-ap-${side} tbody tr`)[index]
-    return selectedRow.$$("td")[side === "right" ? 0 : 2].$("button")
+  async getAssociatedPositionActionButton(side, index) {
+    const selectedRow = (await browser.$$(`#edit-ap-${side} tbody tr`))[index]
+    return (await selectedRow.$$("td"))[side === "right" ? 0 : 2].$("button")
   }
 
-  areNotesExist(notes) {
+  async areNotesExist(notes) {
     let areExist = true
-    const allNoteTexts = this.getNoteCards().map(card =>
-      card.$(".card-body > div").getText()
+    const allNoteTexts = await Promise.all(
+      (
+        await this.getNoteCards()
+      ).map(async card => await (await card.$(".card-body > div")).getText())
     )
-    notes.forEach(note => {
+    for (const note of notes) {
       if (!allNoteTexts.includes(note)) {
         areExist = false
       }
-    })
+    }
     return areExist
   }
 }

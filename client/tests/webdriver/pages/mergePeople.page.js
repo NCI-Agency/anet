@@ -3,113 +3,118 @@ import Page from "./page"
 const PATH = "/admin/merge/people"
 
 class MergePeople extends Page {
-  open() {
-    super.openAsAdminUser(PATH)
+  async open() {
+    await super.openAsAdminUser(PATH)
   }
 
-  openPage(path) {
-    super.openAsAdminUser(path)
+  async openPage(path) {
+    await super.openAsAdminUser(path)
   }
 
-  getErrorTitle() {
+  async getErrorTitle() {
     return browser.$("//h1")
   }
 
-  getTitle() {
+  async getTitle() {
     return browser.$('//h4[contains(text(),"Merge People")]')
   }
 
-  getLeftPersonField() {
+  async getLeftPersonField() {
     return browser.$("#Person1")
   }
 
-  getRightPersonField() {
+  async getRightPersonField() {
     return browser.$("#Person2")
   }
 
-  getAdvancedSelectPopover() {
+  async getAdvancedSelectPopover() {
     return browser.$(".bp4-popover2-content")
   }
 
-  getPersonHeaderFromPopover() {
+  async getPersonHeaderFromPopover() {
     return browser.$('//table//th[contains(text(), "name")]')
   }
 
-  getFirstItemFromAdvancedSelect() {
+  async getFirstItemFromAdvancedSelect() {
     return browser.$("table > tbody > tr:first-child > td:nth-child(2) > span")
   }
 
-  getSamePositionsToast() {
+  async getSamePositionsToast() {
     return browser.$('//div[text()="Please select different people"]')
   }
 
-  getMergePeopleButton() {
+  async getMergePeopleButton() {
     return browser.$('//button[text()="Merge People"]')
   }
 
-  getShowNotesButton() {
+  async getShowNotesButton() {
     return browser.$('button[title="Show notes"]')
   }
 
-  getUnoccupiedPositionPersonMessage() {
+  async getUnoccupiedPositionPersonMessage() {
     return browser.$("p.position-empty-message")
   }
 
-  getNoteCards() {
+  async getNoteCards() {
     return browser.$$(".offcanvas .card")
   }
 
-  getClearValueButtons() {
+  async getClearValueButtons() {
     return browser.$$(
       "//div[@id=\"mid-merge-per-col\"]//button[contains(@class, 'remove-button')]"
     )
   }
 
-  getEditHistoryButton() {
+  async getEditHistoryButton() {
     return browser.$('//button[text()="Edit History Manually"]')
   }
 
-  getUseAllButton(side) {
+  async getUseAllButton(side) {
     const button = side === "left" ? "small:first-child" : "small:last-child"
     return browser.$(`#mid-merge-per-col ${button} > button`)
   }
 
-  getSelectButton(side, text) {
-    const buttonDiv = browser.$(
+  async getSelectButton(side, text) {
+    const buttonDiv = await browser.$(
       `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]`
     )
-    const button = buttonDiv.$("..").$("..")
+    const button = await (await buttonDiv.$("..")).$("..")
     return button.$("small > button")
   }
 
-  getColumnContent(side, text) {
+  async getColumnContent(side, text) {
     return browser.$(
       `//div[@id="${side}-merge-per-col"]//div[text()="${text}"]/following-sibling::div`
     )
   }
 
-  getPreviousPositions(side) {
-    const previousPositionsElements = browser.$$(
+  async getPreviousPositions(side) {
+    const previousPositionsElements = await browser.$$(
       `//div[@id="${side}-merge-per-col"]//div[text()="Previous Positions"]/following-sibling::div//table//tbody//tr`
     )
-    const previousPositions = previousPositionsElements.map(elem => {
-      return {
-        name: elem.$$("td")[0].getText(),
-        date: elem.$$("td")[1].getText()
-      }
-    })
+    const previousPositions = await Promise.all(
+      previousPositionsElements.map(async elem => {
+        return {
+          name: await (await elem.$$("td"))[0].getText(),
+          date: await (await elem.$$("td"))[1].getText()
+        }
+      })
+    )
     return previousPositions
   }
 
-  waitForAdvancedSelectLoading(compareStr) {
-    this.getAdvancedSelectPopover().waitForExist()
-    this.getAdvancedSelectPopover().waitForDisplayed()
-    this.getPersonHeaderFromPopover().waitForExist()
-    this.getPersonHeaderFromPopover().waitForDisplayed()
+  async waitForAdvancedSelectLoading(compareStr) {
+    await (await this.getAdvancedSelectPopover()).waitForExist()
+    await (await this.getAdvancedSelectPopover()).waitForDisplayed()
+    await (await this.getPersonHeaderFromPopover()).waitForExist()
+    await (await this.getPersonHeaderFromPopover()).waitForDisplayed()
 
-    browser.waitUntil(
-      () => {
-        return this.getFirstItemFromAdvancedSelect().getText() === compareStr
+    await browser.waitUntil(
+      async() => {
+        return (
+          (await (await this.getFirstItemFromAdvancedSelect()).getText()) ===
+          compareStr
+        )
       },
       {
         timeout: 5000,
@@ -118,12 +123,12 @@ class MergePeople extends Page {
     )
   }
 
-  waitForColumnToChange(compareStr, side, text) {
-    const field = this.getColumnContent(side, text)
+  async waitForColumnToChange(compareStr, side, text) {
+    const field = await this.getColumnContent(side, text)
 
-    browser.waitUntil(
-      () => {
-        return field.getText() === compareStr
+    await browser.waitUntil(
+      async() => {
+        return (await field.getText()) === compareStr
       },
       {
         timeout: 5000,
@@ -132,11 +137,11 @@ class MergePeople extends Page {
     )
   }
 
-  waitForSuccessAlert() {
-    browser.waitUntil(
-      () => {
+  async waitForSuccessAlert() {
+    await browser.waitUntil(
+      async() => {
         return (
-          browser.$(".alert-success").getText() ===
+          (await (await browser.$(".alert-success")).getText()) ===
           "People merged. Displaying merged Person below."
         )
       },
@@ -147,24 +152,26 @@ class MergePeople extends Page {
     )
   }
 
-  areNotesExist(notes) {
+  async areNotesExist(notes) {
     let areExist = true
-    const allNoteTexts = this.getNoteCards().map(card =>
-      card.$(".card-body > div").getText()
+    const allNoteTexts = await Promise.all(
+      (
+        await this.getNoteCards()
+      ).map(async card => await (await card.$(".card-body > div")).getText())
     )
-    notes.forEach(note => {
+    for (const note of notes) {
       if (!allNoteTexts.includes(note)) {
         areExist = false
       }
-    })
+    }
     return areExist
   }
 
-  waitForDifferentRolesAlert() {
-    browser.waitUntil(
-      () => {
+  async waitForDifferentRolesAlert() {
+    await browser.waitUntil(
+      async() => {
         return (
-          browser.$(".alert-warning").getText() ===
+          (await (await browser.$(".alert-warning")).getText()) ===
           "People on each side has different roles."
         )
       },

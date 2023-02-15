@@ -15,65 +15,82 @@ const EXAMPLE_LOCATIONS = {
 }
 
 describe("Merge locations page", () => {
-  it("Should be able to select to locations to merge", () => {
-    MergeLocations.open()
-    MergeLocations.getTitle().waitForExist()
-    MergeLocations.getTitle().waitForDisplayed()
+  it("Should be able to select to locations to merge", async() => {
+    await MergeLocations.open()
+    await (await MergeLocations.getTitle()).waitForExist()
+    await (await MergeLocations.getTitle()).waitForDisplayed()
 
-    MergeLocations.getLeftLocationField().setValue(
-      EXAMPLE_LOCATIONS.left.search
+    await (
+      await MergeLocations.getLeftLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.left.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
+      EXAMPLE_LOCATIONS.left.fullName
     )
-    MergeLocations.waitForAdvancedSelectLoading(EXAMPLE_LOCATIONS.left.fullName)
-    MergeLocations.getFirstItemFromAdvancedSelect().click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "left")
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.left.name,
+      "left"
+    )
 
-    expect(MergeLocations.getColumnLocationName("left").getText()).to.eq(
-      EXAMPLE_LOCATIONS.left.name
-    )
+    await expect(
+      await (await MergeLocations.getColumnLocationName("left")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.name)
 
-    MergeLocations.getRightLocationField().setValue(
-      EXAMPLE_LOCATIONS.right.search
-    )
-    MergeLocations.waitForAdvancedSelectLoading(
+    await (
+      await MergeLocations.getRightLocationField()
+    ).setValue(EXAMPLE_LOCATIONS.right.search)
+    await MergeLocations.waitForAdvancedSelectLoading(
       EXAMPLE_LOCATIONS.right.fullName
     )
-    MergeLocations.getFirstItemFromAdvancedSelect().click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.right.name, "right")
-
-    expect(MergeLocations.getColumnLocationName("right").getText()).to.eq(
-      EXAMPLE_LOCATIONS.right.name
+    await (await MergeLocations.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.right.name,
+      "right"
     )
+
+    await expect(
+      await (await MergeLocations.getColumnLocationName("right")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.name)
   })
 
-  it("Should be able to select all fields from left location", () => {
-    MergeLocations.getUseAllButton("left").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "mid")
-
-    expect(MergeLocations.getColumnLocationName("mid").getText()).to.eq(
-      EXAMPLE_LOCATIONS.left.name
+  it("Should be able to select all fields from left location", async() => {
+    await (await MergeLocations.getUseAllButton("left")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.left.name,
+      "mid"
     )
+
+    await expect(
+      await (await MergeLocations.getColumnLocationName("mid")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.left.name)
   })
 
-  it("Should be able to select all fields from right location", () => {
-    MergeLocations.getUseAllButton("right").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.right.name, "mid")
-
-    expect(MergeLocations.getColumnLocationName("mid").getText()).to.eq(
-      EXAMPLE_LOCATIONS.right.name
+  it("Should be able to select all fields from right location", async() => {
+    await (await MergeLocations.getUseAllButton("right")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.right.name,
+      "mid"
     )
+
+    await expect(
+      await (await MergeLocations.getColumnLocationName("mid")).getText()
+    ).to.eq(EXAMPLE_LOCATIONS.right.name)
   })
 
-  it("Should be able to merge both locations when winner is left location", () => {
-    MergeLocations.getUseAllButton("left").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergeLocations.waitForColumnToChange(EXAMPLE_LOCATIONS.left.name, "mid")
+  it("Should be able to merge both locations when winner is left location", async() => {
+    await (await MergeLocations.getUseAllButton("left")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergeLocations.waitForColumnToChange(
+      EXAMPLE_LOCATIONS.left.name,
+      "mid"
+    )
 
-    MergeLocations.getMergeLocationsButton().click()
+    await (await MergeLocations.getMergeLocationsButton()).click()
 
-    MergeLocations.waitForSuccessAlert()
+    await MergeLocations.waitForSuccessAlert()
   })
 })

@@ -25,72 +25,81 @@ const REPORT_SUBMITTED_STATUS = "This report is PENDING approvals."
 const REPORT_APPROVED_STATUS = "This report is APPROVED."
 
 describe("When creating a report without a principal", () => {
-  it("Should save draft report without primary principal attendee", () => {
-    CreateReport.open()
-    browser.pause(500) // wait for the page transition and rendering of custom fields
-    CreateReport.fillForm(REPORT_FIELDS)
-    browser.pause(500)
-    CreateReport.submitForm()
-    expect(CreateReport.getAlert().getText()).to.include(NO_PRINCIPAL_WARNING)
-  })
-  it("Should warn user about missing primary principal", () => {
-    ShowReport.getSubmitButton().click()
-    ShowReport.getReportModal().waitForDisplayed()
-    expect(ShowReport.getModalWarning().getText()).to.include(
+  it("Should save draft report without primary principal attendee", async() => {
+    await CreateReport.open()
+    await browser.pause(500) // wait for the page transition and rendering of custom fields
+    await CreateReport.fillForm(REPORT_FIELDS)
+    await browser.pause(500)
+    await CreateReport.submitForm()
+    await expect(await (await CreateReport.getAlert()).getText()).to.include(
       NO_PRINCIPAL_WARNING
     )
   })
-  it("Should submit report without primary principal attendee", () => {
-    ShowReport.getConfirmSubmitButton().click()
-    browser.pause(1000) // Wait for status text to be updated
-    expect(ShowReport.getReportStatusText()).to.equal(REPORT_SUBMITTED_STATUS)
+  it("Should warn user about missing primary principal", async() => {
+    await (await ShowReport.getSubmitButton()).click()
+    await (await ShowReport.getReportModal()).waitForDisplayed()
+    await expect(
+      await (await ShowReport.getModalWarning()).getText()
+    ).to.include(NO_PRINCIPAL_WARNING)
   })
-  it("Should show missing principal warning to initial approver", () => {
-    MyReports.open("erin")
-    MyReports.selectReport(REPORT_FIELDS.intent, REPORT_STATES.PENDING_APPROVAL)
-    ShowReport.getApproveButton().waitForDisplayed()
-    ShowReport.getApproveButton().click()
-    ShowReport.getReportModal().waitForDisplayed()
-    expect(ShowReport.getModalWarning().getText()).to.include(
-      NO_PRINCIPAL_WARNING
+  it("Should submit report without primary principal attendee", async() => {
+    await (await ShowReport.getConfirmSubmitButton()).click()
+    await browser.pause(1000) // Wait for status text to be updated
+    await expect(await ShowReport.getReportStatusText()).to.equal(
+      REPORT_SUBMITTED_STATUS
     )
-    ShowReport.getConfirmApproveButton().click()
-    ShowReport.getSuccessfullApprovalToast().waitForDisplayed()
-    ShowReport.logout()
   })
-  it("Should show missing principal warning to secondary reviewer", () => {
-    Home.open("/", "rebecca")
-    Home.getReportsPendingMyApproval().waitForDisplayed()
-    Home.getReportsPendingMyApproval().click()
-    Search.selectReport(REPORT_FIELDS.intent)
-    ShowReport.getApproveButton().waitForDisplayed()
-    ShowReport.getApproveButton().click()
-    ShowReport.getReportModal().waitForDisplayed()
-    expect(ShowReport.getModalWarning().getText()).to.include(
-      NO_PRINCIPAL_WARNING
+  it("Should show missing principal warning to initial approver", async() => {
+    await MyReports.open("erin")
+    await MyReports.selectReport(
+      REPORT_FIELDS.intent,
+      REPORT_STATES.PENDING_APPROVAL
     )
-    ShowReport.getConfirmApproveButton().click()
-    ShowReport.getSuccessfullApprovalToast().waitForDisplayed()
-    ShowReport.logout()
+    await (await ShowReport.getApproveButton()).waitForDisplayed()
+    await (await ShowReport.getApproveButton()).click()
+    await (await ShowReport.getReportModal()).waitForDisplayed()
+    await expect(
+      await (await ShowReport.getModalWarning()).getText()
+    ).to.include(NO_PRINCIPAL_WARNING)
+    await (await ShowReport.getConfirmApproveButton()).click()
+    await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
+    await ShowReport.logout()
   })
-  it("Should show missing principal warning to task owner", () => {
-    Home.open("/", "henry")
-    Home.getReportsPendingMyApproval().waitForDisplayed()
-    Home.getReportsPendingMyApproval().click()
-    Search.selectReport(REPORT_FIELDS.intent)
-    ShowReport.getApproveButton().waitForDisplayed()
-    ShowReport.getApproveButton().click()
-    ShowReport.getReportModal().waitForDisplayed()
-    expect(ShowReport.getModalWarning().getText()).to.include(
-      NO_PRINCIPAL_WARNING
+  it("Should show missing principal warning to secondary reviewer", async() => {
+    await Home.open("/", "rebecca")
+    await (await Home.getReportsPendingMyApproval()).waitForDisplayed()
+    await (await Home.getReportsPendingMyApproval()).click()
+    await Search.selectReport(REPORT_FIELDS.intent)
+    await (await ShowReport.getApproveButton()).waitForDisplayed()
+    await (await ShowReport.getApproveButton()).click()
+    await (await ShowReport.getReportModal()).waitForDisplayed()
+    await expect(
+      await (await ShowReport.getModalWarning()).getText()
+    ).to.include(NO_PRINCIPAL_WARNING)
+    await (await ShowReport.getConfirmApproveButton()).click()
+    await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
+    await ShowReport.logout()
+  })
+  it("Should show missing principal warning to task owner", async() => {
+    await Home.open("/", "henry")
+    await (await Home.getReportsPendingMyApproval()).waitForDisplayed()
+    await (await Home.getReportsPendingMyApproval()).click()
+    await Search.selectReport(REPORT_FIELDS.intent)
+    await (await ShowReport.getApproveButton()).waitForDisplayed()
+    await (await ShowReport.getApproveButton()).click()
+    await (await ShowReport.getReportModal()).waitForDisplayed()
+    await expect(
+      await (await ShowReport.getModalWarning()).getText()
+    ).to.include(NO_PRINCIPAL_WARNING)
+    await (await ShowReport.getConfirmApproveButton()).click()
+    await (await ShowReport.getSuccessfullApprovalToast()).waitForDisplayed()
+    await ShowReport.logout(true)
+  })
+  it("Should complete the approval chain", async() => {
+    await MyReports.open("erin")
+    await MyReports.selectReport(REPORT_FIELDS.intent, REPORT_STATES.APPROVED)
+    await expect(await ShowReport.getReportStatusText()).to.equal(
+      REPORT_APPROVED_STATUS
     )
-    ShowReport.getConfirmApproveButton().click()
-    ShowReport.getSuccessfullApprovalToast().waitForDisplayed()
-    ShowReport.logout(true)
-  })
-  it("Should complete the approval chain", () => {
-    MyReports.open("erin")
-    MyReports.selectReport(REPORT_FIELDS.intent, REPORT_STATES.APPROVED)
-    expect(ShowReport.getReportStatusText()).to.equal(REPORT_APPROVED_STATUS)
   })
 })

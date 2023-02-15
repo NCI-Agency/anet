@@ -3,190 +3,191 @@ import Page from "../page"
 const PAGE_URL = "/reports/:uuid"
 
 class ShowReport extends Page {
-  getEditReportButton() {
+  async getEditReportButton() {
     return browser.$("//a[text()='Edit']")
   }
 
-  getTasksEngagementAssessments() {
+  async getTasksEngagementAssessments() {
     return browser.$("#tasks-engagement-assessments")
   }
 
-  getTask12BUrl() {
-    return browser.$("*=1.2.B").getAttribute("href")
+  async getTask12BUrl() {
+    return (await browser.$("*=1.2.B")).getAttribute("href")
   }
 
-  getDefaultReportView() {
+  async getDefaultReportView() {
     return browser.$(".report-show")
   }
 
-  getCompactView() {
+  async getCompactView() {
     return browser.$(".compact-view")
   }
 
-  getCompactViewButton() {
+  async getCompactViewButton() {
     return browser.$("button[value='compactView']")
   }
 
-  getCompactBanner() {
+  async getCompactBanner() {
     return browser.$(".compact-view .banner")
   }
 
-  getCompactTitle() {
+  async getCompactTitle() {
     return browser.$("header *[value='title']")
   }
 
-  getPrintButton() {
+  async getPrintButton() {
     return browser.$("button[value='print']")
   }
 
-  getCompactReportFields() {
+  async getCompactReportFields() {
     return browser.$$(".compact-view .reportField > th")
   }
 
-  getDetailedViewButton() {
+  async getDetailedViewButton() {
     return browser.$("button[value='detailedView']")
   }
 
-  getReportText() {
+  async getReportText() {
     return browser.$("#report-text")
   }
 
-  getReportStatus() {
+  async getReportStatus() {
     return browser.$("h4.text-danger")
   }
 
-  getReportStatusText() {
-    return this.getReportStatus().getText()
+  async getReportStatusText() {
+    return (await this.getReportStatus()).getText()
   }
 
-  getUuid() {
+  async getUuid() {
     const title =
-      browser
-        .$("//span[@class='title-text'][contains(.,'Report #')]")
-        .getText() || ""
+      (await (
+        await browser.$("//span[@class='title-text'][contains(.,'Report #')]")
+      ).getText()) || ""
     return title.slice(title.lastIndexOf("#") + 1)
   }
 
-  getIntent() {
-    const text = browser.$("#intent > p:first-child").getText() || ""
+  async getIntent() {
+    const text =
+      (await (await browser.$("#intent > p:first-child")).getText()) || ""
     return text.slice(text.indexOf(": ") + 2)
   }
 
-  getEngagementDate() {
-    return browser.$("div[name='engagementDate']").getText()
+  async getEngagementDate() {
+    return (await browser.$("div[name='engagementDate']")).getText()
   }
 
-  getReportConflictIcon() {
+  async getReportConflictIcon() {
     // wait for conflict loader to disappear
-    browser
-      .$("div[name='engagementDate'] > span.reportConflictLoadingIcon")
-      .waitForExist({ reverse: true })
+    await (
+      await browser.$(
+        "div[name='engagementDate'] > span.reportConflictLoadingIcon"
+      )
+    ).waitForExist({ reverse: true })
 
     return browser.$("div[name='engagementDate'] > span.reportConflictIcon")
   }
 
-  getReportConflictTooltipTitle() {
-    browser.pause(200)
-    return browser.$(".reportConflictTooltipContainer > div").getText()
+  async getReportConflictTooltipTitle() {
+    await browser.pause(200)
+    return (await browser.$(".reportConflictTooltipContainer > div")).getText()
   }
 
-  getDuration() {
-    return browser.$("div[name='duration']").getText()
+  async getDuration() {
+    return (await browser.$("div[name='duration']")).getText()
   }
 
-  getLocation() {
-    return browser.$("div[name='location']").getText()
+  async getLocation() {
+    return (await browser.$("div[name='location']")).getText()
   }
 
-  getAuthors() {
-    return browser.$("div[name='authors']").getText()
+  async getAuthors() {
+    return (await browser.$("div[name='authors']")).getText()
   }
 
-  getSubmitButton() {
+  async getSubmitButton() {
     return browser.$('//button[text()="Submit report"]')
   }
 
-  getReportModal() {
+  async getReportModal() {
     return browser.$(".modal-dialog")
   }
 
-  getConfirmSubmitButton() {
-    return this.getReportModal().$('//button[text()="Submit anyway"]')
+  async getConfirmSubmitButton() {
+    return (await this.getReportModal()).$('//button[text()="Submit anyway"]')
   }
 
-  getModalWarning() {
-    return this.getReportModal().$(".alert")
+  async getModalWarning() {
+    return (await this.getReportModal()).$(".alert")
   }
 
-  getApproveButton() {
+  async getApproveButton() {
     return browser.$('//button[text()="Approve"]')
   }
 
-  getConfirmApproveButton() {
-    return this.getReportModal().$('//button[text()="Approve anyway"]')
+  async getConfirmApproveButton() {
+    return (await this.getReportModal()).$('//button[text()="Approve anyway"]')
   }
 
-  getSuccessfullApprovalToast() {
+  async getSuccessfullApprovalToast() {
     return browser.$('//div[text()="Successfully approved report."]')
   }
 
-  getAttendeeByName(name) {
-    const td = browser
-      .$("#reportPeopleContainer")
-      .$(`td.reportPeopleName=${name}`)
+  async getAttendeeByName(name) {
+    const td = await (
+      await browser.$("#reportPeopleContainer")
+    ).$(`td.reportPeopleName=${name}`)
 
-    if (!td.isExisting()) {
+    if (!(await td.isExisting())) {
       return null
     }
 
-    const row = td.$("..")
+    const row = await td.$("..")
     // wait for conflict loader to disappear
-    row.$("td.conflictButton div.bp4-spinner").waitForExist({ reverse: true })
+    await (
+      await row.$("td.conflictButton div.bp4-spinner")
+    ).waitForExist({ reverse: true })
 
     return {
-      name: td.getText(),
-      conflictButton: row.$("td.conflictButton > span")
+      name: await td.getText(),
+      conflictButton: await row.$("td.conflictButton > span")
     }
   }
 
-  open(uuid) {
-    super.open(PAGE_URL.replace(":uuid", uuid))
+  async open(uuid) {
+    await super.open(PAGE_URL.replace(":uuid", uuid))
   }
 
-  waitForShowReportToLoad() {
-    browser.waitUntil(() =>
-      /^.*\/reports\/[a-z0-9-]{36}/.test(browser.getUrl())
+  async waitForShowReportToLoad() {
+    await browser.waitUntil(async() =>
+      /^.*\/reports\/[a-z0-9-]{36}/.test(await browser.getUrl())
     )
-    this.getReportStatus().waitForExist()
-    this.getReportStatus().waitForDisplayed()
+    await (await this.getReportStatus()).waitForExist()
+    await (await this.getReportStatus()).waitForDisplayed()
   }
 
-  getCompactViewAttendees(type, withAssessments) {
+  async getCompactViewAttendees(type, withAssessments) {
+    const attendees = withAssessments
+      ? browser.$$(`#${type} > td > table > tbody > tr > td`)
+      : browser.$$(`#${type} > td > span > a`)
     return withAssessments
-      ? browser
-        .$$(`#${type} > td > table > tbody > tr > td`)
+      ? attendees
       // Filter out the assessment rows to get the attendees
-        .filter(row => {
-          return row.$("span > a").isExisting()
-        })
-        .map(row => {
-          return row.$("span > a").getText()
-        })
-      : browser
-        .$$(`#${type} > td > span > a`)
-        .map(attendeeLink => attendeeLink.getText())
+        .filter(row => row.$("span > a").isExisting())
+        .map(row => row.$("span > a").getText())
+      : attendees.map(attendeeLink => attendeeLink.getText())
   }
 
-  selectOptionalField(field) {
-    const optionalFieldsButton = browser.$(
+  async selectOptionalField(field) {
+    const optionalFieldsButton = await browser.$(
       '//button[text()="Optional Fields ⇓"]'
     )
-    const optionalFields = browser.$("#optionalFields")
-    const fieldCheckbox = browser.$(`input[id="${field}"]`)
-    optionalFieldsButton.click()
-    optionalFields.waitForDisplayed()
-    if (!fieldCheckbox.isSelected()) {
-      fieldCheckbox.click()
+    const optionalFields = await browser.$("#optionalFields")
+    const fieldCheckbox = await browser.$(`input[id="${field}"]`)
+    await optionalFieldsButton.click()
+    await optionalFields.waitForDisplayed()
+    if (!(await fieldCheckbox.isSelected())) {
+      await fieldCheckbox.click()
     }
   }
 }

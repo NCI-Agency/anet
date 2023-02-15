@@ -2,155 +2,161 @@ import moment from "moment"
 import * as cr from "../createReport.page"
 
 class CreateReport extends cr.CreateReport {
-  getTitle() {
+  async getTitle() {
     return browser.$("h4.legend")
   }
 
-  getIntent() {
+  async getIntent() {
     return browser.$("#intent")
   }
 
-  getIntentHelpBlock() {
+  async getIntentHelpBlock() {
     return browser.$("#fg-intent div.invalid-feedback")
   }
 
-  getEngagementDate() {
+  async getEngagementDate() {
     return browser.$("#engagementDate")
   }
 
-  getTomorrow() {
+  async getTomorrow() {
     const tomorrow = moment().add(1, "day").format("ddd MMM DD YYYY")
     return browser.$(`div[aria-label="${tomorrow}"]`)
   }
 
-  getReportPeople() {
+  async getReportPeople() {
     return browser.$("#reportPeople")
   }
 
-  getReportPeopleTable() {
+  async getReportPeopleTable() {
     return browser.$("#reportPeople-popover .table-responsive table")
   }
 
-  getLocation() {
+  async getLocation() {
     return browser.$('#fg-location input[id="location"]')
   }
 
-  getLocationTable() {
+  async getLocationTable() {
     return browser.$("#location-popover .table-responsive table")
   }
 
-  getAtmosphere() {
+  async getAtmosphere() {
     return browser.$("#fg-atmosphere")
   }
 
-  getAtmospherePositive() {
-    return this.getAtmosphere().$('label[for="atmosphere_POSITIVE"]')
+  async getAtmospherePositive() {
+    return (await this.getAtmosphere()).$('label[for="atmosphere_POSITIVE"]')
   }
 
-  getAtmosphereNeutral() {
-    return this.getAtmosphere().$('label[for="atmosphere_NEUTRAL"]')
+  async getAtmosphereNeutral() {
+    return (await this.getAtmosphere()).$('label[for="atmosphere_NEUTRAL"]')
   }
 
-  getAtmosphereNegative() {
-    return this.getAtmosphere().$('label[for="atmosphere_NEGATIVE"]')
+  async getAtmosphereNegative() {
+    return (await this.getAtmosphere()).$('label[for="atmosphere_NEGATIVE"]')
   }
 
-  getKeyOutcomes() {
+  async getKeyOutcomes() {
     return browser.$('#fg-keyOutcomes textarea[id="keyOutcomes"]')
   }
 
-  getNextSteps() {
+  async getNextSteps() {
     return browser.$('#fg-nextSteps textarea[id="nextSteps"]')
   }
 
-  getReportText() {
+  async getReportText() {
     return browser.$("#fg-reportText .editable")
   }
 
-  getPersonByName(name) {
-    const personRow = browser.$$(
+  async getPersonByName(name) {
+    const personRow = await browser.$$(
       `//div[@id="reportPeopleContainer"]//tr[td[@class="reportPeopleName" and .//a[text()="${name}"]]]/td[@class="conflictButton" or @class="reportPeopleName"]`
     )
-    personRow[0].$("div.bp4-spinner").waitForExist({ reverse: true })
+    await (
+      await personRow[0].$("div.bp4-spinner")
+    ).waitForExist({ reverse: true })
 
     return {
-      name: personRow[1].getText(),
-      conflictButton: personRow[0].$("./span")
+      name: await personRow[1].getText(),
+      conflictButton: await personRow[0].$("./span")
     }
   }
 
-  selectAttendeeByName(name) {
-    this.getReportPeople().click()
+  async selectAttendeeByName(name) {
+    await (await this.getReportPeople()).click()
     // wait for reportPeople table loader to disappear
-    this.getReportPeopleTable().waitForDisplayed()
+    await (await this.getReportPeopleTable()).waitForDisplayed()
     let searchTerm = name
     if (
-      searchTerm.startsWith("CIV") ||
-      searchTerm.startsWith("LtCol") ||
-      searchTerm.startsWith("Maj")
+      (await searchTerm.startsWith("CIV")) ||
+      (await searchTerm.startsWith("LtCol")) ||
+      (await searchTerm.startsWith("Maj"))
     ) {
       searchTerm = name.substr(name.indexOf(" ") + 1)
     }
-    browser.keys(searchTerm)
-    this.getReportPeopleTable().waitForDisplayed()
-    const checkBox = this.getReportPeopleTable().$(
-      "tbody tr:first-child td:first-child input.checkbox"
-    )
-    if (!checkBox.isSelected()) {
-      checkBox.click()
+    await browser.keys(searchTerm)
+    await (await this.getReportPeopleTable()).waitForDisplayed()
+    const checkBox = await (
+      await this.getReportPeopleTable()
+    ).$("tbody tr:first-child td:first-child input.checkbox")
+    if (!(await checkBox.isSelected())) {
+      await checkBox.click()
     }
-    this.getTitle().click()
-    this.getReportPeopleTable().waitForExist({ reverse: true, timeout: 3000 })
+    await (await this.getTitle()).click()
+    await (
+      await this.getReportPeopleTable()
+    ).waitForExist({ reverse: true, timeout: 3000 })
   }
 
-  getTasks() {
+  async getTasks() {
     return browser.$("#tasks")
   }
 
-  getTasksTable() {
+  async getTasksTable() {
     return browser.$("#tasks-popover .table-responsive table")
   }
 
-  selectTaskByName(name) {
-    this.getTasks().click()
+  async selectTaskByName(name) {
+    await (await this.getTasks()).click()
     // wait for tasks table loader to disappear
-    this.getTasksTable().waitForDisplayed()
-    browser.keys(name)
-    this.getTasksTable().waitForDisplayed()
-    const checkBox = this.getTasksTable().$(
-      "tbody tr:first-child td:first-child input.checkbox"
-    )
-    if (!checkBox.isSelected()) {
-      checkBox.click()
+    await (await this.getTasksTable()).waitForDisplayed()
+    await browser.keys(name)
+    await (await this.getTasksTable()).waitForDisplayed()
+    const checkBox = await (
+      await this.getTasksTable()
+    ).$("tbody tr:first-child td:first-child input.checkbox")
+    if (!(await checkBox.isSelected())) {
+      await checkBox.click()
     }
-    this.getTitle().click()
-    this.getTasksTable().waitForExist({ reverse: true, timeout: 3000 })
+    await (await this.getTitle()).click()
+    await (
+      await this.getTasksTable()
+    ).waitForExist({ reverse: true, timeout: 3000 })
   }
 
-  selectLocation(location) {
-    this.getLocation().click()
-    browser.keys(location)
-    this.getLocationTable().waitForDisplayed()
-    const checkBox = this.getLocationTable().$(
-      "tbody tr:first-child td:first-child input.form-check-input"
-    )
-    if (!checkBox.isSelected()) {
-      checkBox.click()
+  async selectLocation(location) {
+    await (await this.getLocation()).click()
+    await browser.keys(location)
+    await (await this.getLocationTable()).waitForDisplayed()
+    const checkBox = await (
+      await this.getLocationTable()
+    ).$("tbody tr:first-child td:first-child input.form-check-input")
+    if (!(await checkBox.isSelected())) {
+      await checkBox.click()
     }
   }
 
-  selectAthosphere(option) {
+  async selectAthosphere(option) {
     switch (option) {
       case "Positive":
-        this.getAtmospherePositive().click()
+        await (await this.getAtmospherePositive()).click()
         break
 
       case "Neutral":
-        this.getAtmospherePositive().click()
+        await (await this.getAtmospherePositive()).click()
         break
 
       case "Negative":
-        this.getAtmospherePositive().click()
+        await (await this.getAtmospherePositive()).click()
         break
 
       default:
@@ -158,59 +164,67 @@ class CreateReport extends cr.CreateReport {
     }
   }
 
-  fillForm(fields) {
-    this.getForm().waitForClickable()
+  async fillForm(fields) {
+    await (await this.getForm()).waitForClickable()
 
     if (fields.intent !== undefined) {
-      this.getIntent().setValue(fields.intent)
-      this.getIntentHelpBlock().waitForExist({ reverse: true })
+      await (await this.getIntent()).setValue(fields.intent)
+      await (await this.getIntentHelpBlock()).waitForExist({ reverse: true })
     }
 
     if (moment.isMoment(fields.engagementDate)) {
-      this.getEngagementDate().waitForClickable()
-      this.getEngagementDate().click()
-      this.getTomorrow().waitForDisplayed()
-      browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
+      await (await this.getEngagementDate()).waitForClickable()
+      await (await this.getEngagementDate()).click()
+      await (await this.getTomorrow()).waitForDisplayed()
+      await browser.keys(fields.engagementDate.format("DD-MM-YYYY HH:mm"))
 
-      this.getTitle().click()
-      this.getTomorrow().waitForExist({ reverse: true, timeout: 3000 })
+      await (await this.getTitle()).click()
+      await (
+        await this.getTomorrow()
+      ).waitForExist({ reverse: true, timeout: 3000 })
     }
 
     if (fields.duration !== undefined) {
-      this.getDuration().setValue(fields.duration)
+      await (await this.getDuration()).setValue(fields.duration)
     }
 
     if (fields.location) {
-      this.selectLocation(fields.location)
+      await this.selectLocation(fields.location)
     }
 
     if (fields.atmosphere) {
-      this.selectAthosphere(fields.atmosphere)
+      await this.selectAthosphere(fields.atmosphere)
     }
 
     if (Array.isArray(fields.advisors) && fields.advisors.length) {
-      fields.advisors.forEach(at => this.selectAttendeeByName(at))
+      for (const at of fields.advisors) {
+        await this.selectAttendeeByName(at)
+      }
     }
 
     if (Array.isArray(fields.principals) && fields.principals.length) {
-      fields.principals.forEach(at => this.selectAttendeeByName(at))
+      for (const at of fields.principals) {
+        await this.selectAttendeeByName(at)
+      }
     }
 
     if (Array.isArray(fields.tasks) && fields.tasks.length) {
-      fields.tasks.forEach(t => this.selectTaskByName(t))
+      for (const t of fields.tasks) {
+        await this.selectTaskByName(t)
+      }
     }
 
     if (fields.keyOutcomes) {
-      this.getKeyOutcomes().setValue(fields.keyOutcomes)
+      await (await this.getKeyOutcomes()).setValue(fields.keyOutcomes)
     }
 
     if (fields.nextSteps) {
-      this.getNextSteps().setValue(fields.nextSteps)
+      await (await this.getNextSteps()).setValue(fields.nextSteps)
     }
 
     if (fields.reportText) {
-      this.getReportText().click()
-      browser.keys(fields.reportText)
+      await (await this.getReportText()).click()
+      await browser.keys(fields.reportText)
     }
   }
 }

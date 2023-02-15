@@ -10,80 +10,86 @@ import {
 } from "./locationUtils"
 
 describe("When editing a location", () => {
-  beforeEach("Should create a new location first", () => {
-    CreateNewLocation.open()
-    CreateNewLocation.getNameField().setValue(LOCATION_NAME)
-    CreateNewLocation.getTypeField().selectByIndex(LOCATION_TYPE.index)
-    CreateNewLocation.getLatField().setValue(LOCATION_COORDS.lat)
-    CreateNewLocation.getLngField().setValue(LOCATION_COORDS.lng)
+  beforeEach("Should create a new location first", async() => {
+    await CreateNewLocation.open()
+    await (await CreateNewLocation.getNameField()).setValue(LOCATION_NAME)
+    await (
+      await CreateNewLocation.getTypeField()
+    ).selectByIndex(LOCATION_TYPE.index)
+    await (await CreateNewLocation.getLatField()).setValue(LOCATION_COORDS.lat)
+    await (await CreateNewLocation.getLngField()).setValue(LOCATION_COORDS.lng)
     // trigger onblur effect
-    CreateNewLocation.getNameField().click()
-    CreateNewLocation.getCreateButton().click()
+    await (await CreateNewLocation.getNameField()).click()
+    await (await CreateNewLocation.getCreateButton()).click()
     // We are sent to showLocation page
-    ShowLocation.getSuccessMsg().waitForExist()
-    ShowLocation.getSuccessMsg().waitForDisplayed()
-    ShowLocation.getEditButton().waitForExist()
-    ShowLocation.getEditButton().waitForDisplayed()
-    ShowLocation.getEditButton().click()
+    await (await ShowLocation.getSuccessMsg()).waitForExist()
+    await (await ShowLocation.getSuccessMsg()).waitForDisplayed()
+    await (await ShowLocation.getEditButton()).waitForExist()
+    await (await ShowLocation.getEditButton()).waitForDisplayed()
+    await (await ShowLocation.getEditButton()).click()
     // Now we are in the edit page
   })
 
   describe("When on the edit page of a location", () => {
-    it("Should see the correct location type value of the created location", () => {
-      EditLocation.getLocationTypeLabel().waitForExist()
-      EditLocation.getLocationTypeLabel().waitForDisplayed()
+    it("Should see the correct location type value of the created location", async() => {
+      await (await EditLocation.getLocationTypeLabel()).waitForExist()
+      await (await EditLocation.getLocationTypeLabel()).waitForDisplayed()
 
-      expect(EditLocation.getLocationTypeField().getValue()).to.equal(
-        LOCATION_TYPE.type
-      )
+      await expect(
+        await (await EditLocation.getLocationTypeField()).getValue()
+      ).to.equal(LOCATION_TYPE.type)
     })
 
-    it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", () => {
-      EditLocation.getLatLngLabel().waitForExist()
-      EditLocation.getLatLngLabel().waitForDisplayed()
+    it("Should see the correct latitude and longitude values of the created location when the selected format is LAT_LON", async() => {
+      await (await EditLocation.getLatLngLabel()).waitForExist()
+      await (await EditLocation.getLatLngLabel()).waitForDisplayed()
 
-      expect(EditLocation.getLatInputField().getValue()).to.equal(
-        LOCATION_COORDS.lat
-      )
-      expect(EditLocation.getLngInputField().getValue()).to.equal(
-        LOCATION_COORDS.lng
-      )
+      await expect(
+        await (await EditLocation.getLatInputField()).getValue()
+      ).to.equal(LOCATION_COORDS.lat)
+      await expect(
+        await (await EditLocation.getLngInputField()).getValue()
+      ).to.equal(LOCATION_COORDS.lng)
     })
 
-    it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", () => {
-      editLatLngFields()
-      EditLocation.getAllFormatsPopover().click()
-      EditLocation.getAllFormatsPopoverLat().waitForExist()
-      EditLocation.getAllFormatsPopoverMGRS().waitForExist()
+    it("Should correctly edit and save input fields and display the correct values in both formats in the popover window", async() => {
+      await editLatLngFields()
+      await (await EditLocation.getAllFormatsPopover()).click()
+      await (await EditLocation.getAllFormatsPopoverLat()).waitForExist()
+      await (await EditLocation.getAllFormatsPopoverMGRS()).waitForExist()
 
-      expect(EditLocation.getAllFormatsPopoverLat().getText()).to.equal(
+      await expect(
+        await (await EditLocation.getAllFormatsPopoverLat()).getText()
+      ).to.equal(NEW_COORDS.lat)
+      await expect(
+        await (await EditLocation.getAllFormatsPopoverLng()).getText()
+      ).to.equal(NEW_COORDS.lng)
+      await expect(
+        await (await EditLocation.getAllFormatsPopoverMGRS()).getText()
+      ).to.equal(NEW_COORDS.mgrs)
+
+      await (await EditLocation.getSaveLocationButton()).click()
+      await (await ShowLocation.getSuccessMsg()).waitForExist()
+      await (await ShowLocation.getSuccessMsg()).waitForDisplayed()
+
+      await expect(await (await ShowLocation.getLatField()).getText()).to.equal(
         NEW_COORDS.lat
       )
-      expect(EditLocation.getAllFormatsPopoverLng().getText()).to.equal(
+      await expect(await (await ShowLocation.getLngField()).getText()).to.equal(
         NEW_COORDS.lng
       )
-      expect(EditLocation.getAllFormatsPopoverMGRS().getText()).to.equal(
-        NEW_COORDS.mgrs
-      )
-
-      EditLocation.getSaveLocationButton().click()
-      ShowLocation.getSuccessMsg().waitForExist()
-      ShowLocation.getSuccessMsg().waitForDisplayed()
-
-      expect(ShowLocation.getLatField().getText()).to.equal(NEW_COORDS.lat)
-      expect(ShowLocation.getLngField().getText()).to.equal(NEW_COORDS.lng)
     })
   })
 })
 
-function editLatLngFields() {
-  const latInput = EditLocation.getLatInputField()
-  EditLocation.deleteInput(latInput)
-  latInput.setValue(NEW_COORDS.lat)
+async function editLatLngFields() {
+  const latInput = await EditLocation.getLatInputField()
+  await EditLocation.deleteInput(latInput)
+  await latInput.setValue(NEW_COORDS.lat)
 
-  const lngInput = EditLocation.getLngInputField()
-  EditLocation.deleteInput(lngInput)
-  lngInput.setValue(NEW_COORDS.lng)
+  const lngInput = await EditLocation.getLngInputField()
+  await EditLocation.deleteInput(lngInput)
+  await lngInput.setValue(NEW_COORDS.lng)
   // trigger onblur effect
-  CreateNewLocation.getNameField().click()
+  await (await CreateNewLocation.getNameField()).click()
 }

@@ -1,48 +1,50 @@
 class AdvancedSearch {
-  getAdvancedSearchForm() {
+  async getAdvancedSearchForm() {
     return browser.$(".advanced-search-form")
   }
 
-  getAdvancedSearchPopoverTrigger() {
+  async getAdvancedSearchPopoverTrigger() {
     return browser.$(".advanced-search-form ~ span .asLink")
   }
 
-  getAdvancedSearchPopover() {
+  async getAdvancedSearchPopover() {
     return browser.$(".advanced-search")
   }
 
-  getAnetObjectSearchToggleButtons() {
-    return this.getAdvancedSearchPopover().$$(".btn-group > .btn")
+  async getAnetObjectSearchToggleButtons() {
+    return (await this.getAdvancedSearchPopover()).$$(".btn-group > .btn")
   }
 
-  getCommonSearchFilter() {
-    return this.getAdvancedSearchPopover().$(
+  async getCommonSearchFilter() {
+    return (await this.getAdvancedSearchPopover()).$(
       '.advanced-search-content label[for="status"]'
     )
   }
 
-  getPendingVerificationFilter() {
-    return this.getAdvancedSearchPopover().$(
+  async getPendingVerificationFilter() {
+    return (await this.getAdvancedSearchPopover()).$(
       '.advanced-search-content label[for="pendingVerification"]'
     )
   }
 
-  getAddFilterButtonText() {
-    return this.getAdvancedSearchPopover().$(
+  async getAddFilterButtonText() {
+    return (await this.getAdvancedSearchPopover()).$(
       "form > div:nth-child(3) > div:first-child button"
     )
   }
 
-  getAddFilterButton() {
-    return this.getAdvancedSearchPopover().$("#addFilterDropdown")
+  async getAddFilterButton() {
+    return (await this.getAdvancedSearchPopover()).$("#addFilterDropdown")
   }
 
-  getAddFilterPopover() {
-    return this.getAdvancedSearchPopover().$(".bp4-popover2-content")
+  async getAddFilterPopover() {
+    return (await this.getAdvancedSearchPopover()).$(".bp4-popover2-content")
   }
 
-  getSearchFilter(filter) {
-    return this.getAdvancedSearchPopover().$(`//div/a[text()='${filter}']`)
+  async getSearchFilter(filter) {
+    return (await this.getAdvancedSearchPopover()).$(
+      `//div/a[text()='${filter}']`
+    )
   }
 }
 

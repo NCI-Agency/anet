@@ -3,65 +3,65 @@ import Page from "./page"
 const PAGE_URL = "/tasks/new"
 
 class CreateTask extends Page {
-  getForm() {
+  async getForm() {
     return browser.$("form")
   }
 
-  getAlertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  getSubmitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  getShortName() {
+  async getShortName() {
     return browser.$('input[id="shortName"]')
   }
 
-  getCustomFieldsContainer() {
+  async getCustomFieldsContainer() {
     return browser.$("#custom-fields")
   }
 
-  getAssessmentFields() {
+  async getAssessmentFields() {
     // since only custom field is assessments
-    return this.getCustomFieldsContainer().$$(
+    return (await this.getCustomFieldsContainer()).$$(
       '//div[starts-with(@id,"fg-formCustomFields")]'
     )
   }
 
-  getFirstQuestionsFieldContainer() {
-    return this.getCustomFieldsContainer().$(
+  async getFirstQuestionsFieldContainer() {
+    return (await this.getCustomFieldsContainer()).$(
       'div[id="fg-formCustomFields.assessments.0.questions"]'
     )
   }
 
-  getQuestionsField() {
-    return this.getFirstQuestionsFieldContainer().$(
+  async getQuestionsField() {
+    return (await this.getFirstQuestionsFieldContainer()).$(
       'textarea[id="formCustomFields.assessments.0.questions"]'
     )
   }
 
-  getQuestionsFieldWarningText() {
-    return this.getFirstQuestionsFieldContainer().$(
+  async getQuestionsFieldWarningText() {
+    return (await this.getFirstQuestionsFieldContainer()).$(
       '//div[contains(text(), "Invalid")]'
     )
   }
 
-  getAddAssessmentButton() {
+  async getAddAssessmentButton() {
     return browser.$('button[id="add-formCustomFields.assessments"]')
   }
 
-  openAsSuperUser() {
-    super.openAsSuperUser(PAGE_URL)
+  async openAsSuperUser() {
+    await super.openAsSuperUser(PAGE_URL)
   }
 
-  openAsAdmin() {
-    super.openAsAdminUser(PAGE_URL)
+  async openAsAdmin() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  submitForm() {
-    this.getSubmitButton().click()
+  async submitForm() {
+    await (await this.getSubmitButton()).click()
   }
 }
 

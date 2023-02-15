@@ -31,194 +31,224 @@ const NEW_PERSON_FIELDS_2 = {
 
 describe("Visibility of custom sensitive information", () => {
   describe("Users", () => {
-    it("Should be able to find the non counterpart principal with sensitive information", () => {
-      Home.open("/", DEFAULT_USERNAME)
-      Home.getSearchBar().setValue(NON_COUNTERPART_PRINCIPLE.name)
-      Home.getSubmitSearch().click()
-      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
-      Search.getFoundPeopleTable().waitForDisplayed()
-      Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name).click()
+    it("Should be able to find the non counterpart principal with sensitive information", async() => {
+      await Home.open("/", DEFAULT_USERNAME)
+      await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (
+        await Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name)
+      ).click()
     })
-    it("Should not be able to see political position field if not authorized", () => {
-      ShowPerson.getPoliticalPosition().waitForDisplayed({
+    it("Should not be able to see political position field if not authorized", async() => {
+      await (
+        await ShowPerson.getPoliticalPosition()
+      ).waitForDisplayed({
         timeout: 1000,
         reverse: true
       })
     })
-    it("Should be able to see birthday field with the correct value if authorized", () => {
-      ShowPerson.getBirthday().waitForDisplayed()
-      expect(ShowPerson.getBirthday().getText()).to.equal(
+    it("Should be able to see birthday field with the correct value if authorized", async() => {
+      await (await ShowPerson.getBirthday()).waitForDisplayed()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
-    it("Should be able to find the counterpart principal with sensitive information", () => {
-      Home.open("/", DEFAULT_USERNAME)
-      Home.getSearchBar().setValue(COUNTERPART_PRINCIPLE.name)
-      Home.getSubmitSearch().click()
-      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
-      Search.getFoundPeopleTable().waitForDisplayed()
-      Search.linkOfPersonFound(COUNTERPART_PRINCIPLE.name).click()
+    it("Should be able to find the counterpart principal with sensitive information", async() => {
+      await Home.open("/", DEFAULT_USERNAME)
+      await (await Home.getSearchBar()).setValue(COUNTERPART_PRINCIPLE.name)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (await Search.linkOfPersonFound(COUNTERPART_PRINCIPLE.name)).click()
     })
-    it("Should be able to see political position field with the correct value if counterpart", () => {
-      ShowPerson.getPoliticalPosition().waitForDisplayed()
-      expect(ShowPerson.getPoliticalPosition().getText()).to.equal(
-        COUNTERPART_PRINCIPLE.politicalPosition
-      )
+    it("Should be able to see political position field with the correct value if counterpart", async() => {
+      await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
+      await expect(
+        await (await ShowPerson.getPoliticalPosition()).getText()
+      ).to.equal(COUNTERPART_PRINCIPLE.politicalPosition)
     })
-    it("Should be able to see birthday field with the correct value if counterpart", () => {
-      ShowPerson.getBirthday().waitForDisplayed()
-      expect(ShowPerson.getBirthday().getText()).to.equal(
+    it("Should be able to see birthday field with the correct value if counterpart", async() => {
+      await (await ShowPerson.getBirthday()).waitForDisplayed()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         COUNTERPART_PRINCIPLE.birthday
       )
     })
-    it("Should logout", () => {
-      ShowPerson.logout()
+    it("Should logout", async() => {
+      await ShowPerson.logout()
     })
   })
 
   describe("Superusers", () => {
-    it("Should be able to find the principal with sensitive information", () => {
-      Home.openAsSuperUser()
-      Home.getSearchBar().setValue(NON_COUNTERPART_PRINCIPLE.name)
-      Home.getSubmitSearch().click()
-      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
-      Search.getFoundPeopleTable().waitForDisplayed()
-      Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name).click()
+    it("Should be able to find the principal with sensitive information", async() => {
+      await Home.openAsSuperUser()
+      await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (
+        await Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name)
+      ).click()
     })
-    it("Should not be able to see political position field if not authorized", () => {
-      ShowPerson.getPoliticalPosition().waitForDisplayed({
+    it("Should not be able to see political position field if not authorized", async() => {
+      await (
+        await ShowPerson.getPoliticalPosition()
+      ).waitForDisplayed({
         timeout: 1000,
         reverse: true
       })
     })
-    it("Should be able to see birthday field with the correct value if authorized", () => {
-      ShowPerson.getBirthday().waitForDisplayed()
-      expect(ShowPerson.getBirthday().getText()).to.equal(
+    it("Should be able to see birthday field with the correct value if authorized", async() => {
+      await (await ShowPerson.getBirthday()).waitForDisplayed()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
-    it("Should logout", () => {
-      ShowPerson.logout()
+    it("Should logout", async() => {
+      await ShowPerson.logout()
     })
   })
 
   describe("Admins", () => {
-    it("Should be able to find the principal with sensitive information", () => {
-      Home.openAsAdminUser()
-      Home.getSearchBar().setValue(NON_COUNTERPART_PRINCIPLE.name)
-      Home.getSubmitSearch().click()
-      Search.getFoundPeopleTable().waitForExist({ timeout: 20000 })
-      Search.getFoundPeopleTable().waitForDisplayed()
-      Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name).click()
+    it("Should be able to find the principal with sensitive information", async() => {
+      await Home.openAsAdminUser()
+      await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (
+        await Search.linkOfPersonFound(NON_COUNTERPART_PRINCIPLE.name)
+      ).click()
     })
-    it("Should be able to see political position field with the correct value", () => {
-      ShowPerson.getPoliticalPosition().waitForDisplayed()
-      expect(ShowPerson.getPoliticalPosition().getText()).to.equal(
-        NON_COUNTERPART_PRINCIPLE.politicalPosition
-      )
+    it("Should be able to see political position field with the correct value", async() => {
+      await (await ShowPerson.getPoliticalPosition()).waitForDisplayed()
+      await expect(
+        await (await ShowPerson.getPoliticalPosition()).getText()
+      ).to.equal(NON_COUNTERPART_PRINCIPLE.politicalPosition)
     })
-    it("Should be able to see birthday field with the correct value", () => {
-      ShowPerson.getBirthday().waitForDisplayed()
-      expect(ShowPerson.getBirthday().getText()).to.equal(
+    it("Should be able to see birthday field with the correct value", async() => {
+      await (await ShowPerson.getBirthday()).waitForDisplayed()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
         NON_COUNTERPART_PRINCIPLE.birthday
       )
     })
-    it("Should logout", () => {
-      ShowPerson.logout()
+    it("Should logout", async() => {
+      await ShowPerson.logout()
     })
   })
 })
 
 describe("Creating and editing custom sensitive information", () => {
   describe("Superusers", () => {
-    it("Should be able load a new person form and fill normal required fields", () => {
-      CreatePerson.openAsSuperUser()
-      CreatePerson.getForm().waitForExist()
-      CreatePerson.getForm().waitForDisplayed()
+    it("Should be able load a new person form and fill normal required fields", async() => {
+      await CreatePerson.openAsSuperUser()
+      await (await CreatePerson.getForm()).waitForExist()
+      await (await CreatePerson.getForm()).waitForDisplayed()
       // fill other required fields at the beginning
-      CreatePerson.getLastName().setValue(NEW_PERSON_FIELDS_1.lastname)
-      CreatePerson.getRank().selectByAttribute(
-        "value",
-        NEW_PERSON_FIELDS_1.rank
+      await (
+        await CreatePerson.getLastName()
+      ).setValue(NEW_PERSON_FIELDS_1.lastname)
+      await (
+        await CreatePerson.getRank()
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_1.rank)
+      await (
+        await CreatePerson.getGender()
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_1.gender)
+    })
+    it("Should not be able to edit sensitive fields if not authorized", async() => {
+      await (
+        await CreatePerson.getPoliticalPositionSensitiveFieldContainer()
+      ).waitForDisplayed({
+        timeout: 1000,
+        reverse: true
+      })
+    })
+    it("Should be able to create a new person with sensitive information", async() => {
+      await CreatePerson.deleteInput(CreatePerson.getBirthday())
+      await (await CreatePerson.getBirthday()).setValue("08-06-1963")
+      await (await CreatePerson.getLastName()).click()
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+        "8 June 1963"
       )
-      CreatePerson.getGender().selectByAttribute(
-        "value",
-        NEW_PERSON_FIELDS_1.gender
+    })
+    it("Should be able to edit sensitive information if authorized", async() => {
+      await (await ShowPerson.getEditButton()).click()
+      await (await CreatePerson.getForm()).waitForExist()
+      await (await CreatePerson.getForm()).waitForDisplayed()
+      await CreatePerson.deleteInput(CreatePerson.getBirthday())
+      await (await CreatePerson.getBirthday()).setValue("01-01-1956")
+      await (await CreatePerson.getLastName()).click()
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+        "1 January 1956"
       )
     })
-    it("Should not be able to edit sensitive fields if not authorized", () => {
-      CreatePerson.getPoliticalPositionSensitiveFieldContainer().waitForDisplayed(
-        {
-          timeout: 1000,
-          reverse: true
-        }
-      )
-    })
-    it("Should be able to create a new person with sensitive information", () => {
-      CreatePerson.deleteInput(CreatePerson.getBirthday())
-      CreatePerson.getBirthday().setValue("08-06-1963")
-      CreatePerson.getLastName().click()
-      CreatePerson.submitForm()
-      CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.getBirthday().getText()).to.equal("8 June 1963")
-    })
-    it("Should be able to edit sensitive information if authorized", () => {
-      ShowPerson.getEditButton().click()
-      CreatePerson.getForm().waitForExist()
-      CreatePerson.getForm().waitForDisplayed()
-      CreatePerson.deleteInput(CreatePerson.getBirthday())
-      CreatePerson.getBirthday().setValue("01-01-1956")
-      CreatePerson.getLastName().click()
-      CreatePerson.submitForm()
-      CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.getBirthday().getText()).to.equal("1 January 1956")
-    })
-    it("Should logout", () => {
-      CreatePerson.logout()
+    it("Should logout", async() => {
+      await CreatePerson.logout()
     })
   })
 
   describe("Admins", () => {
-    it("Should be able load a new person form and fill normal required fields", () => {
-      CreatePerson.openAsAdmin()
-      CreatePerson.getForm().waitForExist()
-      CreatePerson.getForm().waitForDisplayed()
+    it("Should be able load a new person form and fill normal required fields", async() => {
+      await CreatePerson.openAsAdmin()
+      await (await CreatePerson.getForm()).waitForExist()
+      await (await CreatePerson.getForm()).waitForDisplayed()
       // fill other required fields at the beginning
-      CreatePerson.getLastName().setValue(NEW_PERSON_FIELDS_2.lastname)
-      CreatePerson.getRank().selectByAttribute(
-        "value",
-        NEW_PERSON_FIELDS_1.rank
+      await (
+        await CreatePerson.getLastName()
+      ).setValue(NEW_PERSON_FIELDS_2.lastname)
+      await (
+        await CreatePerson.getRank()
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_1.rank)
+      await (
+        await CreatePerson.getGender()
+      ).selectByAttribute("value", NEW_PERSON_FIELDS_2.gender)
+    })
+    it("Should be able to create a new person with sensitive information", async() => {
+      await CreatePerson.deleteInput(CreatePerson.getBirthday())
+      await (await CreatePerson.getBirthday()).setValue("01-01-1956")
+      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getMiddleButton()).click()
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+        "1 January 1956"
       )
-      CreatePerson.getGender().selectByAttribute(
-        "value",
-        NEW_PERSON_FIELDS_2.gender
+      await expect(
+        await (await ShowPerson.getPoliticalPosition()).getText()
+      ).to.equal("Middle")
+    })
+    it("Should be able to edit sensitive information", async() => {
+      await (await ShowPerson.getEditButton()).click()
+      await (await CreatePerson.getForm()).waitForExist()
+      await (await CreatePerson.getForm()).waitForDisplayed()
+      await CreatePerson.deleteInput(CreatePerson.getBirthday())
+      await (await CreatePerson.getBirthday()).setValue("08-06-1963")
+      await (await CreatePerson.getLastName()).click()
+      await (await CreatePerson.getLeftButton()).click()
+      await CreatePerson.submitForm()
+      await CreatePerson.waitForAlertSuccessToLoad()
+      await expect(await (await ShowPerson.getBirthday()).getText()).to.equal(
+        "8 June 1963"
       )
+      await expect(
+        await (await ShowPerson.getPoliticalPosition()).getText()
+      ).to.equal("Left")
     })
-    it("Should be able to create a new person with sensitive information", () => {
-      CreatePerson.deleteInput(CreatePerson.getBirthday())
-      CreatePerson.getBirthday().setValue("01-01-1956")
-      CreatePerson.getLastName().click()
-      CreatePerson.getMiddleButton().click()
-      CreatePerson.submitForm()
-      CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.getBirthday().getText()).to.equal("1 January 1956")
-      expect(ShowPerson.getPoliticalPosition().getText()).to.equal("Middle")
-    })
-    it("Should be able to edit sensitive information", () => {
-      ShowPerson.getEditButton().click()
-      CreatePerson.getForm().waitForExist()
-      CreatePerson.getForm().waitForDisplayed()
-      CreatePerson.deleteInput(CreatePerson.getBirthday())
-      CreatePerson.getBirthday().setValue("08-06-1963")
-      CreatePerson.getLastName().click()
-      CreatePerson.getLeftButton().click()
-      CreatePerson.submitForm()
-      CreatePerson.waitForAlertSuccessToLoad()
-      expect(ShowPerson.getBirthday().getText()).to.equal("8 June 1963")
-      expect(ShowPerson.getPoliticalPosition().getText()).to.equal("Left")
-    })
-    it("Should logout", () => {
-      CreatePerson.logout()
+    it("Should logout", async() => {
+      await CreatePerson.logout()
     })
   })
 })

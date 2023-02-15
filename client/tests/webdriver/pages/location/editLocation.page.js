@@ -3,29 +3,29 @@ import Page from "../page"
 const PAGE_URL = "/locations/:uuid/edit"
 
 class EditLocation extends Page {
-  getSaveLocationButton() {
+  async getSaveLocationButton() {
     return browser.$('//button[text()="Save Location"]')
   }
 
-  getLocationTypeLabel() {
+  async getLocationTypeLabel() {
     return browser.$("label*=Type")
   }
 
-  getLatLngLabel() {
+  async getLatLngLabel() {
     return browser.$("label*=Latitude")
   }
 
   // Can't edit anet.yml to change location format, so can't test this for now
-  getMgrsLabel() {
+  async getMgrsLabel() {
     return browser.$("label*=MGRS")
   }
 
-  getAllFormatsPopover() {
+  async getAllFormatsPopover() {
     return browser.$("button#gloc-info-btn")
   }
 
   // parent of MGRS table data => tr
-  getAllFormatsPopoverLat() {
+  async getAllFormatsPopoverLat() {
     return browser
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
@@ -33,7 +33,7 @@ class EditLocation extends Page {
       .$("span:first-child")
   }
 
-  getAllFormatsPopoverLng() {
+  async getAllFormatsPopoverLng() {
     return browser
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
@@ -41,7 +41,7 @@ class EditLocation extends Page {
       .$("span:nth-child(3)")
   }
 
-  getAllFormatsPopoverMGRS() {
+  async getAllFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
     return browser
       .$(".bp4-popover2-content table")
@@ -50,27 +50,27 @@ class EditLocation extends Page {
       .$("span:first-child")
   }
 
-  getLocationTypeField() {
+  async getLocationTypeField() {
     return browser.$("select.location-type-form-group")
   }
 
-  getLatInputField() {
+  async getLatInputField() {
     return browser.$("input#lat")
   }
 
-  getLngInputField() {
+  async getLngInputField() {
     return browser.$("input#lng")
   }
 
-  open(locationId) {
-    super.open(PAGE_URL.replace(":uuid", locationId))
-    this.waitForEditLocationPageToLoad()
+  async open(locationId) {
+    await super.open(PAGE_URL.replace(":uuid", locationId))
+    await this.waitForEditLocationPageToLoad()
   }
 
-  waitForEditLocationPageToLoad() {
-    if (!this.getSaveLocationButton().isDisplayed()) {
-      this.getSaveLocationButton().waitForExist()
-      this.getSaveLocationButton().waitForDisplayed()
+  async waitForEditLocationPageToLoad() {
+    if (!(await (await this.getSaveLocationButton()).isDisplayed())) {
+      await (await this.getSaveLocationButton()).waitForExist()
+      await (await this.getSaveLocationButton()).waitForDisplayed()
     }
   }
 }

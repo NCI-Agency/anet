@@ -1,26 +1,26 @@
 import { CreatePerson } from "./createNewPerson.page"
 
 class Onboard extends CreatePerson {
-  getWelcomeText() {
+  async getWelcomeText() {
     return browser.$(".onboarding-new h1")
   }
 
-  getOnboardingPopover() {
+  async getOnboardingPopover() {
     return browser.$(".hopscotch-bubble-container")
   }
 
-  getCreateYourAccountBtn() {
+  async getCreateYourAccountBtn() {
     return browser.$(".create-account-button-wrapper .btn-primary")
   }
 
-  waitForWelcomeMessage(value) {
-    if (!this.getWelcomeText().isDisplayed()) {
-      this.getWelcomeText().waitForExist()
-      this.getWelcomeText().waitForDisplayed()
+  async waitForWelcomeMessage(value) {
+    if (!(await (await this.getWelcomeText()).isDisplayed())) {
+      await (await this.getWelcomeText()).waitForExist()
+      await (await this.getWelcomeText()).waitForDisplayed()
     }
     return browser.waitUntil(
-      () => {
-        return this.getWelcomeText().getText() === value
+      async() => {
+        return (await (await this.getWelcomeText()).getText()) === value
       },
       { timeout: 5000, timeoutMsg: "Expected different welcome text after 5s" }
     )

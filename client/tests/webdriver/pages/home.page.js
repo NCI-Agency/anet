@@ -1,93 +1,95 @@
 import Page from "./page"
 
 class Home extends Page {
-  getTopbar() {
+  async getTopbar() {
     return browser.$("#topbar")
   }
 
-  getIeBanner() {
+  async getIeBanner() {
     return browser.$("#ieBanner")
   }
 
-  getIeBannerText() {
-    return this.getIeBanner().$("div:nth-child(2)").getText()
+  async getIeBannerText() {
+    return (await (await this.getIeBanner()).$("div:nth-child(2)")).getText()
   }
 
-  getSecurityBanner() {
-    const banner = browser.$("#topbar div:nth-child(1)")
-    banner.waitForExist()
-    banner.waitForDisplayed()
+  async getSecurityBanner() {
+    const banner = await browser.$("#topbar div:nth-child(1)")
+    await banner.waitForExist()
+    await banner.waitForDisplayed()
     return banner
   }
 
-  getBannerUser() {
-    return this.getSecurityBanner().$("#bannerUser")
+  async getBannerUser() {
+    return (await this.getSecurityBanner()).$("#bannerUser")
   }
 
-  getBannerSecurityText() {
-    return this.getSecurityBanner().$("#bannerSecurityText")
+  async getBannerSecurityText() {
+    return (await this.getSecurityBanner()).$("#bannerSecurityText")
   }
 
-  getBannerDropdown() {
-    return this.getBannerUser().$('button[id="dropdown-split-basic"]')
+  async getBannerDropdown() {
+    return (await this.getBannerUser()).$('button[id="dropdown-split-basic"]')
   }
 
-  getLogoutButton() {
-    return this.getBannerUser().$('//a[text()="Sign out"]')
+  async getLogoutButton() {
+    return (await this.getBannerUser()).$('//a[text()="Sign out"]')
   }
 
-  getSearchBar() {
+  async getSearchBar() {
     return browser.$("#searchBarInput")
   }
 
-  getHomeTilesContainer() {
+  async getHomeTilesContainer() {
     return browser.$("fieldset.home-tile-row")
   }
 
-  getPendingMyApprovalOfCount() {
-    return browser
-      .$('//button[contains(text(), "Reports pending my approval")]')
-      .$("h1")
+  async getPendingMyApprovalOfCount() {
+    return (
+      await browser.$(
+        '//button[contains(text(), "Reports pending my approval")]'
+      )
+    ).$("h1")
   }
 
-  getSubmitSearch() {
+  async getSubmitSearch() {
     return browser.$("#topbar #searchBarSubmit")
   }
 
-  getLinksMenuButton() {
+  async getLinksMenuButton() {
     return browser.$('//a[text()="My Work"]')
   }
 
-  getMyOrgLink() {
+  async getMyOrgLink() {
     return browser.$('//a//span[contains(text(), "My Organization")]')
   }
 
-  getMyTasksLink() {
+  async getMyTasksLink() {
     return browser.$('//a//span[text()="My Objective / Efforts"]')
   }
 
-  getMyCounterpartsLink() {
+  async getMyCounterpartsLink() {
     return browser.$('//a//span[text()="My Counterparts"]')
   }
 
-  getMyCounterpartsNotifications() {
-    return this.getMyCounterpartsLink().$("span.badge")
+  async getMyCounterpartsNotifications() {
+    return (await this.getMyCounterpartsLink()).$("span.badge")
   }
 
-  getMyTasksNotifications() {
-    return this.getMyTasksLink().$("span.badge")
+  async getMyTasksNotifications() {
+    return (await this.getMyTasksLink()).$("span.badge")
   }
 
-  getReportsPendingMyApproval() {
+  async getReportsPendingMyApproval() {
     return browser.$('//button[text()="Reports pending my approval"]')
   }
 
-  waitForSecurityBannerValue(value) {
-    this.getSecurityBanner().waitForExist()
-    this.getSecurityBanner().waitForDisplayed()
+  async waitForSecurityBannerValue(value) {
+    await (await this.getSecurityBanner()).waitForExist()
+    await (await this.getSecurityBanner()).waitForDisplayed()
     return browser.waitUntil(
-      () => {
-        return this.getSecurityBanner().getText() === value
+      async() => {
+        return (await (await this.getSecurityBanner()).getText()) === value
       },
       { timeout: 5000, timeoutMsg: "Expected different banner text after 5s" }
     )

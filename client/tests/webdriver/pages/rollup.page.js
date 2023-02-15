@@ -3,20 +3,20 @@ import Page from "./page"
 const PAGE_URL = "/rollup"
 
 class Rollup extends Page {
-  getRollup() {
+  async getRollup() {
     return browser.$("div#daily-rollup")
   }
 
-  getEmailButton() {
+  async getEmailButton() {
     return browser.$("button#email-rollup")
   }
 
-  getEmailPreviewButton() {
+  async getEmailPreviewButton() {
     return browser.$("a#preview-rollup-email")
   }
 
-  open() {
-    super.open(PAGE_URL)
+  async open() {
+    await super.open(PAGE_URL)
   }
 }
 

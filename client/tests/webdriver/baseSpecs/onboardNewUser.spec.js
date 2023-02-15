@@ -17,70 +17,80 @@ const personDetails = {
 }
 
 describe("Onboard new user login", () => {
-  it("Should show onboard welcome", () => {
-    OnboardPage.openAsOnboardUser()
+  it("Should show onboard welcome", async() => {
+    await OnboardPage.openAsOnboardUser()
     const welcomeText = "Welcome to ANET"
-    OnboardPage.waitForWelcomeMessage(welcomeText)
+    await OnboardPage.waitForWelcomeMessage(welcomeText)
 
-    const securityText = OnboardPage.getWelcomeText().getText()
-    expect(securityText).to.equal(welcomeText)
+    const securityText = await (await OnboardPage.getWelcomeText()).getText()
+    await expect(securityText).to.equal(welcomeText)
   })
 
-  it("Should click on create your account", () => {
-    OnboardPage.getCreateYourAccountBtn().scrollIntoView()
-    OnboardPage.getCreateYourAccountBtn().click()
-    browser.pause(500) // wait for the page transition and rendering of custom fields
+  it("Should click on create your account", async() => {
+    await (await OnboardPage.getCreateYourAccountBtn()).scrollIntoView()
+    await (await OnboardPage.getCreateYourAccountBtn()).click()
+    await browser.pause(500) // wait for the page transition and rendering of custom fields
 
     // Check that these are properly copied from the authentication server
-    OnboardPage.getLastName().waitForDisplayed()
-    OnboardPage.getLastName().waitForExist()
-    expect(OnboardPage.getLastName().getValue()).to.equal(ONBOARD_USER.lastName)
-    OnboardPage.getFirstName().waitForDisplayed()
-    OnboardPage.getFirstName().waitForExist()
-    expect(OnboardPage.getFirstName().getValue()).to.equal(
+    await (await OnboardPage.getLastName()).waitForDisplayed()
+    await (await OnboardPage.getLastName()).waitForExist()
+    await expect(await (await OnboardPage.getLastName()).getValue()).to.equal(
+      ONBOARD_USER.lastName
+    )
+    await (await OnboardPage.getFirstName()).waitForDisplayed()
+    await (await OnboardPage.getFirstName()).waitForExist()
+    await expect(await (await OnboardPage.getFirstName()).getValue()).to.equal(
       ONBOARD_USER.firstName
     )
-    OnboardPage.getEmailAddress().waitForDisplayed()
-    OnboardPage.getEmailAddress().waitForExist()
-    expect(OnboardPage.getEmailAddress().getValue()).to.equal(
-      ONBOARD_USER.emailAddress
-    )
+    await (await OnboardPage.getEmailAddress()).waitForDisplayed()
+    await (await OnboardPage.getEmailAddress()).waitForExist()
+    await expect(
+      await (await OnboardPage.getEmailAddress()).getValue()
+    ).to.equal(ONBOARD_USER.emailAddress)
   })
 
-  it("Should not save if endOfTourDate is not in the future", () => {
-    OnboardPage.getEndOfTourDate().waitForExist()
-    OnboardPage.getEndOfTourDate().click()
+  it("Should not save if endOfTourDate is not in the future", async() => {
+    await (await OnboardPage.getEndOfTourDate()).waitForExist()
+    await (await OnboardPage.getEndOfTourDate()).click()
 
-    OnboardPage.getEndOfTourToday().waitForDisplayed()
-    OnboardPage.getEndOfTourToday().waitForExist()
+    await (await OnboardPage.getEndOfTourToday()).waitForDisplayed()
+    await (await OnboardPage.getEndOfTourToday()).waitForExist()
     // select a date
-    OnboardPage.getEndOfTourToday().click()
-    OnboardPage.getLastName().click()
-    const errorMessage = OnboardPage.getEndOfTourDate()
+    await (await OnboardPage.getEndOfTourToday()).click()
+    await (await OnboardPage.getLastName()).click()
+    const errorMessage = await (await OnboardPage.getEndOfTourDate())
       .$("..")
       .$("..")
       .$("..")
       .$("..")
       .$("div.invalid-feedback")
-    errorMessage.waitForExist()
-    errorMessage.waitForDisplayed()
-    expect(errorMessage.getText()).to.equal(
+    await errorMessage.waitForExist()
+    await errorMessage.waitForDisplayed()
+    await expect(await errorMessage.getText()).to.equal(
       "The End of tour date must be in the future"
     )
   })
 
-  it("Should save if all fields properly filled", () => {
-    OnboardPage.getRank().selectByAttribute("value", personDetails.rank)
-    OnboardPage.getGender().selectByAttribute("value", personDetails.gender)
-    OnboardPage.getCountry().selectByAttribute("value", personDetails.country)
-    OnboardPage.getEndOfTourDate().setValue(personDetails.endOfTourDate)
-    OnboardPage.getLastName().click()
-    browser.pause(500) // wait for the error message to disappear
-    OnboardPage.submitForm()
+  it("Should save if all fields properly filled", async() => {
+    await (
+      await OnboardPage.getRank()
+    ).selectByAttribute("value", personDetails.rank)
+    await (
+      await OnboardPage.getGender()
+    ).selectByAttribute("value", personDetails.gender)
+    await (
+      await OnboardPage.getCountry()
+    ).selectByAttribute("value", personDetails.country)
+    await (
+      await OnboardPage.getEndOfTourDate()
+    ).setValue(personDetails.endOfTourDate)
+    await (await OnboardPage.getLastName()).click()
+    await browser.pause(500) // wait for the error message to disappear
+    await OnboardPage.submitForm()
 
-    OnboardPage.waitForAlertWarningToLoad()
-    OnboardPage.getOnboardingPopover().waitForExist()
-    OnboardPage.getOnboardingPopover().waitForDisplayed()
-    OnboardPage.logout()
+    await OnboardPage.waitForAlertWarningToLoad()
+    await (await OnboardPage.getOnboardingPopover()).waitForExist()
+    await (await OnboardPage.getOnboardingPopover()).waitForDisplayed()
+    await OnboardPage.logout()
   })
 })

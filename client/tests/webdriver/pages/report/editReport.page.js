@@ -3,67 +3,67 @@ import Page from "../page"
 const PAGE_URL = "/reports/:uuid/edit"
 
 class EditReport extends Page {
-  getSubmitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  getDeleteButton() {
+  async getDeleteButton() {
     return browser.$(
       "//div[@class='submit-buttons']//button[text()='Delete this planned engagement']"
     )
   }
 
-  getUnpublishButton() {
+  async getUnpublishButton() {
     return browser.$('//button[text()="Unpublish report"]')
   }
 
-  getConfirmModal() {
+  async getConfirmModal() {
     return browser.$("div.triggerable-confirm-bootstrap-modal")
   }
 
-  getReportText() {
+  async getReportText() {
     return browser.$(".reportTextField")
   }
 
-  confirmDeleteButton(uuid) {
+  async confirmDeleteButton(uuid) {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  confirmUnpublishButton(uuid) {
+  async confirmUnpublishButton(uuid) {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  deleteReport(uuid) {
-    this.getDeleteButton().click()
-    browser.pause(300) // wait for modal animation to finish
-    this.confirmDeleteButton(uuid).waitForExist()
-    this.confirmDeleteButton(uuid).waitForDisplayed()
-    this.confirmDeleteButton(uuid).waitForClickable()
-    browser.pause(300) // wait for modal animation to finish
-    this.confirmDeleteButton(uuid).click()
-    this.waitForAlertSuccessToLoad()
+  async deleteReport(uuid) {
+    await (await this.getDeleteButton()).click()
+    await browser.pause(300) // wait for modal animation to finish
+    await (await this.confirmDeleteButton(uuid)).waitForExist()
+    await (await this.confirmDeleteButton(uuid)).waitForDisplayed()
+    await (await this.confirmDeleteButton(uuid)).waitForClickable()
+    await browser.pause(300) // wait for modal animation to finish
+    await (await this.confirmDeleteButton(uuid)).click()
+    await this.waitForAlertSuccessToLoad()
   }
 
-  unpublishReport(uuid) {
-    this.getUnpublishButton().click()
-    browser.pause(300) // wait for modal animation to finish
-    this.confirmUnpublishButton(uuid).waitForExist()
-    this.confirmUnpublishButton(uuid).waitForDisplayed()
-    this.confirmUnpublishButton(uuid).waitForClickable()
-    browser.pause(300) // wait for modal animation to finish
-    this.confirmUnpublishButton(uuid).click()
-    this.waitForAlertSuccessToLoad()
+  async unpublishReport(uuid) {
+    await (await this.getUnpublishButton()).click()
+    await browser.pause(300) // wait for modal animation to finish
+    await (await this.confirmUnpublishButton(uuid)).waitForExist()
+    await (await this.confirmUnpublishButton(uuid)).waitForDisplayed()
+    await (await this.confirmUnpublishButton(uuid)).waitForClickable()
+    await browser.pause(300) // wait for modal animation to finish
+    await (await this.confirmUnpublishButton(uuid)).click()
+    await this.waitForAlertSuccessToLoad()
   }
 
-  open(uuid) {
-    super.open(PAGE_URL.replace(":uuid", uuid))
-    this.waitForEditReportToLoad()
+  async open(uuid) {
+    await super.open(PAGE_URL.replace(":uuid", uuid))
+    await this.waitForEditReportToLoad()
   }
 
-  waitForEditReportToLoad() {
-    if (!this.getSubmitButton().isDisplayed()) {
-      this.getSubmitButton().waitForExist()
-      this.getSubmitButton().waitForDisplayed()
+  async waitForEditReportToLoad() {
+    if (!(await (await this.getSubmitButton()).isDisplayed())) {
+      await (await this.getSubmitButton()).waitForExist()
+      await (await this.getSubmitButton()).waitForDisplayed()
     }
   }
 }

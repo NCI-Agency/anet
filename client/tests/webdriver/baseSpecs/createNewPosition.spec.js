@@ -11,156 +11,184 @@ const SIMILAR_ADVISOR_POSITION_NAME = "EF 1.1 Advisor for Agriculture"
 
 describe("Create position page", () => {
   describe("When creating a position", () => {
-    it("Should show name, organization and location to be required when submitting empty form", () => {
-      CreatePosition.openAsAdminUser()
-      CreatePosition.getForm().waitForExist()
-      CreatePosition.getForm().waitForDisplayed()
-      CreatePosition.submitForm()
-      CreatePosition.getPositionNameHelpBlock().waitForExist()
-      CreatePosition.getPositionNameHelpBlock().waitForDisplayed()
+    it("Should show name, organization and location to be required when submitting empty form", async() => {
+      await CreatePosition.openAsAdminUser()
+      await (await CreatePosition.getForm()).waitForExist()
+      await (await CreatePosition.getForm()).waitForDisplayed()
+      await CreatePosition.submitForm()
+      await (await CreatePosition.getPositionNameHelpBlock()).waitForExist()
+      await (await CreatePosition.getPositionNameHelpBlock()).waitForDisplayed()
 
-      CreatePosition.getOrganizationHelpBlock().waitForExist()
-      CreatePosition.getOrganizationHelpBlock().waitForDisplayed()
+      await (await CreatePosition.getOrganizationHelpBlock()).waitForExist()
+      await (await CreatePosition.getOrganizationHelpBlock()).waitForDisplayed()
 
-      CreatePosition.getTypeAdvisorButton().click()
+      await (await CreatePosition.getTypeAdvisorButton()).click()
 
-      expect(CreatePosition.getPositionNameHelpBlock().getText()).to.equal(
-        "Position name is required"
-      )
-      expect(CreatePosition.getOrganizationHelpBlock().getText()).to.equal(
-        "Organization is required"
-      )
-      expect(CreatePosition.getLocationHelpBlock().getText()).to.equal(
-        "Location is required for NATO Billet"
-      )
+      await expect(
+        await (await CreatePosition.getPositionNameHelpBlock()).getText()
+      ).to.equal("Position name is required")
+      await expect(
+        await (await CreatePosition.getOrganizationHelpBlock()).getText()
+      ).to.equal("Organization is required")
+      await expect(
+        await (await CreatePosition.getLocationHelpBlock()).getText()
+      ).to.equal("Location is required for NATO Billet")
 
-      CreatePosition.getTypePrincipalButton().click()
+      await (await CreatePosition.getTypePrincipalButton()).click()
 
-      expect(CreatePosition.getPositionNameHelpBlock().getText()).to.equal(
-        "Position name is required"
-      )
-      expect(CreatePosition.getOrganizationHelpBlock().getText()).to.equal(
-        "Organization is required"
-      )
+      await expect(
+        await (await CreatePosition.getPositionNameHelpBlock()).getText()
+      ).to.equal("Position name is required")
+      await expect(
+        await (await CreatePosition.getOrganizationHelpBlock()).getText()
+      ).to.equal("Organization is required")
     })
 
-    it("Should display possible duplicates with similar names", () => {
-      CreatePosition.getTypeAdvisorButton().click()
-      CreatePosition.getPositionNameInput().setValue(
-        SIMILAR_ADVISOR_POSITION_NAME
-      )
-      CreatePosition.getDuplicatesButton().waitForDisplayed()
-      CreatePosition.getDuplicatesButton().click()
-      CreatePosition.getModalContent().waitForDisplayed()
-      const similar = CreatePosition.getSimilarPosition().getText()
-      CreatePosition.getModalCloseButton().waitForDisplayed()
-      CreatePosition.getModalCloseButton().click()
-      CreatePosition.getModalContent().waitForDisplayed({ reverse: true })
-      expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
+    it("Should display possible duplicates with similar names", async() => {
+      await (await CreatePosition.getTypeAdvisorButton()).click()
+      await (
+        await CreatePosition.getPositionNameInput()
+      ).setValue(SIMILAR_ADVISOR_POSITION_NAME)
+      await (await CreatePosition.getDuplicatesButton()).waitForDisplayed()
+      await (await CreatePosition.getDuplicatesButton()).click()
+      await (await CreatePosition.getModalContent()).waitForDisplayed()
+      const similar = await (
+        await CreatePosition.getSimilarPosition()
+      ).getText()
+      await (await CreatePosition.getModalCloseButton()).waitForDisplayed()
+      await (await CreatePosition.getModalCloseButton()).click()
+      await (
+        await CreatePosition.getModalContent()
+      ).waitForDisplayed({ reverse: true })
+      await expect(similar).to.equal("EF 1.1 Advisor for Agriculture")
     })
 
-    it("Should successfully create an advisor position when required fields are filled", () => {
-      CreatePosition.getTypeAdvisorButton().click()
-      CreatePosition.getPositionNameInput().setValue("Test Position")
+    it("Should successfully create an advisor position when required fields are filled", async() => {
+      await (await CreatePosition.getTypeAdvisorButton()).click()
+      await (
+        await CreatePosition.getPositionNameInput()
+      ).setValue("Test Position")
 
-      CreatePosition.getOrganizationInput().click()
-      CreatePosition.getOrganizationInput().setValue(ADMIN_ORG)
-      CreatePosition.waitForOrgAdvancedSelectToChange(ADMIN_ORG_COMPLETE)
-      expect(
-        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      await (await CreatePosition.getOrganizationInput()).click()
+      await (await CreatePosition.getOrganizationInput()).setValue(ADMIN_ORG)
+      await CreatePosition.waitForOrgAdvancedSelectToChange(ADMIN_ORG_COMPLETE)
+      await expect(
+        await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(ADMIN_ORG_COMPLETE)
 
-      CreatePosition.getOrgAdvancedSelectFirstItem().click()
+      await (await CreatePosition.getOrgAdvancedSelectFirstItem()).click()
 
-      CreatePosition.getLocationInput().click()
-      CreatePosition.getLocAdvancedSelectFirstItem().click()
+      await (await CreatePosition.getLocationInput()).click()
+      await (await CreatePosition.getLocAdvancedSelectFirstItem()).click()
 
-      CreatePosition.submitForm()
-      CreatePosition.waitForAlertSuccessToLoad()
+      await CreatePosition.submitForm()
+      await CreatePosition.waitForAlertSuccessToLoad()
     })
 
-    it("Should successfully create a principle position when required fields are filled", () => {
-      CreatePosition.openAsAdminUser()
-      CreatePosition.getForm().waitForExist()
-      CreatePosition.getForm().waitForDisplayed()
+    it("Should successfully create a principle position when required fields are filled", async() => {
+      await CreatePosition.openAsAdminUser()
+      await (await CreatePosition.getForm()).waitForExist()
+      await (await CreatePosition.getForm()).waitForDisplayed()
 
-      CreatePosition.getTypePrincipalButton().click()
-      CreatePosition.getPositionNameInput().setValue("Test Position")
+      await (await CreatePosition.getTypePrincipalButton()).click()
+      await (
+        await CreatePosition.getPositionNameInput()
+      ).setValue("Test Position")
 
-      CreatePosition.getOrganizationInput().click()
-      CreatePosition.getOrganizationInput().setValue(PRINCIPAL_ORG)
-      CreatePosition.waitForOrgAdvancedSelectToChange(PRINCIPAL_ORG_COMPLETE)
-      expect(
-        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      await (await CreatePosition.getOrganizationInput()).click()
+      await (
+        await CreatePosition.getOrganizationInput()
+      ).setValue(PRINCIPAL_ORG)
+      await CreatePosition.waitForOrgAdvancedSelectToChange(
+        PRINCIPAL_ORG_COMPLETE
+      )
+      await expect(
+        await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(PRINCIPAL_ORG_COMPLETE)
 
-      CreatePosition.getOrgAdvancedSelectFirstItem().click()
+      await (await CreatePosition.getOrgAdvancedSelectFirstItem()).click()
 
-      CreatePosition.submitForm()
-      CreatePosition.waitForAlertSuccessToLoad()
-      CreatePosition.logout()
+      await CreatePosition.submitForm()
+      await CreatePosition.waitForAlertSuccessToLoad()
+      await CreatePosition.logout()
     })
   })
 
   describe("When changing the position type from principal to advisor and putting back", () => {
-    it("Should update the position type to advisor and back to principal", () => {
-      CreatePosition.open()
-      CreatePosition.getForm().waitForExist()
-      CreatePosition.getForm().waitForDisplayed()
+    it("Should update the position type to advisor and back to principal", async() => {
+      await CreatePosition.open()
+      await (await CreatePosition.getForm()).waitForExist()
+      await (await CreatePosition.getForm()).waitForDisplayed()
 
-      CreatePosition.getTypePrincipalButton().waitForDisplayed()
-      expect(
-        CreatePosition.getTypePrincipalButton().getAttribute("class")
+      await (await CreatePosition.getTypePrincipalButton()).waitForDisplayed()
+      await expect(
+        await (
+          await CreatePosition.getTypePrincipalButton()
+        ).getAttribute("class")
       ).to.not.include("active")
       // NOTE: The ButtonGroup component does not specify it's active selection
       // expect(CreatePosition.getTypeAdvisorButton().getAttribute("class")).to.include(
       //   "active"
       // )
-      expect(CreatePosition.getOrganizationInput().getValue()).to.equal("")
+      await expect(
+        await (await CreatePosition.getOrganizationInput()).getValue()
+      ).to.equal("")
 
-      CreatePosition.getOrganizationInput().click()
-      CreatePosition.getOrganizationInput().setValue(PRINCIPAL_ORG)
+      await (await CreatePosition.getOrganizationInput()).click()
+      await (
+        await CreatePosition.getOrganizationInput()
+      ).setValue(PRINCIPAL_ORG)
       // element should *not* exist as no suggestion found
-      CreatePosition.getOrgAdvancedSelectFirstItem().waitForExist({
+      await (
+        await CreatePosition.getOrgAdvancedSelectFirstItem()
+      ).waitForExist({
         timeout: 2000,
         reverse: true
       })
 
       // Click outside the organization overlay to close the overlay
-      CreatePosition.getTypeAdvisorButton().click()
+      await (await CreatePosition.getTypeAdvisorButton()).click()
 
-      CreatePosition.getOrganizationInput().click()
-      CreatePosition.getOrganizationInput().setValue(ADVISOR_ORG)
-      CreatePosition.waitForOrgAdvancedSelectToChange(ADVISOR_ORG_COMPLETE)
-      expect(
-        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      await (await CreatePosition.getOrganizationInput()).click()
+      await (await CreatePosition.getOrganizationInput()).setValue(ADVISOR_ORG)
+      await CreatePosition.waitForOrgAdvancedSelectToChange(
+        ADVISOR_ORG_COMPLETE
+      )
+      await expect(
+        await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(ADVISOR_ORG_COMPLETE)
 
-      CreatePosition.getOrgAdvancedSelectFirstItem().click()
-      expect(CreatePosition.getOrganizationInput().getValue()).to.equal(
-        ADVISOR_ORG
+      await (await CreatePosition.getOrgAdvancedSelectFirstItem()).click()
+      await expect(
+        await (await CreatePosition.getOrganizationInput()).getValue()
+      ).to.equal(ADVISOR_ORG)
+
+      await (await CreatePosition.getTypePrincipalButton()).click()
+      await expect(
+        await (await CreatePosition.getOrganizationInput()).getValue()
+      ).to.equal("")
+
+      await (await CreatePosition.getOrganizationInput()).click()
+      await (
+        await CreatePosition.getOrganizationInput()
+      ).setValue(PRINCIPAL_ORG)
+      await CreatePosition.waitForOrgAdvancedSelectToChange(
+        PRINCIPAL_ORG_COMPLETE
       )
-
-      CreatePosition.getTypePrincipalButton().click()
-      expect(CreatePosition.getOrganizationInput().getValue()).to.equal("")
-
-      CreatePosition.getOrganizationInput().click()
-      CreatePosition.getOrganizationInput().setValue(PRINCIPAL_ORG)
-      CreatePosition.waitForOrgAdvancedSelectToChange(PRINCIPAL_ORG_COMPLETE)
-      expect(
-        CreatePosition.getOrgAdvancedSelectFirstItem().getText()
+      await expect(
+        await (await CreatePosition.getOrgAdvancedSelectFirstItem()).getText()
       ).to.include(PRINCIPAL_ORG_COMPLETE)
 
-      CreatePosition.getOrgAdvancedSelectFirstItem().click()
-      expect(CreatePosition.getOrganizationInput().getValue()).to.equal(
-        PRINCIPAL_ORG
-      )
-      CreatePosition.getCancelButton().click()
+      await (await CreatePosition.getOrgAdvancedSelectFirstItem()).click()
+      await expect(
+        await (await CreatePosition.getOrganizationInput()).getValue()
+      ).to.equal(PRINCIPAL_ORG)
+      await (await CreatePosition.getCancelButton()).click()
 
       // prevents "unexpected alert open" errors on BrowserStack
-      browser.acceptAlert()
+      await browser.acceptAlert()
 
-      CreatePosition.logout()
+      await CreatePosition.logout()
     })
   })
 })
