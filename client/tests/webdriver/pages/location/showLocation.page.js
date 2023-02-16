@@ -3,23 +3,23 @@ import Page from "../page"
 const PAGE_URL = "/locations/:uuid"
 
 class ShowLocation extends Page {
-  open(uuid) {
-    super.open(PAGE_URL.replace(":uuid", uuid))
+  async open(uuid) {
+    await super.open(PAGE_URL.replace(":uuid", uuid))
   }
 
-  get editButton() {
+  async getEditButton() {
     return browser.$('//a[text()="Edit"]')
   }
 
-  get successMsg() {
+  async getSuccessMsg() {
     return browser.$('//div[text()="Location saved"]')
   }
 
-  get latField() {
+  async getLatField() {
     return browser.$('div[name="location"] span:first-child')
   }
 
-  get lngField() {
+  async getLngField() {
     return browser.$('div[name="location"] span:nth-child(3)')
   }
 }

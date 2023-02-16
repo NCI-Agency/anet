@@ -1,34 +1,38 @@
 import Page from "./page"
 
 class Search extends Page {
-  get foundPeopleTable() {
+  async getFoundPeopleTable() {
     return browser.$("div#people #people-search-results")
   }
 
-  get foundTaskTable() {
+  async getFoundTaskTable() {
     return browser.$("div#tasks #tasks-search-results")
   }
 
-  linkOfPersonFound(name) {
-    return this.foundPeopleTable.$(`//tbody/tr//a[contains(text(), "${name}")]`)
+  async linkOfPersonFound(name) {
+    return (await this.getFoundPeopleTable()).$(
+      `//tbody/tr//a[contains(text(), "${name}")]`
+    )
   }
 
-  linkOfTaskFound(name) {
-    return this.foundTaskTable.$(`//tbody/tr//a[contains(text(), "${name}")]`)
+  async linkOfTaskFound(name) {
+    return (await this.getFoundTaskTable()).$(
+      `//tbody/tr//a[contains(text(), "${name}")]`
+    )
   }
 
-  selectReport(linkText) {
-    const tableTab = browser.$(
+  async selectReport(linkText) {
+    const tableTab = await browser.$(
       ".report-collection div header div button[value='table']"
     )
-    tableTab.waitForExist()
-    tableTab.waitForDisplayed()
-    tableTab.click()
-    const reportLink = browser.$(`*=${linkText}`)
-    reportLink.waitForExist()
-    reportLink.waitForDisplayed()
-    reportLink.click()
-    super.waitUntilLoaded()
+    await tableTab.waitForExist()
+    await tableTab.waitForDisplayed()
+    await tableTab.click()
+    const reportLink = await browser.$(`*=${linkText}`)
+    await reportLink.waitForExist()
+    await reportLink.waitForDisplayed()
+    await reportLink.click()
+    await super.waitUntilLoaded()
   }
 }
 

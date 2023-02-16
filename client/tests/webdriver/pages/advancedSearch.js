@@ -1,48 +1,50 @@
 class AdvancedSearch {
-  get advancedSearchForm() {
+  async getAdvancedSearchForm() {
     return browser.$(".advanced-search-form")
   }
 
-  get advancedSearchPopoverTrigger() {
+  async getAdvancedSearchPopoverTrigger() {
     return browser.$(".advanced-search-form ~ span .asLink")
   }
 
-  get advancedSearchPopover() {
+  async getAdvancedSearchPopover() {
     return browser.$(".advanced-search")
   }
 
-  get anetObjectSearchToggleButtons() {
-    return this.advancedSearchPopover.$$(".btn-group > .btn")
+  async getAnetObjectSearchToggleButtons() {
+    return (await this.getAdvancedSearchPopover()).$$(".btn-group > .btn")
   }
 
-  get commonSearchFilter() {
-    return this.advancedSearchPopover.$(
+  async getCommonSearchFilter() {
+    return (await this.getAdvancedSearchPopover()).$(
       '.advanced-search-content label[for="status"]'
     )
   }
 
-  get pendingVerificationFilter() {
-    return this.advancedSearchPopover.$(
+  async getPendingVerificationFilter() {
+    return (await this.getAdvancedSearchPopover()).$(
       '.advanced-search-content label[for="pendingVerification"]'
     )
   }
 
-  get addFilterButtonText() {
-    return this.advancedSearchPopover.$(
+  async getAddFilterButtonText() {
+    return (await this.getAdvancedSearchPopover()).$(
       "form > div:nth-child(3) > div:first-child button"
     )
   }
 
-  get addFilterButton() {
-    return this.advancedSearchPopover.$("#addFilterDropdown")
+  async getAddFilterButton() {
+    return (await this.getAdvancedSearchPopover()).$("#addFilterDropdown")
   }
 
-  get addFilterPopover() {
-    return this.advancedSearchPopover.$(".bp4-popover2-content")
+  async getAddFilterPopover() {
+    return (await this.getAdvancedSearchPopover()).$(".bp4-popover2-content")
   }
 
-  getSearchFilter(filter) {
-    return this.advancedSearchPopover.$(`//div/a[text()='${filter}']`)
+  async getSearchFilter(filter) {
+    return (await this.getAdvancedSearchPopover()).$(
+      `//div/a[text()='${filter}']`
+    )
   }
 }
 

@@ -1,182 +1,203 @@
 import Page from "./page"
 
 class ShowPerson extends Page {
-  get editButton() {
+  async getEditButton() {
     return browser.$("div a.edit-person")
   }
 
-  get compactView() {
+  async getCompactView() {
     return browser.$(".compact-view")
   }
 
-  get compactViewButton() {
+  async getCompactViewButton() {
     return browser.$("button[value='compactView']")
   }
 
-  get printButton() {
+  async getPrintButton() {
     return browser.$("button[value='print']")
   }
 
-  get detailedViewButton() {
+  async getDetailedViewButton() {
     return browser.$("button[value='detailedView']")
   }
 
-  get optionalFieldsButton() {
+  async getOptionalFieldsButton() {
     return browser.$('//button[text()="Optional Fields ⇓"]')
   }
 
-  get clearAllButton() {
+  async getClearAllButton() {
     return browser.$('//button[text()="Clear All"]')
   }
 
-  get selectAllButton() {
+  async getSelectAllButton() {
     return browser.$('//button[text()="Select All"]')
   }
 
-  get presetsButton() {
+  async getPresetsButton() {
     return browser.$("#presetsButton")
   }
 
-  get defaultPreset() {
+  async getDefaultPreset() {
     return browser.$('//a[text()="Default"]')
   }
 
-  get withoutSensitivePreset() {
+  async getWithoutSensitivePreset() {
     return browser.$('//a[text()="Exclude sensitive fields"]')
   }
 
-  get sensitiveInformationWarning() {
-    return this.compactView.$('//span[text()="Sensitive Information"]')
+  async getSensitiveInformationWarning() {
+    return (await this.getCompactView()).$(
+      '//span[text()="Sensitive Information"]'
+    )
   }
 
-  get leftColumnNumber() {
+  async getLeftColumnNumber() {
     return browser.$("#leftColumnNumber")
   }
 
-  get leftTableFields() {
-    return this.compactView.$$(".left-table > tr")
+  async getLeftTableFields() {
+    return (await this.getCompactView()).$$(".left-table > tr")
   }
 
-  get assessmentsTable() {
-    return this.quarterlyAssessmentContainer.$("table.assessments-table")
+  async getAssessmentsTable() {
+    return (await this.getQuarterlyAssessmentContainer()).$(
+      "table.assessments-table"
+    )
   }
 
-  get addPeriodicAssessmentButton() {
+  async getAddPeriodicAssessmentButton() {
     // get the add assessment button for latest assessable period (previous period)
-    return this.assessmentsTable.$(
+    return (await this.getAssessmentsTable()).$(
       "tbody > tr:last-child > td:nth-child(2) > button"
     )
   }
 
-  get editAssessmentButton() {
+  async getEditAssessmentButton() {
     return browser.$('div.card button[title="Edit assessment"]')
   }
 
-  get deleteAssessmentButton() {
+  async getDeleteAssessmentButton() {
     return browser.$("div.card button.btn.btn-outline-danger.btn-xs")
   }
 
-  get deleteConfirmButton() {
+  async getDeleteConfirmButton() {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  get assessmentModalForm() {
+  async getAssessmentModalForm() {
     return browser.$(".modal-content form")
   }
 
-  get saveAssessmentButton() {
-    return this.assessmentModalForm.$('//button[text()="Save"]')
+  async getSaveAssessmentButton() {
+    return (await this.getAssessmentModalForm()).$('//button[text()="Save"]')
   }
 
-  get shownAssessmentPanel() {
-    return this.assessmentsTable.$("td:nth-child(2) .card")
+  async getShownAssessmentPanel() {
+    return (await this.getAssessmentsTable()).$("td:nth-child(2) .card")
   }
 
-  get shownAssessmentDetails() {
-    return this.shownAssessmentPanel.$$("div.card-body .form-control-plaintext")
+  async getShownAssessmentDetails() {
+    return (await this.getShownAssessmentPanel()).$$(
+      "div.card-body .form-control-plaintext"
+    )
   }
 
-  get quarterlyAssessmentContainer() {
+  async getQuarterlyAssessmentContainer() {
     return browser.$("#entity-assessments-results-quarterly")
   }
 
-  get politicalPosition() {
+  async getPoliticalPosition() {
     return browser.$('div[name="formSensitiveFields.politicalPosition"]')
   }
 
-  get birthday() {
+  async getBirthday() {
     return browser.$('div[name="formSensitiveFields.birthday"]')
   }
 
-  get invalidFeedback() {
+  async getInvalidFeedback() {
     return browser.$$('//div[@class="invalid-feedback"]')
   }
 
-  get topLevelQuestionSetTitle() {
+  async getTopLevelQuestionSetTitle() {
     return browser.$('//h4/span[contains(text(),"Top Level Question Set")]')
   }
 
-  get bottomLevelQuestionSetTitle() {
+  async getBottomLevelQuestionSetTitle() {
     return browser.$('//h4/span[contains(text(),"Bottom Level Question Set")]')
   }
 
-  pickACompactField(field) {
-    browser.$(`#${field}`).click()
+  async pickACompactField(field) {
+    await (await browser.$(`#${field}`)).click()
   }
 
-  waitForCompactField(reverse, ...fields) {
-    fields.forEach(field => {
-      this.compactView
-        .$(`//th[text()="${field}"]`)
-        .waitForDisplayed({ reverse: reverse })
-    })
+  async waitForCompactField(reverse, ...fields) {
+    for (const field of fields) {
+      await (
+        await (await this.getCompactView()).$(`//th[text()="${field}"]`)
+      ).waitForDisplayed({ reverse: reverse })
+    }
   }
 
-  waitForAssessmentModalForm(reverse = false) {
-    browser.pause(300) // wait for modal animation to finish
-    this.assessmentModalForm.waitForExist({ reverse, timeout: 20000 })
-    this.assessmentModalForm.waitForDisplayed()
+  async waitForAssessmentModalForm(reverse = false) {
+    await browser.pause(300) // wait for modal animation to finish
+    await (
+      await this.getAssessmentModalForm()
+    ).waitForExist({ reverse, timeout: 20000 })
+    await (await this.getAssessmentModalForm()).waitForDisplayed()
   }
 
-  fillAssessmentQuestion(valuesArr, prevTextToClear) {
+  async fillAssessmentQuestion(valuesArr, prevTextToClear) {
     // Second value in the valuesArr is the text editor value
     const buttonGroupValues = valuesArr.filter((value, index) => index !== 1)
     const textInputValue = valuesArr[1]
-    this.assessmentModalForm
-      .$$(".modal-content .btn-group")
-      .forEach((btnGroup, index) => {
-        const button = btnGroup.$(
-          `label[for$=".test${index + 1}_${buttonGroupValues[index]}"]`
-        )
-        // wait for a bit, clicks and do double click, sometimes it does not go through
-        browser.pause(300)
-        button.click({ x: 10, y: 10 })
-        button.click({ x: 10, y: 10 })
-        browser.pause(300)
-      })
+    const buttonGroups = await (
+      await this.getAssessmentModalForm()
+    ).$$(".modal-content .btn-group")
+    for (const [index, btnGroup] of buttonGroups.entries()) {
+      const button = await btnGroup.$(
+        `label[for$=".test${index + 1}_${buttonGroupValues[index]}"]`
+      )
+      // wait for a bit, clicks and do double click, sometimes it does not go through
+      await browser.pause(300)
+      await button.click({ x: 10, y: 10 })
+      await button.click({ x: 10, y: 10 })
+      await browser.pause(300)
+    }
 
     // first focus on the text editor input
-    this.assessmentModalForm.$(".editor-container > .editable").click()
+    await (
+      await (
+        await this.getAssessmentModalForm()
+      ).$(".editor-container > .editable")
+    ).click()
     // Wait for the editor to be focused
-    browser.pause(300)
+    await browser.pause(300)
     if (prevTextToClear) {
-      this.deleteText(prevTextToClear)
+      await this.deleteText(prevTextToClear)
       // Wait for the previous value to be deleted
-      browser.pause(300)
+      await browser.pause(300)
     }
     // fourth value is the text field
-    browser.keys(textInputValue)
-    browser.pause(300)
+    await browser.keys(textInputValue)
+    await browser.pause(300)
   }
 
-  saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
-    this.saveAssessmentButton.click()
-    browser.pause(300) // wait for modal animation to finish
-    this.assessmentModalForm.waitForExist({ reverse: true, timeout: 20000 })
+  async saveAssessmentAndWaitForModalClose(detail0ToWaitFor) {
+    await (await this.getSaveAssessmentButton()).click()
+    await browser.pause(300) // wait for modal animation to finish
+    await (
+      await this.getAssessmentModalForm()
+    ).waitForExist({
+      reverse: true,
+      timeout: 20000
+    })
     // wait until details to change, can take some time to update show page
-    browser.waitUntil(
-      () => {
-        return this.shownAssessmentDetails[0].getText() === detail0ToWaitFor
+    await browser.waitUntil(
+      async() => {
+        return (
+          (await (await this.getShownAssessmentDetails())[0].getText()) ===
+          detail0ToWaitFor
+        )
       },
       {
         timeout: 20000,
@@ -185,23 +206,29 @@ class ShowPerson extends Page {
     )
   }
 
-  confirmDelete() {
-    browser.pause(500)
-    this.deleteConfirmButton.waitForExist()
-    this.deleteConfirmButton.waitForDisplayed()
-    this.deleteConfirmButton.click()
+  async confirmDelete() {
+    await browser.pause(500)
+    await (await this.getDeleteConfirmButton()).waitForExist()
+    await (await this.getDeleteConfirmButton()).waitForDisplayed()
+    await (await this.getDeleteConfirmButton()).click()
   }
 
-  waitForDeletedAssessmentToDisappear() {
-    browser.pause(500)
-    this.shownAssessmentPanel.waitForExist({
+  async waitForDeletedAssessmentToDisappear() {
+    await browser.pause(500)
+    await (
+      await this.getShownAssessmentPanel()
+    ).waitForExist({
       reverse: true,
       timeout: 20000
     })
   }
 
-  getValidationErrorMessages() {
-    return this.invalidFeedback.map(errorDiv => errorDiv.getText())
+  async getValidationErrorMessages() {
+    return Promise.all(
+      (await this.getInvalidFeedback()).map(
+        async errorDiv => await errorDiv.getText()
+      )
+    )
   }
 }
 

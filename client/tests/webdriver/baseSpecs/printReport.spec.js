@@ -12,23 +12,30 @@ const PRINCIPALS = [
 const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
 
 describe("Show print report page", () => {
-  beforeEach("Open the show report page", () => {
-    MyReports.open("arthur")
-    MyReports.selectReport("A test report from Arthur", REPORT_STATES.PUBLISHED)
-    ShowReport.compactViewButton.click()
-    ShowReport.compactView.waitForExist()
-    ShowReport.compactView.waitForDisplayed()
+  beforeEach("Open the show report page", async() => {
+    await MyReports.open("arthur")
+    await MyReports.selectReport(
+      "A test report from Arthur",
+      REPORT_STATES.PUBLISHED
+    )
+    await (await ShowReport.getCompactViewButton()).click()
+    await (await ShowReport.getCompactView()).waitForExist()
+    await (await ShowReport.getCompactView()).waitForDisplayed()
   })
   describe("When on the print report page", () => {
-    it("Detailed View button should remove compact view to detailed view", () => {
-      const detailedViewButton = ShowReport.detailedViewButton
-      detailedViewButton.click()
-      ShowReport.defaultReportView.waitForExist()
-      ShowReport.defaultReportView.waitForDisplayed()
-      expect(ShowReport.compactView.isDisplayed()).to.equal(false)
-      expect(ShowReport.compactViewButton.isDisplayed()).to.equal(true)
+    it("Detailed View button should remove compact view to detailed view", async() => {
+      const detailedViewButton = await ShowReport.getDetailedViewButton()
+      await detailedViewButton.click()
+      await (await ShowReport.getDefaultReportView()).waitForExist()
+      await (await ShowReport.getDefaultReportView()).waitForDisplayed()
+      await expect(
+        await (await ShowReport.getCompactView()).isDisplayed()
+      ).to.equal(false)
+      await expect(
+        await (await ShowReport.getCompactViewButton()).isDisplayed()
+      ).to.equal(true)
     })
-    it("We should see the correct report fields", () => {
+    it("We should see the correct report fields", async() => {
       const mustHaveFieldTexts = [
         "purpose",
         "Key outcomes",
@@ -38,55 +45,68 @@ describe("Show print report page", () => {
         "Atmospherics",
         "Efforts"
       ]
-      const fields = ShowReport.compactReportFields
-      const fieldTexts = Array.from(fields).map(field => field.getText())
-      mustHaveFieldTexts.forEach(mustHave => {
-        expect(fieldTexts).to.contain(mustHave)
-      })
+      const fields = await ShowReport.getCompactReportFields()
+      const fieldTexts = await Promise.all(
+        Array.from(fields).map(async field => await field.getText())
+      )
+      for (const mustHave of mustHaveFieldTexts) {
+        await expect(fieldTexts).to.contain(mustHave)
+      }
     })
-    it("We should see a title with the correct text", () => {
-      const title = ShowReport.compactTitle.getText()
-      expect(title).to.equal("Summary / Print")
+    it("We should see a title with the correct text", async() => {
+      const title = await (await ShowReport.getCompactTitle()).getText()
+      await expect(title).to.equal("Summary / Print")
     })
-    it("We should see buttons with the correct text", () => {
-      const printButtonText = ShowReport.printButton.getText()
-      const detailedViewButtonText = ShowReport.detailedViewButton.getText()
-      expect(printButtonText).to.equal("Print")
-      expect(detailedViewButtonText).to.equal("Detailed View")
+    it("We should see buttons with the correct text", async() => {
+      const printButtonText = await (
+        await ShowReport.getPrintButton()
+      ).getText()
+      const detailedViewButtonText = await (
+        await ShowReport.getDetailedViewButton()
+      ).getText()
+      await expect(printButtonText).to.equal("Print")
+      await expect(detailedViewButtonText).to.equal("Detailed View")
     })
-    it("Printable report banner should be the same as security banner", () => {
-      const compactBannerText = ShowReport.compactBanner.getText()
-      Home.openAsAdminUser()
-      const bannerSecurityText = Home.bannerSecurityText.getText()
-      expect(compactBannerText).to.equal(bannerSecurityText)
+    it("Printable report banner should be the same as security banner", async() => {
+      const compactBannerText = await (
+        await ShowReport.getCompactBanner()
+      ).getText()
+      await Home.openAsAdminUser()
+      const bannerSecurityText = await (
+        await Home.getBannerSecurityText()
+      ).getText()
+      await expect(compactBannerText).to.equal(bannerSecurityText)
     })
-    it("Should display all attendees", () => {
-      const displayedPrincipals =
-        ShowReport.getCompactViewAttendees("principals")
-      const displayedAdvisors = ShowReport.getCompactViewAttendees("advisors")
-      PRINCIPALS.forEach(principal => {
-        expect(displayedPrincipals).to.contain(principal)
-      })
-      ADVISORS.forEach(advisor => {
-        expect(displayedAdvisors).to.contain(advisor)
-      })
+    it("Should display all attendees", async() => {
+      const displayedPrincipals = await ShowReport.getCompactViewAttendees(
+        "principals"
+      )
+      const displayedAdvisors = await ShowReport.getCompactViewAttendees(
+        "advisors"
+      )
+      for (const principal of PRINCIPALS) {
+        await expect(displayedPrincipals).to.contain(principal)
+      }
+      for (const advisor of ADVISORS) {
+        await expect(displayedAdvisors).to.contain(advisor)
+      }
     })
-    it("Should display all attendees when assessments are shown", () => {
-      ShowReport.selectOptionalField("assessments")
-      const displayedPrincipals = ShowReport.getCompactViewAttendees(
+    it("Should display all attendees when assessments are shown", async() => {
+      await ShowReport.selectOptionalField("assessments")
+      const displayedPrincipals = await ShowReport.getCompactViewAttendees(
         "principals",
         true
       )
-      PRINCIPALS.forEach(principal => {
-        expect(displayedPrincipals).to.contain(principal)
-      })
-      const displayedAdvisors = ShowReport.getCompactViewAttendees(
+      for (const principal of PRINCIPALS) {
+        await expect(displayedPrincipals).to.contain(principal)
+      }
+      const displayedAdvisors = await ShowReport.getCompactViewAttendees(
         "advisors",
         true
       )
-      ADVISORS.forEach(advisor => {
-        expect(displayedAdvisors).to.contain(advisor)
-      })
+      for (const advisor of ADVISORS) {
+        await expect(displayedAdvisors).to.contain(advisor)
+      }
     })
   })
 })

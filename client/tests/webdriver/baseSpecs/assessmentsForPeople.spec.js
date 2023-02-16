@@ -26,126 +26,137 @@ const ERROR_MESSAGES = [
 
 describe("For the periodic person assessments", () => {
   describe("As an advisor who has a counterpart who needs to be assessed", () => {
-    it("Should first search, find and open the person page", () => {
-      Home.open("/", ADVISOR1_CREDENTIALS)
-      Home.searchBar.setValue(PERSON_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-      Search.foundPeopleTable.waitForDisplayed()
-      Search.linkOfPersonFound(PERSON_SEARCH_STRING).click()
+    it("Should first search, find and open the person page", async() => {
+      await Home.open("/", ADVISOR1_CREDENTIALS)
+      await (await Home.getSearchBar()).setValue(PERSON_SEARCH_STRING)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (await Search.linkOfPersonFound(PERSON_SEARCH_STRING)).click()
     })
 
-    it("Should display nested question sets", () => {
-      ShowPerson.assessmentsTable.waitForExist()
-      ShowPerson.assessmentsTable.waitForDisplayed()
+    it("Should display nested question sets", async() => {
+      await (await ShowPerson.getAssessmentsTable()).waitForExist()
+      await (await ShowPerson.getAssessmentsTable()).waitForDisplayed()
 
-      ShowPerson.addPeriodicAssessmentButton.click()
-      ShowPerson.waitForAssessmentModalForm()
-      ShowPerson.topLevelQuestionSetTitle.waitForDisplayed()
-      ShowPerson.bottomLevelQuestionSetTitle.waitForDisplayed()
+      await (await ShowPerson.getAddPeriodicAssessmentButton()).click()
+      await ShowPerson.waitForAssessmentModalForm()
+      await (await ShowPerson.getTopLevelQuestionSetTitle()).waitForDisplayed()
+      await (
+        await ShowPerson.getBottomLevelQuestionSetTitle()
+      ).waitForDisplayed()
     })
 
-    it("Should display validation error messages on every level", () => {
-      ShowPerson.saveAssessmentButton.click()
-      expect(ShowPerson.getValidationErrorMessages()).to.eql(ERROR_MESSAGES)
+    it("Should display validation error messages on every level", async() => {
+      await (await ShowPerson.getSaveAssessmentButton()).click()
+      await expect(await ShowPerson.getValidationErrorMessages()).to.eql(
+        ERROR_MESSAGES
+      )
     })
 
-    it("Should allow advisor to successfully add an assessment", () => {
+    it("Should allow advisor to successfully add an assessment", async() => {
       // NOTE: assuming assessment question content here, may change in future
-      ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
-      ShowPerson.saveAssessmentAndWaitForModalClose(
+      await ShowPerson.fillAssessmentQuestion(ADVISOR_1_PERSON_CREATE_DETAILS)
+      await ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[0]]
       )
     })
 
-    it("Should show the same assessment details with the details just created", () => {
-      ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
+    it("Should show the same assessment details with the details just created", async() => {
+      const details = await ShowPerson.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await prefix(index)) +
             (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_CREATE_DETAILS[index]] ||
               ADVISOR_1_PERSON_CREATE_DETAILS[index])
         )
-      })
+      }
     })
 
-    it("Should allow the author of the assessment to successfully edit it", () => {
-      ShowPerson.editAssessmentButton.waitForExist()
-      ShowPerson.editAssessmentButton.waitForDisplayed()
+    it("Should allow the author of the assessment to successfully edit it", async() => {
+      await (await ShowPerson.getEditAssessmentButton()).waitForExist()
+      await (await ShowPerson.getEditAssessmentButton()).waitForDisplayed()
 
-      ShowPerson.editAssessmentButton.click()
-      ShowPerson.waitForAssessmentModalForm()
+      await (await ShowPerson.getEditAssessmentButton()).click()
+      await ShowPerson.waitForAssessmentModalForm()
 
-      ShowPerson.fillAssessmentQuestion(
+      await ShowPerson.fillAssessmentQuestion(
         ADVISOR_1_PERSON_EDIT_DETAILS,
         ADVISOR_1_PERSON_CREATE_DETAILS[1]
       )
-      ShowPerson.saveAssessmentAndWaitForModalClose(
+      await ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[0]]
       )
     })
 
-    it("Should show the same assessment details with the details just edited", () => {
-      ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
+    it("Should show the same assessment details with the details just edited", async() => {
+      const details = await ShowPerson.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await prefix(index)) +
             (VALUE_TO_TEXT_FOR_PERSON[ADVISOR_1_PERSON_EDIT_DETAILS[index]] ||
               ADVISOR_1_PERSON_EDIT_DETAILS[index])
         )
-      })
-      ShowPerson.logout()
+      }
+      await ShowPerson.logout()
     })
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the person's page", () => {
-      Home.openAsAdminUser()
-      Home.searchBar.setValue(PERSON_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-      Search.foundPeopleTable.waitForDisplayed()
-      Search.linkOfPersonFound(PERSON_SEARCH_STRING).click()
+    it("Should first search, find and open the person's page", async() => {
+      await Home.openAsAdminUser()
+      await (await Home.getSearchBar()).setValue(PERSON_SEARCH_STRING)
+      await (await Home.getSubmitSearch()).click()
+      await (
+        await Search.getFoundPeopleTable()
+      ).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundPeopleTable()).waitForDisplayed()
+      await (await Search.linkOfPersonFound(PERSON_SEARCH_STRING)).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", () => {
-      expect(ShowPerson.addPeriodicAssessmentButton.isExisting()).to.equal(
-        false
-      )
+    it("Should not show make assessment button when there is an assessment on that period", async() => {
+      await expect(
+        await (await ShowPerson.getAddPeriodicAssessmentButton()).isExisting()
+      ).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assessment", () => {
-      ShowPerson.editAssessmentButton.waitForExist()
-      ShowPerson.editAssessmentButton.waitForDisplayed()
+    it("Should allow admins to successfully edit existing assessment", async() => {
+      await (await ShowPerson.getEditAssessmentButton()).waitForExist()
+      await (await ShowPerson.getEditAssessmentButton()).waitForDisplayed()
 
-      ShowPerson.editAssessmentButton.click()
-      ShowPerson.waitForAssessmentModalForm()
+      await (await ShowPerson.getEditAssessmentButton()).click()
+      await ShowPerson.waitForAssessmentModalForm()
 
-      ShowPerson.fillAssessmentQuestion(
+      await ShowPerson.fillAssessmentQuestion(
         ADMIN_PERSON_EDIT_DETAILS,
         ADVISOR_1_PERSON_EDIT_DETAILS[1]
       )
-      ShowPerson.saveAssessmentAndWaitForModalClose(
+      await ShowPerson.saveAssessmentAndWaitForModalClose(
         VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[0]]
       )
     })
 
-    it("Should show the same assessment details with the details just edited", () => {
-      ShowPerson.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
+    it("Should show the same assessment details with the details just edited", async() => {
+      const details = await ShowPerson.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await prefix(index)) +
             (VALUE_TO_TEXT_FOR_PERSON[ADMIN_PERSON_EDIT_DETAILS[index]] ||
               ADMIN_PERSON_EDIT_DETAILS[index])
         )
-      })
+      }
     })
 
-    it("Should allow an admin to delete the assessment", () => {
-      ShowPerson.deleteAssessmentButton.click()
-      ShowPerson.confirmDelete()
-      ShowPerson.waitForDeletedAssessmentToDisappear()
-      ShowPerson.logout()
+    it("Should allow an admin to delete the assessment", async() => {
+      await (await ShowPerson.getDeleteAssessmentButton()).click()
+      await ShowPerson.confirmDelete()
+      await ShowPerson.waitForDeletedAssessmentToDisappear()
+      await ShowPerson.logout()
     })
   })
 })
 
 // use indexed prefix to see which one fails if any fails
-const prefix = index => `${index}-) `
+const prefix = async index => `${index}-) `

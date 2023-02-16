@@ -73,496 +73,528 @@ const EXAMPLE_PEOPLE = {
 }
 
 describe("Merge people of the same role", () => {
-  it("Should display fields values of the left person", () => {
+  it("Should display fields values of the left person", async() => {
     // Open merge people page.
-    MergePeople.open()
-    MergePeople.title.waitForExist()
-    MergePeople.title.waitForDisplayed()
+    await MergePeople.open()
+    await (await MergePeople.getTitle()).waitForExist()
+    await (await MergePeople.getTitle()).waitForDisplayed()
 
     // Search and select a person from left person field.
-    MergePeople.leftPersonField.setValue(EXAMPLE_PEOPLE.validLeft.search)
-    MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validLeft.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
-    browser.pause(500) // wait for the rendering of custom fields
+    await (
+      await MergePeople.getLeftPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validLeft.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validLeft.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a person from left side.
-    MergePeople.waitForColumnToChange(
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
       "left",
       "Name"
     )
 
-    expect(MergePeople.getColumnContent("left", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.name
-    )
-    expect(MergePeople.getColumnContent("left", "Role").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.role
-    )
-    expect(MergePeople.getColumnContent("left", "Position").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.position
-    )
-    expect(MergePeople.getPreviousPositions("left")).to.eql(
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Role")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Position")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
+    await expect(await MergePeople.getPreviousPositions("left")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
-    expect(MergePeople.getColumnContent("left", "Status").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.status
-    )
-    expect(MergePeople.getColumnContent("left", "Email").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.email
-    )
-    expect(MergePeople.getColumnContent("left", "Phone").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.phone
-    )
-    expect(MergePeople.getColumnContent("left", "Rank").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.rank
-    )
-    expect(MergePeople.getColumnContent("left", "Gender").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.gender
-    )
-    expect(MergePeople.getColumnContent("left", "Nationality").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.nationality
-    )
-    expect(MergePeople.getColumnContent("left", "Biography").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Email")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Phone")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.phone)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
+    await expect(
+      await (
+        await MergePeople.getColumnContent("left", "Nationality")
+      ).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Biography")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
-  it("Should not allow to select the same people", () => {
-    MergePeople.rightPersonField.setValue(EXAMPLE_PEOPLE.validLeft.search)
-    MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validLeft.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
+  it("Should not allow to select the same people", async() => {
+    await (
+      await MergePeople.getRightPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validLeft.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validLeft.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
 
-    MergePeople.samePositionsToast.waitForDisplayed()
+    await (await MergePeople.getSamePositionsToast()).waitForDisplayed()
   })
-  it("Should display fields values of the right person", () => {
+  it("Should display fields values of the right person", async() => {
     // Search and select a person from right person field.
-    MergePeople.rightPersonField.setValue(EXAMPLE_PEOPLE.validRight.search)
-    MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validRight.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
-    browser.pause(500) // wait for the rendering of custom fields
+    await (
+      await MergePeople.getRightPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validRight.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validRight.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
+    await browser.pause(500) // wait for the rendering of custom fields
     // Check if the fields displayed properly after selecting a person from left side.
-    MergePeople.waitForColumnToChange(
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validRight.name,
       "right",
       "Name"
     )
 
-    expect(MergePeople.getColumnContent("right", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.name
-    )
-    expect(MergePeople.getColumnContent("right", "Role").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.role
-    )
-    expect(MergePeople.getColumnContent("right", "Position").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.position
-    )
-    expect(MergePeople.getPreviousPositions("right")).to.eql(
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.name)
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Role")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.role)
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Position")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.position)
+    await expect(await MergePeople.getPreviousPositions("right")).to.eql(
       EXAMPLE_PEOPLE.validRight.previousPositions
     )
-    expect(MergePeople.getColumnContent("right", "Status").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.status
-    )
-    expect(MergePeople.getColumnContent("right", "Email").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.email
-    )
-    expect(MergePeople.getColumnContent("right", "Phone").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.phone
-    )
-    expect(MergePeople.getColumnContent("right", "Rank").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.rank
-    )
-    expect(MergePeople.getColumnContent("right", "Gender").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.gender
-    )
-    expect(
-      MergePeople.getColumnContent("right", "Nationality").getText()
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.status)
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Email")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.email)
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Phone")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.phone)
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.rank)
+    await expect(
+      await (await MergePeople.getColumnContent("right", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.gender)
+    await expect(
+      await (
+        await MergePeople.getColumnContent("right", "Nationality")
+      ).getText()
     ).to.eq(EXAMPLE_PEOPLE.validRight.nationality)
-    expect(MergePeople.getColumnContent("left", "Biography").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("left", "Biography")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
-  it("Should be able to select all fields from left person", () => {
-    MergePeople.getUseAllButton("left").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergePeople.waitForColumnToChange(
+  it("Should be able to select all fields from left person", async() => {
+    await (await MergePeople.getUseAllButton("left")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
       "mid",
       "Name"
     )
 
-    expect(MergePeople.getColumnContent("mid", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.name
-    )
-    expect(MergePeople.getColumnContent("mid", "Role").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.role
-    )
-    expect(MergePeople.getColumnContent("mid", "Position").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.position
-    )
-    expect(MergePeople.getPreviousPositions("mid")).to.eql(
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Role")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
+    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
-    expect(MergePeople.getColumnContent("mid", "Status").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.status
-    )
-    expect(MergePeople.getColumnContent("mid", "Email").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.email
-    )
-    expect(MergePeople.getColumnContent("mid", "Phone").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.phone
-    )
-    expect(MergePeople.getColumnContent("mid", "Rank").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.rank
-    )
-    expect(MergePeople.getColumnContent("mid", "Gender").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.gender
-    )
-    expect(MergePeople.getColumnContent("mid", "Nationality").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.nationality
-    )
-    expect(MergePeople.getColumnContent("mid", "Biography").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Phone")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.phone)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Biography")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
-  it("Should be able to select all fields from right person", () => {
-    MergePeople.getUseAllButton("right").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergePeople.waitForColumnToChange(
+  it("Should be able to select all fields from right person", async() => {
+    await (await MergePeople.getUseAllButton("right")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validRight.name,
       "mid",
       "Name"
     )
 
-    expect(MergePeople.getColumnContent("mid", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.name
-    )
-    expect(MergePeople.getColumnContent("mid", "Role").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.role
-    )
-    expect(MergePeople.getColumnContent("mid", "Position").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.position
-    )
-    expect(MergePeople.getPreviousPositions("mid")).to.eql(
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.name)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Role")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.role)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.position)
+    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validRight.previousPositions
     )
-    expect(MergePeople.getColumnContent("mid", "Status").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.status
-    )
-    expect(MergePeople.getColumnContent("mid", "Email").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.email
-    )
-    expect(MergePeople.getColumnContent("mid", "Phone").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.phone
-    )
-    expect(MergePeople.getColumnContent("mid", "Rank").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.rank
-    )
-    expect(MergePeople.getColumnContent("mid", "Gender").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.gender
-    )
-    expect(MergePeople.getColumnContent("mid", "Nationality").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.nationality
-    )
-    expect(MergePeople.getColumnContent("mid", "Biography").getText()).to.eq(
-      EXAMPLE_PEOPLE.validRight.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.status)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.email)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Phone")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.phone)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.rank)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.gender)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.nationality)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Biography")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validRight.biography)
   })
-  it("Should be able to select from both left and right side.", () => {
-    MergePeople.getSelectButton("left", "Name").click()
-    MergePeople.waitForColumnToChange(
+  it("Should be able to select from both left and right side.", async() => {
+    await (await MergePeople.getSelectButton("left", "Name")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
       "mid",
       "Name"
     )
-    expect(MergePeople.getColumnContent("mid", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.name
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
 
-    MergePeople.getSelectButton("left", "Role").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Role")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.role,
       "mid",
       "Role"
     )
-    expect(MergePeople.getColumnContent("mid", "Role").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.role
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Role")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.role)
 
-    MergePeople.getSelectButton("left", "Position").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Position")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.position,
       "mid",
       "Position"
     )
-    expect(MergePeople.getColumnContent("mid", "Position").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.position
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.position)
 
-    MergePeople.getSelectButton("left", "Status").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Status")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.status,
       "mid",
       "Status"
     )
-    expect(MergePeople.getColumnContent("mid", "Status").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.status
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.status)
 
-    MergePeople.getSelectButton("left", "Email").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Email")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.email,
       "mid",
       "Email"
     )
-    expect(MergePeople.getColumnContent("mid", "Email").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.email
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
-    MergePeople.getSelectButton("left", "Phone").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Phone")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.phone,
       "mid",
       "Phone"
     )
-    expect(MergePeople.getColumnContent("mid", "Phone").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.phone
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Phone")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.phone)
 
-    MergePeople.getSelectButton("left", "Email").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Email")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.email,
       "mid",
       "Email"
     )
-    expect(MergePeople.getColumnContent("mid", "Email").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.email
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.email)
 
-    MergePeople.getSelectButton("left", "Rank").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Rank")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.rank,
       "mid",
       "Rank"
     )
-    expect(MergePeople.getColumnContent("mid", "Rank").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.rank
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.rank)
 
-    MergePeople.getSelectButton("left", "Gender").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Gender")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.gender,
       "mid",
       "Gender"
     )
-    expect(MergePeople.getColumnContent("mid", "Gender").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.gender
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.gender)
 
-    MergePeople.getSelectButton("left", "Nationality").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Nationality")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.nationality,
       "mid",
       "Nationality"
     )
-    expect(
-      MergePeople.getColumnContent("mid", "Nationality").getText()
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
     ).to.equal(EXAMPLE_PEOPLE.validLeft.nationality)
 
-    MergePeople.getSelectButton("left", "Biography").click()
-    MergePeople.waitForColumnToChange(
+    await (await MergePeople.getSelectButton("left", "Biography")).click()
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.biography,
       "mid",
       "Biography"
     )
-    expect(MergePeople.getColumnContent("mid", "Biography").getText()).to.equal(
-      EXAMPLE_PEOPLE.validLeft.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Biography")).getText()
+    ).to.equal(EXAMPLE_PEOPLE.validLeft.biography)
 
-    MergePeople.getSelectButton("left", "Previous Positions").click()
-    expect(MergePeople.getPreviousPositions("mid")).to.eql(
+    await (
+      await MergePeople.getSelectButton("left", "Previous Positions")
+    ).click()
+    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
   })
-  it("Should be able to merge both people when winner is left person", () => {
-    MergePeople.mergePeopleButton.click()
-    MergePeople.waitForSuccessAlert()
+  it("Should be able to merge both people when winner is left person", async() => {
+    await (await MergePeople.getMergePeopleButton()).click()
+    await MergePeople.waitForSuccessAlert()
   })
-  it("Should merge notes of the both people", () => {
-    MergePeople.showNotesButton.click()
+  it("Should merge notes of the both people", async() => {
+    await (await MergePeople.getShowNotesButton()).click()
     // Wait for offcanvas to open
-    browser.pause(100)
-    expect(
-      MergePeople.areNotesExist([
+    await browser.pause(100)
+    await expect(
+      await MergePeople.areNotesExist([
         ...EXAMPLE_PEOPLE.validLeft.notes,
         ...EXAMPLE_PEOPLE.validRight.notes
       ])
     ).to.eq(true)
   })
-  it("Should be able to delete the loser person", () => {
-    MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
-    MergePeople.errorTitle.waitForExist()
-    expect(MergePeople.errorTitle.getText()).to.equal(
+  it("Should be able to delete the loser person", async() => {
+    await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validRight.perUuid}`)
+    await (await MergePeople.getErrorTitle()).waitForExist()
+    await expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validRight.perUuid} not found.`
     )
   })
-  it("Should remove the loser from its position and position history", () => {
-    MergePeople.openPage(`/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`)
-    expect(MergePeople.unoccupiedPositionPersonMessage.getText()).to.equal(
-      "Chief of Merge People Test 2 is currently empty."
+  it("Should remove the loser from its position and position history", async() => {
+    await MergePeople.openPage(
+      `/positions/${EXAMPLE_PEOPLE.validRight.posUuid}`
     )
+    await expect(
+      await (await MergePeople.getUnoccupiedPositionPersonMessage()).getText()
+    ).to.equal("Chief of Merge People Test 2 is currently empty.")
   })
 })
 
 describe("Merge people of different roles", () => {
-  it("Should select a principal for the left side", () => {
+  it("Should select a principal for the left side", async() => {
     // Open merge people page.
-    MergePeople.open()
-    MergePeople.title.waitForExist()
-    MergePeople.title.waitForDisplayed()
+    await MergePeople.open()
+    await (await MergePeople.getTitle()).waitForExist()
+    await (await MergePeople.getTitle()).waitForDisplayed()
     // Search and select a person from left person field.
-    MergePeople.leftPersonField.setValue(EXAMPLE_PEOPLE.validLeft.search)
-    MergePeople.waitForAdvancedSelectLoading(EXAMPLE_PEOPLE.validLeft.fullName)
-    MergePeople.firstItemFromAdvancedSelect.click()
+    await (
+      await MergePeople.getLeftPersonField()
+    ).setValue(EXAMPLE_PEOPLE.validLeft.search)
+    await MergePeople.waitForAdvancedSelectLoading(
+      EXAMPLE_PEOPLE.validLeft.fullName
+    )
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     // Check if the fields displayed properly after selecting a person from left side.
-    MergePeople.waitForColumnToChange(
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
       "left",
       "Name"
     )
   })
-  it("Sould select an advisor for the right side", () => {
-    MergePeople.rightPersonField.setValue(EXAMPLE_PEOPLE.advisorRight.search)
-    MergePeople.waitForAdvancedSelectLoading(
+  it("Sould select an advisor for the right side", async() => {
+    await (
+      await MergePeople.getRightPersonField()
+    ).setValue(EXAMPLE_PEOPLE.advisorRight.search)
+    await MergePeople.waitForAdvancedSelectLoading(
       EXAMPLE_PEOPLE.advisorRight.fullName
     )
-    MergePeople.firstItemFromAdvancedSelect.click()
+    await (await MergePeople.getFirstItemFromAdvancedSelect()).click()
     // Check if the fields displayed properly after selecting a person from left side.
-    MergePeople.waitForColumnToChange(
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.advisorRight.name,
       "right",
       "Name"
     )
   })
-  it("Should display the different roles warning", () => {
-    MergePeople.waitForDifferentRolesAlert()
+  it("Should display the different roles warning", async() => {
+    await MergePeople.waitForDifferentRolesAlert()
   })
-  it("Should not display the select buttons on each side", () => {
-    MergePeople.getSelectButton("left", "Name").waitForDisplayed({
+  it("Should not display the select buttons on each side", async() => {
+    await (
+      await MergePeople.getSelectButton("left", "Name")
+    ).waitForDisplayed({
       reverse: true
     })
-    MergePeople.getSelectButton("right", "Name").waitForDisplayed({
+    await (
+      await MergePeople.getSelectButton("right", "Name")
+    ).waitForDisplayed({
       reverse: true
     })
   })
-  it("Should be able to select all fields from left person", () => {
-    MergePeople.getUseAllButton("left").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergePeople.waitForColumnToChange(
+  it("Should be able to select all fields from left person", async() => {
+    await (await MergePeople.getUseAllButton("left")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.validLeft.name,
       "mid",
       "Name"
     )
-    expect(MergePeople.getColumnContent("mid", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.name
-    )
-    expect(MergePeople.getColumnContent("mid", "Role").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.role
-    )
-    expect(MergePeople.getColumnContent("mid", "Position").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.position
-    )
-    expect(MergePeople.getPreviousPositions("mid")).to.eql(
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.name)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Role")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.role)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.position)
+    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.validLeft.previousPositions
     )
-    expect(MergePeople.getColumnContent("mid", "Status").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.status
-    )
-    expect(MergePeople.getColumnContent("mid", "Email").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.email
-    )
-    expect(MergePeople.getColumnContent("mid", "Phone").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.phone
-    )
-    expect(MergePeople.getColumnContent("mid", "Rank").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.rank
-    )
-    expect(MergePeople.getColumnContent("mid", "Gender").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.gender
-    )
-    expect(MergePeople.getColumnContent("mid", "Nationality").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.nationality
-    )
-    expect(MergePeople.getColumnContent("mid", "Biography").getText()).to.eq(
-      EXAMPLE_PEOPLE.validLeft.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.status)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.email)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Phone")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.phone)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.rank)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.gender)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.nationality)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Biography")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.validLeft.biography)
   })
-  it("Should be able to select all fields from right person", () => {
-    MergePeople.getUseAllButton("right").click()
-    browser.pause(500) // wait for the rendering of custom fields
-    MergePeople.waitForColumnToChange(
+  it("Should be able to select all fields from right person", async() => {
+    await (await MergePeople.getUseAllButton("right")).click()
+    await browser.pause(500) // wait for the rendering of custom fields
+    await MergePeople.waitForColumnToChange(
       EXAMPLE_PEOPLE.advisorRight.name,
       "mid",
       "Name"
     )
-    expect(MergePeople.getColumnContent("mid", "Name").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.name
-    )
-    expect(MergePeople.getColumnContent("mid", "Role").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.role
-    )
-    expect(MergePeople.getColumnContent("mid", "Position").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.position
-    )
-    expect(MergePeople.getPreviousPositions("mid")).to.eql(
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Name")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.name)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Role")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.role)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Position")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.position)
+    await expect(await MergePeople.getPreviousPositions("mid")).to.eql(
       EXAMPLE_PEOPLE.advisorRight.previousPositions
     )
-    expect(MergePeople.getColumnContent("mid", "Status").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.status
-    )
-    expect(MergePeople.getColumnContent("mid", "Email").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.email
-    )
-    expect(MergePeople.getColumnContent("mid", "Phone").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.phone
-    )
-    expect(MergePeople.getColumnContent("mid", "Rank").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.rank
-    )
-    expect(MergePeople.getColumnContent("mid", "Gender").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.gender
-    )
-    expect(MergePeople.getColumnContent("mid", "Nationality").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.nationality
-    )
-    expect(MergePeople.getColumnContent("mid", "Biography").getText()).to.eq(
-      EXAMPLE_PEOPLE.advisorRight.biography
-    )
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Status")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.status)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Email")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.email)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Phone")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.phone)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Rank")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.rank)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Gender")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.gender)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Nationality")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.nationality)
+    await expect(
+      await (await MergePeople.getColumnContent("mid", "Biography")).getText()
+    ).to.eq(EXAMPLE_PEOPLE.advisorRight.biography)
   })
-  it("Should not display clear field buttons on the middle column", () => {
-    expect(MergePeople.clearValueButtons.length).to.eq(0)
+  it("Should not display clear field buttons on the middle column", async() => {
+    await expect((await MergePeople.getClearValueButtons()).length).to.eq(0)
   })
-  it("Should not display edit history button on the middle column", () => {
-    MergePeople.editHistoryButton.waitForDisplayed({ reverse: true })
+  it("Should not display edit history button on the middle column", async() => {
+    await (
+      await MergePeople.getEditHistoryButton()
+    ).waitForDisplayed({ reverse: true })
   })
-  it("Should be able to merge both people when winner is right person", () => {
-    MergePeople.mergePeopleButton.click()
-    MergePeople.waitForSuccessAlert()
+  it("Should be able to merge both people when winner is right person", async() => {
+    await (await MergePeople.getMergePeopleButton()).click()
+    await MergePeople.waitForSuccessAlert()
   })
-  it("Should merge notes of the both people", () => {
-    MergePeople.showNotesButton.click()
+  it("Should merge notes of the both people", async() => {
+    await (await MergePeople.getShowNotesButton()).click()
     // Wait for offcanvas to open
-    browser.pause(100)
+    await browser.pause(100)
     // As validRight and validLeft merged before, notes should include notes from three people
-    expect(
-      MergePeople.areNotesExist([
+    await expect(
+      await MergePeople.areNotesExist([
         ...EXAMPLE_PEOPLE.validLeft.notes,
         ...EXAMPLE_PEOPLE.validRight.notes,
         ...EXAMPLE_PEOPLE.advisorRight.notes
       ])
     ).to.eq(true)
   })
-  it("Should be able to delete the loser person", () => {
-    MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
-    MergePeople.errorTitle.waitForExist()
-    expect(MergePeople.errorTitle.getText()).to.equal(
+  it("Should be able to delete the loser person", async() => {
+    await MergePeople.openPage(`/people/${EXAMPLE_PEOPLE.validLeft.perUuid}`)
+    await (await MergePeople.getErrorTitle()).waitForExist()
+    await expect(await (await MergePeople.getErrorTitle()).getText()).to.equal(
       `User #${EXAMPLE_PEOPLE.validLeft.perUuid} not found.`
     )
   })

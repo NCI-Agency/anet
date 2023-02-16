@@ -19,19 +19,19 @@ export const INSIGHTS = [
 ]
 
 class Insights extends Page {
-  get insightsMenu() {
+  async getInsightsMenu() {
     return browser.$("#insights")
   }
 
-  getInsightLink(insight) {
+  async getInsightLink(insight) {
     return browser.$(`a[href="/insights/${insight}"]`)
   }
 
-  get alert() {
+  async getAlert() {
     return browser.$(".alert")
   }
 
-  getInsightDiv(insight) {
+  async getInsightDiv(insight) {
     return browser.$(`div[id="${insight}"]`)
   }
 }

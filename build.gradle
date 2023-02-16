@@ -746,7 +746,7 @@ allprojects {
 
 node {
 	nodeProjectDir = file("${project.projectDir}/client")
-	version = '14.20.1'
+	version = '18.14.0'
 	yarnVersion = '1.22.19'
 	download = true
 }

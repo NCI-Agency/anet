@@ -3,107 +3,111 @@ import Page from "../page"
 const PAGE_URL = "/locations/new"
 
 class CreateNewLocation extends Page {
-  get form() {
+  async getForm() {
     return browser.$(".form-horizontal")
   }
 
-  get createButton() {
+  async getCreateButton() {
     return browser.$('//button[contains(text(),"Save Location")]')
   }
 
-  get nameRequiredError() {
+  async getNameRequiredError() {
     return browser.$('//div[contains(text(),"name is a required field")]')
   }
 
-  get nameField() {
-    return this.form.$("input#name")
+  async getNameField() {
+    return (await this.getForm()).$("input#name")
   }
 
-  get typeRequiredError() {
+  async getTypeRequiredError() {
     return browser.$('//div[contains(text(),"type is a required field")]')
   }
 
-  get typeField() {
-    return this.form.$("select.location-type-form-group")
+  async getTypeField() {
+    return (await this.getForm()).$("select.location-type-form-group")
   }
 
-  get duplicatesButton() {
+  async getDuplicatesButton() {
     return browser.$('//button[text()="Possible Duplicates"]')
   }
 
-  get modalContent() {
+  async getModalContent() {
     return browser.$("div.modal-content")
   }
 
-  get modalCloseButton() {
-    return this.modalContent.$(".btn-close")
+  async getModalCloseButton() {
+    return (await this.getModalContent()).$(".btn-close")
   }
 
-  get similarLocation() {
-    return this.modalContent.$(
+  async getSimilarLocation() {
+    return (await this.getModalContent()).$(
       ".modal-content tbody tr:first-child td:first-child a"
     )
   }
 
-  get latField() {
-    return this.form.$("input#lat")
+  async getLatField() {
+    return (await this.getForm()).$("input#lat")
   }
 
-  get lngField() {
-    return this.form.$("input#lng")
+  async getLngField() {
+    return (await this.getForm()).$("input#lng")
   }
 
-  get allFormatsPopover() {
-    return this.form.$("button#gloc-info-btn")
+  async getAllFormatsPopover() {
+    return (await this.getForm()).$("button#gloc-info-btn")
   }
 
   // parent of MGRS table data => tr
-  get allFormatsPopoverLat() {
-    return this.form
+  async getAllFormatsPopoverLat() {
+    return (await this.getForm())
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
       .$("..")
       .$("span:first-child")
   }
 
-  get allFormatsPopoverLng() {
-    return this.form
+  async getAllFormatsPopoverLng() {
+    return (await this.getForm())
       .$(".bp4-popover2-content table")
       .$("td*=Latitude")
       .$("..")
       .$("span:nth-child(3)")
   }
 
-  get allFormatsPopoverMGRS() {
+  async getAllFormatsPopoverMGRS() {
     // parent of MGRS table data => tr
-    return this.form
+    return (await this.getForm())
       .$(".bp4-popover2-content table")
       .$("td*=MGRS")
       .$("..")
       .$("span:first-child")
   }
 
-  get successMsg() {
+  async getSuccessMsg() {
     return browser.$('//div[text()="Location saved"]')
   }
 
-  latLngErrorsDisplayed() {
-    const latError = browser.$('//div[contains(text(), "Latitude must be")]')
-    const lngError = browser.$('//div[contains(text(), "Longitude must be")]')
-    latError.waitForExist()
-    lngError.waitForExist()
-    latError.waitForDisplayed()
-    lngError.waitForDisplayed()
+  async latLngErrorsDisplayed() {
+    const latError = await browser.$(
+      '//div[contains(text(), "Latitude must be")]'
+    )
+    const lngError = await browser.$(
+      '//div[contains(text(), "Longitude must be")]'
+    )
+    await latError.waitForExist()
+    await lngError.waitForExist()
+    await latError.waitForDisplayed()
+    await lngError.waitForDisplayed()
   }
 
-  open() {
-    super.openAsAdminUser(PAGE_URL)
-    this.waitForPageToLoad()
+  async open() {
+    await super.openAsAdminUser(PAGE_URL)
+    await this.waitForPageToLoad()
   }
 
-  waitForPageToLoad() {
-    this.form.waitForExist()
-    this.form.waitForDisplayed()
+  async waitForPageToLoad() {
+    await (await this.getForm()).waitForExist()
+    await (await this.getForm()).waitForDisplayed()
   }
 }
 

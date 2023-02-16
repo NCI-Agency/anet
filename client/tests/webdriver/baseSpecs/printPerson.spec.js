@@ -53,76 +53,92 @@ const PRESET_WITHOUT_SENSITIVE_LABELS = [
 ]
 
 describe("Show person page", () => {
-  beforeEach("Should have print button", () => {
-    Home.openAsAdminUser()
-    Home.searchBar.setValue("Roger")
-    Home.submitSearch.click()
-    Search.foundPeopleTable.waitForExist({ timeout: 20000 })
-    Search.foundPeopleTable.waitForDisplayed()
-    Search.linkOfPersonFound("Roger").click()
-    ShowPerson.compactViewButton.waitForExist()
-    ShowPerson.compactViewButton.waitForDisplayed()
-    ShowPerson.compactViewButton.click()
-    ShowPerson.compactView.waitForExist()
-    ShowPerson.compactView.waitForDisplayed()
+  beforeEach("Should have print button", async() => {
+    await Home.openAsAdminUser()
+    await (await Home.getSearchBar()).setValue("Roger")
+    await (await Home.getSubmitSearch()).click()
+    await (await Search.getFoundPeopleTable()).waitForExist({ timeout: 20000 })
+    await (await Search.getFoundPeopleTable()).waitForDisplayed()
+    await (await Search.linkOfPersonFound("Roger")).click()
+    await (await ShowPerson.getCompactViewButton()).waitForExist()
+    await (await ShowPerson.getCompactViewButton()).waitForDisplayed()
+    await (await ShowPerson.getCompactViewButton()).click()
+    await (await ShowPerson.getCompactView()).waitForExist()
+    await (await ShowPerson.getCompactView()).waitForDisplayed()
   })
   describe("When on the print person page", () => {
-    it("All fields can be selected using the optional fields dropdown", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.selectAllButton.waitForDisplayed()
-      ShowPerson.selectAllButton.click()
-      ShowPerson.waitForCompactField(
+    it("All fields can be selected using the optional fields dropdown", async() => {
+      await (await ShowPerson.getOptionalFieldsButton()).click()
+      await (await ShowPerson.getSelectAllButton()).waitForDisplayed()
+      await (await ShowPerson.getSelectAllButton()).click()
+      await ShowPerson.waitForCompactField(
         false,
-        ...Object.values(SOME_FIELDS).map(field => field.fieldLabel)
+        ...(await Promise.all(
+          Object.values(SOME_FIELDS).map(async field => field.fieldLabel)
+        ))
       )
     })
-    it("All fields can be cleared using the optional fields dropdown", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.clearAllButton.waitForDisplayed()
-      ShowPerson.clearAllButton.click()
-      ShowPerson.waitForCompactField(
+    it("All fields can be cleared using the optional fields dropdown", async() => {
+      await (await ShowPerson.getOptionalFieldsButton()).click()
+      await (await ShowPerson.getClearAllButton()).waitForDisplayed()
+      await (await ShowPerson.getClearAllButton()).click()
+      await ShowPerson.waitForCompactField(
         true,
-        ...Object.values(SOME_FIELDS).map(field => field.fieldLabel)
+        ...(await Promise.all(
+          Object.values(SOME_FIELDS).map(async field => field.fieldLabel)
+        ))
       )
     })
-    it("Individual fields can be selected using optional fields dropdown", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.clearAllButton.waitForDisplayed()
-      ShowPerson.clearAllButton.click()
-      ShowPerson.pickACompactField(SOME_FIELDS.currentPosition.id)
-      ShowPerson.waitForCompactField(
+    it("Individual fields can be selected using optional fields dropdown", async() => {
+      await (await ShowPerson.getOptionalFieldsButton()).click()
+      await (await ShowPerson.getClearAllButton()).waitForDisplayed()
+      await (await ShowPerson.getClearAllButton()).click()
+      await ShowPerson.pickACompactField(SOME_FIELDS.currentPosition.id)
+      await ShowPerson.waitForCompactField(
         false,
         SOME_FIELDS.currentPosition.fieldLabel
       )
-      ShowPerson.pickACompactField(SOME_FIELDS.birthday.id)
-      ShowPerson.waitForCompactField(false, SOME_FIELDS.birthday.fieldLabel)
+      await ShowPerson.pickACompactField(SOME_FIELDS.birthday.id)
+      await ShowPerson.waitForCompactField(
+        false,
+        SOME_FIELDS.birthday.fieldLabel
+      )
     })
-    it("Default preset should select correct fields and display sensitive information warning", () => {
-      ShowPerson.presetsButton.click()
-      ShowPerson.defaultPreset.waitForDisplayed()
-      ShowPerson.defaultPreset.click()
-      ShowPerson.waitForCompactField(false, ...PRESET_DEFAULT_LABELS)
-      ShowPerson.sensitiveInformationWarning.waitForDisplayed()
+    it("Default preset should select correct fields and display sensitive information warning", async() => {
+      await (await ShowPerson.getPresetsButton()).click()
+      await (await ShowPerson.getDefaultPreset()).waitForDisplayed()
+      await (await ShowPerson.getDefaultPreset()).click()
+      await ShowPerson.waitForCompactField(false, ...PRESET_DEFAULT_LABELS)
+      await (
+        await ShowPerson.getSensitiveInformationWarning()
+      ).waitForDisplayed()
     })
-    it("Exclude sensitive fields preset should select correct fields", () => {
-      ShowPerson.presetsButton.click()
-      ShowPerson.withoutSensitivePreset.waitForDisplayed()
-      ShowPerson.withoutSensitivePreset.click()
-      ShowPerson.waitForCompactField(false, ...PRESET_WITHOUT_SENSITIVE_LABELS)
-      ShowPerson.sensitiveInformationWarning.waitForDisplayed({ reverse: true })
+    it("Exclude sensitive fields preset should select correct fields", async() => {
+      await (await ShowPerson.getPresetsButton()).click()
+      await (await ShowPerson.getWithoutSensitivePreset()).waitForDisplayed()
+      await (await ShowPerson.getWithoutSensitivePreset()).click()
+      await ShowPerson.waitForCompactField(
+        false,
+        ...PRESET_WITHOUT_SENSITIVE_LABELS
+      )
+      await (
+        await ShowPerson.getSensitiveInformationWarning()
+      ).waitForDisplayed({
+        reverse: true
+      })
     })
-    it("Should select the number of fields on the left", () => {
-      ShowPerson.optionalFieldsButton.click()
-      ShowPerson.selectAllButton.waitForDisplayed()
-      ShowPerson.selectAllButton.click()
-      ShowPerson.leftColumnNumber.setValue(4)
+    it("Should select the number of fields on the left", async() => {
+      await (await ShowPerson.getOptionalFieldsButton()).click()
+      await (await ShowPerson.getSelectAllButton()).waitForDisplayed()
+      await (await ShowPerson.getSelectAllButton()).click()
+      await (await ShowPerson.getLeftColumnNumber()).setValue(4)
       // Left column contains 2 additional fields name and avatar
-      expect(ShowPerson.leftTableFields.length).to.equal(6)
+      await expect((await ShowPerson.getLeftTableFields()).length).to.equal(6)
     })
-    it("Should return to the show person page when detailed view button clicked", () => {
-      ShowPerson.detailedViewButton.click()
-      ShowPerson.compactViewButton.waitForExist()
-      ShowPerson.compactViewButton.waitForDisplayed()
+    it("Should return to the show person page when detailed view button clicked", async() => {
+      await (await ShowPerson.getDetailedViewButton()).click()
+      await (await ShowPerson.getCompactViewButton()).waitForExist()
+      await (await ShowPerson.getCompactViewButton()).waitForDisplayed()
     })
   })
 })

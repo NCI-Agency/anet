@@ -10,44 +10,44 @@ import CreateNewLocation from "../pages/location/createNewLocation.page"
 // Forms should work just fine without custom fields
 
 describe("When looking at anet object forms with dictionary that doesn't include custom fields", () => {
-  afterEach("On the form page...", () => {
-    CreateReport.logout()
+  afterEach("On the form page...", async() => {
+    await CreateReport.logout()
   })
 
-  it("Should see that report form successfully loads", () => {
-    CreateReport.open()
-    CreateReport.form.waitForExist()
-    CreateReport.form.waitForDisplayed()
+  it("Should see that report form successfully loads", async() => {
+    await CreateReport.open()
+    await (await CreateReport.getForm()).waitForExist()
+    await (await CreateReport.getForm()).waitForDisplayed()
   })
-  it("Should see that person form successfully loads", () => {
-    CreatePerson.openAsSuperUser()
-    CreatePerson.form.waitForExist()
-    CreatePerson.form.waitForDisplayed()
+  it("Should see that person form successfully loads", async() => {
+    await CreatePerson.openAsSuperUser()
+    await (await CreatePerson.getForm()).waitForExist()
+    await (await CreatePerson.getForm()).waitForDisplayed()
   })
-  it("Should see that task form successfully loads", () => {
-    CreateTask.openAsAdmin()
-    CreateTask.form.waitForExist()
-    CreateTask.form.waitForDisplayed()
+  it("Should see that task form successfully loads", async() => {
+    await CreateTask.openAsAdmin()
+    await (await CreateTask.getForm()).waitForExist()
+    await (await CreateTask.getForm()).waitForDisplayed()
   })
-  it("Should see that authorization groups form successfully loads", () => {
-    CreateAuthorizationGroup.open()
-    CreateAuthorizationGroup.form.waitForExist()
-    CreateAuthorizationGroup.form.waitForDisplayed()
+  it("Should see that authorization groups form successfully loads", async() => {
+    await CreateAuthorizationGroup.open()
+    await (await CreateAuthorizationGroup.getForm()).waitForExist()
+    await (await CreateAuthorizationGroup.getForm()).waitForDisplayed()
   })
-  it("Should see that location form successfully loads", () => {
-    CreateNewLocation.open()
-    CreateNewLocation.createButton.click()
-    CreateNewLocation.nameRequiredError.waitForExist()
-    CreateNewLocation.nameRequiredError.waitForDisplayed()
+  it("Should see that location form successfully loads", async() => {
+    await CreateNewLocation.open()
+    await (await CreateNewLocation.getCreateButton()).click()
+    await (await CreateNewLocation.getNameRequiredError()).waitForExist()
+    await (await CreateNewLocation.getNameRequiredError()).waitForDisplayed()
   })
-  it("Should see that position form successfully loads", () => {
-    CreatePosition.open()
-    CreatePosition.form.waitForExist()
-    CreatePosition.form.waitForDisplayed()
+  it("Should see that position form successfully loads", async() => {
+    await CreatePosition.open()
+    await (await CreatePosition.getForm()).waitForExist()
+    await (await CreatePosition.getForm()).waitForDisplayed()
   })
-  it("Should see that organization form successfully loads", () => {
-    CreateOrganization.openAsAdmin()
-    CreateOrganization.form.waitForExist()
-    CreateOrganization.form.waitForDisplayed()
+  it("Should see that organization form successfully loads", async() => {
+    await CreateOrganization.openAsAdmin()
+    await (await CreateOrganization.getForm()).waitForExist()
+    await (await CreateOrganization.getForm()).waitForDisplayed()
   })
 })

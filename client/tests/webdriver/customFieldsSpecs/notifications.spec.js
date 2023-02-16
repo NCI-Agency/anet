@@ -4,48 +4,59 @@ import Home from "../pages/home.page"
 
 describe("Home page", () => {
   describe("When checking the notification numbers", () => {
-    afterEach("On the create authorization group page...", () => {
-      Home.logout()
+    afterEach("On the create authorization group page...", async() => {
+      await Home.logout()
     })
 
-    it("Should see that Erin has 1 counterpart and no tasks with pending assessments", () => {
-      Home.open()
-      Home.linksMenuButton.click()
-      Home.myCounterpartsLink.waitForDisplayed()
-      Home.myTasksLink.waitForDisplayed()
-      browser.pause(1000)
-      expect(Home.myCounterpartsNotifications.getText()).to.equal("1")
+    it("Should see that Erin has 1 counterpart and no tasks with pending assessments", async() => {
+      await Home.open()
+      await (await Home.getLinksMenuButton()).click()
+      await (await Home.getMyCounterpartsLink()).waitForDisplayed()
+      await (await Home.getMyTasksLink()).waitForDisplayed()
+      await browser.pause(1000)
+      await expect(
+        await (await Home.getMyCounterpartsNotifications()).getText()
+      ).to.equal("1")
       // eslint-disable-next-line no-unused-expressions
-      expect(Home.myTasksNotifications.isExisting()).to.be.false
+      expect(await (await Home.getMyTasksNotifications()).isExisting()).to.be
+        .false
     })
-    it("Should see that Bob has no counterparts and 1 task with pending assessments", () => {
-      Home.open("/", "bob")
-      Home.linksMenuButton.click()
-      Home.myCounterpartsLink.waitForDisplayed()
-      Home.myTasksLink.waitForDisplayed()
-      browser.pause(1000)
+    it("Should see that Bob has no counterparts and 1 task with pending assessments", async() => {
+      await Home.open("/", "bob")
+      await (await Home.getLinksMenuButton()).click()
+      await (await Home.getMyCounterpartsLink()).waitForDisplayed()
+      await (await Home.getMyTasksLink()).waitForDisplayed()
+      await browser.pause(1000)
       // eslint-disable-next-line no-unused-expressions
-      expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
-      expect(Home.myTasksNotifications.getText()).to.equal("1")
+      expect(await (await Home.getMyCounterpartsNotifications()).isExisting())
+        .to.be.false
+      await expect(
+        await (await Home.getMyTasksNotifications()).getText()
+      ).to.equal("1")
     })
-    it("Should see that Jack has no counterpart and 1 task with pending assessments", () => {
-      Home.open("/", "jack")
-      Home.linksMenuButton.click()
-      Home.myCounterpartsLink.waitForDisplayed()
-      Home.myTasksLink.waitForDisplayed()
-      browser.pause(1000)
+    it("Should see that Jack has no counterpart and 1 task with pending assessments", async() => {
+      await Home.open("/", "jack")
+      await (await Home.getLinksMenuButton()).click()
+      await (await Home.getMyCounterpartsLink()).waitForDisplayed()
+      await (await Home.getMyTasksLink()).waitForDisplayed()
+      await browser.pause(1000)
       // eslint-disable-next-line no-unused-expressions
-      expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
-      expect(Home.myTasksNotifications.getText()).to.equal("1")
+      expect(await (await Home.getMyCounterpartsNotifications()).isExisting())
+        .to.be.false
+      await expect(
+        await (await Home.getMyTasksNotifications()).getText()
+      ).to.equal("1")
     })
-    it("Should see that Nick has no counterparts and no tasks with pending assessments", () => {
-      Home.open("/", "nick")
-      Home.linksMenuButton.click()
-      Home.myCounterpartsLink.waitForDisplayed()
-      Home.myTasksLink.waitForDisplayed()
+    it("Should see that Nick has no counterparts and no tasks with pending assessments", async() => {
+      await Home.open("/", "nick")
+      await (await Home.getLinksMenuButton()).click()
+      await (await Home.getMyCounterpartsLink()).waitForDisplayed()
+      await (await Home.getMyTasksLink()).waitForDisplayed()
       /* eslint-disable no-unused-expressions */
-      expect(Home.myCounterpartsNotifications.isExisting()).to.be.false
-      expect(Home.myTasksNotifications.isExisting()).to.be.false
+      expect(await (await Home.getMyCounterpartsNotifications()).isExisting())
+        .to.be.false
+      expect(await (await Home.getMyTasksNotifications()).isExisting()).to.be
+        .false
       /* eslint-enable no-unused-expressions */
     })
   })

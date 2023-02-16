@@ -3,64 +3,68 @@ import Page from "./page"
 const PAGE_URL = "/admin/authorizationGroups/new"
 
 class CreateAuthorizationGroup extends Page {
-  get form() {
+  async getForm() {
     return browser.$("form")
   }
 
-  get alertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get name() {
+  async getName() {
     return browser.$("#name")
   }
 
-  get description() {
+  async getDescription() {
     return browser.$("#description")
   }
 
   /* React Bootstrap v2 hides the input and styles the label. Input is not clickable.
         In order to click toggleButtonGroup, label needs to be grabbed */
-  get statusActiveInput() {
+  async getStatusActiveInput() {
     return browser.$("input#status_ACTIVE")
   }
 
-  get statusInactiveInput() {
+  async getStatusInactiveInput() {
     return browser.$("input#status_INACTIVE")
   }
 
-  get statusActiveButton() {
+  async getStatusActiveButton() {
     return browser.$('label[for="status_ACTIVE"]')
   }
 
-  get statusInactiveButton() {
+  async getStatusInactiveButton() {
     return browser.$('label[for="status_INACTIVE"]')
   }
 
-  get positionsInput() {
+  async getPositionsInput() {
     return browser.$("#positions")
   }
 
-  get positionsAdvancedSelectFirstItem() {
+  async getPositionsAdvancedSelectFirstItem() {
     return browser.$(
       "#positions-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  get submitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  open() {
+  async open() {
     // Only admin users can create authorization groups
-    super.openAsAdminUser(PAGE_URL)
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  waitForPositionsAdvancedSelectToChange(value) {
-    this.positionsAdvancedSelectFirstItem.waitForExist()
+  async waitForPositionsAdvancedSelectToChange(value) {
+    await (await this.getPositionsAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      () => {
-        return this.positionsAdvancedSelectFirstItem.getText() === value
+      async() => {
+        return (
+          (await (
+            await this.getPositionsAdvancedSelectFirstItem()
+          ).getText()) === value
+        )
       },
       {
         timeout: 5000,
@@ -72,8 +76,8 @@ class CreateAuthorizationGroup extends Page {
     )
   }
 
-  submitForm() {
-    this.submitButton.click()
+  async submitForm() {
+    await (await this.getSubmitButton()).click()
   }
 }
 

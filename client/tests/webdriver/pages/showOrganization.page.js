@@ -1,26 +1,26 @@
 import Page from "./page"
 
 class ShowOrganization extends Page {
-  get alertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get longName() {
+  async getLongName() {
     return browser.$('div[id="longName"')
   }
 
-  get location() {
+  async getLocation() {
     return browser.$('div[id="location"')
   }
 
-  get profile() {
+  async getProfile() {
     return browser.$('div[id="profile"')
   }
 
-  waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
+  async waitForAlertSuccessToLoad() {
+    if (!(await (await this.getAlertSuccess()).isDisplayed())) {
+      await (await this.getAlertSuccess()).waitForExist()
+      await (await this.getAlertSuccess()).waitForDisplayed()
     }
   }
 }

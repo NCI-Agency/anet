@@ -3,65 +3,69 @@ import Page from "./page"
 const PAGE_URL = "/organizations/new"
 
 class CreateOrganization extends Page {
-  get form() {
+  async getForm() {
     return browser.$("form.form-horizontal")
   }
 
-  get alertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get submitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get organizationShortNameHelpBlock() {
+  async getOrganizationShortNameHelpBlock() {
     return browser.$("#fg-shortName div.invalid-feedback")
   }
 
-  get typeAdvisorButton() {
+  async getTypeAdvisorButton() {
     return browser.$('label[for="type_ADVISOR_ORG"]')
   }
 
-  get shortNameInput() {
+  async getShortNameInput() {
     return browser.$("#shortName")
   }
 
-  get longNameInput() {
+  async getLongNameInput() {
     return browser.$("#longName")
   }
 
-  get locationInput() {
+  async getLocationInput() {
     return browser.$("#location")
   }
 
-  get locationAdvancedSelectFirstItem() {
+  async getLocationAdvancedSelectFirstItem() {
     return browser.$(
       "#location-popover tbody tr:first-child td:nth-child(2) span"
     )
   }
 
-  get profileInput() {
+  async getProfileInput() {
     return browser.$("#fg-profile .editable")
   }
 
-  openAsSuperUser() {
-    super.openAsSuperUser(PAGE_URL)
+  async openAsSuperUser() {
+    await super.openAsSuperUser(PAGE_URL)
   }
 
-  openAsAdmin() {
-    super.openAsAdminUser(PAGE_URL)
+  async openAsAdmin() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  submitForm() {
-    this.submitButton.click()
+  async submitForm() {
+    await (await this.getSubmitButton()).click()
   }
 
-  waitForLocationAdvancedSelectToChange(value) {
-    this.locationAdvancedSelectFirstItem.waitForExist()
+  async waitForLocationAdvancedSelectToChange(value) {
+    await (await this.getLocationAdvancedSelectFirstItem()).waitForExist()
     return browser.waitUntil(
-      () => {
-        return this.locationAdvancedSelectFirstItem.getText() === value
+      async() => {
+        return (
+          (await (
+            await this.getLocationAdvancedSelectFirstItem()
+          ).getText()) === value
+        )
       },
       {
         timeout: 5000,
@@ -73,10 +77,10 @@ class CreateOrganization extends Page {
     )
   }
 
-  fillOrganizationProfile(profile) {
-    this.profileInput.click()
-    browser.keys(profile)
-    browser.pause(300)
+  async fillOrganizationProfile(profile) {
+    await (await this.getProfileInput()).click()
+    await browser.keys(profile)
+    await browser.pause(300)
   }
 }
 

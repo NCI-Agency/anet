@@ -24,23 +24,23 @@ export const REPORT_STATES = {
 }
 
 class MyReports extends Page {
-  open(credentials) {
-    super.open(PAGE_URL, credentials)
+  async open(credentials) {
+    await super.open(PAGE_URL, credentials)
   }
 
-  selectReport(linkText, reportState) {
+  async selectReport(linkText, reportState) {
     const sectionId = reportState.id
-    const tableTab = browser.$(
+    const tableTab = await browser.$(
       `#${sectionId} .report-collection div header div button[value='table']`
     )
-    tableTab.waitForExist()
-    tableTab.waitForDisplayed()
-    tableTab.click()
-    const reportLink = browser.$(`*=${linkText}`)
-    reportLink.waitForExist()
-    reportLink.waitForDisplayed()
-    reportLink.click()
-    super.waitUntilLoaded()
+    await tableTab.waitForExist()
+    await tableTab.waitForDisplayed()
+    await tableTab.click()
+    const reportLink = await browser.$(`*=${linkText}`)
+    await reportLink.waitForExist()
+    await reportLink.waitForDisplayed()
+    await reportLink.click()
+    await super.waitUntilLoaded()
   }
 }
 

@@ -24,243 +24,256 @@ const OTHER_FIELDS = {
 }
 
 export class CreateReport extends Page {
-  get form() {
+  async getForm() {
     return browser.$("form")
   }
 
-  get alert() {
+  async getAlert() {
     return browser.$(".alert")
   }
 
-  get duration() {
+  async getDuration() {
     return browser.$("#duration")
   }
 
-  get positiveAtmosphere() {
+  async getPositiveAtmosphere() {
     return browser.$('label[for="atmosphere_POSITIVE"]')
   }
 
-  getCustomFieldFormGroup(id) {
+  async getCustomFieldFormGroup(id) {
     return browser.$(`div[id="fg-${id}"]`)
   }
 
-  get engagementInformationTitle() {
+  async getEngagementInformationTitle() {
     return browser.$('//span[text()="Engagement information"]')
   }
 
-  get testReferenceFieldFormGroup() {
+  async getTestReferenceFieldFormGroup() {
     return this.getCustomFieldFormGroup(RELATED_REPORT_ID)
   }
 
-  get testReferenceFieldLabel() {
-    return this.testReferenceFieldFormGroup.$(
+  async getTestReferenceFieldLabel() {
+    return (await this.getTestReferenceFieldFormGroup()).$(
       `label[for="${RELATED_REPORT_ID}"]`
     )
   }
 
-  get testReferenceFieldHelpText() {
-    return this.testReferenceFieldFormGroup.$("div.form-text")
+  async getTestReferenceFieldHelpText() {
+    return (await this.getTestReferenceFieldFormGroup()).$("div.form-text")
   }
 
-  get testReferenceField() {
-    return this.testReferenceFieldFormGroup.$(
+  async getTestReferenceField() {
+    return (await this.getTestReferenceFieldFormGroup()).$(
       `input[id="${RELATED_REPORT_ID}"]`
     )
   }
 
-  get testReferenceFieldAdvancedSelectFirstItem() {
-    return this.testReferenceFieldFormGroup.$(
+  async getTestReferenceFieldAdvancedSelectFirstItem() {
+    return (await this.getTestReferenceFieldFormGroup()).$(
       `div[id="${RELATED_REPORT_ID}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
 
-  get testReferenceFieldValue() {
-    return this.testReferenceFieldFormGroup.$(
+  async getTestReferenceFieldValue() {
+    return (await this.getTestReferenceFieldFormGroup()).$(
       `table[id="${RELATED_REPORT_ID}-value"] tbody tr:first-child`
     )
   }
 
-  get testMultiReferenceFieldFormGroup() {
+  async getTestMultiReferenceFieldFormGroup() {
     return this.getCustomFieldFormGroup(ADDITIONAL_ENGAGEMENTS_ID)
   }
 
-  get testMultiReferenceFieldLabel() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  async getTestMultiReferenceFieldLabel() {
+    return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `label[for="${ADDITIONAL_ENGAGEMENTS_ID}"]`
     )
   }
 
-  get testMultiReferenceFieldHelpText() {
-    return this.testMultiReferenceFieldFormGroup.$("div.form-text")
+  async getTestMultiReferenceFieldHelpText() {
+    return (await this.getTestMultiReferenceFieldFormGroup()).$("div.form-text")
   }
 
-  get testMultiReferenceField() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  async getTestMultiReferenceField() {
+    return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `input[id="${ADDITIONAL_ENGAGEMENTS_ID}"]`
     )
   }
 
-  get testMultiReferenceFieldAdvancedSelect() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  async getTestMultiReferenceFieldAdvancedSelect() {
+    return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `div[id="${ADDITIONAL_ENGAGEMENTS_ID}-popover"] tbody`
     )
   }
 
-  get engagementTypesFieldFormGroup() {
+  async getEngagementTypesFieldFormGroup() {
     return this.getCustomFieldFormGroup(ENGAGEMENT_TYPES_ID)
   }
 
-  get engagementTypesFieldLabel() {
-    return this.engagementTypesFieldFormGroup.$(
+  async getEngagementTypesFieldLabel() {
+    return (await this.getEngagementTypesFieldFormGroup()).$(
       `label[for="${ENGAGEMENT_TYPES_ID}"]`
     )
   }
 
-  getEngagementTypesButtonByName(name) {
-    return this.engagementTypesFieldFormGroup.$(
+  async getEngagementTypesButtonByName(name) {
+    return (await this.getEngagementTypesFieldFormGroup()).$(
       `label[for="formCustomFields.multipleButtons_${name}"]`
     )
   }
 
-  get fieldsToggledVisibilityByTrainButton() {
-    return Object.keys(TRAINING_TOGGLED_FIELDS).map(fieldId => {
-      return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS[fieldId])
-    })
+  async getFieldsToggledVisibilityByTrainButton() {
+    return Promise.all(
+      Object.keys(TRAINING_TOGGLED_FIELDS).map(async fieldId => {
+        return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS[fieldId])
+      })
+    )
   }
 
-  get fieldsNotToggledVisibilityByTrainButton() {
-    return Object.keys(ADVISE_FIELDS)
-      .map(fieldId => {
-        return this.getCustomFieldFormGroup(ADVISE_FIELDS[fieldId])
-      })
-      .concat(
-        // fieldsets are not prepended with fg-
-        Object.keys(OTHER_FIELDS).map(fieldsetId => {
+  async getFieldsNotToggledVisibilityByTrainButton() {
+    return (
+      await Promise.all(
+        Object.keys(ADVISE_FIELDS).map(async fieldId => {
+          return this.getCustomFieldFormGroup(ADVISE_FIELDS[fieldId])
+        })
+      )
+    ).concat(
+      await Promise.all(
+        Object.keys(OTHER_FIELDS).map(async fieldsetId => {
           return browser.$(`div[id="${OTHER_FIELDS[fieldsetId]}"]`)
         })
       )
+    )
   }
 
-  get numberTrainedFormGroup() {
+  async getNumberTrainedFormGroup() {
     return this.getCustomFieldFormGroup(TRAINING_TOGGLED_FIELDS.numberTrained)
   }
 
-  get numberTrainedField() {
-    return this.numberTrainedFormGroup.$(
+  async getNumberTrainedField() {
+    return (await this.getNumberTrainedFormGroup()).$(
       `input[id="${TRAINING_TOGGLED_FIELDS.numberTrained}"]`
     )
   }
 
-  get numberTrainedFieldShowed() {
-    return this.numberTrainedFormGroup.$("div.form-control-plaintext")
+  async getNumberTrainedFieldShowed() {
+    return (await this.getNumberTrainedFormGroup()).$(
+      "div.form-control-plaintext"
+    )
   }
 
-  get numberTrainedErrorText() {
-    return this.numberTrainedFormGroup.$("div.invalid-feedback")
+  async getNumberTrainedErrorText() {
+    return (await this.getNumberTrainedFormGroup()).$("div.invalid-feedback")
   }
 
-  getTestMultiReferenceFieldAdvancedSelectItem(n) {
-    return this.testMultiReferenceFieldAdvancedSelect.$(
+  async getTestMultiReferenceFieldAdvancedSelectItem(n) {
+    return (await this.getTestMultiReferenceFieldAdvancedSelect()).$(
       `tr:nth-child(${n}) td:nth-child(2)`
     )
   }
 
-  getTestMultiReferenceFieldAdvancedSelectItemLabel(n) {
-    return this.getTestMultiReferenceFieldAdvancedSelectItem(n).$("span")
+  async getTestMultiReferenceFieldAdvancedSelectItemLabel(n) {
+    return (await this.getTestMultiReferenceFieldAdvancedSelectItem(n)).$(
+      "span"
+    )
   }
 
-  get testMultiReferenceFieldValue() {
-    return this.testMultiReferenceFieldFormGroup.$(
+  async getTestMultiReferenceFieldValue() {
+    return (await this.getTestMultiReferenceFieldFormGroup()).$(
       `table[id="${ADDITIONAL_ENGAGEMENTS_ID}-value"]`
     )
   }
 
-  get testMultiReferenceFieldValueRows() {
-    return this.testMultiReferenceFieldValue.$$("tbody tr")
+  async getTestMultiReferenceFieldValueRows() {
+    return (await this.getTestMultiReferenceFieldValue()).$$("tbody tr")
   }
 
-  getTestMultiReferenceFieldValueRow(n) {
-    return this.testMultiReferenceFieldValue.$(`tbody tr:nth-child(${n})`)
+  async getTestMultiReferenceFieldValueRow(n) {
+    return (await this.getTestMultiReferenceFieldValue()).$(
+      `tbody tr:nth-child(${n})`
+    )
   }
 
-  get attendeesAssessments() {
+  async getAttendeesAssessments() {
     return browser.$("#attendees-engagement-assessments")
   }
 
-  get attendeeAssessmentRows() {
-    return this.attendeesAssessments.$$("tr")
+  async getAttendeeAssessmentRows() {
+    return (await this.getAttendeesAssessments()).$$("tr")
   }
 
-  getAttendeeAssessment(name) {
-    return this.attendeesAssessments.$(`//td/a[text()="${name}"]`)
+  async getAttendeeAssessment(name) {
+    return (await this.getAttendeesAssessments()).$(`//td/a[text()="${name}"]`)
   }
 
-  get tasksAssessments() {
+  async getTasksAssessments() {
     return browser.$("#tasks-engagement-assessments")
   }
 
-  get taskAssessmentRows() {
-    return this.tasksAssessments.$$("tr")
+  async getTaskAssessmentRows() {
+    return (await this.getTasksAssessments()).$$("tr")
   }
 
-  getTaskAssessment(shortName) {
-    return this.tasksAssessments.$(`//td/a[text()="${shortName}"]`)
+  async getTaskAssessment(shortName) {
+    return (await this.getTasksAssessments()).$(`//td/a[text()="${shortName}"]`)
   }
 
-  get submitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get editButton() {
+  async getEditButton() {
     return browser.$('//a[text()="Edit"]')
   }
 
-  get cancelButton() {
+  async getCancelButton() {
     return browser.$('//button[text()="Cancel"]')
   }
 
-  get deleteButton() {
+  async getDeleteButton() {
     return browser.$('//button[text()="Delete this report"]')
   }
 
-  get confirmButton() {
+  async getConfirmButton() {
     return browser.$('//button[text()="Yes, I am sure"]')
   }
 
-  open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
-    super.open(pathName, credentials)
+  async open(pathName = PAGE_URL, credentials = Page.DEFAULT_CREDENTIALS.user) {
+    await super.open(pathName, credentials)
   }
 
-  openAs(user) {
-    super.open(PAGE_URL, user)
+  async openAs(user) {
+    await super.open(PAGE_URL, user)
   }
 
-  openAsAdminUser() {
-    super.openAsAdminUser(PAGE_URL)
+  async openAsAdminUser() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  waitForAlertToLoad() {
-    this.alert.waitForExist()
-    this.alert.waitForDisplayed()
+  async waitForAlertToLoad() {
+    await (await this.getAlert()).waitForExist()
+    await (await this.getAlert()).waitForDisplayed()
   }
 
-  waitForAdvancedSelectToChange(item, value) {
-    item.waitForExist()
+  async waitForAdvancedSelectToChange(item, value) {
+    await (await item).waitForExist()
     return browser.waitUntil(
-      () => {
-        return item.getText() === value
+      async() => {
+        return (await (await item).getText()) === value
       },
       {
         timeout: 5000,
-        timeoutMsg: `Expected advanced select input to contain "${value}" after 5s, but was "${item.getText()}"`
+        timeoutMsg: `Expected advanced select input to contain "${value}" after 5s, but was "${await (
+          await item
+        ).getText()}"`
       }
     )
   }
 
-  submitForm() {
-    this.submitButton.waitForClickable()
-    this.submitButton.click()
-    this.submitButton.waitForExist({ reverse: true })
+  async submitForm() {
+    await (await this.getSubmitButton()).waitForClickable()
+    await (await this.getSubmitButton()).click()
+    await (await this.getSubmitButton()).waitForExist({ reverse: true })
   }
 }
 

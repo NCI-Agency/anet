@@ -16,22 +16,32 @@ export const examplePersonDetails = {
 
 // need uniqueName to run tests without resetting DB
 // because previous names are saved as normal user
-export function createOnboardingNewPerson(
+export async function createOnboardingNewPerson(
   personDetails = examplePersonDetails
 ) {
-  OnboardPage.createYourAccountBtn.waitForExist()
-  OnboardPage.createYourAccountBtn.waitForDisplayed()
-  OnboardPage.createYourAccountBtn.click()
-  CreatePerson.lastName.setValue(personDetails.lastName)
-  CreatePerson.firstName.setValue(personDetails.firstName)
-  CreatePerson.emailAddress.setValue(personDetails.emailAddress)
-  CreatePerson.rank.selectByAttribute("value", personDetails.rank)
-  CreatePerson.gender.selectByAttribute("value", personDetails.gender)
-  CreatePerson.country.selectByAttribute("value", personDetails.country)
-  CreatePerson.endOfTourDate.setValue(personDetails.endOfTourDate)
+  await (await OnboardPage.getCreateYourAccountBtn()).waitForExist()
+  await (await OnboardPage.getCreateYourAccountBtn()).waitForDisplayed()
+  await (await OnboardPage.getCreateYourAccountBtn()).click()
+  await (await CreatePerson.getLastName()).setValue(personDetails.lastName)
+  await (await CreatePerson.getFirstName()).setValue(personDetails.firstName)
+  await (
+    await CreatePerson.getEmailAddress()
+  ).setValue(personDetails.emailAddress)
+  await (
+    await CreatePerson.getRank()
+  ).selectByAttribute("value", personDetails.rank)
+  await (
+    await CreatePerson.getGender()
+  ).selectByAttribute("value", personDetails.gender)
+  await (
+    await CreatePerson.getCountry()
+  ).selectByAttribute("value", personDetails.country)
+  await (
+    await CreatePerson.getEndOfTourDate()
+  ).setValue(personDetails.endOfTourDate)
 
-  CreatePerson.submitForm()
-  Home.waitForAlertWarningToLoad()
-  Home.onboardingPopover.waitForExist()
-  Home.onboardingPopover.waitForDisplayed()
+  await CreatePerson.submitForm()
+  await Home.waitForAlertWarningToLoad()
+  await (await Home.getOnboardingPopover()).waitForExist()
+  await (await Home.getOnboardingPopover()).waitForDisplayed()
 }

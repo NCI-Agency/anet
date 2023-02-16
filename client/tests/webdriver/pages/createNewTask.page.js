@@ -3,65 +3,65 @@ import Page from "./page"
 const PAGE_URL = "/tasks/new"
 
 class CreateTask extends Page {
-  get form() {
+  async getForm() {
     return browser.$("form")
   }
 
-  get alertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  get submitButton() {
+  async getSubmitButton() {
     return browser.$("#formBottomSubmit")
   }
 
-  get shortName() {
+  async getShortName() {
     return browser.$('input[id="shortName"]')
   }
 
-  get customFieldsContainer() {
+  async getCustomFieldsContainer() {
     return browser.$("#custom-fields")
   }
 
-  get assessmentFields() {
+  async getAssessmentFields() {
     // since only custom field is assessments
-    return this.customFieldsContainer.$$(
+    return (await this.getCustomFieldsContainer()).$$(
       '//div[starts-with(@id,"fg-formCustomFields")]'
     )
   }
 
-  get firstQuestionsFieldContainer() {
-    return this.customFieldsContainer.$(
+  async getFirstQuestionsFieldContainer() {
+    return (await this.getCustomFieldsContainer()).$(
       'div[id="fg-formCustomFields.assessments.0.questions"]'
     )
   }
 
-  get questionsField() {
-    return this.firstQuestionsFieldContainer.$(
+  async getQuestionsField() {
+    return (await this.getFirstQuestionsFieldContainer()).$(
       'textarea[id="formCustomFields.assessments.0.questions"]'
     )
   }
 
-  get questionsFieldWarningText() {
-    return this.firstQuestionsFieldContainer.$(
+  async getQuestionsFieldWarningText() {
+    return (await this.getFirstQuestionsFieldContainer()).$(
       '//div[contains(text(), "Invalid")]'
     )
   }
 
-  get addAssessmentButton() {
+  async getAddAssessmentButton() {
     return browser.$('button[id="add-formCustomFields.assessments"]')
   }
 
-  openAsSuperUser() {
-    super.openAsSuperUser(PAGE_URL)
+  async openAsSuperUser() {
+    await super.openAsSuperUser(PAGE_URL)
   }
 
-  openAsAdmin() {
-    super.openAsAdminUser(PAGE_URL)
+  async openAsAdmin() {
+    await super.openAsAdminUser(PAGE_URL)
   }
 
-  submitForm() {
-    this.submitButton.click()
+  async submitForm() {
+    await (await this.getSubmitButton()).click()
   }
 }
 

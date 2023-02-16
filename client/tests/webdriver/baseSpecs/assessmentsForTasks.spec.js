@@ -20,157 +20,167 @@ const VALUE_TO_TEXT_FOR_TASK = {
 }
 describe("For the periodic task assessments", () => {
   describe("As an advisor who has tasks he is responsible for", () => {
-    it("Should first search, find and open the task page", () => {
-      Home.open("/", ADVISOR1_CREDENTIALS)
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
+    it("Should first search, find and open the task page", async() => {
+      await Home.open("/", ADVISOR1_CREDENTIALS)
+      await (await Home.getSearchBar()).setValue(TASK_SEARCH_STRING)
+      await (await Home.getSubmitSearch()).click()
+      await (await Search.getFoundTaskTable()).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundTaskTable()).waitForDisplayed()
+      await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
 
-    it("Should allow advisor to successfully add an assessment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-      ShowTask.addMonthlyAssessmentButton.click()
-      ShowTask.waitForAssessmentModalForm()
+    it("Should allow advisor to successfully add an assessment", async() => {
+      await (await ShowTask.getMonthlyAssessmentsTable()).waitForExist()
+      await (await ShowTask.getMonthlyAssessmentsTable()).waitForDisplayed()
+      await (await ShowTask.getAddMonthlyAssessmentButton()).click()
+      await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
-      ShowTask.fillAssessmentQuestion(ADVISOR_1_TASK_CREATE_DETAILS)
-      ShowTask.saveAssessmentAndWaitForModalClose(
+      await ShowTask.fillAssessmentQuestion(ADVISOR_1_TASK_CREATE_DETAILS)
+      await ShowTask.saveAssessmentAndWaitForModalClose(
         ADVISOR_1_TASK_CREATE_DETAILS[0]
       )
     })
 
-    it("Should show the same assessment details with the details just created", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
-            // Only some values are mapped, others are same
+    it("Should show the same assessment details with the details just created", async() => {
+      const details = await ShowTask.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await // Only some values are mapped, others are same
+          prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADVISOR_1_TASK_CREATE_DETAILS[index]] ||
               ADVISOR_1_TASK_CREATE_DETAILS[index])
         )
-      })
+      }
     })
 
-    it("Should allow the author of the assessment to successfully edit it", () => {
-      ShowTask.editMonthlyAssessmentButton.waitForExist()
-      ShowTask.editMonthlyAssessmentButton.waitForDisplayed()
-      ShowTask.editMonthlyAssessmentButton.click()
-      ShowTask.waitForAssessmentModalForm()
+    it("Should allow the author of the assessment to successfully edit it", async() => {
+      await (await ShowTask.getEditMonthlyAssessmentButton()).waitForExist()
+      await (await ShowTask.getEditMonthlyAssessmentButton()).waitForDisplayed()
+      await (await ShowTask.getEditMonthlyAssessmentButton()).click()
+      await ShowTask.waitForAssessmentModalForm()
 
-      ShowTask.fillAssessmentQuestion(
+      await ShowTask.fillAssessmentQuestion(
         ADVISOR_1_TASK_EDIT_DETAILS,
         ADVISOR_1_TASK_CREATE_DETAILS[0]
       )
-      ShowTask.saveAssessmentAndWaitForModalClose(
+      await ShowTask.saveAssessmentAndWaitForModalClose(
         ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
     })
 
-    it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
-            // Only some values are mapped, others are same
+    it("Should show the same assessment details with the details just edited", async() => {
+      const details = await ShowTask.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await // Only some values are mapped, others are same
+          prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADVISOR_1_TASK_EDIT_DETAILS[index]] ||
               ADVISOR_1_TASK_EDIT_DETAILS[index])
         )
-      })
-      ShowTask.logout()
+      }
+      await ShowTask.logout()
     })
   })
 
   describe("As an admin", () => {
-    it("Should first search, find and open the task's page", () => {
-      Home.openAsAdminUser()
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
+    it("Should first search, find and open the task's page", async() => {
+      await Home.openAsAdminUser()
+      await (await Home.getSearchBar()).setValue(TASK_SEARCH_STRING)
+      await (await Home.getSubmitSearch()).click()
+      await (await Search.getFoundTaskTable()).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundTaskTable()).waitForDisplayed()
+      await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", () => {
-      expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
+    it("Should not show make assessment button when there is an assessment on that period", async() => {
+      await expect(
+        await (await ShowTask.getAddMonthlyAssessmentButton()).isExisting()
+      ).to.equal(false)
     })
 
-    it("Should allow admins to successfully edit existing assessment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-      ShowTask.editMonthlyAssessmentButton.click()
-      ShowTask.waitForAssessmentModalForm()
+    it("Should allow admins to successfully edit existing assessment", async() => {
+      await (await ShowTask.getMonthlyAssessmentsTable()).waitForExist()
+      await (await ShowTask.getMonthlyAssessmentsTable()).waitForDisplayed()
+      await (await ShowTask.getEditMonthlyAssessmentButton()).click()
+      await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
-      ShowTask.fillAssessmentQuestion(
+      await ShowTask.fillAssessmentQuestion(
         ADMIN_TASK_EDIT_DETAILS,
         ADVISOR_1_TASK_EDIT_DETAILS[0]
       )
-      ShowTask.saveAssessmentAndWaitForModalClose(ADMIN_TASK_EDIT_DETAILS[0])
+      await ShowTask.saveAssessmentAndWaitForModalClose(
+        ADMIN_TASK_EDIT_DETAILS[0]
+      )
     })
 
-    it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
-            // Only some values are mapped, others are same
+    it("Should show the same assessment details with the details just edited", async() => {
+      const details = await ShowTask.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await // Only some values are mapped, others are same
+          prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADMIN_TASK_EDIT_DETAILS[index]] ||
               ADMIN_TASK_EDIT_DETAILS[index])
         )
-      })
-      ShowTask.logout()
+      }
+      await ShowTask.logout()
     })
   })
 
   describe("As a different advisor responsible from same task", () => {
-    it("Should first search, find and open the task's page", () => {
-      Home.open("/", ADVISOR2_CREDENTIALS)
-      Home.searchBar.setValue(TASK_SEARCH_STRING)
-      Home.submitSearch.click()
-      Search.foundTaskTable.waitForExist({ timeout: 20000 })
-      Search.foundTaskTable.waitForDisplayed()
-      Search.linkOfTaskFound(TASK_SEARCH_STRING).click()
+    it("Should first search, find and open the task's page", async() => {
+      await Home.open("/", ADVISOR2_CREDENTIALS)
+      await (await Home.getSearchBar()).setValue(TASK_SEARCH_STRING)
+      await (await Home.getSubmitSearch()).click()
+      await (await Search.getFoundTaskTable()).waitForExist({ timeout: 20000 })
+      await (await Search.getFoundTaskTable()).waitForDisplayed()
+      await (await Search.linkOfTaskFound(TASK_SEARCH_STRING)).click()
     })
 
-    it("Should not show make assessment button when there is an assessment on that period", () => {
-      expect(ShowTask.addMonthlyAssessmentButton.isExisting()).to.equal(false)
+    it("Should not show make assessment button when there is an assessment on that period", async() => {
+      await expect(
+        await (await ShowTask.getAddMonthlyAssessmentButton()).isExisting()
+      ).to.equal(false)
     })
 
-    it("Should allow the other advisor to successfully edit existing assessment", () => {
-      ShowTask.monthlyAssessmentsTable.waitForExist()
-      ShowTask.monthlyAssessmentsTable.waitForDisplayed()
-      ShowTask.editMonthlyAssessmentButton.click()
-      ShowTask.waitForAssessmentModalForm()
+    it("Should allow the other advisor to successfully edit existing assessment", async() => {
+      await (await ShowTask.getMonthlyAssessmentsTable()).waitForExist()
+      await (await ShowTask.getMonthlyAssessmentsTable()).waitForDisplayed()
+      await (await ShowTask.getEditMonthlyAssessmentButton()).click()
+      await ShowTask.waitForAssessmentModalForm()
 
       // NOTE: assuming assessment question content here, may change in future
-      ShowTask.fillAssessmentQuestion(
+      await ShowTask.fillAssessmentQuestion(
         ADVISOR_2_TASK_EDIT_DETAILS,
         ADMIN_TASK_EDIT_DETAILS[0]
       )
-      ShowTask.saveAssessmentAndWaitForModalClose(
+      await ShowTask.saveAssessmentAndWaitForModalClose(
         ADVISOR_2_TASK_EDIT_DETAILS[0]
       )
     })
 
-    it("Should show the same assessment details with the details just edited", () => {
-      ShowTask.shownAssessmentDetails.forEach((detail, index) => {
-        expect(prefix(index) + detail.getText()).to.equal(
-          prefix(index) +
-            // Only some values are mapped, others are same
+    it("Should show the same assessment details with the details just edited", async() => {
+      const details = await ShowTask.getShownAssessmentDetails()
+      for (const [index, detail] of details.entries()) {
+        await expect((await prefix(index)) + (await detail.getText())).to.equal(
+          (await // Only some values are mapped, others are same
+          prefix(index)) +
             (VALUE_TO_TEXT_FOR_TASK[ADVISOR_2_TASK_EDIT_DETAILS[index]] ||
               ADVISOR_2_TASK_EDIT_DETAILS[index])
         )
-      })
+      }
     })
 
-    it("Should allow the other advisor to delete the assessment", () => {
-      ShowTask.deleteMonthlyAssessmentButton.click()
-      ShowTask.confirmDelete()
-      ShowTask.waitForDeletedAssessmentToDisappear()
-      ShowTask.logout()
+    it("Should allow the other advisor to delete the assessment", async() => {
+      await (await ShowTask.getDeleteMonthlyAssessmentButton()).click()
+      await ShowTask.confirmDelete()
+      await ShowTask.waitForDeletedAssessmentToDisappear()
+      await ShowTask.logout()
     })
   })
 })
 
 // use indexed prefix to see which one fails if any fails
-const prefix = index => `${index}-) `
+const prefix = async index => `${index}-) `

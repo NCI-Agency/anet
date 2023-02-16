@@ -3,40 +3,44 @@ import Page from "./page"
 const PAGE_URL = "/positions/counterparts"
 
 class MyTasks extends Page {
-  open() {
-    super.open(PAGE_URL)
+  async open() {
+    await super.open(PAGE_URL)
   }
 
-  openAs(user) {
-    super.open(PAGE_URL, user)
+  async openAs(user) {
+    await super.open(PAGE_URL, user)
   }
 
-  openAsSuperUser() {
-    super.openAsSuperUser(PAGE_URL)
+  async openAsSuperUser() {
+    await super.openAsSuperUser(PAGE_URL)
   }
 
-  openAsOnboardUser() {
-    super.openAsOnboardUser(PAGE_URL)
+  async openAsOnboardUser() {
+    await super.openAsOnboardUser(PAGE_URL)
   }
 
-  get myCounterparts() {
+  async getMyCounterparts() {
     return browser.$("#my-counterparts")
   }
 
-  get myPendingCounterparts() {
+  async getMyPendingCounterparts() {
     return browser.$("#my-counterparts-with-pending-assessments")
   }
 
-  get myPendingCounterpartsContent() {
-    return browser.$("#my-counterparts-with-pending-assessments").$("tbody")
+  async getMyPendingCounterpartsContent() {
+    return (await browser.$("#my-counterparts-with-pending-assessments")).$(
+      "tbody"
+    )
   }
 
-  getMyPendingCounterpart(name) {
-    return this.myPendingCounterpartsContent.$(`//a[text()="${name}"]`)
+  async getMyPendingCounterpart(name) {
+    return (await this.getMyPendingCounterpartsContent()).$(
+      `//a[text()="${name}"]`
+    )
   }
 
-  getMyCounterpart(name) {
-    return this.myCounterparts.$(`//a[text()="${name}"]`)
+  async getMyCounterpart(name) {
+    return (await this.getMyCounterparts()).$(`//a[text()="${name}"]`)
   }
 }
 

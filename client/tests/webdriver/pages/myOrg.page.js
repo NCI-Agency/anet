@@ -1,27 +1,27 @@
 import Page from "./page"
 
 class MyOrg extends Page {
-  get engagementDateStatistics() {
-    return browser.$("[id^=engagementDate-statistics]").$(".fc")
+  async getEngagementDateStatistics() {
+    return (await browser.$("[id^=engagementDate-statistics]")).$(".fc")
   }
 
-  get locationStatistics() {
+  async getLocationStatistics() {
     return browser.$("[id^=map-location-statistics]")
   }
 
-  get engagementStatus() {
+  async getEngagementStatus() {
     return browser.$("[id^=engagementStatus-statistics]")
   }
 
-  get tasks() {
+  async getTasks() {
     return browser.$("[id^=tasks-statistics]")
   }
 
-  get trainingEvent() {
+  async getTrainingEvent() {
     return browser.$("[id*=trainingEvent-statistics]")
   }
 
-  get numberTrained() {
+  async getNumberTrained() {
     return browser.$("[id*=numberTrained-statistics]")
   }
 }

@@ -8,36 +8,50 @@ const LOCATION = "Cabot Tower"
 const PROFILE = "Test Organization 1 profile"
 
 describe("When creating an organization", () => {
-  it("Should show name to be required when submitting empty form", () => {
-    CreateOrganization.openAsAdmin()
-    CreateOrganization.form.waitForExist()
-    CreateOrganization.form.waitForDisplayed()
-    CreateOrganization.submitForm()
-    CreateOrganization.organizationShortNameHelpBlock.waitForExist()
-    CreateOrganization.organizationShortNameHelpBlock.waitForDisplayed()
+  it("Should show name to be required when submitting empty form", async() => {
+    await CreateOrganization.openAsAdmin()
+    await (await CreateOrganization.getForm()).waitForExist()
+    await (await CreateOrganization.getForm()).waitForDisplayed()
+    await CreateOrganization.submitForm()
+    await (
+      await CreateOrganization.getOrganizationShortNameHelpBlock()
+    ).waitForExist()
+    await (
+      await CreateOrganization.getOrganizationShortNameHelpBlock()
+    ).waitForDisplayed()
   })
 
-  it("Should successfully create an advisor organization with location and profile", () => {
-    CreateOrganization.typeAdvisorButton.click()
-    CreateOrganization.shortNameInput.setValue(SHORT_NAME)
-    CreateOrganization.longNameInput.setValue(DESCRIPTION)
-    CreateOrganization.locationInput.click()
-    CreateOrganization.locationInput.setValue(LOCATION)
-    CreateOrganization.waitForLocationAdvancedSelectToChange(LOCATION)
-    expect(
-      CreateOrganization.locationAdvancedSelectFirstItem.getText()
+  it("Should successfully create an advisor organization with location and profile", async() => {
+    await (await CreateOrganization.getTypeAdvisorButton()).click()
+    await (await CreateOrganization.getShortNameInput()).setValue(SHORT_NAME)
+    await (await CreateOrganization.getLongNameInput()).setValue(DESCRIPTION)
+    await (await CreateOrganization.getLocationInput()).click()
+    await (await CreateOrganization.getLocationInput()).setValue(LOCATION)
+    await CreateOrganization.waitForLocationAdvancedSelectToChange(LOCATION)
+    await expect(
+      await (
+        await CreateOrganization.getLocationAdvancedSelectFirstItem()
+      ).getText()
     ).to.include(LOCATION)
-    CreateOrganization.locationAdvancedSelectFirstItem.click()
-    CreateOrganization.fillOrganizationProfile(PROFILE)
-    CreateOrganization.submitForm()
-    ShowOrganization.waitForAlertSuccessToLoad()
-    expect(ShowOrganization.alertSuccess.getText()).to.equal(
-      "Organization saved"
-    )
+    await (
+      await CreateOrganization.getLocationAdvancedSelectFirstItem()
+    ).click()
+    await CreateOrganization.fillOrganizationProfile(PROFILE)
+    await CreateOrganization.submitForm()
+    await ShowOrganization.waitForAlertSuccessToLoad()
+    await expect(
+      await (await ShowOrganization.getAlertSuccess()).getText()
+    ).to.equal("Organization saved")
   })
-  it("Should display the newly created organization", () => {
-    expect(ShowOrganization.longName.getText()).to.equal(DESCRIPTION)
-    expect(ShowOrganization.location.getText()).to.include(LOCATION)
-    expect(ShowOrganization.profile.getText()).to.include(PROFILE)
+  it("Should display the newly created organization", async() => {
+    await expect(
+      await (await ShowOrganization.getLongName()).getText()
+    ).to.equal(DESCRIPTION)
+    await expect(
+      await (await ShowOrganization.getLocation()).getText()
+    ).to.include(LOCATION)
+    await expect(
+      await (await ShowOrganization.getProfile()).getText()
+    ).to.include(PROFILE)
   })
 })

@@ -6,86 +6,90 @@ const attId = "reportPeople"
 const tskId = "tasks"
 
 class CreateFutureReport extends CreateReport {
-  get engagementDate() {
+  async getEngagementDate() {
     return browser.$('input[id="engagementDate"]')
   }
 
-  get attendeesFieldFormGroup() {
+  async getAttendeesFieldFormGroup() {
     return browser.$(`div[id="fg-${attId}"]`)
   }
 
-  get attendeesFieldLabel() {
-    return this.attendeesFieldFormGroup.$(`label[for="${attId}"]`)
+  async getAttendeesFieldLabel() {
+    return (await this.getAttendeesFieldFormGroup()).$(`label[for="${attId}"]`)
   }
 
-  get attendeesField() {
-    return this.attendeesFieldFormGroup.$(`input[id="${attId}"]`)
+  async getAttendeesField() {
+    return (await this.getAttendeesFieldFormGroup()).$(`input[id="${attId}"]`)
   }
 
-  get attendeesFieldAdvancedSelectFirstItem() {
-    return this.attendeesFieldFormGroup.$(
+  async getAttendeesFieldAdvancedSelectFirstItem() {
+    return (await this.getAttendeesFieldFormGroup()).$(
       `div[id="${attId}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
 
-  get attendeesFieldValue() {
-    return this.attendeesFieldFormGroup.$(
+  async getAttendeesFieldValue() {
+    return (await this.getAttendeesFieldFormGroup()).$(
       `div[id="${attId}Container"] .principalAttendeesTable`
     )
   }
 
-  getAttendeesFieldValueRow(n) {
-    return this.attendeesFieldValue.$(`tbody tr:nth-child(${n})`)
+  async getAttendeesFieldValueRow(n) {
+    return (await this.getAttendeesFieldValue()).$(`tbody tr:nth-child(${n})`)
   }
 
-  get attendeesAssessments() {
+  async getAttendeesAssessments() {
     return browser.$("#attendees-engagement-assessments")
   }
 
-  getAttendeeAssessment(name) {
-    return this.attendeesAssessments.$(`//td//a[text()="${name}"]`)
+  async getAttendeeAssessment(name) {
+    return (await this.getAttendeesAssessments()).$(`//td//a[text()="${name}"]`)
   }
 
-  get tasksFieldFormGroup() {
+  async getTasksFieldFormGroup() {
     return browser.$(`div[id="fg-${tskId}"]`)
   }
 
-  get tasksFieldLabel() {
-    return this.tasksFieldFormGroup.$(`label[for="${tskId}"]`)
+  async getTasksFieldLabel() {
+    return (await this.getTasksFieldFormGroup()).$(`label[for="${tskId}"]`)
   }
 
-  get tasksField() {
-    return this.tasksFieldFormGroup.$(`input[id="${tskId}"]`)
+  async getTasksField() {
+    return (await this.getTasksFieldFormGroup()).$(`input[id="${tskId}"]`)
   }
 
-  get tasksFieldAdvancedSelectFirstItem() {
-    return this.tasksFieldFormGroup.$(
+  async getTasksFieldAdvancedSelectFirstItem() {
+    return (await this.getTasksFieldFormGroup()).$(
       `div[id="${tskId}-popover"] tbody tr:first-child td:nth-child(2)`
     )
   }
 
-  get tasksFieldValue() {
-    return this.tasksFieldFormGroup.$(`div[id="${tskId}-${tskId}"]`)
+  async getTasksFieldValue() {
+    return (await this.getTasksFieldFormGroup()).$(
+      `div[id="${tskId}-${tskId}"]`
+    )
   }
 
-  getTasksFieldValueRow(n) {
-    return this.tasksFieldValue.$(`tbody tr:nth-child(${n})`)
+  async getTasksFieldValueRow(n) {
+    return (await this.getTasksFieldValue()).$(`tbody tr:nth-child(${n})`)
   }
 
-  get tasksAssessments() {
+  async getTasksAssessments() {
     return browser.$("#tasks-engagement-assessments")
   }
 
-  getTaskAssessment(shortName) {
-    return this.tasksAssessments.$(`//td//a[text()="${shortName}"]`)
+  async getTaskAssessment(shortName) {
+    return (await this.getTasksAssessments()).$(
+      `//td//a[text()="${shortName}"]`
+    )
   }
 
-  get deleteButton() {
+  async getDeleteButton() {
     return browser.$('//button[text()="Delete this planned engagement"]')
   }
 
-  open() {
-    super.open(PAGE_URL, "selena")
+  async open() {
+    await super.open(PAGE_URL, "selena")
   }
 }
 

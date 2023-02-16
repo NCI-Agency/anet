@@ -11,67 +11,75 @@ import {
 const SHORT_WAIT_MS = 1000
 
 describe("When creating a new Location", () => {
-  it("Should not create a location without name & type input", () => {
-    CreateNewLocation.open()
-    CreateNewLocation.createButton.click()
-    CreateNewLocation.nameRequiredError.waitForExist()
-    CreateNewLocation.nameRequiredError.waitForDisplayed()
-    CreateNewLocation.typeRequiredError.waitForExist()
-    CreateNewLocation.typeRequiredError.waitForDisplayed()
+  it("Should not create a location without name & type input", async() => {
+    await CreateNewLocation.open()
+    await (await CreateNewLocation.getCreateButton()).click()
+    await (await CreateNewLocation.getNameRequiredError()).waitForExist()
+    await (await CreateNewLocation.getNameRequiredError()).waitForDisplayed()
+    await (await CreateNewLocation.getTypeRequiredError()).waitForExist()
+    await (await CreateNewLocation.getTypeRequiredError()).waitForDisplayed()
   })
 
-  it("Should display possible duplicates with similar names", () => {
-    CreateNewLocation.nameField.setValue(SIMILAR_LOCATION.name)
-    CreateNewLocation.typeField.selectByIndex(LOCATION_TYPE.index)
-    CreateNewLocation.duplicatesButton.waitForDisplayed()
-    CreateNewLocation.duplicatesButton.click()
-    browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
-    CreateNewLocation.modalContent.waitForDisplayed()
-    const similar = CreateNewLocation.similarLocation.getText()
-    CreateNewLocation.modalCloseButton.waitForDisplayed()
-    CreateNewLocation.modalCloseButton.click()
-    browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
-    CreateNewLocation.modalContent.waitForDisplayed({ reverse: true })
-    expect(similar).to.equal("Kabul Hospital")
+  it("Should display possible duplicates with similar names", async() => {
+    await (
+      await CreateNewLocation.getNameField()
+    ).setValue(SIMILAR_LOCATION.name)
+    await (
+      await CreateNewLocation.getTypeField()
+    ).selectByIndex(LOCATION_TYPE.index)
+    await (await CreateNewLocation.getDuplicatesButton()).waitForDisplayed()
+    await (await CreateNewLocation.getDuplicatesButton()).click()
+    await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide in (transition is 300 ms)
+    await (await CreateNewLocation.getModalContent()).waitForDisplayed()
+    const similar = await (
+      await CreateNewLocation.getSimilarLocation()
+    ).getText()
+    await (await CreateNewLocation.getModalCloseButton()).waitForDisplayed()
+    await (await CreateNewLocation.getModalCloseButton()).click()
+    await browser.pause(SHORT_WAIT_MS) // wait for the modal to slide out (transition is 300 ms)
+    await (
+      await CreateNewLocation.getModalContent()
+    ).waitForDisplayed({ reverse: true })
+    await expect(similar).to.equal("Kabul Hospital")
   })
 
-  it("Should not accept invalid latitude-longitude inputs", () => {
-    CreateNewLocation.nameField.setValue(LOCATION_NAME)
-    CreateNewLocation.latField.setValue(BAD_LAT_LNG_VAL)
-    CreateNewLocation.lngField.setValue(BAD_LAT_LNG_VAL)
+  it("Should not accept invalid latitude-longitude inputs", async() => {
+    await (await CreateNewLocation.getNameField()).setValue(LOCATION_NAME)
+    await (await CreateNewLocation.getLatField()).setValue(BAD_LAT_LNG_VAL)
+    await (await CreateNewLocation.getLngField()).setValue(BAD_LAT_LNG_VAL)
     // trigger onblur effect
-    CreateNewLocation.nameField.click()
+    await (await CreateNewLocation.getNameField()).click()
 
-    CreateNewLocation.latLngErrorsDisplayed()
+    await CreateNewLocation.latLngErrorsDisplayed()
   })
 
-  it("Should have a location with correct MGRS in popover", () => {
-    CreateNewLocation.deleteInput(CreateNewLocation.latField)
-    CreateNewLocation.latField.setValue(LOCATION_COORDS.lat)
-    CreateNewLocation.deleteInput(CreateNewLocation.lngField)
-    CreateNewLocation.lngField.setValue(LOCATION_COORDS.lng)
+  it("Should have a location with correct MGRS in popover", async() => {
+    await CreateNewLocation.deleteInput(CreateNewLocation.getLatField())
+    await (await CreateNewLocation.getLatField()).setValue(LOCATION_COORDS.lat)
+    await CreateNewLocation.deleteInput(CreateNewLocation.getLngField())
+    await (await CreateNewLocation.getLngField()).setValue(LOCATION_COORDS.lng)
     // trigger onblur effect
-    CreateNewLocation.nameField.click()
-    CreateNewLocation.allFormatsPopover.click()
-    CreateNewLocation.allFormatsPopoverLat.waitForExist()
-    CreateNewLocation.allFormatsPopoverMGRS.waitForExist()
+    await (await CreateNewLocation.getNameField()).click()
+    await (await CreateNewLocation.getAllFormatsPopover()).click()
+    await (await CreateNewLocation.getAllFormatsPopoverLat()).waitForExist()
+    await (await CreateNewLocation.getAllFormatsPopoverMGRS()).waitForExist()
 
-    expect(CreateNewLocation.allFormatsPopoverLat.getText()).to.equal(
-      LOCATION_COORDS.lat
-    )
+    await expect(
+      await (await CreateNewLocation.getAllFormatsPopoverLat()).getText()
+    ).to.equal(LOCATION_COORDS.lat)
 
-    expect(CreateNewLocation.allFormatsPopoverLng.getText()).to.equal(
-      LOCATION_COORDS.lng
-    )
+    await expect(
+      await (await CreateNewLocation.getAllFormatsPopoverLng()).getText()
+    ).to.equal(LOCATION_COORDS.lng)
 
-    expect(CreateNewLocation.allFormatsPopoverMGRS.getText()).to.equal(
-      LOCATION_COORDS.mgrs
-    )
+    await expect(
+      await (await CreateNewLocation.getAllFormatsPopoverMGRS()).getText()
+    ).to.equal(LOCATION_COORDS.mgrs)
   })
 
-  it("Should create a location successfully", () => {
-    CreateNewLocation.createButton.click()
-    CreateNewLocation.successMsg.waitForExist()
-    CreateNewLocation.successMsg.waitForDisplayed()
+  it("Should create a location successfully", async() => {
+    await (await CreateNewLocation.getCreateButton()).click()
+    await (await CreateNewLocation.getSuccessMsg()).waitForExist()
+    await (await CreateNewLocation.getSuccessMsg()).waitForDisplayed()
   })
 })

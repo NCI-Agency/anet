@@ -7,139 +7,141 @@ class Page {
     noPositionUser: "nopos"
   }
 
-  get loginForm() {
+  async getLoginForm() {
     return browser.$("#kc-form-login")
   }
 
-  get loginFormUsername() {
+  async getLoginFormUsername() {
     return browser.$("#username")
   }
 
-  get loginFormPassword() {
+  async getLoginFormPassword() {
     return browser.$("#password")
   }
 
-  get loginFormSubmitButton() {
+  async getLoginFormSubmitButton() {
     return browser.$("#kc-login")
   }
 
-  get logo() {
+  async getLogo() {
     return browser.$("#topbar .logo")
   }
 
-  loginFormSubmit() {
-    this.loginFormSubmitButton.click()
+  async loginFormSubmit() {
+    await (await this.getLoginFormSubmitButton()).click()
   }
 
-  waitForLoginForm() {
-    this.loginForm.waitForExist()
-    this.loginForm.waitForDisplayed()
+  async waitForLoginForm() {
+    await (await this.getLoginForm()).waitForExist()
+    await (await this.getLoginForm()).waitForDisplayed()
   }
 
-  login(credentials) {
-    this.waitForLoginForm()
-    this.loginFormUsername.setValue(credentials)
-    this.loginFormPassword.setValue(credentials)
-    this.loginFormSubmit()
+  async login(credentials) {
+    await this.waitForLoginForm()
+    await (await this.getLoginFormUsername()).setValue(credentials)
+    await (await this.getLoginFormPassword()).setValue(credentials)
+    await this.loginFormSubmit()
   }
 
-  logout(resetRedux = false) {
+  async logout(resetRedux = false) {
     // Reset redux state before logout
     if (resetRedux) {
-      this.logo.click()
-      browser.pause(1000)
+      await (await this.getLogo()).click()
+      await browser.pause(1000)
     }
-    browser.url("/api/logout")
+    await browser.url("/api/logout")
   }
 
-  waitUntilLoaded() {
-    browser.$("div.loader").waitForExist({
+  async waitUntilLoaded() {
+    await (
+      await browser.$("div.loader")
+    ).waitForExist({
       timeout: 30000,
       reverse: true,
       timeoutMsg: "Expected everything to be loaded by now"
     })
   }
 
-  _open(pathName, credentials) {
-    browser.url(pathName)
-    if (this.loginForm.isExisting()) {
-      this.login(credentials)
+  async _open(pathName, credentials) {
+    await browser.url(pathName)
+    if (await (await this.getLoginForm()).isExisting()) {
+      await this.login(credentials)
     }
-    this.waitUntilLoaded()
+    await this.waitUntilLoaded()
   }
 
-  openWithoutWaiting(
+  async openWithoutWaiting(
     pathName = "/",
     credentials = Page.DEFAULT_CREDENTIALS.user
   ) {
-    browser.url(pathName)
-    if (this.loginForm.isExisting()) {
-      this.login(credentials)
+    await browser.url(pathName)
+    if (await (await this.getLoginForm()).isExisting()) {
+      await this.login(credentials)
     }
   }
 
-  open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
-    this._open(pathName, credentials)
+  async open(pathName = "/", credentials = Page.DEFAULT_CREDENTIALS.user) {
+    await this._open(pathName, credentials)
   }
 
-  openAsSuperUser(pathName = "/") {
-    this._open(pathName, Page.DEFAULT_CREDENTIALS.superUser)
+  async openAsSuperUser(pathName = "/") {
+    await this._open(pathName, Page.DEFAULT_CREDENTIALS.superUser)
   }
 
-  openAsAdminUser(pathName = "/") {
-    this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
+  async openAsAdminUser(pathName = "/") {
+    await this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
   }
 
-  openAsPositionlessUser(pathName = "/") {
-    this._open(pathName, Page.DEFAULT_CREDENTIALS.noPositionUser)
+  async openAsPositionlessUser(pathName = "/") {
+    await this._open(pathName, Page.DEFAULT_CREDENTIALS.noPositionUser)
   }
 
-  openAsOnboardUser(
+  async openAsOnboardUser(
     pathName = "/",
     uniqueName = Page.DEFAULT_CREDENTIALS.onboardUser
   ) {
-    this._open(pathName, uniqueName)
+    await this._open(pathName, uniqueName)
   }
 
-  get alertSuccess() {
+  async getAlertSuccess() {
     return browser.$(".alert-success")
   }
 
-  waitForAlertSuccessToLoad() {
-    if (!this.alertSuccess.isDisplayed()) {
-      this.alertSuccess.waitForExist()
-      this.alertSuccess.waitForDisplayed()
+  async waitForAlertSuccessToLoad() {
+    if (!(await (await this.getAlertSuccess()).isDisplayed())) {
+      await (await this.getAlertSuccess()).waitForExist()
+      await (await this.getAlertSuccess()).waitForDisplayed()
     }
   }
 
-  get alertWarning() {
+  async getAlertWarning() {
     return browser.$(".alert-warning")
   }
 
-  waitForAlertWarningToLoad() {
-    if (!this.alertWarning.isDisplayed()) {
-      this.alertWarning.waitForExist()
-      this.alertWarning.waitForDisplayed()
+  async waitForAlertWarningToLoad() {
+    if (!(await (await this.getAlertWarning()).isDisplayed())) {
+      await (await this.getAlertWarning()).waitForExist()
+      await (await this.getAlertWarning()).waitForDisplayed()
     }
   }
 
-  getRandomOption(select) {
-    const options = select.$$("option")
+  async getRandomOption(select) {
+    const options = await select.$$("option")
     // Ignore the first option, it is always the empty one
     const index = 1 + Math.floor(Math.random() * (options.length - 1))
     return options[index].getValue()
   }
 
-  deleteText(text = "") {
+  async deleteText(text = "") {
     // Clumsy way to clear text…
-    browser.keys(["End"].concat(Array(text.length).fill("Backspace")))
+    await browser.keys(["End"].concat(Array(text.length).fill("Backspace")))
   }
 
-  deleteInput(inputField) {
+  async deleteInput(inputField) {
     // Clumsy way to clear input…
-    if (inputField && inputField.isDisplayed()) {
-      inputField.click()
-      this.deleteText(inputField.getValue())
+    if (await (await inputField)?.isDisplayed()) {
+      await (await inputField).click()
+      await this.deleteText(await (await inputField).getValue())
     }
   }
 }
