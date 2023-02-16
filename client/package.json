@@ -185,7 +185,7 @@
     "slate-hyperscript": "0.77.0",
     "slate-react": "0.90.0",
     "title-case": "3.0.3",
-    "use-debounce": "8.0.4",
+    "use-debounce": "9.0.3",
     "uuid": "9.0.0",
     "yup": "0.32.11"
   },
