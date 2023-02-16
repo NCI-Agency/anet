@@ -25,16 +25,8 @@ const ENTITY_TYPE_TO_RELATED_OBJECT_TYPE = flip(
 
 export function getEntityInfoFromUrl(url) {
   const urnMatch = url.match(/^urn:anet:([^:]*):(.*)$/)
-  let entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[urnMatch?.[1]]
-  let entityUuid = urnMatch?.[2]
-  if (!entityType || !UUID_REGEX.test(entityUuid)) {
-    // Fall back to old-style encoded href;
-    // TODO: can be removed once all rich-text content has been updated
-    const splitUrl = url.split(/[\\/]/)
-    entityType =
-      ENTITY_TYPE_TO_RELATED_OBJECT_TYPE[splitUrl?.[splitUrl.length - 2]]
-    entityUuid = splitUrl?.[splitUrl.length - 1]
-  }
+  const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[urnMatch?.[1]]
+  const entityUuid = urnMatch?.[2]
   if (entityType && UUID_REGEX.test(entityUuid)) {
     return { type: ANET_LINK, entityType, entityUuid }
   } else {
