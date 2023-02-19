@@ -1,4 +1,4 @@
-branches: 
+branches:
   - main
 name-template: "ANET $NEXT_PATCH_VERSION"
 version-template: "$MAJOR.$MINOR.$PATCH"
@@ -7,6 +7,8 @@ categories:
     label: feature
   - title: '🎨 Enhancements'
     label: enhancement
+  - title : '🖌 Improvements'
+    label: improvement
   - title: '🐛 Bug Fixes'
     label: bug
   - title: '🔧 Under the hood'
