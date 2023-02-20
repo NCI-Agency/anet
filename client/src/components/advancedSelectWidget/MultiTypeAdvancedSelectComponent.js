@@ -21,7 +21,6 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
-import { ENTITY_TYPES } from "utils_links"
 
 const entityFilters = {
   allEntities: {
@@ -124,6 +123,15 @@ const widgetPropsTask = {
   queryParams: { status: Model.STATUS.ACTIVE },
   fields: Models.Task.autocompleteQueryWithNotes,
   addon: TASKS_ICON
+}
+
+const ENTITY_TYPES = {
+  REPORTS: Models.Report.resourceName,
+  PEOPLE: Models.Person.resourceName,
+  ORGANIZATIONS: Models.Organization.resourceName,
+  POSITIONS: Models.Position.resourceName,
+  LOCATIONS: Models.Location.resourceName,
+  TASKS: Models.Task.resourceName
 }
 
 const widgetTypeMapping = {

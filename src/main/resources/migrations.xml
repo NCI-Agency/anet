@@ -34,6 +34,10 @@
 	<property name="blob_type" value="blob" dbms="mssql" />
 	<property name="blob_type" value="bytea" dbms="postgresql" />
 
+	<!-- For updating old-style ANET links to new urn: format -->
+	<property name="oldAnetLink" value="(&lt;a href=\\?&quot;)https?://[^/]*/(reports|people|organizations|positions|locations|tasks)/([0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})(\\?&quot;[^&gt;]*&gt;&lt;/a&gt;)" />
+	<property name="newAnetLink" value="\1urn:anet:\2:\3\4" />
+
 	<changeSet id="1" author="hpitelka">
 		<createTable tableName="people">
 			<column name="id" type="int" autoIncrement="true">
@@ -4316,6 +4320,32 @@
 
 			DELETE FROM notes n
 			WHERE n.type = 2;
+		</sql>
+	</changeSet>
+
+	<changeSet id="update-anet-links-in-rich-text" author="gjvoosten" dbms="postgresql">
+		<sql>
+		<![CDATA[
+			UPDATE locations
+			SET "customFields"=REGEXP_REPLACE("customFields", '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE notes
+			SET text=REGEXP_REPLACE(text, '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE organizations
+			SET profile=REGEXP_REPLACE(profile, '${oldAnetLink}', '${newAnetLink}', 'ig'),
+			    "customFields"=REGEXP_REPLACE("customFields", '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE people
+			SET biography=REGEXP_REPLACE(biography, '${oldAnetLink}', '${newAnetLink}', 'ig'),
+			    "customFields"=REGEXP_REPLACE("customFields", '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE positions
+			SET "customFields"=REGEXP_REPLACE("customFields", '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE reports
+			SET text=REGEXP_REPLACE(text, '${oldAnetLink}', '${newAnetLink}', 'ig'),
+			    "customFields"=REGEXP_REPLACE("customFields", '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE "reportsSensitiveInformation"
+			SET text=REGEXP_REPLACE(text, '${oldAnetLink}', '${newAnetLink}', 'ig');
+			UPDATE tasks
+			SET "customFields"=REGEXP_REPLACE("customFields", '${oldAnetLink}', '${newAnetLink}', 'ig');
+		]]>
 		</sql>
 	</changeSet>
 

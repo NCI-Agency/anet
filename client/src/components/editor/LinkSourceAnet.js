@@ -5,6 +5,7 @@ import PropTypes from "prop-types"
 import React, { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { Transforms } from "slate"
+import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
 import * as yup from "yup"
 
 const LinkSourceAnet = ({
@@ -14,7 +15,7 @@ const LinkSourceAnet = ({
   selection,
   external
 }) => {
-  const instertAnetLink = useCallback(
+  const insertAnetLink = useCallback(
     node => {
       if (selection) {
         Transforms.insertNodes(editor, node, {
@@ -52,7 +53,7 @@ const LinkSourceAnet = ({
                 values.url,
                 values.text
               )
-              instertAnetLink(externalLinkNode)
+              insertAnetLink(externalLinkNode)
             }}
             onCancel={() => setShowModal(false)}
           />
@@ -60,7 +61,7 @@ const LinkSourceAnet = ({
           <MultiTypeAdvancedSelectComponent
             onConfirm={(value, objectType) => {
               const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
-              instertAnetLink(anetLinkNode)
+              insertAnetLink(anetLinkNode)
             }}
           />
         )}
@@ -133,17 +134,17 @@ ExternalLinkForm.propTypes = {
 
 function createAnetLinkNode(entityType, entityUuid) {
   return {
-    type: "anet-link",
-    entityType: entityType,
-    entityUuid: entityUuid,
+    type: ANET_LINK,
+    entityType,
+    entityUuid,
     children: [{ text: "" }]
   }
 }
 
 function createExternalLinkNode(url, text) {
   return {
-    type: "anet-link",
-    href: url,
+    type: EXTERNAL_LINK,
+    url,
     children: [{ text: text }]
   }
 }

@@ -1,60 +1,43 @@
 import * as Models from "models"
-import { PAGE_URLS } from "pages/util"
+
+export const ANET_LINK = "anet-link"
+export const EXTERNAL_LINK = "external-link"
+export const LINK_TYPES = [ANET_LINK, EXTERNAL_LINK]
 
 const UUID_REGEX =
-  "^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$"
+  /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i
 
-// Entity type --> entity name
-export const ENTITY_TYPES = {
-  REPORTS: Models.Report.resourceName,
-  PEOPLE: Models.Person.resourceName,
-  ORGANIZATIONS: Models.Organization.resourceName,
-  POSITIONS: Models.Position.resourceName,
-  LOCATIONS: Models.Location.resourceName,
-  TASKS: Models.Task.resourceName
+const RELATED_OBJECT_TYPE_TO_ENTITY_TYPE = {
+  [Models.Report.relatedObjectType]: Models.Report.resourceName,
+  [Models.Person.relatedObjectType]: Models.Person.resourceName,
+  [Models.Organization.relatedObjectType]: Models.Organization.resourceName,
+  [Models.Position.relatedObjectType]: Models.Position.resourceName,
+  [Models.Location.relatedObjectType]: Models.Location.resourceName,
+  [Models.Task.relatedObjectType]: Models.Task.resourceName
 }
 
-// Entity URL --> Entity type
-const ENTITY_URL_TYPES = {
-  [PAGE_URLS.REPORTS]: ENTITY_TYPES.REPORTS,
-  [PAGE_URLS.PEOPLE]: ENTITY_TYPES.PEOPLE,
-  [PAGE_URLS.ORGANIZATIONS]: ENTITY_TYPES.ORGANIZATIONS,
-  [PAGE_URLS.POSITIONS]: ENTITY_TYPES.POSITIONS,
-  [PAGE_URLS.LOCATIONS]: ENTITY_TYPES.LOCATIONS,
-  [PAGE_URLS.TASKS]: ENTITY_TYPES.TASKS
-}
-// Entity type --> Entity URL
-const ENTITY_TYPE_URLS = {
-  [ENTITY_TYPES.REPORTS]: PAGE_URLS.REPORTS,
-  [ENTITY_TYPES.PEOPLE]: PAGE_URLS.PEOPLE,
-  [ENTITY_TYPES.ORGANIZATIONS]: PAGE_URLS.ORGANIZATIONS,
-  [ENTITY_TYPES.POSITIONS]: PAGE_URLS.POSITIONS,
-  [ENTITY_TYPES.LOCATIONS]: PAGE_URLS.LOCATIONS,
-  [ENTITY_TYPES.TASKS]: PAGE_URLS.TASKS
-}
+const flip = data =>
+  Object.fromEntries(Object.entries(data).map(([key, value]) => [value, key]))
+
+const ENTITY_TYPE_TO_RELATED_OBJECT_TYPE = flip(
+  RELATED_OBJECT_TYPE_TO_ENTITY_TYPE
+)
 
 export function getEntityInfoFromUrl(url) {
-  const splittedUrl = url.split(/[\\/]/)
-
-  if (splittedUrl.length > 1) {
-    const typeRaw = "/" + splittedUrl[splittedUrl.length - 2]
-    const uuid = splittedUrl[splittedUrl.length - 1]
-    const type = ENTITY_URL_TYPES[typeRaw]
-
-    if (type && new RegExp(UUID_REGEX).test(uuid)) {
-      return { type: type, uuid: uuid }
-    }
+  const urnMatch = url.match(/^urn:anet:([^:]*):(.*)$/)
+  const entityType = RELATED_OBJECT_TYPE_TO_ENTITY_TYPE[urnMatch?.[1]]
+  const entityUuid = urnMatch?.[2]
+  if (entityType && UUID_REGEX.test(entityUuid)) {
+    return { type: ANET_LINK, entityType, entityUuid }
+  } else {
+    return { type: EXTERNAL_LINK, url }
   }
-
-  return null
 }
 
 export function getUrlFromEntityInfo(node) {
-  const { href, entityType, entityUuid } = node
-  if (href) {
-    return href
-  }
-  const baseUrl = window.location.origin
-  const type = ENTITY_TYPE_URLS[entityType]
-  return `${baseUrl}${type}/${entityUuid}`
+  const { url, entityType, entityUuid } = node
+  return (
+    url ||
+    `urn:anet:${ENTITY_TYPE_TO_RELATED_OBJECT_TYPE[entityType]}:${entityUuid}`
+  )
 }

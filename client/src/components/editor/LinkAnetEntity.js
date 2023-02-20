@@ -30,7 +30,7 @@ LinkAnetEntity.propTypes = {
   type: PropTypes.string.isRequired,
   uuid: PropTypes.string.isRequired,
   displayCallback: PropTypes.func,
-  children: PropTypes.any
+  children: PropTypes.node
 }
 
 LinkAnetEntity.defaultProps = {
