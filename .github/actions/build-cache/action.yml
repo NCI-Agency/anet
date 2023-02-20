@@ -30,7 +30,7 @@ runs:
     shell: bash
   - name: Get yarn cache directory path
     id: yarn-cache-dir-path
-    run: echo "dir=$(./gradlew -q yarn_cache_dir)" >> $GITHUB_OUTPUT
+    run: echo "dir=$(./gradlew -q yarn_cache_dir |& tail -1)" >> $GITHUB_OUTPUT
     shell: bash
   - name: Cache yarn and node_modules
     uses: actions/cache@v3
