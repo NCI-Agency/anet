@@ -17,6 +17,9 @@ import ReportStateFilter, {
 import SelectFilter, {
   deserialize as deserializeSelectFilter
 } from "components/advancedSearch/SelectFilter"
+import TaskFilter, {
+  deserialize as deserializeTaskFilter
+} from "components/advancedSearch/TaskFilter"
 import TextInputFilter, {
   deserialize as deserializeTextInputFilter
 } from "components/advancedSearch/TextInputFilter"
@@ -36,7 +39,10 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
-import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
+import {
+  POSITION_POSITION_TYPE_FILTER_KEY,
+  RECURSE_STRATEGY
+} from "searchUtils"
 import Settings from "settings"
 
 export const SearchQueryPropType = PropTypes.shape({
@@ -88,6 +94,7 @@ const SubscriptionFilter = {
 }
 
 const taskFilters = () => {
+  const taskShortLabel = Settings.fields.task.shortLabel
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
@@ -95,6 +102,15 @@ const taskFilters = () => {
       props: {
         queryKey: "taskedOrgUuid",
         queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+      }
+    },
+    [`Within ${taskShortLabel}`]: {
+      component: TaskFilter,
+      deserializer: deserializeTaskFilter,
+      props: {
+        queryKey: "customFieldRef1Uuid",
+        queryRecurseStrategyKey: "customFieldRef1RecurseStrategy",
+        fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
       }
     }
   }
