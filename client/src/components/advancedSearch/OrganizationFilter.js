@@ -24,18 +24,22 @@ const OrganizationFilter = ({
   queryKey,
   value: inputValue,
   onChange,
-  queryOrgRecurseStrategyKey,
+  queryRecurseStrategyKey,
+  fixedRecurseStrategy,
   orgFilterQueryParams,
   ...advancedSelectProps
 }) => {
   const defaultValue = {
     value: inputValue.value || {},
-    orgRecurseStrategy: inputValue.orgRecurseStrategy || RECURSE_STRATEGY.NONE
+    orgRecurseStrategy:
+      fixedRecurseStrategy ||
+      inputValue.orgRecurseStrategy ||
+      RECURSE_STRATEGY.NONE
   }
   const toQuery = val => {
     return {
       [queryKey]: val.value?.uuid,
-      [queryOrgRecurseStrategyKey]: val.orgRecurseStrategy
+      [queryRecurseStrategyKey]: val.orgRecurseStrategy
     }
   }
   const [value, setValue] = useSearchFilter(
@@ -47,10 +51,12 @@ const OrganizationFilter = ({
   )
 
   let msg = value.value?.shortName
-  if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
-    msg += ", including sub-organizations"
-  } else if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS) {
-    msg += ", including parent organizations"
+  if (!fixedRecurseStrategy) {
+    if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.CHILDREN) {
+      msg += ", including sub-organizations"
+    } else if (msg && value.orgRecurseStrategy === RECURSE_STRATEGY.PARENTS) {
+      msg += ", including parent organizations"
+    }
   }
 
   const advancedSelectFilters = {
@@ -81,36 +87,38 @@ const OrganizationFilter = ({
         onChange={handleChangeOrg}
         value={value.value}
       />
-      <div>
-        <ToggleButtonGroup
-          type="radio"
-          name="orgRecurseStrategy"
-          value={value.orgRecurseStrategy}
-          onChange={handleChangeOrgRecurseStrategy}
-        >
-          <ToggleButton
-            id="orgRecurseStrategyNone"
-            value={RECURSE_STRATEGY.NONE}
-            variant="outline-secondary"
+      {!fixedRecurseStrategy && (
+        <div>
+          <ToggleButtonGroup
+            type="radio"
+            name="orgRecurseStrategy"
+            value={value.orgRecurseStrategy}
+            onChange={handleChangeOrgRecurseStrategy}
           >
-            exact match
-          </ToggleButton>
-          <ToggleButton
-            id="orgRecurseStrategyChildren"
-            value={RECURSE_STRATEGY.CHILDREN}
-            variant="outline-secondary"
-          >
-            include sub-orgs
-          </ToggleButton>
-          <ToggleButton
-            id="orgRecurseStrategyParents"
-            value={RECURSE_STRATEGY.PARENTS}
-            variant="outline-secondary"
-          >
-            include parent orgs
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </div>
+            <ToggleButton
+              id="orgRecurseStrategyNone"
+              value={RECURSE_STRATEGY.NONE}
+              variant="outline-secondary"
+            >
+              exact match
+            </ToggleButton>
+            <ToggleButton
+              id="orgRecurseStrategyChildren"
+              value={RECURSE_STRATEGY.CHILDREN}
+              variant="outline-secondary"
+            >
+              include sub-orgs
+            </ToggleButton>
+            <ToggleButton
+              id="orgRecurseStrategyParents"
+              value={RECURSE_STRATEGY.PARENTS}
+              variant="outline-secondary"
+            >
+              include parent orgs
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      )}
     </div>
   )
 
@@ -129,7 +137,8 @@ const OrganizationFilter = ({
 }
 OrganizationFilter.propTypes = {
   queryKey: PropTypes.string.isRequired,
-  queryOrgRecurseStrategyKey: PropTypes.string.isRequired,
+  queryRecurseStrategyKey: PropTypes.string.isRequired,
+  fixedRecurseStrategy: PropTypes.string,
   value: PropTypes.any,
   onChange: PropTypes.func,
   orgFilterQueryParams: PropTypes.object,
@@ -140,7 +149,7 @@ OrganizationFilter.defaultProps = {
 }
 
 export const deserialize = (
-  { queryKey, queryOrgRecurseStrategyKey },
+  { queryKey, queryRecurseStrategyKey },
   query,
   key
 ) => {
@@ -153,10 +162,10 @@ export const deserialize = (
           [queryKey]: query[queryKey]
         }
         const value = { value: data.organization }
-        const orgRecurseStrategy = query[queryOrgRecurseStrategyKey]
+        const orgRecurseStrategy = query[queryRecurseStrategyKey]
         if (orgRecurseStrategy) {
           value.orgRecurseStrategy = orgRecurseStrategy
-          toQueryValue[queryOrgRecurseStrategyKey] = orgRecurseStrategy
+          toQueryValue[queryRecurseStrategyKey] = orgRecurseStrategy
         }
         return {
           key: key,

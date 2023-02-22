@@ -101,7 +101,7 @@ const taskFilters = () => {
       deserializer: deserializeOrganizationFilter,
       props: {
         queryKey: "taskedOrgUuid",
-        queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+        queryRecurseStrategyKey: "orgRecurseStrategy"
       }
     },
     [`Within ${taskShortLabel}`]: {
@@ -297,7 +297,7 @@ export const searchFilters = function() {
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       "Engagement Date": {
@@ -397,7 +397,7 @@ export const searchFilters = function() {
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Role: {
@@ -478,6 +478,15 @@ export const searchFilters = function() {
           ]
         }
       },
+      "Within Organization": {
+        component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
+        props: {
+          queryKey: "parentOrgUuid",
+          queryRecurseStrategyKey: "orgRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
+      },
       Location: {
         component: AdvancedSelectFilter,
         deserializer: deserializeAdvancedSelectFilter,
@@ -526,7 +535,7 @@ export const searchFilters = function() {
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "organizationUuid",
-          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Location: {
