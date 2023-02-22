@@ -115,9 +115,11 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
   }
 
   protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
-    if (query.getCustomFieldRef1Recursively()) {
+    if (RecurseStrategy.CHILDREN.equals(query.getCustomFieldRef1RecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getCustomFieldRef1RecurseStrategy())) {
       qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks", "tasks",
-          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid(), true);
+          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid(),
+          RecurseStrategy.CHILDREN.equals(query.getCustomFieldRef1RecurseStrategy()));
     } else {
       qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
           query.getCustomFieldRef1Uuid());

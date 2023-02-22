@@ -1170,7 +1170,7 @@ input TaskInput {
 input TaskSearchQueryInput {
   category: String
   customField: String
-  customFieldRef1Recursively: Boolean
+  customFieldRef1RecurseStrategy: RecurseStrategy
   customFieldRef1Uuid: [String]
   hasCustomFieldRef1: Boolean
   inMyReports: Boolean

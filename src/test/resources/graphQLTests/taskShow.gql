@@ -98,7 +98,7 @@ task(uuid: "${taskUuid}") {
 subTasks: taskList(query: {
   pageSize: 0
   customFieldRef1Uuid: ["${taskUuid}"]
-  customFieldRef1Recursively: true
+  customFieldRef1RecurseStrategy: CHILDREN
 }) {
   list {
     uuid

@@ -49,7 +49,7 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   // Including the parent Task(s).
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean customFieldRef1Recursively;
+  private RecurseStrategy customFieldRef1RecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   private String responsiblePositionUuid;
@@ -146,12 +146,12 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.customFieldRef1Uuid = customFieldRef1Uuid;
   }
 
-  public boolean getCustomFieldRef1Recursively() {
-    return Boolean.TRUE.equals(customFieldRef1Recursively);
+  public RecurseStrategy getCustomFieldRef1RecurseStrategy() {
+    return customFieldRef1RecurseStrategy;
   }
 
-  public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {
-    this.customFieldRef1Recursively = customFieldRef1Recursively;
+  public void setCustomFieldRef1RecurseStrategy(RecurseStrategy customFieldRef1RecurseStrategy) {
+    this.customFieldRef1RecurseStrategy = customFieldRef1RecurseStrategy;
   }
 
   public String getResponsiblePositionUuid() {
@@ -167,7 +167,7 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
         projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
-        customFieldRef1Recursively, responsiblePositionUuid);
+        customFieldRef1RecurseStrategy, responsiblePositionUuid);
   }
 
   @Override
@@ -186,7 +186,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
         && Objects.equals(getProjectStatus(), other.getProjectStatus())
         && Objects.equals(getCustomField(), other.getCustomField())
         && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
-        && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively())
+        && Objects.equals(getCustomFieldRef1RecurseStrategy(),
+            other.getCustomFieldRef1RecurseStrategy())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
   }
 

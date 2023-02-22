@@ -117,7 +117,7 @@ const GQL_GET_TASK = gql`
     subTasks: taskList(query: {
       pageSize: 0
       customFieldRef1Uuid: [$uuid]
-      customFieldRef1Recursively: true
+      customFieldRef1RecurseStrategy: CHILDREN
     }) {
       list {
         uuid

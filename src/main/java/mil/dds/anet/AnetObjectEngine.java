@@ -383,7 +383,7 @@ public class AnetObjectEngine {
   public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
     final TaskSearchQuery query = new TaskSearchQuery();
     query.setCustomFieldRef1Uuid(Collections.singletonList(parentTaskUuid));
-    query.setCustomFieldRef1Recursively(true);
+    query.setCustomFieldRef1RecurseStrategy(RecurseStrategy.CHILDREN);
     query.setPageSize(0);
     final List<Task> taskList = taskDao.search(query).getList();
     return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
