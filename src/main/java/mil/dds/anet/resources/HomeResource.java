@@ -73,7 +73,7 @@ public class HomeResource {
     final AnetKeycloakConfiguration keycloakConfiguration = config.getKeycloakConfiguration();
     final URI requestlUrl = UriBuilder.fromUri(request.getRequestURL().toString()).build();
     final String redirectUri =
-        URLEncoder.encode(getBaseRequestUrl(requestlUrl), StandardCharsets.UTF_8.toString());
+        URLEncoder.encode(getLogoutUrl(requestlUrl), StandardCharsets.UTF_8.toString());
     // Redirect to Keycloak to log out
     // scan:ignore — false positive, we only let Keycloak redirect back to the original request URI
     response.sendRedirect(String.format(
@@ -88,16 +88,17 @@ public class HomeResource {
   private static final String HTTPS_SCHEME = "https";
   private static final int HTTPS_DEFAULT_PORT = 443;
 
-  private String getBaseRequestUrl(URI requestlUrl) {
-    final String scheme = requestlUrl.getScheme();
-    final int port = requestlUrl.getPort();
-    final String host = requestlUrl.getHost();
+  private String getLogoutUrl(URI requestUrl) {
+    final String scheme = requestUrl.getScheme();
+    final int port = requestUrl.getPort();
+    final String host = requestUrl.getHost();
+    final String logoutPage = "/assets/client/logout.html";
     return (port == -1 // no port in the request URL
         // or using the default port of the scheme
         || HTTP_SCHEME.equals(scheme) && HTTP_DEFAULT_PORT == port
         || HTTPS_SCHEME.equals(scheme) && HTTPS_DEFAULT_PORT == port)
-            ? String.format("%s://%s/", scheme, host)
-            : String.format("%s://%s:%s/", scheme, host, port);
+            ? String.format("%s://%s%s", scheme, host, logoutPage)
+            : String.format("%s://%s:%s%s", scheme, host, port, logoutPage);
   }
 
 }
