@@ -1124,9 +1124,6 @@ type Task {
   category: String
   childrenTasks(query: TaskSearchQueryInput): [Task]
   createdAt: Instant
-  customField: String
-  customFieldEnum1: String
-  customFieldEnum2: String
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   descendantTasks(query: TaskSearchQueryInput): [Task]
@@ -1151,9 +1148,6 @@ input TaskInput {
   approvalSteps: [ApprovalStepInput]
   category: String
   createdAt: Instant
-  customField: String
-  customFieldEnum1: String
-  customFieldEnum2: String
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   longName: String
@@ -1172,7 +1166,6 @@ input TaskInput {
 """"""
 input TaskSearchQueryInput {
   category: String
-  customField: String
   hasParentTask: Boolean
   inMyReports: Boolean
   orgRecurseStrategy: RecurseStrategy
@@ -1182,7 +1175,6 @@ input TaskSearchQueryInput {
   parentTaskUuid: [String]
   plannedCompletionEnd: Instant
   plannedCompletionStart: Instant
-  projectStatus: String
   projectedCompletionEnd: Instant
   projectedCompletionStart: Instant
   responsiblePositionUuid: String

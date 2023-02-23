@@ -3,9 +3,6 @@ task(uuid: "${taskUuid}") {
   shortName
   longName
   status
-  customField
-  customFieldEnum1
-  customFieldEnum2
   plannedCompletion
   projectedCompletion
   taskedOrganizations {

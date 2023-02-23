@@ -52,14 +52,12 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
 
     qb.addStringEqualsClause("category", "tasks.category", query.getCategory());
     qb.addEnumEqualsClause("status", "tasks.status", query.getStatus());
-    qb.addLikeClause("projectStatus", "tasks.\"customFieldEnum1\"", query.getProjectStatus());
     qb.addDateRangeClause("plannedCompletionStart", "tasks.\"plannedCompletion\"", Comparison.AFTER,
         query.getPlannedCompletionStart(), "plannedCompletionEnd", "tasks.\"plannedCompletion\"",
         Comparison.BEFORE, query.getPlannedCompletionEnd());
     qb.addDateRangeClause("projectedCompletionStart", "tasks.\"projectedCompletion\"",
         Comparison.AFTER, query.getProjectedCompletionStart(), "projectedCompletionEnd",
         "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
-    qb.addLikeClause("customField", "tasks.\"customField\"", query.getCustomField());
 
     if (query.getHasParentTask() != null) {
       if (query.getHasParentTask()) {

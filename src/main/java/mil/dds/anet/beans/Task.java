@@ -44,15 +44,6 @@ public class Task extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String category;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customField;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customFieldEnum1;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customFieldEnum2;
   // annotated below
   private ForeignObjectHolder<Task> parentTask = new ForeignObjectHolder<>();
   @GraphQLQuery
@@ -98,30 +89,6 @@ public class Task extends AbstractCustomizableAnetBean
 
   public void setLongName(String longName) {
     this.longName = Utils.trimStringReturnNull(longName);
-  }
-
-  public String getCustomField() {
-    return customField;
-  }
-
-  public void setCustomField(String customField) {
-    this.customField = Utils.trimStringReturnNull(customField);
-  }
-
-  public String getCustomFieldEnum1() {
-    return customFieldEnum1;
-  }
-
-  public void setCustomFieldEnum1(String customFieldEnum1) {
-    this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
-  }
-
-  public String getCustomFieldEnum2() {
-    return customFieldEnum2;
-  }
-
-  public void setCustomFieldEnum2(String customFieldEnum2) {
-    this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
   }
 
   public String getCategory() {

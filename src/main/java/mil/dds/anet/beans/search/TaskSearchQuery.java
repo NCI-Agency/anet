@@ -30,12 +30,6 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private Instant projectedCompletionStart;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String projectStatus;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customField;
   // Find tasks who (don't) have the parentTask filled in
   @GraphQLQuery
   @GraphQLInputField
@@ -114,22 +108,6 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.projectedCompletionStart = projectedCompletionStart;
   }
 
-  public String getProjectStatus() {
-    return projectStatus;
-  }
-
-  public void setProjectStatus(String projectStatus) {
-    this.projectStatus = projectStatus;
-  }
-
-  public String getCustomField() {
-    return customField;
-  }
-
-  public void setCustomField(String customField) {
-    this.customField = customField;
-  }
-
   public Boolean getHasParentTask() {
     return hasParentTask;
   }
@@ -166,8 +144,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   public int hashCode() {
     return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
-        projectedCompletionStart, projectStatus, customField, parentTaskUuid,
-        parentTaskRecurseStrategy, responsiblePositionUuid);
+        projectedCompletionStart, parentTaskUuid, parentTaskRecurseStrategy,
+        responsiblePositionUuid);
   }
 
   @Override
@@ -183,8 +161,6 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
         && Objects.equals(getPlannedCompletionStart(), other.getPlannedCompletionStart())
         && Objects.equals(getProjectedCompletionEnd(), other.getProjectedCompletionEnd())
         && Objects.equals(getProjectedCompletionStart(), other.getProjectedCompletionStart())
-        && Objects.equals(getProjectStatus(), other.getProjectStatus())
-        && Objects.equals(getCustomField(), other.getCustomField())
         && Objects.equals(getParentTaskUuid(), other.getParentTaskUuid())
         && Objects.equals(getParentTaskRecurseStrategy(), other.getParentTaskRecurseStrategy())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());

@@ -506,12 +506,6 @@ properties:
             "$ref": "#/$defs/inputField"
           parentTask:
             "$ref": "#/$defs/inputField"
-          customField:
-            "$ref": "#/$defs/inputField"
-          customFieldEnum1:
-            "$ref": "#/$defs/choiceField"
-          customFieldEnum2:
-            "$ref": "#/$defs/choiceField"
           taskedOrganizations:
             "$ref": "#/$defs/inputField"
           responsiblePositions:

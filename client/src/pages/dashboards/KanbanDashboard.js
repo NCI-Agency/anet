@@ -23,7 +23,6 @@ const GQL_GET_TASK_LIST = gql`
         uuid
         longName
         shortName
-        customFieldEnum1
         createdAt
         updatedAt
         taskedOrganizations {

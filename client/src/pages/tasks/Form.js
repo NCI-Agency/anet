@@ -68,11 +68,8 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskParentTask = DictionaryField(FastField)
-  const TaskCustomField = DictionaryField(FastField)
   const PlannedCompletionField = DictionaryField(FastField)
   const ProjectedCompletionField = DictionaryField(FastField)
-  const TaskCustomFieldEnum1 = DictionaryField(FastField)
-  const TaskCustomFieldEnum2 = DictionaryField(FastField)
   const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
   const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
@@ -296,13 +293,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   />
                 )}
 
-                <TaskCustomField
-                  dictProps={Settings.fields.task.customField}
-                  name="customField"
-                  component={FieldHelper.InputField}
-                  disabled={disabled}
-                />
-
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
                     dictProps={Settings.fields.task.plannedCompletion}
@@ -328,42 +318,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                     disabled={disabled}
-                  />
-                )}
-
-                {Settings.fields.task.customFieldEnum1 && (
-                  <>
-                    <TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
-                      )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      disabled={disabled}
-                      buttons={FieldHelper.customEnumButtons(
-                        Settings.fields.task.customFieldEnum1.enum
-                      )}
-                      onChange={value =>
-                        setFieldValue("customFieldEnum1", value)
-                      }
-                    />
-                  </>
-                )}
-
-                {Settings.fields.task.customFieldEnum2 && (
-                  <TaskCustomFieldEnum2
-                    dictProps={Object.without(
-                      Settings.fields.task.customFieldEnum2,
-                      "enum"
-                    )}
-                    name="customFieldEnum2"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    disabled={disabled}
-                    buttons={FieldHelper.customEnumButtons(
-                      Settings.fields.task.customFieldEnum2.enum
-                    )}
-                    onChange={value => setFieldValue("customFieldEnum2", value)}
                   />
                 )}
               </Fieldset>

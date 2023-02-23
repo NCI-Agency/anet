@@ -17,9 +17,6 @@ const GQL_GET_TASK = gql`
       shortName
       longName
       status
-      customField
-      customFieldEnum1
-      customFieldEnum2
       plannedCompletion
       projectedCompletion
       taskedOrganizations {
@@ -168,20 +165,6 @@ const TaskPreview = ({ className, uuid }) => {
                 Settings.dateFormats.forms.displayShort.date
               )
             }
-          />
-        )}
-
-        {Settings.fields.task.customFieldEnum1 && (
-          <PreviewField
-            label={Settings.fields.task.customFieldEnum1.label}
-            value={task.customFieldEnum1}
-          />
-        )}
-
-        {Settings.fields.task.customFieldEnum2 && (
-          <PreviewField
-            label={Settings.fields.task.customFieldEnum2.label}
-            value={task.customFieldEnum2}
           />
         )}
       </div>

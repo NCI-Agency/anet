@@ -66,11 +66,11 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static final String REPORT_FIELDS =
       "{ uuid state workflow { type createdAt person { uuid } step " + APPROVAL_STEP_FIELDS
           + " } reportPeople { uuid role primary author attendee } }";
-  private static final String TASK_FIELDS = "{ uuid shortName longName status"
-      + " customField customFieldEnum1 customFieldEnum2 plannedCompletion projectedCompletion"
-      + " taskedOrganizations { uuid shortName longName identificationCode }"
-      + " parentTask { uuid } responsiblePositions { uuid } planningApprovalSteps "
-      + APPROVAL_STEP_FIELDS + " approvalSteps " + APPROVAL_STEP_FIELDS + " customFields }";
+  private static final String TASK_FIELDS =
+      "{ uuid shortName longName status" + " plannedCompletion projectedCompletion"
+          + " taskedOrganizations { uuid shortName longName identificationCode }"
+          + " parentTask { uuid } responsiblePositions { uuid } planningApprovalSteps "
+          + APPROVAL_STEP_FIELDS + " approvalSteps " + APPROVAL_STEP_FIELDS + " customFields }";
 
   // Test report approval scenarios for tasks mostly use the following data:
   // - report task 2.A (which has tasked org EF 2)

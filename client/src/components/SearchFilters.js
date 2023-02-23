@@ -20,9 +20,6 @@ import SelectFilter, {
 import TaskFilter, {
   deserialize as deserializeTaskFilter
 } from "components/advancedSearch/TaskFilter"
-import TextInputFilter, {
-  deserialize as deserializeTextInputFilter
-} from "components/advancedSearch/TextInputFilter"
 import {
   LocationOverlayRow,
   PersonDetailedOverlayRow,
@@ -131,28 +128,6 @@ const taskFilters = () => {
       deserializer: deserializeDateRangeFilter,
       props: {
         queryKey: "plannedCompletion"
-      }
-    }
-  }
-  const customEnum1 = Settings.fields.task.customFieldEnum1
-  if (customEnum1) {
-    taskFiltersObj[customEnum1.label] = {
-      component: SelectFilter,
-      deserializer: deserializeSelectFilter,
-      props: {
-        queryKey: "projectStatus",
-        options: Object.keys(customEnum1.enum),
-        labels: Object.values(customEnum1.enum).map(o => o.label)
-      }
-    }
-  }
-  const customField = Settings.fields.task.customField
-  if (customField) {
-    taskFiltersObj[customField.label] = {
-      component: TextInputFilter,
-      deserializer: deserializeTextInputFilter,
-      props: {
-        queryKey: "customField"
       }
     }
   }

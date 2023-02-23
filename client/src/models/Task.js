@@ -13,9 +13,6 @@ export const {
   shortLabel,
   longLabel,
   parentTask,
-  customField,
-  customFieldEnum1,
-  customFieldEnum2,
   plannedCompletion,
   projectedCompletion,
   responsiblePositions
@@ -68,21 +65,6 @@ export default class Task extends Model {
         .nullable()
         .default({})
         .label(parentTask && parentTask.label),
-      customFieldEnum1: yup
-        .string()
-        .nullable()
-        .default("")
-        .label(customFieldEnum1 && customFieldEnum1.label),
-      customFieldEnum2: yup
-        .string()
-        .nullable()
-        .default("")
-        .label(customFieldEnum2 && customFieldEnum2.label),
-      customField: yup
-        .string()
-        .nullable()
-        .default("")
-        .label(customField && customField.label),
       projectedCompletion: yupDate
         .nullable()
         .default(null)
@@ -191,7 +173,9 @@ export default class Task extends Model {
     return this.fieldSettings().assessments || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["assessment_customFieldEnum1"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    // Fill if necessary
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

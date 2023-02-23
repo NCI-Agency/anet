@@ -41,9 +41,6 @@ const GQL_GET_TASK = gql`
       status
       isSubscribed
       updatedAt
-      customField
-      customFieldEnum1
-      customFieldEnum2
       plannedCompletion
       projectedCompletion
       taskedOrganizations {
@@ -168,17 +165,8 @@ const TaskShow = ({ pageDispatchers }) => {
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskParentTask = DictionaryField(Field)
-  const TaskCustomField = DictionaryField(Field)
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const cfe1Button =
-    Settings.fields.task.customFieldEnum1?.enum?.[task.customFieldEnum1]
-  const cfe1Buttons = cfe1Button ? { [task.customFieldEnum1]: cfe1Button } : {}
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
-  const cfe2Button =
-    Settings.fields.task.customFieldEnum2?.enum?.[task.customFieldEnum2]
-  const cfe2Buttons = cfe2Button ? { [task.customFieldEnum2]: cfe2Button } : {}
 
   // Admins can edit tasks or users in positions related to the task
   const isAdmin = currentUser && currentUser.isAdmin()
@@ -304,11 +292,6 @@ const TaskShow = ({ pageDispatchers }) => {
                       }
                     />
                   )}
-                  <TaskCustomField
-                    dictProps={Settings.fields.task.customField}
-                    name="customField"
-                    component={FieldHelper.ReadonlyField}
-                  />
                   {Settings.fields.task.plannedCompletion && (
                     <PlannedCompletionField
                       dictProps={Settings.fields.task.plannedCompletion}
@@ -333,30 +316,6 @@ const TaskShow = ({ pageDispatchers }) => {
                           Settings.dateFormats.forms.displayShort.date
                         )
                       }
-                    />
-                  )}
-                  {Settings.fields.task.customFieldEnum1 && (
-                    <TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
-                      )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      disabled={true}
-                      buttons={FieldHelper.customEnumButtons(cfe1Buttons)}
-                    />
-                  )}
-                  {Settings.fields.task.customFieldEnum2 && (
-                    <TaskCustomFieldEnum2
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum2,
-                        "enum"
-                      )}
-                      name="customFieldEnum2"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      disabled={true}
-                      buttons={FieldHelper.customEnumButtons(cfe2Buttons)}
                     />
                   )}
                 </Fieldset>

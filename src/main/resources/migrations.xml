@@ -4365,4 +4365,10 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="drop-obsolete-custom-fields-from-tasks" author="gjvoosten">
+		<dropColumn tableName="tasks" columnName="customField" />
+		<dropColumn tableName="tasks" columnName="customFieldEnum1" />
+		<dropColumn tableName="tasks" columnName="customFieldEnum2" />
+	</changeSet>
+
 </databaseChangeLog>
