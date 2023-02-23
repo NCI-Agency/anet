@@ -11,10 +11,10 @@ categories:
     label: improvement
   - title: '🐛 Bug Fixes'
     label: bug
+  - title: '⬆️ Dependency Updates'
+    label: dependencies
   - title: '🔧 Under the hood'
-    labels:
-      - debt
-      - dependencies
+    label: debt
 change-template: "* $TITLE (#$NUMBER)"
 exclude-labels:
   - devDependencies
