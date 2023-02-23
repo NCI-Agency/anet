@@ -25,6 +25,7 @@ const GQL_GET_TASK_LIST = gql`
         shortName
         createdAt
         updatedAt
+        customFields
         taskedOrganizations {
           uuid
           shortName
@@ -49,7 +50,6 @@ const GQL_GET_TASK_LIST = gql`
         }) {
           uuid
         }
-
       }
     }
   }

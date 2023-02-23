@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -352,6 +353,17 @@ const TaskShow = ({ pageDispatchers }) => {
                 mapId="reports"
               />
             </Fieldset>
+            {Settings.fields.task.customFields && (
+              <Fieldset
+                title={`${fieldSettings.shortLabel} information`}
+                id="custom-fields"
+              >
+                <ReadonlyCustomFields
+                  fieldsConfig={Settings.fields.task.customFields}
+                  values={values}
+                />
+              </Fieldset>
+            )}
           </div>
         )
       }}

@@ -204,6 +204,21 @@ fields:
     responsiblePositions:
       label: Responsible positions
       placeholder: Search for a position...
+    customFields:
+      projectStatus:
+        type: enum
+        label: Project status
+        helpText: Set the current project status
+        choices:
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
 
   report:
     canUnpublishReports: true
