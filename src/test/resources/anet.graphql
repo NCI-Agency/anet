@@ -1120,7 +1120,9 @@ enum SubscriptionUpdateSearchSortBy {
 """"""
 type Task {
   approvalSteps: [ApprovalStep]
+  ascendantTasks(query: TaskSearchQueryInput): [Task]
   category: String
+  childrenTasks(query: TaskSearchQueryInput): [Task]
   createdAt: Instant
   customField: String
   customFieldEnum1: String
@@ -1128,6 +1130,7 @@ type Task {
   customFieldRef1: Task
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  descendantTasks(query: TaskSearchQueryInput): [Task]
   isSubscribed: Boolean
   longName: String
   notes: [Note]

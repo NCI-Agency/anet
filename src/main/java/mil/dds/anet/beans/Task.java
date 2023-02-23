@@ -11,8 +11,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.search.FkBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -269,6 +273,46 @@ public class Task extends AbstractCustomizableAnetBean
   @GraphQLInputField(name = "approvalSteps")
   public void setApprovalSteps(List<ApprovalStep> steps) {
     this.approvalSteps = steps;
+  }
+
+  @GraphQLQuery(name = "childrenTasks")
+  public CompletableFuture<List<Task>> loadChildrenTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    // Note: no recursion, only direct children!
+    query.setBatchParams(
+        new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"customFieldRef1Uuid\""));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+  }
+
+  @GraphQLQuery(name = "descendantTasks")
+  public CompletableFuture<List<Task>> loadDescendantTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    // Note: recursion, includes transitive children!
+    query.setBatchParams(
+        new RecursiveFkBatchParams<Task, TaskSearchQuery>("tasks", "\"customFieldRef1Uuid\"",
+            "tasks", "\"customFieldRef1Uuid\"", ISearchQuery.RecurseStrategy.CHILDREN));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+  }
+
+  @GraphQLQuery(name = "ascendantTasks")
+  public CompletableFuture<List<Task>> loadAscendantTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    // Note: recursion, includes transitive parents!
+    query.setBatchParams(new RecursiveFkBatchParams<Task, TaskSearchQuery>("tasks", "uuid", "tasks",
+        "\"customFieldRef1Uuid\"", ISearchQuery.RecurseStrategy.PARENTS));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
   }
 
   @Override
