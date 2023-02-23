@@ -89,24 +89,6 @@ const GQL_GET_TASK = gql`
       }
       customFields
     }
-    subTasks: taskList(
-      query: {
-        pageSize: 0
-        parentTaskUuid: [$uuid]
-        parentTaskRecurseStrategy: CHILDREN
-      }
-    ) {
-      list {
-        uuid
-        shortName
-        longName
-        parentTask {
-          uuid
-          shortName
-        }
-        customFields
-      }
-    }
   }
 `
 
@@ -126,8 +108,6 @@ const TaskPreview = ({ className, uuid }) => {
     Model.populateCustomFields(data.task)
   }
   const task = new Task(data.task ? data.task : {})
-
-  data.subTasks && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
 
   const fieldSettings = task.fieldSettings()
 
