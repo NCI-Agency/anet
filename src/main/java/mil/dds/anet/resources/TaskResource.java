@@ -104,7 +104,7 @@ public class TaskResource {
     // Check for loops in the hierarchy
     final Map<String, Task> children =
         AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(t));
-    if (t.getCustomFieldRef1Uuid() != null && children.containsKey(t.getCustomFieldRef1Uuid())) {
+    if (t.getParentTaskUuid() != null && children.containsKey(t.getParentTaskUuid())) {
       throw new WebApplicationException("Task can not be its own (grand…)parent");
     }
 

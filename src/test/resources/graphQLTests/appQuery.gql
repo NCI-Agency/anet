@@ -80,7 +80,7 @@ me {
       uuid
       shortName
       longName
-      customFieldRef1 {
+      parentTask {
         uuid
       }
       customFields

@@ -61,16 +61,16 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
         "tasks.\"projectedCompletion\"", Comparison.BEFORE, query.getProjectedCompletionEnd());
     qb.addLikeClause("customField", "tasks.\"customField\"", query.getCustomField());
 
-    if (query.getHasCustomFieldRef1() != null) {
-      if (query.getHasCustomFieldRef1()) {
-        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NOT NULL");
+    if (query.getHasParentTask() != null) {
+      if (query.getHasParentTask()) {
+        qb.addWhereClause("tasks.\"parentTaskUuid\" IS NOT NULL");
       } else {
-        qb.addWhereClause("tasks.\"customFieldRef1Uuid\" IS NULL");
+        qb.addWhereClause("tasks.\"parentTaskUuid\" IS NULL");
       }
     }
 
-    if (query.getCustomFieldRef1Uuid() != null) {
-      addCustomFieldRef1UuidQuery(query);
+    if (query.getParentTaskUuid() != null) {
+      addParentTaskUuidQuery(query);
     }
 
     if (query.getResponsiblePositionUuid() != null) {
@@ -114,15 +114,14 @@ public abstract class AbstractTaskSearcher extends AbstractSearcher<Task, TaskSe
     }
   }
 
-  protected void addCustomFieldRef1UuidQuery(TaskSearchQuery query) {
-    if (RecurseStrategy.CHILDREN.equals(query.getCustomFieldRef1RecurseStrategy())
-        || RecurseStrategy.PARENTS.equals(query.getCustomFieldRef1RecurseStrategy())) {
-      qb.addRecursiveClause(null, "tasks", "\"customFieldRef1Uuid\"", "parent_tasks", "tasks",
-          "\"customFieldRef1Uuid\"", "customFieldRef1Uuid", query.getCustomFieldRef1Uuid(),
-          RecurseStrategy.CHILDREN.equals(query.getCustomFieldRef1RecurseStrategy()));
+  protected void addParentTaskUuidQuery(TaskSearchQuery query) {
+    if (RecurseStrategy.CHILDREN.equals(query.getParentTaskRecurseStrategy())
+        || RecurseStrategy.PARENTS.equals(query.getParentTaskRecurseStrategy())) {
+      qb.addRecursiveClause(null, "tasks", "\"parentTaskUuid\"", "parent_tasks", "tasks",
+          "\"parentTaskUuid\"", "parentTaskUuid", query.getParentTaskUuid(),
+          RecurseStrategy.CHILDREN.equals(query.getParentTaskRecurseStrategy()));
     } else {
-      qb.addInListClause("customFieldRef1Uuid", "tasks.\"customFieldRef1Uuid\"",
-          query.getCustomFieldRef1Uuid());
+      qb.addInListClause("parentTaskUuid", "tasks.\"parentTaskUuid\"", query.getParentTaskUuid());
     }
   }
 

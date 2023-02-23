@@ -504,7 +504,7 @@ properties:
             "$ref": "#/$defs/inputField"
           plannedCompletion:
             "$ref": "#/$defs/inputField"
-          customFieldRef1:
+          parentTask:
             "$ref": "#/$defs/inputField"
           customField:
             "$ref": "#/$defs/inputField"

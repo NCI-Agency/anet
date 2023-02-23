@@ -26,7 +26,7 @@ const Kanban = ({ columns, allTasks }) => (
       const tasks =
         (column.tasks &&
           allTasks.filter(task => column.tasks.includes(task.uuid))) ||
-        allTasks.filter(task => task.customFieldRef1?.uuid === column)
+        allTasks.filter(task => task.parentTask?.uuid === column)
 
       return <Column name={name} tasks={tasks} key={name} />
     })}

@@ -108,8 +108,8 @@ const taskFilters = () => {
       component: TaskFilter,
       deserializer: deserializeTaskFilter,
       props: {
-        queryKey: "customFieldRef1Uuid",
-        queryRecurseStrategyKey: "customFieldRef1RecurseStrategy",
+        queryKey: "parentTaskUuid",
+        queryRecurseStrategyKey: "parentTaskRecurseStrategy",
         fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
       }
     }

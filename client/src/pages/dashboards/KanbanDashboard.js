@@ -30,7 +30,7 @@ const GQL_GET_TASK_LIST = gql`
           uuid
           shortName
         }
-        customFieldRef1 {
+        parentTask {
           uuid
         }
         allReports: reports {

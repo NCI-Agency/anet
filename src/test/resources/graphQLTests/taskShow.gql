@@ -14,7 +14,7 @@ task(uuid: "${taskUuid}") {
     longName
     identificationCode
   }
-  customFieldRef1 {
+  parentTask {
     uuid
     shortName
     longName
@@ -97,14 +97,14 @@ task(uuid: "${taskUuid}") {
 }
 subTasks: taskList(query: {
   pageSize: 0
-  customFieldRef1Uuid: ["${taskUuid}"]
-  customFieldRef1RecurseStrategy: CHILDREN
+  parentTaskUuid: ["${taskUuid}"]
+  parentTaskRecurseStrategy: CHILDREN
 }) {
   list {
     uuid
     shortName
     longName
-    customFieldRef1 {
+    parentTask {
       uuid
       shortName
     }

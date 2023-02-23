@@ -74,9 +74,9 @@ public class TestData {
   }
 
   public static TaskInput createTaskInput(String shortName, String longName, String category,
-      TaskInput customFieldRef1, List<OrganizationInput> taskedOrganizations, Status status) {
+      TaskInput parentTask, List<OrganizationInput> taskedOrganizations, Status status) {
     return TaskInput.builder().withShortName(shortName).withLongName(longName)
-        .withCategory(category).withCustomFieldRef1(customFieldRef1)
+        .withCategory(category).withParentTask(parentTask)
         .withTaskedOrganizations(taskedOrganizations).withStatus(status).build();
   }
 

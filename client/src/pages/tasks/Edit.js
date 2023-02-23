@@ -38,7 +38,7 @@ const GQL_GET_TASK = gql`
         longName
         identificationCode
       }
-      customFieldRef1 {
+      parentTask {
         uuid
         shortName
         longName

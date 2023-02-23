@@ -188,7 +188,7 @@ public class Utils {
       final Set<String> seenUuids = new HashSet<>();
       String curr = t.getUuid();
       seenUuids.add(curr);
-      String parentUuid = t.getCustomFieldRef1Uuid();
+      String parentUuid = t.getParentTaskUuid();
       while (!Objects.equals(parentUuid, topParentUuid) && taskMap.containsKey(parentUuid)) {
         curr = parentUuid;
         if (seenUuids.contains(curr)) {
@@ -198,7 +198,7 @@ public class Utils {
           throw new IllegalArgumentException(errorMsg);
         }
         seenUuids.add(curr);
-        parentUuid = taskMap.get(parentUuid).getCustomFieldRef1Uuid();
+        parentUuid = taskMap.get(parentUuid).getParentTaskUuid();
       }
       result.put(t.getUuid(), taskMap.get(curr));
     }

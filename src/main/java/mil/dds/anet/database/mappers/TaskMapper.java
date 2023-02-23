@@ -21,7 +21,7 @@ public class TaskMapper implements RowMapper<Task> {
     p.setPlannedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "tasks_plannedCompletion"));
     p.setProjectedCompletion(MapperUtils.getInstantAsLocalDateTime(r, "tasks_projectedCompletion"));
     p.setStatus(MapperUtils.getEnumIdx(r, "tasks_status", Task.Status.class));
-    p.setCustomFieldRef1Uuid(r.getString("tasks_customFieldRef1Uuid"));
+    p.setParentTaskUuid(r.getString("tasks_parentTaskUuid"));
 
     if (MapperUtils.containsColumnNamed(r, "totalCount")) {
       ctx.define("totalCount", r.getInt("totalCount"));

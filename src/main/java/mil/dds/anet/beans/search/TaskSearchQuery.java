@@ -36,20 +36,20 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private String customField;
-  // Find tasks who (don't) have the customFieldRef1 filled in
+  // Find tasks who (don't) have the parentTask filled in
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean hasCustomFieldRef1;
+  private Boolean hasParentTask;
   // Search for tasks with one of the given parent Task(s)
   @GraphQLQuery
   @GraphQLInputField
-  private List<String> customFieldRef1Uuid;
+  private List<String> parentTaskUuid;
   // Include descendants recursively from the specified parent(s).
   // If true will include all tasks in the tree of the parent Task(s)
   // Including the parent Task(s).
   @GraphQLQuery
   @GraphQLInputField
-  private RecurseStrategy customFieldRef1RecurseStrategy;
+  private RecurseStrategy parentTaskRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   private String responsiblePositionUuid;
@@ -130,28 +130,28 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.customField = customField;
   }
 
-  public Boolean getHasCustomFieldRef1() {
-    return hasCustomFieldRef1;
+  public Boolean getHasParentTask() {
+    return hasParentTask;
   }
 
-  public void setHasCustomFieldRef1(Boolean hasCustomFieldRef1) {
-    this.hasCustomFieldRef1 = hasCustomFieldRef1;
+  public void setHasParentTask(Boolean hasParentTask) {
+    this.hasParentTask = hasParentTask;
   }
 
-  public List<String> getCustomFieldRef1Uuid() {
-    return customFieldRef1Uuid;
+  public List<String> getParentTaskUuid() {
+    return parentTaskUuid;
   }
 
-  public void setCustomFieldRef1Uuid(List<String> customFieldRef1Uuid) {
-    this.customFieldRef1Uuid = customFieldRef1Uuid;
+  public void setParentTaskUuid(List<String> parentTaskUuid) {
+    this.parentTaskUuid = parentTaskUuid;
   }
 
-  public RecurseStrategy getCustomFieldRef1RecurseStrategy() {
-    return customFieldRef1RecurseStrategy;
+  public RecurseStrategy getParentTaskRecurseStrategy() {
+    return parentTaskRecurseStrategy;
   }
 
-  public void setCustomFieldRef1RecurseStrategy(RecurseStrategy customFieldRef1RecurseStrategy) {
-    this.customFieldRef1RecurseStrategy = customFieldRef1RecurseStrategy;
+  public void setParentTaskRecurseStrategy(RecurseStrategy parentTaskRecurseStrategy) {
+    this.parentTaskRecurseStrategy = parentTaskRecurseStrategy;
   }
 
   public String getResponsiblePositionUuid() {
@@ -166,8 +166,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   public int hashCode() {
     return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
-        projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
-        customFieldRef1RecurseStrategy, responsiblePositionUuid);
+        projectedCompletionStart, projectStatus, customField, parentTaskUuid,
+        parentTaskRecurseStrategy, responsiblePositionUuid);
   }
 
   @Override
@@ -185,17 +185,16 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
         && Objects.equals(getProjectedCompletionStart(), other.getProjectedCompletionStart())
         && Objects.equals(getProjectStatus(), other.getProjectStatus())
         && Objects.equals(getCustomField(), other.getCustomField())
-        && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
-        && Objects.equals(getCustomFieldRef1RecurseStrategy(),
-            other.getCustomFieldRef1RecurseStrategy())
+        && Objects.equals(getParentTaskUuid(), other.getParentTaskUuid())
+        && Objects.equals(getParentTaskRecurseStrategy(), other.getParentTaskRecurseStrategy())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
   }
 
   @Override
   public TaskSearchQuery clone() throws CloneNotSupportedException {
     final TaskSearchQuery clone = (TaskSearchQuery) super.clone();
-    if (customFieldRef1Uuid != null) {
-      clone.setCustomFieldRef1Uuid(new ArrayList<>(customFieldRef1Uuid));
+    if (parentTaskUuid != null) {
+      clone.setParentTaskUuid(new ArrayList<>(parentTaskUuid));
     }
     return clone;
   }

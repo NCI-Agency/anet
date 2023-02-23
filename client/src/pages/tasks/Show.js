@@ -52,7 +52,7 @@ const GQL_GET_TASK = gql`
         longName
         identificationCode
       }
-      customFieldRef1 {
+      parentTask {
         uuid
         shortName
         longName
@@ -116,14 +116,14 @@ const GQL_GET_TASK = gql`
     }
     subTasks: taskList(query: {
       pageSize: 0
-      customFieldRef1Uuid: [$uuid]
-      customFieldRef1RecurseStrategy: CHILDREN
+      parentTaskUuid: [$uuid]
+      parentTaskRecurseStrategy: CHILDREN
     }) {
       list {
         uuid
         shortName
         longName
-        customFieldRef1 {
+        parentTask {
           uuid
           shortName
         }
@@ -173,7 +173,7 @@ const TaskShow = ({ pageDispatchers }) => {
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
-  const TaskCustomFieldRef1 = DictionaryField(Field)
+  const TaskParentTask = DictionaryField(Field)
   const TaskCustomField = DictionaryField(Field)
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
@@ -295,16 +295,16 @@ const TaskShow = ({ pageDispatchers }) => {
                       )
                     }
                   />
-                  {Settings.fields.task.customFieldRef1 && (
-                    <TaskCustomFieldRef1
-                      dictProps={Settings.fields.task.customFieldRef1}
-                      name="customFieldRef1"
+                  {Settings.fields.task.parentTask && (
+                    <TaskParentTask
+                      dictProps={Settings.fields.task.parentTask}
+                      name="parentTask"
                       component={FieldHelper.ReadonlyField}
                       humanValue={
-                        task.customFieldRef1 && (
-                          <LinkTo modelType="Task" model={task.customFieldRef1}>
-                            {task.customFieldRef1.shortName}{" "}
-                            {task.customFieldRef1.longName}
+                        task.parentTask && (
+                          <LinkTo modelType="Task" model={task.parentTask}>
+                            {task.parentTask.shortName}{" "}
+                            {task.parentTask.longName}
                           </LinkTo>
                         )
                       }

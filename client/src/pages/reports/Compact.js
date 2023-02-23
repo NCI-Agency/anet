@@ -137,7 +137,7 @@ const GQL_GET_REPORT = gql`
         uuid
         shortName
         longName
-        customFieldRef1 {
+        parentTask {
           uuid
           shortName
         }

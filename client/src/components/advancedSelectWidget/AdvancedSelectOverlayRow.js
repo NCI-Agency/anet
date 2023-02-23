@@ -80,9 +80,7 @@ export const TaskDetailedOverlayRow = item => (
       <AsLink modelType="Task" model={item} />
     </td>
     <td className="parentTaskName">
-      {item.customFieldRef1 && (
-        <AsLink modelType="Task" model={item.customFieldRef1} />
-      )}
+      {item.parentTask && <AsLink modelType="Task" model={item.parentTask} />}
     </td>
   </React.Fragment>
 )

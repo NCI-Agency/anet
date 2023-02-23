@@ -76,7 +76,7 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           shortName
           longName
-          customFieldRef1 {
+          parentTask {
             uuid
           }
           ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}

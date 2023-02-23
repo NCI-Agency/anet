@@ -69,7 +69,7 @@ public class TaskApprovalTest extends AbstractResourceTest {
   private static final String TASK_FIELDS = "{ uuid shortName longName status"
       + " customField customFieldEnum1 customFieldEnum2 plannedCompletion projectedCompletion"
       + " taskedOrganizations { uuid shortName longName identificationCode }"
-      + " customFieldRef1 { uuid } responsiblePositions { uuid } planningApprovalSteps "
+      + " parentTask { uuid } responsiblePositions { uuid } planningApprovalSteps "
       + APPROVAL_STEP_FIELDS + " approvalSteps " + APPROVAL_STEP_FIELDS + " customFields }";
 
   // Test report approval scenarios for tasks mostly use the following data:

@@ -28,7 +28,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   private static final String[] fields = {"uuid", "shortName", "longName", "status", "category",
       "createdAt", "updatedAt", "projectedCompletion", "plannedCompletion", "customField",
-      "customFieldEnum1", "customFieldEnum2", "customFieldRef1Uuid", "customFields"};
+      "customFieldEnum1", "customFieldEnum2", "parentTaskUuid", "customFields"};
   public static final String TABLE_NAME = "tasks";
   public static final String TASK_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
@@ -111,14 +111,15 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
 
   @Override
   public Task insertInternal(Task p) {
-    getDbHandle().createUpdate("/* insertTask */ INSERT INTO tasks "
-        + "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"createdAt\", "
-        + "\"updatedAt\", status, \"customField\", \"customFieldEnum1\", \"customFieldEnum2\", "
-        + "\"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
-        + "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :createdAt, "
-        + ":updatedAt, :status, :customField, :customFieldEnum1, :customFieldEnum2, "
-        + ":plannedCompletion, :projectedCompletion, :customFields)").bindBean(p)
-        .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+    getDbHandle()
+        .createUpdate("/* insertTask */ INSERT INTO tasks "
+            + "(uuid, \"longName\", \"shortName\", category, \"parentTaskUuid\", \"createdAt\", "
+            + "\"updatedAt\", status, \"customField\", \"customFieldEnum1\", \"customFieldEnum2\", "
+            + "\"plannedCompletion\", \"projectedCompletion\", \"customFields\") "
+            + "VALUES (:uuid, :longName, :shortName, :category, :parentTaskUuid, :createdAt, "
+            + ":updatedAt, :status, :customField, :customFieldEnum1, :customFieldEnum2, "
+            + ":plannedCompletion, :projectedCompletion, :customFields)")
+        .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
@@ -147,7 +148,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task, TaskSearchQuery> {
   public int updateInternal(Task p) {
     return getDbHandle().createUpdate(
         "/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
-            + "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, "
+            + "category = :category, \"parentTaskUuid\" = :parentTaskUuid, "
             + "\"updatedAt\" = :updatedAt, status = :status, \"customField\" = :customField, "
             + "\"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
             + "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion, "

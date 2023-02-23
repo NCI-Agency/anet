@@ -436,7 +436,7 @@ public class PendingAssessmentsHelper {
     final TaskSearchQuery tsq = new TaskSearchQuery();
     tsq.setPageSize(0);
     tsq.setStatus(Position.Status.ACTIVE);
-    tsq.setHasCustomFieldRef1(!topLevel);
+    tsq.setHasParentTask(!topLevel);
     return taskDao.search(tsq).getList();
   }
 
