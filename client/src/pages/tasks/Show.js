@@ -57,6 +57,17 @@ const GQL_GET_TASK = gql`
         shortName
         longName
       }
+      descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+        uuid
+        shortName
+        longName
+        parentTask {
+          uuid
+          shortName
+        }
+        customFields
+        ${GRAPHQL_NOTES_FIELDS}
+      }
       responsiblePositions {
         uuid
         name
@@ -114,23 +125,6 @@ const GQL_GET_TASK = gql`
       customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
-    subTasks: taskList(query: {
-      pageSize: 0
-      parentTaskUuid: [$uuid]
-      parentTaskRecurseStrategy: CHILDREN
-    }) {
-      list {
-        uuid
-        shortName
-        longName
-        parentTask {
-          uuid
-          shortName
-        }
-        customFields
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    }
   }
 `
 
@@ -166,9 +160,9 @@ const TaskShow = ({ pageDispatchers }) => {
   }
   const task = new Task(data ? data.task : {})
 
-  data && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
+  Model.populateEntitiesNotesCustomFields(task.descendantTasks)
 
-  const subTasks = data.subTasks.list.map(task => new Task(task))
+  const subTasks = task.descendantTasks?.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
