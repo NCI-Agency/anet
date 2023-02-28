@@ -93,12 +93,13 @@ const SubscriptionFilter = {
 const taskFilters = () => {
   const taskShortLabel = Settings.fields.task.shortLabel
   const taskFiltersObj = {
-    Organization: {
+    "Within Organization": {
       component: OrganizationFilter,
       deserializer: deserializeOrganizationFilter,
       props: {
         queryKey: "taskedOrgUuid",
-        queryRecurseStrategyKey: "orgRecurseStrategy"
+        queryRecurseStrategyKey: "orgRecurseStrategy",
+        fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
       }
     },
     [`Within ${taskShortLabel}`]: {
@@ -267,12 +268,13 @@ export const searchFilters = function() {
           queryKey: "attendeePositionUuid"
         })
       },
-      Organization: {
+      "Within Organization": {
         component: OrganizationFilter,
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       },
       "Engagement Date": {
@@ -367,12 +369,13 @@ export const searchFilters = function() {
 
   filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
     filters: {
-      Organization: {
+      "Within Organization": {
         component: OrganizationFilter,
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       },
       Role: {
@@ -505,12 +508,13 @@ export const searchFilters = function() {
           isPositionTypeFilter: true
         }
       },
-      Organization: {
+      "Within Organization": {
         component: OrganizationFilter,
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "organizationUuid",
-          queryRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
         }
       },
       Location: {
