@@ -7,7 +7,7 @@ plugins {
 	id "com.bmuschko.docker-remote-api" version "9.2.1"
 	id "com.github.node-gradle.node" version "3.5.1"
 	id "com.diffplug.spotless" version "6.15.0"
-	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.9"
+	id "com.graphql_java_generator.graphql-gradle-plugin" version "1.18.10"
 	id "org.beryx.runtime" version "1.13.0"
 	id "nebula.ospackage" version "9.1.1"
 }
@@ -103,7 +103,7 @@ dependencies {
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
 	implementation 'com.graphql-java:java-dataloader:3.2.0'
-	implementation 'io.leangen.graphql:spqr:0.12.0'
+	implementation 'io.leangen.graphql:spqr:0.12.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20220608.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 	// Authentication
@@ -128,9 +128,9 @@ dependencies {
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:1.18.9'
+	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:1.18.10'
 	// We use some extended scalars in `generateClientCodeConf` below
-	testImplementation 'com.graphql-java:graphql-java-extended-scalars:19.1'
+	testImplementation 'com.graphql-java:graphql-java-extended-scalars:20.0'
 
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "io.dropwizard:dropwizard-client:${dropwizardVersion}"
