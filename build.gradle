@@ -114,7 +114,12 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	implementation 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	implementation 'com.qindesign:snowy-json:0.16.0'
+	implementation('io.vertx:vertx-json-schema:4.3.8') {
+		// We don't actually need most of these (dragged in through vertx-core)
+		exclude group: 'io.netty'
+	}
+	// But we do need io.netty.buffer.ByteBufOutputStream, so explicitly include that here
+	implementation 'io.netty:netty-buffer:4.1.87.Final'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.2.3'
@@ -128,7 +133,10 @@ dependencies {
 
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
-	testImplementation 'com.graphql-java-generator:graphql-java-client-runtime:1.18.10'
+	testImplementation('com.graphql-java-generator:graphql-java-client-runtime:1.18.10') {
+		// We don't actually need any of these (dragged in through org.springframework.boot)
+		exclude group: 'io.netty'
+	}
 	// We use some extended scalars in `generateClientCodeConf` below
 	testImplementation 'com.graphql-java:graphql-java-extended-scalars:20.0'
 

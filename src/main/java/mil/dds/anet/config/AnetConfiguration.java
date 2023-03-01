@@ -5,29 +5,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.qindesign.json.schema.Annotation;
-import com.qindesign.json.schema.Error;
-import com.qindesign.json.schema.JSONPath;
-import com.qindesign.json.schema.MalformedSchemaException;
-import com.qindesign.json.schema.Option;
-import com.qindesign.json.schema.Options;
-import com.qindesign.json.schema.Specification;
-import com.qindesign.json.schema.Validator;
 import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.Draft;
+import io.vertx.json.schema.JsonSchema;
+import io.vertx.json.schema.JsonSchemaOptions;
+import io.vertx.json.schema.OutputUnit;
+import io.vertx.json.schema.SchemaException;
+import io.vertx.json.schema.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -229,7 +225,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
 
   // Before setting the dictionary with the dictionaryMap value,
   // check the dictionaryMap value if it is valid
-  public boolean isValid(Map<String, Object> dictionaryMap)
+  public boolean isValid(final Map<String, Object> dictionaryMap)
       throws IOException, IllegalArgumentException {
     try (final InputStream inputStream =
         AnetConfiguration.class.getResourceAsStream("/anet-schema.yml")) {
@@ -237,44 +233,31 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
         logger.error("ANET schema [anet-schema.yml] not found");
         throw new IOException("ANET schema [anet-schema.yml] not found");
       } else {
-        final Specification jsonSchemaVersion = Specification.DRAFT_2019_09;
-        final Options opts = new Options();
-        opts.set(Option.FORMAT, true);
-        opts.set(Option.CONTENT, true);
-        opts.set(Option.DEFAULT_SPECIFICATION, jsonSchemaVersion);
-        final Map<JSONPath, Map<JSONPath, Error<?>>> errors = new HashMap<>();
-        final Map<JSONPath, Map<String, Map<JSONPath, Annotation<?>>>> annotations =
-            new HashMap<>();
-        final Validator validator =
-            new Validator(convertYamlToJson(inputStream), jsonSchemaVersion.id(), null, null, opts);
-        if (!validator.validate(new Gson().toJsonTree(dictionaryMap), annotations, errors)) {
-          logErrors(errors);
+        final JsonSchema schema = JsonSchema.of(convertYamlToJson(inputStream));
+        final OutputUnit validationResult = Validator
+            .create(schema, new JsonSchemaOptions().setDraft(Draft.DRAFT201909).setBaseUri(
+                "https://raw.githubusercontent.com/NCI-Agency/anet/main/src/main/resources/anet-schema.yml"))
+            .validate(dictionaryMap);
+        if (!validationResult.getValid()) {
+          logErrors(validationResult.getErrors());
           throw new IllegalArgumentException("Invalid dictionary in the configuration");
         }
         logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
         return true;
       }
-    } catch (MalformedSchemaException e) {
+    } catch (final SchemaException e) {
       logger.error("Malformed ANET schema", e);
     }
     return false;
   }
 
-  private final static JsonElement convertYamlToJson(InputStream yaml) throws IOException {
-    return JsonParser
-        .parseString(jsonMapper.writeValueAsString(yamlMapper.readValue(yaml, Object.class)));
+  private JsonObject convertYamlToJson(final InputStream yaml) throws IOException {
+    return new JsonObject(jsonMapper.writeValueAsString(yamlMapper.readValue(yaml, Object.class)));
   }
 
-  private static void logErrors(Map<JSONPath, Map<JSONPath, Error<?>>> errors) {
-    errors.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e -> {
-      e.getValue().values().stream()
-          .filter(
-              err -> !err.isPruned() && !err.result && !err.value.toString().startsWith("https://"))
-          .sorted(Comparator.comparing(err -> err.loc.schema)).forEach(err -> {
-            logger.error("JSON error: {} at {}", err.value,
-                Utils.isEmptyOrNull(err.loc.instance) ? "<root>" : err.loc.instance);
-          });
-    });
+  private void logErrors(final List<OutputUnit> errors) {
+    errors.forEach(e -> logger.error("Dictionary error: {} (location: {})", e.getError(),
+        e.getInstanceLocation()));
   }
 
   @SuppressWarnings("unchecked")
