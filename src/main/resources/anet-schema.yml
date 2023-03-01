@@ -504,14 +504,8 @@ properties:
             "$ref": "#/$defs/inputField"
           plannedCompletion:
             "$ref": "#/$defs/inputField"
-          customFieldRef1:
+          parentTask:
             "$ref": "#/$defs/inputField"
-          customField:
-            "$ref": "#/$defs/inputField"
-          customFieldEnum1:
-            "$ref": "#/$defs/choiceField"
-          customFieldEnum2:
-            "$ref": "#/$defs/choiceField"
           taskedOrganizations:
             "$ref": "#/$defs/inputField"
           responsiblePositions:

@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
+import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -41,9 +42,6 @@ const GQL_GET_TASK = gql`
       status
       isSubscribed
       updatedAt
-      customField
-      customFieldEnum1
-      customFieldEnum2
       plannedCompletion
       projectedCompletion
       taskedOrganizations {
@@ -52,10 +50,21 @@ const GQL_GET_TASK = gql`
         longName
         identificationCode
       }
-      customFieldRef1 {
+      parentTask {
         uuid
         shortName
         longName
+      }
+      descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+        uuid
+        shortName
+        longName
+        parentTask {
+          uuid
+          shortName
+        }
+        customFields
+        ${GRAPHQL_NOTES_FIELDS}
       }
       responsiblePositions {
         uuid
@@ -114,23 +123,6 @@ const GQL_GET_TASK = gql`
       customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
-    subTasks: taskList(query: {
-      pageSize: 0
-      customFieldRef1Uuid: [$uuid]
-      customFieldRef1Recursively: true
-    }) {
-      list {
-        uuid
-        shortName
-        longName
-        customFieldRef1 {
-          uuid
-          shortName
-        }
-        customFields
-        ${GRAPHQL_NOTES_FIELDS}
-      }
-    }
   }
 `
 
@@ -166,25 +158,16 @@ const TaskShow = ({ pageDispatchers }) => {
   }
   const task = new Task(data ? data.task : {})
 
-  data && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
+  Model.populateEntitiesNotesCustomFields(task.descendantTasks)
 
-  const subTasks = data.subTasks.list.map(task => new Task(task))
+  const subTasks = task.descendantTasks?.map(task => new Task(task))
 
   const fieldSettings = task.fieldSettings()
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
-  const TaskCustomFieldRef1 = DictionaryField(Field)
-  const TaskCustomField = DictionaryField(Field)
+  const TaskParentTask = DictionaryField(Field)
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
-  const TaskCustomFieldEnum1 = DictionaryField(Field)
-  const cfe1Button =
-    Settings.fields.task.customFieldEnum1?.enum?.[task.customFieldEnum1]
-  const cfe1Buttons = cfe1Button ? { [task.customFieldEnum1]: cfe1Button } : {}
-  const TaskCustomFieldEnum2 = DictionaryField(Field)
-  const cfe2Button =
-    Settings.fields.task.customFieldEnum2?.enum?.[task.customFieldEnum2]
-  const cfe2Buttons = cfe2Button ? { [task.customFieldEnum2]: cfe2Button } : {}
 
   // Admins can edit tasks or users in positions related to the task
   const isAdmin = currentUser && currentUser.isAdmin()
@@ -295,26 +278,21 @@ const TaskShow = ({ pageDispatchers }) => {
                       )
                     }
                   />
-                  {Settings.fields.task.customFieldRef1 && (
-                    <TaskCustomFieldRef1
-                      dictProps={Settings.fields.task.customFieldRef1}
-                      name="customFieldRef1"
+                  {Settings.fields.task.parentTask && (
+                    <TaskParentTask
+                      dictProps={Settings.fields.task.parentTask}
+                      name="parentTask"
                       component={FieldHelper.ReadonlyField}
                       humanValue={
-                        task.customFieldRef1 && (
-                          <LinkTo modelType="Task" model={task.customFieldRef1}>
-                            {task.customFieldRef1.shortName}{" "}
-                            {task.customFieldRef1.longName}
+                        task.parentTask && (
+                          <LinkTo modelType="Task" model={task.parentTask}>
+                            {task.parentTask.shortName}{" "}
+                            {task.parentTask.longName}
                           </LinkTo>
                         )
                       }
                     />
                   )}
-                  <TaskCustomField
-                    dictProps={Settings.fields.task.customField}
-                    name="customField"
-                    component={FieldHelper.ReadonlyField}
-                  />
                   {Settings.fields.task.plannedCompletion && (
                     <PlannedCompletionField
                       dictProps={Settings.fields.task.plannedCompletion}
@@ -339,30 +317,6 @@ const TaskShow = ({ pageDispatchers }) => {
                           Settings.dateFormats.forms.displayShort.date
                         )
                       }
-                    />
-                  )}
-                  {Settings.fields.task.customFieldEnum1 && (
-                    <TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
-                      )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      disabled={true}
-                      buttons={FieldHelper.customEnumButtons(cfe1Buttons)}
-                    />
-                  )}
-                  {Settings.fields.task.customFieldEnum2 && (
-                    <TaskCustomFieldEnum2
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum2,
-                        "enum"
-                      )}
-                      name="customFieldEnum2"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      disabled={true}
-                      buttons={FieldHelper.customEnumButtons(cfe2Buttons)}
                     />
                   )}
                 </Fieldset>
@@ -399,6 +353,17 @@ const TaskShow = ({ pageDispatchers }) => {
                 mapId="reports"
               />
             </Fieldset>
+            {Settings.fields.task.customFields && (
+              <Fieldset
+                title={`${fieldSettings.shortLabel} information`}
+                id="custom-fields"
+              >
+                <ReadonlyCustomFields
+                  fieldsConfig={Settings.fields.task.customFields}
+                  values={values}
+                />
+              </Fieldset>
+            )}
           </div>
         )
       }}

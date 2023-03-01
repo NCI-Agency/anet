@@ -46,9 +46,9 @@ const NoPaginationTaskTable = ({
                   </td>
                   {showParent && (
                     <td className="parentTaskName">
-                      {task.customFieldRef1 && (
-                        <LinkTo modelType="Task" model={task.customFieldRef1}>
-                          {task.customFieldRef1.shortName}
+                      {task.parentTask && (
+                        <LinkTo modelType="Task" model={task.parentTask}>
+                          {task.parentTask.shortName}
                         </LinkTo>
                       )}
                     </td>

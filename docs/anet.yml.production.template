@@ -191,31 +191,9 @@ dictionary:
         label: Projected Completion
       plannedCompletion:
         label: Planned Completion
-      customFieldRef1:
+      parentTask:
         label: Parent task
         placeholder: Start typing to search for a higher level task
-      customField:
-        label: Custom field
-        placeholder: Fill in the custom field
-      customFieldEnum1:
-        label: Project status
-        enum:
-          GREEN:
-            label: Green
-            color: '#c2ffb3'
-          AMBER:
-            label: Amber
-            color: '#ffe396'
-          RED:
-            label: Red
-            color: '#ff8279'
-      customFieldEnum2:
-        label: Custom field enum 2
-        enum:
-          CUSTOMVALUE1:
-            label: Custom value 1
-          CUSTOMVALUE2:
-            label: Custom value 2
       taskedOrganizations:
         label: Tasked organizations
         placeholder: Search for an organization...

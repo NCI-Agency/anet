@@ -27,9 +27,6 @@ const GQL_GET_TASK = gql`
       shortName
       longName
       status
-      customField
-      customFieldEnum1
-      customFieldEnum2
       plannedCompletion
       projectedCompletion
       taskedOrganizations {
@@ -38,7 +35,7 @@ const GQL_GET_TASK = gql`
         longName
         identificationCode
       }
-      customFieldRef1 {
+      parentTask {
         uuid
         shortName
         longName

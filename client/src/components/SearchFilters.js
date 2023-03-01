@@ -17,9 +17,9 @@ import ReportStateFilter, {
 import SelectFilter, {
   deserialize as deserializeSelectFilter
 } from "components/advancedSearch/SelectFilter"
-import TextInputFilter, {
-  deserialize as deserializeTextInputFilter
-} from "components/advancedSearch/TextInputFilter"
+import TaskFilter, {
+  deserialize as deserializeTaskFilter
+} from "components/advancedSearch/TaskFilter"
 import {
   LocationOverlayRow,
   PersonDetailedOverlayRow,
@@ -36,7 +36,10 @@ import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import TASKS_ICON from "resources/tasks.png"
-import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
+import {
+  POSITION_POSITION_TYPE_FILTER_KEY,
+  RECURSE_STRATEGY
+} from "searchUtils"
 import Settings from "settings"
 
 export const SearchQueryPropType = PropTypes.shape({
@@ -88,13 +91,23 @@ const SubscriptionFilter = {
 }
 
 const taskFilters = () => {
+  const taskShortLabel = Settings.fields.task.shortLabel
   const taskFiltersObj = {
     Organization: {
       component: OrganizationFilter,
       deserializer: deserializeOrganizationFilter,
       props: {
         queryKey: "taskedOrgUuid",
-        queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+        queryRecurseStrategyKey: "orgRecurseStrategy"
+      }
+    },
+    [`Within ${taskShortLabel}`]: {
+      component: TaskFilter,
+      deserializer: deserializeTaskFilter,
+      props: {
+        queryKey: "parentTaskUuid",
+        queryRecurseStrategyKey: "parentTaskRecurseStrategy",
+        fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
       }
     }
   }
@@ -115,28 +128,6 @@ const taskFilters = () => {
       deserializer: deserializeDateRangeFilter,
       props: {
         queryKey: "plannedCompletion"
-      }
-    }
-  }
-  const customEnum1 = Settings.fields.task.customFieldEnum1
-  if (customEnum1) {
-    taskFiltersObj[customEnum1.label] = {
-      component: SelectFilter,
-      deserializer: deserializeSelectFilter,
-      props: {
-        queryKey: "projectStatus",
-        options: Object.keys(customEnum1.enum),
-        labels: Object.values(customEnum1.enum).map(o => o.label)
-      }
-    }
-  }
-  const customField = Settings.fields.task.customField
-  if (customField) {
-    taskFiltersObj[customField.label] = {
-      component: TextInputFilter,
-      deserializer: deserializeTextInputFilter,
-      props: {
-        queryKey: "customField"
       }
     }
   }
@@ -281,7 +272,7 @@ export const searchFilters = function() {
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       "Engagement Date": {
@@ -381,7 +372,7 @@ export const searchFilters = function() {
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "orgUuid",
-          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Role: {
@@ -462,6 +453,15 @@ export const searchFilters = function() {
           ]
         }
       },
+      "Within Organization": {
+        component: OrganizationFilter,
+        deserializer: deserializeOrganizationFilter,
+        props: {
+          queryKey: "parentOrgUuid",
+          queryRecurseStrategyKey: "orgRecurseStrategy",
+          fixedRecurseStrategy: RECURSE_STRATEGY.CHILDREN
+        }
+      },
       Location: {
         component: AdvancedSelectFilter,
         deserializer: deserializeAdvancedSelectFilter,
@@ -510,7 +510,7 @@ export const searchFilters = function() {
         deserializer: deserializeOrganizationFilter,
         props: {
           queryKey: "organizationUuid",
-          queryOrgRecurseStrategyKey: "orgRecurseStrategy"
+          queryRecurseStrategyKey: "orgRecurseStrategy"
         }
       },
       Location: {

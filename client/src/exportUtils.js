@@ -94,8 +94,7 @@ const GQL_GET_TASK_LIST = gql`
           uuid
           shortName
         }
-        customFieldEnum1
-        customFieldRef1 {
+        parentTask {
           uuid
           shortName
         }

@@ -3,9 +3,6 @@ task(uuid: "${taskUuid}") {
   shortName
   longName
   status
-  customField
-  customFieldEnum1
-  customFieldEnum2
   plannedCompletion
   projectedCompletion
   taskedOrganizations {
@@ -14,10 +11,69 @@ task(uuid: "${taskUuid}") {
     longName
     identificationCode
   }
-  customFieldRef1 {
+  parentTask {
     uuid
     shortName
     longName
+  }
+  descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+    uuid
+    shortName
+    longName
+    parentTask {
+      uuid
+      shortName
+    }
+    customFields
+    notes {
+      uuid
+      createdAt
+      updatedAt
+      type
+      assessmentKey
+      text
+      author {
+        uuid
+        name
+        rank
+        role
+      }
+      noteRelatedObjects {
+        noteUuid
+        relatedObjectType
+        relatedObjectUuid
+        relatedObject {
+          ... on AuthorizationGroup {
+            name
+          }
+          ... on Location {
+            name
+          }
+          ... on Organization {
+            shortName
+          }
+          ... on Person {
+            role
+            rank
+            name
+            avatar(size: 32)
+          }
+          ... on Position {
+            type
+            name
+          }
+          ... on Report {
+            intent
+            engagementDate
+            state
+          }
+          ... on Task {
+            shortName
+            longName
+          }
+        }
+      }
+    }
   }
   responsiblePositions {
     uuid
@@ -75,6 +131,7 @@ task(uuid: "${taskUuid}") {
     createdAt
     updatedAt
     type
+    assessmentKey
     text
     author {
       uuid
@@ -86,52 +143,36 @@ task(uuid: "${taskUuid}") {
       noteUuid
       relatedObjectType
       relatedObjectUuid
-    }
-  }
-  publishedReports: reports(query: {
-    pageSize: 0
-    state: [PUBLISHED]
-  }) {
-    uuid
-  }
-}
-subTasks: taskList(query: {
-  pageSize: 0
-  customFieldRef1Uuid: ["${taskUuid}"]
-  customFieldRef1Recursively: true
-}) {
-  list {
-    uuid
-    shortName
-    longName
-    customFieldRef1 {
-      uuid
-      shortName
-    }
-    customFields
-    notes {
-      uuid
-      createdAt
-      updatedAt
-      type
-      text
-      author {
-        uuid
-        name
-        rank
-        role
+      relatedObject {
+        ... on AuthorizationGroup {
+          name
+        }
+        ... on Location {
+          name
+        }
+        ... on Organization {
+          shortName
+        }
+        ... on Person {
+          role
+          rank
+          name
+          avatar(size: 32)
+        }
+        ... on Position {
+          type
+          name
+        }
+        ... on Report {
+          intent
+          engagementDate
+          state
+        }
+        ... on Task {
+          shortName
+          longName
+        }
       }
-      noteRelatedObjects {
-        noteUuid
-        relatedObjectType
-        relatedObjectUuid
-      }
-    }
-    publishedReports: reports(query: {
-      pageSize: 0
-      state: [PUBLISHED]
-    }) {
-      uuid
     }
   }
 }

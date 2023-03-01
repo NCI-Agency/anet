@@ -1120,17 +1120,17 @@ enum SubscriptionUpdateSearchSortBy {
 """"""
 type Task {
   approvalSteps: [ApprovalStep]
+  ascendantTasks(query: TaskSearchQueryInput): [Task]
   category: String
+  childrenTasks(query: TaskSearchQueryInput): [Task]
   createdAt: Instant
-  customField: String
-  customFieldEnum1: String
-  customFieldEnum2: String
-  customFieldRef1: Task
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  descendantTasks(query: TaskSearchQueryInput): [Task]
   isSubscribed: Boolean
   longName: String
   notes: [Note]
+  parentTask: Task
   plannedCompletion: Instant
   planningApprovalSteps: [ApprovalStep]
   projectedCompletion: Instant
@@ -1148,13 +1148,10 @@ input TaskInput {
   approvalSteps: [ApprovalStepInput]
   category: String
   createdAt: Instant
-  customField: String
-  customFieldEnum1: String
-  customFieldEnum2: String
-  customFieldRef1: TaskInput
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
   longName: String
+  parentTask: TaskInput
   plannedCompletion: Instant
   planningApprovalSteps: [ApprovalStepInput]
   projectedCompletion: Instant
@@ -1169,17 +1166,15 @@ input TaskInput {
 """"""
 input TaskSearchQueryInput {
   category: String
-  customField: String
-  customFieldRef1Recursively: Boolean
-  customFieldRef1Uuid: [String]
-  hasCustomFieldRef1: Boolean
+  hasParentTask: Boolean
   inMyReports: Boolean
   orgRecurseStrategy: RecurseStrategy
   pageNum: Int
   pageSize: Int
+  parentTaskRecurseStrategy: RecurseStrategy
+  parentTaskUuid: [String]
   plannedCompletionEnd: Instant
   plannedCompletionStart: Instant
-  projectStatus: String
   projectedCompletionEnd: Instant
   projectedCompletionStart: Instant
   responsiblePositionUuid: String

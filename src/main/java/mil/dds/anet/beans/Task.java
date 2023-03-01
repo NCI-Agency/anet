@@ -11,8 +11,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.search.FkBatchParams;
+import mil.dds.anet.beans.search.ISearchQuery;
 import mil.dds.anet.beans.search.M2mBatchParams;
+import mil.dds.anet.beans.search.RecursiveFkBatchParams;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.utils.Utils;
@@ -40,17 +44,8 @@ public class Task extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private String category;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customField;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customFieldEnum1;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customFieldEnum2;
   // annotated below
-  private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
+  private ForeignObjectHolder<Task> parentTask = new ForeignObjectHolder<>();
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
@@ -96,30 +91,6 @@ public class Task extends AbstractCustomizableAnetBean
     this.longName = Utils.trimStringReturnNull(longName);
   }
 
-  public String getCustomField() {
-    return customField;
-  }
-
-  public void setCustomField(String customField) {
-    this.customField = Utils.trimStringReturnNull(customField);
-  }
-
-  public String getCustomFieldEnum1() {
-    return customFieldEnum1;
-  }
-
-  public void setCustomFieldEnum1(String customFieldEnum1) {
-    this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
-  }
-
-  public String getCustomFieldEnum2() {
-    return customFieldEnum2;
-  }
-
-  public void setCustomFieldEnum2(String customFieldEnum2) {
-    this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
-  }
-
   public String getCategory() {
     return category;
   }
@@ -128,36 +99,35 @@ public class Task extends AbstractCustomizableAnetBean
     this.category = Utils.trimStringReturnNull(category);
   }
 
-  @GraphQLQuery(name = "customFieldRef1")
-  public CompletableFuture<Task> loadCustomFieldRef1(
-      @GraphQLRootContext Map<String, Object> context) {
-    if (customFieldRef1.hasForeignObject()) {
-      return CompletableFuture.completedFuture(customFieldRef1.getForeignObject());
+  @GraphQLQuery(name = "parentTask")
+  public CompletableFuture<Task> loadParentTask(@GraphQLRootContext Map<String, Object> context) {
+    if (parentTask.hasForeignObject()) {
+      return CompletableFuture.completedFuture(parentTask.getForeignObject());
     }
-    return new UuidFetcher<Task>()
-        .load(context, IdDataLoaderKey.TASKS, customFieldRef1.getForeignUuid()).thenApply(o -> {
-          customFieldRef1.setForeignObject(o);
+    return new UuidFetcher<Task>().load(context, IdDataLoaderKey.TASKS, parentTask.getForeignUuid())
+        .thenApply(o -> {
+          parentTask.setForeignObject(o);
           return o;
         });
   }
 
   @JsonIgnore
-  public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
-    this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1Uuid);
+  public void setParentTaskUuid(String parentTaskUuid) {
+    this.parentTask = new ForeignObjectHolder<>(parentTaskUuid);
   }
 
   @JsonIgnore
-  public String getCustomFieldRef1Uuid() {
-    return customFieldRef1.getForeignUuid();
+  public String getParentTaskUuid() {
+    return parentTask.getForeignUuid();
   }
 
-  @GraphQLInputField(name = "customFieldRef1")
-  public void setCustomFieldRef1(Task customFieldRef1) {
-    this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1);
+  @GraphQLInputField(name = "parentTask")
+  public void setParentTask(Task parentTask) {
+    this.parentTask = new ForeignObjectHolder<>(parentTask);
   }
 
-  public Task getCustomFieldRef1() {
-    return customFieldRef1.getForeignObject();
+  public Task getParentTask() {
+    return parentTask.getForeignObject();
   }
 
   @Override
@@ -271,6 +241,45 @@ public class Task extends AbstractCustomizableAnetBean
     this.approvalSteps = steps;
   }
 
+  @GraphQLQuery(name = "childrenTasks")
+  public CompletableFuture<List<Task>> loadChildrenTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    // Note: no recursion, only direct children!
+    query.setBatchParams(new FkBatchParams<Task, TaskSearchQuery>("tasks", "\"parentTaskUuid\""));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+  }
+
+  @GraphQLQuery(name = "descendantTasks")
+  public CompletableFuture<List<Task>> loadDescendantTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    // Note: recursion, includes transitive children!
+    query.setBatchParams(
+        new RecursiveFkBatchParams<Task, TaskSearchQuery>("tasks", "\"parentTaskUuid\"", "tasks",
+            "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.CHILDREN));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+  }
+
+  @GraphQLQuery(name = "ascendantTasks")
+  public CompletableFuture<List<Task>> loadAscendantTasks(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") TaskSearchQuery query) {
+    if (query == null) {
+      query = new TaskSearchQuery();
+    }
+    // Note: recursion, includes transitive parents!
+    query.setBatchParams(new RecursiveFkBatchParams<Task, TaskSearchQuery>("tasks", "uuid", "tasks",
+        "\"parentTaskUuid\"", ISearchQuery.RecurseStrategy.PARENTS));
+    return AnetObjectEngine.getInstance().getTaskDao().getTasksBySearch(context, uuid, query);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof Task)) {
@@ -281,20 +290,19 @@ public class Task extends AbstractCustomizableAnetBean
         && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
-        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
+        && Objects.equals(other.getParentTaskUuid(), getParentTaskUuid())
         && Objects.equals(other.getStatus(), status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, shortName, longName, category, customFieldRef1,
-        status);
+    return Objects.hash(super.hashCode(), uuid, shortName, longName, category, parentTask, status);
   }
 
   @Override
   public String toString() {
-    return String.format("[uuid:%s shortName:%s category:%s customFieldRef1:%s]", uuid, shortName,
-        category, getCustomFieldRef1Uuid());
+    return String.format("[uuid:%s shortName:%s category:%s parentTask:%s]", uuid, shortName,
+        category, getParentTaskUuid());
   }
 
 }

@@ -30,26 +30,20 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   @GraphQLQuery
   @GraphQLInputField
   private Instant projectedCompletionStart;
+  // Find tasks who (don't) have the parentTask filled in
   @GraphQLQuery
   @GraphQLInputField
-  private String projectStatus;
-  @GraphQLQuery
-  @GraphQLInputField
-  private String customField;
-  // Find tasks who (don't) have the customFieldRef1 filled in
-  @GraphQLQuery
-  @GraphQLInputField
-  private Boolean hasCustomFieldRef1;
+  private Boolean hasParentTask;
   // Search for tasks with one of the given parent Task(s)
   @GraphQLQuery
   @GraphQLInputField
-  private List<String> customFieldRef1Uuid;
+  private List<String> parentTaskUuid;
   // Include descendants recursively from the specified parent(s).
   // If true will include all tasks in the tree of the parent Task(s)
   // Including the parent Task(s).
   @GraphQLQuery
   @GraphQLInputField
-  private Boolean customFieldRef1Recursively;
+  private RecurseStrategy parentTaskRecurseStrategy;
   @GraphQLQuery
   @GraphQLInputField
   private String responsiblePositionUuid;
@@ -114,44 +108,28 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
     this.projectedCompletionStart = projectedCompletionStart;
   }
 
-  public String getProjectStatus() {
-    return projectStatus;
+  public Boolean getHasParentTask() {
+    return hasParentTask;
   }
 
-  public void setProjectStatus(String projectStatus) {
-    this.projectStatus = projectStatus;
+  public void setHasParentTask(Boolean hasParentTask) {
+    this.hasParentTask = hasParentTask;
   }
 
-  public String getCustomField() {
-    return customField;
+  public List<String> getParentTaskUuid() {
+    return parentTaskUuid;
   }
 
-  public void setCustomField(String customField) {
-    this.customField = customField;
+  public void setParentTaskUuid(List<String> parentTaskUuid) {
+    this.parentTaskUuid = parentTaskUuid;
   }
 
-  public Boolean getHasCustomFieldRef1() {
-    return hasCustomFieldRef1;
+  public RecurseStrategy getParentTaskRecurseStrategy() {
+    return parentTaskRecurseStrategy;
   }
 
-  public void setHasCustomFieldRef1(Boolean hasCustomFieldRef1) {
-    this.hasCustomFieldRef1 = hasCustomFieldRef1;
-  }
-
-  public List<String> getCustomFieldRef1Uuid() {
-    return customFieldRef1Uuid;
-  }
-
-  public void setCustomFieldRef1Uuid(List<String> customFieldRef1Uuid) {
-    this.customFieldRef1Uuid = customFieldRef1Uuid;
-  }
-
-  public boolean getCustomFieldRef1Recursively() {
-    return Boolean.TRUE.equals(customFieldRef1Recursively);
-  }
-
-  public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {
-    this.customFieldRef1Recursively = customFieldRef1Recursively;
+  public void setParentTaskRecurseStrategy(RecurseStrategy parentTaskRecurseStrategy) {
+    this.parentTaskRecurseStrategy = parentTaskRecurseStrategy;
   }
 
   public String getResponsiblePositionUuid() {
@@ -166,8 +144,8 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
   public int hashCode() {
     return Objects.hash(super.hashCode(), taskedOrgUuid, orgRecurseStrategy, category,
         plannedCompletionEnd, plannedCompletionStart, projectedCompletionEnd,
-        projectedCompletionStart, projectStatus, customField, customFieldRef1Uuid,
-        customFieldRef1Recursively, responsiblePositionUuid);
+        projectedCompletionStart, parentTaskUuid, parentTaskRecurseStrategy,
+        responsiblePositionUuid);
   }
 
   @Override
@@ -183,18 +161,16 @@ public class TaskSearchQuery extends SubscribableObjectSearchQuery<TaskSearchSor
         && Objects.equals(getPlannedCompletionStart(), other.getPlannedCompletionStart())
         && Objects.equals(getProjectedCompletionEnd(), other.getProjectedCompletionEnd())
         && Objects.equals(getProjectedCompletionStart(), other.getProjectedCompletionStart())
-        && Objects.equals(getProjectStatus(), other.getProjectStatus())
-        && Objects.equals(getCustomField(), other.getCustomField())
-        && Objects.equals(getCustomFieldRef1Uuid(), other.getCustomFieldRef1Uuid())
-        && Objects.equals(getCustomFieldRef1Recursively(), other.getCustomFieldRef1Recursively())
+        && Objects.equals(getParentTaskUuid(), other.getParentTaskUuid())
+        && Objects.equals(getParentTaskRecurseStrategy(), other.getParentTaskRecurseStrategy())
         && Objects.equals(getResponsiblePositionUuid(), other.getResponsiblePositionUuid());
   }
 
   @Override
   public TaskSearchQuery clone() throws CloneNotSupportedException {
     final TaskSearchQuery clone = (TaskSearchQuery) super.clone();
-    if (customFieldRef1Uuid != null) {
-      clone.setCustomFieldRef1Uuid(new ArrayList<>(customFieldRef1Uuid));
+    if (parentTaskUuid != null) {
+      clone.setParentTaskUuid(new ArrayList<>(parentTaskUuid));
     }
     return clone;
   }

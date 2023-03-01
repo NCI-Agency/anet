@@ -26,7 +26,7 @@ const Kanban = ({ columns, allTasks }) => (
       const tasks =
         (column.tasks &&
           allTasks.filter(task => column.tasks.includes(task.uuid))) ||
-        allTasks.filter(task => task.customFieldRef1?.uuid === column)
+        allTasks.filter(task => task.parentTask?.uuid === column)
 
       return <Column name={name} tasks={tasks} key={name} />
     })}
@@ -49,8 +49,11 @@ Kanban.propTypes = {
 
 const Column = ({ name, tasks }) => {
   const [open, setOpen] = useState(false)
+  const enumSettings =
+    Settings.fields.task.customFields?.projectStatus?.choices || {}
   const counters = tasks.reduce((counter, task) => {
-    counter[task.customFieldEnum1] = ++counter[task.customFieldEnum1] || 1
+    const { projectStatus } = utils.parseJsonSafe(task.customFields)
+    counter[projectStatus] = ++counter[projectStatus] || 1
     return counter
   }, {})
 
@@ -68,11 +71,11 @@ const Column = ({ name, tasks }) => {
           data={counters}
           label={`${tasks.length}`}
           segmentFill={entity => {
-            const matching = Object.entries(
-              Settings.fields.task.customFieldEnum1?.enum || {}
-            ).filter(([key, val]) => {
-              return key === entity.data.key
-            })
+            const matching = Object.entries(enumSettings).filter(
+              ([key, val]) => {
+                return key === entity.data.key
+              }
+            )
             return matching.length > 0 ? matching[0][1].color : "#bbbbbb"
           }}
           segmentLabel={d => d.data.value}
@@ -125,15 +128,15 @@ Column.propTypes = {
 
 const CardView = ({ task }) => {
   const [open, setOpen] = useState(false)
-  const { customFieldEnum1 } = task
-  const enumSettings = Settings.fields.task.customFieldEnum1?.enum
+  const { projectStatus } = utils.parseJsonSafe(task.customFields)
+  const enumSettings =
+    Settings.fields.task.customFields?.projectStatus?.choices || {}
   return (
     <Card
       onClick={() => setOpen(!open)}
       style={{
         backgroundColor:
-          customFieldEnum1 &&
-          (enumSettings[customFieldEnum1]?.color || "#f9f7f7"),
+          projectStatus && (enumSettings[projectStatus]?.color || "#f9f7f7"),
         margin: "3px"
       }}
     >

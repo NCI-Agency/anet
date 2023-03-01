@@ -84,6 +84,7 @@ organization(uuid:"${orgUuid}") {
     createdAt
     updatedAt
     type
+    assessmentKey
     text
     author {
       uuid

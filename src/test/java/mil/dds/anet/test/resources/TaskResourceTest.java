@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 public class TaskResourceTest extends AbstractResourceTest {
 
   protected static final String FIELDS =
-      "{ uuid shortName longName category customFieldRef1 { uuid } taskedOrganizations { uuid }"
+      "{ uuid shortName longName category parentTask { uuid } taskedOrganizations { uuid }"
           + " status customFields }";
 
   @Test

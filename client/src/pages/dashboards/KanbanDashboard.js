@@ -23,14 +23,14 @@ const GQL_GET_TASK_LIST = gql`
         uuid
         longName
         shortName
-        customFieldEnum1
         createdAt
         updatedAt
+        customFields
         taskedOrganizations {
           uuid
           shortName
         }
-        customFieldRef1 {
+        parentTask {
           uuid
         }
         allReports: reports {
@@ -50,7 +50,6 @@ const GQL_GET_TASK_LIST = gql`
         }) {
           uuid
         }
-
       }
     }
   }

@@ -67,12 +67,9 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
 
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
-  const TaskCustomFieldRef1 = DictionaryField(FastField)
-  const TaskCustomField = DictionaryField(FastField)
+  const TaskParentTask = DictionaryField(FastField)
   const PlannedCompletionField = DictionaryField(FastField)
   const ProjectedCompletionField = DictionaryField(FastField)
-  const TaskCustomFieldEnum1 = DictionaryField(FastField)
-  const TaskCustomFieldEnum2 = DictionaryField(FastField)
   const TaskedOrganizationsMultiSelect = DictionaryField(FastField)
   const ResponsiblePositionsMultiSelect = DictionaryField(FastField)
 
@@ -89,7 +86,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
   const tasksFilters = {
     allObjectives: {
       label: `All ${Settings.fields.task.topLevel.longLabel}`,
-      queryVars: { hasCustomFieldRef1: false }
+      queryVars: { hasParentTask: false }
     }
   }
   const positionsFilters = {
@@ -264,23 +261,23 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   }
                 />
 
-                {Settings.fields.task.customFieldRef1 && (
-                  <TaskCustomFieldRef1
-                    name="customFieldRef1"
+                {Settings.fields.task.parentTask && (
+                  <TaskParentTask
+                    name="parentTask"
                     component={FieldHelper.SpecialField}
-                    dictProps={Settings.fields.task.customFieldRef1}
+                    dictProps={Settings.fields.task.parentTask}
                     onChange={value => {
                       // validation will be done by setFieldValue
-                      setFieldTouched("customFieldRef1", true, false) // onBlur doesn't work when selecting an option
-                      setFieldValue("customFieldRef1", value)
+                      setFieldTouched("parentTask", true, false) // onBlur doesn't work when selecting an option
+                      setFieldValue("parentTask", value)
                     }}
                     widget={
                       <AdvancedSingleSelect
-                        fieldName="customFieldRef1"
+                        fieldName="parentTask"
                         placeholder={
-                          Settings.fields.task.customFieldRef1.placeholder
+                          Settings.fields.task.parentTask.placeholder
                         }
-                        value={values.customFieldRef1}
+                        value={values.parentTask}
                         overlayColumns={["Name"]}
                         overlayRenderRow={TaskSimpleOverlayRow}
                         filterDefs={tasksFilters}
@@ -295,13 +292,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     disabled={disabled}
                   />
                 )}
-
-                <TaskCustomField
-                  dictProps={Settings.fields.task.customField}
-                  name="customField"
-                  component={FieldHelper.InputField}
-                  disabled={disabled}
-                />
 
                 {Settings.fields.task.plannedCompletion && (
                   <PlannedCompletionField
@@ -328,42 +318,6 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                     onBlur={() => setFieldTouched("projectedCompletion")}
                     widget={<CustomDateInput id="projectedCompletion" />}
                     disabled={disabled}
-                  />
-                )}
-
-                {Settings.fields.task.customFieldEnum1 && (
-                  <>
-                    <TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
-                      )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.RadioButtonToggleGroupField}
-                      disabled={disabled}
-                      buttons={FieldHelper.customEnumButtons(
-                        Settings.fields.task.customFieldEnum1.enum
-                      )}
-                      onChange={value =>
-                        setFieldValue("customFieldEnum1", value)
-                      }
-                    />
-                  </>
-                )}
-
-                {Settings.fields.task.customFieldEnum2 && (
-                  <TaskCustomFieldEnum2
-                    dictProps={Object.without(
-                      Settings.fields.task.customFieldEnum2,
-                      "enum"
-                    )}
-                    name="customFieldEnum2"
-                    component={FieldHelper.RadioButtonToggleGroupField}
-                    disabled={disabled}
-                    buttons={FieldHelper.customEnumButtons(
-                      Settings.fields.task.customFieldEnum2.enum
-                    )}
-                    onChange={value => setFieldValue("customFieldEnum2", value)}
                   />
                 )}
               </Fieldset>
@@ -465,7 +419,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
 
   function save(values, form) {
     const task = Task.filterClientSideFields(new Task(values))
-    task.customFieldRef1 = utils.getReference(task.customFieldRef1)
+    task.parentTask = utils.getReference(task.parentTask)
     task.customFields = customFieldsJSONString(values)
     task.taskedOrganizations = task.taskedOrganizations.map(a =>
       utils.getReference(a)

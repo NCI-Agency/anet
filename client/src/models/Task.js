@@ -12,10 +12,7 @@ import * as yup from "yup"
 export const {
   shortLabel,
   longLabel,
-  customFieldRef1,
-  customField,
-  customFieldEnum1,
-  customFieldEnum2,
+  parentTask,
   plannedCompletion,
   projectedCompletion,
   responsiblePositions
@@ -63,26 +60,11 @@ export default class Task extends Model {
         .nullable()
         .default([])
         .label(Settings.fields.task.taskedOrganizations.label),
-      customFieldRef1: yup
+      parentTask: yup
         .object()
         .nullable()
         .default({})
-        .label(customFieldRef1 && customFieldRef1.label),
-      customFieldEnum1: yup
-        .string()
-        .nullable()
-        .default("")
-        .label(customFieldEnum1 && customFieldEnum1.label),
-      customFieldEnum2: yup
-        .string()
-        .nullable()
-        .default("")
-        .label(customFieldEnum2 && customFieldEnum2.label),
-      customField: yup
-        .string()
-        .nullable()
-        .default("")
-        .label(customField && customField.label),
+        .label(parentTask && parentTask.label),
       projectedCompletion: yupDate
         .nullable()
         .default(null)
@@ -151,7 +133,7 @@ export default class Task extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, shortName, longName, customFieldRef1 { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
+    "uuid, shortName, longName, parentTask { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -164,7 +146,7 @@ export default class Task extends Model {
   }
 
   isTopLevelTask() {
-    return _isEmpty(this.customFieldRef1)
+    return _isEmpty(this.parentTask)
   }
 
   fieldSettings() {
@@ -191,7 +173,9 @@ export default class Task extends Model {
     return this.fieldSettings().assessments || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = ["assessment_customFieldEnum1"]
+  static FILTERED_CLIENT_SIDE_FIELDS = [
+    // Fill if necessary
+  ]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

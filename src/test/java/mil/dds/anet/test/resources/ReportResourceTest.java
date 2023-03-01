@@ -101,7 +101,7 @@ public class ReportResourceTest extends AbstractResourceTest {
       String.format("{ org { %1$s } published cancelled }", _ORGANIZATION_FIELDS);
   private static final String _TASK_FIELDS = "uuid shortName longName category";
   private static final String TASK_FIELDS =
-      String.format("{ %1$s customFieldRef1 { %1$s } }", _TASK_FIELDS);
+      String.format("{ %1$s parentTask { %1$s } }", _TASK_FIELDS);
   protected static final String FIELDS = String.format(
       "{ %1$s advisorOrg %2$s principalOrg %2$s authors %3$s attendees %3$s"
           + " reportPeople %3$s tasks %4$s approvalStep { uuid relatedObjectUuid } location %5$s"

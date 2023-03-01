@@ -4,10 +4,10 @@ import Home from "../pages/home.page"
 
 const ANET_OBJECT_TYPES = {
   Reports: {
-    sampleFilter: "Attendee"
+    sampleFilter: "Author"
   },
   People: {
-    sampleFilter: "Role"
+    sampleFilter: "Organization"
   },
   Organizations: {
     sampleFilter: "Organization Type"
@@ -19,7 +19,7 @@ const ANET_OBJECT_TYPES = {
     sampleFilter: "Location Type"
   },
   "Objective / Efforts": {
-    sampleFilter: "Project status"
+    sampleFilter: "Organization"
   }
 }
 const COMMON_FILTER_TEXT = "Status"

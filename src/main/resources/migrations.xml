@@ -4349,4 +4349,26 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="rename-customFieldRef1Uuid-in-tasks" author="gjvoosten">
+		<dropIndex tableName="tasks" indexName="IDX_tasks_customFieldRef1Uuid" />
+		<dropForeignKeyConstraint baseTableName="tasks" constraintName="FK_tasks_customFieldRef1" />
+		<renameColumn
+				columnDataType="${uuid_type}"
+				oldColumnName="customFieldRef1Uuid"
+				newColumnName="parentTaskUuid"
+				tableName="tasks" />
+		<addForeignKeyConstraint baseColumnNames="parentTaskUuid" baseTableName="tasks"
+								 constraintName="FK_tasks_parentTask" onDelete="NO ACTION" onUpdate="NO ACTION"
+								 referencedColumnNames="uuid" referencedTableName="tasks" />
+		<createIndex indexName="IDX_tasks_parentTaskUuid" tableName="tasks">
+			<column name="parentTaskUuid" />
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="drop-obsolete-custom-fields-from-tasks" author="gjvoosten">
+		<dropColumn tableName="tasks" columnName="customField" />
+		<dropColumn tableName="tasks" columnName="customFieldEnum1" />
+		<dropColumn tableName="tasks" columnName="customFieldEnum2" />
+	</changeSet>
+
 </databaseChangeLog>

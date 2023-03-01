@@ -54,6 +54,7 @@ person(uuid:"${personUuid}") {
     createdAt
     updatedAt
     type
+    assessmentKey
     text
     author {
       uuid

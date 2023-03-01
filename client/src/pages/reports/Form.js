@@ -201,7 +201,7 @@ const ReportForm = ({
   const recentTasksVarCommon = {
     pageSize: 6,
     status: Model.STATUS.ACTIVE,
-    hasCustomFieldRef1: true,
+    hasParentTask: true,
     sortBy: "RECENT",
     sortOrder: "DESC"
   }
@@ -363,7 +363,7 @@ const ReportForm = ({
             label: `Assigned to ${currentOrg.shortName}`,
             queryVars: {
               taskedOrgUuid: currentOrg.uuid,
-              hasCustomFieldRef1: true,
+              hasParentTask: true,
               orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
@@ -382,7 +382,7 @@ const ReportForm = ({
             label: `Assigned to ${primaryAdvisor.position.organization.shortName}`,
             queryVars: {
               taskedOrgUuid: primaryAdvisor.position.organization.uuid,
-              hasCustomFieldRef1: true,
+              hasParentTask: true,
               orgRecurseStrategy: RECURSE_STRATEGY.PARENTS
             }
           }
@@ -391,7 +391,7 @@ const ReportForm = ({
         if (currentUser.isAdmin()) {
           tasksFilters.allTasks = {
             label: `All ${tasksLabel}`,
-            queryVars: { hasCustomFieldRef1: true }
+            queryVars: { hasParentTask: true }
           }
         }
 

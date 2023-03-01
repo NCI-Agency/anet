@@ -17,9 +17,6 @@ const GQL_GET_TASK = gql`
       shortName
       longName
       status
-      customField
-      customFieldEnum1
-      customFieldEnum2
       plannedCompletion
       projectedCompletion
       taskedOrganizations {
@@ -28,7 +25,7 @@ const GQL_GET_TASK = gql`
         longName
         identificationCode
       }
-      customFieldRef1 {
+      parentTask {
         uuid
         shortName
         longName
@@ -89,24 +86,6 @@ const GQL_GET_TASK = gql`
       }
       customFields
     }
-    subTasks: taskList(
-      query: {
-        pageSize: 0
-        customFieldRef1Uuid: [$uuid]
-        customFieldRef1Recursively: true
-      }
-    ) {
-      list {
-        uuid
-        shortName
-        longName
-        customFieldRef1 {
-          uuid
-          shortName
-        }
-        customFields
-      }
-    }
   }
 `
 
@@ -126,8 +105,6 @@ const TaskPreview = ({ className, uuid }) => {
     Model.populateCustomFields(data.task)
   }
   const task = new Task(data.task ? data.task : {})
-
-  data.subTasks && Model.populateEntitiesNotesCustomFields(data.subTasks.list)
 
   const fieldSettings = task.fieldSettings()
 
@@ -166,14 +143,13 @@ const TaskPreview = ({ className, uuid }) => {
           }
         />
 
-        {Settings.fields.task.customFieldRef1 && (
+        {Settings.fields.task.parentTask && (
           <PreviewField
-            label={Settings.fields.task.customFieldRef1.label}
+            label={Settings.fields.task.parentTask.label}
             value={
-              task.customFieldRef1 && (
-                <LinkTo modelType="Task" model={task.customFieldRef1}>
-                  {task.customFieldRef1.shortName}{" "}
-                  {task.customFieldRef1.longName}
+              task.parentTask && (
+                <LinkTo modelType="Task" model={task.parentTask}>
+                  {task.parentTask.shortName} {task.parentTask.longName}
                 </LinkTo>
               )
             }
@@ -189,20 +165,6 @@ const TaskPreview = ({ className, uuid }) => {
                 Settings.dateFormats.forms.displayShort.date
               )
             }
-          />
-        )}
-
-        {Settings.fields.task.customFieldEnum1 && (
-          <PreviewField
-            label={Settings.fields.task.customFieldEnum1.label}
-            value={task.customFieldEnum1}
-          />
-        )}
-
-        {Settings.fields.task.customFieldEnum2 && (
-          <PreviewField
-            label={Settings.fields.task.customFieldEnum2.label}
-            value={task.customFieldEnum2}
           />
         )}
       </div>

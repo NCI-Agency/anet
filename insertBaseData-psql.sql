@@ -44,8 +44,8 @@ TRUNCATE TABLE "taskTaskedOrganizations";
 TRUNCATE TABLE "taskResponsiblePositions";
 TRUNCATE TABLE "organizationAdministrativePositions";
 DELETE FROM positions;
-DELETE FROM tasks WHERE "customFieldRef1Uuid" IS NOT NULL;
-DELETE FROM tasks WHERE "customFieldRef1Uuid" IS NULL;
+DELETE FROM tasks WHERE "parentTaskUuid" IS NOT NULL;
+DELETE FROM tasks WHERE "parentTaskUuid" IS NULL;
 DELETE FROM reports;
 DELETE FROM notes;
 DELETE FROM people;
@@ -404,7 +404,7 @@ INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 9 Approvers'), (SELECT uuid from positions where name = 'EF 9 Approver'));
 
 -- Create some tasks
-INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "updatedAt", "customFieldRef1Uuid")
+INSERT INTO tasks (uuid, "shortName", "longName", category, "createdAt", "updatedAt", "parentTaskUuid")
 	VALUES
 		(N'1145e584-4485-4ce0-89c4-2fa2e1fe846a', 'EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 		(N'fdf107e7-a88a-4dc4-b744-748e9aaffabc', '1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, N'1145e584-4485-4ce0-89c4-2fa2e1fe846a'),
@@ -505,7 +505,7 @@ INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
 	SELECT uuid_generate_v4(), tasks.uuid, 'Task Owner approval', 1
 	FROM tasks
 	WHERE status = 0
-	AND "customFieldRef1Uuid" IS NOT NULL;
+	AND "parentTaskUuid" IS NOT NULL;
 
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 	SELECT "approvalSteps".uuid, "taskResponsiblePositions"."positionUuid"
