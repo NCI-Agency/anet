@@ -91,7 +91,7 @@
     "jest-environment-jsdom": "29.4.3",
     "js-yaml": "4.1.0",
     "json-loader": "0.5.7",
-    "keycloak-connect": "20.0.3",
+    "keycloak-connect": "21.0.1",
     "moment-timezone": "0.5.40",
     "postcss": "8.4.21",
     "postcss-calc": "8.2.4",
