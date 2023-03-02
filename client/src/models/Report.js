@@ -115,7 +115,7 @@ export default class Report extends Model {
       cancelledReason: yup
         .string()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
+        .when("cancelled", ([cancelled], schema) =>
           cancelled
             ? schema.required("You must provide a reason for cancellation")
             : schema.nullable()
@@ -126,7 +126,7 @@ export default class Report extends Model {
         .nullable()
         .when(
           ["cancelled", "engagementDate"],
-          (cancelled, engagementDate, schema) =>
+          ([cancelled, engagementDate], schema) =>
             cancelled
               ? schema.nullable()
               : !Report.isFuture(engagementDate)
@@ -142,7 +142,7 @@ export default class Report extends Model {
         .nullable()
         .when(
           ["cancelled", "atmosphere", "engagementDate"],
-          (cancelled, atmosphere, engagementDate, schema) =>
+          ([cancelled, atmosphere, engagementDate], schema) =>
             cancelled
               ? schema.nullable()
               : !Report.isFuture(engagementDate)
@@ -158,61 +158,54 @@ export default class Report extends Model {
       location: yup
         .object()
         .nullable()
-        .test(
-          "location",
-          "location error",
-          // can't use arrow function here because of binding to 'this'
-          function(location) {
-            return _isEmpty(location)
-              ? this.createError({ message: "You must provide the Location" })
-              : true
-          }
+        .test("location", "location error", (location, testContext) =>
+          _isEmpty(location)
+            ? testContext.createError({
+              message: "You must provide the Location"
+            })
+            : true
         )
         .default({}),
       reportPeople: yup
         .array()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
+        .when("cancelled", ([cancelled], schema) =>
           cancelled
             ? schema.nullable()
             : schema // Only do validation warning when engagement not cancelled
               .test(
                 "primary-advisor",
                 "primary advisor error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkPrimaryAttendee(
+                (reportPeople, testContext) => {
+                  const message = Report.checkPrimaryAttendee(
                     reportPeople,
                     Person.ROLE.ADVISOR
                   )
-                  return err ? this.createError({ message: err }) : true
+                  return message ? testContext.createError({ message }) : true
                 }
               )
               .test(
                 "no-author",
                 "no author error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkAnyAuthor(reportPeople)
-                  return err ? this.createError({ message: err }) : true
+                (reportPeople, testContext) => {
+                  const message = Report.checkAnyAuthor(reportPeople)
+                  return message ? testContext.createError({ message }) : true
                 }
               )
               .test(
                 "attending-author",
                 "no attending author error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkAttendingAuthor(reportPeople)
-                  return err ? this.createError({ message: err }) : true
+                (reportPeople, testContext) => {
+                  const message = Report.checkAttendingAuthor(reportPeople)
+                  return message ? testContext.createError({ message }) : true
                 }
               )
               .test(
                 "purposeless-people",
                 "purposeless people error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkUnInvolvedPeople(reportPeople)
-                  return err ? this.createError({ message: err }) : true
+                (reportPeople, testContext) => {
+                  const message = Report.checkUnInvolvedPeople(reportPeople)
+                  return message ? testContext.createError({ message }) : true
                 }
               )
         )
@@ -222,37 +215,30 @@ export default class Report extends Model {
       tasks: yup
         .array()
         .nullable()
-        .test(
-          "tasks",
-          "tasks error",
-          // can't use arrow function here because of binding to 'this'
-          function(tasks) {
-            return _isEmpty(tasks)
-              ? this.createError({
-                message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
-              })
-              : true
-          }
+        .test("tasks", "tasks error", (tasks, testContext) =>
+          _isEmpty(tasks)
+            ? testContext.createError({
+              message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
+            })
+            : true
         )
         .default([]),
       comments: yup.array().nullable().default([]),
       reportText: yup
         .string()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
+        .when("cancelled", ([cancelled], schema) =>
           cancelled
             ? schema.nullable()
             : schema.test(
               "reportText",
               "reportText error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportText) {
-                return utils.isEmptyHtml(reportText)
-                  ? this.createError({
+              (reportText, testContext) =>
+                utils.isEmptyHtml(reportText)
+                  ? testContext.createError({
                     message: `You must provide the ${Settings.fields.report.reportText}`
                   })
                   : true
-              }
             )
         )
         .default("")
@@ -260,7 +246,7 @@ export default class Report extends Model {
       nextSteps: yup
         .string()
         .nullable()
-        .when(["engagementDate"], (engagementDate, schema) =>
+        .when("engagementDate", ([engagementDate], schema) =>
           !Report.isFuture(engagementDate)
             ? schema.required(
               `You must provide a brief summary of the ${Settings.fields.report.nextSteps.label}`
@@ -274,7 +260,7 @@ export default class Report extends Model {
         .nullable()
         .when(
           ["cancelled", "engagementDate"],
-          (cancelled, engagementDate, schema) =>
+          ([cancelled, engagementDate], schema) =>
             cancelled
               ? schema.nullable()
               : Settings.fields.report.keyOutcomes &&
@@ -300,20 +286,19 @@ export default class Report extends Model {
     reportPeople: yup
       .array()
       .nullable()
-      .when("cancelled", (cancelled, schema) =>
+      .when("cancelled", ([cancelled], schema) =>
         cancelled
           ? schema.nullable()
           : schema // Only do validation warning when engagement not cancelled
             .test(
               "primary-principal",
               "primary principal error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportPeople) {
-                const err = Report.checkPrimaryAttendee(
+              (reportPeople, testContext) => {
+                const message = Report.checkPrimaryAttendee(
                   reportPeople,
                   Person.ROLE.PRINCIPAL
                 )
-                return err ? this.createError({ message: err }) : true
+                return message ? testContext.createError({ message }) : true
               }
             )
       ),
@@ -323,7 +308,10 @@ export default class Report extends Model {
       .nullable()
       .when(
         ["reportSensitiveInformation", "reportSensitiveInformation.text"],
-        (reportSensitiveInformation, reportSensitiveInformationText, schema) =>
+        (
+          [reportSensitiveInformation, reportSensitiveInformationText],
+          schema
+        ) =>
           _isEmpty(reportSensitiveInformation) ||
           _isEmpty(reportSensitiveInformationText)
             ? schema.nullable()

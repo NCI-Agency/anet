@@ -63,7 +63,7 @@ export default class Person extends Model {
       firstName: yup
         .string()
         .nullable()
-        .when("role", (role, schema) =>
+        .when("role", ([role], schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
               `You must provide the ${Settings.fields.person.firstName}`
@@ -89,17 +89,18 @@ export default class Person extends Model {
         .string()
         .nullable()
         .email()
-        .when("role", (role, schema) =>
+        .when("role", ([role], schema) =>
           schema.test(
             "emailAddress",
             "emailAddress error",
-            // can't use arrow function here because of binding to 'this'
-            function(emailAddress) {
+            (emailAddress, testContext) => {
               const r = utils.handleEmailValidation(
                 emailAddress,
                 role === Person.ROLE.ADVISOR
               )
-              return r.isValid ? true : this.createError({ message: r.message })
+              return r.isValid
+                ? true
+                : testContext.createError({ message: r.message })
             }
           )
         )
@@ -135,7 +136,7 @@ export default class Person extends Model {
         .nullable()
         .when(
           ["role", "pendingVerification"],
-          (role, pendingVerification, schema) => {
+          ([role, pendingVerification], schema) => {
             if (Person.isPrincipal({ role })) {
               return schema
             } else {
