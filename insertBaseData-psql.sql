@@ -70,7 +70,7 @@ INSERT INTO people (uuid, name, status, role, "emailAddress", "phoneNumber", ran
 		(uuid_generate_v4(), 'GUIST, Lin', 0, 0, 'lin+guist@example.com', '+444-44-4444', 'CIV', 'Lin can speak so many languages', 'lin', 'd8d9eb8f-acfd-40fa-91c7-1ddc4401b8da', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'PRETER, Inter', 0, 0, 'inter+preter@example.com', '+444-44-4444', 'CIV', 'Inter is fluent in various languages', 'inter', '7a17af5d-7863-47b5-8034-4e2f79f3fa0b', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Advisor with no position for testing
-		(uuid_generate_v4(), 'NOPOSITION, Ihave', 0, 0, 'hunter+"noPosition"@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'NOPOSITION, Ihave', 0, 0, 'hunter+noPosition@example.com', '+444-44-4545', 'OF-2', 'I need a career change', 'nopos', 'e88f6157-61bf-4d43-96eb-f65a91d927c0', 'Canada', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'REPORTGUY, Ima', 0, 0, 'ima+reportguy@example.com', '+444-44-4545', 'CIV', 'I need a career change', 'reportguy', NULL, 'France', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'REPORTGIRL, Ima', 0, 0, 'ima+reportgirl@example.com', '+444-44-4545', 'CIV', 'I need a career change', 'reportgirl', NULL, 'Mexico', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 -- Principals
