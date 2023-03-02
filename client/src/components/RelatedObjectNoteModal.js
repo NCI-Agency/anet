@@ -29,17 +29,12 @@ const RelatedObjectNoteModal = ({
     type: yup.string().required(),
     text: yup
       .string()
-      .test(
-        "text",
-        "text error",
-        // can't use arrow function here because of binding to 'this'
-        function(text) {
-          return utils.isEmptyHtml(text)
-            ? this.createError({
-              message: "You must provide the text"
-            })
-            : true
-        }
+      .test("text", "text error", (text, testContext) =>
+        utils.isEmptyHtml(text)
+          ? testContext.createError({
+            message: "You must provide the text"
+          })
+          : true
       )
       .default("")
   })

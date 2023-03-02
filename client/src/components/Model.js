@@ -199,15 +199,10 @@ const CUSTOM_FIELD_TYPE_SCHEMA = {
   [CUSTOM_FIELD_TYPE.JSON]: yup
     .mixed()
     .nullable()
-    .test(
-      "json",
-      "json error",
-      // can't use arrow function here because of binding to 'this'
-      function(value) {
-        return typeof value === "object"
-          ? true
-          : this.createError({ message: "Invalid JSON" })
-      }
+    .test("json", "json error", (value, testContext) =>
+      typeof value === "object"
+        ? true
+        : testContext.createError({ message: "Invalid JSON" })
     )
     .default(CUSTOM_FIELD_TYPE_DEFAULTS[CUSTOM_FIELD_TYPE.JSON]),
   [CUSTOM_FIELD_TYPE.ENUM]: yup

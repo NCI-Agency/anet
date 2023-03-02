@@ -158,15 +158,12 @@ export default class Report extends Model {
       location: yup
         .object()
         .nullable()
-        .test(
-          "location",
-          "location error",
-          // can't use arrow function here because of binding to 'this'
-          function(location) {
-            return _isEmpty(location)
-              ? this.createError({ message: "You must provide the Location" })
-              : true
-          }
+        .test("location", "location error", (location, testContext) =>
+          _isEmpty(location)
+            ? testContext.createError({
+              message: "You must provide the Location"
+            })
+            : true
         )
         .default({}),
       reportPeople: yup
@@ -179,40 +176,36 @@ export default class Report extends Model {
               .test(
                 "primary-advisor",
                 "primary advisor error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkPrimaryAttendee(
+                (reportPeople, testContext) => {
+                  const message = Report.checkPrimaryAttendee(
                     reportPeople,
                     Person.ROLE.ADVISOR
                   )
-                  return err ? this.createError({ message: err }) : true
+                  return message ? testContext.createError({ message }) : true
                 }
               )
               .test(
                 "no-author",
                 "no author error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkAnyAuthor(reportPeople)
-                  return err ? this.createError({ message: err }) : true
+                (reportPeople, testContext) => {
+                  const message = Report.checkAnyAuthor(reportPeople)
+                  return message ? testContext.createError({ message }) : true
                 }
               )
               .test(
                 "attending-author",
                 "no attending author error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkAttendingAuthor(reportPeople)
-                  return err ? this.createError({ message: err }) : true
+                (reportPeople, testContext) => {
+                  const message = Report.checkAttendingAuthor(reportPeople)
+                  return message ? testContext.createError({ message }) : true
                 }
               )
               .test(
                 "purposeless-people",
                 "purposeless people error",
-                // can't use arrow function here because of binding to 'this'
-                function(reportPeople) {
-                  const err = Report.checkUnInvolvedPeople(reportPeople)
-                  return err ? this.createError({ message: err }) : true
+                (reportPeople, testContext) => {
+                  const message = Report.checkUnInvolvedPeople(reportPeople)
+                  return message ? testContext.createError({ message }) : true
                 }
               )
         )
@@ -222,17 +215,12 @@ export default class Report extends Model {
       tasks: yup
         .array()
         .nullable()
-        .test(
-          "tasks",
-          "tasks error",
-          // can't use arrow function here because of binding to 'this'
-          function(tasks) {
-            return _isEmpty(tasks)
-              ? this.createError({
-                message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
-              })
-              : true
-          }
+        .test("tasks", "tasks error", (tasks, testContext) =>
+          _isEmpty(tasks)
+            ? testContext.createError({
+              message: `You must provide at least one ${Settings.fields.task.subLevel.shortLabel}`
+            })
+            : true
         )
         .default([]),
       comments: yup.array().nullable().default([]),
@@ -245,14 +233,12 @@ export default class Report extends Model {
             : schema.test(
               "reportText",
               "reportText error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportText) {
-                return utils.isEmptyHtml(reportText)
-                  ? this.createError({
+              (reportText, testContext) =>
+                utils.isEmptyHtml(reportText)
+                  ? testContext.createError({
                     message: `You must provide the ${Settings.fields.report.reportText}`
                   })
                   : true
-              }
             )
         )
         .default("")
@@ -307,13 +293,12 @@ export default class Report extends Model {
             .test(
               "primary-principal",
               "primary principal error",
-              // can't use arrow function here because of binding to 'this'
-              function(reportPeople) {
-                const err = Report.checkPrimaryAttendee(
+              (reportPeople, testContext) => {
+                const message = Report.checkPrimaryAttendee(
                   reportPeople,
                   Person.ROLE.PRINCIPAL
                 )
-                return err ? this.createError({ message: err }) : true
+                return message ? testContext.createError({ message }) : true
               }
             )
       ),

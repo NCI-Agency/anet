@@ -93,13 +93,14 @@ export default class Person extends Model {
           schema.test(
             "emailAddress",
             "emailAddress error",
-            // can't use arrow function here because of binding to 'this'
-            function(emailAddress) {
+            (emailAddress, testContext) => {
               const r = utils.handleEmailValidation(
                 emailAddress,
                 role === Person.ROLE.ADVISOR
               )
-              return r.isValid ? true : this.createError({ message: r.message })
+              return r.isValid
+                ? true
+                : testContext.createError({ message: r.message })
             }
           )
         )
