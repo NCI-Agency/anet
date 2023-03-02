@@ -281,7 +281,7 @@ const createFieldYupSchema = (fieldKey, fieldConfig, parentFieldName) => {
   // Field type specific validation not needed when the field is invisible
   fieldYupSchema = fieldYupSchema.when(
     INVISIBLE_CUSTOM_FIELDS_FIELD,
-    (invisibleCustomFields, schema) =>
+    ([invisibleCustomFields], schema) =>
       invisibleCustomFields &&
       invisibleCustomFields.includes(`${parentFieldName}.${fieldKey}`)
         ? schema
@@ -331,7 +331,7 @@ export const createAssessmentSchema = (
     assessmentSchemaShape.fields.expirationDate =
       assessmentSchemaShape.fields.expirationDate.when(
         ENTITY_ON_DEMAND_ASSESSMENT_DATE,
-        (assessmentDate, schema) => {
+        ([assessmentDate], schema) => {
           if (assessmentDate) {
             return schema.min(
               assessmentDate,
@@ -407,7 +407,7 @@ export default class Model {
 
   static fillObject(props, yupSchema) {
     try {
-      const obj = yupSchema.cast(props)
+      const obj = yupSchema.cast(props, { assert: "ignore-optionality" })
       _forEach(yupSchema.fields, (value, key) => {
         if (
           !Object.prototype.hasOwnProperty.call(obj, key) ||

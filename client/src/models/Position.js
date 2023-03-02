@@ -68,7 +68,7 @@ export default class Position extends Model {
         .nullable()
         .default(null)
         .label("Location")
-        .when("type", (type, schema) =>
+        .when("type", ([type], schema) =>
           [
             Position.TYPE.ADVISOR,
             Position.TYPE.SUPER_USER,

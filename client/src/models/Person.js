@@ -63,7 +63,7 @@ export default class Person extends Model {
       firstName: yup
         .string()
         .nullable()
-        .when("role", (role, schema) =>
+        .when("role", ([role], schema) =>
           Person.isAdvisor({ role })
             ? schema.required(
               `You must provide the ${Settings.fields.person.firstName}`
@@ -89,7 +89,7 @@ export default class Person extends Model {
         .string()
         .nullable()
         .email()
-        .when("role", (role, schema) =>
+        .when("role", ([role], schema) =>
           schema.test(
             "emailAddress",
             "emailAddress error",
@@ -135,7 +135,7 @@ export default class Person extends Model {
         .nullable()
         .when(
           ["role", "pendingVerification"],
-          (role, pendingVerification, schema) => {
+          ([role, pendingVerification], schema) => {
             if (Person.isPrincipal({ role })) {
               return schema
             } else {

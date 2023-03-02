@@ -115,7 +115,7 @@ export default class Report extends Model {
       cancelledReason: yup
         .string()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
+        .when("cancelled", ([cancelled], schema) =>
           cancelled
             ? schema.required("You must provide a reason for cancellation")
             : schema.nullable()
@@ -126,7 +126,7 @@ export default class Report extends Model {
         .nullable()
         .when(
           ["cancelled", "engagementDate"],
-          (cancelled, engagementDate, schema) =>
+          ([cancelled, engagementDate], schema) =>
             cancelled
               ? schema.nullable()
               : !Report.isFuture(engagementDate)
@@ -142,7 +142,7 @@ export default class Report extends Model {
         .nullable()
         .when(
           ["cancelled", "atmosphere", "engagementDate"],
-          (cancelled, atmosphere, engagementDate, schema) =>
+          ([cancelled, atmosphere, engagementDate], schema) =>
             cancelled
               ? schema.nullable()
               : !Report.isFuture(engagementDate)
@@ -172,7 +172,7 @@ export default class Report extends Model {
       reportPeople: yup
         .array()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
+        .when("cancelled", ([cancelled], schema) =>
           cancelled
             ? schema.nullable()
             : schema // Only do validation warning when engagement not cancelled
@@ -239,7 +239,7 @@ export default class Report extends Model {
       reportText: yup
         .string()
         .nullable()
-        .when("cancelled", (cancelled, schema) =>
+        .when("cancelled", ([cancelled], schema) =>
           cancelled
             ? schema.nullable()
             : schema.test(
@@ -260,7 +260,7 @@ export default class Report extends Model {
       nextSteps: yup
         .string()
         .nullable()
-        .when(["engagementDate"], (engagementDate, schema) =>
+        .when("engagementDate", ([engagementDate], schema) =>
           !Report.isFuture(engagementDate)
             ? schema.required(
               `You must provide a brief summary of the ${Settings.fields.report.nextSteps.label}`
@@ -274,7 +274,7 @@ export default class Report extends Model {
         .nullable()
         .when(
           ["cancelled", "engagementDate"],
-          (cancelled, engagementDate, schema) =>
+          ([cancelled, engagementDate], schema) =>
             cancelled
               ? schema.nullable()
               : Settings.fields.report.keyOutcomes &&
@@ -300,7 +300,7 @@ export default class Report extends Model {
     reportPeople: yup
       .array()
       .nullable()
-      .when("cancelled", (cancelled, schema) =>
+      .when("cancelled", ([cancelled], schema) =>
         cancelled
           ? schema.nullable()
           : schema // Only do validation warning when engagement not cancelled
@@ -323,7 +323,10 @@ export default class Report extends Model {
       .nullable()
       .when(
         ["reportSensitiveInformation", "reportSensitiveInformation.text"],
-        (reportSensitiveInformation, reportSensitiveInformationText, schema) =>
+        (
+          [reportSensitiveInformation, reportSensitiveInformationText],
+          schema
+        ) =>
           _isEmpty(reportSensitiveInformation) ||
           _isEmpty(reportSensitiveInformationText)
             ? schema.nullable()
