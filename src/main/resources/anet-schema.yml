@@ -510,6 +510,8 @@ properties:
             "$ref": "#/$defs/inputField"
           parentTask:
             "$ref": "#/$defs/inputField"
+          childTask:
+            "$ref": "#/$defs/inputField"
           taskedOrganizations:
             "$ref": "#/$defs/inputField"
           responsiblePositions:

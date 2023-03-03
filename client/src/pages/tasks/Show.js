@@ -304,7 +304,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       )
                     }
                   />
-                  {Settings.fields.task.parentTask && (
+                  {task.parentTask && task.parentTask.uuid && (
                     <TaskParentTask
                       dictProps={Settings.fields.task.parentTask}
                       name="parentTask"

@@ -199,6 +199,9 @@ fields:
     parentTask:
       label: Parent task
       placeholder: Start typing to search for a higher level task
+    childTask:
+      label: Child task
+      placeholder: Start typing to search for a lower level task
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization...
