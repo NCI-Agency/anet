@@ -33,6 +33,10 @@ import React, { useContext, useState } from "react"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
+import {
+  ListGroup,
+  ListGroupItem
+} from "react-bootstrap"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -66,6 +70,10 @@ const GQL_GET_TASK = gql`
         parentTask {
           uuid
         }
+      }
+      childrenTasks {
+        uuid
+        shortName
       }
       descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
         uuid
@@ -184,6 +192,7 @@ const TaskShow = ({ pageDispatchers }) => {
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskParentTask = DictionaryField(Field)
+  const TaskChildrenTasks = DictionaryField(Field)
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
 
@@ -304,7 +313,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       )
                     }
                   />
-                  {task.parentTask && task.parentTask.uuid && (
+                  {Settings.fields.task.parentTask && task.parentTask?.uuid && (
                     <TaskParentTask
                       dictProps={Settings.fields.task.parentTask}
                       name="parentTask"
@@ -318,6 +327,26 @@ const TaskShow = ({ pageDispatchers }) => {
                             parentField="parentTask"
                           />
                         )
+                      }
+                    />
+                  )}
+                  {Settings.fields.task.childrenTasks && task.childrenTasks.length > 0 && (
+                    <TaskChildrenTasks
+                      dictProps={Settings.fields.task.childrenTasks}
+                      name="subEfforts"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <ListGroup>
+                          {task.childrenTasks?.map(task => (
+                            <ListGroupItem key={task.uuid}>
+                              <LinkTo
+                                showIcon={false}
+                                modelType="Task"
+                                model={task}
+                              />
+                            </ListGroupItem>
+                          ))}
+                        </ListGroup>
                       }
                     />
                   )}

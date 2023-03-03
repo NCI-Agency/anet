@@ -510,8 +510,10 @@ properties:
             "$ref": "#/$defs/inputField"
           parentTask:
             "$ref": "#/$defs/inputField"
-          childTask:
-            "$ref": "#/$defs/inputField"
+          childrenTasks:
+            type: string
+            title: The sub tasks for this field
+            description: Used in the UI where sub tasks for task are shown.
           taskedOrganizations:
             "$ref": "#/$defs/inputField"
           responsiblePositions:

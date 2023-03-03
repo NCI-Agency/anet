@@ -197,11 +197,9 @@ fields:
               label: Instant assessment Question 3
 
     parentTask:
-      label: Parent task
+      label: Parent objective / effort
       placeholder: Start typing to search for a higher level task
-    childTask:
-      label: Child task
-      placeholder: Start typing to search for a lower level task
+    childrenTasks: Sub efforts
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization...

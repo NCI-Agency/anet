@@ -10,6 +10,10 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import Settings from "settings"
+import {
+  ListGroup,
+  ListGroupItem
+} from "react-bootstrap"
 
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
@@ -39,6 +43,10 @@ const GQL_GET_TASK = gql`
         parentTask {
           uuid
         }
+      }
+      childrenTasks {
+        uuid
+        shortName
       }
       responsiblePositions {
         uuid
@@ -117,7 +125,6 @@ const TaskPreview = ({ className, uuid }) => {
   const task = new Task(data.task ? data.task : {})
 
   const fieldSettings = task.fieldSettings()
-
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
@@ -153,7 +160,7 @@ const TaskPreview = ({ className, uuid }) => {
           }
         />
 
-        {Settings.fields.task.parentTask && (
+        {Settings.fields.task.parentTask && task.parentTask?.uuid && (
           <PreviewField
             label={Settings.fields.task.parentTask.label}
             value={
@@ -165,6 +172,26 @@ const TaskPreview = ({ className, uuid }) => {
                   parentField="parentTask"
                 />
               )
+            }
+          />
+        )}
+
+        {task.childrenTasks.length > 0 && (
+          <PreviewField
+            label={Settings.fields.task.childrenTasks}
+            name="subEfforts"
+            value={
+              <ListGroup>
+                {task.childrenTasks?.map(task => (
+                  <ListGroupItem key={task.uuid}>
+                    <LinkTo
+                      showIcon={false}
+                      modelType="Task"
+                      model={task}
+                    />
+                  </ListGroupItem>
+                ))}
+              </ListGroup>
             }
           />
         )}
