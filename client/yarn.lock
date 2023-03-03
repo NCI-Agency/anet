@@ -11802,10 +11802,10 @@ keycloak-connect@20.0.3:
   optionalDependencies:
     chromedriver latest
 
-keycloak-js@20.0.3:
-  version "20.0.3"
-  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-20.0.3.tgz#1c1779e67b16bb2a1e7943e1d78557d3277bc705"
-  integrity sha512-XOOPip8M8K8BsHvk9hnyHuHQ49u9cDu42UXY187G6fM9wsFSvM2apYK3WQ0EUg90nlWt1oMykrWsCWJY10Ihkw==
+keycloak-js@20.0.5:
+  version "20.0.5"
+  resolved "https://registry.yarnpkg.com/keycloak-js/-/keycloak-js-20.0.5.tgz#8dd94d2c813170db5381dabfbe3a3327ce5ed6db"
+  integrity sha512-7+M5Uni4oNlAmbjM/lDJzFHu2+PGqU6/bvmTBuQssE1fJ7ZyNeCRHgFoaVfFpIU3m6aAFwPUko4lVcn4kPXP5Q==
   dependencies:
     base64-js "^1.5.1"
     js-sha256 "^0.9.0"
