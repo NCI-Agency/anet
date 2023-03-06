@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 public class TaskResourceTest extends AbstractResourceTest {
 
   protected static final String FIELDS =
-      "{ uuid shortName longName category parentTask { uuid } taskedOrganizations { uuid }"
+      "{ uuid shortName longName description category parentTask { uuid } taskedOrganizations { uuid }"
           + " status customFields }";
 
   @Test
@@ -77,13 +77,27 @@ public class TaskResourceTest extends AbstractResourceTest {
     taskAInput.setLongName("Do a thing with a person modified");
     // update JSON of customFields
     taskAInput.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
-    final Integer nrUpdated = adminMutationExecutor.updateTask("", taskAInput);
+    Integer nrUpdated = adminMutationExecutor.updateTask("", taskAInput);
     assertThat(nrUpdated).isEqualTo(1);
     final Task returnedA = adminQueryExecutor.task(FIELDS, taskA.getUuid());
     assertThat(returnedA.getLongName()).isEqualTo(taskAInput.getLongName());
     // check that JSON of customFields is sanitized after update
     assertThat(returnedA.getCustomFields())
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
+
+    // update description
+    taskAInput.setDescription(UtilsTest.getCombinedHtmlTestCase().getInput());
+    nrUpdated = adminMutationExecutor.updateTask("", taskAInput);
+    assertThat(nrUpdated).isEqualTo(1);
+
+    // add html to description and ensure it gets stripped out.
+    taskAInput.setDescription(
+        "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
+    nrUpdated = adminMutationExecutor.updateTask("", taskAInput);
+    assertThat(nrUpdated).isEqualTo(1);
+    final Task updated = adminQueryExecutor.task(FIELDS, taskA.getUuid());
+    assertThat(updated.getDescription()).contains("<b>Hello world</b>");
+    assertThat(updated.getDescription()).doesNotContain("<script>window.alert");
 
     // Assign the Task to the AO
     final OrganizationSearchQueryInput queryOrgs =

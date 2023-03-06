@@ -4411,4 +4411,11 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="add-description-to-tasks" author="cigdemers">
+		<!-- add description field to tasks -->
+		<addColumn tableName="tasks">
+			<column name="description" type="text"/>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

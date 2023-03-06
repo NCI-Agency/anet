@@ -49,6 +49,9 @@ public class Task extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private Status status;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String description;
   // annotated below
   private List<Position> responsiblePositions;
   // annotated below
@@ -138,6 +141,14 @@ public class Task extends AbstractCustomizableAnetBean
   @Override
   public void setStatus(Status status) {
     this.status = status;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @GraphQLQuery(name = "reports")
@@ -291,12 +302,14 @@ public class Task extends AbstractCustomizableAnetBean
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getParentTaskUuid(), getParentTaskUuid())
-        && Objects.equals(other.getStatus(), status);
+        && Objects.equals(other.getStatus(), status)
+        && Objects.equals(other.getDescription(), description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, shortName, longName, category, parentTask, status);
+    return Objects.hash(super.hashCode(), uuid, shortName, longName, category, parentTask, status,
+        description);
   }
 
   @Override

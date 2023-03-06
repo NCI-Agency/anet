@@ -52,6 +52,8 @@ public class TaskResource {
   public Task createTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task t) {
     t.checkAndFixCustomFields();
+    t.setDescription(
+        Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
     AuthUtils.assertAdministrator(user);
     final Task created;
@@ -88,6 +90,8 @@ public class TaskResource {
   public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task t) {
     t.checkAndFixCustomFields();
+    t.setDescription(
+        Utils.isEmptyHtml(t.getDescription()) ? null : Utils.sanitizeHtml(t.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
     final List<Position> existingResponsiblePositions =
         dao.getResponsiblePositionsForTask(engine.getContext(), DaoUtils.getUuid(t)).join();
