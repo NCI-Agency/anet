@@ -11,7 +11,7 @@
 
 .editor-container .editable {
   min-height: 10rem;
-  max-height: 50rem;
+  max-height: 25rem;
   overflow: auto;
   padding: 1rem;
 }
