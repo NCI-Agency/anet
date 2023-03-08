@@ -2315,12 +2315,6 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="add-assessment-to-Tasks" author="VassilIordanov">
-		<addColumn tableName="tasks">
-			<column name="assessment" type="${long_text_type}" />
-		</addColumn>
-	</changeSet>
-
 	<changeSet id="migrate-tasks-assessments" author="gjvoosten" dbms="mssql">
 		<!-- Column tasks.assessment will never have existed in PostgreSQL or SQLite -->
 		<createTable tableName="tmpTasksAssessments">
