@@ -4418,4 +4418,44 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="alter-full_text-index-add-tasks_description" author="cigdemers" runInTransaction="false">
+		<sql>
+			<!-- Drop full-text materialized view (incl. indexes);
+                             copied from changeset alter-postgresql-fulltext -->
+			DROP MATERIALIZED VIEW mv_fts_tasks;
+
+			<!-- Drop generated full-text column from tasks;
+			     copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE tasks DROP COLUMN full_text;
+
+			<!-- Re-add generated full-text column to tasks, now including description;
+			     copied mostly from changeset alter-postgresql-fulltext -->
+			ALTER TABLE tasks
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+						setweight(to_tsvector('simple', coalesce(tasks."shortName", '')), ${fts_high}) ||
+						setweight(to_tsvector(${fts_config}, coalesce(tasks."longName", ''))
+							  || to_tsvector('simple', coalesce(tasks."longName", '')), ${fts_high}) ||
+						setweight(to_tsvector(${fts_config}, coalesce(tasks.description, ''))
+							  || to_tsvector('simple', coalesce(tasks.description, '')), ${fts_low})
+					) STORED;
+
+			<!-- Re-create full-text materialized views and indexes;
+			     copied from changeset alter-postgresql-fulltext -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_tasks(uuid, full_text) AS
+			SELECT
+				tasks.uuid,
+				tasks.full_text
+				|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+			FROM tasks
+			LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'tasks'
+				AND "noteRelatedObjects"."relatedObjectUuid" = tasks.uuid
+			LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+			GROUP BY tasks.uuid
+			WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_tasks" ON mv_fts_tasks(uuid);
+			CREATE INDEX "FT_mv_fts_tasks" ON mv_fts_tasks USING gin(full_text);
+			CREATE INDEX "TR_tasks_uuid" ON mv_fts_tasks USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
