@@ -5,8 +5,6 @@ import { jumpToTop } from "components/Page"
 import "locale-compare-polyfill"
 import App from "pages/App"
 import React from "react"
-import { DndProvider } from "react-dnd-multi-backend"
-import HTML5ToTouch from "react-dnd-multi-backend/dist/cjs/HTML5toTouch"
 import { createRoot } from "react-dom/client"
 import { Provider } from "react-redux"
 import { BrowserRouter } from "react-router-dom"
@@ -30,11 +28,9 @@ root.render(
   <Provider store={store}>
     <PersistGate persistor={persistor}>
       <ApolloProvider client={API.client}>
-        <DndProvider options={HTML5ToTouch}>
-          <BrowserRouter onUpdate={jumpToTop}>
-            <App />
-          </BrowserRouter>
-        </DndProvider>
+        <BrowserRouter onUpdate={jumpToTop}>
+          <App />
+        </BrowserRouter>
       </ApolloProvider>
     </PersistGate>
   </Provider>
