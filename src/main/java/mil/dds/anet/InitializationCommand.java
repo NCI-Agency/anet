@@ -34,8 +34,8 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
         .help("set administrative position name");
     subparser.addArgument("--adminFullName").action(Arguments.store()).required(true)
         .help("set administrator's full name; use format: LASTNAME, Firstname");
-    subparser.addArgument("--adminDomainName").action(Arguments.store()).required(true)
-        .help("set administrator's domain user name");
+    subparser.addArgument("--adminDomainUsername").action(Arguments.store()).required(true)
+        .help("set administrator's domain username");
 
     super.configure(subparser);
   }
@@ -110,7 +110,7 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     // Create admin user
     Person admin = new Person();
     admin.setName(namespace.getString("adminFullName"));
-    admin.setDomainUsername(namespace.getString("adminDomainName"));
+    admin.setDomainUsername(namespace.getString("adminDomainUsername"));
     admin.setRole(Role.ADVISOR);
     admin = engine.getPersonDao().insert(admin);
     engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());

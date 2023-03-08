@@ -61,6 +61,11 @@ run.environment("ANET_SMTP_SSLTRUST", run.environment["ANET_SMTP_SSLTRUST"] ?: r
 run.environment("ANET_SMTP_HTTP_PORT", run.environment["ANET_SMTP_HTTP_PORT"] ?: isTestEnv ? 1180 : 1080)
 run.environment("ANET_DICTIONARY_NAME", run.environment["ANET_DICTIONARY_NAME"] ?: "anet-dictionary.yml")
 
+String adminOrgName = run.environment["ANET_ADMIN_ORG_NAME"] ?: "ANET Administrators"
+String adminPosName = run.environment["ANET_ADMIN_POS_NAME"] ?: "ANET Administrator"
+String adminFullName = run.environment["ANET_ADMIN_FULL_NAME"] ?: "DMIN, Arthur"
+String adminDomainUsername = run.environment["ANET_ADMIN_DOMAIN_USERNAME"] ?: "arthur"
+
 String dbContainerName = isTestEnv ? "anet-psql-test-server" : "anet-psql-server"
 String fakeSmtpContainerName = isTestEnv ? "anet-fake-smtp-test-server" : "anet-fake-smtp-server"
 String keycloakContainerName = "anet-keycloak-server"
@@ -289,13 +294,15 @@ task dbWait(dependsOn: 'compileJava', type: JavaExec) {
 dbWait.mustRunAfter('dockerStartDB')
 
 // Create the task that runs the initialization command. Run with:
-//   ./gradlew dbInit -Pargs="--adminOrgName <adminOrgName> --adminPosName <adminPosName>
-//                            --adminFullName <LASTNAME, Firstname> --adminDomainName <adminDomainName>"
-// e.g. (take care to escape spaces in argument values with a backslash):
-//   ./gradlew dbInit -Pargs="--adminOrgName ANET\ Administrators --adminPosName ANET\ Administrator
-//                            --adminFullName DMIN,\ Arthur --adminDomainName arthur"
-// To see all options, run just:
 //   ./gradlew dbInit
+// to use the defaults. You can override the defaults with environment variables:
+//   env ANET_ADMIN_ORG_NAME="ACME Administrators Inc." \
+//       ANET_ADMIN_POS_NAME="The ANET admin" \
+//       ANET_ADMIN_FULL_NAME="DOE, John" \
+//       ANET_ADMIN_DOMAIN_USERNAME="johndoe" \
+//       ./gradlew dbInit
+// To see all options, run:
+//   ./gradlew dbInit -Pargs="--help"
 // which will print the help.
 task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database runtime"
@@ -305,9 +312,14 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 	mainClass = mainClassName
 	def cmdline = ["init"]
 	if (project.hasProperty("args")) {
-		cmdline.addAll(project.args.split("(?<!\\\\)\\s+").collect { a -> a.replace("\\ ", " ")})
+		cmdline.add(project.args)
 	} else {
-		cmdline << "--help"
+		cmdline.addAll([
+			"--adminOrgName", adminOrgName,
+			"--adminPosName", adminPosName,
+			"--adminFullName", adminFullName,
+			"--adminDomainUsername", adminDomainUsername
+		])
 	}
 	cmdline << anetConfig
 	args cmdline
