@@ -1,8 +1,9 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import useSearchFilter from "components/advancedSearch/hooks"
-import { TaskSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { TaskOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import { Task } from "models"
 import PropTypes from "prop-types"
 import React from "react"
@@ -51,8 +52,17 @@ const TaskFilter = ({
     }
   }
 
+  const parentKey = "parentTask"
+  const valueKey = "shortName"
   return !asFormField ? (
-    <>{value.value?.shortName}</>
+    <>
+      {getBreadcrumbTrailAsText(
+        value.value,
+        value.value?.ascendantTasks,
+        parentKey,
+        valueKey
+      )}
+    </>
   ) : (
     <AdvancedSingleSelect
       {...advancedSelectProps}
@@ -62,9 +72,12 @@ const TaskFilter = ({
       showRemoveButton={false}
       filterDefs={advancedSelectFilters}
       overlayColumns={["Name"]}
-      overlayRenderRow={TaskSimpleOverlayRow}
+      overlayRenderRow={TaskOverlayRow}
       objectType={Task}
-      valueKey="shortName"
+      valueKey={valueKey}
+      valueFunc={(v, k) =>
+        getBreadcrumbTrailAsText(v, v?.ascendantTasks, parentKey, k)
+      }
       fields={Task.autocompleteQuery}
       placeholder="Filter by task..."
       addon={TASKS_ICON}

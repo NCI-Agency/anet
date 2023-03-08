@@ -1,5 +1,6 @@
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
-import { Location } from "models"
+import { Location, Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
@@ -10,17 +11,27 @@ const cursorStyle = {
   cursor: "pointer"
 }
 
-const AsLink = ({ modelType, model, whenUnspecified, children }) => (
-  <LinkTo
-    modelType={modelType}
-    model={model}
-    whenUnspecified={whenUnspecified}
-    isLink={false}
-    style={cursorStyle}
-  >
-    {children}
-  </LinkTo>
-)
+const AsLink = ({ modelType, model, whenUnspecified, children }) =>
+  modelType === Task.resourceName ? (
+    <BreadcrumbTrail
+      modelType={modelType}
+      leaf={model}
+      ascendantObjects={model.ascendantTasks}
+      parentField="parentTask"
+      isLink={false}
+      style={cursorStyle}
+    />
+  ) : (
+    <LinkTo
+      modelType={modelType}
+      model={model}
+      whenUnspecified={whenUnspecified}
+      isLink={false}
+      style={cursorStyle}
+    >
+      {children}
+    </LinkTo>
+  )
 AsLink.propTypes = {
   modelType: PropTypes.string.isRequired,
   model: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
@@ -62,25 +73,12 @@ export const OrganizationOverlayRow = item => (
   </React.Fragment>
 )
 
-export const TaskSimpleOverlayRow = item => (
+export const TaskOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
       <span>
-        <AsLink modelType="Task" model={item}>
-          {` - ${item.longName}`}
-        </AsLink>
+        <AsLink modelType="Task" model={item} />
       </span>
-    </td>
-  </React.Fragment>
-)
-
-export const TaskDetailedOverlayRow = item => (
-  <React.Fragment key={item.uuid}>
-    <td className="taskName">
-      <AsLink modelType="Task" model={item} />
-    </td>
-    <td className="parentTaskName">
-      {item.parentTask && <AsLink modelType="Task" model={item.parentTask} />}
     </td>
   </React.Fragment>
 )

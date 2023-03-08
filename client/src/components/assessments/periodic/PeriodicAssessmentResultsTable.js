@@ -1,8 +1,10 @@
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import _isEmpty from "lodash/isEmpty"
+import { Task } from "models"
 import {
   AssessmentPeriodsConfigPropType,
   getPeriodsConfig,
@@ -43,12 +45,22 @@ const EntityPeriodicAssessmentResults = ({
     return null
   }
   const instantAssessments = entity.getInstantAssessments()
+  const modelType = entityType.resourceName
   const { periods } = periodsConfig
   return (
     <>
       <tr>
         <td colSpan={periods.length} className="entity-title-row">
-          <LinkTo modelType={entityType.resourceName} model={entity} />
+          {modelType === Task.resourceName ? (
+            <BreadcrumbTrail
+              modelType={modelType}
+              leaf={entity}
+              ascendantObjects={entity.ascendantTasks}
+              parentField="parentTask"
+            />
+          ) : (
+            <LinkTo modelType={modelType} model={entity} />
+          )}
         </td>
       </tr>
       {instantAssessments.map(([ak, ac]) => {

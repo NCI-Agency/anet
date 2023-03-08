@@ -66,6 +66,13 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
         taskedOrganizations {
           uuid
           shortName
@@ -287,7 +294,6 @@ const ReportPreview = ({ className, uuid }) => {
       <div className="preview-section">
         <NoPaginationTaskTable
           tasks={report.tasks}
-          showParent
           noTasksMessage={`No ${tasksLabel} selected`}
         />
       </div>

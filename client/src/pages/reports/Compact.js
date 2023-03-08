@@ -4,6 +4,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import CompactTable, {
   CompactFooterContent,
   CompactHeaderContent,
@@ -39,6 +40,7 @@ import React, { useContext, useState } from "react"
 import { Button, Dropdown, DropdownButton } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
+import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
 
@@ -140,6 +142,13 @@ const GQL_GET_REPORT = gql`
         parentTask {
           uuid
           shortName
+        }
+        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
         }
         taskedOrganizations {
           uuid
@@ -354,6 +363,7 @@ const CompactReportView = ({ pageDispatchers }) => {
                       className="reportField"
                     />
                     <CompactRow
+                      id="tasks"
                       label={Settings.fields.task.subLevel.longLabel}
                       content={getTasksAndAssessments()}
                       className="reportField"
@@ -466,8 +476,16 @@ const CompactReportView = ({ pageDispatchers }) => {
           readonly
         />
       ) : (
-        report.tasks.map(task => (
-          <LinkTo key={task.uuid} modelType="Task" model={task} />
+        report.tasks.map((task, i) => (
+          <React.Fragment key={task.uuid}>
+            {i > 0 && <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />}
+            <BreadcrumbTrail
+              modelType="Task"
+              leaf={task}
+              ascendantObjects={task.ascendantTasks}
+              parentField="parentTask"
+            />
+          </React.Fragment>
         ))
       )
     )

@@ -22,8 +22,10 @@ const AdvancedSelectOverlayTable = ({
     <Table responsive hover striped>
       <thead>
         <tr>
-          {columns.map(col => (
-            <th key={col}>{col}</th>
+          {columns.map((col, idx) => (
+            <th className={idx === 0 ? "col-1" : undefined} key={col}>
+              {col}
+            </th>
           ))}
         </tr>
       </thead>

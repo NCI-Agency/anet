@@ -968,7 +968,7 @@ header.searchPagination {
   width: 100% !important;
 }
 
-.advanced-select-popover span.bp4-popover2-target {
+.advanced-select-popover .input-group > span.bp4-popover2-target {
   display: block;
   width: 100%;
 }

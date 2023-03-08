@@ -147,6 +147,13 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
         taskedOrganizations {
           uuid
           shortName
@@ -666,7 +673,6 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
               <Fieldset title={Settings.fields.task.subLevel.longLabel}>
                 <NoPaginationTaskTable
                   tasks={report.tasks}
-                  showParent
                   noTasksMessage={`No ${tasksLabel} selected`}
                 />
               </Fieldset>

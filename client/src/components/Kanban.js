@@ -1,5 +1,6 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Pie from "components/graphs/Pie"
 import LinkTo from "components/LinkTo"
 import { EngagementTrends } from "components/Trends"
@@ -141,9 +142,12 @@ const CardView = ({ task }) => {
       }}
     >
       <div>
-        <LinkTo modelType="Task" model={task}>
-          <strong>{task.shortName}</strong>
-        </LinkTo>
+        <BreadcrumbTrail
+          modelType="Task"
+          leaf={task}
+          ascendantObjects={task.ascendantTasks}
+          parentField="parentTask"
+        />
         <br />
         <EngagementTrends
           newValue={task.lastMonthReports.length}

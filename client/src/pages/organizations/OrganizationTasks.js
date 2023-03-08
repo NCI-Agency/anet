@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client"
 import API from "api"
 import AppContext from "components/AppContext"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
@@ -102,9 +103,12 @@ const OrganizationTasks = ({ pageDispatchers, queryParams, organization }) => {
             {Task.map(tasks, (task, idx) => (
               <tr key={task.uuid} id={`task_${idx}`}>
                 <td>
-                  <LinkTo modelType="Task" model={task}>
-                    {task.shortName}
-                  </LinkTo>
+                  <BreadcrumbTrail
+                    modelType="Task"
+                    leaf={task}
+                    ascendantObjects={task.ascendantTasks}
+                    parentField="parentTask"
+                  />
                 </td>
                 <td>{task.longName}</td>
               </tr>

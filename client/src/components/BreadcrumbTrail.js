@@ -2,12 +2,7 @@ import LinkTo from "components/LinkTo"
 import PropTypes from "prop-types"
 import React from "react"
 
-export const BreadcrumbTrail = ({
-  ascendantObjects,
-  leaf,
-  modelType,
-  parentField
-}) => {
+const getBreadcrumbTrail = (leaf, ascendantObjects, parentField) => {
   const parentMap =
     ascendantObjects?.reduce((acc, val) => {
       acc[val.uuid] = val
@@ -21,25 +16,54 @@ export const BreadcrumbTrail = ({
     if (!node) {
       break
     }
-    if (trail.length) {
-      trail.unshift(" » ")
-    }
-    trail.unshift(
-      <LinkTo
-        key={node.uuid}
-        modelType={modelType}
-        model={node}
-        showIcon={false}
-      />
-    )
+    trail.unshift(node)
     uuid = node[parentField]?.uuid
   }
   return trail
+}
+
+export const getBreadcrumbTrailAsText = (
+  leaf,
+  ascendantObjects,
+  parentField,
+  labelField
+) => {
+  const trail = getBreadcrumbTrail(leaf, ascendantObjects, parentField)
+  return trail.map(node => node[labelField]).join(" » ")
+}
+
+export const BreadcrumbTrail = ({
+  modelType,
+  leaf,
+  ascendantObjects,
+  parentField,
+  isLink,
+  style
+}) => {
+  const trail = getBreadcrumbTrail(leaf, ascendantObjects, parentField)
+  return (
+    <span>
+      {trail.map((node, i) => (
+        <React.Fragment key={node.uuid}>
+          {i > 0 && " » "}
+          <LinkTo
+            modelType={modelType}
+            model={node}
+            showIcon={false}
+            isLink={isLink}
+            style={style}
+          />
+        </React.Fragment>
+      ))}
+    </span>
+  )
 }
 
 BreadcrumbTrail.propTypes = {
   modelType: PropTypes.string.isRequired,
   leaf: PropTypes.object.isRequired,
   ascendantObjects: PropTypes.array,
-  parentField: PropTypes.string.isRequired
+  parentField: PropTypes.string.isRequired,
+  isLink: PropTypes.bool,
+  style: PropTypes.object
 }

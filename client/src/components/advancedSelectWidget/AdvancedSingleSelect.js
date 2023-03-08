@@ -16,7 +16,9 @@ const AdvancedSingleSelect = props => {
       handleRemoveItem={handleRemoveItem}
       closeOverlayOnAdd
       selectedValueAsString={
-        !_isEmpty(props.value) ? props.value[props.valueKey] : ""
+        _isEmpty(props.value)
+          ? ""
+          : props.valueFunc(props.value, props.valueKey)
       }
       extraAddon={
         props.showRemoveButton && !_isEmpty(props.value) ? (
@@ -37,10 +39,12 @@ const AdvancedSingleSelect = props => {
 AdvancedSingleSelect.propTypes = {
   ...advancedSelectPropTypes,
   value: PropTypes.object,
-  valueKey: PropTypes.string
+  valueKey: PropTypes.string,
+  valueFunc: PropTypes.func
 }
 AdvancedSingleSelect.defaultProps = {
   value: {},
+  valueFunc: (v, k) => v?.[k],
   overlayTable: AdvancedSingleSelectOverlayTable,
   showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
 }

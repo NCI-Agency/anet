@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import { PageDispatchersPropType, useBoilerplate } from "components/Page"
 import { ReportCompactWorkflow } from "components/ReportWorkflow"
@@ -13,6 +14,7 @@ import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useEffect, useRef, useState } from "react"
 import { Badge, Col, Container, Row } from "react-bootstrap"
+import TASKS_ICON from "resources/tasks.png"
 import Settings from "settings"
 import utils from "utils"
 
@@ -63,6 +65,17 @@ const GQL_GET_REPORT_LIST = gql`
         tasks {
           uuid
           shortName
+          parentTask {
+            uuid
+            shortName
+          }
+          ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
+          }
         }
         workflow {
           type
@@ -327,10 +340,19 @@ const ReportSummaryRow = ({ report }) => {
               <strong>
                 {pluralize(Settings.fields.task.subLevel.shortLabel)}:
               </strong>{" "}
-              {report.tasks.map(
-                (task, i) =>
-                  task.shortName + (i < report.tasks.length - 1 ? ", " : "")
-              )}
+              {report.tasks.map((task, i) => (
+                <React.Fragment key={task.uuid}>
+                  {i > 0 && (
+                    <img src={TASKS_ICON} alt="★" className="ms-1 me-1" />
+                  )}
+                  <BreadcrumbTrail
+                    modelType="Task"
+                    leaf={task}
+                    ascendantObjects={task.ascendantTasks}
+                    parentField="parentTask"
+                  />
+                </React.Fragment>
+              ))}
             </span>
           )}
         </Col>
