@@ -372,7 +372,9 @@ UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE 
 -- Assign responsible positions for organizations
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid")
 	VALUES
+		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
 		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.1'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
+		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Super User')),
 		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Final Reviewer'));
 
 

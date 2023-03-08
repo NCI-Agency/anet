@@ -131,7 +131,10 @@ const OrganizationLaydown = ({ organization, refetch }) => {
           )
         }
       >
-        <PositionTable positions={organization.administratingPositions} />
+        <PositionTable
+          positions={organization.administratingPositions}
+          id="super-user-table"
+        />
         <EditAdministratingPositionsModal
           organization={organization}
           showModal={showAdministratingPositionsModal}

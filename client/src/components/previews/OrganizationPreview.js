@@ -3,7 +3,7 @@ import API from "api"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
-import { Organization, Position } from "models"
+import { Organization } from "models"
 import OrganizationLaydown from "pages/organizations/Laydown"
 import OrganizationTasks from "pages/organizations/OrganizationTasks"
 import PropTypes from "prop-types"
@@ -109,14 +109,6 @@ const OrganizationPreview = ({ className, uuid }) => {
     ? Settings.fields.principal.org
     : Settings.fields.advisor.org
 
-  const superUsers = organization.positions.filter(
-    pos =>
-      pos.status !== Model.STATUS.INACTIVE &&
-      (!pos.person || pos.person.status !== Model.STATUS.INACTIVE) &&
-      (pos.type === Position.TYPE.SUPER_USER ||
-        pos.type === Position.TYPE.ADMINISTRATOR)
-  )
-
   return (
     <div className={`${className} preview-content-scroll`}>
       <div className="preview-sticky-title">
@@ -152,33 +144,6 @@ const OrganizationPreview = ({ className, uuid }) => {
                 {organization.parentOrg.longName}{" "}
                 {organization.parentOrg.identificationCode}
               </LinkTo>
-            }
-          />
-        )}
-
-        {organization.isAdvisorOrg() && (
-          <PreviewField
-            label="Super users"
-            value={
-              <React.Fragment>
-                {superUsers.map(position => (
-                  <p key={position.uuid}>
-                    {position.person ? (
-                      <LinkTo modelType="Person" model={position.person} />
-                    ) : (
-                      <i>
-                        <LinkTo modelType="Position" model={position} />-
-                        (Unfilled)
-                      </i>
-                    )}
-                  </p>
-                ))}
-                {superUsers.length === 0 && (
-                  <p>
-                    <i>No super users</i>
-                  </p>
-                )}
-              </React.Fragment>
             }
           />
         )}

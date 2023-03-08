@@ -722,7 +722,7 @@ fields:
       location:
         filter: [ADVISOR_LOCATION]
       administratingPositions:
-        label: Administrating positions
+        label: Assigned Super Users
         placeholder: Search for a position...
 
   principal:
@@ -941,7 +941,7 @@ fields:
       location:
         filter: [PRINCIPAL_LOCATION]
       administratingPositions:
-        label: Administrating positions
+        label: Assigned Super Users
         placeholder: Search for a position...
 
   superUser:
