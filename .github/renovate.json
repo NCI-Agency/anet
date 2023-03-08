@@ -117,12 +117,6 @@
       "matchPackagePrefixes": ["@fullcalendar/"]
     },
     {
-      "groupName": "NPM, dependencies, Projectstorm",
-      "matchManagers": ["npm"],
-      "matchDepTypes": ["dependencies"],
-      "matchPackagePrefixes": ["@projectstorm/"]
-    },
-    {
       "groupName": "NPM, dependencies, Slate",
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],

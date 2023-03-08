@@ -2,21 +2,17 @@ import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import {
   CanvasWidget,
-  SelectionBoxLayerFactory
-} from "@projectstorm/react-canvas-core"
-import {
+  DagreEngine,
   DefaultDiagramState,
+  DefaultLabelFactory,
   DiagramEngine,
   DiagramModel,
   LinkLayerFactory,
   NodeLayerFactory,
-  PortModelAlignment
-} from "@projectstorm/react-diagrams-core"
-import { DefaultLabelFactory } from "@projectstorm/react-diagrams-defaults"
-import {
-  DagreEngine,
-  PathFindingLinkFactory
-} from "@projectstorm/react-diagrams-routing"
+  PathFindingLinkFactory,
+  PortModelAlignment,
+  SelectionBoxLayerFactory
+} from "@projectstorm/react-diagrams"
 import { DEFAULT_PAGE_PROPS } from "actions"
 import MultiTypeAdvancedSelectComponent from "components/advancedSelectWidget/MultiTypeAdvancedSelectComponent"
 import LinkTo from "components/LinkTo"

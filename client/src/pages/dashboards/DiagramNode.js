@@ -2,19 +2,15 @@ import { css, keyframes } from "@emotion/react"
 import styled from "@emotion/styled"
 import {
   AbstractModelFactory,
-  AbstractReactFactory
-} from "@projectstorm/react-canvas-core"
-import {
+  AbstractReactFactory,
+  DefaultLinkFactory,
+  DefaultLinkModel,
+  DefaultLinkWidget,
   NodeModel,
   PortModel,
   PortModelAlignment,
   PortWidget
-} from "@projectstorm/react-diagrams-core"
-import {
-  DefaultLinkFactory,
-  DefaultLinkModel,
-  DefaultLinkWidget
-} from "@projectstorm/react-diagrams-defaults"
+} from "@projectstorm/react-diagrams"
 import AggregationWidgetContainer, {
   AGGREGATION_WIDGET_TYPE,
   getAggregationWidget
