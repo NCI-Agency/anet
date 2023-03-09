@@ -11,6 +11,9 @@ import DateRangeFilter, {
 import OrganizationFilter, {
   deserialize as deserializeOrganizationFilter
 } from "components/advancedSearch/OrganizationFilter"
+import RadioButtonFilter, {
+  deserialize as deserializeRadioButtonFilter
+} from "components/advancedSearch/RadioButtonFilter"
 import ReportStateFilter, {
   deserialize as deserializeReportStateFilter
 } from "components/advancedSearch/ReportStateFilter"
@@ -418,22 +421,23 @@ export const searchFilters = function() {
         }
       },
       "Has Biography?": {
-        component: SelectFilter,
+        component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "hasBiography",
-          options: ["true", "false"],
+          options: [true, false],
           labels: ["Yes", "No"]
         }
       },
       "Pending Verification": {
-        component: SelectFilter,
+        component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
         isDefault: true,
         props: {
           queryKey: "pendingVerification",
-          options: ["false", "true"],
-          labels: ["No", "Yes"]
+          options: [true, false],
+          defaultOption: false,
+          labels: ["Yes", "No"]
         }
       }
     }
@@ -475,11 +479,11 @@ export const searchFilters = function() {
         })
       },
       [`Has ${Settings.fields.organization.profile}?`]: {
-        component: SelectFilter,
+        component: RadioButtonFilter,
         deserializer: deserializeSelectFilter,
         props: {
           queryKey: "hasProfile",
-          options: ["true", "false"],
+          options: [true, false],
           labels: ["Yes", "No"]
         }
       }
@@ -527,11 +531,11 @@ export const searchFilters = function() {
         })
       },
       "Is Filled?": {
-        component: SelectFilter,
-        deserializer: deserializeSelectFilter,
+        component: RadioButtonFilter,
+        deserializer: deserializeRadioButtonFilter,
         props: {
           queryKey: "isFilled",
-          options: ["true", "false"],
+          options: [true, false],
           labels: ["Yes", "No"]
         }
       },
