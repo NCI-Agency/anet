@@ -5,6 +5,7 @@ import PropTypes from "prop-types"
 import React, { useCallback } from "react"
 import { Button, Form as FormBS, Modal } from "react-bootstrap"
 import { Transforms } from "slate"
+import { ReactEditor } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
 import * as yup from "yup"
 
@@ -17,6 +18,7 @@ const LinkSourceAnet = ({
 }) => {
   const insertAnetLink = useCallback(
     node => {
+      ReactEditor.focus(editor)
       if (selection) {
         Transforms.insertNodes(editor, node, {
           at: { path: selection.focus.path, offset: selection.focus.offset },
@@ -27,6 +29,7 @@ const LinkSourceAnet = ({
           select: true
         })
       }
+      Transforms.move(editor, { distance: 1 })
       setShowModal(false)
     },
     [editor, selection, setShowModal]
