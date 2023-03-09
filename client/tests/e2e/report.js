@@ -150,7 +150,7 @@ test.serial("Draft and submit a report", async t => {
   )
 
   const $newTaskRow = await $("#tasks-tasks table tbody tr td")
-  await assertElementText(t, $newTaskRow, "2.A")
+  await assertElementText(t, $newTaskRow, "EF 2 » 2.A")
 
   await pageHelpers.writeInForm("#keyOutcomes", "key outcomes")
   await pageHelpers.writeInForm("#nextSteps", "next steps")

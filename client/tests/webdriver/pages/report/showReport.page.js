@@ -166,16 +166,13 @@ class ShowReport extends Page {
     await (await this.getReportStatus()).waitForDisplayed()
   }
 
-  async getCompactViewAttendees(type, withAssessments) {
-    const attendees = withAssessments
-      ? browser.$$(`#${type} > td > table > tbody > tr > td`)
-      : browser.$$(`#${type} > td > span > a`)
-    return withAssessments
-      ? attendees
-      // Filter out the assessment rows to get the attendees
-        .filter(row => row.$("span > a").isExisting())
-        .map(row => row.$("span > a").getText())
-      : attendees.map(attendeeLink => attendeeLink.getText())
+  async getCompactViewElements(type, withAssessments) {
+    const elements = await (withAssessments
+      ? browser.$$(`#${type} > td > table > tbody > tr > td > span`)
+      : browser.$$(`#${type} > td > span`))
+    return await Promise.all(
+      elements.map(async element => (await element).getText())
+    )
   }
 
   async selectOptionalField(field) {

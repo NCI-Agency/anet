@@ -6,7 +6,7 @@ const PRINCIPAL = "Christopf"
 const PRINCIPAL_VALUE = `CIV TOPFERNESS, ${PRINCIPAL}`
 
 const TASK = "1.2.A"
-const TASK_VALUE = `${TASK}`
+const TASK_VALUE = "EF 1 » EF 1.2 » 1.2.A"
 
 const ENGAGEMENT_DATE_FORMAT = "DD-MM-YYYY HH:mm"
 const SHORT_WAIT_MS = 1000
@@ -147,9 +147,7 @@ describe("Create report form page", () => {
         await (await CreateFutureReport.getTasksAssessments()).isExisting()
       ).to.be.true
       expect(
-        await (
-          await CreateFutureReport.getTaskAssessment(TASK_VALUE)
-        ).isExisting()
+        await (await CreateFutureReport.getTaskAssessment(TASK)).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
 
@@ -175,9 +173,7 @@ describe("Create report form page", () => {
         await (await CreateFutureReport.getTasksAssessments()).isExisting()
       ).to.be.true
       expect(
-        await (
-          await CreateFutureReport.getTaskAssessment(TASK_VALUE)
-        ).isExisting()
+        await (await CreateFutureReport.getTaskAssessment(TASK)).isExisting()
       ).to.be.true
       /* eslint-enable no-unused-expressions */
     })
