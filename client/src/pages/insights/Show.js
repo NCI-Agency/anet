@@ -163,7 +163,7 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
       state: [Report.STATE.PUBLISHED],
       releasedAtStart: defaultPastDates.startDate.startOf("day").valueOf(),
       releasedAtEnd: defaultPastDates.endDate.endOf("day").valueOf(),
-      includeEngagementDayOfWeek: 1
+      includeEngagementDayOfWeek: true
     },
     [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
       engagementDateStart: defaultFutureDates.startDate
