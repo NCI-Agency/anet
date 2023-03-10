@@ -45,11 +45,12 @@ fields:
       placeholder: Enter an objective / effort name, example....
     longLabel: Objectives and Efforts
     longName:
-      label: Objective / Effort description
-      placeholder: Enter an objective / effort description, example ....
+      label: Objective / Effort long name
+      placeholder: Enter an objective / effort long name, example ....
       asA: textarea
       style:
         height: 400px
+    description: Objective / Effort description
     topLevel:
       shortLabel: Objective
       shortName:
@@ -57,8 +58,8 @@ fields:
         placeholder: Enter a Name for this Objective name, example ....
       longLabel: Objectives
       longName:
-        label: Description of this Objective
-        placeholder: Enter a description for this Objective, example ....
+        label: Long Name of this Objective
+        placeholder: Enter a long name for this Objective, example ....
         asA: textarea
         style:
           height: 400px
@@ -118,8 +119,8 @@ fields:
         placeholder: Enter an effort name, example....
       longLabel: Efforts
       longName:
-        label: Effort description
-        placeholder: Enter an effort description, example ....
+        label: Effort Long Name
+        placeholder: Enter an effort Long Name, example ....
         asA: textarea
         style:
           height: 400px

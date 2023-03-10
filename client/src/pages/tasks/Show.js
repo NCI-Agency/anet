@@ -24,6 +24,7 @@ import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
@@ -40,6 +41,7 @@ const GQL_GET_TASK = gql`
       uuid
       shortName
       longName
+      description
       status
       isSubscribed
       updatedAt
@@ -270,6 +272,14 @@ const TaskShow = ({ pageDispatchers }) => {
                     style={{}}
                     name="longName"
                     component={FieldHelper.ReadonlyField}
+                  />
+                  <Field
+                    name="description"
+                    component={FieldHelper.ReadonlyField}
+                    label={Settings.fields.task.description}
+                    humanValue={
+                      <RichTextEditor readOnly value={values.description} />
+                    }
                   />
                   <Field
                     name="status"
