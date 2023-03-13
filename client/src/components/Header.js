@@ -5,7 +5,7 @@ import React from "react"
 import { Col, Container, Row } from "react-bootstrap"
 import { Link } from "react-router-dom"
 import menuLogo from "resources/anet-menu.svg"
-import logo from "resources/logo.svg"
+import logo from "../../public/favicon/logo.svg"
 
 const backgroundCss = {
   background: "#fff",

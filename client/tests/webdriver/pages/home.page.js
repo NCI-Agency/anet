@@ -36,6 +36,10 @@ class Home extends Page {
     return (await this.getBannerUser()).$('//a[text()="Sign out"]')
   }
 
+  async getLoginButton() {
+    return browser.$('//a[text()="Login"]')
+  }
+
   async getSearchBar() {
     return browser.$("#searchBarInput")
   }
