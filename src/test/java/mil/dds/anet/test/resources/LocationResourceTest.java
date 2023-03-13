@@ -16,11 +16,12 @@ import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.util.MutationExecutor;
 import mil.dds.anet.test.client.util.QueryExecutor;
+import mil.dds.anet.test.utils.UtilsTest;
 import org.junit.jupiter.api.Test;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
-  public static final String FIELDS = "{ uuid name type status lat lng customFields }";
+  public static final String FIELDS = "{ uuid name type description status lat lng customFields }";
 
   @Test
   public void locationTestGraphQL()
@@ -45,10 +46,29 @@ public class LocationResourceTest extends AbstractResourceTest {
 
     // Update
     created.setName("Down by the Bay");
-    final Integer nrUpdated = adminMutationExecutor.updateLocation("", getLocationInput(created));
+    Integer nrUpdated = adminMutationExecutor.updateLocation("", getLocationInput(created));
     assertThat(nrUpdated).isEqualTo(1);
     final Location updated = adminQueryExecutor.location(FIELDS, created.getUuid());
     assertThat(updated.getName()).isEqualTo(created.getName());
+
+    // Update description
+    updated.setDescription(UtilsTest.getCombinedHtmlTestCase().getInput());
+    nrUpdated = adminMutationExecutor.updateLocation("", getLocationInput(updated));
+    assertThat(nrUpdated).isEqualTo(1);
+
+
+    // Add html to description and ensure it gets stripped out
+    final LocationInput updatedDescInput = getLocationInput(updated);
+    updatedDescInput.setDescription(
+        "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
+    nrUpdated = adminMutationExecutor.updateLocation("", updatedDescInput);
+    System.out.println("üüüüü");
+    System.out.println(updated.getDescription());
+    assertThat(nrUpdated).isEqualTo(1);
+    final Location updatedDesc = adminQueryExecutor.location(FIELDS, updated.getUuid());
+    assertThat(updatedDesc.getDescription()).contains("<b>Hello world</b>");
+    assertThat(updatedDesc.getDescription()).doesNotContain("<script>window.alert");
+
   }
 
   @Test

@@ -282,6 +282,7 @@ type Location {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
+  description: String
   isSubscribed: Boolean
   lat: Float
   lng: Float
@@ -300,6 +301,7 @@ input LocationInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
+  description: String
   lat: Float
   lng: Float
   name: String

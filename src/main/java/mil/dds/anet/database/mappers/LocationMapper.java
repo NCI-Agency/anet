@@ -19,6 +19,7 @@ public class LocationMapper implements RowMapper<Location> {
     l.setLat(MapperUtils.getOptionalDouble(rs, "locations_lat"));
     l.setLng(MapperUtils.getOptionalDouble(rs, "locations_lng"));
     l.setType(LocationType.valueOfCode(rs.getString("locations_type")));
+    l.setDescription(MapperUtils.getOptionalString(rs, "locations_description"));
 
     if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
       ctx.define("totalCount", rs.getInt("totalCount"));

@@ -4365,4 +4365,50 @@
 		<dropColumn tableName="tasks" columnName="customFieldEnum2" />
 	</changeSet>
 
+	<changeSet id="add-description-field-to-locations" author="cigdemers">
+		<!-- add description field to locations -->
+		<addColumn tableName="locations">
+			<column name="description" type="text"/>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="alter-full_text-index-add-locations_description" author="cigdemers" runInTransaction="false">
+		<sql>
+			<!-- Drop full-text materialized view (incl. indexes);
+                             copied from changeset alter-postgresql-fulltext -->
+			DROP MATERIALIZED VIEW mv_fts_locations;
+
+			<!-- Drop generated full-text column from locations;
+			     copied from changeset alter-postgresql-fulltext -->
+			ALTER TABLE locations DROP COLUMN full_text;
+
+			<!-- Re-add generated full-text column to locations, now including description;
+			     copied mostly from changeset alter-postgresql-fulltext -->
+			ALTER TABLE locations
+				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
+					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
+						  || to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
+					setweight(to_tsvector(${fts_config}, coalesce(locations."description", ''))
+					      || to_tsvector('simple', coalesce(locations."description", '')), ${fts_low})
+				) STORED;
+
+			<!-- Re-create full-text materialized views and indexes;
+			     copied from changeset alter-postgresql-fulltext -->
+			CREATE MATERIALIZED VIEW IF NOT EXISTS mv_fts_locations(uuid, full_text) AS
+				SELECT
+					locations.uuid,
+					locations.full_text
+					|| coalesce(tsvector_agg(notes.full_text), ''::tsvector)
+				FROM locations
+				LEFT JOIN "noteRelatedObjects" ON "noteRelatedObjects"."relatedObjectType" = 'locations'
+					AND "noteRelatedObjects"."relatedObjectUuid" = locations.uuid
+				LEFT JOIN notes ON notes.uuid = "noteRelatedObjects"."noteUuid"
+				GROUP BY locations.uuid
+				WITH DATA;
+			CREATE UNIQUE INDEX "UQ_mv_fts_locations_uuid" ON mv_fts_locations(uuid);
+			CREATE INDEX "FT_mv_fts_locations" ON mv_fts_locations USING gin(full_text);
+			CREATE INDEX "TR_locations_uuid" ON mv_fts_locations USING gin(uuid gin_trgm_ops);
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
