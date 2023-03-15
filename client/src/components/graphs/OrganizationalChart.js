@@ -8,7 +8,7 @@ import {
 } from "components/Page"
 import * as d3 from "d3"
 import _xor from "lodash/xor"
-import { Symbol } from "milsymbol"
+import ms from "milsymbol"
 import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
@@ -259,7 +259,7 @@ const OrganizationalChart = ({
           element => element.value === positions?.[0]?.person?.rank
         )?.app6Modifier
 
-        const sym = new Symbol(
+        const sym = new ms.Symbol(
           `S${
             d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
           }GPU------${unitcode || "-"}`,
