@@ -13,8 +13,10 @@ async function populateLocation(location, user) {
           ? Location.LOCATION_TYPES.PRINCIPAL_LOCATION
           : Location.LOCATION_TYPES.ADVISOR_LOCATION,
     name: () => faker.address.city(),
-    lat: () => faker.address.latitude(38.4862816432, 29.318572496, 10),
-    lng: () => faker.address.longitude(75.1580277851, 60.5284298033, 10)
+    lat: () =>
+      parseFloat(faker.address.latitude(38.4862816432, 29.318572496, 10)),
+    lng: () =>
+      parseFloat(faker.address.longitude(75.1580277851, 60.5284298033, 10))
   }
   populate(location, template)
     .status.always()
