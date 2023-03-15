@@ -4388,8 +4388,8 @@
 				ADD COLUMN full_text tsvector GENERATED ALWAYS AS (
 					setweight(to_tsvector(${fts_config}, coalesce(locations.name, ''))
 						  || to_tsvector('simple', coalesce(locations.name, '')), ${fts_high}) ||
-					setweight(to_tsvector(${fts_config}, coalesce(locations."description", ''))
-					      || to_tsvector('simple', coalesce(locations."description", '')), ${fts_low})
+					setweight(to_tsvector(${fts_config}, coalesce(locations.description, ''))
+					      || to_tsvector('simple', coalesce(locations.description, '')), ${fts_low})
 				) STORED;
 
 			<!-- Re-create full-text materialized views and indexes;

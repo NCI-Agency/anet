@@ -25,6 +25,7 @@ const GQL_GET_LOCATION = gql`
     location(uuid: $uuid) {
       uuid
       name
+      description
       status
       type
       lat

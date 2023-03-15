@@ -51,6 +51,7 @@ export default class Location extends Model {
     .object()
     .shape({
       name: yup.string().required().default(""),
+      description: yup.string().nullable().default(""),
       status: yup
         .string()
         .required()
@@ -160,6 +161,7 @@ export default class Location extends Model {
   static allFieldsQuery = `
     uuid
     name
+    description
     type
     lat
     lng
