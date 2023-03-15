@@ -314,7 +314,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(searchResults).isNotEmpty();
     assertThat(
         searchResults.stream().filter(p -> (p.getPerson() == null)).collect(Collectors.toList()))
-            .hasSameElementsAs(searchResults);
+        .hasSameElementsAs(searchResults);
 
     // Search by name and is filled and type
     query.setIsFilled(true);
@@ -323,7 +323,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(searchResults).isNotEmpty();
     assertThat(searchResults.stream().filter(p -> (p.getPerson() != null))
         .filter(p -> p.getType().equals(PositionType.ADVISOR)).collect(Collectors.toList()))
-            .hasSameElementsAs(searchResults);
+        .hasSameElementsAs(searchResults);
 
     // Search for text= advisor and type = admin should be empty.
     query.setType(ImmutableList.of(PositionType.ADMINISTRATOR));
