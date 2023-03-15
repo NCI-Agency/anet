@@ -56,14 +56,12 @@ async function populateReport(report, user, args) {
       if (advisor) {
         advisor.primary = primary
         advisor.attendee = true
-        advisor.author = false
+        // Set the first random advisor attendee as author
+        advisor.author = i === 0
         primary = false
         reportPeople.push(advisor)
       }
     }
-    // Pick random advisor attendee as author
-    const n = faker.datatype.number({ min: 0, max: reportPeople.length - 1 })
-    reportPeople[n].author = true
 
     const nbOfPrincipals = faker.datatype.number({ min: 1, max: 5 })
     primary = true
