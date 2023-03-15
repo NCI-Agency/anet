@@ -104,13 +104,16 @@ public class AccountDeactivationWorkerTest {
 
     assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-            && e.getToAddresses().contains("test15@test.com"))).isTrue();
+            && e.getToAddresses().contains("test15@test.com")))
+        .isTrue();
     assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-            && e.getToAddresses().contains("test30@test.com"))).isTrue();
+            && e.getToAddresses().contains("test30@test.com")))
+        .isTrue();
     assertThat(
         emails.stream().anyMatch(e -> (e.getAction() instanceof AccountDeactivationWarningEmail)
-            && e.getToAddresses().contains("test45@test.com"))).isTrue();
+            && e.getToAddresses().contains("test45@test.com")))
+        .isTrue();
   }
 
   @Test

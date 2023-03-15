@@ -711,11 +711,11 @@ public class Report extends AbstractCustomizableAnetBean
       return (isFutureEngagement()
           ? getPlanningWorkflowForRelatedObject(context, engine, DaoUtils.getUuid(task))
           : getWorkflowForRelatedObject(context, engine, DaoUtils.getUuid(task)))
-              .thenCompose(taskSteps -> getTaskWorkflow(context, engine, taskIterator)
-                  .thenCompose(nextTaskSteps -> {
-                    taskSteps.addAll(nextTaskSteps);
-                    return CompletableFuture.completedFuture(taskSteps);
-                  }));
+          .thenCompose(taskSteps -> getTaskWorkflow(context, engine, taskIterator)
+              .thenCompose(nextTaskSteps -> {
+                taskSteps.addAll(nextTaskSteps);
+                return CompletableFuture.completedFuture(taskSteps);
+              }));
     }
   }
 

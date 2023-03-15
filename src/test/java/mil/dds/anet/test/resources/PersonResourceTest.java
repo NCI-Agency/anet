@@ -231,7 +231,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(
         searchResults.getList().stream().filter(p -> p.getStatus() == Status.INACTIVE).count())
-            .isEqualTo(searchResults.getList().size());
+        .isEqualTo(searchResults.getList().size());
 
     // Search with children orgs
     org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1")).findFirst()

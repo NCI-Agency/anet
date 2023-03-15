@@ -1195,7 +1195,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getLocation().getUuid().equals(cabot.getUuid())))
-            .hasSameSizeAs(searchResults.getList());
+        .hasSameSizeAs(searchResults.getList());
 
     // Search by Status.
     query.setLocationUuid(null);
@@ -1288,7 +1288,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     searchResults = jackQueryExecutor.reportList(getListFields(FIELDS), query);
     assertThat(searchResults.getList().stream()
         .filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)).count())
-            .isEqualTo(searchResults.getList().size());
+        .isEqualTo(searchResults.getList().size());
   }
 
   @Test
@@ -1961,7 +1961,7 @@ public class ReportResourceTest extends AbstractResourceTest {
     assertThat(t11aApprovers.size()).isGreaterThan(0);
     assertThat(
         t11aApprovers.stream().anyMatch(a -> andrew.getUuid().equals(a.getPerson().getUuid())))
-            .isEqualTo(true);
+        .isEqualTo(true);
 
     // Check that the approval workflow has a step for location Portugal Cove Ferry Terminal
     final List<ReportAction> locActions = submitted.getWorkflow().stream()
