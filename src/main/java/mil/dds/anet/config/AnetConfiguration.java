@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -239,7 +238,7 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
                 "https://raw.githubusercontent.com/NCI-Agency/anet/main/src/main/resources/anet-schema.yml"))
             .validate(dictionaryMap);
         if (!validationResult.getValid()) {
-          logErrors(validationResult.getErrors());
+          logErrors(validationResult);
           throw new IllegalArgumentException("Invalid dictionary in the configuration");
         }
         logger.info("dictionary: {}", yamlMapper.writeValueAsString(dictionaryMap));
@@ -255,9 +254,15 @@ public class AnetConfiguration extends Configuration implements AssetsBundleConf
     return new JsonObject(jsonMapper.writeValueAsString(yamlMapper.readValue(yaml, Object.class)));
   }
 
-  private void logErrors(final List<OutputUnit> errors) {
-    errors.forEach(e -> logger.error("Dictionary error: {} (location: {})", e.getError(),
-        e.getInstanceLocation()));
+  private void logErrors(final OutputUnit validationResult) {
+    if (!Utils.isEmptyOrNull(validationResult.getError())) {
+      logger.error("Dictionary error: {} (location: {})", validationResult.getError(),
+          validationResult.getInstanceLocation());
+    }
+    if (validationResult.getErrors() != null) {
+      // Recurse down through the errors
+      validationResult.getErrors().forEach(e -> logErrors(e));
+    }
   }
 
   @SuppressWarnings("unchecked")
