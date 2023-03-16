@@ -51,17 +51,13 @@
 
 .workflow-fieldset .workflow-action button::after {
   position: relative;
-  font-family: 'Glyphicons Halflings';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
   -webkit-font-smoothing: antialiased;
-  content: "\e092";
-  color: #777;
-  width: 18px;
-  height: 18px;
-  top: 3px;
-  right: -26px;
+  content: "➡";
+  color: #000;
+  right: -25px;
 }
 
 .workflow-fieldset :last-child button::after {
