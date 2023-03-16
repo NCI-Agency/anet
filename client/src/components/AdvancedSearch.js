@@ -232,18 +232,22 @@ const AdvancedSearch = ({
     setObjectType(objectType)
     const defaultFiltersForObjectType = objectType
       ? Object.entries(ALL_FILTERS[objectType].filters)
-        .filter(([key, filter]) => filter.isDefault)
-        .map(([k, f]) => ({ key: k }))
+        .filter(([, filter]) => filter.isDefault)
+        .map(([k]) => ({
+          key: k,
+          // Keep any previous value for the default filters
+          value: filters.find(f => f.key === k)?.value
+        }))
       : []
 
     setFilters(
       filters
         .filter(
-          value =>
+          f =>
             // Keep the common filters for every object type
-            commonFiltersForAllObjectTypes[value.key] &&
+            commonFiltersForAllObjectTypes[f.key] &&
             // Discard the default filters as they will be concatenated later
-            !ALL_FILTERS[objectType].filters[value.key].isDefault
+            !ALL_FILTERS[objectType]?.filters[f.key].isDefault
         )
         // Add defaults as well
         .concat(defaultFiltersForObjectType)
