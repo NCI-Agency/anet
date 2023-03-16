@@ -101,15 +101,11 @@ export const deserialize = ({ queryKey }, query, key) => {
       uuid: query[queryKey]
     }).then(data => {
       if (data.task) {
-        const toQueryValue = {
-          [queryKey]: query[queryKey]
-        }
-        const value = { value: data.task }
         return {
           key: key,
           value: {
-            ...value,
-            toQuery: toQueryValue
+            value: data.task,
+            toQuery: { ...query }
           }
         }
       } else {
