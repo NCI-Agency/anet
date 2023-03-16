@@ -12662,10 +12662,10 @@ micromatch@^4.0.2, micromatch@^4.0.4, micromatch@^4.0.5:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-milsymbol@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/milsymbol/-/milsymbol-2.1.0.tgz#83fadb3715188f3db6ca3d7aa9384ef667af1ca5"
-  integrity sha512-2YY124u2rXV/W+5/qq0z+jU8TV4OwZxydD6/2zDFTlKpPgK95jH8ldziOrBLH7WuKj5mLaHw+AZPG117Jiy3fQ==
+milsymbol@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/milsymbol/-/milsymbol-2.2.0.tgz#0dc61ad5080175ccb61fc8ce1a3d3239f5c58945"
+  integrity sha512-TR9D+90u8h5vPCF33SkyjRmCPDbVBsvHtty3m18qfbz4bYr+Rj5lLSZ56lMf+dtzbfPTj32m4O/7H2RZ5tMOdg==
 
 mime-db@1.52.0, "mime-db@>= 1.43.0 < 2":
   version "1.52.0"
