@@ -168,7 +168,7 @@ const BarChart = ({
       .attr("height", function(d) {
         return yHeight - yScale(getPropValue(d, yProp))
       })
-    addD3Tooltip(bar, tooltip)
+    addD3Tooltip(bar, tooltip, !!onBarClick)
     if (onBarClick) {
       bar.on("click", (event, d) => onBarClick(d))
     }

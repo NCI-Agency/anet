@@ -126,7 +126,7 @@ const DailyRollupChart = ({
       .attr("id", function(d, i) {
         return `bar_${d.org.uuid}`
       })
-    addD3Tooltip(bar, tooltip)
+    addD3Tooltip(bar, tooltip, !!onBarClick)
     if (onBarClick) {
       bar.on("click", (event, d) => onBarClick(d.org))
     }

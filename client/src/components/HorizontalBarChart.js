@@ -251,7 +251,7 @@ const HorizontalBarChart = ({
       .attr("y", yCategoryScale(BAR_PADDING))
       .attr("width", d => xScale(d.value))
       .attr("height", BAR_HEIGHT)
-    addD3Tooltip(barsGroup, tooltip)
+    addD3Tooltip(barsGroup, tooltip, !!onBarClick)
 
     barsGroup
       .selectAll(".bar-label")
