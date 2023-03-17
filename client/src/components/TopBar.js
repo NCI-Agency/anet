@@ -68,16 +68,18 @@ const TopBar = ({
 
   return (
     <div
-      style={{ flex: "0 0 auto", zIndex: 1201 }}
+      style={{ flex: "0 0 auto" }}
       className="d-print-none"
       ref={topbarDiv}
     >
-      <div id="topbar">
+      <div id="topbar" style={{ zIndex: 1300 }}>
         <GeneralBanner options={bannerOptions} />
         <SecurityBanner onLogout={resetPages} />
         {currentUser &&
           !currentUser.hasActivePosition() &&
           !currentUser.isPendingVerification() && <NoPositionBanner />}
+      </div>
+      <div id="topbar-header" style={{ zIndex: 1201 }}>
         <Header
           minimalHeader={minimalHeader}
           toggleMenuAction={toggleMenuAction}
