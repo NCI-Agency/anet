@@ -21,8 +21,8 @@ const Toolbar = ({
   setShowAnetLinksModal,
   showExternalLinksModal,
   setShowExternalLinksModal,
-  showInFullScreen,
-  setFullScreenHandle,
+  showFullSize,
+  setShowFullSize,
   disableFullSize
 }) => {
   const editor = useSlate()
@@ -135,11 +135,11 @@ const Toolbar = ({
         {!disableFullSize
           ? <EditorToggleButton
               type={BUTTON_TYPES.FULLSCREEN}
-              icon= {showInFullScreen ? "minimize" : "fullscreen"}
+              icon= {showFullSize ? "minimize" : "fullscreen"}
               editor={editor}
-              showFullScreen={showInFullScreen}
-              setFullScreenHandle={setFullScreenHandle}
-              tooltipText={showInFullScreen ? "Minimize (Escape)" : "Full Size (Alt + Enter)"}
+              showFullSize={showFullSize}
+              setShowFullSize={setShowFullSize}
+              tooltipText={showFullSize ? "Minimize (Escape)" : "Full Size (Alt + Enter)"}
             /> : ""}
       </div>
       <LinkSourceAnet
@@ -164,9 +164,9 @@ Toolbar.propTypes = {
   setShowAnetLinksModal: PropTypes.func.isRequired,
   showExternalLinksModal: PropTypes.bool.isRequired,
   setShowExternalLinksModal: PropTypes.func.isRequired,
-  showInFullScreen: PropTypes.bool.isRequired,
-  setFullScreenHandle: PropTypes.func.isRequired,
-  disableFullSize: PropTypes.bool.isRequired
+  showFullSize: PropTypes.bool.isRequired,
+  setShowFullSize: PropTypes.func.isRequired,
+  disableFullSize: PropTypes.bool
 }
 
 function toggleBlock(editor, format, event) {
@@ -222,8 +222,8 @@ const EditorToggleButton = ({
   setShowModal,
   selectionRef,
   onClick,
-  showFullScreen,
-  setFullScreenHandle
+  showFullSize,
+  setShowFullSize
 }) => {
   let isActive
   let onMouseDown
@@ -245,7 +245,7 @@ const EditorToggleButton = ({
       break
     case BUTTON_TYPES.FULLSCREEN:
       onMouseDown = () => {
-        setFullScreenHandle(!showFullScreen)
+        setShowFullSize(!showFullSize)
       }
       break
     default:
@@ -286,8 +286,8 @@ EditorToggleButton.propTypes = {
   setShowModal: PropTypes.func,
   selectionRef: PropTypes.object,
   onClick: PropTypes.func,
-  showFullScreen: PropTypes.bool,
-  setFullScreenHandle: PropTypes.func
+  showFullSize: PropTypes.bool,
+  setShowFullSize: PropTypes.func
 }
 
 export const handleOnKeyDown = (
@@ -295,7 +295,7 @@ export const handleOnKeyDown = (
   editor,
   setShowAnetLinksModal,
   setShowExternalLinksModal,
-  setFullScreen,
+  setShowFullSize,
   disableFullSize
 ) => {
   // Ignore the state of CapsLock
@@ -321,17 +321,20 @@ export const handleOnKeyDown = (
         toggleBlock(editor, "block-quote", event)
         break
       case "enter":
+        // Make it full size
         if (!disableFullSize) {
           event.preventDefault()
-          setFullScreen(true)
+          setShowFullSize(true)
         }
         break
       default:
         break
     }
   }
+  // Return to normal size
   if (key === "escape" && !disableFullSize) {
-    setFullScreen(false)
+    event.preventDefault()
+    setShowFullSize(false)
   }
   if (event.ctrlKey) {
     switch (key) {

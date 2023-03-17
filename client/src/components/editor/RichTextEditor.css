@@ -1,3 +1,6 @@
+:root {
+  --banner-height: 50px
+}
 .editor-container {
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -5,18 +8,17 @@
 
 /* Style used to make rich-text-editor to full-size */
 .editor-container-fullsize {
-  position: absolute;
-  padding-top: 0px;
-  padding-right: 0px;
-  padding-left: 0px;
-  top: var(--logo-size);
+  position: absolute; 
+  /* In full size mode the richtext-editor start position, just below the topbar */
+  top: var(--banner-height);
   left: 0;
   max-width: none;
-  max-height: calc(100% - var(--logo-size));
+  max-height: calc(100% - var(--banner-height));
   width: 100%;
   height: 100%;
   background: whitesmoke;
-  z-index: 1300;
+  z-index: 1201;
+  /* Hide scrollbars in both x and y directions */
   overflow-y: hidden;
   overflow-x: hidden;
 }
@@ -28,11 +30,11 @@
   /* position, top and z-index with the following values are used to make rich text toolbar alway accesible even if the text is getting longer */
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1;
   border: 1px solid #ccc;
 }
 
-.editor-editable {
+.editor-container .editable {
   min-height: 10rem;
   max-height: 25rem;
   overflow: auto;
@@ -40,13 +42,12 @@
 }
 
 /* Style used to make editable area to full-size */
-.editor-editable-fullsize {
+.editor-container .editable-fullsize {
   /* Prevent edit-area from being longer than the editor-container */
-  max-height: calc(100% - var(--logo-size)); 
+  max-height: calc(100% - var(--banner-height)); 
   /* Support full height, but limited by max-height parameter */
   height: 100%; 
   border: 1px solid #ccc;
-  z-index: 50;
 }
 
 .editor-toggle-button-container {

@@ -226,7 +226,6 @@ a.btn {
 .dropdown-menu {
   overflow-y: auto;
   max-height: 400px;
-  z-index: 1301;
 }
 
 .dropdown-menu > li > a {

@@ -8,7 +8,7 @@ import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment/moment"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
@@ -71,20 +71,10 @@ const RichTextEditor = ({
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-  const slateEditorId = useId()
-  const editAreaId = useId()
-
-  const setFullScreenMode = (isFullScreen) => {
-    if (isFullScreen) {
-      const top = document.getElementById("bannerUser").offsetHeight + "px"
-      document.documentElement.style.setProperty("--logo-size", top)
-      document.getElementById(slateEditorId).classList?.toggle("editor-container-fullsize", true)
-      document.getElementById(editAreaId).classList?.toggle("editor-editable-fullsize", true)
-    } else {
-      document.getElementById(slateEditorId).classList?.remove("editor-container-fullsize")
-      document.getElementById(editAreaId).classList?.remove("editor-editable-fullsize")
-    }
-    setShowFullSize(isFullScreen)
+  const handleFullSizeMode = (isFullSize) => {
+    const topOffset = document.getElementById("bannerUser").offsetHeight + "px"
+    document.documentElement.style.setProperty("--banner-height", topOffset)
+    setShowFullSize(isFullSize)
   }
 
   return (
@@ -97,15 +87,15 @@ const RichTextEditor = ({
           serializeDebounced(editor, onChange)
         }}
       >
-        <div className={!readOnly ? "editor-container" : null} id={slateEditorId} >
+        <div className={!readOnly ? (showFullSize ? "editor-container editor-container-fullsize" : "editor-container") : null} >
           {!readOnly && (
             <Toolbar
               showAnetLinksModal={showAnetLinksModal}
               setShowAnetLinksModal={setShowAnetLinksModal}
               showExternalLinksModal={showExternalLinksModal}
               setShowExternalLinksModal={setShowExternalLinksModal}
-              showInFullScreen={showFullSize}
-              setFullScreenHandle={setFullScreenMode}
+              showFullSize={showFullSize}
+              setShowFullSize={handleFullSizeMode}
               disableFullSize={disableFullSize}
             />
           )}
@@ -119,13 +109,12 @@ const RichTextEditor = ({
                 editor,
                 setShowAnetLinksModal,
                 setShowExternalLinksModal,
-                setFullScreenMode,
+                handleFullSizeMode,
                 disableFullSize
               )
             }
-            className="editor-editable"
+            className={ showFullSize ? "editable editable-fullsize" : "editable"}
             readOnly={readOnly}
-            id={editAreaId}
           />
         </div>
       </Slate>
