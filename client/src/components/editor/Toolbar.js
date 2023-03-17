@@ -294,7 +294,9 @@ export const handleOnKeyDown = (
   event,
   editor,
   setShowAnetLinksModal,
-  setShowExternalLinksModal
+  setShowExternalLinksModal,
+  setFullScreen,
+  disableFullSize
 ) => {
   // Ignore the state of CapsLock
   const key = event.shiftKey ? event.key.toUpperCase() : event.key.toLowerCase()
@@ -318,9 +320,18 @@ export const handleOnKeyDown = (
       case "q":
         toggleBlock(editor, "block-quote", event)
         break
+      case "enter":
+        if (!disableFullSize) {
+          event.preventDefault()
+          setFullScreen(true)
+        }
+        break
       default:
         break
     }
+  }
+  if (key === "escape" && !disableFullSize) {
+    setFullScreen(false)
   }
   if (event.ctrlKey) {
     switch (key) {

@@ -118,7 +118,9 @@ const RichTextEditor = ({
                 e,
                 editor,
                 setShowAnetLinksModal,
-                setShowExternalLinksModal
+                setShowExternalLinksModal,
+                setFullScreenMode,
+                disableFullSize
               )
             }
             className="editor-editable"
