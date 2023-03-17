@@ -7,7 +7,7 @@ import {
   AuthorizationGroupOverlayRow,
   LocationOverlayRow,
   PersonDetailedOverlayRow,
-  TaskDetailedOverlayRow
+  TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
@@ -766,17 +766,15 @@ const ReportForm = ({
                           <NoPaginationTaskTable
                             id="tasks-tasks"
                             tasks={values.tasks}
-                            showParent
                             showDelete
                             showDescription
                             noTasksMessage={`No ${tasksLabel} selected; click in the efforts box to view your organization's efforts`}
                           />
                         }
                         overlayColumns={[
-                          Settings.fields.task.subLevel.shortLabel,
-                          Settings.fields.task.topLevel.shortLabel
+                          Settings.fields.task.subLevel.shortLabel
                         ]}
-                        overlayRenderRow={TaskDetailedOverlayRow}
+                        overlayRenderRow={TaskOverlayRow}
                         filterDefs={tasksFilters}
                         objectType={Task}
                         queryParams={{ status: Model.STATUS.ACTIVE }}

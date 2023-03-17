@@ -1,3 +1,4 @@
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _get from "lodash/get"
@@ -10,7 +11,6 @@ import Settings from "settings"
 const NoPaginationTaskTable = ({
   id,
   tasks,
-  showParent,
   showOrganization,
   showDelete,
   showDescription,
@@ -26,9 +26,6 @@ const NoPaginationTaskTable = ({
           <thead>
             <tr>
               <th>Name</th>
-              {showParent && (
-                <th>{Settings.fields.task.topLevel.shortLabel}</th>
-              )}
               {showOrganization && <th>Tasked organizations</th>}
               {showDescription && <th>Description</th>}
               <th />
@@ -40,19 +37,13 @@ const NoPaginationTaskTable = ({
               return (
                 <tr key={task.uuid}>
                   <td className="taskName">
-                    <LinkTo modelType="Task" model={task}>
-                      {task.shortName}
-                    </LinkTo>
+                    <BreadcrumbTrail
+                      modelType="Task"
+                      leaf={task}
+                      ascendantObjects={task.ascendantTasks}
+                      parentField="parentTask"
+                    />
                   </td>
-                  {showParent && (
-                    <td className="parentTaskName">
-                      {task.parentTask && (
-                        <LinkTo modelType="Task" model={task.parentTask}>
-                          {task.parentTask.shortName}
-                        </LinkTo>
-                      )}
-                    </td>
-                  )}
                   {showOrganization && (
                     <td className="taskOrg">
                       {task.taskedOrganizations.map(org => (
@@ -92,7 +83,6 @@ const NoPaginationTaskTable = ({
 NoPaginationTaskTable.propTypes = {
   id: PropTypes.string,
   tasks: PropTypes.array,
-  showParent: PropTypes.bool,
   showDelete: PropTypes.bool,
   onDelete: PropTypes.func,
   showOrganization: PropTypes.bool,

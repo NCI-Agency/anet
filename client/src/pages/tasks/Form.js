@@ -4,7 +4,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   OrganizationOverlayRow,
   PositionOverlayRow,
-  TaskSimpleOverlayRow
+  TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
@@ -279,7 +279,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                         }
                         value={values.parentTask}
                         overlayColumns={["Name"]}
-                        overlayRenderRow={TaskSimpleOverlayRow}
+                        overlayRenderRow={TaskOverlayRow}
                         filterDefs={tasksFilters}
                         objectType={Task}
                         fields={Task.autocompleteQuery}

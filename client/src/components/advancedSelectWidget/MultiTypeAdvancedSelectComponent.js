@@ -6,7 +6,7 @@ import {
   PersonDetailedOverlayRow,
   PositionOverlayRow,
   ReportDetailedOverlayRow,
-  TaskSimpleOverlayRow
+  TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
@@ -117,7 +117,7 @@ const widgetPropsLocation = {
 
 const widgetPropsTask = {
   objectType: Models.Task,
-  overlayRenderRow: TaskSimpleOverlayRow,
+  overlayRenderRow: TaskOverlayRow,
   overlayColumns: ["Name"],
   filterDefs: entityFilters,
   queryParams: { status: Model.STATUS.ACTIVE },

@@ -11,6 +11,7 @@ const AdvancedSelectFilter = ({
   value: inputValue,
   onChange,
   valueKey,
+  valueFunc,
   ...advancedSelectProps
 }) => {
   const defaultValue = inputValue || {}
@@ -26,7 +27,7 @@ const AdvancedSelectFilter = ({
   )
 
   return !asFormField ? (
-    <>{value[valueKey]}</>
+    <>{valueFunc(value, valueKey)}</>
   ) : (
     <AdvancedSingleSelect
       {...advancedSelectProps}
@@ -37,6 +38,7 @@ const AdvancedSelectFilter = ({
       onChange={handleChange}
       value={value}
       valueKey={valueKey}
+      valueFunc={valueFunc}
       smallOverlay
     />
   )
@@ -57,10 +59,12 @@ AdvancedSelectFilter.propTypes = {
   value: PropTypes.any,
   onChange: PropTypes.func, // eslint-disable-line react/no-unused-prop-types
   valueKey: PropTypes.string.isRequired,
+  valueFunc: PropTypes.func,
   fields: PropTypes.string,
   asFormField: PropTypes.bool
 }
 AdvancedSelectFilter.defaultProps = {
+  valueFunc: (v, k) => v?.[k],
   fields: "",
   asFormField: true
 }

@@ -260,7 +260,7 @@ describe("In new report page", () => {
         const assessment = taskAssessmentRows[i + 1]
         const questions = await assessment.$$("td > div")
         switch (await task.getText()) {
-          case "1.2.A":
+          case "EF 1 » EF 1.2 » 1.2.A":
             expect(questions).to.have.length(3)
             expect(await questions[0].getAttribute("id")).to.match(
               /\.question1$/

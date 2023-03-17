@@ -104,6 +104,14 @@ const GQL_GET_APP_DATA = gql`
           longName
           parentTask {
             uuid
+            shortName
+          }
+          ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
           }
           ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
         }

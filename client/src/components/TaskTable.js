@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
-import LinkTo from "components/LinkTo"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import {
   mapPageDispatchersToProps,
   PageDispatchersPropType,
@@ -24,6 +24,17 @@ const GQL_GET_TASK_LIST = gql`
         uuid
         shortName
         longName
+        parentTask {
+          uuid
+          shortName
+        }
+        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
       }
     }
   }
@@ -106,17 +117,18 @@ const BaseTaskTable = ({
             </tr>
           </thead>
           <tbody>
-            {Task.map(tasks, task => {
-              return (
-                <tr key={task.uuid}>
-                  <td>
-                    <LinkTo modelType="Task" model={task}>
-                      {task.shortName}
-                    </LinkTo>
-                  </td>
-                </tr>
-              )
-            })}
+            {Task.map(tasks, task => (
+              <tr key={task.uuid}>
+                <td>
+                  <BreadcrumbTrail
+                    modelType="Task"
+                    leaf={task}
+                    ascendantObjects={task.ascendantTasks}
+                    parentField="parentTask"
+                  />
+                </td>
+              </tr>
+            ))}
           </tbody>
         </Table>
       </UltimatePaginationTopDown>

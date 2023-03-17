@@ -81,6 +81,13 @@ const GQL_GET_REPORT = gql`
           uuid
           shortName
         }
+        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
+        }
         taskedOrganizations {
           uuid
           shortName

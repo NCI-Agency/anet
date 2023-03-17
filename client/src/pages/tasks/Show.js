@@ -4,6 +4,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import Approvals from "components/approvals/Approvals"
 import AssessmentResultsContainer from "components/assessments/AssessmentResultsContainer"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -53,15 +54,30 @@ const GQL_GET_TASK = gql`
       parentTask {
         uuid
         shortName
-        longName
+        parentTask {
+          uuid
+        }
+      }
+      ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+        uuid
+        shortName
+        parentTask {
+          uuid
+        }
       }
       descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
         uuid
         shortName
-        longName
         parentTask {
           uuid
           shortName
+        }
+        ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+          uuid
+          shortName
+          parentTask {
+            uuid
+          }
         }
         customFields
         ${GRAPHQL_NOTES_FIELDS}
@@ -285,10 +301,12 @@ const TaskShow = ({ pageDispatchers }) => {
                       component={FieldHelper.ReadonlyField}
                       humanValue={
                         task.parentTask && (
-                          <LinkTo modelType="Task" model={task.parentTask}>
-                            {task.parentTask.shortName}{" "}
-                            {task.parentTask.longName}
-                          </LinkTo>
+                          <BreadcrumbTrail
+                            modelType="Task"
+                            leaf={task.parentTask}
+                            ascendantObjects={task.ascendantTasks}
+                            parentField="parentTask"
+                          />
                         )
                       }
                     />

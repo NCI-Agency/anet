@@ -11,6 +11,8 @@ const PRINCIPALS = [
 
 const ADVISORS = ["CIV DMIN, Arthur", "CIV GUIST, Lin"]
 
+const TASKS = ["EF 1 » EF 1.2 » 1.2.A", "EF 1 » EF 1.2 » 1.2.B"]
+
 describe("Show print report page", () => {
   beforeEach("Open the show report page", async() => {
     await MyReports.open("arthur")
@@ -78,10 +80,10 @@ describe("Show print report page", () => {
       await expect(compactBannerText).to.equal(bannerSecurityText)
     })
     it("Should display all attendees", async() => {
-      const displayedPrincipals = await ShowReport.getCompactViewAttendees(
+      const displayedPrincipals = await ShowReport.getCompactViewElements(
         "principals"
       )
-      const displayedAdvisors = await ShowReport.getCompactViewAttendees(
+      const displayedAdvisors = await ShowReport.getCompactViewElements(
         "advisors"
       )
       for (const principal of PRINCIPALS) {
@@ -93,19 +95,35 @@ describe("Show print report page", () => {
     })
     it("Should display all attendees when assessments are shown", async() => {
       await ShowReport.selectOptionalField("assessments")
-      const displayedPrincipals = await ShowReport.getCompactViewAttendees(
+      const displayedPrincipals = await ShowReport.getCompactViewElements(
         "principals",
         true
       )
       for (const principal of PRINCIPALS) {
         await expect(displayedPrincipals).to.contain(principal)
       }
-      const displayedAdvisors = await ShowReport.getCompactViewAttendees(
+      const displayedAdvisors = await ShowReport.getCompactViewElements(
         "advisors",
         true
       )
       for (const advisor of ADVISORS) {
         await expect(displayedAdvisors).to.contain(advisor)
+      }
+    })
+    it("Should display all tasks", async() => {
+      const displayedTasks = await ShowReport.getCompactViewElements("tasks")
+      for (const task of TASKS) {
+        await expect(displayedTasks).to.contain(task)
+      }
+    })
+    it("Should display all tasks when assessments are shown", async() => {
+      await ShowReport.selectOptionalField("assessments")
+      const displayedTasks = await ShowReport.getCompactViewElements(
+        "tasks",
+        true
+      )
+      for (const task of TASKS) {
+        await expect(displayedTasks).to.contain(task)
       }
     })
   })

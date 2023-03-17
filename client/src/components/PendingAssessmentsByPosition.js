@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import {
@@ -78,6 +79,14 @@ const GQL_GET_POSITION_LIST = gql`
           longName
           parentTask {
             uuid
+            shortName
+          }
+          ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+            uuid
+            shortName
+            parentTask {
+              uuid
+            }
           }
           ${GRAPHQL_NOTIFICATIONS_NOTE_FIELDS}
         }
@@ -285,9 +294,12 @@ const TaskList = ({ tasks }) => {
           return (
             <tr key={task.uuid}>
               <td>
-                <LinkTo modelType="Task" model={task}>
-                  {task.shortName} {task.longName}
-                </LinkTo>
+                <BreadcrumbTrail
+                  modelType="Task"
+                  leaf={task}
+                  ascendantObjects={task.ascendantTasks}
+                  parentField="parentTask"
+                />
               </td>
             </tr>
           )

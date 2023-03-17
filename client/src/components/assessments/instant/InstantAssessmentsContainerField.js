@@ -1,4 +1,5 @@
 import AppContext from "components/AppContext"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import {
   CustomFieldsContainer,
   ReadonlyCustomFields
@@ -6,6 +7,7 @@ import {
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
+import { Task } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useMemo } from "react"
 import { Table } from "react-bootstrap"
@@ -145,12 +147,22 @@ const InstantAssessmentsContainerField = ({
       <tbody>
         {filteredEntities.map(entity => {
           const entityInstantAssessments = entity.getInstantAssessments()
+          const modelType = entityType.resourceName
 
           return (
             <React.Fragment key={`assessment-${values.uuid}-${entity.uuid}`}>
               <tr>
                 <td>
-                  <LinkTo modelType={entityType.resourceName} model={entity} />
+                  {modelType === Task.resourceName ? (
+                    <BreadcrumbTrail
+                      modelType={modelType}
+                      leaf={entity}
+                      ascendantObjects={entity.ascendantTasks}
+                      parentField="parentTask"
+                    />
+                  ) : (
+                    <LinkTo modelType={modelType} model={entity} />
+                  )}
                 </td>
               </tr>
               {entityInstantAssessments.map(([ak, ac]) => (

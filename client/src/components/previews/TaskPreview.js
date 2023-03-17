@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import { PreviewField } from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
 import Model from "components/Model"
@@ -28,7 +29,16 @@ const GQL_GET_TASK = gql`
       parentTask {
         uuid
         shortName
-        longName
+        parentTask {
+          uuid
+        }
+      }
+      ascendantTasks(query: { pageNum: 0, pageSize: 0 }) {
+        uuid
+        shortName
+        parentTask {
+          uuid
+        }
       }
       responsiblePositions {
         uuid
@@ -148,9 +158,12 @@ const TaskPreview = ({ className, uuid }) => {
             label={Settings.fields.task.parentTask.label}
             value={
               task.parentTask && (
-                <LinkTo modelType="Task" model={task.parentTask}>
-                  {task.parentTask.shortName} {task.parentTask.longName}
-                </LinkTo>
+                <BreadcrumbTrail
+                  modelType="Task"
+                  leaf={task.parentTask}
+                  ascendantObjects={task.ascendantTasks}
+                  parentField="parentTask"
+                />
               )
             }
           />

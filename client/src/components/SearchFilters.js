@@ -27,8 +27,9 @@ import {
   LocationOverlayRow,
   PersonDetailedOverlayRow,
   PositionOverlayRow,
-  TaskSimpleOverlayRow
+  TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { getBreadcrumbTrailAsText } from "components/BreadcrumbTrail"
 import Model from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import _pickBy from "lodash/pickBy"
@@ -168,9 +169,11 @@ const advancedSelectFilterLocationProps = {
 }
 const advancedSelectFilterTaskProps = {
   overlayColumns: ["Name"],
-  overlayRenderRow: TaskSimpleOverlayRow,
+  overlayRenderRow: TaskOverlayRow,
   objectType: Task,
   valueKey: "shortName",
+  valueFunc: (v, k) =>
+    getBreadcrumbTrailAsText(v, v?.ascendantTasks, "parentTask", k),
   fields: Task.autocompleteQuery,
   addon: TASKS_ICON
 }

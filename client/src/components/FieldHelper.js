@@ -1,12 +1,14 @@
 import { Icon } from "@blueprintjs/core"
 import { IconNames } from "@blueprintjs/icons"
 import classNames from "classnames"
+import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import { CompactRow } from "components/Compact"
 import LinkTo from "components/LinkTo"
 import RemoveButton from "components/RemoveButton"
 import _cloneDeep from "lodash/cloneDeep"
 import _get from "lodash/get"
 import _isEmpty from "lodash/isEmpty"
+import { Task } from "models"
 import PropTypes from "prop-types"
 import React, { useCallback, useMemo } from "react"
 import {
@@ -608,32 +610,41 @@ export const FieldShortcuts = ({
   onChange,
   handleAddItem,
   title
-}) =>
-  shortcuts &&
-  shortcuts.length > 0 && (
-    <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
-      <h5>{title}</h5>
-      <ListGroup>
-        {objectType.map(shortcuts, (shortcut, idx) => (
-          <ListGroup.Item key={shortcut.uuid}>
-            <Button
-              onClick={() => handleAddItem(shortcut, onChange, curValue)}
-              variant="secondary"
-              size="sm"
-            >
-              <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
-            </Button>
-            <LinkTo
-              modelType={objectType.resourceName}
-              model={shortcut}
-              isLink={false}
-              forShortcut
-            />
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-    </div>
+}) => {
+  const modelType = objectType.resourceName
+  return (
+    shortcuts &&
+    shortcuts.length > 0 && (
+      <div id={`${fieldName}-shortcut-list`} className="shortcut-list">
+        <h5>{title}</h5>
+        <ListGroup>
+          {objectType.map(shortcuts, (shortcut, idx) => (
+            <ListGroup.Item key={shortcut.uuid}>
+              <Button
+                onClick={() => handleAddItem(shortcut, onChange, curValue)}
+                variant="secondary"
+                size="sm"
+              >
+                <Icon icon={IconNames.DOUBLE_CHEVRON_LEFT} />
+              </Button>
+              {modelType === Task.resourceName ? (
+                <BreadcrumbTrail
+                  modelType={modelType}
+                  leaf={shortcut}
+                  ascendantObjects={shortcut.ascendantTasks}
+                  parentField="parentTask"
+                  isLink={false}
+                />
+              ) : (
+                <LinkTo modelType={modelType} model={shortcut} isLink={false} />
+              )}
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </div>
+    )
   )
+}
 
 FieldShortcuts.propTypes = {
   shortcuts: PropTypes.arrayOf(PropTypes.shape({ uuid: PropTypes.string })),

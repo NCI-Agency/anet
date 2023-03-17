@@ -133,7 +133,9 @@ export default class Task extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, shortName, longName, parentTask { uuid, shortName } taskedOrganizations { uuid, shortName }, customFields"
+    "uuid shortName longName parentTask { uuid shortName }" +
+    " ascendantTasks(query: { pageNum: 0, pageSize: 0 }) { uuid shortName parentTask { uuid } }" +
+    " taskedOrganizations { uuid shortName } customFields"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -173,9 +175,7 @@ export default class Task extends Model {
     return this.fieldSettings().assessments || {}
   }
 
-  static FILTERED_CLIENT_SIDE_FIELDS = [
-    // Fill if necessary
-  ]
+  static FILTERED_CLIENT_SIDE_FIELDS = ["ascendantTasks"]
 
   static filterClientSideFields(obj, ...additionalFields) {
     return Model.filterClientSideFields(

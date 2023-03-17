@@ -4,7 +4,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   LocationOverlayRow,
   OrganizationOverlayRow,
-  TaskSimpleOverlayRow
+  TaskOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
@@ -429,7 +429,7 @@ const OrganizationForm = ({ edit, title, initialValues, notesComponent }) => {
                                 />
                               }
                               overlayColumns={["Name"]}
-                              overlayRenderRow={TaskSimpleOverlayRow}
+                              overlayRenderRow={TaskOverlayRow}
                               filterDefs={tasksFilters}
                               objectType={Task}
                               queryParams={{ status: Model.STATUS.ACTIVE }}
