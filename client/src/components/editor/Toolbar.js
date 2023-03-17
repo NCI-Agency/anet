@@ -12,14 +12,18 @@ const LIST_TYPES = ["bulleted-list", "numbered-list"]
 const BUTTON_TYPES = {
   MARK: "mark",
   BLOCK: "block",
-  MODAL: "modal"
+  MODAL: "modal",
+  FULLSCREEN: "fullscreen"
 }
 
 const Toolbar = ({
   showAnetLinksModal,
   setShowAnetLinksModal,
   showExternalLinksModal,
-  setShowExternalLinksModal
+  setShowExternalLinksModal,
+  showInFullScreen,
+  setFullScreenHandle,
+  disableFullSize
 }) => {
   const editor = useSlate()
   const selectionRef = useRef(editor.selection)
@@ -128,6 +132,15 @@ const Toolbar = ({
           onClick={editor.redo}
           tooltipText="Redo (Ctrl + y or Ctrl + ⇧ + z)"
         />
+        {!disableFullSize
+          ? <EditorToggleButton
+              type={BUTTON_TYPES.FULLSCREEN}
+              icon= {showInFullScreen ? "minimize" : "fullscreen"}
+              editor={editor}
+              showFullScreen={showInFullScreen}
+              setFullScreenHandle={setFullScreenHandle}
+              tooltipText={showInFullScreen ? "Minimize (Escape)" : "Full Size (Alt + Enter)"}
+            /> : ""}
       </div>
       <LinkSourceAnet
         editor={editor}
@@ -150,7 +163,10 @@ Toolbar.propTypes = {
   showAnetLinksModal: PropTypes.bool.isRequired,
   setShowAnetLinksModal: PropTypes.func.isRequired,
   showExternalLinksModal: PropTypes.bool.isRequired,
-  setShowExternalLinksModal: PropTypes.func.isRequired
+  setShowExternalLinksModal: PropTypes.func.isRequired,
+  showInFullScreen: PropTypes.bool.isRequired,
+  setFullScreenHandle: PropTypes.func.isRequired,
+  disableFullSize: PropTypes.bool.isRequired
 }
 
 function toggleBlock(editor, format, event) {
@@ -205,7 +221,9 @@ const EditorToggleButton = ({
   showModal,
   setShowModal,
   selectionRef,
-  onClick
+  onClick,
+  showFullScreen,
+  setFullScreenHandle
 }) => {
   let isActive
   let onMouseDown
@@ -223,6 +241,11 @@ const EditorToggleButton = ({
       onMouseDown = () => {
         selectionRef.current = editor.selection
         setShowModal(true)
+      }
+      break
+    case BUTTON_TYPES.FULLSCREEN:
+      onMouseDown = () => {
+        setFullScreenHandle(!showFullScreen)
       }
       break
     default:
@@ -262,7 +285,9 @@ EditorToggleButton.propTypes = {
   showModal: PropTypes.bool,
   setShowModal: PropTypes.func,
   selectionRef: PropTypes.object,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
+  showFullScreen: PropTypes.bool,
+  setFullScreenHandle: PropTypes.func
 }
 
 export const handleOnKeyDown = (

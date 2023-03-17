@@ -8,7 +8,7 @@ import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment/moment"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
@@ -45,7 +45,8 @@ const RichTextEditor = ({
   onChange,
   onHandleBlur,
   className,
-  readOnly
+  readOnly,
+  disableFullSize
 }) => {
   const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
   const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
@@ -53,6 +54,7 @@ const RichTextEditor = ({
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
   )
+  const [showFullSize, setShowFullSize] = useState(false)
 
   const [slateValue, setSlateValue] = useState(createSlateValue(value))
   const previousValue = usePrevious(value)
@@ -64,10 +66,26 @@ const RichTextEditor = ({
       editor.children = createSlateValue(value)
       editor.onChange()
     }
-  }, [editor, previousValue, readOnly, value])
+  }, [editor, previousValue, readOnly, disableFullSize, value])
 
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
+
+  const slateEditorId = useId()
+  const editAreaId = useId()
+
+  const setFullScreenMode = (isFullScreen) => {
+    if (isFullScreen) {
+      const top = document.getElementById("bannerUser").offsetHeight + "px"
+      document.documentElement.style.setProperty("--logo-size", top)
+      document.getElementById(slateEditorId).classList?.toggle("editor-container-fullsize", true)
+      document.getElementById(editAreaId).classList?.toggle("editor-editable-fullsize", true)
+    } else {
+      document.getElementById(slateEditorId).classList?.remove("editor-container-fullsize")
+      document.getElementById(editAreaId).classList?.remove("editor-editable-fullsize")
+    }
+    setShowFullSize(isFullScreen)
+  }
 
   return (
     <div className={className}>
@@ -79,13 +97,16 @@ const RichTextEditor = ({
           serializeDebounced(editor, onChange)
         }}
       >
-        <div className={!readOnly ? "editor-container" : null}>
+        <div className={!readOnly ? "editor-container" : null} id={slateEditorId} >
           {!readOnly && (
             <Toolbar
               showAnetLinksModal={showAnetLinksModal}
               setShowAnetLinksModal={setShowAnetLinksModal}
               showExternalLinksModal={showExternalLinksModal}
               setShowExternalLinksModal={setShowExternalLinksModal}
+              showInFullScreen={showFullSize}
+              setFullScreenHandle={setFullScreenMode}
+              disableFullSize={disableFullSize}
             />
           )}
           <Editable
@@ -100,8 +121,9 @@ const RichTextEditor = ({
                 setShowExternalLinksModal
               )
             }
-            className="editable"
+            className="editor-editable"
             readOnly={readOnly}
+            id={editAreaId}
           />
         </div>
       </Slate>
@@ -114,7 +136,8 @@ RichTextEditor.propTypes = {
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
   className: PropTypes.string,
-  readOnly: PropTypes.bool
+  readOnly: PropTypes.bool,
+  disableFullSize: PropTypes.bool
 }
 
 const withHtml = editor => {
