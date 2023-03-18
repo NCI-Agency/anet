@@ -91,7 +91,7 @@ dependencies {
 	implementation 'commons-collections:commons-collections:3.2.2'
 
 	// Supported database is PostgreSQL:
-	implementation 'org.postgresql:postgresql:42.5.4'
+	implementation 'org.postgresql:postgresql:42.6.0'
 	implementation 'org.liquibase:liquibase-core:4.20.0'
 
 	// For caching domain users (used in every request in the AuthenticationFilter)
@@ -718,7 +718,7 @@ jar {
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('config/google_checks.xml')
-	toolVersion = '10.9.0'
+	toolVersion = '10.9.2'
 }
 //Easiest way to avoid checking generated code
 checkstyleTest {
