@@ -37,7 +37,10 @@ const SecurityBanner = ({ onLogout }) => {
 
   return (
     <>
-      <SecurityBannerContainer className="bg-primary">
+      <SecurityBannerContainer
+        className="bg-primary"
+        id="securityBannerContainer"
+      >
         <VersionBox id="bannerVersion">Version : {Version}</VersionBox>
         <SecurityTextContainer
           id="bannerSecurityText"
@@ -148,6 +151,8 @@ const SecurityBannerContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   color: white;
+  z-index: 1202;
+  position: relative;
 `
 
 const ConnectionBanner = ({ connection }) => {

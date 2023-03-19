@@ -1,7 +1,7 @@
 import { Icon } from "@blueprintjs/core"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
-import React, { useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
@@ -23,14 +23,36 @@ const Toolbar = ({
   setShowExternalLinksModal,
   showFullSize,
   setShowFullSize,
-  disableFullSize
+  disableFullSize,
+  handleToolbarHeight
 }) => {
   const editor = useSlate()
   const selectionRef = useRef(editor.selection)
+  const [height, setHeight] = useState(0)
+  const toolbarDiv = useRef()
+
+  useEffect(() => {
+    function updateToolbarHeight() {
+      const curHeight = toolbarDiv.current.clientHeight
+      if (curHeight !== undefined && curHeight !== height) {
+        setHeight(curHeight)
+      }
+    }
+    updateToolbarHeight()
+    window.addEventListener("resize", updateToolbarHeight)
+    // returned function will be called on component unmount
+    return () => {
+      window.removeEventListener("resize", updateToolbarHeight)
+    }
+  }, [height])
+
+  useEffect(() => {
+    handleToolbarHeight(height)
+  }, [height, handleToolbarHeight])
 
   return (
     <>
-      <div className="toolbar">
+      <div className="toolbar" ref={toolbarDiv}>
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
@@ -132,15 +154,16 @@ const Toolbar = ({
           onClick={editor.redo}
           tooltipText="Redo (Ctrl + y or Ctrl + ⇧ + z)"
         />
-        {!disableFullSize
-          ? <EditorToggleButton
-              type={BUTTON_TYPES.FULLSCREEN}
-              icon= {showFullSize ? "minimize" : "fullscreen"}
-              editor={editor}
-              showFullSize={showFullSize}
-              setShowFullSize={setShowFullSize}
-              tooltipText={showFullSize ? "Minimize (Escape)" : "Full Size (Alt + Enter)"}
-            /> : ""}
+        {!disableFullSize && (
+          <EditorToggleButton
+            type={BUTTON_TYPES.FULLSCREEN}
+            icon={showFullSize ? "minimize" : "fullscreen"}
+            editor={editor}
+            showFullSize={showFullSize}
+            setShowFullSize={setShowFullSize}
+            tooltipText={showFullSize ? "Minimize (Escape)" : "Full Size (Alt + Enter)"}
+          />
+        )}
       </div>
       <LinkSourceAnet
         editor={editor}
@@ -166,7 +189,8 @@ Toolbar.propTypes = {
   setShowExternalLinksModal: PropTypes.func.isRequired,
   showFullSize: PropTypes.bool.isRequired,
   setShowFullSize: PropTypes.func.isRequired,
-  disableFullSize: PropTypes.bool
+  disableFullSize: PropTypes.bool,
+  handleToolbarHeight: PropTypes.func.isRequired
 }
 
 function toggleBlock(editor, format, event) {
@@ -244,9 +268,7 @@ const EditorToggleButton = ({
       }
       break
     case BUTTON_TYPES.FULLSCREEN:
-      onMouseDown = () => {
-        setShowFullSize(!showFullSize)
-      }
+      onMouseDown = () => setShowFullSize(!showFullSize)
       break
     default:
       onMouseDown = onClick

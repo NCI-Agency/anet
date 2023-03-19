@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
+import classNames from "classnames"
 import {
   Editable,
   Slate,
@@ -72,10 +73,23 @@ const RichTextEditor = ({
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
   const handleFullSizeMode = (isFullSize) => {
-    const topOffset = document.getElementById("bannerUser").offsetHeight + "px"
-    document.documentElement.style.setProperty("--banner-height", topOffset)
+    handleBannerHeight()
     setShowFullSize(isFullSize)
   }
+  const handleBannerHeight = () => {
+    const topOffset = document.getElementById("securityBannerContainer").getBoundingClientRect().bottom + "px"
+    document.documentElement.style.setProperty("--banner-height", topOffset)
+  }
+  const handleToolbarHeight = (toolbarHeight) => document.documentElement.style.setProperty("--toolbar-height", toolbarHeight + "px")
+
+  useEffect(() => {
+    function handleWindowResize() {
+      handleBannerHeight()
+    }
+    window.addEventListener("resize", handleWindowResize)
+    // returned function will be called on component unmount
+    return () => window.removeEventListener("resize", handleWindowResize)
+  }, [])
 
   return (
     <div className={className}>
@@ -87,7 +101,7 @@ const RichTextEditor = ({
           serializeDebounced(editor, onChange)
         }}
       >
-        <div className={!readOnly ? (showFullSize ? "editor-container editor-container-fullsize" : "editor-container") : null} >
+        <div className={classNames({ "editor-container": !readOnly, "editor-container-fullsize": showFullSize })}>
           {!readOnly && (
             <Toolbar
               showAnetLinksModal={showAnetLinksModal}
@@ -97,6 +111,7 @@ const RichTextEditor = ({
               showFullSize={showFullSize}
               setShowFullSize={handleFullSizeMode}
               disableFullSize={disableFullSize}
+              handleToolbarHeight={handleToolbarHeight}
             />
           )}
           <Editable
@@ -113,7 +128,7 @@ const RichTextEditor = ({
                 disableFullSize
               )
             }
-            className={ showFullSize ? "editable editable-fullsize" : "editable"}
+            className={classNames("editable", { "editable-fullsize": showFullSize })}
             readOnly={readOnly}
           />
         </div>

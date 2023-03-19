@@ -68,7 +68,7 @@ const TopBar = ({
 
   return (
     <div
-      style={{ flex: "0 0 auto", zIndex: 1201 }}
+      style={{ flex: "0 0 auto" }}
       className="d-print-none"
       ref={topbarDiv}
     >
