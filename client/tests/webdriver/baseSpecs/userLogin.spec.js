@@ -2,12 +2,17 @@ import { expect } from "chai"
 import Home from "../pages/home.page"
 
 describe("Anet home page", () => {
-  it("should be able to logout using the dropdown in header", async() => {
+  it("should be able to logout using the dropdown in header and login from logout page", async() => {
     await Home.open()
     await (await Home.getBannerDropdown()).click()
     await (await Home.getLogoutButton()).waitForDisplayed()
     await (await Home.getLogoutButton()).click()
-    await Home.waitForLoginForm()
+    const title = await browser.getTitle()
+    await expect(title).to.equal("ANET Logout")
+    await (await Home.getLoginButton()).waitForDisplayed()
+    await (await Home.getLoginButton()).click()
+    const titleLogin = await browser.getTitle()
+    await expect(titleLogin).to.equal("Sign in to ANET")
   })
   it("should have the right title", async() => {
     await Home.open()
