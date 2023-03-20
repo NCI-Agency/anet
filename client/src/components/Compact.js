@@ -13,8 +13,8 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Link, useLocation } from "react-router-dom"
-import anetLogo from "../../public/favicon/logo.svg"
 import Settings from "settings"
+import anetLogo from "../../public/favicon/logo.svg"
 
 export const PAGE_SIZES = {
   A4: {
