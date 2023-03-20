@@ -1129,6 +1129,7 @@ type Task {
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
   descendantTasks(query: TaskSearchQueryInput): [Task]
+  description: String
   isSubscribed: Boolean
   longName: String
   notes: [Note]
@@ -1152,6 +1153,7 @@ input TaskInput {
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformationInput]
+  description: String
   longName: String
   parentTask: TaskInput
   plannedCompletion: Instant

@@ -19,6 +19,18 @@ class CreateTask extends Page {
     return browser.$('input[id="shortName"]')
   }
 
+  async getShortNameInput() {
+    return browser.$("#shortName")
+  }
+
+  async getLongNameInput() {
+    return browser.$("#longName")
+  }
+
+  async getDescriptionInput() {
+    return browser.$("#fg-description .editable")
+  }
+
   async getCustomFieldsContainer() {
     return browser.$("#custom-fields")
   }
@@ -62,6 +74,12 @@ class CreateTask extends Page {
 
   async submitForm() {
     await (await this.getSubmitButton()).click()
+  }
+
+  async fillTaskDescription(description) {
+    await (await this.getDescriptionInput()).click()
+    await browser.keys(description)
+    await browser.pause(300)
   }
 }
 

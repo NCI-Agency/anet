@@ -54,6 +54,11 @@ export default class Task extends Model {
         .nullable()
         .default("")
         .label(Settings.fields.task.longName.label),
+      description: yup
+        .string()
+        .nullable()
+        .default("")
+        .label(Settings.fields.task.description),
       category: yup.string().nullable().default(""),
       taskedOrganizations: yup
         .array()

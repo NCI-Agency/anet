@@ -9,6 +9,18 @@ class ShowTask extends Page {
     return browser.$("#entity-assessments-results-weekly")
   }
 
+  async getLongName() {
+    return browser.$('div[id="longName"')
+  }
+
+  async getShortName() {
+    return browser.$('div[id="shortName"')
+  }
+
+  async getDescription() {
+    return browser.$('div[id="description"')
+  }
+
   async getMonthlyAssessmentsTable() {
     return (await this.getAssessmentResultsMonthly()).$(
       "table.assessments-table"

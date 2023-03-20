@@ -22,7 +22,9 @@ import NavigationWarning from "components/NavigationWarning"
 import OrganizationTable from "components/OrganizationTable"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
+import RichTextEditor from "components/RichTextEditor"
 import { FastField, Field, Form, Formik } from "formik"
+import _isEqual from "lodash/isEqual"
 import { Organization, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { useContext, useState } from "react"
@@ -179,6 +181,23 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
                   dictProps={fieldSettings.longName}
                   name="longName"
                   component={FieldHelper.InputField}
+                />
+
+                <FastField
+                  name="description"
+                  label={fieldSettings.description}
+                  component={FieldHelper.SpecialField}
+                  onChange={value => {
+                    // prevent initial unnecessary render of RichTextEditor
+                    if (!_isEqual(values.description, value)) {
+                      setFieldValue("description", value, true)
+                    }
+                  }}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("description", true, false)
+                  }}
+                  widget={<RichTextEditor className="description" />}
                 />
 
                 {disabled ? (
