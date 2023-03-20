@@ -17,3 +17,4 @@ export const LOCATION_TYPE = {
   index: 1,
   type: "ADVISOR_LOCATION"
 }
+export const DESCRIPTION = "Location Description"

@@ -21,6 +21,7 @@ import {
 } from "components/Page"
 import RelatedObjectNotes from "components/RelatedObjectNotes"
 import ReportCollection from "components/ReportCollection"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { convertLatLngToMGRS } from "geoUtils"
 import _escape from "lodash/escape"
@@ -141,6 +142,14 @@ const LocationShow = ({ pageDispatchers }) => {
               />
               <Fieldset>
                 <Field name="name" component={FieldHelper.ReadonlyField} />
+
+                <Field
+                  name="description"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <RichTextEditor readOnly value={values.description} />
+                  }
+                />
 
                 <Field
                   name="status"

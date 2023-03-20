@@ -60,6 +60,9 @@ public class Location extends AbstractCustomizableAnetBean
   @GraphQLQuery
   @GraphQLInputField
   private LocationType type;
+  @GraphQLQuery
+  @GraphQLInputField
+  private String description;
   /* The following are all Lazy Loaded */
   // annotated below
   List<ApprovalStep> planningApprovalSteps; /* Planning approval process for this Task */
@@ -106,6 +109,14 @@ public class Location extends AbstractCustomizableAnetBean
 
   public void setType(LocationType type) {
     this.type = type;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @GraphQLQuery(name = "planningApprovalSteps")
@@ -161,12 +172,14 @@ public class Location extends AbstractCustomizableAnetBean
     return super.equals(o) && Objects.equals(other.getUuid(), uuid)
         && Objects.equals(other.getName(), name) && Objects.equals(other.getStatus(), status)
         && Objects.equals(other.getLat(), lat) && Objects.equals(other.getLng(), lng)
-        && Objects.equals(other.getType(), type) && Objects.equals(other.getCreatedAt(), createdAt);
+        && Objects.equals(other.getType(), type) && Objects.equals(other.getCreatedAt(), createdAt)
+        && Objects.equals(other.getDescription(), description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), uuid, name, type, status, lat, lng, createdAt);
+    return Objects.hash(super.hashCode(), uuid, name, type, status, lat, lng, createdAt,
+        description);
   }
 
   @Override

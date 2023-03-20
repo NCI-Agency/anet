@@ -12,8 +12,8 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSearchQuery> {
 
-  private static final String[] fields =
-      {"uuid", "name", "status", "lat", "lng", "type", "createdAt", "updatedAt", "customFields"};
+  private static final String[] fields = {"uuid", "name", "status", "lat", "lng", "type",
+      "description", "createdAt", "updatedAt", "customFields"};
   public static final String TABLE_NAME = "locations";
   public static final String LOCATION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
 
@@ -42,9 +42,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   @Override
   public Location insertInternal(Location l) {
     getDbHandle().createUpdate(
-        "/* locationInsert */ INSERT INTO locations (uuid, name, type, status, lat, lng, \"createdAt\", "
-            + "\"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :status, :lat, :lng, :createdAt, "
-            + ":updatedAt, :customFields)")
+        "/* locationInsert */ INSERT INTO locations (uuid, name, type, description, status, lat, lng, "
+            + "\"createdAt\", \"updatedAt\", \"customFields\") VALUES (:uuid, :name, :type, :description, :status, "
+            + ":lat, :lng, :createdAt, :updatedAt, :customFields)")
         .bindBean(l).bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus()))
@@ -55,9 +55,9 @@ public class LocationDao extends AnetSubscribableObjectDao<Location, LocationSea
   @Override
   public int updateInternal(Location l) {
     return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
-        + "SET name = :name, type = :type, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt, "
-        + "\"customFields\" = :customFields WHERE uuid = :uuid").bindBean(l)
-        .bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
+        + "SET name = :name, type = :type, description = :description, status = :status, lat = :lat, lng = :lng, "
+        + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields WHERE uuid = :uuid")
+        .bindBean(l).bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
         .bind("status", DaoUtils.getEnumId(l.getStatus()))
         .bind("type", DaoUtils.getEnumString(l.getType())).execute();
   }

@@ -2,6 +2,7 @@ import { expect } from "chai"
 import CreateNewLocation from "../pages/location/createNewLocation.page"
 import {
   BAD_LAT_LNG_VAL,
+  DESCRIPTION,
   LOCATION_COORDS,
   LOCATION_NAME,
   LOCATION_TYPE,
@@ -58,12 +59,12 @@ describe("When creating a new Location", () => {
     await (await CreateNewLocation.getLatField()).setValue(LOCATION_COORDS.lat)
     await CreateNewLocation.deleteInput(CreateNewLocation.getLngField())
     await (await CreateNewLocation.getLngField()).setValue(LOCATION_COORDS.lng)
+    await CreateNewLocation.fillLocationDescription(DESCRIPTION)
     // trigger onblur effect
     await (await CreateNewLocation.getNameField()).click()
     await (await CreateNewLocation.getAllFormatsPopover()).click()
     await (await CreateNewLocation.getAllFormatsPopoverLat()).waitForExist()
     await (await CreateNewLocation.getAllFormatsPopoverMGRS()).waitForExist()
-
     await expect(
       await (await CreateNewLocation.getAllFormatsPopoverLat()).getText()
     ).to.equal(LOCATION_COORDS.lat)
