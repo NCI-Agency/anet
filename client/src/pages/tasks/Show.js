@@ -30,6 +30,7 @@ import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
 import React, { useContext, useState } from "react"
+import { ListGroup, ListGroupItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
@@ -66,6 +67,10 @@ const GQL_GET_TASK = gql`
         parentTask {
           uuid
         }
+      }
+      childrenTasks {
+        uuid
+        shortName
       }
       descendantTasks(query: { pageNum: 0, pageSize: 0 }) {
         uuid
@@ -304,7 +309,7 @@ const TaskShow = ({ pageDispatchers }) => {
                       )
                     }
                   />
-                  {Settings.fields.task.parentTask && (
+                  {Settings.fields.task.parentTask && task.parentTask?.uuid && (
                     <TaskParentTask
                       dictProps={Settings.fields.task.parentTask}
                       name="parentTask"
@@ -320,6 +325,27 @@ const TaskShow = ({ pageDispatchers }) => {
                         )
                       }
                     />
+                  )}
+                  {Settings.fields.task.childrenTasks &&
+                    task.childrenTasks?.length > 0 && (
+                      <Field
+                        label={Settings.fields.task.childrenTasks}
+                        name="subEfforts"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <ListGroup>
+                            {task.childrenTasks?.map(task => (
+                              <ListGroupItem key={task.uuid}>
+                                <LinkTo
+                                  showIcon={false}
+                                  modelType="Task"
+                                  model={task}
+                                />
+                              </ListGroupItem>
+                            ))}
+                          </ListGroup>
+                        }
+                      />
                   )}
                   {Settings.fields.task.plannedCompletion && (
                     <PlannedCompletionField
