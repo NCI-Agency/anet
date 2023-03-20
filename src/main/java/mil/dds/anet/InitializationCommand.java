@@ -62,11 +62,11 @@ public class InitializationCommand extends EnvironmentCommand<AnetConfiguration>
     }
 
     // Set Classification String as default
-    saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION, "NATO_UNCLASSIFIED");
+    saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_CLASSIFICATION, "NATO UNCLASSIFIED");
 
     // Set Releasablility String as default
     saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_RELEASABILITY,
-        "releasable to NATO_UNCLASSIFIED");
+        "releasable to Finland and Sweden");
 
     // Set Classification Color as default
     saveAdminSetting(engine, AdminSettingKeys.SECURITY_BANNER_COLOR, "GREEN");
