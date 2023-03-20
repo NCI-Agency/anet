@@ -22,7 +22,7 @@ public class Position extends AbstractCustomizableAnetBean
     implements RelatableObject, SubscribableObject, WithStatus {
 
   public static enum PositionType {
-    ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
+    ADVISOR, PRINCIPAL, SUPERUSER, ADMINISTRATOR
   }
 
   @GraphQLQuery

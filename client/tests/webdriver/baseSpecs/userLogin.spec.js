@@ -40,12 +40,12 @@ describe("Anet default user login", () => {
   })
 })
 
-describe("Anet super user login", () => {
-  it("Super user is logged in", async() => {
-    await Home.openAsSuperUser()
+describe("Anet superuser login", () => {
+  it("Superuser is logged in", async() => {
+    await Home.openAsSuperuser()
     const bannerUser = await (await Home.getBannerUser()).getText()
-    const superUserValue = "BECCABON, Rebecca"
-    await expect(bannerUser).to.equal(superUserValue)
+    const superuserValue = "BECCABON, Rebecca"
+    await expect(bannerUser).to.equal(superuserValue)
     await Home.logout()
   })
 })

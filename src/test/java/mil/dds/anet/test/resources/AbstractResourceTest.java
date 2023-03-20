@@ -169,7 +169,7 @@ public abstract class AbstractResourceTest {
   }
 
   // Advisors in the test database
-  public static Person getSuperUser() {
+  public static Person getSuperuser() {
     final Person rebecca =
         findOrPutPersonInDb(Person.builder().withDomainUsername("rebecca").build());
     assertThat(rebecca).isNotNull();
@@ -232,8 +232,8 @@ public abstract class AbstractResourceTest {
   }
 
   // Getting the above as a normal bean
-  public static mil.dds.anet.beans.Person getSuperUserBean() {
-    return getInput(getSuperUser(), mil.dds.anet.beans.Person.class);
+  public static mil.dds.anet.beans.Person getSuperuserBean() {
+    return getInput(getSuperuser(), mil.dds.anet.beans.Person.class);
   }
 
   public static mil.dds.anet.beans.Person getRegularUserBean() {

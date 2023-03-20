@@ -379,10 +379,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
   @Test
   public void organizationUpdateTypePermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Person superUser = getBobBobtown();
+    final Person superuser = getBobBobtown();
     final Person regularUser = getRegularUser();
-    final MutationExecutor superUserMutationExecutor =
-        getMutationExecutor(superUser.getDomainUsername());
+    final MutationExecutor superuserMutationExecutor =
+        getMutationExecutor(superuser.getDomainUsername());
     final MutationExecutor regularUserMutationExecutor =
         getMutationExecutor(regularUser.getDomainUsername());
 
@@ -395,24 +395,24 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     org.setType(OrganizationType.PRINCIPAL_ORG);
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(org));
     org.setType(OrganizationType.ADVISOR_ORG);
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(org));
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(org));
     failUpdateOrganization(regularUserMutationExecutor, getOrganizationInput(org));
   }
 
   @Test
-  public void organizationSuperUserPermissionTest()
+  public void organizationSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Person superUser = getBobBobtown();
-    final Position superUserPosition = superUser.getPosition();
-    final MutationExecutor superUserMutationExecutor =
-        getMutationExecutor(superUser.getDomainUsername());
+    final Person superuser = getBobBobtown();
+    final Position superuserPosition = superuser.getPosition();
+    final MutationExecutor superuserMutationExecutor =
+        getMutationExecutor(superuser.getDomainUsername());
 
     final OrganizationInput orgInput = OrganizationInput.builder()
         .withShortName("Parent Organization")
-        .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
+        .withLongName("Advisor Organization for Testing Superusers").withStatus(Status.ACTIVE)
         .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
         .withLocation(getLocationInput(getGeneralHospital())).build();
-    failCreateOrganization(superUserMutationExecutor, orgInput);
+    failCreateOrganization(superuserMutationExecutor, orgInput);
     final Organization parentOrg = succeedCreateOrganization(adminMutationExecutor, orgInput);
 
     final OrganizationInput childOrgInput = OrganizationInput.builder()
@@ -420,49 +420,49 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         .withStatus(Status.ACTIVE).withIdentificationCode(UUID.randomUUID().toString())
         .withParentOrg(getOrganizationInput(parentOrg)).withType(OrganizationType.ADVISOR_ORG)
         .withLocation(getLocationInput(getGeneralHospital())).build();
-    failCreateOrganization(superUserMutationExecutor, childOrgInput);
+    failCreateOrganization(superuserMutationExecutor, childOrgInput);
 
-    // Set super-user as responsible for the parent organization
-    parentOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
+    // Set superuser as responsible for the parent organization
+    parentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(parentOrg));
 
     final Organization createdChildOrg =
-        succeedCreateOrganization(superUserMutationExecutor, childOrgInput);
+        succeedCreateOrganization(superuserMutationExecutor, childOrgInput);
 
     // Can edit the child of their responsible organization
     createdChildOrg.setShortName("Updated Child Organization");
-    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    succeedUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
 
-    // Super-users cannot change the type of the organization
+    // Superusers cannot change the type of the organization
     createdChildOrg.setType(OrganizationType.PRINCIPAL_ORG);
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
 
-    // Super-users cannot update their own organizations if they're not responsible
-    final Organization superUserOrg =
-        adminQueryExecutor.organization(FIELDS, superUserPosition.getOrganization().getUuid());
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(superUserOrg));
+    // Superusers cannot update their own organizations if they're not responsible
+    final Organization superuserOrg =
+        adminQueryExecutor.organization(FIELDS, superuserPosition.getOrganization().getUuid());
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(superuserOrg));
 
     // Given responsibility now they can edit their organization
-    superUserOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
-    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superUserOrg));
-    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(superUserOrg));
+    superuserOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superuserOrg));
+    succeedUpdateOrganization(superuserMutationExecutor, getOrganizationInput(superuserOrg));
 
     // Remove position
-    superUserOrg.setAdministratingPositions(new ArrayList<>());
-    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superUserOrg));
+    superuserOrg.setAdministratingPositions(new ArrayList<>());
+    succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(superuserOrg));
   }
 
   @Test
-  public void changeParentOrganizationAsSuperUserTest()
+  public void changeParentOrganizationAsSuperuserTest()
       throws GraphQLRequestPreparationException, GraphQLRequestExecutionException {
-    final Person superUser = getBobBobtown();
-    final Position superUserPosition = superUser.getPosition();
-    final MutationExecutor superUserMutationExecutor =
-        getMutationExecutor(superUser.getDomainUsername());
+    final Person superuser = getBobBobtown();
+    final Position superuserPosition = superuser.getPosition();
+    final MutationExecutor superuserMutationExecutor =
+        getMutationExecutor(superuser.getDomainUsername());
 
     final OrganizationInput orgInput = OrganizationInput.builder()
         .withShortName("Parent Organization")
-        .withLongName("Advisor Organization for Testing Super Users").withStatus(Status.ACTIVE)
+        .withLongName("Advisor Organization for Testing Superusers").withStatus(Status.ACTIVE)
         .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
         .withLocation(getLocationInput(getGeneralHospital())).build();
     final Organization createdParentOrg =
@@ -478,27 +478,27 @@ public class OrganizationResourceTest extends AbstractResourceTest {
         succeedCreateOrganization(adminMutationExecutor, childOrgInput);
 
     createdChildOrg.setParentOrg(null);
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
 
-    // Set super-user as responsible for the child organization
-    createdChildOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
+    // Set superuser as responsible for the child organization
+    createdChildOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdChildOrg));
 
     // Cannot set parent as null because they're not responsible for the parent organization
     createdChildOrg.setParentOrg(null);
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
-    // Set super-user as responsible for the parent organization
-    createdParentOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
+    // Set superuser as responsible for the parent organization
+    createdParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdParentOrg));
-    // Now super-user can set the parent organization as null
+    // Now superuser can set the parent organization as null
     createdChildOrg.setParentOrg(null);
-    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    succeedUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
 
     final OrganizationInput newParentOrg = OrganizationInput.builder()
         .withShortName("New Parent Organization")
-        .withLongName("New Parent Organization for Testing Super Users").withStatus(Status.ACTIVE)
+        .withLongName("New Parent Organization for Testing Superusers").withStatus(Status.ACTIVE)
         .withIdentificationCode(UUID.randomUUID().toString()).withType(OrganizationType.ADVISOR_ORG)
         .withLocation(getLocationInput(getGeneralHospital())).build();
 
@@ -508,23 +508,23 @@ public class OrganizationResourceTest extends AbstractResourceTest {
     // Cannot assign the new organization as the child's parent because they're not responsible for
     // the new organization
     createdChildOrg.setParentOrg(createdNewParentOrg);
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
     // Revert previous change
     createdChildOrg.setParentOrg(createdParentOrg);
 
     // Update responsible position
-    createdNewParentOrg.setAdministratingPositions(Lists.newArrayList(superUserPosition));
+    createdNewParentOrg.setAdministratingPositions(Lists.newArrayList(superuserPosition));
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdNewParentOrg));
 
     // Now they can assign the new parent
     createdChildOrg.setParentOrg(createdNewParentOrg);
-    succeedUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    succeedUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
 
     // Test for changing the parent to a different type of organization
     createdParentOrg.setType(OrganizationType.PRINCIPAL_ORG);
     succeedUpdateOrganization(adminMutationExecutor, getOrganizationInput(createdParentOrg));
     createdChildOrg.setParentOrg(createdParentOrg);
-    failUpdateOrganization(superUserMutationExecutor, getOrganizationInput(createdChildOrg));
+    failUpdateOrganization(superuserMutationExecutor, getOrganizationInput(createdChildOrg));
   }
 
   @Test

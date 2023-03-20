@@ -86,7 +86,7 @@ describe("Visibility of custom sensitive information", () => {
 
   describe("Superusers", () => {
     it("Should be able to find the principal with sensitive information", async() => {
-      await Home.openAsSuperUser()
+      await Home.openAsSuperuser()
       await (await Home.getSearchBar()).setValue(NON_COUNTERPART_PRINCIPLE.name)
       await (await Home.getSubmitSearch()).click()
       await (
@@ -150,7 +150,7 @@ describe("Visibility of custom sensitive information", () => {
 describe("Creating and editing custom sensitive information", () => {
   describe("Superusers", () => {
     it("Should be able load a new person form and fill normal required fields", async() => {
-      await CreatePerson.openAsSuperUser()
+      await CreatePerson.openAsSuperuser()
       await (await CreatePerson.getForm()).waitForExist()
       await (await CreatePerson.getForm()).waitForDisplayed()
       // fill other required fields at the beginning

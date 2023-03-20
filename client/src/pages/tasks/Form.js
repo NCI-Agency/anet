@@ -98,7 +98,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
         status: Model.STATUS.ACTIVE,
         type: [
           Position.TYPE.ADVISOR,
-          Position.TYPE.SUPER_USER,
+          Position.TYPE.SUPERUSER,
           Position.TYPE.ADMINISTRATOR
         ],
         matchPersonName: true
@@ -112,7 +112,7 @@ const TaskForm = ({ edit, title, initialValues, notesComponent }) => {
       queryVars: {
         type: [
           Position.TYPE.ADVISOR,
-          Position.TYPE.SUPER_USER,
+          Position.TYPE.SUPERUSER,
           Position.TYPE.ADMINISTRATOR
         ],
         matchPersonName: true

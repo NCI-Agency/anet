@@ -12,7 +12,7 @@ import * as yup from "yup"
 export const advisorPosition = Settings.fields.advisor.position
 export const principalPosition = Settings.fields.principal.position
 export const administratorPosition = Settings.fields.administrator.position
-export const superUserPosition = Settings.fields.superUser.position
+export const superuserPosition = Settings.fields.superuser.position
 
 export default class Position extends Model {
   static resourceName = "Position"
@@ -23,7 +23,7 @@ export default class Position extends Model {
   static TYPE = {
     ADVISOR: "ADVISOR",
     PRINCIPAL: "PRINCIPAL",
-    SUPER_USER: "SUPER_USER",
+    SUPERUSER: "SUPERUSER",
     ADMINISTRATOR: "ADMINISTRATOR"
   }
 
@@ -71,7 +71,7 @@ export default class Position extends Model {
         .when("type", ([type], schema) =>
           [
             Position.TYPE.ADVISOR,
-            Position.TYPE.SUPER_USER,
+            Position.TYPE.SUPERUSER,
             Position.TYPE.ADMINISTRATOR
           ].includes(type)
             ? schema.required(
@@ -171,8 +171,8 @@ export default class Position extends Model {
       return principalPosition.type
     } else if (type === Position.TYPE.ADVISOR) {
       return advisorPosition.type
-    } else if (type === Position.TYPE.SUPER_USER) {
-      return superUserPosition.type
+    } else if (type === Position.TYPE.SUPERUSER) {
+      return superuserPosition.type
     } else if (type === Position.TYPE.ADMINISTRATOR) {
       return administratorPosition.type
     }
@@ -212,8 +212,8 @@ export default class Position extends Model {
         return Settings.fields.advisor.position.type
       case "PRINCIPAL":
         return Settings.fields.principal.position.type
-      case "SUPER_USER":
-        return Settings.fields.superUser.position.type
+      case "SUPERUSER":
+        return Settings.fields.superuser.position.type
       case "ADMINISTRATOR":
         return Settings.fields.administrator.position.type
       default:

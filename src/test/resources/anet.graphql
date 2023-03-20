@@ -702,7 +702,7 @@ enum PositionType {
   ADMINISTRATOR
   ADVISOR
   PRINCIPAL
-  SUPER_USER
+  SUPERUSER
 }
 
 """Query root"""

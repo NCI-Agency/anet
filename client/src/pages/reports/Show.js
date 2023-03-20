@@ -884,7 +884,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           You cannot submit a report: you are not assigned to a{" "}
           {advisorPositionSingular} position.
           <br />
-          Please contact your organization's super user(s) and request to be
+          Please contact your organization's superuser(s) and request to be
           assigned to a {advisorPositionSingular} position.
           <br />
           If you are unsure, you can also contact the support team{" "}
@@ -897,7 +897,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
           You cannot submit a report: your assigned {advisorPositionSingular}{" "}
           position has an inactive status.
           <br />
-          Please contact your organization's super users and request them to
+          Please contact your organization's superusers and request them to
           assign you to an active {advisorPositionSingular} position.
           <br />
           If you are unsure, you can also contact the support team{" "}

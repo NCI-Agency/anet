@@ -234,9 +234,9 @@ public class TaskResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void taskCreateSuperUserPermissionTest()
+  public void taskCreateSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    createTask(getSuperUser());
+    createTask(getSuperuser());
   }
 
   @Test

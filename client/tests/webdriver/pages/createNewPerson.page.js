@@ -188,8 +188,8 @@ export class CreatePerson extends Page {
     return (await this.getSensitiveFieldsContainer()).$(`div[id="fg-${name}"]`)
   }
 
-  async openAsSuperUser() {
-    await super.openAsSuperUser(PAGE_URL)
+  async openAsSuperuser() {
+    await super.openAsSuperuser(PAGE_URL)
   }
 
   async openAsAdmin() {

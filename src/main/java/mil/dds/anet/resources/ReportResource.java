@@ -365,7 +365,7 @@ public class ReportResource {
     if (!isAuthor && !AuthUtils.canAdministrateOrg(user, r.getAdvisorOrgUuid(), true)
         && !AuthUtils.isAdmin(user)) {
       throw new WebApplicationException(
-          "Cannot submit report unless you are a report's author, his/her super user or an admin",
+          "Cannot submit report unless you are a report's author, his/her superuser or an admin",
           Status.FORBIDDEN);
     }
 
@@ -799,7 +799,7 @@ public class ReportResource {
       @GraphQLArgument(name = "orgUuid",
           defaultValue = Organization.DUMMY_ORG_UUID) String orgUuid) {
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperUser(user);
+    AuthUtils.assertSuperuser(user);
 
     Instant now = Instant.now();
     Instant weekStart = now.atZone(DaoUtils.getServerNativeZoneId()).with(DayOfWeek.MONDAY)

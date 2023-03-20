@@ -48,7 +48,7 @@ const Help = ({ pageDispatchers }) => {
     currentUser.position.organization
   ) {
     return (
-      <HelpFetchSuperUsers
+      <HelpFetchSuperusers
         orgUuid={currentUser.position.organization.uuid}
         appSettings={appSettings}
         currentUser={currentUser}
@@ -69,16 +69,16 @@ Help.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-const HelpFetchSuperUsers = ({
+const HelpFetchSuperusers = ({
   orgUuid,
   appSettings,
   currentUser,
   pageDispatchers
 }) => {
-  // Retrieve super users
+  // Retrieve superusers
   const positionQuery = {
     pageSize: 0, // retrieve all these positions
-    type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
+    type: [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR],
     status: Model.STATUS.ACTIVE,
     organizationUuid: orgUuid
   }
@@ -96,7 +96,7 @@ const HelpFetchSuperUsers = ({
   )
 }
 
-HelpFetchSuperUsers.propTypes = {
+HelpFetchSuperusers.propTypes = {
   orgUuid: PropTypes.string.isRequired,
   appSettings: PropTypes.object,
   currentUser: PropTypes.instanceOf(Person),
@@ -127,12 +127,12 @@ const HelpConditional = ({
     return result
   }
 
-  let superUsers = []
+  let superusers = []
   if (data) {
     const filledPositions = data.positionList.list.filter(
       position => position && position.person
     )
-    superUsers = filledPositions.map(position => position.person)
+    superusers = filledPositions.map(position => position.person)
   }
 
   return (
@@ -151,28 +151,28 @@ const HelpConditional = ({
           style={screenshotCss}
         />
 
-        <h4>2. Email your super user</h4>
+        <h4>2. Email your superuser</h4>
         <p>
-          Your organization's super users are able to modify a lot of data in
-          the system regarding how your organization, position, profile, and{" "}
+          Your organization's superusers are able to modify a lot of data in the
+          system regarding how your organization, position, profile, and{" "}
           {Settings.fields.principal.person.name} are set up.
         </p>
-        <p>Your super users:</p>
+        <p>Your superusers:</p>
         <ul>
-          {superUsers.map(user => (
+          {superusers.map(user => (
             <li key={user.emailAddress}>
               <a href={`mailto:${user.emailAddress}`}>
                 {user.rank} {user.name} - {user.emailAddress}
               </a>
             </li>
           ))}
-          {superUsers.length === 0 && <em>No super users found</em>}
+          {superusers.length === 0 && <em>No superusers found</em>}
         </ul>
 
         <h4>3. Check out the FAQ</h4>
         <p>
           Many common issues are explained in the FAQ document, especially for
-          common super user tasks.
+          common superuser tasks.
         </p>
         <p>
           <a href={url} target="help">

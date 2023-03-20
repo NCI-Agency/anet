@@ -26,7 +26,7 @@ import ReportCollection from "components/ReportCollection"
 import RichTextEditor from "components/RichTextEditor"
 import SubNav from "components/SubNav"
 import { Field, Form, Formik } from "formik"
-import { Location, Organization, Position, Report } from "models"
+import { Location, Organization, Report } from "models"
 import { orgTour } from "pages/HopscotchTour"
 import pluralize from "pluralize"
 import React, { useContext, useState } from "react"
@@ -215,13 +215,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
     ? Settings.fields.principal.org
     : Settings.fields.advisor.org
 
-  const superUsers = organization.positions.filter(
-    pos =>
-      pos.status !== Model.STATUS.INACTIVE &&
-      (!pos.person || pos.person.status !== Model.STATUS.INACTIVE) &&
-      (pos.type === Position.TYPE.SUPER_USER ||
-        pos.type === Position.TYPE.ADMINISTRATOR)
-  )
   const myOrg =
     currentUser && currentUser.position
       ? currentUser.position.organization
@@ -326,7 +319,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
               {!isMyOrg && isPrincipalOrg && orgSubNav}
             </SubNav>
 
-            {currentUser.isSuperUser() && (
+            {currentUser.isSuperuser() && (
               <div className="float-end">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."
@@ -405,38 +398,6 @@ const OrganizationShow = ({ pageDispatchers }) => {
                           )}
                         </LinkTo>
                       )
-                    }
-                  />
-                )}
-
-                {organization.isAdvisorOrg() && (
-                  <Field
-                    name="superUsers"
-                    component={FieldHelper.ReadonlyField}
-                    label="Super users"
-                    humanValue={
-                      <>
-                        {superUsers.map(position => (
-                          <p key={position.uuid}>
-                            {position.person ? (
-                              <LinkTo
-                                modelType="Person"
-                                model={position.person}
-                              />
-                            ) : (
-                              <i>
-                                <LinkTo modelType="Position" model={position} />
-                                - (Unfilled)
-                              </i>
-                            )}
-                          </p>
-                        ))}
-                        {superUsers.length === 0 && (
-                          <p>
-                            <i>No super users</i>
-                          </p>
-                        )}
-                      </>
                     }
                   />
                 )}

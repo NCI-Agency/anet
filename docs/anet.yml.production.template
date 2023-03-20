@@ -327,10 +327,10 @@ dictionary:
           label: UIC
           placeholder: the six character code
 
-    superUser:
+    superuser:
 
       position:
-        type: ANET Super User
+        type: ANET Superuser
 
     administrator:
 

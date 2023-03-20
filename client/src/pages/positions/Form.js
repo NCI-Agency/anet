@@ -99,9 +99,9 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   ]
   const adminPermissionsButtons = nonAdminPermissionsButtons.concat([
     {
-      id: "permsSuperUserButton",
-      value: Position.TYPE.SUPER_USER,
-      label: Settings.fields.superUser.position.type
+      id: "permsSuperuserButton",
+      value: Position.TYPE.SUPERUSER,
+      label: Settings.fields.superuser.position.type
     },
     {
       id: "permsAdminButton",
@@ -118,7 +118,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
   if (
     [
       Position.TYPE.ADVISOR,
-      Position.TYPE.SUPER_USER,
+      Position.TYPE.SUPERUSER,
       Position.TYPE.ADMINISTRATOR
     ].includes(initialValues.type)
   ) {
@@ -152,16 +152,16 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
           : nonAdminPermissionsButtons
         const administratingOrgUuids =
           currentUser.position.organizationsAdministrated.map(org => org.uuid)
-        const isSuperUser =
-          currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()
-        const isSuperUserWithoutAdministratingOrgs =
-          isSuperUser && _isEmpty(administratingOrgUuids)
-        // Super users without organizations administrated cannot create advisor positions
-        const typeButtons = isSuperUserWithoutAdministratingOrgs
+        const isSuperuser =
+          currentUser && currentUser.isSuperuser() && !currentUser.isAdmin()
+        const isSuperuserWithoutAdministratingOrgs =
+          isSuperuser && _isEmpty(administratingOrgUuids)
+        // Superusers without organizations administrated cannot create advisor positions
+        const typeButtons = isSuperuserWithoutAdministratingOrgs
           ? advisorDisabledTypeButtons
           : regularTypeButtons
         if (
-          isSuperUserWithoutAdministratingOrgs &&
+          isSuperuserWithoutAdministratingOrgs &&
           values.type !== Position.TYPE.PRINCIPAL
         ) {
           setFieldValue("type", Position.TYPE.PRINCIPAL)
@@ -171,7 +171,7 @@ const PositionForm = ({ edit, title, initialValues, notesComponent }) => {
           orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
         } else {
           orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
-          if (isSuperUser) {
+          if (isSuperuser) {
             orgSearchQuery.parentOrgUuid = [...administratingOrgUuids]
             orgSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN
           }

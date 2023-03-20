@@ -52,9 +52,9 @@ const LOCATION_TYPES_ADMIN = [
   Location.LOCATION_TYPES.VIRTUAL_LOCATION
 ]
 
-// Location types to be shown to super users in the new location page.
-const LOCATION_TYPES_SUPER_USER =
-  Settings?.fields?.location?.superUserTypeOptions
+// Location types to be shown to superusers in the new location page.
+const LOCATION_TYPES_SUPERUSER =
+  Settings?.fields?.location?.superuserTypeOptions
 
 const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const { currentUser } = useContext(AppContext)
@@ -62,7 +62,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
   const [error, setError] = useState(null)
   const [showSimilarLocations, setShowSimilarLocations] = useState(false)
   const canEditName =
-    (!edit && currentUser.isSuperUser()) || (edit && currentUser.isAdmin())
+    (!edit && currentUser.isSuperuser()) || (edit && currentUser.isAdmin())
   const statusButtons = [
     {
       id: "statusActiveButton",
@@ -82,7 +82,7 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
       queryVars: {
         type: [
           Position.TYPE.ADVISOR,
-          Position.TYPE.SUPER_USER,
+          Position.TYPE.SUPERUSER,
           Position.TYPE.ADMINISTRATOR
         ],
         matchPersonName: true
@@ -339,8 +339,8 @@ const LocationForm = ({ edit, title, initialValues, notesComponent }) => {
     switch (user.position.type) {
       case Position.TYPE.ADMINISTRATOR:
         return LOCATION_TYPES_ADMIN
-      case Position.TYPE.SUPER_USER:
-        return LOCATION_TYPES_SUPER_USER
+      case Position.TYPE.SUPERUSER:
+        return LOCATION_TYPES_SUPERUSER
       default:
         return []
     }

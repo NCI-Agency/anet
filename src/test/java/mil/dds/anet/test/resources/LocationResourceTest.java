@@ -70,9 +70,9 @@ public class LocationResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void locationCreateSuperUserPermissionTest()
+  public void locationCreateSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    createLocation(getSuperUser());
+    createLocation(getSuperuser());
   }
 
   @Test
@@ -85,27 +85,27 @@ public class LocationResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final LocationInput lInput = TestData.createLocationInput("The Boat Dock2", 43.21, -87.65);
     try {
       final Location l = userMutationExecutor.createLocation(FIELDS, lInput);
-      if (isSuperUser) {
+      if (isSuperuser) {
         assertThat(l).isNotNull();
         assertThat(l.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }
   }
 
   @Test
-  public void locationUpdateSuperUserPermissionTest()
+  public void locationUpdateSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    updateLocation(getSuperUser());
+    updateLocation(getSuperuser());
   }
 
   @Test
@@ -119,7 +119,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
     final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final LocationSearchQueryInput query =
         LocationSearchQueryInput.builder().withText("Police").build();
     final AnetBeanList_Location searchObjects =
@@ -130,13 +130,13 @@ public class LocationResourceTest extends AbstractResourceTest {
 
     try {
       final Integer nrUpdated = userMutationExecutor.updateLocation("", getLocationInput(l));
-      if (isSuperUser) {
+      if (isSuperuser) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }

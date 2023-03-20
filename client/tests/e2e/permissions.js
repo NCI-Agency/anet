@@ -1,7 +1,7 @@
 const uuidv4 = require("uuid").v4
 const test = require("../util/test")
 
-test.serial("checking super user permissions", async t => {
+test.serial("checking superuser permissions", async t => {
   t.plan(13)
 
   const {
@@ -23,13 +23,13 @@ test.serial("checking super user permissions", async t => {
   await assertElementDisabled(
     t,
     "#role_ADVISOR",
-    "Advisor button should be disabled for super users"
+    "Advisor button should be disabled for superusers"
   )
   const $tooltip = await $("#role_ADVISOR_tooltip")
   t.regex(
     await $tooltip.getAttribute("title"),
-    /^Super users cannot create .*$/,
-    "Expected tooltip for super users"
+    /^Superusers cannot create .*$/,
+    "Expected tooltip for superusers"
   )
 
   // Cancel Create Person
@@ -47,14 +47,14 @@ test.serial("checking super user permissions", async t => {
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
 
-  const $rebeccaLink = await findSuperUserLink(t, "CTR BECCABON, Rebecca")
+  const $rebeccaLink = await findSuperuserLink(t, "CTR BECCABON, Rebecca")
 
   await $rebeccaLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($rebeccaLink))
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is super user, they may edit position of type super user for
+  // User is superuser, they may edit position of type superuser for
   // the organization their position is administrating
   await editAndSavePositionFromCurrentUserPage(t, true)
 
@@ -63,18 +63,18 @@ test.serial("checking super user permissions", async t => {
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMenuLinksButton()
   await pageHelpers.clickMyOrgLink()
-  const $jacobLink = await findSuperUserLink(t, "CIV JACOBSON, Jacob")
+  const $jacobLink = await findSuperuserLink(t, "CIV JACOBSON, Jacob")
   await $jacobLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($jacobLink))
 
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is super user, they may edit position of type super user for
+  // User is superuser, they may edit position of type superuser for
   // the organization their position is administrating
   await editAndSavePositionFromCurrentUserPage(t, true)
 
-  // User is super user, they may edit positions only for
-  // the organization their position is administrating
+  // User is superuser, they may edit positions only for
+  // organizations their position is assigned to
   const $otherOrgPositionLink = await getFromSearchResults(
     t,
     "EF 1 Manager",
@@ -89,7 +89,7 @@ test.serial("checking super user permissions", async t => {
   await assertElementNotPresent(
     t,
     ".edit-position",
-    "super user should not be able to edit positions of the organization their position is not administrating",
+    "superuser should not be able to edit positions of the organization their position is not administrating",
     shortWaitMs
   )
 
@@ -100,7 +100,7 @@ test.serial("checking super user permissions", async t => {
     "organizations"
   )
   await $principalOrgLink.click()
-  await validateSuperUserPrincipalOrgPermissions(t)
+  await validateSuperuserPrincipalOrgPermissions(t)
 
   const $locationLink = await getFromSearchResults(
     t,
@@ -109,7 +109,7 @@ test.serial("checking super user permissions", async t => {
     "locations"
   )
   await $locationLink.click()
-  await validateSuperUserLocationPermissions(t)
+  await validateSuperuserLocationPermissions(t)
 
   await t.context.logout()
 
@@ -123,16 +123,15 @@ test.serial("checking super user permissions", async t => {
   await $ownOrgPositionLink.click()
   await t.context.driver.wait(t.context.until.stalenessOf($ownOrgPositionLink))
 
-  await assertElementNotPresent(
-    t,
-    ".edit-position",
-    "super user should not be able to edit positions of the organization their position is not administrating",
-    shortWaitMs
+  const $editPositionButton = await $(".edit-position")
+  await t.context.driver.wait(
+    t.context.until.elementIsVisible($editPositionButton)
   )
+  t.pass('Jacob should be able to edit his own organization ("EF 2.2")')
 })
 
 validateUserCannotEditOtherUser(
-  "super user cannot edit administrator",
+  "superuser cannot edit administrator",
   "rebecca",
   "arthur",
   "CIV DMIN, Arthur",
@@ -140,11 +139,11 @@ validateUserCannotEditOtherUser(
 )
 
 validateUserCannotEditOtherUser(
-  "super user cannot edit people from the organizations their position is not administrating",
+  "superuser cannot edit people from the organizations their position is not administrating",
   "jacob",
-  "rebecca",
-  "CTR BECCABON, Rebecca",
-  "EF 2.2 Final Reviewer"
+  "andrew",
+  "CIV ANDERSON, Andrew",
+  "EF 1 Manager"
 )
 
 test.serial("checking regular user permissions", async t => {
@@ -175,7 +174,7 @@ test.serial("checking regular user permissions", async t => {
 })
 
 validateUserCannotEditOtherUser(
-  "Regular user cannot edit super user people or positions",
+  "Regular user cannot edit superuser people or positions",
   "jack",
   "rebecca",
   "CTR BECCABON, Rebecca",
@@ -234,12 +233,14 @@ test.serial("checking admin permissions", async t => {
 
   await t.context.pageHelpers.clickMenuLinksButton()
   await t.context.pageHelpers.clickMyOrgLink()
-  const $arthurLink = await findSuperUserLink(t, "CIV DMIN, Arthur")
-  await $arthurLink.click()
-  await t.context.driver.wait(t.context.until.stalenessOf($arthurLink))
+
+  const element = await t.context.driver.findElement(
+    By.linkText("CIV DMIN, Arthur")
+  )
+  await element.click()
 
   await validateUserCanEditUserForCurrentPage(t)
-  // User is admin, and can therefore edit an admin position type
+  // User is admin, and can therefore edit (its own) admin position type
   await editAndSavePositionFromCurrentUserPage(t, true)
 
   const $principalOrgLink = await getFromSearchResults(
@@ -278,7 +279,7 @@ test.serial("admins can edit superusers and their positions", async t => {
   await t.context.driver.wait(t.context.until.stalenessOf($rebeccaPersonLink))
   await validateUserCanEditUserForCurrentPage(t)
 
-  // User is admin, and can therefore edit a super user position type
+  // User is admin, and can therefore edit a superuser position type
   await editAndSavePositionFromCurrentUserPage(t, true)
 
   await t.context.logout()
@@ -331,20 +332,22 @@ function validateUserCannotEditOtherUser(
   })
 }
 
-async function findSuperUserLink(t, desiredSuperUserName) {
-  const $superUserLinks = await t.context.$$("[name=superUsers] p a")
+async function findSuperuserLink(t, desiredSuperuserName) {
+  const $superuserLinks = await t.context.$$(
+    "[id=superuser-table] tbody tr td:nth-child(4) span a"
+  )
   let $foundLink
-  for (const $superUserLink of $superUserLinks) {
-    const superUserName = await $superUserLink.getText()
-    if (superUserName === desiredSuperUserName) {
-      $foundLink = $superUserLink
+  for (const $superuserLink of $superuserLinks) {
+    const superuserName = await $superuserLink.getText()
+    if (superuserName === desiredSuperuserName) {
+      $foundLink = $superuserLink
       break
     }
   }
 
   if (!$foundLink) {
     t.fail(
-      `Could not find superuser '${desiredSuperUserName}'. The data does not match what this test expects.`
+      `Could not find superuser '${desiredSuperuserName}'. The data does not match what this test expects.`
     )
   }
 
@@ -418,13 +421,13 @@ async function validationEditPositionOnCurrentPage(t, validateTrue) {
   }
 }
 
-async function validateSuperUserPrincipalOrgPermissions(t) {
+async function validateSuperuserPrincipalOrgPermissions(t) {
   const { assertElementNotPresent, shortWaitMs } = t.context
 
   await assertElementNotPresent(
     t,
     "#editButton",
-    "Super users should not be able to edit principal organizations",
+    "Superusers should not be able to edit principal organizations",
     shortWaitMs
   )
 }
@@ -469,7 +472,7 @@ async function validateAdminPrincipalOrgPermissions(t) {
   )
 }
 
-async function validateSuperUserLocationPermissions(t) {
+async function validateSuperuserLocationPermissions(t) {
   const { $, assertElementEnabled, assertElementDisabled } = t.context
 
   const $editLocationButton = await $("#editButton")
@@ -480,12 +483,12 @@ async function validateSuperUserLocationPermissions(t) {
   await assertElementDisabled(
     t,
     '[name="name"]',
-    "Field name of a location should be disabled for super users"
+    "Field name of a location should be disabled for superusers"
   )
   await assertElementEnabled(
     t,
     '[name="status"]',
-    "Field status of a location should be enabled for super users"
+    "Field status of a location should be enabled for superusers"
   )
 }
 

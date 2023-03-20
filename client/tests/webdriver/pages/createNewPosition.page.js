@@ -81,7 +81,7 @@ class CreatePosition extends Page {
   }
 
   async open() {
-    await super.openAsSuperUser(PAGE_URL)
+    await super.openAsSuperuser(PAGE_URL)
   }
 
   async openAsAdminUser() {

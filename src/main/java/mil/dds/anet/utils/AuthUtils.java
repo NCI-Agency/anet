@@ -47,11 +47,11 @@ public class AuthUtils {
       return true;
     }
     logger.debug("Position for user {} is {}", user, position);
-    if (position.getType() != PositionType.SUPER_USER) {
+    if (position.getType() != PositionType.SUPERUSER) {
       return false;
     }
 
-    // Given that we know it's a super-user position, does it actually match this organization?
+    // Given that we know it's a superuser position, does it actually match this organization?
     Organization loadedOrg =
         AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(organizationUuid);
     if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG && allowPrincipalOrgs) {
@@ -88,10 +88,10 @@ public class AuthUtils {
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
   }
 
-  public static void assertSuperUser(Person user) {
-    logger.debug("Asserting super user position for {}", user);
+  public static void assertSuperuser(Person user) {
+    logger.debug("Asserting superuser position for {}", user);
     Position position = DaoUtils.getPosition(user);
-    if (position != null && (position.getType() == PositionType.SUPER_USER
+    if (position != null && (position.getType() == PositionType.SUPERUSER
         || position.getType() == PositionType.ADMINISTRATOR)) {
       return;
     }

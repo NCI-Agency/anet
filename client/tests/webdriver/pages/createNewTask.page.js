@@ -64,8 +64,8 @@ class CreateTask extends Page {
     return browser.$('button[id="add-formCustomFields.assessments"]')
   }
 
-  async openAsSuperUser() {
-    await super.openAsSuperUser(PAGE_URL)
+  async openAsSuperuser() {
+    await super.openAsSuperuser(PAGE_URL)
   }
 
   async openAsAdmin() {

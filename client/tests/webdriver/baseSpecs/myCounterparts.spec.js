@@ -43,7 +43,7 @@ describe("My counterparts page", () => {
 
   describe("When Rebecca is checking the content of the page", () => {
     it("Should see a table of the counterparts", async() => {
-      await MyCounterparts.openAsSuperUser()
+      await MyCounterparts.openAsSuperuser()
       await (await MyCounterparts.getMyCounterparts()).waitForDisplayed()
       const myCounterpartsItems = await (
         await MyCounterparts.getMyCounterparts()

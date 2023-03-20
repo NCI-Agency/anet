@@ -1,7 +1,7 @@
 class Page {
   static DEFAULT_CREDENTIALS = {
     user: "erin",
-    superUser: "rebecca",
+    superuser: "rebecca",
     adminUser: "arthur",
     onboardUser: "bonny",
     noPositionUser: "nopos"
@@ -84,8 +84,8 @@ class Page {
     await this._open(pathName, credentials)
   }
 
-  async openAsSuperUser(pathName = "/") {
-    await this._open(pathName, Page.DEFAULT_CREDENTIALS.superUser)
+  async openAsSuperuser(pathName = "/") {
+    await this._open(pathName, Page.DEFAULT_CREDENTIALS.superuser)
   }
 
   async openAsAdminUser(pathName = "/") {

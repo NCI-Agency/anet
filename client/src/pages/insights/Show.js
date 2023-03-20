@@ -141,7 +141,7 @@ const InsightsShow = ({ pageDispatchers, searchQuery, setSearchQuery }) => {
     ? {}
     : {
       organizationUuid: currentUser.position.organization.uuid,
-      orgRecurseStrategy: currentUser.isSuperUser()
+      orgRecurseStrategy: currentUser.isSuperuser()
         ? RECURSE_STRATEGY.CHILDREN
         : RECURSE_STRATEGY.NONE
     }

@@ -555,9 +555,9 @@ public class PositionResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void positionUpdateSuperUserPermissionTest()
+  public void positionUpdateSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    updatePosition(getSuperUser());
+    updatePosition(getSuperuser());
   }
 
   @Test
@@ -571,7 +571,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
     final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
 
     // try to update a position from the user's org
@@ -585,13 +585,13 @@ public class PositionResourceTest extends AbstractResourceTest {
       final Integer nrUpdated = userMutationExecutor.updatePosition("", getPositionInput(p1));
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);
-      } else if (isSuperUser) {
+      } else if (isSuperuser) {
         assertThat(nrUpdated).isEqualTo(1);
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isAdmin || isSuperUser) {
+      if (isAdmin || isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }
@@ -621,10 +621,10 @@ public class PositionResourceTest extends AbstractResourceTest {
       }
     }
 
-    // try to update a regular user position and make it super user
+    // try to update a regular user position and make it superuser
     final PositionInput p3 = getPositionInput(newPosition);
     try {
-      p3.setType(PositionType.SUPER_USER);
+      p3.setType(PositionType.SUPERUSER);
       final Integer nrUpdated = userMutationExecutor.updatePosition("", p3);
       if (isAdmin) {
         assertThat(nrUpdated).isEqualTo(1);

@@ -82,7 +82,7 @@ const AuthorizationGroupShow = ({ pageDispatchers }) => {
   )
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const canEdit = currentUser.isSuperUser()
+  const canEdit = currentUser.isSuperuser()
 
   return (
     <Formik enableReinitialize initialValues={authorizationGroup}>

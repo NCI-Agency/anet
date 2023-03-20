@@ -384,7 +384,7 @@ const Navigation = ({
         Help
       </SidebarLink>
 
-      {(currentUser.isAdmin() || currentUser.isSuperUser()) && (
+      {(currentUser.isAdmin() || currentUser.isSuperuser()) && (
         <NavDropdown title="Insights" id="insights" active={inInsights}>
           {INSIGHTS.map(insight => (
             <LinkContainer

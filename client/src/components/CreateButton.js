@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom"
 
 const DEFAULT_ACTIONS = [Models.Report]
 
-const SUPER_USER_ACTIONS = [Models.Person, Models.Position, Models.Location]
+const SUPERUSER_ACTIONS = [Models.Person, Models.Position, Models.Location]
 
 const ADMIN_ACTIONS = [
   Models.Organization,
@@ -19,7 +19,7 @@ const CreateButton = () => {
   const navigate = useNavigate()
 
   const modelClasses = DEFAULT_ACTIONS.concat(
-    currentUser.isSuperUser() && SUPER_USER_ACTIONS,
+    currentUser.isSuperuser() && SUPERUSER_ACTIONS,
     currentUser.isAdmin() && ADMIN_ACTIONS
   ).filter(value => !!value)
 

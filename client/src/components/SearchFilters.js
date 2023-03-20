@@ -201,7 +201,7 @@ export const searchFilters = function() {
       queryVars: {
         type: [
           Position.TYPE.ADVISOR,
-          Position.TYPE.SUPER_USER,
+          Position.TYPE.SUPERUSER,
           Position.TYPE.ADMINISTRATOR
         ]
       }
@@ -503,13 +503,13 @@ export const searchFilters = function() {
           options: [
             Position.TYPE.PRINCIPAL,
             Position.TYPE.ADVISOR,
-            Position.TYPE.SUPER_USER,
+            Position.TYPE.SUPERUSER,
             Position.TYPE.ADMINISTRATOR
           ],
           labels: [
             Settings.fields.principal.position.name,
             Settings.fields.advisor.position.name,
-            Settings.fields.superUser.position.name,
+            Settings.fields.superuser.position.name,
             Settings.fields.administrator.position.name
           ],
           isPositionTypeFilter: true

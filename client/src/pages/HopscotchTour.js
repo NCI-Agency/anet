@@ -68,14 +68,14 @@ const userTour = (currentUser, navigate) => {
   }
 }
 
-const superUserTour = (currentUser, navigate) => {
+const superuserTour = (currentUser, navigate) => {
   return {
     id: "home",
     steps: [
       {
         title: "Welcome",
         content:
-          "Welcome to ANET! This guided tour shows super users how to find reports you need to approve and keep your organization up to date.",
+          "Welcome to ANET! This guided tour shows superusers how to find reports you need to approve and keep your organization up to date.",
         target: ".persistent-tour-launcher",
         placement: "left"
       },
@@ -146,7 +146,7 @@ const reportTour = (currentUser, navigate) => {
       {
         title: "Engagement location",
         content:
-          "Start typing the location of where the engagement took place. Select one of the options available, or ask your super user to add it.",
+          "Start typing the location of where the engagement took place. Select one of the options available, or ask your superuser to add it.",
         target: "#location",
         placement: "right"
       },
@@ -158,7 +158,7 @@ const reportTour = (currentUser, navigate) => {
       },
       {
         title: "Attendee(s)",
-        content: `Start typing the name of everyone who was at the meeting, including ${principalPlural} and ${advisorPlural}. Select one of the options available or ask your super user to add it.`,
+        content: `Start typing the name of everyone who was at the meeting, including ${principalPlural} and ${advisorPlural}. Select one of the options available or ask your superuser to add it.`,
         target: "#attendees",
         placement: "right"
       },
@@ -236,7 +236,7 @@ const orgTour = (currentUser, navigate) => {
       {
         title: "Your organization's information",
         content:
-          "This section shows your organization's super users and sub-organizations. Keep in mind that super users in a sub-organization can only update information for that sub-organization.",
+          "This section shows your organization's superusers and sub-organizations. Keep in mind that superusers in a sub-organization can only update information for that sub-organization.",
         target: "info",
         placement: "bottom"
       },
@@ -263,14 +263,14 @@ const orgTour = (currentUser, navigate) => {
       {
         title: "Engagement planning approval process",
         content:
-          'Set up or update the approval process for planning of future engagements authored in your organization by clicking "Edit" on the top of the page. We recommend having more than one approver in each step so that either person can approve the planning of the engagement. When a future engagement has gone through every step in your approval chain, it will automatically be published on ANET. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you\'ll need to set up an approval chain for each sub-organization as well.',
+          'Set up or update the approval process for planning of future engagements authored in your organization by clicking "Edit" on the top of the page. We recommend having more than one approver in each step so that either person can approve the planning of the engagement. When a future engagement has gone through every step in your approval chain, it will automatically be published on ANET. You can add anyone in a position to your approval chain, they do not need to be a superuser. Keep in mind that you\'ll need to set up an approval chain for each sub-organization as well.',
         target: "#planningApprovals h4",
         placement: "top"
       },
       {
         title: "Report publication approval process",
         content:
-          "Set up or update the approval process for publication of reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a super user. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
+          "Set up or update the approval process for publication of reports authored in your organization by clicking \"Edit\" on the top of the page. We recommend having more than one approver in each step so that either person can approve the report. When a report has gone through every step in your approval chain, it will automatically go into that day's daily rollup. You can add anyone in a position to your approval chain, they do not need to be a superuser. Keep in mind that you'll need to set up an approval chain for each sub-organization as well.",
         target: "#approvals h4",
         placement: "top"
       },
@@ -316,7 +316,7 @@ const positionTour = (currentUser, navigate) => {
       },
       {
         title: "Type of user",
-        content: `There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations. This section isn't visible if you're looking at a ${principalPositionSingular} position.`,
+        content: `There are three types of users: user, superuser, and administrator. Superusers can give other positions either user or superuser privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Superusers are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations. This section isn't visible if you're looking at a ${principalPositionSingular} position.`,
         target: "#type",
         placement: "bottom"
       },
@@ -362,7 +362,7 @@ const personTour = (currentUser, navigate) => {
     steps: [
       {
         title: "Information about this person",
-        content: `You can review this person's basic information, including their contact information, and see if they are "Active". A super user should change a person to "Inactive" when they are no longer in a job as a ${advisorSingular} or ${principalSingular}. Setting them as inactive keeps them from being added to reports as attendees.`,
+        content: `You can review this person's basic information, including their contact information, and see if they are "Active". A superuser should change a person to "Inactive" when they are no longer in a job as a ${advisorSingular} or ${principalSingular}. Setting them as inactive keeps them from being added to reports as attendees.`,
         target: "#phoneNumber",
         placement: "bottom"
       },
@@ -398,7 +398,7 @@ const personTour = (currentUser, navigate) => {
 
 export {
   userTour,
-  superUserTour,
+  superuserTour,
   reportTour,
   orgTour,
   positionTour,

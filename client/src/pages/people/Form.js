@@ -93,7 +93,7 @@ const PersonForm = ({
   const userRoleButtons = [
     {
       id: "roleAdvisorButton",
-      title: `Super users cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`,
+      title: `Superusers cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`,
       value: Person.ROLE.ADVISOR,
       label: Settings.fields.advisor.person.name,
       disabled: true
@@ -163,13 +163,13 @@ const PersonForm = ({
           // Assign default country if there's only one
           values.country = countries[0]
         }
-        // admins can edit all persons, new users can be edited by super users or themselves
+        // admins can edit all persons, new users can be edited by superusers or themselves
         const canEditName =
           isAdmin ||
           ((isPendingVerification || !edit) &&
             currentUser &&
-            (currentUser.isSuperUser() || isSelf))
-        // admins and super users with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
+            (currentUser.isSuperuser() || isSelf))
+        // admins and superusers with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
         const disableStatusChange =
           (initialValues.status === Model.STATUS.INACTIVE && !isAdmin) || isSelf
         const fullName = Person.fullName(Person.parseFullName(values.name))

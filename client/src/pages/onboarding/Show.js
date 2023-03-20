@@ -28,7 +28,7 @@ const OnboardingShow = ({ pageDispatchers }) => {
       </p>
       <p>
         Let's create a new account for you. We'll grab your basic information
-        and help your super user get you set up.
+        and help your superuser get you set up.
       </p>
       <div className="create-account-button-wrapper">
         <Button variant="primary" onClick={onCreateAccountClick}>

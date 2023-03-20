@@ -100,7 +100,7 @@ const PositionShow = ({ pageDispatchers }) => {
   const CodeFieldWithLabel = DictionaryField(Field)
 
   const isPrincipal = position.type === Position.TYPE.PRINCIPAL
-  const isSuperUser = position.type === Position.TYPE.SUPER_USER
+  const isSuperuser = position.type === Position.TYPE.SUPERUSER
   const assignedRole = isPrincipal
     ? Settings.fields.advisor.person.name
     : Settings.fields.principal.person.name
@@ -109,11 +109,11 @@ const PositionShow = ({ pageDispatchers }) => {
     : Settings.fields.advisor.position
 
   const canEdit =
-    // Super Users can edit any Principal
-    (currentUser.isSuperUser() && isPrincipal) ||
+    // Superusers can edit any Principal
+    (currentUser.isSuperuser() && isPrincipal) ||
     // Admins can edit anybody
     currentUser.isAdmin() ||
-    // Super users can edit positions if they have administrative permissions for the organization of the position
+    // Superusers can edit positions if they have administrative permissions for the organization of the position
     (position.organization &&
       position.organization.uuid &&
       currentUser.hasAdministrativePermissionsForOrganization(
@@ -370,7 +370,7 @@ const PositionShow = ({ pageDispatchers }) => {
               >
                 <PreviousPeople history={position.previousPeople} />
               </Fieldset>
-              {isSuperUser && (
+              {isSuperuser && (
                 <Fieldset
                   id="organizationsAdministrated"
                   title={utils.sentenceCase(
