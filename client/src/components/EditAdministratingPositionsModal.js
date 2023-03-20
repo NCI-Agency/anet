@@ -38,7 +38,7 @@ const EditAdministratingPositionsModal = ({
       label: "All advisor positions",
       queryVars: {
         status: Model.STATUS.ACTIVE,
-        type: [Position.TYPE.SUPER_USER],
+        type: [Position.TYPE.SUPERUSER],
         matchPersonName: true
       }
     }

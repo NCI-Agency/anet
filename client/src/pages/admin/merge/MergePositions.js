@@ -287,7 +287,7 @@ const MergePositions = ({ pageDispatchers }) => {
                 mergeState={mergeState}
                 dispatchMergeActions={dispatchMergeActions}
               />
-              {mergeState?.merged?.type === Position.TYPE.SUPER_USER && (
+              {mergeState?.merged?.type === Position.TYPE.SUPERUSER && (
                 <PositionField
                   label="Organizations Administrated"
                   fieldName="organizationsAdministrated"
@@ -623,7 +623,7 @@ const PositionColumn = ({ align, label, mergeState, dispatchMergeActions }) => {
             mergeState={mergeState}
             dispatchMergeActions={dispatchMergeActions}
           />
-          {position.type === Position.TYPE.SUPER_USER && (
+          {position.type === Position.TYPE.SUPERUSER && (
             <PositionField
               label="Organizations Administrated"
               fieldName="organizationsAdministrated"

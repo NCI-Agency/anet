@@ -43,7 +43,7 @@ public class GraphQlResourceTest extends AbstractResourceTest {
       fail("Unexpected exception", e);
     }
     try {
-      getQueryExecutor(getSuperUser().getDomainUsername())
+      getQueryExecutor(getSuperuser().getDomainUsername())
           .exec(IntrospectionQuery.INTROSPECTION_QUERY);
       fail("Expected exception");
     } catch (Exception e) {

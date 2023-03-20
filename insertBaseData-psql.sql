@@ -82,11 +82,11 @@ INSERT INTO people (uuid, name, status, role, "emailAddress", "phoneNumber", ran
 		(uuid_generate_v4(), 'BEMERGED, Myposwill', 0, 1, 'bemerged+myposwill@example.com', '+1-412-7324', 'CIV', 'Myposwill is a test person whose position will be merged', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		('3cb2076c-5317-47fe-86ad-76f298993917', 'MERGED, Duplicate Winner', 0, 1, 'merged+winner@example.com', '+1-234-5678', 'CIV', 'Winner is a test person who will be merged', NULL, NULL, 'Afghanistan', 'MALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		('c725aef3-cdd1-4baf-ac72-f28219b234e9', 'MERGED, Duplicate Loser', 0, 1, 'merged+loser@example.com', '+1-876-5432', 'CTR', 'Loser is a test person who will be merged', NULL, NULL, 'Afghanistan', 'FEMALE', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
--- Super Users
-		(uuid_generate_v4(), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'HENDERSON, Henry', 0, 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		('f683335a-91e3-4788-aa3f-9eed384f4ac1', 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', '9eb4b898-6fe4-40f8-abca-e893424d75d1', 'Germany', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+-- Superusers
+		(uuid_generate_v4(), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@example.com', '+1-444-7324', 'CIV', 'Bob is a Superuser in EF 1.1', 'bob', '505c6bd9-e2d1-4f9e-83b0-ecc9279c42c5', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'HENDERSON, Henry', 0, 0, 'hunter+henry@example.com', '+2-456-7324', 'BGen', 'Henry is a Superuser in EF 2.1', 'henry', '04fbbc19-3bd9-4075-8dd8-bc8c741d8c3c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@example.com', '+2-456-7324', 'CIV', 'Jacob is a Superuser in EF 2.2', 'jacob', '19fcef93-1b1a-472b-97f5-77f46cf6f3fd', 'Italy', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		('f683335a-91e3-4788-aa3f-9eed384f4ac1', 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@example.com', '+2-456-7324', 'CTR', 'Rebecca is a Superuser in EF 2.2', 'rebecca', '9eb4b898-6fe4-40f8-abca-e893424d75d1', 'Germany', 'FEMALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@example.com', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', '3276c85a-bf03-4591-a74b-56d70ac8eec0', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'SCHRUTE, Dwight', 0, 0, 'dwight+schrute@example.com', '+1-412-7324', 'CIV', 'Beets & Battlestar Galactica.', 'dwight', 'cb23f6a5-1321-4330-b972-22d98bff12af', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'HALPERT, Jim', 0, 0, 'jim+halpert@example.com', '+1-412-7324', 'CIV', 'Lets prank dwight.', 'jim', 'e8c81377-eaac-4ace-8aa6-7b255b53494c', 'United States of America', 'MALE', CURRENT_TIMESTAMP + INTERVAL '1 year', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -151,18 +151,18 @@ INSERT INTO positions (uuid, name, type, status, "currentPersonUuid", "locationU
 		(uuid_generate_v4(), 'EF 1.1 Advisor for Mining', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 1.1 Advisor for Space Issues', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 1.1 Advisor for Interagency Advising', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'EF 1.1 SuperUser', 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 1.1 Superuser', 2, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		('525d6c4b-deaa-4218-b8fd-abfb7c81a4c2', 'EF 1.2 Advisor', 0, 0, NULL, 'cc49bb27-4d8f-47a8-a9ee-af2b68b992ac', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.1 Advisor B', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.1 Advisor for Accounting', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.1 Advisor for Kites', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'EF 2.1 SuperUser', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 2.1 Superuser', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.2 Advisor C', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.2 Advisor D', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.2 Old and Inactive', 0, 1, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		('2b7d86a9-3ed4-4843-ab4e-136c3ab109bf', 'EF 2.2 Advisor Sewing Facilities', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.2 Advisor Local Kebabs', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'EF 2.2 Super User', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 2.2 Superuser', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 2.2 Final Reviewer', 2, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 4.1 Advisor A', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 4.1 Advisor for Coffee', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -172,8 +172,8 @@ INSERT INTO positions (uuid, name, type, status, "currentPersonUuid", "locationU
 		(uuid_generate_v4(), 'EF 5 Admin', 3, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(N'05c42ce0-34a0-4391-8b2f-c4cd85ee6b47', 'EF 5.1 Advisor Quality Assurance', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 5.1 Advisor Accounting', 0, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'EF 5.1 Super User Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-		(uuid_generate_v4(), 'EF 5.1 Super User Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 5.1 Superuser Sales 1', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+		(uuid_generate_v4(), 'EF 5.1 Superuser Sales 2', 2, 0, NULL, 'c7a9f420-457a-490c-a810-b504c022cf1e', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 9 Advisor', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'EF 9 Approver', 0, 0, NULL, '7339f9e3-99d1-497a-9e3b-1269c4c287fe', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 		(uuid_generate_v4(), 'LNG Advisor A', 0, 0, NULL, '8c138750-91ce-41bf-9b4c-9f0ddc73608b', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -184,15 +184,15 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
 	VALUES ((SELECT uuid from positions where name = 'EF 1 Manager'), (SELECT uuid from people where "emailAddress" = 'hunter+andrew@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+andrew@example.com') WHERE name = 'EF 1 Manager';
 
--- Put Bob into the Super User Billet in EF 1.1
+-- Put Bob into the Superuser Billet in EF 1.1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 1.1 SuperUser'), (SELECT uuid from people where "emailAddress" = 'hunter+bob@example.com'), CURRENT_TIMESTAMP);
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+bob@example.com') WHERE name = 'EF 1.1 SuperUser';
+	VALUES ((SELECT uuid from positions where name = 'EF 1.1 Superuser'), (SELECT uuid from people where "emailAddress" = 'hunter+bob@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+bob@example.com') WHERE name = 'EF 1.1 Superuser';
 
--- Put Henry into the Super User Billet in EF 2.1
+-- Put Henry into the Superuser Billet in EF 2.1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 2.1 SuperUser'), (SELECT uuid from people where "emailAddress" = 'hunter+henry@example.com'), CURRENT_TIMESTAMP);
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+henry@example.com') WHERE name = 'EF 2.1 SuperUser';
+	VALUES ((SELECT uuid from positions where name = 'EF 2.1 Superuser'), (SELECT uuid from people where "emailAddress" = 'hunter+henry@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+henry@example.com') WHERE name = 'EF 2.1 Superuser';
 
 -- Rotate an advisor through a billet ending up with Jack in the EF 2.1 Advisor B Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
@@ -233,10 +233,10 @@ INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
 	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Advisor D'), (SELECT uuid from people where "emailAddress" = 'hunter+erin@example.com'), CURRENT_TIMESTAMP);
 UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+erin@example.com') WHERE name = 'EF 2.2 Advisor D';
 
--- Put Jacob in the EF 2.2 Super User Billet
+-- Put Jacob in the EF 2.2 Superuser Billet
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Super User'), (SELECT uuid from people where "emailAddress" = 'hunter+jacob@example.com'), CURRENT_TIMESTAMP);
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+jacob@example.com') WHERE name = 'EF 2.2 Super User';
+	VALUES ((SELECT uuid from positions where name = 'EF 2.2 Superuser'), (SELECT uuid from people where "emailAddress" = 'hunter+jacob@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'hunter+jacob@example.com') WHERE name = 'EF 2.2 Superuser';
 
 -- Put Rebecca in the EF 2.2 Final Reviewer Position
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
@@ -260,13 +260,13 @@ UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "email
 
 -- Put Jim into the EF 5.1 Sales 1
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Super User Sales 1'), (SELECT uuid from people where "emailAddress" = 'jim+halpert@example.com'), CURRENT_TIMESTAMP);
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'jim+halpert@example.com') WHERE name = 'EF 5.1 Super User Sales 1';
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 1'), (SELECT uuid from people where "emailAddress" = 'jim+halpert@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'jim+halpert@example.com') WHERE name = 'EF 5.1 Superuser Sales 1';
 
 -- Put Dwight into the EF 5.1 Sales 2
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
-	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Super User Sales 2'), (SELECT uuid from people where "emailAddress" = 'dwight+schrute@example.com'), CURRENT_TIMESTAMP);
-UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'dwight+schrute@example.com') WHERE name = 'EF 5.1 Super User Sales 2';
+	VALUES ((SELECT uuid from positions where name = 'EF 5.1 Superuser Sales 2'), (SELECT uuid from people where "emailAddress" = 'dwight+schrute@example.com'), CURRENT_TIMESTAMP);
+UPDATE positions SET "currentPersonUuid" = (SELECT uuid from people where "emailAddress" = 'dwight+schrute@example.com') WHERE name = 'EF 5.1 Superuser Sales 2';
 
 -- Put Michael into the EF 5 Admin
 INSERT INTO "peoplePositions" ("positionUuid", "personUuid", "createdAt")
@@ -373,8 +373,8 @@ UPDATE positions SET "organizationUuid" = (SELECT uuid FROM organizations WHERE 
 INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "positionUuid")
 	VALUES
 		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 1'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
-		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.1'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
-		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Super User')),
+		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.1'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Superuser')),
+		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Superuser')),
 		((SELECT uuid FROM organizations WHERE "shortName" = 'EF 2.2'), (SELECT uuid FROM positions WHERE name = 'EF 2.2 Final Reviewer'));
 
 
@@ -382,7 +382,7 @@ INSERT INTO "organizationAdministrativePositions" ("organizationUuid", "position
 INSERT INTO "approvalSteps" (uuid, "relatedObjectUuid", name, type)
 	VALUES (uuid_generate_v4(), (SELECT uuid from organizations where "shortName"='EF 1.1'), 'EF 1.1 Approvers', 1);
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
-	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 SuperUser'));
+	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 Superuser'));
 
 -- Create the EF 2.2 approval process
 -- DECLARE :approvalStepUuid varchar(36);
@@ -393,7 +393,7 @@ INSERT INTO "approvalSteps" (uuid, name, "relatedObjectUuid", "nextStepUuid", ty
 	VALUES (uuid_generate_v4(), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where "shortName"='EF 2.2'), :approvalStepUuid, 1);
 
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
-	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Super User'));
+	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Superuser'));
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
 	VALUES ((SELECT uuid from "approvalSteps" WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Advisor D'));
 INSERT INTO approvers ("approvalStepUuid", "positionUuid")
@@ -486,7 +486,7 @@ INSERT INTO "taskTaskedOrganizations" ("taskUuid", "organizationUuid")
 -- Create a task approval process for some tasks
 INSERT INTO "taskResponsiblePositions" ("taskUuid", "positionUuid")
 	VALUES
-		((SELECT uuid FROM tasks WHERE "shortName" = '1.1'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 SuperUser')),
+		((SELECT uuid FROM tasks WHERE "shortName" = '1.1'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Superuser')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '1.1.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '1.1.A'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor A')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '1.1.B'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor B')),
@@ -495,7 +495,7 @@ INSERT INTO "taskResponsiblePositions" ("taskUuid", "positionUuid")
 		((SELECT uuid FROM tasks WHERE "shortName" = '1.1.C'), (SELECT uuid FROM positions WHERE name = 'EF 1.1 Advisor for Mining')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '1.2.A'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '1.2.B'), (SELECT uuid FROM positions WHERE name = 'EF 1 Manager')),
-		((SELECT uuid FROM tasks WHERE "shortName" = '2.A'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 SuperUser')),
+		((SELECT uuid FROM tasks WHERE "shortName" = '2.A'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Superuser')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '2.B'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor B')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '2.C'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Accounting')),
 		((SELECT uuid FROM tasks WHERE "shortName" = '2.D'), (SELECT uuid FROM positions WHERE name = 'EF 2.1 Advisor for Kites')),

@@ -71,7 +71,7 @@ const AuthorizationGroupForm = ({ edit, title, initialValues }) => {
               status: Model.STATUS.ACTIVE,
               type: [
                 Position.TYPE.ADVISOR,
-                Position.TYPE.SUPER_USER,
+                Position.TYPE.SUPERUSER,
                 Position.TYPE.ADMINISTRATOR
               ],
               matchPersonName: true

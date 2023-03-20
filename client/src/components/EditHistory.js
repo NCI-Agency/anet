@@ -667,7 +667,7 @@ function getSingleSelectParameters(historyEntityType, parentEntityType) {
               ? Position.TYPE.PRINCIPAL
               : [
                 Position.TYPE.ADVISOR,
-                Position.TYPE.SUPER_USER,
+                Position.TYPE.SUPERUSER,
                 Position.TYPE.ADMINSTRATOR
               ]
         }

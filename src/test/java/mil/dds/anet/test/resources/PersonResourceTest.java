@@ -183,7 +183,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getPosition()).isNotNull();
     assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 
-    // Now newPerson2 who is a super user, should NOT be able to edit newPerson
+    // Now newPerson2 who is a superuser, should NOT be able to edit newPerson
     // Because they are not in newPerson2's organization.
     try {
       newPerson2MutationExecutor.updatePerson("", getPersonInput(newPerson));
@@ -350,9 +350,9 @@ public class PersonResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void personCreateSuperUserPermissionTest()
+  public void personCreateSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    createPerson(getSuperUser());
+    createPerson(getSuperuser());
   }
 
   @Test
@@ -366,7 +366,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
     final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
     final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final Organization organization = position.getOrganization();
 
     // principal
@@ -376,14 +376,14 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     try {
       final Person p = userMutationExecutor.createPerson(FIELDS, principalInput);
-      if (isSuperUser) {
+      if (isSuperuser) {
         assertThat(p).isNotNull();
         assertThat(p.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }
@@ -395,14 +395,14 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     try {
       final Person anp = userMutationExecutor.createPerson(FIELDS, advisorNoPositionInput);
-      if (isSuperUser) {
+      if (isSuperuser) {
         assertThat(anp).isNotNull();
         assertThat(anp.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }
@@ -423,14 +423,14 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     try {
       final Person ap = userMutationExecutor.createPerson(FIELDS, advisorPositionInput);
-      if (isSuperUser) {
+      if (isSuperuser) {
         assertThat(ap).isNotNull();
         assertThat(ap.getUuid()).isNotNull();
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }

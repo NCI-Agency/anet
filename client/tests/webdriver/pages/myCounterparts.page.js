@@ -11,8 +11,8 @@ class MyTasks extends Page {
     await super.open(PAGE_URL, user)
   }
 
-  async openAsSuperUser() {
-    await super.openAsSuperUser(PAGE_URL)
+  async openAsSuperuser() {
+    await super.openAsSuperuser(PAGE_URL)
   }
 
   async openAsOnboardUser() {

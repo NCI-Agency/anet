@@ -95,19 +95,19 @@ public class PersonResource {
     if (editorPos.getType() == PositionType.ADMINISTRATOR) {
       return true;
     }
-    if (editorPos.getType() == PositionType.SUPER_USER) {
-      // Super users can edit any principal
+    if (editorPos.getType() == PositionType.SUPERUSER) {
+      // Superusers can edit any principal
       if (subject.getRole().equals(Role.PRINCIPAL)) {
         return true;
       }
-      // Ensure that the editor is the super user for the subject's organization.
+      // Ensure that the editor is the superuser for the subject's organization.
       final Position subjectPos =
           create
               ? AnetObjectEngine.getInstance().getPositionDao()
                   .getByUuid(DaoUtils.getUuid(subject.getPosition()))
               : DaoUtils.getPosition(subject);
       if (subjectPos == null) {
-        // Super users can edit position-less people.
+        // Superusers can edit position-less people.
         return true;
       }
       return AuthUtils.canAdministrateOrg(editor, subjectPos.getOrganizationUuid(), true);
@@ -134,19 +134,19 @@ public class PersonResource {
       final String positionUuid = DaoUtils.getUuid(p.getPosition());
       if (existingPos == null && positionUuid != null) {
         // Update the position for this person.
-        AuthUtils.assertSuperUser(user);
+        AuthUtils.assertSuperuser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
             positionUuid);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
       } else if (existingPos != null && positionUuid == null) {
         // Remove this person from their position.
-        AuthUtils.assertSuperUser(user);
+        AuthUtils.assertSuperuser(user);
         AnetObjectEngine.getInstance().getPositionDao()
             .removePersonFromPosition(existingPos.getUuid());
         AnetAuditLogger.log("Person {} removed from position {} by {}", p, existingPos, user);
       } else if (existingPos != null && !existingPos.getUuid().equals(positionUuid)) {
         // Update the position for this person.
-        AuthUtils.assertSuperUser(user);
+        AuthUtils.assertSuperuser(user);
         AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p),
             positionUuid);
         AnetAuditLogger.log("Person {} put in position {} by {}", p, p.getPosition(), user);
@@ -169,8 +169,8 @@ public class PersonResource {
       if (existingPos != null) {
         // A user can reset 'themselves' if the account was incorrect ("This is not me")
         if (!user.getUuid().equals(p.getUuid())) {
-          // Otherwise needs to be at least super user
-          AuthUtils.assertSuperUser(user);
+          // Otherwise needs to be at least superuser
+          AuthUtils.assertSuperuser(user);
         }
         AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive",
             p, user);

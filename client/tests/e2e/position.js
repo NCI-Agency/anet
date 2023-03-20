@@ -14,7 +14,7 @@ test.serial("Move someone in and out of a position", async t => {
     longWaitMs
   } = t.context
 
-  // Login as rebecca (super_user).
+  // Login as rebecca (superuser).
   await t.context.get("/", "rebecca")
 
   await t.context.pageHelpers.clickMenuLinksButton()
@@ -195,8 +195,8 @@ test.serial("Update permissions while changing positions", async t => {
     admin: 0,
     advisor_1: 1,
     advisor_2: 2,
-    super_user_1: 3,
-    super_user_2: 4
+    superuser_1: 3,
+    superuser_2: 4
   }
 
   /* In order to grab the user and a specific attribute,
@@ -221,13 +221,13 @@ test.serial("Update permissions while changing positions", async t => {
       personName: "CIV MALONE, Kevin"
     },
     {
-      positionName: "EF 5.1 Super User Sales 1",
+      positionName: "EF 5.1 Superuser Sales 1",
       person: "HALPERT, Jim",
       rank: "CIV",
       personName: "CIV HALPERT, Jim"
     },
     {
-      positionName: "EF 5.1 Super User Sales 2",
+      positionName: "EF 5.1 Superuser Sales 2",
       person: "SCHRUTE, Dwight",
       rank: "CIV",
       personName: "CIV SCHRUTE, Dwight"
@@ -285,7 +285,7 @@ test.serial("Update permissions while changing positions", async t => {
   await t.context.get("/", "arthur")
 
   // ***********************************************
-  // Removing a Super User from a position and check if the position is converted to ANET User.
+  // Removing a Superuser from a position and check if the position is converted to ANET User.
   // ***********************************************
 
   await navigateOrganization("EF 5")
@@ -293,8 +293,8 @@ test.serial("Update permissions while changing positions", async t => {
 
   // Click to the given advisor name from the "Supported positions" div.
   await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(
-    testUsers[testUserMapper.super_user_2].personName, // Dwight
-    testUsers[testUserMapper.super_user_2].positionName // EF 5.1 Super User Sales 2
+    testUsers[testUserMapper.superuser_2].personName, // Dwight
+    testUsers[testUserMapper.superuser_2].positionName // EF 5.1 Superuser Sales 2
   )
   // Wait for transition.
   await t.context.driver.sleep(longWaitMs)
@@ -347,7 +347,7 @@ test.serial("Update permissions while changing positions", async t => {
   await t.context.driver.sleep(mediumWaitMs)
 
   await checkPermission(
-    testUsers[testUserMapper.super_user_2].positionName,
+    testUsers[testUserMapper.superuser_2].positionName,
     "ANET User"
   )
 
@@ -407,8 +407,8 @@ test.serial("Update permissions while changing positions", async t => {
   )
 
   // ***********************************************
-  // Moving an ANET Super User to another position and check if new position permission is
-  // converted to ANET Super User and old position permission is converted to ANET User.
+  // Moving an ANET Superuser to another position and check if new position permission is
+  // converted to ANET Superuser and old position permission is converted to ANET User.
   // ***********************************************
 
   await navigateOrganization("EF 5")
@@ -444,7 +444,7 @@ test.serial("Update permissions while changing positions", async t => {
     for (const item of listItems) {
       if (
         (await item.getText()) ===
-        testUsers[testUserMapper.super_user_1].personName // Jim
+        testUsers[testUserMapper.superuser_1].personName // Jim
       ) {
         await item.click()
         await t.context.driver.sleep(mediumWaitMs)
@@ -474,15 +474,15 @@ test.serial("Update permissions while changing positions", async t => {
   )
   // Wait until the information is displayed.
   await t.context.driver.wait(until.elementIsVisible($infoText), mediumWaitMs)
-  // Assert if the position type is converted to "ANET Super User".
-  await assertElementText(t, $infoText, "ANET Super User")
+  // Assert if the position type is converted to "ANET Superuser".
+  await assertElementText(t, $infoText, "ANET Superuser")
   // Go back to organization page.
   await t.context.driver.navigate().back()
   // Wait for transition.
   await t.context.driver.sleep(mediumWaitMs)
 
   await checkPermission(
-    testUsers[testUserMapper.super_user_1].positionName,
+    testUsers[testUserMapper.superuser_1].positionName,
     "ANET User"
   )
 

@@ -319,7 +319,7 @@ const OrganizationShow = ({ pageDispatchers }) => {
               {!isMyOrg && isPrincipalOrg && orgSubNav}
             </SubNav>
 
-            {currentUser.isSuperUser() && (
+            {currentUser.isSuperuser() && (
               <div className="float-end">
                 <GuidedTour
                   title="Take a guided tour of this organization's page."

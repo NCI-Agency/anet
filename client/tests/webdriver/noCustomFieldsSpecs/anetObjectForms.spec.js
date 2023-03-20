@@ -20,7 +20,7 @@ describe("When looking at anet object forms with dictionary that doesn't include
     await (await CreateReport.getForm()).waitForDisplayed()
   })
   it("Should see that person form successfully loads", async() => {
-    await CreatePerson.openAsSuperUser()
+    await CreatePerson.openAsSuperuser()
     await (await CreatePerson.getForm()).waitForExist()
     await (await CreatePerson.getForm()).waitForDisplayed()
   })

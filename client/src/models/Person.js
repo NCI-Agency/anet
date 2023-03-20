@@ -294,10 +294,10 @@ export default class Person extends Model {
     return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
   }
 
-  isSuperUser() {
+  isSuperuser() {
     return (
       this.position &&
-      (this.position.type === Position.TYPE.SUPER_USER ||
+      (this.position.type === Position.TYPE.SUPERUSER ||
         this.position.type === Position.TYPE.ADMINISTRATOR)
     )
   }
@@ -313,11 +313,11 @@ export default class Person extends Model {
     )
   }
 
-  // Checks if this user is a valid super user for a particular organization
+  // Checks if this user is a valid superuser for a particular organization
   // Must be either
   // - an administrator
-  // - a super user administrating this organization
-  // - a super user administrating this organization's (transitive) parent
+  // - a superuser administrating this organization
+  // - a superuser administrating this organization's (transitive) parent
   hasAdministrativePermissionsForOrganization(org) {
     if (!org) {
       return false
@@ -326,7 +326,7 @@ export default class Person extends Model {
       return true
     }
     if (
-      this.position?.type !== Position.TYPE.SUPER_USER ||
+      this.position?.type !== Position.TYPE.SUPERUSER ||
       !this.position?.organization
     ) {
       return false

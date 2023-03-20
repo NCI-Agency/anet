@@ -5,7 +5,7 @@ Closes #
 #### User changes
 -
 
-#### Super User changes
+#### Superuser changes
 -
 
 #### Admin changes

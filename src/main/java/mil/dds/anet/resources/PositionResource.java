@@ -48,12 +48,12 @@ public class PositionResource {
     if (pos.getType() == null) {
       throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST);
     }
-    // only admins can make super user positions
-    if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPER_USER)) {
+    // only admins can make superuser positions
+    if (!AuthUtils.isAdmin(user) && (pos.getType() == PositionType.SUPERUSER)) {
       final Position existingPos = dao.getByUuid(pos.getUuid());
-      if (existingPos.getType() != PositionType.SUPER_USER) {
+      if (existingPos.getType() != PositionType.SUPERUSER) {
         throw new WebApplicationException(
-            "You are not allowed to change the position type to SUPER_USER", Status.FORBIDDEN);
+            "You are not allowed to change the position type to SUPERUSER", Status.FORBIDDEN);
       }
     }
   }

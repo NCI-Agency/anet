@@ -53,7 +53,7 @@ public class LocationResource {
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperUser(user);
+    AuthUtils.assertSuperuser(user);
     if (l.getName() == null || l.getName().trim().length() == 0) {
       throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
     }
@@ -89,7 +89,7 @@ public class LocationResource {
     l.setDescription(
         Utils.isEmptyHtml(l.getDescription()) ? null : Utils.sanitizeHtml(l.getDescription()));
     final Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperUser(user);
+    AuthUtils.assertSuperuser(user);
     final int numRows = dao.update(l);
     if (numRows == 0) {
       throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);

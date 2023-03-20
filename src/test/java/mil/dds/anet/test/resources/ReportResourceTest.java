@@ -145,7 +145,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withStatus(Status.ACTIVE).build();
     Position approver1Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
@@ -157,7 +157,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withStatus(Status.ACTIVE).build();
     final Position approver2Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
@@ -271,9 +271,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     } catch (ForbiddenException expectedException) {
     }
 
-    // Have a super-user of another AO try to submit the report
+    // Have a superuser of another AO try to submit the report
     try {
-      getMutationExecutor(getSuperUser().getDomainUsername()).submitReport("", created.getUuid());
+      getMutationExecutor(getSuperuser().getDomainUsername()).submitReport("", created.getUuid());
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
@@ -508,7 +508,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final PositionInput approver1PosInput = PositionInput.builder()
         .withName("Test Approver 1 Position").withOrganization(getOrganizationInput(advisorOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withStatus(Status.ACTIVE).build();
     Position approver1Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver1PosInput);
@@ -520,7 +520,7 @@ public class ReportResourceTest extends AbstractResourceTest {
 
     final PositionInput approver2PosInput = PositionInput.builder()
         .withName("Test Approver 2 Position").withOrganization(getOrganizationInput(advisorOrg))
-        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPER_USER)
+        .withLocation(getLocationInput(getGeneralHospital())).withType(PositionType.SUPERUSER)
         .withStatus(Status.ACTIVE).build();
     final Position approver2Pos =
         adminMutationExecutor.createPosition(POSITION_FIELDS, approver2PosInput);
@@ -634,9 +634,9 @@ public class ReportResourceTest extends AbstractResourceTest {
     } catch (ForbiddenException expectedException) {
     }
 
-    // Have a super-user of another AO try to submit the report
+    // Have a superuser of another AO try to submit the report
     try {
-      getMutationExecutor(getSuperUser().getDomainUsername()).submitReport("", created.getUuid());
+      getMutationExecutor(getSuperuser().getDomainUsername()).submitReport("", created.getUuid());
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
@@ -1836,9 +1836,9 @@ public class ReportResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void testAdvisorReportInsightsSuperUser()
+  public void testAdvisorReportInsightsSuperuser()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    advisorReportInsights(getSuperUser());
+    advisorReportInsights(getSuperuser());
   }
 
   @Test
@@ -1850,20 +1850,20 @@ public class ReportResourceTest extends AbstractResourceTest {
   private void advisorReportInsights(final Person user)
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final Position position = user.getPosition();
-    final boolean isSuperUser = position.getType() == PositionType.SUPER_USER;
+    final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     try {
       createTestReport();
       final List<AdvisorReportsEntry> advisorReports =
           getQueryExecutor(user.getDomainUsername()).advisorReportInsights(
               "{ uuid name stats { week nrReportsSubmitted nrEngagementsAttended } }", "-1", 3);
-      if (isSuperUser) {
+      if (isSuperuser) {
         assertThat(advisorReports).isNotNull();
         assertThat(advisorReports.size()).isGreaterThan(0);
       } else {
         fail("Expected ForbiddenException");
       }
     } catch (ForbiddenException expectedException) {
-      if (isSuperUser) {
+      if (isSuperuser) {
         fail("Unexpected ForbiddenException");
       }
     }
@@ -2167,7 +2167,7 @@ public class ReportResourceTest extends AbstractResourceTest {
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
-    // Try to unpublish published report by super user
+    // Try to unpublish published report by superuser
     try {
       getMutationExecutor("bob").unpublishReport("", published.getUuid());
       fail("Expected ForbiddenException");

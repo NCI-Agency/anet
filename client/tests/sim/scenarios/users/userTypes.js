@@ -87,13 +87,13 @@ const userTypes = [
     }
   },
   {
-    name: "existingSuperUser",
+    name: "existingSuperuser",
     frequency: 1,
     userFunction: async function(value) {
       return getRandomUser(specialUser, {
         status: Model.STATUS.ACTIVE,
         isFilled: true,
-        type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]
+        type: [Position.TYPE.SUPERUSER, Position.TYPE.ADMINISTRATOR]
       })
     }
   },

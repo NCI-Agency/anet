@@ -70,7 +70,7 @@ const LocationShow = ({ pageDispatchers }) => {
     )
   }
   const location = new Location(data ? data.location : {})
-  const canEdit = currentUser.isSuperUser()
+  const canEdit = currentUser.isSuperuser()
 
   return (
     <Formik enableReinitialize initialValues={location}>

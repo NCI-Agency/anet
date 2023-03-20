@@ -30,9 +30,9 @@ public class AdminResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void saveSuperUserPermissionTest()
+  public void saveSuperuserPermissionTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    saveSettings(getSuperUser());
+    saveSettings(getSuperuser());
   }
 
   @Test
@@ -54,9 +54,9 @@ public class AdminResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void clearCacheSuperUserTest()
+  public void clearCacheSuperuserTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    clearCache(getSuperUser());
+    clearCache(getSuperuser());
   }
 
   @Test
@@ -72,9 +72,9 @@ public class AdminResourceTest extends AbstractResourceTest {
   }
 
   @Test
-  public void recentActivitiesSuperUserTest()
+  public void recentActivitiesSuperuserTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    recentActivities(getSuperUser());
+    recentActivities(getSuperuser());
   }
 
   @Test

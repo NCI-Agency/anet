@@ -56,10 +56,10 @@ const TopBar = ({
     const output =
       currentUser &&
       ((visibilitySetting === GENERAL_BANNER_VISIBILITIES.USERS_ONLY.value &&
-        !currentUser.isSuperUser()) ||
+        !currentUser.isSuperuser()) ||
         (visibilitySetting ===
-          GENERAL_BANNER_VISIBILITIES.SUPER_USERS_AND_ADMINISTRATORS.value &&
-          currentUser.isSuperUser()) ||
+          GENERAL_BANNER_VISIBILITIES.SUPERUSERS_AND_ADMINISTRATORS.value &&
+          currentUser.isSuperuser()) ||
         visibilitySetting === GENERAL_BANNER_VISIBILITIES.ALL.value)
     if (bannerVisibility !== output) {
       setBannerVisibility(output)

@@ -461,7 +461,7 @@ properties:
   fields:
     type: object
     additionalProperties: false
-    required: [task, report, person, position, organization, advisor, principal, superUser, administrator]
+    required: [task, report, person, position, organization, advisor, principal, superuser, administrator]
     properties:
 
       task:
@@ -674,7 +674,7 @@ properties:
         additionalProperties: false
         required: [format]
         properties:
-          superUserTypeOptions:
+          superuserTypeOptions:
             type: array
             uniqueItems: true
             items:
@@ -940,7 +940,7 @@ properties:
               administratingPositions:
                 "$ref": "#/$defs/inputField"
 
-      superUser:
+      superuser:
         type: object
         additionalProperties: false
         required: [position]
@@ -958,7 +958,7 @@ properties:
               type:
                 type: string
                 title: The permissions type of this field
-                description: Used in the UI for the type/permissions of a super user position.
+                description: Used in the UI for the type/permissions of a superuser position.
 
       administrator:
         type: object

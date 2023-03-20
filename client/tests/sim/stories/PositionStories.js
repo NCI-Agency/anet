@@ -132,7 +132,7 @@ function randomPositionTemplate(organizations) {
         if (rand < 0.9) {
           return Position.TYPE.ADVISOR
         } else if (rand < 0.99) {
-          return Position.TYPE.SUPER_USER
+          return Position.TYPE.SUPERUSER
         } else {
           return Position.TYPE.ADMINISTRATOR
         }
@@ -167,7 +167,7 @@ function getPositionType(organizationType) {
     if (rand < 0.9) {
       return Position.TYPE.ADVISOR
     } else if (rand < 0.99) {
-      return Position.TYPE.SUPER_USER
+      return Position.TYPE.SUPERUSER
     } else {
       return Position.TYPE.ADMINISTRATOR
     }

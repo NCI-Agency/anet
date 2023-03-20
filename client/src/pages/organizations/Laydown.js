@@ -25,7 +25,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
   const canAdministrateOrg =
     currentUser &&
     currentUser.hasAdministrativePermissionsForOrganization(organization)
-  const isSuperUser = currentUser && currentUser.isSuperUser()
+  const isSuperuser = currentUser && currentUser.isSuperuser()
   const isPrincipalOrg = organization.type === Organization.TYPE.PRINCIPAL_ORG
   const numInactivePos = organization.positions.filter(
     p => p.status === Model.STATUS.INACTIVE
@@ -38,7 +38,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
     position => positionsNeedingAttention.indexOf(position) === -1
   )
   const canCreatePositions =
-    canAdministrateOrg || (isSuperUser && isPrincipalOrg)
+    canAdministrateOrg || (isSuperuser && isPrincipalOrg)
 
   const orgSettings = isPrincipalOrg
     ? Settings.fields.principal.org
@@ -133,7 +133,7 @@ const OrganizationLaydown = ({ organization, refetch }) => {
       >
         <PositionTable
           positions={organization.administratingPositions}
-          id="super-user-table"
+          id="superuser-table"
         />
         <EditAdministratingPositionsModal
           organization={organization}

@@ -57,13 +57,13 @@ const stories = [
     mean: 1,
     stddev: 0,
     runnable: createPerson,
-    userTypes: ["existingSuperUser"]
+    userTypes: ["existingSuperuser"]
   },
   {
     name: "Update person",
     frequency: 1 / 10,
     runnable: updatePerson,
-    userTypes: ["existingSuperUser"]
+    userTypes: ["existingSuperuser"]
   },
   {
     name: "Delete person",
@@ -71,7 +71,7 @@ const stories = [
     mean: 125,
     stddev: 10,
     runnable: deletePerson,
-    userTypes: ["existingSuperUser"]
+    userTypes: ["existingSuperuser"]
   },
   {
     name: "Create organization",

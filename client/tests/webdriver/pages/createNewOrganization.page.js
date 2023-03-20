@@ -45,8 +45,8 @@ class CreateOrganization extends Page {
     return browser.$("#fg-profile .editable")
   }
 
-  async openAsSuperUser() {
-    await super.openAsSuperUser(PAGE_URL)
+  async openAsSuperuser() {
+    await super.openAsSuperuser(PAGE_URL)
   }
 
   async openAsAdmin() {

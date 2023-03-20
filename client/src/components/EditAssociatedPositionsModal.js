@@ -87,11 +87,11 @@ const EditAssociatedPositionsModal = ({
   if (position.type === Position.TYPE.PRINCIPAL) {
     positionSearchQuery.type = [
       Position.TYPE.ADVISOR,
-      Position.TYPE.SUPER_USER,
+      Position.TYPE.SUPERUSER,
       Position.TYPE.ADMINISTRATOR
     ]
     if (currentUser.isAdmin() === false) {
-      // Super Users can only assign a position in their organization!
+      // Superusers can only assign a position in their organization!
       positionSearchQuery.organizationUuid =
         currentUser.position.organization.uuid
       positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN

@@ -15,11 +15,11 @@ export const GENERAL_BANNER_LEVELS = {
 
 export const GENERAL_BANNER_VISIBILITIES = {
   USERS_ONLY: { value: 1, label: "Users only" },
-  SUPER_USERS_AND_ADMINISTRATORS: {
+  SUPERUSERS_AND_ADMINISTRATORS: {
     value: 2,
-    label: "Super users and administrators only"
+    label: "Superusers and administrators only"
   },
-  ALL: { value: 3, label: "Users, super users and administrators" }
+  ALL: { value: 3, label: "Users, superusers and administrators" }
 }
 
 function bannerClassName(level) {

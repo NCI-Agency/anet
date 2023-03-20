@@ -426,8 +426,8 @@ public class PendingAssessmentsHelper {
     if (withCounterparts) {
       psq.setHasCounterparts(Boolean.TRUE);
     }
-    psq.setType(ImmutableList.of(PositionType.ADMINISTRATOR, PositionType.SUPER_USER,
-        PositionType.ADVISOR));
+    psq.setType(
+        ImmutableList.of(PositionType.ADMINISTRATOR, PositionType.SUPERUSER, PositionType.ADVISOR));
     return positionDao.search(psq).getList();
   }
 

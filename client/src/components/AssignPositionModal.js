@@ -193,11 +193,11 @@ const AssignPositionModal = ({ person, showModal, onCancel, onSuccess }) => {
     if (currentUser.isAdmin()) {
       // only admins can put people in admin billets.
       positionSearchQuery.type.push(Position.TYPE.ADMINISTRATOR)
-      positionSearchQuery.type.push(Position.TYPE.SUPER_USER)
-    } else if (currentUser.isSuperUser()) {
-      // Only super users can put people in super user billets
+      positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
+    } else if (currentUser.isSuperuser()) {
+      // Only superusers can put people in superuser billets
       // And they are limited to their organization.
-      positionSearchQuery.type.push(Position.TYPE.SUPER_USER)
+      positionSearchQuery.type.push(Position.TYPE.SUPERUSER)
       positionSearchQuery.organizationUuid =
         currentUser.position.organization.uuid
       positionSearchQuery.orgRecurseStrategy = RECURSE_STRATEGY.CHILDREN

@@ -560,7 +560,7 @@ fields:
             color: 'skyblue'
 
   location:
-    superUserTypeOptions: [POINT_LOCATION]
+    superuserTypeOptions: [POINT_LOCATION]
     format: LAT_LON
     customFields:
       multipleButtons:
@@ -1201,7 +1201,7 @@ fields:
       location:
         filter: [ADVISOR_LOCATION]
       administratingPositions:
-        label: Assigned Super Users
+        label: Assigned Superusers
         placeholder: Search for a position...
 
   principal:
@@ -1430,14 +1430,14 @@ fields:
       location:
         filter: [PRINCIPAL_LOCATION]
       administratingPositions:
-        label: Assigned Super Users
+        label: Assigned Superusers
         placeholder: Search for a position...
 
-  superUser:
+  superuser:
 
     position:
-      name: Super User
-      type: ANET Super User
+      name: Superuser
+      type: ANET Superuser
 
   administrator:
 

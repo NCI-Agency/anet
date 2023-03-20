@@ -19,7 +19,7 @@ import {
 import { deserializeQueryParams } from "components/SearchFilters"
 import { LAST_WEEK } from "dateUtils"
 import { Person, Report } from "models"
-import { superUserTour, userTour } from "pages/HopscotchTour"
+import { superuserTour, userTour } from "pages/HopscotchTour"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Button, Col, Container, Row } from "react-bootstrap"
@@ -291,7 +291,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
       <div style={{ width: "inherit" }} className="float-end">
         <GuidedTour
           title="Take a guided tour of the home page."
-          tour={currentUser.isSuperUser() ? superUserTour : userTour}
+          tour={currentUser.isSuperuser() ? superuserTour : userTour}
           autostart={
             localStorage.newUser === "true" &&
             localStorage.hasSeenHomeTour !== "true"
@@ -305,7 +305,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
           You are not assigned to a {Settings.fields.advisor.position.name}{" "}
           position.
           <br />
-          Please contact your organization's super user(s) to assign you to a{" "}
+          Please contact your organization's superuser(s) to assign you to a{" "}
           {Settings.fields.advisor.position.name} position.
           <br />
           If you are unsure, you can also contact the support team{" "}
@@ -317,7 +317,7 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
           Your {Settings.fields.advisor.position.name} position has an inactive
           status.
           <br />
-          Please contact your organization's super users to change your position
+          Please contact your organization's superusers to change your position
           to an active status.
           <br />
           If you are unsure, you can also contact the support team{" "}

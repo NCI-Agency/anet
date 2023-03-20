@@ -8,7 +8,7 @@ import utils from "utils"
 
 const advisorSearchPositionTypes = [
   Position.TYPE.ADVISOR,
-  Position.TYPE.SUPER_USER,
+  Position.TYPE.SUPERUSER,
   Position.TYPE.ADMINISTRATOR
 ]
 
@@ -25,7 +25,7 @@ const SelectFilter = ({
     value: inputValue.value || options[0] || ""
   }
   const toQuery = val => {
-    // Searching for advisors implies searching for super users and admins as well
+    // Searching for advisors implies searching for superusers and admins as well
     const valueForQuery =
       isPositionTypeFilter && val.value === Position.TYPE.ADVISOR
         ? advisorSearchPositionTypes

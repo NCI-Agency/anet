@@ -174,7 +174,7 @@ const PersonShow = ({ pageDispatchers }) => {
 
   // User can always edit themselves
   // Admins can always edit anybody
-  // Super users can edit people in their org, their descendant orgs, or un-positioned people.
+  // Superusers can edit people in their org, their descendant orgs, or un-positioned people.
   const isAdmin = currentUser && currentUser.isAdmin()
   const hasPosition = position && position.uuid
   const canEdit =
@@ -184,16 +184,16 @@ const PersonShow = ({ pageDispatchers }) => {
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
-    (!hasPosition && currentUser.isSuperUser()) ||
-    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
+    (!hasPosition && currentUser.isSuperuser()) ||
+    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperuser())
   const canChangePosition =
     isAdmin ||
-    (!hasPosition && currentUser.isSuperUser()) ||
+    (!hasPosition && currentUser.isSuperuser()) ||
     (hasPosition &&
       currentUser.hasAdministrativePermissionsForOrganization(
         position.organization
       )) ||
-    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
+    (person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperuser())
   const canAddPeriodicAssessment =
     Position.isAdvisor(position) ||
     (Position.isPrincipal(position) &&
@@ -571,8 +571,8 @@ const PersonShow = ({ pageDispatchers }) => {
         </OverlayTrigger>
       ) : null
 
-    // when the person is not in a position, any super user can assign them.
-    const canAssignPosition = currentUser.isSuperUser()
+    // when the person is not in a position, any superuser can assign them.
+    const canAssignPosition = currentUser.isSuperuser()
 
     const assignPositionButton =
       !hasPosition && canAssignPosition ? (
