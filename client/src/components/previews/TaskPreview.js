@@ -9,11 +9,8 @@ import { Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
+import { ListGroup, ListGroupItem } from "react-bootstrap"
 import Settings from "settings"
-import {
-  ListGroup,
-  ListGroupItem
-} from "react-bootstrap"
 
 const GQL_GET_TASK = gql`
   query ($uuid: String!) {
@@ -176,7 +173,7 @@ const TaskPreview = ({ className, uuid }) => {
           />
         )}
 
-        {task.childrenTasks.length > 0 && (
+        {Settings.fields.task.childrenTasks && task.childrenTasks?.length > 0 && (
           <PreviewField
             label={Settings.fields.task.childrenTasks}
             name="subEfforts"
@@ -184,11 +181,7 @@ const TaskPreview = ({ className, uuid }) => {
               <ListGroup>
                 {task.childrenTasks?.map(task => (
                   <ListGroupItem key={task.uuid}>
-                    <LinkTo
-                      showIcon={false}
-                      modelType="Task"
-                      model={task}
-                    />
+                    <LinkTo showIcon={false} modelType="Task" model={task} />
                   </ListGroupItem>
                 ))}
               </ListGroup>

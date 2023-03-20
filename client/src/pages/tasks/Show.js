@@ -30,13 +30,10 @@ import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
 import moment from "moment"
 import React, { useContext, useState } from "react"
+import { ListGroup, ListGroupItem } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 import Settings from "settings"
-import {
-  ListGroup,
-  ListGroupItem
-} from "react-bootstrap"
 import DictionaryField from "../../HOC/DictionaryField"
 
 const GQL_GET_TASK = gql`
@@ -192,7 +189,6 @@ const TaskShow = ({ pageDispatchers }) => {
   const ShortNameField = DictionaryField(Field)
   const LongNameField = DictionaryField(Field)
   const TaskParentTask = DictionaryField(Field)
-  const TaskChildrenTasks = DictionaryField(Field)
   const PlannedCompletionField = DictionaryField(Field)
   const ProjectedCompletionField = DictionaryField(Field)
 
@@ -330,25 +326,26 @@ const TaskShow = ({ pageDispatchers }) => {
                       }
                     />
                   )}
-                  {Settings.fields.task.childrenTasks && task.childrenTasks.length > 0 && (
-                    <TaskChildrenTasks
-                      dictProps={Settings.fields.task.childrenTasks}
-                      name="subEfforts"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <ListGroup>
-                          {task.childrenTasks?.map(task => (
-                            <ListGroupItem key={task.uuid}>
-                              <LinkTo
-                                showIcon={false}
-                                modelType="Task"
-                                model={task}
-                              />
-                            </ListGroupItem>
-                          ))}
-                        </ListGroup>
-                      }
-                    />
+                  {Settings.fields.task.childrenTasks &&
+                    task.childrenTasks?.length > 0 && (
+                      <Field
+                        label={Settings.fields.task.childrenTasks}
+                        name="subEfforts"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <ListGroup>
+                            {task.childrenTasks?.map(task => (
+                              <ListGroupItem key={task.uuid}>
+                                <LinkTo
+                                  showIcon={false}
+                                  modelType="Task"
+                                  model={task}
+                                />
+                              </ListGroupItem>
+                            ))}
+                          </ListGroup>
+                        }
+                      />
                   )}
                   {Settings.fields.task.plannedCompletion && (
                     <PlannedCompletionField

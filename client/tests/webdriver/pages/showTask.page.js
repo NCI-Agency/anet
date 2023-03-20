@@ -1,20 +1,40 @@
 import Page from "./page"
 
 class ShowTask extends Page {
-  async getAssessmentResultsMonthly() {
-    return browser.$("#entity-assessments-results-monthly")
-  }
-
-  async getAssessmentResultsWeekly() {
-    return browser.$("#entity-assessments-results-weekly")
+  async getShortName() {
+    return browser.$('div[id="shortName"')
   }
 
   async getLongName() {
     return browser.$('div[id="longName"')
   }
 
-  async getShortName() {
-    return browser.$('div[id="shortName"')
+  async getParentTask() {
+    return browser.$('div[id="parentTask"')
+  }
+
+  async getParentTaskField() {
+    return browser.$("#fg-parentTask")
+  }
+
+  async getChildrenTasks() {
+    return browser.$('div[id="subEfforts"')
+  }
+
+  async getChildrenTasksField() {
+    return browser.$("#fg-subEfforts")
+  }
+
+  async getFirstItemFromChildrenTasks() {
+    return browser.$("#subEfforts > .list-group .list-group-item:first-child")
+  }
+
+  async getAssessmentResultsMonthly() {
+    return browser.$("#entity-assessments-results-monthly")
+  }
+
+  async getAssessmentResultsWeekly() {
+    return browser.$("#entity-assessments-results-weekly")
   }
 
   async getDescription() {
