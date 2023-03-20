@@ -62,8 +62,6 @@ public class LocationResourceTest extends AbstractResourceTest {
     updatedDescInput.setDescription(
         "<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
     nrUpdated = adminMutationExecutor.updateLocation("", updatedDescInput);
-    System.out.println("üüüüü");
-    System.out.println(updated.getDescription());
     assertThat(nrUpdated).isEqualTo(1);
     final Location updatedDesc = adminQueryExecutor.location(FIELDS, updated.getUuid());
     assertThat(updatedDesc.getDescription()).contains("<b>Hello world</b>");
