@@ -12,8 +12,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import mil.dds.anet.test.TestData;
@@ -469,10 +471,11 @@ public class PositionResourceTest extends AbstractResourceTest {
         adminQueryExecutor.organizationList(getListFields(ORGANIZATION_FIELDS), queryOrgs);
     assertThat(orgs.getList().size()).isGreaterThan(0);
 
+    final String positionCode = UUID.randomUUID().toString();
     final PositionInput newbPositionInput = PositionInput.builder()
         .withName("PositionTest Position for Newb").withType(PositionType.PRINCIPAL)
         .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
-        .withPerson(getPersonInput(newb)).build();
+        .withPerson(getPersonInput(newb)).withCode(positionCode).build();
 
     final Position newbPosition = adminMutationExecutor.createPosition(FIELDS, newbPositionInput);
     assertThat(newbPosition).isNotNull();
@@ -546,6 +549,17 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPerson().getUuid()).isEqualTo(newb.getUuid());
     assertThat(history.get(1).getPerson().getUuid()).isEqualTo(prin2.getUuid());
+
+    // Try to create another position with the same code
+    final PositionInput dupCodePositionInput = PositionInput.builder()
+        .withName("PositionTest Position for duplicate code").withType(PositionType.PRINCIPAL)
+        .withOrganization(getOrganizationInput(orgs.getList().get(0))).withStatus(Status.ACTIVE)
+        .withCode(positionCode).build();
+    try {
+      adminMutationExecutor.createPosition(FIELDS, dupCodePositionInput);
+      fail("Expected ClientErrorException");
+    } catch (ClientErrorException expectedException) {
+    }
   }
 
   @Test
