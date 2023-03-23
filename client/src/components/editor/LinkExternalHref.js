@@ -5,7 +5,7 @@ import React from "react"
 
 const LinkExternalHref = ({ url, children }) => {
   return (
-    <a href={url}>
+    <a href={url} target="_blank" rel="noreferrer">
       {children}{" "}
       <Icon
         icon={IconNames.SHARE}
