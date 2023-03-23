@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -24,6 +21,7 @@ import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.FkDataLoaderKey;
+import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.SqDataLoaderKey;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -39,6 +37,9 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       "organizationUuid", "currentPersonUuid", "type", "status", "locationUuid", "customFields"};
   public static final String TABLE_NAME = "positions";
   public static final String POSITION_FIELDS = DaoUtils.buildFieldAliases(TABLE_NAME, fields, true);
+  public static final String DUPLICATE_POSITION_CODE =
+      "Another position is already using this code and each position must have its own code. "
+          + "Please double check that you entered the right code.";
 
   @Override
   public Position insertInternal(Position p) {
@@ -60,23 +61,9 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
       // Specifically don't set currentPersonUuid here because we'll handle that later in
       // setPersonInPosition();
     } catch (UnableToExecuteStatementException e) {
-      checkForUniqueCodeViolation(e);
-      throw e;
+      throw ResponseUtils.handleSqlException(e, DUPLICATE_POSITION_CODE);
     }
     return p;
-  }
-
-  public void checkForUniqueCodeViolation(UnableToExecuteStatementException e) {
-    if (e.getCause() != null && e.getCause() instanceof SQLException) {
-      SQLException cause = (SQLException) e.getCause();
-      if (cause.getErrorCode() == 2601) { // Unique Key Violation constant for SQL Server
-        if (cause.getMessage().contains("UQ_PositionCodes")) {
-          throw new WebApplicationException("Another position is already using this "
-              + "code and each position must have its own code. "
-              + "Please double check that you entered the right code. ", Status.CONFLICT);
-        }
-      }
-    }
   }
 
   @Override
@@ -176,8 +163,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position, PositionSea
           .evictFromCacheByPositionUuid(DaoUtils.getUuid(p));
       return nr;
     } catch (UnableToExecuteStatementException e) {
-      checkForUniqueCodeViolation(e);
-      throw e;
+      throw ResponseUtils.handleSqlException(e, DUPLICATE_POSITION_CODE);
     }
   }
 
