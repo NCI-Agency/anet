@@ -1600,12 +1600,12 @@
   dependencies:
     fast-deep-equal "^3.1.3"
 
-"@graphiql/react@^0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@graphiql/react/-/react-0.17.0.tgz#bdfc3047d7de3dcaea90966e89f5396c4e0e56fb"
-  integrity sha512-mn8FfucLJzFLQQ5OoJ9U1Dvnva1smOxBL89D2TSM2B6mmDyQIRhFXmjzUTPdsqwpauFiqkDaQZiqX7T/ZPrg/w==
+"@graphiql/react@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@graphiql/react/-/react-0.17.1.tgz#14078bf82fb35c0cd9d12c12ce170b3a889719c9"
+  integrity sha512-p99Vnl3aoQsh/T651pkGiS0wqvn7y65Bv4Q32l990T2IIgEDqeqJxgwRp3F48Ol9dWzk6KzxNkZYqe5IVHEmoA==
   dependencies:
-    "@graphiql/toolkit" "^0.8.2"
+    "@graphiql/toolkit" "^0.8.3"
     "@reach/combobox" "^0.17.0"
     "@reach/dialog" "^0.17.0"
     "@reach/listbox" "^0.17.0"
@@ -1614,16 +1614,16 @@
     "@reach/visually-hidden" "^0.17.0"
     clsx "^1.2.1"
     codemirror "^5.65.3"
-    codemirror-graphql "^2.0.4"
+    codemirror-graphql "^2.0.5"
     copy-to-clipboard "^3.2.0"
-    graphql-language-service "^5.1.2"
+    graphql-language-service "^5.1.3"
     markdown-it "^12.2.0"
     set-value "^4.1.0"
 
-"@graphiql/toolkit@^0.8.2":
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/@graphiql/toolkit/-/toolkit-0.8.2.tgz#ad7de51d0dbc7ba917ba2eb55a848c9c6857ad55"
-  integrity sha512-FGtXBYTzcPuwfpaC+0BGeriLD6kwTdcF5xugGvjutk5J93Dgy2vw+SkBdbi1QGzz/jooETi1kEtFeDuWTzIG7Q==
+"@graphiql/toolkit@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@graphiql/toolkit/-/toolkit-0.8.3.tgz#62ffb6efc0202a94fe0fc38dd39c31f89d1d15c9"
+  integrity sha512-B5WfZlBes/tMmM7TeTTD/F2E1kbtQD6PYmyX76qWrIt1Sx3+lQoCe8NzHbBvNII77F5sr737RASmkhQ1fcdFWQ==
   dependencies:
     "@n1ru4l/push-pull-async-iterable-iterator" "^3.1.0"
     meros "^1.1.4"
@@ -6648,12 +6648,12 @@ code-excerpt@^4.0.0:
   dependencies:
     convert-to-spaces "^2.0.1"
 
-codemirror-graphql@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/codemirror-graphql/-/codemirror-graphql-2.0.4.tgz#2062056846f26d4b95af20cb37d633b6f1052c00"
-  integrity sha512-u68lfUJv4hESfIZLJUGSWU2+txNrfoT29EEMxNksDBPXjnF41Ivpp/r8rxJBXigNcDOBmjMfKfs1J4L0Jggwrg==
+codemirror-graphql@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/codemirror-graphql/-/codemirror-graphql-2.0.5.tgz#bcda4d47b125a5ba437f7f3b2d914fdbe324275a"
+  integrity sha512-erpJV/hOQe4ScOBNhV+rJAAcsCGyC913VkTp3fbGHh/aZQBshpwxgew4+43+EDl855Gw+df36/+maun+Nj8tKw==
   dependencies:
-    graphql-language-service "5.1.2"
+    graphql-language-service "5.1.3"
 
 codemirror@^5.65.3:
   version "5.65.11"
@@ -7409,10 +7409,10 @@ d3-zoom@3:
     d3-selection "2 - 3"
     d3-transition "2 - 3"
 
-d3@7.8.2:
-  version "7.8.2"
-  resolved "https://registry.yarnpkg.com/d3/-/d3-7.8.2.tgz#2bdb3c178d095ae03b107a18837ae049838e372d"
-  integrity sha512-WXty7qOGSHb7HR7CfOzwN1Gw04MUOzN8qh9ZUsvwycIMb4DYMpY9xczZ6jUorGtO6bR9BPMPaueIKwiDxu9uiQ==
+d3@7.8.3:
+  version "7.8.3"
+  resolved "https://registry.yarnpkg.com/d3/-/d3-7.8.3.tgz#b6c862d16368e15bf764c89e248a300a56f2ab40"
+  integrity sha512-cAa866AkPXtt4IzRx6nzGf50uerq6VYks7p/tTH94be4QfhUkyTfJfaxXGPOB5ZRVUZmUV1wcM1dism/Ua0lCw==
   dependencies:
     d3-array "3"
     d3-axis "3"
@@ -9749,15 +9749,14 @@ grapheme-splitter@^1.0.2, grapheme-splitter@^1.0.4:
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
-graphiql@2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-2.4.0.tgz#ffbe3967faf9c8e4220891b3567d05320d77de5a"
-  integrity sha512-lJ6OYDQkhAMZePrz8g6r9vMVmxa4SY9eEzzyJxsgE+jA+6PFKds2e8/tDAaCYfX0HNv84nc7W/th1vsHIdgYiA==
+graphiql@2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/graphiql/-/graphiql-2.4.1.tgz#e690b4f78d2330e0d6c54c3d895ac0711c9633f4"
+  integrity sha512-PLTY2KI+FwU6548Bsrip2ptne/t2QzNdARHZwXl/KGJ+KVfSpXjjfryJQBHXiEq4plQnG4orw7dJpm8KfM5iig==
   dependencies:
-    "@graphiql/react" "^0.17.0"
-    "@graphiql/toolkit" "^0.8.2"
-    entities "^2.0.0"
-    graphql-language-service "^5.1.2"
+    "@graphiql/react" "^0.17.1"
+    "@graphiql/toolkit" "^0.8.3"
+    graphql-language-service "^5.1.3"
     markdown-it "^12.2.0"
 
 graphlib@^2.1.8:
@@ -9784,10 +9783,10 @@ graphql-config@^4.5.0:
     string-env-interpolation "1.0.1"
     tslib "^2.4.0"
 
-graphql-language-service@5.1.2, graphql-language-service@^5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/graphql-language-service/-/graphql-language-service-5.1.2.tgz#f76dbe5f6c9bd8266bad26d64eb8e309c147a801"
-  integrity sha512-oeuztbvd7fwKWZ/GCp0voqgctdIL4BDjTkd/phz1jEyH+pfj6inJWKKIkUJPW5ebWHx+mFsZ00wdE6tiCvW2fA==
+graphql-language-service@5.1.3, graphql-language-service@^5.1.3:
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/graphql-language-service/-/graphql-language-service-5.1.3.tgz#6e2333dca9d739b5c6e545c9758e9f3c70a11324"
+  integrity sha512-01KZLExoF53i8a2Jhgt+nVGsm9O2+jmDdwms4THSxCY+gU9FukF6X4pPLO2Gk7qZ6CVcInM8+IQx/ph4AOTOLA==
   dependencies:
     nullthrows "^1.0.0"
     vscode-languageserver-types "^3.17.1"
@@ -14739,10 +14738,10 @@ react-test-renderer@18.2.0:
     react-shallow-renderer "^16.15.0"
     scheduler "^0.23.0"
 
-react-toastify@9.1.1:
-  version "9.1.1"
-  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-9.1.1.tgz#9280caea4a13dc1739c350d90660a630807bf10b"
-  integrity sha512-pkFCla1z3ve045qvjEmn2xOJOy4ZciwRXm1oMPULVkELi5aJdHCN/FHnuqXq8IwGDLB7PPk2/J6uP9D8ejuiRw==
+react-toastify@9.1.2:
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-9.1.2.tgz#293aa1f952240129fe485ae5cb2f8d09c652cf3f"
+  integrity sha512-PBfzXO5jMGEtdYR5jxrORlNZZe/EuOkwvwKijMatsZZm8IZwLj01YvobeJYNjFcA6uy6CVrx2fzL9GWbhWPTDA==
   dependencies:
     clsx "^1.1.1"
 
@@ -14756,10 +14755,10 @@ react-transition-group@^4.4.2, react-transition-group@^4.4.5:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react-ultimate-pagination@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/react-ultimate-pagination/-/react-ultimate-pagination-1.3.0.tgz#feb4d9518e52b3915c863d4305a1190b66befdbd"
-  integrity sha512-Nvf+PjncTqBW/wHgO4FM3EX7VzrUf13CnpElREUgZloG2BiEQkGseDS2r5p3h/TIvLfLb602IeaihQFJbUSt0A==
+react-ultimate-pagination@1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/react-ultimate-pagination/-/react-ultimate-pagination-1.3.2.tgz#a146d38c20440b2c508080d00fb73d5f24ce7a60"
+  integrity sha512-TDrUFR0hcI4nx9/EK3Gj4nlbhNQ5cXi6/7CGuF3j7k0vur7NUFOczm3POlGnuhTku2KUnpoM4Jf7E0l8Fpi2/Q==
   dependencies:
     prop-types "^15.0.0"
     ultimate-pagination "1.0.0"
