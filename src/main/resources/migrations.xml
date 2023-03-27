@@ -4474,7 +4474,7 @@
 	<changeSet id="add-attachments-table" author="cigdemers">
 		<createTable tableName="attachments">
 			<column name="uuid" type="${uuid_type}">
-				<constraints nullable="false" />
+				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="fileName" type="${long_text_type}" />
 			<column name="mimeType" type="${long_text_type}" />

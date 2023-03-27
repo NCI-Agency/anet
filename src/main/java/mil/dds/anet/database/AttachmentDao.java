@@ -72,8 +72,8 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   @Override
   public int updateInternal(Attachment obj) {
-    deleteAttachmentRelatedObjects(DaoUtils.getUuid(obj));
-    insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
+    if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
+      insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
     return getDbHandle()
         .createUpdate(
             "/* updateAttachment */ " + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, "

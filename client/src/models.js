@@ -1,6 +1,7 @@
 export Organization from "models/Organization"
 export Person from "models/Person"
 export Task from "models/Task"
+export Attachment from "models/Attachment"
 export Position from "models/Position"
 export Report from "models/Report"
 export Location from "models/Location"

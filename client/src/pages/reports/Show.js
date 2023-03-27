@@ -230,6 +230,11 @@ const GQL_GET_REPORT = gql`
         name
         description
       }
+      attachments {
+        uuid
+        fileName
+        mimeType
+      }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
     }
@@ -660,6 +665,21 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                       modelType="Organization"
                       model={report.principalOrg}
                     />
+                  }
+                />
+
+                <Field
+                  name="attachments"
+                  label={Settings.fields.attachment.shortLabel}
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <>
+                      {report.attachments.map(attach => (
+                        <p key={attach.uuid}>
+                          <LinkTo modelType="Attachment" model={attach} />
+                        </p>
+                      ))}
+                    </>
                   }
                 />
               </Fieldset>

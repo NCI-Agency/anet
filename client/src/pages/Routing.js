@@ -9,6 +9,9 @@ import MergePeople from "pages/admin/merge/MergePeople"
 import MergePositions from "pages/admin/merge/MergePositions"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
+import AttachmentEdit from "pages/attachments/Edit"
+import AttachmentNew from "pages/attachments/New"
+import AttachmentShow from "pages/attachments/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import KanbanDashboard from "pages/dashboards/KanbanDashboard"
@@ -70,6 +73,13 @@ const Routing = () => {
           <Route path="edit" element={<ReportEdit />} />
           {/* TODO: Backwards-compatibility; this route can be removed at some point */}
           <Route path="min" element={<ReportShow />} />
+        </Route>
+      </Route>
+      <Route path={PAGE_URLS.ATTACHMENTS}>
+        <Route path="new" element={<AttachmentNew />} />
+        <Route path=":uuid">
+          <Route index element={<AttachmentShow />} />
+          <Route path="edit" element={<AttachmentEdit />} />
         </Route>
       </Route>
       <Route path={PAGE_URLS.PEOPLE}>

@@ -12,6 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import FormAttachment from "components/Attachment/FormAttachment"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -173,6 +174,8 @@ const ReportForm = ({
   const [showSensitiveInfo, setShowSensitiveInfo] = useState(ssi)
   const [saveError, setSaveError] = useState(null)
   const [autoSavedAt, setAutoSavedAt] = useState(null)
+  const [isAttachment, setIsAttachment] = useState(false)
+  const [loadingError, setLoadingError] = useState(false)
   // We need the report tasks/attendees in order to be able to dynamically
   // update the yup schema for the selected tasks/attendees instant assessments
   const [reportTasks, setReportTasks] = useState(initialValues.tasks)
@@ -180,6 +183,7 @@ const ReportForm = ({
   const [showCustomFields, setShowCustomFields] = useState(
     !!Settings.fields.report.customFields
   )
+  const attachmentFunc = useRef(null)
   // some autosave settings
   const defaultTimeout = moment.duration(AUTOSAVE_TIMEOUT, "seconds")
   const autoSaveSettings = useRef({
@@ -427,10 +431,11 @@ const ReportForm = ({
         const isFutureEngagement = Report.isFuture(values.engagementDate)
         const hasAssessments = values.engagementDate && !isFutureEngagement
         const relatedObject = hasAssessments ? values : {}
-
         return (
           <div className="report-form">
-            <NavigationWarning isBlocking={dirty && !isSubmitting} />
+            <NavigationWarning
+              isBlocking={(dirty && !isSubmitting) || (isAttachment && !isSubmitting)}
+            />
             <Messages error={saveError} />
 
             {showAssignedPositionWarning && (
@@ -922,6 +927,33 @@ const ReportForm = ({
                   widget={<RichTextEditor className="reportTextField" />}
                 />
 
+                <FastField
+                  name="attachments"
+                  label={Settings.fields.attachment.shortLabel}
+                  component={FieldHelper.SpecialField}
+                  widget={
+                    <FormAttachment
+                      className="attachmentField"
+                      attachmentFunc={attachmentFunc}
+                      type={Report.relatedObjectType}
+                      setIsAttachment={setIsAttachment}
+                      setLoadingError={setLoadingError}
+                      loadingError={loadingError}
+                    />
+                  }
+                />
+
+                {edit && (
+                  <FastField
+                    name="uploaded-attachments"
+                    label="Uploaded Attachment(s)"
+                    component={FieldHelper.SpecialField}
+                    widget={
+                      <div>files</div>
+                    }
+                  />
+                )}
+
                 <div style={{ textAlign: "center" }}>
                   <Button
                     variant="outline-secondary"
@@ -1217,7 +1249,7 @@ const ReportForm = ({
         autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
       )
     } else {
-      save(autoSaveSettings.current.values, false)
+      save(autoSaveSettings.current.values, false, true)
         .then(response => {
           const newValues = _cloneDeep(autoSaveSettings.current.values)
           Object.assign(newValues, response)
@@ -1285,8 +1317,10 @@ const ReportForm = ({
 
   function onSubmit(values, form) {
     form.setSubmitting(true)
-    return save(values, true)
-      .then(response => onSubmitSuccess(response, values, form.resetForm))
+    return save(values, true, false)
+      .then(response => {
+        onSubmitSuccess(response, values, form.resetForm)
+      })
       .catch(error => {
         setSaveError(error)
         form.setSubmitting(false)
@@ -1383,7 +1417,7 @@ const ReportForm = ({
     return assessmentNotes
   }
 
-  function save(values, sendEmail) {
+  function save(values, sendEmail, autoSave) {
     const report = Report.filterClientSideFields(new Report(values))
     if (Report.isFuture(values.engagementDate)) {
       // Empty fields which should not be set for future reports.
@@ -1423,6 +1457,7 @@ const ReportForm = ({
     const variables = { report }
     return _saveReport(edit, variables, sendEmail).then(response => {
       const report = response[operation]
+      attachmentFunc.current(report.uuid)
       if (!canWriteAssessments) {
         // Skip updating assessments!
         return report

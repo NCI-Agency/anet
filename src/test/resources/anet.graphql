@@ -184,10 +184,9 @@ enum Atmosphere {
 }
 
 """"""
-input AttachmentInput {
-  attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+type Attachment {
+  attachmentRelatedObjects: [AttachmentRelatedObject]
   classification: Classification
-  classificationUuid: String
   content: Base64String
   createdAt: Instant
   description: String
@@ -195,6 +194,27 @@ input AttachmentInput {
   mimeType: String
   updatedAt: Instant
   uuid: String
+}
+
+""""""
+input AttachmentInput {
+  attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+  classification: Classification
+  content: Base64String
+  createdAt: Instant
+  description: String
+  fileName: String
+  mimeType: String
+  updatedAt: Instant
+  uuid: String
+}
+
+""""""
+type AttachmentRelatedObject {
+  attachmentUuid: String
+  relatedObject: RelatableObject
+  relatedObjectType: String
+  relatedObjectUuid: String
 }
 
 """"""
@@ -309,6 +329,7 @@ scalar Instant
 """"""
 type Location {
   approvalSteps: [ApprovalStep]
+  attachments: [Attachment]
   createdAt: Instant
   customFields: String
   customSensitiveInformation: [CustomSensitiveInformation]
@@ -478,6 +499,7 @@ type Organization {
   administratingPositions: [Position]
   approvalSteps: [ApprovalStep]
   ascendantOrgs(query: OrganizationSearchQueryInput): [Organization]
+  attachments: [Attachment]
   childrenOrgs(query: OrganizationSearchQueryInput): [Organization]
   createdAt: Instant
   customFields: String
@@ -554,6 +576,7 @@ enum OrganizationType {
 
 """"""
 type Person {
+  attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   authoredReports(query: ReportSearchQueryInput): AnetBeanList_Report
   avatar(size: Int = 256): Base64String
@@ -662,6 +685,7 @@ enum PersonSearchSortBy {
 """"""
 type Position {
   associatedPositions: [Position]
+  attachments: [Attachment]
   authorizationGroups: [AuthorizationGroup]
   code: String
   createdAt: Instant
@@ -743,6 +767,8 @@ type Query {
   adminSettings: [AdminSetting]
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!
+  attachment(uuid: String): Attachment
+  attachments(uuid: String): [Attachment]
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
   location(uuid: String): Location
@@ -796,6 +822,7 @@ type Report {
   approvalStep: ApprovalStep
   atmosphere: Atmosphere
   atmosphereDetails: String
+  attachments: [Attachment]
   attendees: [ReportPerson]
   authorizationGroups: [AuthorizationGroup]
   authors: [ReportPerson]
@@ -886,6 +913,7 @@ input ReportInput {
 
 """"""
 type ReportPerson {
+  attachments: [Attachment]
   attendedReports(query: ReportSearchQueryInput): AnetBeanList_Report
   attendee: Boolean!
   author: Boolean!
@@ -1156,6 +1184,7 @@ enum SubscriptionUpdateSearchSortBy {
 type Task {
   approvalSteps: [ApprovalStep]
   ascendantTasks(query: TaskSearchQueryInput): [Task]
+  attachments: [Attachment]
   category: String
   childrenTasks(query: TaskSearchQueryInput): [Task]
   createdAt: Instant

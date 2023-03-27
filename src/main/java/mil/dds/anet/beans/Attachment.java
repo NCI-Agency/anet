@@ -79,7 +79,7 @@ public class Attachment extends AbstractAnetBean {
     return classification;
   }
 
-  @GraphQLQuery(name = "attachmentRelatedObject")
+  @GraphQLQuery(name = "attachmentRelatedObjects")
   public CompletableFuture<List<AttachmentRelatedObject>> loadAttachmentRelatedObjects(
       @GraphQLRootContext Map<String, Object> context) {
     if (attachmentRelatedObjects != null) {

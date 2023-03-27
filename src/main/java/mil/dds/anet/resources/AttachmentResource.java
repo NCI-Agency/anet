@@ -24,7 +24,7 @@ import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 
-@Path("/api/attachments")
+@Path("/api/attachment")
 public class AttachmentResource {
 
   private final AttachmentDao dao;
@@ -98,10 +98,10 @@ public class AttachmentResource {
   @GET
   @Timed
   @Path("/download/{uuid}")
-  @Produces(MediaType.MULTIPART_FORM_DATA)
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadAttachment(@PathParam("uuid") String uuid) {
     final Attachment attachment = dao.getByUuid(uuid);
-    ResponseBuilder response = Response.ok((Object) attachment);
+    ResponseBuilder response = Response.ok(attachment.getContent(), MediaType.APPLICATION_OCTET_STREAM);
     return response.build();
   }
 }

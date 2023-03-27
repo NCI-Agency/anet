@@ -401,6 +401,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(adminResource);
     environment.jersey().register(homeResource);
     environment.jersey().register(graphQlResource);
+    environment.jersey().register(attachmentResource);
     environment.jersey().register(new RequestLoggingFilter(engine));
     environment.jersey().register(ViewRequestFilter.class);
     environment.jersey().register(ViewResponseFilter.class);
