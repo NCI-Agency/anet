@@ -214,18 +214,50 @@ public class TaskResourceTest extends AbstractResourceTest {
   @Test
   public void duplicateTaskTest()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final Task created = adminMutationExecutor.createTask(FIELDS,
-        TestData.createTaskInput("DupTest", "Test dups", "Test-EF"));
+    final Task taskEF7 = adminQueryExecutor.task(FIELDS, "19364d81-3203-483d-a6bf-461d58888c76");
+    final Task taskEF8 = adminQueryExecutor.task(FIELDS, "9b9f4205-0721-4893-abf8-69e020d4db23");
+
+    final TaskInput taskInput = TestData.createTaskInput("DupTest " + UUID.randomUUID(),
+        "Test dups", "Test-EF", getTaskInput(taskEF7), null, Status.ACTIVE);
+    final Task created = adminMutationExecutor.createTask(FIELDS, taskInput);
     assertThat(created).isNotNull();
     assertThat(created.getUuid()).isNotNull();
 
-    // Trying to create another task with the same shortName should fail
+    // Trying to create another task with the same shortName but a different parentTask should
+    // succeed
+    taskInput.setParentTask(getTaskInput(taskEF8));
+    final Task created2 = adminMutationExecutor.createTask(FIELDS, taskInput);
+    assertThat(created2).isNotNull();
+    assertThat(created2.getUuid()).isNotNull();
+
+    // Trying to create another task with the same shortName and parentTask should fail
     try {
-      adminMutationExecutor.createTask(FIELDS,
-          TestData.createTaskInput("DupTest", "Test dups", "Test-EF"));
+      adminMutationExecutor.createTask(FIELDS, taskInput);
       fail("Expected ClientErrorException");
     } catch (ClientErrorException expectedException) {
     }
+
+    // Trying to create another task with a different shortName but the same parentTask should
+    // succeed
+    taskInput.setShortName("DupTest " + UUID.randomUUID());
+    final Task created3 = adminMutationExecutor.createTask(FIELDS, taskInput);
+    assertThat(created3).isNotNull();
+    assertThat(created3.getUuid()).isNotNull();
+
+    // Trying to create another top-level task with a duplicate shortName should fail
+    final TaskInput topLevelTaskInput = TestData.createTaskInput(taskEF7.getShortName(),
+        "Test dups", "Test-EF 7", null, null, Status.ACTIVE);
+    try {
+      adminMutationExecutor.createTask(FIELDS, topLevelTaskInput);
+      fail("Expected ClientErrorException");
+    } catch (ClientErrorException expectedException) {
+    }
+
+    // Trying to create another top-level task with a different shortName should succeed
+    topLevelTaskInput.setShortName("DupTest " + UUID.randomUUID());
+    final Task created4 = adminMutationExecutor.createTask(FIELDS, topLevelTaskInput);
+    assertThat(created4).isNotNull();
+    assertThat(created4.getUuid()).isNotNull();
   }
 
   @Test
