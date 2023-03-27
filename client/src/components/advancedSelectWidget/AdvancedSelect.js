@@ -91,6 +91,7 @@ export const propTypes = {
     PropTypes.func,
     PropTypes.object
   ]),
+  applySearchTerms: PropTypes.bool,
   extraAddon: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]), // how to render the selected items
@@ -131,6 +132,7 @@ const AdvancedSelect = ({
   closeOverlayOnAdd,
   filterDefs,
   onChange,
+  applySearchTerms,
   objectType,
   queryParams,
   fields,
@@ -275,20 +277,20 @@ const AdvancedSelect = ({
       fetchResultsDebounced(searchTerms)
     }
   }, [fetchType, fetchResults, fetchResultsDebounced, searchTerms])
-
   useEffect(() => {
     if (doReset) {
       setIsLoading(false)
       setShowOverlay(false)
       setFilterType(firstFilter)
-      setSearchTerms(selectedValueAsString)
+      if (!applySearchTerms) {
+        setSearchTerms(selectedValueAsString)
+      }
       setResults({})
       setPageNum(0)
       setFetchType(FETCH_TYPE.NONE)
       setDoReset(false)
     }
-  }, [doReset, firstFilter, selectedValueAsString])
-
+  }, [doReset, firstFilter, selectedValueAsString, applySearchTerms])
   return (
     <>
       {!(disabled && renderSelectedWithDelete) && (
@@ -372,7 +374,7 @@ const AdvancedSelect = ({
                 <InputGroup>
                   <Form.Control
                     name={fieldName}
-                    value={searchTerms || ""}
+                    value={searchTerms}
                     placeholder={placeholder}
                     onChange={changeSearchTerms}
                     onFocus={event => handleInteraction(true, event)}
@@ -423,7 +425,9 @@ const AdvancedSelect = ({
           // overlay is being opened
           // Note: state updates are being batched here
           setShowOverlay(openOverlay)
-          setSearchTerms("")
+          if (!applySearchTerms) {
+            setSearchTerms("")
+          }
           setIsLoading(true)
           setFetchType(FETCH_TYPE.NORMAL)
         } else {
@@ -440,6 +444,7 @@ const AdvancedSelect = ({
 
   function changeSearchTerms(event) {
     setSearchTerms(event.target.value)
+    console.log(searchTerms)
     // Reset the results state when the search terms change
     setResults({})
     setPageNum(0)
