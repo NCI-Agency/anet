@@ -179,8 +179,7 @@ public class TaskResource {
   }
 
   private WebApplicationException createDuplicateException(UnableToExecuteStatementException e) {
-    final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
-    return ResponseUtils.handleSqlException(e,
-        String.format("Duplicate %s number", taskShortLabel));
+    final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortName.label");
+    return ResponseUtils.handleSqlException(e, String.format("Duplicate %s", taskShortLabel));
   }
 }
