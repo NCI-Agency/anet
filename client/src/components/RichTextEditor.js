@@ -1,20 +1,29 @@
+import classNames from "classnames"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import LinkExternalHref from "components/editor/LinkExternalHref"
 import "components/editor/RichTextEditor.css"
 import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment/moment"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { createEditor, Text, Transforms } from "slate"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react"
+import { createEditor, Range, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
-import classNames from "classnames"
 import {
   Editable,
+  ReactEditor,
   Slate,
   useFocused,
   useSelected,
@@ -56,6 +65,12 @@ const RichTextEditor = ({
     []
   )
   const [showFullSize, setShowFullSize] = useState(false)
+  const [toolbarHeight, setToolbarHeight] = useState(0)
+  const { topbarOffset, securityBannerOffset } = useContext(
+    ResponsiveLayoutContext
+  )
+  const editableRef = useRef()
+  const toolbarRef = useRef()
 
   const [slateValue, setSlateValue] = useState(createSlateValue(value))
   const previousValue = usePrevious(value)
@@ -72,24 +87,40 @@ const RichTextEditor = ({
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-  const handleFullSizeMode = (isFullSize) => {
-    handleBannerHeight()
-    setShowFullSize(isFullSize)
-  }
-  const handleBannerHeight = () => {
-    const topOffset = document.getElementById("securityBannerContainer").getBoundingClientRect().bottom + "px"
-    document.documentElement.style.setProperty("--banner-height", topOffset)
-  }
-  const handleToolbarHeight = (toolbarHeight) => document.documentElement.style.setProperty("--toolbar-height", toolbarHeight + "px")
+  useEffect(() => {
+    editableRef.current = ReactEditor.toDOMNode(editor, editor)
+  }, [editor])
+
+  const handleFullSizeMode = isFullSize => setShowFullSize(isFullSize)
+
+  const makeToolbarAccessible = debounce(node => {
+    if (showFullSize || !Range.isRange(node.selection) || readOnly) {
+      return
+    }
+    const toolbarRect = toolbarRef.current?.getBoundingClientRect()
+    if (!toolbarRect || toolbarRect.top >= topbarOffset) {
+      return
+    }
+    editableRef.current.scrollIntoView({
+      block: "center",
+      inline: "nearest"
+    })
+  }, 100)
 
   useEffect(() => {
-    function handleWindowResize() {
-      handleBannerHeight()
+    function updateToolbarHeight() {
+      const curHeight = toolbarRef.current?.clientHeight || 0
+      if (curHeight !== undefined && curHeight !== toolbarHeight) {
+        setToolbarHeight(curHeight)
+      }
     }
-    window.addEventListener("resize", handleWindowResize)
-    // returned function will be called on component unmount
-    return () => window.removeEventListener("resize", handleWindowResize)
-  }, [])
+    if (!readOnly) {
+      updateToolbarHeight()
+      window.addEventListener("resize", updateToolbarHeight)
+      // returned function will be called on component unmount
+      return () => window.removeEventListener("resize", updateToolbarHeight)
+    }
+  }, [toolbarHeight, readOnly])
 
   return (
     <div className={className}>
@@ -99,9 +130,19 @@ const RichTextEditor = ({
         onChange={newValue => {
           setSlateValue(newValue)
           serializeDebounced(editor, onChange)
+          makeToolbarAccessible(editor)
         }}
       >
-        <div className={classNames({ "editor-container": !readOnly, "editor-container-fullsize": showFullSize })}>
+        <div
+          className={classNames({
+            "editor-container": !readOnly,
+            "editor-container-fullsize": showFullSize
+          })}
+          style={{
+            "--banner-height": `${securityBannerOffset}px`,
+            "--toolbar-height": `${toolbarHeight}px`
+          }}
+        >
           {!readOnly && (
             <Toolbar
               showAnetLinksModal={showAnetLinksModal}
@@ -111,7 +152,7 @@ const RichTextEditor = ({
               showFullSize={showFullSize}
               setShowFullSize={handleFullSizeMode}
               disableFullSize={disableFullSize}
-              handleToolbarHeight={handleToolbarHeight}
+              toolbarRef={toolbarRef}
             />
           )}
           <Editable
@@ -128,7 +169,9 @@ const RichTextEditor = ({
                 disableFullSize
               )
             }
-            className={classNames("editable", { "editable-fullsize": showFullSize })}
+            className={classNames("editable", {
+              "editable-fullsize": showFullSize
+            })}
             readOnly={readOnly}
           />
         </div>

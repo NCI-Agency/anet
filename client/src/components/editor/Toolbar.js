@@ -1,7 +1,7 @@
 import { Icon } from "@blueprintjs/core"
 import { Tooltip2 } from "@blueprintjs/popover2"
 import PropTypes from "prop-types"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useRef } from "react"
 import { Editor, Transforms } from "slate"
 import { useSlate } from "slate-react"
 import { ANET_LINK, EXTERNAL_LINK } from "utils_links"
@@ -24,35 +24,14 @@ const Toolbar = ({
   showFullSize,
   setShowFullSize,
   disableFullSize,
-  handleToolbarHeight
+  toolbarRef
 }) => {
   const editor = useSlate()
   const selectionRef = useRef(editor.selection)
-  const [height, setHeight] = useState(0)
-  const toolbarDiv = useRef()
-
-  useEffect(() => {
-    function updateToolbarHeight() {
-      const curHeight = toolbarDiv.current.clientHeight
-      if (curHeight !== undefined && curHeight !== height) {
-        setHeight(curHeight)
-      }
-    }
-    updateToolbarHeight()
-    window.addEventListener("resize", updateToolbarHeight)
-    // returned function will be called on component unmount
-    return () => {
-      window.removeEventListener("resize", updateToolbarHeight)
-    }
-  }, [height])
-
-  useEffect(() => {
-    handleToolbarHeight(height)
-  }, [height, handleToolbarHeight])
 
   return (
     <>
-      <div className="toolbar" ref={toolbarDiv}>
+      <div className="toolbar" ref={toolbarRef}>
         <EditorToggleButton
           type={BUTTON_TYPES.MARK}
           editor={editor}
@@ -161,7 +140,9 @@ const Toolbar = ({
             editor={editor}
             showFullSize={showFullSize}
             setShowFullSize={setShowFullSize}
-            tooltipText={showFullSize ? "Minimize (Escape)" : "Full Size (Alt + Enter)"}
+            tooltipText={
+              showFullSize ? "Minimize (Escape)" : "Full Size (Alt + Enter)"
+            }
           />
         )}
       </div>
@@ -190,7 +171,7 @@ Toolbar.propTypes = {
   showFullSize: PropTypes.bool.isRequired,
   setShowFullSize: PropTypes.func.isRequired,
   disableFullSize: PropTypes.bool,
-  handleToolbarHeight: PropTypes.func.isRequired
+  toolbarRef: PropTypes.object.isRequired
 }
 
 function toggleBlock(editor, format, event) {

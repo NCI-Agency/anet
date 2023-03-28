@@ -24,23 +24,43 @@ const css = {
   alignItems: "center"
 }
 
-const SecurityBanner = ({ onLogout }) => {
+const SecurityBanner = ({ onLogout, handleSecurityBannerHeight }) => {
   const { appSettings, currentUser, connection } = useContext(AppContext)
   const background = appSettings[SETTING_KEY_COLOR]
   const securityTextRef = useRef(null)
   const [bannerSideHeight, setBannerSideHeight] = useState(0)
   const securityTextHeight = securityTextRef.current?.clientHeight || 0
+  const securityBannerRef = useRef()
+  const [securityBannerHeight, setSecurityBannerHeight] = useState(0)
 
   useEffect(() => {
     setBannerSideHeight(securityTextHeight)
   }, [setBannerSideHeight, securityTextHeight])
 
+  useEffect(() => {
+    function updateSecurityBannerHeight() {
+      const curHeight = securityBannerRef.current.clientHeight
+      if (curHeight !== undefined && curHeight !== securityBannerHeight) {
+        setSecurityBannerHeight(curHeight)
+      }
+    }
+    updateSecurityBannerHeight()
+    window.addEventListener("resize", updateSecurityBannerHeight)
+    // returned function will be called on component unmount
+    return () => {
+      window.removeEventListener("resize", updateSecurityBannerHeight)
+    }
+  }, [securityBannerHeight])
+
+  useEffect(() => {
+    if (handleSecurityBannerHeight !== undefined) {
+      handleSecurityBannerHeight(securityBannerHeight)
+    }
+  }, [securityBannerHeight, handleSecurityBannerHeight])
+
   return (
     <>
-      <SecurityBannerContainer
-        className="bg-primary"
-        id="securityBannerContainer"
-      >
+      <SecurityBannerContainer className="bg-primary" ref={securityBannerRef}>
         <VersionBox id="bannerVersion">Version : {Version}</VersionBox>
         <SecurityTextContainer
           id="bannerSecurityText"
@@ -93,7 +113,8 @@ const SecurityBanner = ({ onLogout }) => {
 }
 
 SecurityBanner.propTypes = {
-  onLogout: PropTypes.func
+  onLogout: PropTypes.func,
+  handleSecurityBannerHeight: PropTypes.func
 }
 
 const VersionBox = styled.h6`

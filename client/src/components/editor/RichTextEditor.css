@@ -28,10 +28,6 @@
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  /* position, top and z-index with the following values are used to make rich text toolbar always accessible  even if the text is getting longer */
-  position: sticky;
-  top: 0;
-  z-index: 1;
   border: 1px solid #ccc;
 }
 
