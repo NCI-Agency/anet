@@ -206,7 +206,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
                   "found existing user={} by domainUsername={}; setting openIdSubject={} (was {})",
                   existingPerson, username, openIdSubject, existingPerson.getOpenIdSubject());
               existingPerson.setOpenIdSubject(openIdSubject);
-              dao.update(existingPerson);
+              dao.updateAuthenticationDetails(existingPerson);
               return existingPerson;
             }
 
@@ -219,7 +219,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
                   "found existing user={} by emailAddress={}; setting openIdSubject={} (was {})",
                   existingPerson, email, openIdSubject, existingPerson.getOpenIdSubject());
               existingPerson.setOpenIdSubject(openIdSubject);
-              dao.update(existingPerson);
+              dao.updateAuthenticationDetails(existingPerson);
               return existingPerson;
             }
 

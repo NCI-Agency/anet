@@ -160,6 +160,22 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     return p;
   }
 
+  @InTransaction
+  public int updateAuthenticationDetails(Person p) {
+    DaoUtils.setUpdateFields(p);
+    final String sql = "/* personUpdateAuthenticationDetails */ UPDATE people "
+        + "SET \"openIdSubject\" = :openIdSubject , \"updatedAt\" = :updatedAt "
+        + "WHERE uuid = :uuid";
+    final int nr = getDbHandle().createUpdate(sql).bind("openIdSubject", p.getOpenIdSubject())
+        .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt())).bind("uuid", p.getUuid())
+        .execute();
+    evictFromCache(p);
+    // The openIdSubject has changed, evict original person as well
+    evictFromCache(findInCache(p));
+    // No need to update subscriptions, this is an internal change
+    return nr;
+  }
+
   @Override
   public int updateInternal(Person p) {
     final String sql = "/* personUpdate */ UPDATE people "
@@ -167,7 +183,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         + "\"emailAddress\" = :emailAddress, \"avatar\" = :avatar, code = :code, "
         + "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
         + "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
-        + "\"openIdSubject\" = :openIdSubject, "
         + "\"updatedAt\" = :updatedAt, \"customFields\" = :customFields, \"endOfTourDate\" = :endOfTourDate "
         + "WHERE uuid = :uuid";
 
@@ -177,8 +192,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
     evictFromCache(p);
-    // The openIdSubject may have changed, evict original person as well
-    evictFromCache(findInCache(p));
     return nr;
   }
 
