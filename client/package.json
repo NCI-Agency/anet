@@ -188,7 +188,7 @@
     "yup": "1.0.2"
   },
   "resolutions": {
-    "webpack": "5.76.2",
+    "webpack": "5.77.0",
     "@storybook/builder-webpack4": "link:./node_modules/@storybook/builder-webpack5",
     "@storybook/manager-webpack4": "link:./node_modules/@storybook/manager-webpack5"
   },
