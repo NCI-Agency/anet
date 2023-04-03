@@ -107,8 +107,6 @@ dependencies {
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
-	implementation 'com.graphql-java:java-dataloader:3.2.0'
-	implementation 'io.leangen.graphql:spqr:0.12.1'
 	implementation 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20220608.1'
 	implementation 'com.mikesamuel:json-sanitizer:1.2.3'
 	// Authentication
@@ -136,6 +134,10 @@ dependencies {
 	// For fast and simple image scaling
 	implementation 'net.coobird:thumbnailator:0.4.19'
 
+	// GraphQL dependencies
+	implementation 'com.graphql-java:graphql-java:20.2'
+	implementation 'com.graphql-java:java-dataloader:3.2.0'
+	implementation 'io.leangen.graphql:spqr:0.12.1'
 	// The graphql-java-client-runtime module aggregates all dependencies for the generated code,
 	// including the plugin runtime
 	testImplementation('com.graphql-java-generator:graphql-java-client-runtime:1.18.10') {
