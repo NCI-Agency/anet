@@ -503,6 +503,8 @@ test.serial("Verify that validations work", async t => {
     'Clicking the "today" button puts the current date in the engagement field'
   )
 
+  await $meetingGoalInput.click() // click intent to make sure the date picker is being closed
+
   const $locationInput = await $("#location")
   t.is(
     await $locationInput.getAttribute("value"),
