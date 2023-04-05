@@ -632,27 +632,29 @@ const ReportForm = ({
                     className="atmosphere-form-group"
                   />
                 )}
-                {!isFutureEngagement && !values.cancelled && values.atmosphere && (
-                  <Field
-                    name="atmosphereDetails"
-                    label={Settings.fields.report.atmosphereDetails}
-                    component={FieldHelper.InputField}
-                    onChange={event => {
-                      setFieldTouched("atmosphereDetails", true, false)
-                      setFieldValue(
-                        "atmosphereDetails",
-                        event.target.value,
-                        false
-                      )
-                      validateFieldDebounced("atmosphereDetails")
-                    }}
-                    placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
-                      values.atmosphere === Report.ATMOSPHERE.POSITIVE
-                        ? "(optional)"
-                        : ""
-                    }`}
-                    className="atmosphere-details"
-                  />
+                {!isFutureEngagement &&
+                  !values.cancelled &&
+                  values.atmosphere && (
+                    <Field
+                      name="atmosphereDetails"
+                      label={Settings.fields.report.atmosphereDetails}
+                      component={FieldHelper.InputField}
+                      onChange={event => {
+                        setFieldTouched("atmosphereDetails", true, false)
+                        setFieldValue(
+                          "atmosphereDetails",
+                          event.target.value,
+                          false
+                        )
+                        validateFieldDebounced("atmosphereDetails")
+                      }}
+                      placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${
+                        values.atmosphere === Report.ATMOSPHERE.POSITIVE
+                          ? "(optional)"
+                          : ""
+                      }`}
+                      className="atmosphere-details"
+                    />
                 )}
               </Fieldset>
 

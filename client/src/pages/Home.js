@@ -312,17 +312,18 @@ const Home = ({ setSearchQuery, pageDispatchers }) => {
           {supportEmailMessage}.
         </div>
       )}
-      {currentUser.hasAssignedPosition() && !currentUser.hasActivePosition() && (
-        <div className="alert alert-warning" style={alertStyle}>
-          Your {Settings.fields.advisor.position.name} position has an inactive
-          status.
-          <br />
-          Please contact your organization's superusers to change your position
-          to an active status.
-          <br />
-          If you are unsure, you can also contact the support team{" "}
-          {supportEmailMessage}.
-        </div>
+      {currentUser.hasAssignedPosition() &&
+        !currentUser.hasActivePosition() && (
+          <div className="alert alert-warning" style={alertStyle}>
+            Your {Settings.fields.advisor.position.name} position has an
+            inactive status.
+            <br />
+            Please contact your organization's superusers to change your
+            position to an active status.
+            <br />
+            If you are unsure, you can also contact the support team{" "}
+            {supportEmailMessage}.
+          </div>
       )}
 
       <Messages success={stateSuccess} />

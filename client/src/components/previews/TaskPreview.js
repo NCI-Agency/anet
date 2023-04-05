@@ -173,20 +173,21 @@ const TaskPreview = ({ className, uuid }) => {
           />
         )}
 
-        {Settings.fields.task.childrenTasks && task.childrenTasks?.length > 0 && (
-          <PreviewField
-            label={Settings.fields.task.childrenTasks}
-            name="subEfforts"
-            value={
-              <ListGroup>
-                {task.childrenTasks?.map(task => (
-                  <ListGroupItem key={task.uuid}>
-                    <LinkTo showIcon={false} modelType="Task" model={task} />
-                  </ListGroupItem>
-                ))}
-              </ListGroup>
-            }
-          />
+        {Settings.fields.task.childrenTasks &&
+          task.childrenTasks?.length > 0 && (
+            <PreviewField
+              label={Settings.fields.task.childrenTasks}
+              name="subEfforts"
+              value={
+                <ListGroup>
+                  {task.childrenTasks?.map(task => (
+                    <ListGroupItem key={task.uuid}>
+                      <LinkTo showIcon={false} modelType="Task" model={task} />
+                    </ListGroupItem>
+                  ))}
+                </ListGroup>
+              }
+            />
         )}
 
         {Settings.fields.task.plannedCompletion && (
