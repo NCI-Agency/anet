@@ -1,4 +1,3 @@
-import { addDecorator } from "@storybook/react"
 import "bootstrap/dist/css/bootstrap.css"
 import "index.css"
 import React from "react"
@@ -9,12 +8,12 @@ export const parameters = {
   options: {
     // Sort stories alphabetically
     storySort: (a, b) =>
-      a[1].kind === b[1].kind
+      a.title === b.title
         ? 0
-        : a[1].id.localeCompare(b[1].id, undefined, { numeric: true })
+        : a.id.localeCompare(b.id, undefined, { numeric: true })
   }
 }
 
-addDecorator(story => (
-  <MemoryRouter initialEntries={["/"]}>{story()}</MemoryRouter>
-))
+export const decorators = [
+  story => <MemoryRouter initialEntries={["/"]}>{story()}</MemoryRouter>
+]

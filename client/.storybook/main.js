@@ -1,9 +1,8 @@
-const webpack = require("webpack")
-const paths = require("../config/paths")
+import webpack from "webpack"
+import paths from "../config/paths"
 
-module.exports = {
+export default {
   core: {
-    builder: "webpack5",
     disableTelemetry: true
   },
   stories: [
@@ -14,8 +13,22 @@ module.exports = {
   addons: [
     "@storybook/addon-essentials",
     "@storybook/addon-links",
-    "@storybook/addon-postcss"
+    {
+      name: "@storybook/addon-styling",
+      options: {
+        postCss: {
+          implementation: require("postcss")
+        }
+      }
+    }
   ],
+  framework: {
+    name: "@storybook/react-webpack5",
+    options: {}
+  },
+  docs: {
+    autodocs: true
+  },
   webpackFinal: async(config, { configType }) => {
     // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
     // You can change the configuration based on that.
@@ -31,27 +44,6 @@ module.exports = {
         "process.env.NODE_ENV": JSON.stringify("development")
       })
     )
-
-    /**
-     * CSS handling, specifically overriding postcss loader
-     * since storybook's own postcss dep is always behind and always causing errors
-     */
-    // Find the only Storybook webpack rule that tests for css
-    const cssRule = config.module.rules.find(rule =>
-      "test.css".match(rule.test)
-    )
-    // Which loader in this rule mentions the custom Storybook postcss-loader?
-    const loaderIndex = cssRule.use.findIndex(loader => {
-      // Loaders can be strings or objects
-      const loaderString = typeof loader === "string" ? loader : loader.loader
-      // Find the first mention of "postcss-loader", it may be in a string like:
-      // "@storybook/core/node_modules/postcss-loader"
-      return loaderString.includes("postcss-loader")
-    })
-    // Simple loader string form, removes the obsolete "options" key
-    cssRule.use[loaderIndex] = "postcss-loader"
-
-    // Return the altered config
     return config
   }
 }
