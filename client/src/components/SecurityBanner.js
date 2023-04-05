@@ -24,39 +24,39 @@ const css = {
   alignItems: "center"
 }
 
-const SecurityBanner = ({ onLogout, handleSecurityBannerHeight }) => {
+const SecurityBanner = ({ onLogout, handleSecurityBannerBottom }) => {
   const { appSettings, currentUser, connection } = useContext(AppContext)
   const background = appSettings[SETTING_KEY_COLOR]
   const securityTextRef = useRef(null)
   const [bannerSideHeight, setBannerSideHeight] = useState(0)
   const securityTextHeight = securityTextRef.current?.clientHeight || 0
   const securityBannerRef = useRef()
-  const [securityBannerHeight, setSecurityBannerHeight] = useState(0)
+  const [securityBannerOffset, setSecurityBannerOffset] = useState(0)
 
   useEffect(() => {
     setBannerSideHeight(securityTextHeight)
   }, [setBannerSideHeight, securityTextHeight])
 
   useEffect(() => {
-    function updateSecurityBannerHeight() {
-      const curHeight = securityBannerRef.current.clientHeight
-      if (curHeight !== undefined && curHeight !== securityBannerHeight) {
-        setSecurityBannerHeight(curHeight)
+    function updateSecurityBannerBottom() {
+      const curOffset = securityBannerRef.current.getBoundingClientRect().bottom
+      if (curOffset !== undefined && curOffset !== securityBannerOffset) {
+        setSecurityBannerOffset(curOffset)
       }
     }
-    updateSecurityBannerHeight()
-    window.addEventListener("resize", updateSecurityBannerHeight)
+    updateSecurityBannerBottom()
+    window.addEventListener("resize", updateSecurityBannerBottom)
     // returned function will be called on component unmount
     return () => {
-      window.removeEventListener("resize", updateSecurityBannerHeight)
+      window.removeEventListener("resize", updateSecurityBannerBottom)
     }
-  }, [securityBannerHeight])
+  }, [securityBannerOffset])
 
   useEffect(() => {
-    if (handleSecurityBannerHeight !== undefined) {
-      handleSecurityBannerHeight(securityBannerHeight)
+    if (handleSecurityBannerBottom !== undefined) {
+      handleSecurityBannerBottom(securityBannerOffset)
     }
-  }, [securityBannerHeight, handleSecurityBannerHeight])
+  }, [securityBannerOffset, handleSecurityBannerBottom])
 
   return (
     <>
@@ -114,7 +114,7 @@ const SecurityBanner = ({ onLogout, handleSecurityBannerHeight }) => {
 
 SecurityBanner.propTypes = {
   onLogout: PropTypes.func,
-  handleSecurityBannerHeight: PropTypes.func
+  handleSecurityBannerBottom: PropTypes.func
 }
 
 const VersionBox = styled.h6`

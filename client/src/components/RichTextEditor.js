@@ -18,12 +18,11 @@ import React, {
   useRef,
   useState
 } from "react"
-import { createEditor, Range, Text, Transforms } from "slate"
+import { createEditor, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
 import {
   Editable,
-  ReactEditor,
   Slate,
   useFocused,
   useSelected,
@@ -87,14 +86,10 @@ const RichTextEditor = ({
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
 
-  useEffect(() => {
-    editableRef.current = ReactEditor.toDOMNode(editor, editor)
-  }, [editor])
-
   const handleFullSizeMode = isFullSize => setShowFullSize(isFullSize)
 
   const makeToolbarAccessible = debounce(node => {
-    if (showFullSize || !Range.isRange(node.selection) || readOnly) {
+    if (showFullSize || readOnly) {
       return
     }
     const toolbarRect = toolbarRef.current?.getBoundingClientRect()
@@ -142,6 +137,7 @@ const RichTextEditor = ({
             "--banner-height": `${securityBannerOffset}px`,
             "--toolbar-height": `${toolbarHeight}px`
           }}
+          ref={editableRef}
         >
           {!readOnly && (
             <Toolbar

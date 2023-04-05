@@ -19,7 +19,7 @@ const TopBar = ({
   resetPages,
   minimalHeader,
   toggleMenuAction,
-  handleSecurityBannerHeight
+  handleSecurityBannerBottom
 }) => {
   const { appSettings, currentUser } = useContext(AppContext)
   const [bannerVisibility, setBannerVisibility] = useState(false)
@@ -73,7 +73,7 @@ const TopBar = ({
         <GeneralBanner options={bannerOptions} />
         <SecurityBanner
           onLogout={resetPages}
-          handleSecurityBannerHeight={handleSecurityBannerHeight}
+          handleSecurityBannerBottom={handleSecurityBannerBottom}
         />
         {currentUser &&
           !currentUser.hasActivePosition() &&
@@ -92,7 +92,7 @@ TopBar.propTypes = {
   resetPages: PropTypes.func.isRequired,
   minimalHeader: PropTypes.bool,
   toggleMenuAction: PropTypes.func,
-  handleSecurityBannerHeight: PropTypes.func.isRequired
+  handleSecurityBannerBottom: PropTypes.func.isRequired
 }
 
 const mapDispatchToProps = dispatch => ({

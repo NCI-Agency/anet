@@ -55,7 +55,7 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
   const location = useLocation()
   const [floatingMenu, setFloatingMenu] = useState(false)
   const [topbarHeight, setTopbarHeight] = useState(0)
-  const [securityBannerHeight, setSecurityBannerHeight] = useState(0)
+  const [securityBannerBottom, setSecurityBannerBottom] = useState(0)
   useEffect(() => {
     // We want to hide the floating menu on navigation events
     showFloatingMenu(false)
@@ -68,14 +68,14 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
       value={{
         showFloatingMenu: showFloatingMenu,
         topbarOffset: topbarHeight,
-        securityBannerOffset: securityBannerHeight
+        securityBannerOffset: securityBannerBottom
       }}
     >
       <div style={anetContainer} className="anet">
         <TopBar
           handleTopbarHeight={handleTopbarHeight}
           minimalHeader={pageProps.minimalHeader}
-          handleSecurityBannerHeight={handleSecurityBannerHeight}
+          handleSecurityBannerBottom={handleSecurityBannerBottom}
           toggleMenuAction={() => {
             showFloatingMenu(!floatingMenu)
           }}
@@ -110,8 +110,8 @@ const ResponsiveLayout = ({ pageProps, sidebarData, children }) => {
     setTopbarHeight(topbarHeight)
   }
 
-  function handleSecurityBannerHeight(securityBannerHeight) {
-    setSecurityBannerHeight(securityBannerHeight)
+  function handleSecurityBannerBottom(securityBannerBottom) {
+    setSecurityBannerBottom(securityBannerBottom)
   }
 
   function showFloatingMenu(floatingMenu) {
