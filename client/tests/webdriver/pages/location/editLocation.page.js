@@ -28,7 +28,8 @@ class EditLocation extends Page {
   async getAllFormatsPopoverLat() {
     return browser
       .$(".bp4-popover2-content table")
-      .$("td*=Latitude")
+      .$("button*=Latitude")
+      .$("..")
       .$("..")
       .$("span:first-child")
   }
@@ -36,7 +37,8 @@ class EditLocation extends Page {
   async getAllFormatsPopoverLng() {
     return browser
       .$(".bp4-popover2-content table")
-      .$("td*=Latitude")
+      .$("button*=Latitude")
+      .$("..")
       .$("..")
       .$("span:nth-child(3)")
   }
@@ -45,7 +47,8 @@ class EditLocation extends Page {
     // parent of MGRS table data => tr
     return browser
       .$(".bp4-popover2-content table")
-      .$("td*=MGRS")
+      .$("button*=MGRS")
+      .$("..")
       .$("..")
       .$("span:first-child")
   }
