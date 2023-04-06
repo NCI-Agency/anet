@@ -65,7 +65,8 @@ class CreateNewLocation extends Page {
   async getAllFormatsPopoverLat() {
     return (await this.getForm())
       .$(".bp4-popover2-content table")
-      .$("td*=Latitude")
+      .$("button*=Latitude")
+      .$("..")
       .$("..")
       .$("span:first-child")
   }
@@ -73,7 +74,8 @@ class CreateNewLocation extends Page {
   async getAllFormatsPopoverLng() {
     return (await this.getForm())
       .$(".bp4-popover2-content table")
-      .$("td*=Latitude")
+      .$("button*=Latitude")
+      .$("..")
       .$("..")
       .$("span:nth-child(3)")
   }
@@ -82,7 +84,8 @@ class CreateNewLocation extends Page {
     // parent of MGRS table data => tr
     return (await this.getForm())
       .$(".bp4-popover2-content table")
-      .$("td*=MGRS")
+      .$("button*=MGRS")
+      .$("..")
       .$("..")
       .$("span:first-child")
   }
