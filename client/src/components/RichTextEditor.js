@@ -18,7 +18,8 @@ import React, {
   useRef,
   useState
 } from "react"
-import { createEditor, Text, Transforms } from "slate"
+import scrollIntoView from "scroll-into-view-if-needed"
+import { createEditor, Range, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
 import {
@@ -47,6 +48,22 @@ const usePrevious = value => {
     ref.current = value
   }, [value])
   return ref.current
+}
+
+function scrollSelectionIntoView(editor, domRange) {
+  // Use the same condition as Editable.defaultScrollSelectionIntoView for deciding when to scroll
+  if (
+    !editor.selection ||
+    (editor.selection && Range.isCollapsed(editor.selection))
+  ) {
+    // Use a newer version of scrollIntoView than Slate, and only do a smooth scroll if needed
+    scrollIntoView(domRange.startContainer.parentElement, {
+      behavior: "smooth",
+      scrollMode: "if-needed",
+      block: "nearest",
+      inline: "nearest"
+    })
+  }
 }
 
 const RichTextEditor = ({
@@ -169,6 +186,7 @@ const RichTextEditor = ({
               "editable-fullsize": showFullSize
             })}
             readOnly={readOnly}
+            scrollSelectionIntoView={scrollSelectionIntoView}
           />
         </div>
       </Slate>
