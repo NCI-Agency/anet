@@ -1274,18 +1274,18 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@blueprintjs/colors@^4.1.20":
-  version "4.1.20"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/colors/-/colors-4.1.20.tgz#561527f95e4ff0bab05c33fcc01c5316611ce3cf"
-  integrity sha512-sUGt96sK/KPjGt9J34B6nR3vq1fyHGFt1VOhDjguKZhapYb6f19wh3U/FA8LYvo2THq3pT6UeMryJv+/ey6Aqg==
+"@blueprintjs/colors@^4.1.21":
+  version "4.1.21"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/colors/-/colors-4.1.21.tgz#622c56ac7f9af466680eafcdbaf26e5c9152ad3b"
+  integrity sha512-5csitaTn1xyHktMRyXAcvWzsbrgtP9pK7ZmYX9f0TGjB1UG5zNaTGLexX0aFqop44SpfsSP5mbA8xGBniy8nZA==
 
-"@blueprintjs/core@4.17.7", "@blueprintjs/core@^4.17.7":
-  version "4.17.7"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-4.17.7.tgz#64bfaa3b109ac55912c0987a01c4412d708e354f"
-  integrity sha512-6ZllGsg9w73tj/X9FHvAiPg9/m1CvNRajGOkpDFh2gYxaNvNmQhit94VmpfG0+emiKni7y3nKmrZYJwEPtNM4w==
+"@blueprintjs/core@4.17.8", "@blueprintjs/core@^4.17.8":
+  version "4.17.8"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-4.17.8.tgz#82d42f421c2e9daf3487943546e0613bb9f369fe"
+  integrity sha512-hPspPY3luquQlVBlEyJVQT6nYXNl+ABOcqXFiURaneFsweKh/cjlp0ERmiypVh4XsewzmpOa2REePtfI1defAw==
   dependencies:
-    "@blueprintjs/colors" "^4.1.20"
-    "@blueprintjs/icons" "^4.14.4"
+    "@blueprintjs/colors" "^4.1.21"
+    "@blueprintjs/icons" "^4.14.5"
     "@juggle/resize-observer" "^3.4.0"
     "@types/dom4" "^2.0.2"
     classnames "^2.3.1"
@@ -1296,31 +1296,31 @@
     react-transition-group "^4.4.5"
     tslib "~2.5.0"
 
-"@blueprintjs/datetime@4.4.26":
-  version "4.4.26"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/datetime/-/datetime-4.4.26.tgz#feeca60beffc67d3842accb47df1cba94a17d47d"
-  integrity sha512-1ZtM4xETO+dkI374BxIJlCoLh/HSv5POKH70l3WLLtvw3hixNz/Mx89mP22uiVFKsQRzmkxJc2fgYUcHzQjMrg==
+"@blueprintjs/datetime@4.4.27":
+  version "4.4.27"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/datetime/-/datetime-4.4.27.tgz#a31ead6298e84db20463dc06167877c297cac130"
+  integrity sha512-bNV/s4OPEMuj3k/lso/+l68qATMhVP4gTUMvw6YkdHD/VyAWEwhop5ipIPfoTFSJ9KZm6shX/Gj+RM4G5Kmzyw==
   dependencies:
-    "@blueprintjs/core" "^4.17.7"
+    "@blueprintjs/core" "^4.17.8"
     classnames "^2.3.1"
     react-day-picker "7.4.9"
     tslib "~2.5.0"
 
-"@blueprintjs/icons@^4.14.4":
-  version "4.14.4"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-4.14.4.tgz#021d043d5e5828947942370a127c780cfd691bbd"
-  integrity sha512-HYJXujMQDE4hUiGbp7gKAKMn5jUmVHyk2Inie6A79S7XUbUKA4gFOPjKYAc/+tz4zxl6TMPruRbucOriiH7snA==
+"@blueprintjs/icons@^4.14.5":
+  version "4.14.5"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-4.14.5.tgz#cb54e4aa56511b4cb395bc6e45f853c544c1fd5e"
+  integrity sha512-Nvfina9vy3E1JJpISd/TNJeEc3UxJ+QM/rJbYgWlPaVU9iowfHSEHDdDtbKeFj9E0oDUzTYOJ4aNp0vjJ2B6/Q==
   dependencies:
     change-case "^4.1.2"
     classnames "^2.3.1"
     tslib "~2.5.0"
 
-"@blueprintjs/popover2@1.13.11":
-  version "1.13.11"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-1.13.11.tgz#cc6e359e49f173715d5b9009e4c022b23779612c"
-  integrity sha512-xh8w8L/uwlQGTek1tdAWVMgdRiqD7GeoYVjPiEvA7oDgdAfn99MeyKJNxwXBvzT2EbGrWlPSD+saIoBH0VQxDQ==
+"@blueprintjs/popover2@1.13.12":
+  version "1.13.12"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/popover2/-/popover2-1.13.12.tgz#b8859954f93ce97e08445c62603bfc30cf4b0776"
+  integrity sha512-1pn7eRnI/FAqgJT0SDFJRUMKQnP1mhGGd7bOpCpg+Q2hiuk8YTlYClPgYneoRGtLhK3JLyby66UofdAyFklWWQ==
   dependencies:
-    "@blueprintjs/core" "^4.17.7"
+    "@blueprintjs/core" "^4.17.8"
     "@juggle/resize-observer" "^3.4.0"
     "@popperjs/core" "^2.11.6"
     classnames "^2.3.1"
