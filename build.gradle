@@ -103,7 +103,7 @@ dependencies {
 	implementation 'javax.cache:cache-api:1.1.1'
 	implementation 'commons-beanutils:commons-beanutils:1.9.4'
 
-	implementation 'org.simplejavamail:simple-java-mail:8.0.0'
+	implementation 'org.simplejavamail:simple-java-mail:8.0.1'
 	implementation "ch.qos.logback:logback-classic:${logbackVersion}"
 	implementation "ch.qos.logback:logback-core:${logbackVersion}"
 	implementation "ch.qos.logback:logback-access:${logbackVersion}"
@@ -122,7 +122,7 @@ dependencies {
 		exclude group: 'io.netty'
 	}
 	// But we do need io.netty.buffer.ByteBufOutputStream, so explicitly include that here
-	implementation 'io.netty:netty-buffer:4.1.90.Final'
+	implementation 'io.netty:netty-buffer:4.1.91.Final'
 
 	// used for writing Excel documents
 	implementation 'org.apache.poi:poi:5.2.3'
