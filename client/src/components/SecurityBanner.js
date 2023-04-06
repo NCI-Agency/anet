@@ -24,20 +24,43 @@ const css = {
   alignItems: "center"
 }
 
-const SecurityBanner = ({ onLogout }) => {
+const SecurityBanner = ({ onLogout, handleSecurityBannerBottom }) => {
   const { appSettings, currentUser, connection } = useContext(AppContext)
   const background = appSettings[SETTING_KEY_COLOR]
   const securityTextRef = useRef(null)
   const [bannerSideHeight, setBannerSideHeight] = useState(0)
   const securityTextHeight = securityTextRef.current?.clientHeight || 0
+  const securityBannerRef = useRef()
+  const [securityBannerOffset, setSecurityBannerOffset] = useState(0)
 
   useEffect(() => {
     setBannerSideHeight(securityTextHeight)
   }, [setBannerSideHeight, securityTextHeight])
 
+  useEffect(() => {
+    function updateSecurityBannerBottom() {
+      const curOffset = securityBannerRef.current.getBoundingClientRect().bottom
+      if (curOffset !== undefined && curOffset !== securityBannerOffset) {
+        setSecurityBannerOffset(curOffset)
+      }
+    }
+    updateSecurityBannerBottom()
+    window.addEventListener("resize", updateSecurityBannerBottom)
+    // returned function will be called on component unmount
+    return () => {
+      window.removeEventListener("resize", updateSecurityBannerBottom)
+    }
+  }, [securityBannerOffset])
+
+  useEffect(() => {
+    if (handleSecurityBannerBottom !== undefined) {
+      handleSecurityBannerBottom(securityBannerOffset)
+    }
+  }, [securityBannerOffset, handleSecurityBannerBottom])
+
   return (
     <>
-      <SecurityBannerContainer className="bg-primary">
+      <SecurityBannerContainer className="bg-primary" ref={securityBannerRef}>
         <VersionBox id="bannerVersion">Version : {Version}</VersionBox>
         <SecurityTextContainer
           id="bannerSecurityText"
@@ -90,7 +113,8 @@ const SecurityBanner = ({ onLogout }) => {
 }
 
 SecurityBanner.propTypes = {
-  onLogout: PropTypes.func
+  onLogout: PropTypes.func,
+  handleSecurityBannerBottom: PropTypes.func
 }
 
 const VersionBox = styled.h6`
@@ -148,6 +172,8 @@ const SecurityBannerContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   color: white;
+  z-index: 1202;
+  position: relative;
 `
 
 const ConnectionBanner = ({ connection }) => {

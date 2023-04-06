@@ -98,7 +98,7 @@ const RelatedObjectNoteModal = ({
                       // validation will be done by setFieldValue
                       setFieldTouched("text", true, false)
                     }}
-                    widget={<RichTextEditor />}
+                    widget={<RichTextEditor disableFullSize />}
                     vertical
                   />
                   <RelatedObjectsTable

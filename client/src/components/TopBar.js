@@ -18,7 +18,8 @@ const TopBar = ({
   handleTopbarHeight,
   resetPages,
   minimalHeader,
-  toggleMenuAction
+  toggleMenuAction,
+  handleSecurityBannerBottom
 }) => {
   const { appSettings, currentUser } = useContext(AppContext)
   const [bannerVisibility, setBannerVisibility] = useState(false)
@@ -67,14 +68,13 @@ const TopBar = ({
   }, [bannerVisibility, currentUser, visibilitySetting])
 
   return (
-    <div
-      style={{ flex: "0 0 auto", zIndex: 1201 }}
-      className="d-print-none"
-      ref={topbarDiv}
-    >
+    <div style={{ flex: "0 0 auto" }} className="d-print-none" ref={topbarDiv}>
       <div id="topbar">
         <GeneralBanner options={bannerOptions} />
-        <SecurityBanner onLogout={resetPages} />
+        <SecurityBanner
+          onLogout={resetPages}
+          handleSecurityBannerBottom={handleSecurityBannerBottom}
+        />
         {currentUser &&
           !currentUser.hasActivePosition() &&
           !currentUser.isPendingVerification() && <NoPositionBanner />}
@@ -91,7 +91,8 @@ TopBar.propTypes = {
   handleTopbarHeight: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired,
   minimalHeader: PropTypes.bool,
-  toggleMenuAction: PropTypes.func
+  toggleMenuAction: PropTypes.func,
+  handleSecurityBannerBottom: PropTypes.func.isRequired
 }
 
 const mapDispatchToProps = dispatch => ({

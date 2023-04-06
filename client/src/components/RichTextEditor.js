@@ -1,15 +1,25 @@
+import classNames from "classnames"
 import LinkAnetEntity from "components/editor/LinkAnetEntity"
 import LinkExternalHref from "components/editor/LinkExternalHref"
 import "components/editor/RichTextEditor.css"
 import Toolbar, { handleOnKeyDown } from "components/editor/Toolbar"
+import ResponsiveLayoutContext from "components/ResponsiveLayoutContext"
 import escapeHtml from "escape-html"
 import { debounce } from "lodash"
 import _isEmpty from "lodash/isEmpty"
 import * as Models from "models"
 import moment from "moment/moment"
 import PropTypes from "prop-types"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { createEditor, Text, Transforms } from "slate"
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react"
+import scrollIntoView from "scroll-into-view-if-needed"
+import { createEditor, Range, Text, Transforms } from "slate"
 import { withHistory } from "slate-history"
 import { jsx } from "slate-hyperscript"
 import {
@@ -40,12 +50,33 @@ const usePrevious = value => {
   return ref.current
 }
 
+function smoothScrollIntoView(element) {
+  scrollIntoView(element, {
+    behavior: "smooth",
+    scrollMode: "if-needed",
+    block: "nearest",
+    inline: "nearest"
+  })
+}
+
+function scrollSelectionIntoView(editor, domRange) {
+  // Use the same condition as Editable.defaultScrollSelectionIntoView for deciding when to scroll
+  if (
+    !editor.selection ||
+    (editor.selection && Range.isCollapsed(editor.selection))
+  ) {
+    // Use a newer version of scrollIntoView than Slate, and only do a smooth scroll if needed
+    smoothScrollIntoView(domRange.startContainer.parentElement)
+  }
+}
+
 const RichTextEditor = ({
   value,
   onChange,
   onHandleBlur,
   className,
-  readOnly
+  readOnly,
+  disableFullSize
 }) => {
   const [showAnetLinksModal, setShowAnetLinksModal] = useState(false)
   const [showExternalLinksModal, setShowExternalLinksModal] = useState(false)
@@ -53,6 +84,13 @@ const RichTextEditor = ({
     () => withHtml(withReact(withHistory(withAnetLink(createEditor())))),
     []
   )
+  const [showFullSize, setShowFullSize] = useState(false)
+  const [toolbarHeight, setToolbarHeight] = useState(0)
+  const { topbarOffset, securityBannerOffset } = useContext(
+    ResponsiveLayoutContext
+  )
+  const editableRef = useRef()
+  const toolbarRef = useRef()
 
   const [slateValue, setSlateValue] = useState(createSlateValue(value))
   const previousValue = usePrevious(value)
@@ -64,10 +102,38 @@ const RichTextEditor = ({
       editor.children = createSlateValue(value)
       editor.onChange()
     }
-  }, [editor, previousValue, readOnly, value])
+  }, [editor, previousValue, readOnly, disableFullSize, value])
 
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
+
+  const handleFullSizeMode = isFullSize => setShowFullSize(isFullSize)
+
+  const makeToolbarAccessible = debounce(node => {
+    if (showFullSize || readOnly) {
+      return
+    }
+    const toolbarRect = toolbarRef.current?.getBoundingClientRect()
+    if (!toolbarRect || toolbarRect.top >= topbarOffset) {
+      return
+    }
+    smoothScrollIntoView(editableRef.current)
+  }, 100)
+
+  useEffect(() => {
+    function updateToolbarHeight() {
+      const curHeight = toolbarRef.current?.clientHeight || 0
+      if (curHeight !== undefined && curHeight !== toolbarHeight) {
+        setToolbarHeight(curHeight)
+      }
+    }
+    if (!readOnly) {
+      updateToolbarHeight()
+      window.addEventListener("resize", updateToolbarHeight)
+      // returned function will be called on component unmount
+      return () => window.removeEventListener("resize", updateToolbarHeight)
+    }
+  }, [toolbarHeight, readOnly])
 
   return (
     <div className={className}>
@@ -77,15 +143,30 @@ const RichTextEditor = ({
         onChange={newValue => {
           setSlateValue(newValue)
           serializeDebounced(editor, onChange)
+          makeToolbarAccessible(editor)
         }}
       >
-        <div className={!readOnly ? "editor-container" : null}>
+        <div
+          className={classNames({
+            "editor-container": !readOnly,
+            "editor-container-fullsize": showFullSize
+          })}
+          style={{
+            "--banner-height": `${securityBannerOffset}px`,
+            "--toolbar-height": `${toolbarHeight}px`
+          }}
+          ref={editableRef}
+        >
           {!readOnly && (
             <Toolbar
               showAnetLinksModal={showAnetLinksModal}
               setShowAnetLinksModal={setShowAnetLinksModal}
               showExternalLinksModal={showExternalLinksModal}
               setShowExternalLinksModal={setShowExternalLinksModal}
+              showFullSize={showFullSize}
+              setShowFullSize={handleFullSizeMode}
+              disableFullSize={disableFullSize}
+              toolbarRef={toolbarRef}
             />
           )}
           <Editable
@@ -97,11 +178,16 @@ const RichTextEditor = ({
                 e,
                 editor,
                 setShowAnetLinksModal,
-                setShowExternalLinksModal
+                setShowExternalLinksModal,
+                handleFullSizeMode,
+                disableFullSize
               )
             }
-            className="editable"
+            className={classNames("editable", {
+              "editable-fullsize": showFullSize
+            })}
             readOnly={readOnly}
+            scrollSelectionIntoView={scrollSelectionIntoView}
           />
         </div>
       </Slate>
@@ -114,7 +200,8 @@ RichTextEditor.propTypes = {
   onChange: PropTypes.func,
   onHandleBlur: PropTypes.func,
   className: PropTypes.string,
-  readOnly: PropTypes.bool
+  readOnly: PropTypes.bool,
+  disableFullSize: PropTypes.bool
 }
 
 const withHtml = editor => {
