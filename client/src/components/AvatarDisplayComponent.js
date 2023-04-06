@@ -2,6 +2,8 @@ import PropTypes from "prop-types"
 import React from "react"
 import DEFAULT_AVATAR from "resources/default_avatar.svg"
 
+export const AVATAR_DATA_PREAMBLE = "data:image/png;base64,"
+
 const AvatarDisplayComponent = ({
   avatar,
   height,
@@ -10,7 +12,7 @@ const AvatarDisplayComponent = ({
   className
 }) => (
   <img
-    src={avatar || DEFAULT_AVATAR}
+    src={avatar ? `${AVATAR_DATA_PREAMBLE}${avatar}` : DEFAULT_AVATAR}
     className={className}
     height={height}
     width={width}

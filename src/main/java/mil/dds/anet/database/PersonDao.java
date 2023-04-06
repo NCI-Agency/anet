@@ -153,6 +153,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
     getDbHandle().createUpdate(sql).bindBean(p)
         .bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+        .bind("avatar", p.getAvatarData())
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();
@@ -188,6 +189,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person, PersonSearchQue
 
     final int nr = getDbHandle().createUpdate(sql).bindBean(p)
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+        .bind("avatar", p.getAvatarData())
         .bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
         .bind("status", DaoUtils.getEnumId(p.getStatus()))
         .bind("role", DaoUtils.getEnumId(p.getRole())).execute();

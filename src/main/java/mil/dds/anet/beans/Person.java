@@ -7,7 +7,6 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
@@ -276,8 +275,13 @@ public class Person extends AbstractCustomizableAnetBean
     return AnetObjectEngine.getInstance().getReportDao().search(context, query);
   }
 
+  @GraphQLInputField
+  public void setAvatar(byte[] avatar) {
+    this.avatar = Optional.ofNullable(avatar);
+  }
+
   @GraphQLQuery(name = "avatar")
-  public CompletableFuture<String> loadAvatar(@GraphQLRootContext Map<String, Object> context,
+  public CompletableFuture<byte[]> loadAvatar(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "size", defaultValue = "256") int size) {
     if (avatar != null) {
       return CompletableFuture.completedFuture(resizeAvatar(size));
@@ -285,41 +289,21 @@ public class Person extends AbstractCustomizableAnetBean
     return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE_AVATARS, uuid)
         .thenApply(o -> {
           // Careful, `o` might be null
-          avatar = Optional.ofNullable(o == null ? null : o.getAvatar());
+          avatar = Optional.ofNullable(o == null ? null : o.getAvatarData());
           return resizeAvatar(size);
         });
   }
 
-  public String resizeAvatar(int size) {
+  public byte[] resizeAvatar(int size) {
     try {
-      return String.format("data:image/%1$s;base64,%2$s", AVATAR_TYPE, Base64.getEncoder()
-          .encodeToString(Utils.resizeImage(getAvatar(), size, size, AVATAR_TYPE)));
+      return Utils.resizeImage(getAvatarData(), size, size, AVATAR_TYPE);
     } catch (Exception e) {
       return null;
     }
   }
 
-  public byte[] getAvatar() {
+  public byte[] getAvatarData() {
     return avatar == null ? null : avatar.orElse(null);
-  }
-
-  public void setAvatar(byte[] avatar) {
-    this.avatar = Optional.ofNullable(avatar);
-  }
-
-  @GraphQLInputField(name = "avatar")
-  public void setAvatar(String avatar) {
-    if (avatar == null) {
-      this.avatar = Optional.ofNullable(null);
-    } else {
-      try {
-        final String[] parts = avatar.split(",", 2);
-        final String dataPart = parts.length == 1 ? parts[0] : parts[1];
-        this.avatar = Optional.ofNullable(Base64.getDecoder().decode(dataPart));
-      } catch (Exception e) {
-        this.avatar = Optional.ofNullable(null);
-      }
-    }
   }
 
   public String getCode() {
@@ -364,7 +348,8 @@ public class Person extends AbstractCustomizableAnetBean
         && Objects.equals(other.getDomainUsername(), domainUsername)
         && Objects.equals(other.getOpenIdSubject(), openIdSubject)
         && Objects.equals(other.getPendingVerification(), pendingVerification)
-        && Objects.equals(other.getAvatar(), getAvatar()) && Objects.equals(other.getCode(), code)
+        && Objects.equals(other.getAvatarData(), getAvatarData())
+        && Objects.equals(other.getCode(), code)
         && (createdAt != null ? createdAt.equals(other.getCreatedAt())
             : (other.getCreatedAt() == null && updatedAt != null)
                 ? updatedAt.equals(other.getUpdatedAt())

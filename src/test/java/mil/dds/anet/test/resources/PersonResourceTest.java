@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -102,27 +101,27 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(newPerson.getCustomFields())
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
-    newPerson.setName("testCreatePerson updated name");
-    newPerson.setCountry("The Commonwealth of Canada");
-    newPerson.setCode("A123456");
+    final PersonInput updatedNewPersonInput = getPersonInput(newPerson);
+    updatedNewPersonInput.setName("testCreatePerson updated name");
+    updatedNewPersonInput.setCountry("The Commonwealth of Canada");
+    updatedNewPersonInput.setCode("A123456");
 
     // update avatar
-    byte[] fileContent = Files.readAllBytes(DEFAULT_AVATAR.toPath());
-    String defaultAvatarData = Base64.getEncoder().encodeToString(fileContent);
-    newPerson.setAvatar(defaultAvatarData);
+    byte[] defaultAvatarData = Files.readAllBytes(DEFAULT_AVATAR.toPath());
+    updatedNewPersonInput.setAvatar(defaultAvatarData);
 
     // update HTML of biography
-    newPerson.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
+    updatedNewPersonInput.setBiography(UtilsTest.getCombinedHtmlTestCase().getInput());
     // update JSON of customFields
-    newPerson.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
+    updatedNewPersonInput.setCustomFields(UtilsTest.getCombinedJsonTestCase().getInput());
 
-    Integer nrUpdated = adminMutationExecutor.updatePerson("", getPersonInput(newPerson));
+    Integer nrUpdated = adminMutationExecutor.updatePerson("", updatedNewPersonInput);
     assertThat(nrUpdated).isEqualTo(1);
 
-    retPerson = jackQueryExecutor.person(FIELDS, newPerson.getUuid());
-    assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
-    assertThat(retPerson.getCode()).isEqualTo(newPerson.getCode());
-    assertThat(retPerson.getAvatar()).isNotNull();
+    retPerson = jackQueryExecutor.person(FIELDS, updatedNewPersonInput.getUuid());
+    assertThat(retPerson.getName()).isEqualTo(updatedNewPersonInput.getName());
+    assertThat(retPerson.getCode()).isEqualTo(updatedNewPersonInput.getCode());
+    assertThat(retPerson.getAvatar()).isNotEmpty();
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedHtmlTestCase().getOutput());
     // check that JSON of customFields is sanitized after update
@@ -186,7 +185,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Now newPerson2 who is a superuser, should NOT be able to edit newPerson
     // Because they are not in newPerson2's organization.
     try {
-      newPerson2MutationExecutor.updatePerson("", getPersonInput(newPerson));
+      newPerson2MutationExecutor.updatePerson("", updatedNewPersonInput);
       fail("Expected ForbiddenException");
     } catch (ForbiddenException expectedException) {
     }
