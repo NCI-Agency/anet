@@ -37,7 +37,7 @@ class Home extends Page {
   }
 
   async getLoginButton() {
-    return browser.$('//a[text()="Login"]')
+    return browser.$('//a[text()="Sign In"]')
   }
 
   async getSearchBar() {

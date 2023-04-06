@@ -8,7 +8,7 @@ describe("Anet home page", () => {
     await (await Home.getLogoutButton()).waitForDisplayed()
     await (await Home.getLogoutButton()).click()
     const title = await browser.getTitle()
-    await expect(title).to.equal("ANET Logout")
+    await expect(title).to.equal("ANET Sign Out")
     await (await Home.getLoginButton()).waitForDisplayed()
     await (await Home.getLoginButton()).click()
     const titleLogin = await browser.getTitle()
