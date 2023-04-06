@@ -50,6 +50,15 @@ const usePrevious = value => {
   return ref.current
 }
 
+function smoothScrollIntoView(element) {
+  scrollIntoView(element, {
+    behavior: "smooth",
+    scrollMode: "if-needed",
+    block: "nearest",
+    inline: "nearest"
+  })
+}
+
 function scrollSelectionIntoView(editor, domRange) {
   // Use the same condition as Editable.defaultScrollSelectionIntoView for deciding when to scroll
   if (
@@ -57,12 +66,7 @@ function scrollSelectionIntoView(editor, domRange) {
     (editor.selection && Range.isCollapsed(editor.selection))
   ) {
     // Use a newer version of scrollIntoView than Slate, and only do a smooth scroll if needed
-    scrollIntoView(domRange.startContainer.parentElement, {
-      behavior: "smooth",
-      scrollMode: "if-needed",
-      block: "nearest",
-      inline: "nearest"
-    })
+    smoothScrollIntoView(domRange.startContainer.parentElement)
   }
 }
 
@@ -113,10 +117,7 @@ const RichTextEditor = ({
     if (!toolbarRect || toolbarRect.top >= topbarOffset) {
       return
     }
-    editableRef.current.scrollIntoView({
-      block: "center",
-      inline: "nearest"
-    })
+    smoothScrollIntoView(editableRef.current)
   }, 100)
 
   useEffect(() => {
