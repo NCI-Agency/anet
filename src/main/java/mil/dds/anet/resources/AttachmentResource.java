@@ -5,9 +5,9 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -42,13 +42,13 @@ public class AttachmentResource {
     return a;
   }
 
-  @GraphQLQuery(name = "attachments")
+  @GraphQLQuery(name = "getAttachmentsForRelatedObject")
   public List<Attachment> getAttachmentsForRelatedObject(
       @GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "uuid") String uuid) {
-    final CompletableFuture<List<Attachment>> attachments =
-        dao.getAttachmentsForRelatedObject(context, uuid);
-    return attachments.join();
+    final List<List<Attachment>> attachments =
+        dao.getAttachmentsOfRelatedObject(Collections.singletonList(uuid));
+    return attachments.get(0);
   }
 
   // @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -101,7 +101,15 @@ public class AttachmentResource {
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadAttachment(@PathParam("uuid") String uuid) {
     final Attachment attachment = dao.getByUuid(uuid);
-    ResponseBuilder response = Response.ok(attachment.getContent(), MediaType.APPLICATION_OCTET_STREAM);
+    if (attachment == null) {
+      throw new WebApplicationException("Attachment not found", Status.NOT_FOUND);
+    }
+    if (attachment.getContent() == null) {
+      throw new WebApplicationException("Invalid attachment", Status.NOT_FOUND);
+    }
+    ResponseBuilder response =
+        Response.ok(attachment.getContent(), MediaType.APPLICATION_OCTET_STREAM);
+    response.header("Content-Disposition", "attachment; filename=" + attachment.getFileName());
     return response.build();
   }
 }

@@ -72,14 +72,15 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   @Override
   public int updateInternal(Attachment obj) {
-    if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
-      insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
+    if (obj.getAttachmentRelatedObjects() != null) {
+      if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
+        insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
+    }
     return getDbHandle()
-        .createUpdate(
-            "/* updateAttachment */ " + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, "
-                + "\"content\" = :content, " + "\"fileName\" = :fileName, "
-                + "\"description\" = :description, " + "\"classification\" = :classification, "
-                + "\"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
+        .createUpdate("/* updateAttachment */ "
+            + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, " + "\"fileName\" = :fileName, "
+            + "\"description\" = :description, " + "\"classification\" = :classification, "
+            + "\"updatedAt\" = :updatedAt " + "WHERE uuid = :uuid")
         .bind("classification", DaoUtils.getEnumId(obj.getClassification())).bindBean(obj)
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
   }
@@ -106,6 +107,12 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
     return new ForeignKeyFetcher<Attachment>()
         .load(context, FkDataLoaderKey.ATTACHMENT_RELATED_OBJECT_ATTACHMENTS, relatedObjectUuid)
         .thenApply(attachments -> attachments.stream().collect(Collectors.toList()));
+  }
+
+  public List<List<Attachment>> getAttachmentsOfRelatedObject(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Attachment> attachmentsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(AttachmentBatcher.class);
+    return attachmentsBatcher.getByForeignKeys(foreignKeys);
   }
 
   public List<List<AttachmentRelatedObject>> getAttachmentRelatedObjects(List<String> foreignKeys) {
