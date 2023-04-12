@@ -23,13 +23,13 @@ if (testEnv === "local") {
  * For running the test runner programmatically, please see:
  * https://webdriver.io/docs/clioptions.html#run-the-test-runner-programmatically
  */
-const Launcher = require("@wdio/cli").default
-
-// config file path is relative to the directory where package.json resides
-new Launcher("./config/wdio.config.ie.js").run().then(
-  code => process.exit(code),
-  error => {
-    console.error("Launcher failed to start the test!", error.stacktrace)
-    process.exit(1)
-  }
+import("@wdio/cli").then(cli =>
+  // config file path is relative to the directory where package.json resides
+  new cli.Launcher("./config/wdio.config.ie.js").run().then(
+    code => process.exit(code),
+    error => {
+      console.error("Launcher failed to start the test!", error.stacktrace)
+      process.exit(1)
+    }
+  )
 )
