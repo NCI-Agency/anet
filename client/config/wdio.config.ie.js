@@ -8,7 +8,7 @@ const config = require("./wdio.config.js").config
 
 // override default wdio config for IE tests
 config.baseUrl = process.env.SERVER_URL
-config.specs = ["./tests/webdriver/ie/**/*.spec.js"]
+config.specs = ["../tests/webdriver/ie/**/*.spec.js"]
 config.exclude = []
 
 const capabilities = config.capabilities[0]
