@@ -91,7 +91,7 @@
       "groupName": "NPM, dev-dependencies, Storybook",
       "matchManagers": ["npm"],
       "matchDepTypes": ["devDependencies"],
-      "matchPackagePrefixes": ["@storybook/"]
+      "matchPackagePrefixes": ["@storybook/", "storybook"]
     },
     {
       "groupName": "NPM, dev-dependencies, WebdriverIO",
