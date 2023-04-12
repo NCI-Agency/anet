@@ -1,13 +1,5 @@
-[![Board Status](https://dev.azure.com/ncia-anet/2aa083a5-af3d-44e1-8c7b-6e9e6b124d91/dea5cef7-9622-4f05-823d-b563717ca3e7/_apis/work/boardbadge/cae09787-9bf7-4800-9bb9-b25c1d2b8c62)](https://dev.azure.com/ncia-anet/2aa083a5-af3d-44e1-8c7b-6e9e6b124d91/_boards/board/t/dea5cef7-9622-4f05-823d-b563717ca3e7/Microsoft.RequirementCategory)
-
 [![Build ANET](https://github.com/NCI-Agency/anet/workflows/Build%20ANET/badge.svg)](https://github.com/NCI-Agency/anet/actions)
-[![Build Status](https://dev.azure.com/advisornetwork/anet/_apis/build/status/NCI-Agency.anet)](https://dev.azure.com/advisornetwork/anet/_build/latest?definitionId=1)
-[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=dm9UUkRidFh3ekFrMFpvRWZnWHQxZmlYNnJWbVlVdTJTNW1OQ3IxYW9CMD0tLTNQeGNlajhLRzlDYlpTOW1ZR3VWN2c9PQ==--8758d27fb131132fdff84e521835a90c203ee88e)](https://www.browserstack.com/automate/public-build/dm9UUkRidFh3ekFrMFpvRWZnWHQxZmlYNnJWbVlVdTJTNW1OQ3IxYW9CMD0tLTNQeGNlajhLRzlDYlpTOW1ZR3VWN2c9PQ==--8758d27fb131132fdff84e521835a90c203ee88e)
-[![Docker Pulls](https://img.shields.io/docker/pulls/ncia/anet-app-server.svg)](https://hub.docker.com/r/ncia/anet-app-server/)
-
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/context:javascript)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/context:java)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/NCI-Agency/anet.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/NCI-Agency/anet/alerts/)
+[![Board Status](https://dev.azure.com/ncia-anet/2aa083a5-af3d-44e1-8c7b-6e9e6b124d91/dea5cef7-9622-4f05-823d-b563717ca3e7/_apis/work/boardbadge/cae09787-9bf7-4800-9bb9-b25c1d2b8c62)](https://dev.azure.com/ncia-anet/2aa083a5-af3d-44e1-8c7b-6e9e6b124d91/_boards/board/t/dea5cef7-9622-4f05-823d-b563717ca3e7/Microsoft.RequirementCategory)
 
 ## What is ANET?
 
