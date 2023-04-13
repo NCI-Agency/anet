@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.WebApplicationException;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
@@ -224,6 +225,25 @@ public class TaskResourceTest extends AbstractResourceTest {
           TestData.createTaskInput("DupTest", "Test dups", "Test-EF"));
       fail("Expected ClientErrorException");
     } catch (ClientErrorException expectedException) {
+    }
+  }
+
+  @Test
+  void illegalParentTaskTest()
+      throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
+    final String testTopTaskUuid = "cd35abe7-a5c9-4b3e-885b-4c72bf564ed7";
+    final Task task = adminQueryExecutor.task(FIELDS, testTopTaskUuid);
+    assertThat(task).isNotNull();
+    assertThat(task.getUuid()).isEqualTo(testTopTaskUuid);
+    // Set self as parent
+    final TaskInput taskInput = getTaskInput(task);
+    final TaskInput parentTaskInput = getTaskInput(task);
+    taskInput.setParentTask(parentTaskInput);
+    try {
+      // Should fail, as it would create a loop
+      adminMutationExecutor.updateTask("", taskInput);
+      fail("Expected WebApplicationException");
+    } catch (WebApplicationException expectedException) {
     }
   }
 
