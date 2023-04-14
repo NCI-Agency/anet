@@ -768,9 +768,9 @@ type Query {
   advisorReportInsights(orgUuid: String = "-1", weeksAgo: Int = 3): [AdvisorReportsEntry]
   approvalStepInUse(uuid: String): Boolean!
   attachment(uuid: String): Attachment
-  attachments(uuid: String): [Attachment]
   authorizationGroup(uuid: String): AuthorizationGroup
   authorizationGroupList(query: AuthorizationGroupSearchQueryInput): AnetBeanList_AuthorizationGroup
+  getAttachmentsForRelatedObject(uuid: String): [Attachment]
   location(uuid: String): Location
   locationList(query: LocationSearchQueryInput): AnetBeanList_Location
   me: Person

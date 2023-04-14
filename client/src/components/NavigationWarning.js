@@ -8,13 +8,7 @@ const LEAVE_WARNING =
 
 const NavigationWarning = ({ isBlocking }) => {
   return (
-    <div>
-      <Prompt
-        when={isBlocking}
-        title={LEAVE_TITLE}
-        message={LEAVE_WARNING}
-      />
-    </div>
+    <Prompt when={isBlocking} title={LEAVE_TITLE} message={LEAVE_WARNING} />
   )
 }
 

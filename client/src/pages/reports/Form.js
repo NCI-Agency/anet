@@ -13,6 +13,7 @@ import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingle
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
 import FormAttachment from "components/Attachment/FormAttachment"
+import ShowUploadedAttachments from "components/Attachment/ShowUploadedAttachments"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -309,6 +310,10 @@ const ReportForm = ({
             autoSaveSettings.current.autoSaveTimeout.asMilliseconds()
           )
         }
+        if (isAttachment) {
+          autoSaveSettings.current.dirty = true
+          autoSave({ setFieldValue, setFieldTouched, resetForm })
+        }
 
         if (!validateFieldDebounced) {
           validateFieldDebounced = _debounce(validateField, 400)
@@ -434,7 +439,9 @@ const ReportForm = ({
         return (
           <div className="report-form">
             <NavigationWarning
-              isBlocking={(dirty && !isSubmitting) || (isAttachment && !isSubmitting)}
+              isBlocking={
+                (dirty && !isSubmitting) || (isAttachment && !isSubmitting)
+              }
             />
             <Messages error={saveError} />
 
@@ -931,6 +938,10 @@ const ReportForm = ({
                   name="attachments"
                   label={Settings.fields.attachment.shortLabel}
                   component={FieldHelper.SpecialField}
+                  onHandleBlur={() => {
+                    // validation will be done by setFieldValue
+                    setFieldTouched("attachments", true, false)
+                  }}
                   widget={
                     <FormAttachment
                       className="attachmentField"
@@ -947,9 +958,11 @@ const ReportForm = ({
                   <FastField
                     name="uploaded-attachments"
                     label="Uploaded Attachment(s)"
-                    component={FieldHelper.SpecialField}
-                    widget={
-                      <div>files</div>
+                    component={FieldHelper.ReadonlyField}
+                    humanValue={
+                      <ShowUploadedAttachments
+                        relatedObjectUuid={values.uuid}
+                      />
                     }
                   />
                 )}
@@ -1270,6 +1283,8 @@ const ReportForm = ({
           toast.success(
             `Your ${getReportType(newValues)} has been automatically saved`
           )
+          setIsAttachment(false)
+          autoSaveSettings.current.dirty = false
           // And re-schedule the auto-save timer
           autoSaveSettings.current.timeoutId = window.setTimeout(
             autosaveHandler,

@@ -1,13 +1,13 @@
 .FileUploadContainer {
-  position: relative;
   margin: 10px 0;
-  border: 2px dotted lightgray;
+  display: flex;
+  position: relative;
   padding: 35px 20px;
   border-radius: 6px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  flex-direction: column;
   background-color: #f2f2f2;
+  border: 2px dotted lightgray;
 }
 
 .FileUploadContainer:hover {
@@ -15,25 +15,25 @@
 }
 
 .FormField {
-  cursor: pointer;
-  font-size: 18px;
-  display: block;
-  width: 100%;
-  border: none;
-  text-transform: none;
-  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   opacity: 0;
+  width: 100%;
+  border: none;
+  display: block;
+  cursor: pointer;
+  font-size: 18px;
+  position: absolute;
+  text-transform: none;
 }
 
 .InputLabel {
-  top: -21px;
-  font-size: 13px;
-  color: black;
   left: 0;
+  top: -21px;
+  color: black;
+  font-size: 13px;
   position: absolute;
 }
 
@@ -52,29 +52,29 @@
 }
 
 .UploadFileBtn {
-  box-sizing: border-box;
-  appearance: none;
-  background-color: transparent;
-  border: 2px solid #3498db;
+  width: 45%;
+  z-index: 1;
+  display: flex;
+  line-height: 1;
   cursor: pointer;
   font-size: 1rem;
-  line-height: 1;
-  padding: 1.1em 2.8em;
-  text-align: center;
-  text-transform: uppercase;
-  font-weight: 700;
-  border-radius: 6px;
-  color: #3498db;
-  position: relative;
+  padding-right: 0;
+  appearance: none;
   overflow: hidden;
-  z-index: 1;
+  font-weight: 700;
+  color: #3498db;
+  text-align: center;
+  border-radius: 6px;
+  position: relative;
+  align-items: center;
+  padding: 1.1em 2.8em;
+  justify-content: center;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  border: 2px solid #3498db;
+  background-color: transparent;
   transition: color 250ms ease-in-out;
   font-family: "Open Sans", sans-serif;
-  width: 45%;
-  display: flex;
-  align-items: center;
-  padding-right: 0;
-  justify-content: center;
 }
 
 .FilePreviewContainer {
@@ -97,17 +97,17 @@
 }
 
 .PreviewContainer {
-  padding: 0.25rem;
   width: 20%;
   height: 120px;
+  padding: 0.25rem;
   border-radius: 6px;
   box-sizing: border-box;
 }
 
 .ImagePreview {
-  border-radius: 6px;
   width: 100%;
   height: 100%;
+  border-radius: 6px;
 }
 
 .file-info {
@@ -115,17 +115,25 @@
 }
 .info-show:hover .file-info {
   height: 100%;
-  padding: 5px;
   display: flex;
-  border-radius: 6px;
-  background: #ffffff73;
   flex-direction: column;
+  background: #ffffff73;
   justify-content: space-between;
 }
 .info-line {
   width: 100%;
   display: flex;
   justify-content: space-between;
+}
+.file-info > .bp4-popover2-target {
+  height: 100%;
+  width: 100%;
+}
+.detail-btn {
+  display: grid;
+  width: 100%;
+  height: 120px;
+  place-content: center;
 }
 .icon:hover {
   cursor: pointer;

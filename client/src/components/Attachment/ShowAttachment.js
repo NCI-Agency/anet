@@ -16,7 +16,6 @@ import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Attachment } from "models"
 import React, { useContext } from "react"
-import { Col } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 
@@ -26,14 +25,13 @@ const GQL_GET_ATTACHMENT = gql`
       uuid
       fileName
       mimeType
-      content
       classification
       description
     }
   }
 `
 
-const AttachmentShow = ({ pageDispatchers }) => {
+const ShowAttachment = () => {
   const { currentUser } = useContext(AppContext)
   const { uuid } = useParams()
   const routerLocation = useLocation()
@@ -78,36 +76,19 @@ const AttachmentShow = ({ pageDispatchers }) => {
                 action={action}
               />
               <Fieldset>
-                <div style={{ display: "flex" }}>
-                  <Col xs={12} sm={3} className="label-align">
-                    <img
-                      alt="file"
-                      src={`data:${attachment.mimeType};base64,${attachment.content}`}
-                      style={{ width: "100%", borderRadius: "5px" }}
-                    />
-                  </Col>
-                  <Col xs={12} sm={3} lg={8}>
-                    <Field
-                      name="fileName"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="description"
-                      component={FieldHelper.ReadonlyField}
-                      humanValue={
-                        <RichTextEditor readOnly value={values.description} />
-                      }
-                    />
-                    <Field
-                      name="mimeType"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
-                      name="classification"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                  </Col>
-                </div>
+                <Field name="fileName" component={FieldHelper.ReadonlyField} />
+                <Field name="mimeType" component={FieldHelper.ReadonlyField} />
+                <Field
+                  name="description"
+                  component={FieldHelper.ReadonlyField}
+                  humanValue={
+                    <RichTextEditor readOnly value={values.description} />
+                  }
+                />
+                <Field
+                  name="classification"
+                  component={FieldHelper.ReadonlyField}
+                />
               </Fieldset>
             </Form>
           </div>
@@ -117,8 +98,8 @@ const AttachmentShow = ({ pageDispatchers }) => {
   )
 }
 
-AttachmentShow.propTypes = {
+ShowAttachment.propTypes = {
   pageDispatchers: PageDispatchersPropType
 }
 
-export default connect(null, mapPageDispatchersToProps)(AttachmentShow)
+export default ShowAttachment
