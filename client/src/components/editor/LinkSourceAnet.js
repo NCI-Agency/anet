@@ -66,6 +66,7 @@ const LinkSourceAnet = ({
               const anetLinkNode = createAnetLinkNode(objectType, value.uuid)
               insertAnetLink(anetLinkNode)
             }}
+            keepSearchText
           />
         )}
       </Modal.Body>

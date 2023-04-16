@@ -86,6 +86,7 @@ export const propTypes = {
   pageSize: PropTypes.number,
   disabled: PropTypes.bool,
   selectedValueAsString: PropTypes.string,
+  keepSearchText: PropTypes.bool,
   addon: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -121,6 +122,7 @@ const AdvancedSelect = ({
   pageSize,
   disabled,
   selectedValueAsString,
+  keepSearchText,
   addon,
   extraAddon,
   value,
@@ -281,13 +283,15 @@ const AdvancedSelect = ({
       setIsLoading(false)
       setShowOverlay(false)
       setFilterType(firstFilter)
-      setSearchTerms(selectedValueAsString)
+      if (!keepSearchText) {
+        setSearchTerms(selectedValueAsString)
+      }
       setResults({})
       setPageNum(0)
       setFetchType(FETCH_TYPE.NONE)
       setDoReset(false)
     }
-  }, [doReset, firstFilter, selectedValueAsString])
+  }, [doReset, firstFilter, selectedValueAsString, keepSearchText])
 
   return (
     <>
@@ -423,7 +427,9 @@ const AdvancedSelect = ({
           // overlay is being opened
           // Note: state updates are being batched here
           setShowOverlay(openOverlay)
-          setSearchTerms("")
+          if (!keepSearchText) {
+            setSearchTerms("")
+          }
           setIsLoading(true)
           setFetchType(FETCH_TYPE.NORMAL)
         } else {

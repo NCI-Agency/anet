@@ -151,7 +151,8 @@ const MultiTypeAdvancedSelectComponent = ({
   value,
   isMultiSelect,
   filters,
-  className
+  className,
+  keepSearchText
 }) => {
   const [entityType, setEntityType] = useState(
     objectType ||
@@ -214,6 +215,7 @@ const MultiTypeAdvancedSelectComponent = ({
         placeholder={searchPlaceholder}
         value={value}
         showEmbedded
+        keepSearchText={keepSearchText}
         overlayColumns={advancedSelectProps.overlayColumns}
         overlayRenderRow={advancedSelectProps.overlayRenderRow}
         filterDefs={filterDefs}
@@ -236,12 +238,14 @@ MultiTypeAdvancedSelectComponent.propTypes = {
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   isMultiSelect: PropTypes.bool.isRequired,
   filters: PropTypes.array,
-  className: PropTypes.string
+  className: PropTypes.string,
+  keepSearchText: PropTypes.bool
 }
 MultiTypeAdvancedSelectComponent.defaultProps = {
   fieldName: "entitySelect",
   entityTypes: Object.values(ENTITY_TYPES),
   isMultiSelect: false,
+  keepSearchText: false,
   filters: []
 }
 
