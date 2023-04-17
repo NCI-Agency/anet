@@ -1,18 +1,23 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLInputField;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.utils.IdDataLoaderKey;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Attachment extends AbstractAnetBean {
 
   public static enum Classification {
-    NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU
+    UNDEFINED, NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU
+
   }
 
   @GraphQLQuery
@@ -35,6 +40,9 @@ public class Attachment extends AbstractAnetBean {
   @GraphQLQuery
   @GraphQLInputField
   private Classification classification;
+
+  // annotated below
+  private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
 
   // annotated below
   private List<AttachmentRelatedObject> attachmentRelatedObjects;
@@ -77,6 +85,37 @@ public class Attachment extends AbstractAnetBean {
 
   public Classification getClassification() {
     return classification;
+  }
+
+  @GraphQLQuery(name = "author")
+  public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
+    if (author.hasForeignObject()) {
+      return CompletableFuture.completedFuture(author.getForeignObject());
+    }
+    return new UuidFetcher<Person>().load(context, IdDataLoaderKey.PEOPLE, author.getForeignUuid())
+        .thenApply(o -> {
+          author.setForeignObject(o);
+          return o;
+        });
+  }
+
+  @JsonIgnore
+  public void setAuthorUuid(String authorUuid) {
+    this.author = new ForeignObjectHolder<>(authorUuid);
+  }
+
+  @JsonIgnore
+  public String getAuthorUuid() {
+    return author.getForeignUuid();
+  }
+
+  @GraphQLInputField(name = "author")
+  public void setAuthor(Person author) {
+    this.author = new ForeignObjectHolder<>(author);
+  }
+
+  public Person getAuthor() {
+    return author.getForeignObject();
   }
 
   @GraphQLQuery(name = "attachmentRelatedObjects")

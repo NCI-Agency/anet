@@ -298,7 +298,10 @@ fields:
   report:
     attachments:
       label: Attachment
-      classification: [NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU]
+      classification:
+        - UNDEFINED
+        - NATO UNCLASSIFIED
+        - NATO UNCLASSIFIED Releasable to EU
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

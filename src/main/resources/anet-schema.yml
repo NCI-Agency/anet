@@ -557,7 +557,9 @@ properties:
                 items:
                   type: string
                   enum:
-                    [NATO_UNCLASSIFIED, NATO_UNCLASSIFIED_Releasable_to_EU]
+                    - UNDEFINED
+                    - NATO UNCLASSIFIED
+                    - NATO UNCLASSIFIED Releasable to EU
             title: Whether reports have attachments
             description: Used for attachments in reports
           canUnpublishReports:

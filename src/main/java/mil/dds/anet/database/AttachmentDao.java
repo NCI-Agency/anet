@@ -52,10 +52,11 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
   @Override
   public Attachment insertInternal(Attachment obj) {
     getDbHandle().createUpdate("/* insertAttachment */ "
-        + "INSERT INTO \"attachments\" (uuid, \"mimeType\", \"content\", \"fileName\", \"description\", \"classification\", "
+        + "INSERT INTO \"attachments\" (uuid, \"authorUuid\", \"mimeType\", \"content\", \"fileName\", \"description\", \"classification\", "
         + "\"createdAt\", \"updatedAt\") "
-        + "VALUES (:uuid, :mimeType, :content, :fileName, :description, :classification, :createdAt, :updatedAt)")
+        + "VALUES (:uuid, :authorUuid, :mimeType, :content, :fileName, :description, :classification, :createdAt, :updatedAt)")
         .bindBean(obj).bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
+        .bind("authorUuid", obj.getAuthorUuid())
         .bind("classification", DaoUtils.getEnumId(obj.getClassification()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt())).execute();
     if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
@@ -72,10 +73,9 @@ public class AttachmentDao extends AnetBaseDao<Attachment, AbstractSearchQuery<?
 
   @Override
   public int updateInternal(Attachment obj) {
-    if (obj.getAttachmentRelatedObjects() != null) {
-      if (obj.getAttachmentRelatedObjects().get(0).getRelatedObjectUuid() != null)
-        insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
-    }
+    deleteAttachmentRelatedObjects(DaoUtils.getUuid(obj));
+    insertAttachmentRelatedObjects(DaoUtils.getUuid(obj), obj.getAttachmentRelatedObjects());
+
     return getDbHandle()
         .createUpdate("/* updateAttachment */ "
             + "UPDATE \"attachments\" SET \"mimeType\" = :mimeType, " + "\"fileName\" = :fileName, "

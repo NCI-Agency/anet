@@ -12,6 +12,7 @@ public class AttachmentMapper implements RowMapper<Attachment> {
     final Attachment a = new Attachment();
     MapperUtils.setCommonBeanFields(a, rs, null);
     a.setMimeType(rs.getString("mimeType"));
+    a.setAuthorUuid(rs.getString("authorUuid"));
     a.setContent(rs.getBytes("content"));
     a.setFileName(rs.getString("fileName"));
     a.setDescription(rs.getString("description"));

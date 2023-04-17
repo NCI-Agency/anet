@@ -22,6 +22,7 @@ import mil.dds.anet.beans.Attachment;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.AttachmentDao;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 
 @Path("/api/attachment")
@@ -55,7 +56,12 @@ public class AttachmentResource {
   @GraphQLMutation(name = "createAttachment")
   public String createAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
+    if (attachment.getClassification() != null) {
+      // classification is not "undefined"
+      throw new WebApplicationException("Classification cannot be set", Status.FORBIDDEN);
+    }
     final Person user = DaoUtils.getUserFromContext(context);
+    attachment.setAuthorUuid(DaoUtils.getUuid(user));
     attachment = dao.insert(attachment);
     AnetAuditLogger.log("Attachment {} created by {}", DaoUtils.getUuid(attachment), user);
     return DaoUtils.getUuid(attachment);
@@ -70,6 +76,13 @@ public class AttachmentResource {
     }
 
     final Person user = DaoUtils.getUserFromContext(context);
+
+    final Attachment.Classification originalClassification = original.getClassification();
+    if (!AuthUtils.isAdmin(user) && !user.equals(original.getAuthor())) {
+      // only admin or owner can change classification
+      throw new WebApplicationException("You don't have permission to update classification",
+          Status.FORBIDDEN);
+    }
 
     final int numRows = dao.update(attachment);
     if (numRows == 0) {

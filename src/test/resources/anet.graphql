@@ -186,6 +186,7 @@ enum Atmosphere {
 """"""
 type Attachment {
   attachmentRelatedObjects: [AttachmentRelatedObject]
+  author: Person
   classification: Classification
   content: Base64String
   createdAt: Instant
@@ -199,6 +200,7 @@ type Attachment {
 """"""
 input AttachmentInput {
   attachmentRelatedObjects: [AttachmentRelatedObjectInput]
+  author: PersonInput
   classification: Classification
   content: Base64String
   createdAt: Instant
@@ -272,6 +274,7 @@ scalar Base64String
 enum Classification {
   NATO_UNCLASSIFIED
   NATO_UNCLASSIFIED_Releasable_to_EU
+  UNDEFINED
 }
 
 """"""

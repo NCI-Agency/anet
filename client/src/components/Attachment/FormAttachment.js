@@ -75,7 +75,8 @@ const FormAttachment = ({
     attachment.content = base64
     attachment.attachmentRelatedObjects.relatedObjectType = type
     attachment.attachmentRelatedObjects.relatedObjectUuid = null
-    attachment.classification = Settings.fields.report.attachments.classification[0]
+    attachment.classification =
+      Settings.fields.report.attachments.classification[0]
     save(attachment).then(response => {
       attachment.uuid = response.createAttachment
       handleUploadFile(attachment)
@@ -173,7 +174,10 @@ const FormAttachment = ({
                     </div>
                   </div>
                   <Card.Body className="p-1">
-                    <Card.Title style={{ fontSize: "15px" }} className="info-line">
+                    <Card.Title
+                      style={{ fontSize: "15px" }}
+                      className="info-line"
+                    >
                       {file?.fileName?.substring(0, 8)}...
                       <span>{returnFileSize(file?.content?.length)}</span>
                     </Card.Title>
@@ -183,10 +187,7 @@ const FormAttachment = ({
                           variant="outline-primary"
                           onClick={() => showEditAttachmentModal(file.uuid)}
                         >
-                          <Icon
-                            icon={IconNames.EDIT}
-                            className="icon edit"
-                          />
+                          <Icon icon={IconNames.EDIT} className="icon edit" />
                         </Button>
                         <AttachmentEditModal
                           attachment={file}

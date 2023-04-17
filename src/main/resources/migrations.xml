@@ -4476,6 +4476,9 @@
 			<column name="uuid" type="${uuid_type}">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
+			<column name="authorUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
 			<column name="fileName" type="${long_text_type}" />
 			<column name="mimeType" type="${long_text_type}" />
 			<column name="content" type="${blob_type}" />
@@ -4484,6 +4487,16 @@
 			<column name="createdAt" type="datetime" />
 			<column name="updatedAt" type="datetime" />
 		</createTable>
+
+		<createIndex
+			indexName="IDX_attachments_authorUuid" tableName="attachments">
+			<column name="authorUuid"/>
+		</createIndex>
+
+		<addForeignKeyConstraint
+			baseTableName="attachments" constraintName="FK_attachments_author" baseColumnNames="authorUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
 
 		<createTable tableName="attachmentRelatedObjects">
 			<column name="attachmentUuid" type="${uuid_type}">
@@ -4497,6 +4510,12 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="attachmentRelatedObjects" constraintName="FK_attachmentRelatedObjects_attachment" baseColumnNames="attachmentUuid"
+			referencedTableName="attachments" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
 	</changeSet>
 
 </databaseChangeLog>
