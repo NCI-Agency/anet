@@ -16,7 +16,7 @@ import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Attachment } from "models"
 import React, { useContext } from "react"
-import { Col } from "react-bootstrap"
+import { Button, Col } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useLocation, useParams } from "react-router-dom"
 
@@ -60,14 +60,19 @@ const AttachmentShow = ({ pageDispatchers }) => {
     <Formik enableReinitialize initialValues={attachment}>
       {({ values }) => {
         const action = canEdit && (
-          <LinkTo
-            modelType="Attachment"
-            model={attachment}
-            edit
-            button="primary"
-          >
-            Edit
-          </LinkTo>
+          <>
+            <a href={`/api/attachment/download/${attachment.uuid}`}>
+              <Button className="me-3">Download</Button>
+            </a>
+            <LinkTo
+              modelType="Attachment"
+              model={attachment}
+              edit
+              button="primary"
+            >
+              Edit
+            </LinkTo>
+          </>
         )
         return (
           <div>
