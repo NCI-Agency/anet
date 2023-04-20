@@ -57,7 +57,7 @@ fields:
         placeholder: Enter a Name for this Objective name, example ....
       longLabel: Objectives
       longName:
-        label: Long name of this Objective
+        label: Long Name of this Objective
         placeholder: Enter a long name for this Objective, example ....
         asA: textarea
         style:
@@ -127,6 +127,20 @@ fields:
         subTaskMonthly:
           recurrence: monthly
           questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTaskMonthly.requiredButFilteredOutQuestion]
+            questionFor11B:
+              test: $.subject[?(@property === "shortName" && @ === "1.1.B")]
+              type: text
+              label: This question applies only to 1.1.B
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTaskMonthly.questionFor11B]
             issues:
               type: special_field
               label: Top 3 issues
@@ -171,6 +185,27 @@ fields:
           recurrence: once
           relatedObjectType: report
           questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTaskOnceReport.requiredButFilteredOutQuestion]
+            questionFor11B:
+              test: $.subject[?(@property === "shortName" && @ === "1.1.B")]
+              type: text
+              label: This question applies only to 1.1.B
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTaskOnceReport.questionFor11B]
+            questionForNegative:
+              test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
+              type: text
+              label: This question applies only to Negative engagements
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTaskOnceReport.questionForNegative]
             question1:
               type: special_field
               widget: likertScale
@@ -194,10 +229,36 @@ fields:
             question3:
               type: number
               label: Instant assessment Question 3
+        subTask11COnceReport:
+          recurrence: once
+          relatedObjectType: report
+          test: $.subject[?(@property === "shortName" && @ === "1.1.C")]
+          questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTask11COnceReport.requiredButFilteredOutQuestion]
+            requiredQuestion:
+              type: text
+              label: This question is required
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTask11COnceReport.requiredQuestion]
+            questionForNegative:
+              test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
+              type: text
+              label: This question applies only to Negative engagements
+              validations:
+                - type: required
+                  params: [You must provide the answer to subTask11COnceReport.questionForNegative]
 
     parentTask:
-      label: Parent task
+      label: Parent objective / effort
       placeholder: Start typing to search for a higher level task
+    childrenTasks: Sub efforts
     taskedOrganizations:
       label: Tasked organizations
       placeholder: Search for an organization...
@@ -327,7 +388,7 @@ fields:
     format: LAT_LON
 
   position:
-    name: 'Position Name'
+    name: Position Name
 
   organization:
     shortName: Name
@@ -369,6 +430,27 @@ fields:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to advisorOnceReportLinguist.requiredButFilteredOutQuestion]
+            questionForNegative:
+              test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
+              type: text
+              label: This question applies only to Negative engagements
+              validations:
+                - type: required
+                  params: [You must provide the answer to advisorOnceReportLinguist.questionForNegative]
+            questionForLin:
+              test: $.subject[?(@property === "name" && @ === "GUIST, Lin")]
+              type: text
+              label: This question applies only to Lin
+              validations:
+                - type: required
+                  params: [You must provide the answer to advisorOnceReportLinguist.questionForLin]
             preparedDocuments:
               type: enum
               helpText: "Did the linguist prepare any written documents used for the engagement meeting?"
@@ -381,7 +463,7 @@ fields:
             documentQuality:
               test: $.relatedObject.attendeesAssessments[?(@property === @root.subject.uuid && @.advisorOnceReportLinguist && @.advisorOnceReportLinguist.preparedDocuments === "yes")]
               type: enum
-              helpText: "What was the quality of the document the linuist prepared?"
+              helpText: "What was the quality of the document the linguist prepared?"
               label: Document quality
               choices:
                 "EX":
@@ -677,8 +759,33 @@ fields:
                   widget: richTextEditor
                   style:
                     height: 100px
+        advisorOnceReportLinguistLin:
+          recurrence: once
+          relatedObjectType: report
+          test: $.subject[?(@property === "name" && @ === "GUIST, Lin")]
+          questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to advisorOnceReportLinguistLin.requiredButFilteredOutQuestion]
+            requiredQuestion:
+              type: text
+              label: This question is required
+              validations:
+                - type: required
+                  params: [You must provide the answer to advisorOnceReportLinguistLin.requiredQuestion]
+            questionForNegative:
+              test: $.relatedObject[?(@property === "atmosphere" && @ === "NEGATIVE")]
+              type: text
+              label: This question applies only to Negative engagements
+              validations:
+                - type: required
+                  params: [You must provide the answer to advisorOnceReportLinguistLin.questionForNegative]
         advisorPeriodic:
-          recurrence: "monthly"
+          recurrence: monthly
           questions:
             question1:
                 type: special_field
@@ -736,6 +843,20 @@ fields:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to principalMonthly.requiredButFilteredOutQuestion]
+            questionForChristopf:
+              test: $.subject[?(@property === "name" && @ === "TOPFERNESS, Christopf")]
+              type: text
+              label: This question applies only to Christopf
+              validations:
+                - type: required
+                  params: [You must provide the answer to principalMonthly.questionForChristopf]
             text:
               type: special_field
               label: Text
@@ -862,6 +983,20 @@ fields:
             read: ['c21e7321-7ec5-4837-8805-a302f9575754']
             write: ['39a78d51-c351-452c-9206-4305ec8dd76d']
           questions:
+            requiredButFilteredOutQuestion:
+              test: $.subject[?(@property === "noSuchProperty" && @.match(/^willNeverMatch/i))]
+              type: text
+              label: This question is required but will be filtered out
+              validations:
+                - type: required
+                  params: [You must provide the answer to principalOndemandScreeningAndVetting.requiredButFilteredOutQuestion]
+            questionForChristopf:
+              test: $.subject[?(@property === "name" && @ === "TOPFERNESS, Christopf")]
+              type: text
+              label: This question applies only to Christopf
+              validations:
+                - type: required
+                  params: [You must provide the answer to this principalOndemandScreeningAndVetting.questionForChristopf]
             assessmentDate:
               type: date
               label: Screening and vetting date
