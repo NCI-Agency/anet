@@ -1,7 +1,6 @@
 import { BreadcrumbTrail } from "components/BreadcrumbTrail"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import _isEmpty from "lodash/isEmpty"
 import { Task } from "models"
@@ -25,7 +24,7 @@ import "./PeriodicAssessmentResultsTable.css"
  *   assessments made on tasks, while filling  report related to the tasks) or
  *   assessments made on the entity/subentity itself;
  *   the configuration of these assessments can be retrieved using
- *   entity.getInstantAssessmens()
+ *   entity.getInstantAssessments()
  * - periodic assessments => made on the entity/subentities periodically,
  *   as a measurement of the given period of time;
  *   the config and yupSchema for these assessments is to be found in
@@ -145,16 +144,11 @@ const PeriodicAssessmentResultsTable = ({
   const subEntitiesInstantAssessmentConfig = subEntities
     ?.map(s => s.getInstantAssessments())
     .filter(mc => !_isEmpty(mc))
-  const { assessmentConfig } =
-    entity.getPeriodicAssessmentDetails(assessmentKey)
-  const filteredAssessmentConfig = Model.filterAssessmentConfig(
-    assessmentConfig,
-    entity
-  )
+  const { assessmentConfig } = entity.getAssessmentDetails(assessmentKey)
   if (
     _isEmpty(entityInstantAssessmentConfig) &&
     _isEmpty(subEntitiesInstantAssessmentConfig) &&
-    _isEmpty(filteredAssessmentConfig)
+    _isEmpty(assessmentConfig)
   ) {
     return null
   }
@@ -162,7 +156,9 @@ const PeriodicAssessmentResultsTable = ({
     <>
       <div style={{ ...style }}>
         <Fieldset
-          title={`Assessment results - ${assessmentConfig.label || recurrence}`}
+          title={`Assessment results - ${
+            assessmentConfig?.label || recurrence
+          }`}
           id={`entity-assessments-results-${recurrence}`}
         >
           <PeriodsNavigation offset={offset} onChange={setOffset} />

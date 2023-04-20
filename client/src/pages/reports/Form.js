@@ -269,7 +269,11 @@ const ReportForm = ({
   const canWriteAssessments =
     canReadAssessments && !Report.isPublished(initialValues.state)
 
-  const reportSchema = Report.getReportSchema(reportTasks, reportPeople)
+  const reportSchema = Report.getReportSchema(
+    initialValues,
+    reportTasks,
+    reportPeople
+  )
   let validateFieldDebounced
   return (
     <Formik

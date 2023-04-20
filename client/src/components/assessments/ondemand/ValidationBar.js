@@ -32,9 +32,9 @@ const ValidationBar = ({
             ? index === sortedOnDemandNotes.length - 1
               ? "ondemand-red-validation-text"
               : "ondemand-grey-validation-text"
-            : index !== sortedOnDemandNotes.length - 1
-              ? "ondemand-grey-validation-text"
-              : "ondemand-green-validation-text"
+            : index === sortedOnDemandNotes.length - 1
+              ? "ondemand-green-validation-text"
+              : "ondemand-grey-validation-text"
         }
       >
         {/* Only the last object in the sortedOnDemandNotes can be valid.

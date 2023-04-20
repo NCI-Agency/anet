@@ -328,6 +328,7 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
     }
 
     reportSchema = Report.getReportSchema(
+      data.report,
       data.report.tasks,
       data.report.reportPeople
     )

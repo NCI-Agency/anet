@@ -632,8 +632,11 @@ export default class Model {
     return this.getAssessmentConfigByKey(assessmentKey)
   }
 
-  getPeriodicAssessmentDetails(assessmentKey) {
-    const assessmentConfig = this.getAssessmentConfigByKey(assessmentKey)
+  getAssessmentDetails(assessmentKey) {
+    let assessmentConfig = this.getAssessmentConfigByKey(assessmentKey)
+    if (!_isEmpty(assessmentConfig)) {
+      assessmentConfig = Model.filterAssessmentConfig(assessmentConfig, this)
+    }
     return {
       assessmentConfig: assessmentConfig,
       assessmentYupSchema:
@@ -693,12 +696,24 @@ export default class Model {
     const assessmentsConfig = {}
     const assessmentsSchemaShape = {}
     entities?.forEach(entity => {
-      assessmentsConfig[entity.uuid] = entity.getInstantAssessments()
-      if (!_isEmpty(assessmentsConfig[entity.uuid])) {
-        assessmentsConfig[entity.uuid].forEach(([ak, ac]) => {
-          assessmentsSchemaShape[entity.uuid] = createAssessmentSchema(ac, ak)
-        })
-      }
+      entity.getInstantAssessments()?.forEach(([ak, ac]) => {
+        const filteredAssessmentConfig = Model.filterAssessmentConfig(
+          ac,
+          entity,
+          relatedObject
+        )
+        if (!_isEmpty(filteredAssessmentConfig)) {
+          assessmentsConfig[entity.uuid] = assessmentsConfig[entity.uuid] || []
+          assessmentsConfig[entity.uuid].push(filteredAssessmentConfig)
+          const assessmentSchema = createAssessmentSchema(
+            filteredAssessmentConfig,
+            ak
+          )
+          assessmentsSchemaShape[entity.uuid] =
+            assessmentsSchemaShape[entity.uuid]?.concat(assessmentSchema) ||
+            assessmentSchema
+        }
+      })
     })
     return {
       assessmentsConfig: assessmentsConfig,
