@@ -204,12 +204,8 @@ export const PeriodicAssessmentsRows = ({
   }
 
   const { assessmentConfig, assessmentYupSchema } =
-    entity.getPeriodicAssessmentDetails(assessmentKey)
-  const filteredAssessmentConfig = Model.filterAssessmentConfig(
-    assessmentConfig,
-    entity
-  )
-  if (_isEmpty(filteredAssessmentConfig)) {
+    entity.getAssessmentDetails(assessmentKey)
+  if (_isEmpty(assessmentConfig)) {
     return null
   }
 
@@ -243,7 +239,7 @@ export const PeriodicAssessmentsRows = ({
                       assessmentKey={assessmentKey}
                       assessment={assessment}
                       assessmentYupSchema={assessmentYupSchema}
-                      assessmentConfig={filteredAssessmentConfig}
+                      assessmentConfig={assessmentConfig}
                       entity={entity}
                       period={periods[index]}
                       recurrence={recurrence}
@@ -294,7 +290,7 @@ export const PeriodicAssessmentsRows = ({
                       assessmentYupSchema={assessmentYupSchema}
                       recurrence={recurrence}
                       assessmentPeriod={period}
-                      assessmentConfig={filteredAssessmentConfig}
+                      assessmentConfig={assessmentConfig}
                       onSuccess={() => {
                         setShowAssessmentModalKey(null)
                         onUpdateAssessment()

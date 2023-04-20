@@ -7,10 +7,7 @@ import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
-import Model, {
-  ENTITY_ON_DEMAND_EXPIRATION_DATE,
-  NOTE_TYPE
-} from "components/Model"
+import { ENTITY_ON_DEMAND_EXPIRATION_DATE, NOTE_TYPE } from "components/Model"
 import PeriodsNavigation from "components/PeriodsNavigation"
 import { Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
@@ -64,27 +61,20 @@ const OnDemandAssessment = ({
   // 'assessmentConfig' has question set for ondemand assessments defined in the dictionary
   // and 'assessmentYupSchema' used for this question set.
   const { assessmentConfig, assessmentYupSchema } = useMemo(
-    () => entity.getPeriodicAssessmentDetails(assessmentKey),
+    () => entity.getAssessmentDetails(assessmentKey),
     [entity, assessmentKey]
   )
   const addAssessmentLabel = `Add ${
-    assessmentConfig.label || "a new assessment"
+    assessmentConfig?.label || "a new assessment"
   }`
 
-  const filteredAssessmentConfig = useMemo(
-    () => Model.filterAssessmentConfig(assessmentConfig, entity),
-    [assessmentConfig, entity]
-  )
-
   if (
-    filteredAssessmentConfig?.questions[ENTITY_ON_DEMAND_EXPIRATION_DATE] &&
-    filteredAssessmentConfig?.onDemandAssessmentExpirationDays
+    assessmentConfig?.questions[ENTITY_ON_DEMAND_EXPIRATION_DATE] &&
+    assessmentConfig?.onDemandAssessmentExpirationDays
   ) {
-    filteredAssessmentConfig.questions[
-      ENTITY_ON_DEMAND_EXPIRATION_DATE
-    ].helpText = `
+    assessmentConfig.questions[ENTITY_ON_DEMAND_EXPIRATION_DATE].helpText = `
       If this field is left empty, the assessment will be valid for
-      ${filteredAssessmentConfig.onDemandAssessmentExpirationDays} days.
+      ${assessmentConfig.onDemandAssessmentExpirationDays} days.
     `
   }
 
@@ -118,13 +108,13 @@ const OnDemandAssessment = ({
         <React.Fragment>
           <ValidationBar
             assessmentExpirationDays={
-              filteredAssessmentConfig?.onDemandAssessmentExpirationDays
+              assessmentConfig?.onDemandAssessmentExpirationDays
             }
             index={index}
             assessmentFieldsObject={assessmentFieldsObject}
             sortedOnDemandNotes={sortedOnDemandNotes}
           />
-          <Card key={index}>
+          <Card key={note.uuid}>
             <Card.Header>
               <Row>
                 <Col xs={8}>
@@ -191,20 +181,20 @@ const OnDemandAssessment = ({
                   {() => {
                     return (
                       <>
-                        {!_isEmpty(filteredAssessmentConfig?.questions) && (
+                        {!_isEmpty(assessmentConfig?.questions) && (
                           <ReadonlyCustomFields
                             parentFieldName={parentFieldName}
-                            fieldsConfig={filteredAssessmentConfig.questions}
+                            fieldsConfig={assessmentConfig.questions}
                             values={{
                               [parentFieldName]: assessmentFieldsObject
                             }}
                             vertical
                           />
                         )}
-                        {!_isEmpty(filteredAssessmentConfig?.questionSets) && (
+                        {!_isEmpty(assessmentConfig?.questionSets) && (
                           <QuestionSet
                             parentFieldName={`${parentFieldName}.questionSets`}
-                            questionSets={filteredAssessmentConfig.questionSets}
+                            questionSets={assessmentConfig.questionSets}
                             formikProps={{
                               values: {
                                 [parentFieldName]: assessmentFieldsObject
@@ -237,7 +227,7 @@ const OnDemandAssessment = ({
         })
     }
   }, [
-    filteredAssessmentConfig,
+    assessmentConfig,
     entity,
     onUpdateAssessment,
     hasWriteAccess,
@@ -286,7 +276,7 @@ const OnDemandAssessment = ({
       `Recurrence type is not ${RECURRENCE_TYPE.ON_DEMAND}. Component will not be rendered!`
     )
     return null
-  } else if (!filteredAssessmentConfig) {
+  } else if (_isEmpty(assessmentConfig)) {
     return null
   } else {
     return (
@@ -354,7 +344,7 @@ const OnDemandAssessment = ({
           title={`Assessment for ${entity.toString()}`}
           assessmentYupSchema={assessmentYupSchema}
           recurrence={recurrence}
-          assessmentConfig={filteredAssessmentConfig}
+          assessmentConfig={assessmentConfig}
           onSuccess={() => {
             setShowModal(false)
             onUpdateAssessment()

@@ -533,7 +533,7 @@ export default class Report extends Model {
     )
   }
 
-  static getReportSchema(tasks, reportPeople) {
+  static getReportSchema(report, tasks, reportPeople) {
     // Update the report schema according to the selected report tasks and attendees
     // instant assessments schema
     let reportSchema = Report.yupSchema
@@ -542,14 +542,16 @@ export default class Report extends Model {
       assessmentsSchema: tasksInstantAssessmentsSchema
     } = Task.getInstantAssessmentsDetailsForEntities(
       tasks,
-      Report.TASKS_ASSESSMENTS_PARENT_FIELD
+      Report.TASKS_ASSESSMENTS_PARENT_FIELD,
+      report
     )
     const {
       assessmentsConfig: attendeesInstantAssessmentsConfig,
       assessmentsSchema: attendeesInstantAssessmentsSchema
     } = Person.getInstantAssessmentsDetailsForEntities(
       reportPeople?.filter(rp => rp.attendee),
-      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD
+      Report.ATTENDEES_ASSESSMENTS_PARENT_FIELD,
+      report
     )
     if (!_isEmpty(tasksInstantAssessmentsConfig)) {
       reportSchema = reportSchema.concat(tasksInstantAssessmentsSchema)
