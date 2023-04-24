@@ -670,6 +670,7 @@ const ArrayOfAnetObjectsField = ({
           fieldName={name}
           entityTypes={types}
           isMultiSelect
+          keepSearchText
           onConfirm={(value, entityType) => {
             if (value.length > fieldValue.length) {
               // entity was added at the end, set correct value
