@@ -1,19 +1,22 @@
 import { gql } from "@apollo/client"
 import API from "api"
+import AppContext from "components/AppContext"
+import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
-import { FastField, Form, Formik } from "formik"
+import { FastField, Field, Form, Formik } from "formik"
 import _isEqual from "lodash/isEqual"
 import { Attachment } from "models"
 import PropTypes from "prop-types"
-import React, { useState } from "react"
-import { Button } from "react-bootstrap"
-import { useNavigate } from "react-router-dom"
+import React, { useContext, useState } from "react"
+import { Button, Col } from "react-bootstrap"
+import { useNavigate, useParams } from "react-router-dom"
 import Settings from "settings"
 
 const GQL_CREATE_ATTACHMENT = gql`
@@ -34,9 +37,75 @@ const GQL_DELETE_ATTACHMENT = gql`
   }
 `
 
+const GQL_GET_ATTACHMENT = gql`
+  query ($uuid: String) {
+    attachment(uuid: $uuid) {
+      content
+      attachmentRelatedObjects {
+        relatedObject {
+          ... on AuthorizationGroup {
+            name
+          }
+          ... on Location {
+            name
+          }
+          ... on Organization {
+            shortName
+          }
+          ... on Person {
+            role
+            rank
+            name
+            avatar(size: 32)
+          }
+          ... on Position {
+            type
+            name
+          }
+          ... on Report {
+            intent
+            engagementDate
+            state
+          }
+          ... on Task {
+            shortName
+            longName
+          }
+        }
+        relatedObjectUuid
+        relatedObjectType
+      }
+    }
+  }
+`
+
 const AttachmentForm = ({ edit, title, initialValues }) => {
   const navigate = useNavigate()
+  const { uuid } = useParams()
+  const { currentUser } = useContext(AppContext)
+  const { data } = API.useApiQuery(GQL_GET_ATTACHMENT, { uuid })
   const [error, setError] = useState(null)
+  const canEdit = currentUser.isAdmin() || (currentUser.uuid === initialValues.author.uuid)
+
+  const classificationButtons = [
+    {
+      id: Settings.fields.attachment.classification.choices.UNDEFINED.label,
+      value: Settings.fields.attachment.classification.choices.UNDEFINED.value,
+      label: Settings.fields.attachment.classification.choices.UNDEFINED.label
+    },
+    {
+      id: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED.label,
+      value: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED.value,
+      label: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED.label
+    },
+    {
+      id: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED_Releasable_to_EU.label,
+      value: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED_Releasable_to_EU.value,
+      label: Settings.fields.attachment.classification.choices.NATO_UNCLASSIFIED_Releasable_to_EU.label
+    }
+  ]
+  // TODO: This will remove, but now it make submit button not workable
+  const attachmentPreview = new Attachment(data ? data.attachment : {})
 
   return (
     <Formik
@@ -68,8 +137,6 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
             </Button>
           </div>
         )
-        // Only an author can delete a report, and only in DRAFT or REJECTED state.
-        const canDelete = true
         return (
           <div>
             <NavigationWarning isBlocking={dirty && !isSubmitting} />
@@ -77,36 +144,82 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
             <Form className="form-horizontal" method="post">
               <Fieldset title={title} action={action} />
               <Fieldset>
-                <FastField
-                  name="fileName"
-                  placeholder={Settings.fields.attachment.shortName.placeholder}
-                  label={Settings.fields.attachment.shortName.label}
-                  component={FieldHelper.InputField}
-                />
+                <div style={{ display: "flex" }}>
+                  <Col xs={12} sm={3} className="label-align">
+                    <img
+                      alt="file"
+                      className="attachmentImage"
+                      src={`data:${attachmentPreview.mimeType};base64,${attachmentPreview.content}`}
+                    />
+                  </Col>
+                  <Col xs={12} sm={3} lg={10}>
+                    <FastField
+                      name="fileName"
+                      placeholder={
+                        Settings.fields.attachment.shortName.placeholder
+                      }
+                      label={Settings.fields.attachment.shortName.label}
+                      component={FieldHelper.InputField}
+                    />
 
-                <FastField
-                  name="description"
-                  label={Settings.fields.attachment.description}
-                  component={FieldHelper.SpecialField}
-                  onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
-                    if (!_isEqual(values.description, value)) {
-                      setFieldValue("description", value, true)
-                    }
-                  }}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("description", true, false)
-                  }}
-                  widget={<RichTextEditor className="description" />}
-                />
+                    <FastField
+                      name="description"
+                      label={Settings.fields.attachment.description}
+                      component={FieldHelper.SpecialField}
+                      onChange={value => {
+                        // prevent initial unnecessary render of RichTextEditor
+                        if (!_isEqual(values.description, value)) {
+                          setFieldValue("description", value, true)
+                        }
+                      }}
+                      onHandleBlur={() => {
+                        // validation will be done by setFieldValue
+                        setFieldTouched("description", true, false)
+                      }}
+                      widget={<RichTextEditor className="description" />}
+                    />
 
-                {/* <FastField
-                  name="attachments"
-                  label={Settings.fields.report.attachments.label}
-                  component={FieldHelper.SpecialField}
-                  widget={<Attachments className="attachmentField" />}
-                /> */}
+                    <Field
+                      name="owner"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <LinkTo modelType="Person" model={values.author} />
+                      }
+                    />
+                    {canEdit ? (
+                      <FastField
+                        name="classification"
+                        component={FieldHelper.RadioButtonToggleGroupField}
+                        buttons={classificationButtons}
+                        onChange={value =>
+                          setFieldValue("classification", value)
+                        }
+                      />
+                    ) : (
+                      <Field
+                        name="classification"
+                        component={FieldHelper.ReadonlyField}
+                      />
+                    )}
+                    {edit && (
+                      <Field
+                        name="used in"
+                        component={FieldHelper.ReadonlyField}
+                        humanValue={
+                          <>
+                            {attachmentPreview.content.length > 0 && (
+                              <AttachmentRelatedObjectsTable
+                                relatedObjects={
+                                  attachmentPreview.attachmentRelatedObjects
+                                }
+                              />
+                            )}
+                          </>
+                        }
+                      />
+                    )}
+                  </Col>
+                </div>
               </Fieldset>
 
               <div className="submit-buttons">
@@ -115,16 +228,14 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
                     Cancel
                   </Button>
                 </div>
-                {canDelete && (
-                  <ConfirmDestructive
-                    onConfirm={() => onConfirmDelete(values, resetForm)}
-                    objectType="report"
-                    objectDisplay={values.uuid}
-                    variant="danger"
-                    buttonLabel={"Delete this Attachment"}
-                    buttonDisabled={isSubmitting}
-                  />
-                )}
+                <ConfirmDestructive
+                  onConfirm={() => onConfirmDelete(values, resetForm)}
+                  objectType="attachment"
+                  objectDisplay={values.uuid}
+                  variant="danger"
+                  buttonLabel={"Delete this Attachment"}
+                  buttonDisabled={isSubmitting}
+                />
                 <div>
                   <Button
                     id="formBottomSubmit"
@@ -149,7 +260,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
         // reset the form to latest values
         // to avoid unsaved changes prompt if it somehow becomes dirty
         resetForm({ values, isSubmitting: true })
-        navigate("/", { state: { success: "Report deleted" } })
+        navigate("/", { state: { success: "Attachment deleted" } })
       })
       .catch(error => {
         setError(error)
@@ -192,7 +303,7 @@ const AttachmentForm = ({ edit, title, initialValues }) => {
   function save(values, form) {
     const attachment = Attachment.filterClientSideFields(values)
     attachment.content = null
-    attachment.classification = "NATO_UNCLASSIFIED"
+    attachment.classification = values.classification
     return API.mutation(edit ? GQL_UPDATE_ATTACHMENT : GQL_CREATE_ATTACHMENT, {
       attachment: attachment
     })

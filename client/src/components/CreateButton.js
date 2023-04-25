@@ -10,7 +10,6 @@ const SUPERUSER_ACTIONS = [Models.Person, Models.Position, Models.Location]
 
 const ADMIN_ACTIONS = [
   Models.Organization,
-  Models.Attachment,
   Models.Task,
   Models.AuthorizationGroup
 ]

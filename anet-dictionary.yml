@@ -294,14 +294,23 @@ fields:
       label: Attachment Name
       placeholder: Enter an attachment name, example....
     description: Attachment description
+    classification:
+      type: enum
+      label: UNDEFINED / NATO_UNCLASSIFIED / NATO_UNCLASSIFIED_Releasable_to_EU
+      choices:
+        UNDEFINED:
+          value: UNDEFINED
+          label: undefined
+        NATO_UNCLASSIFIED:
+          value: NATO_UNCLASSIFIED
+          label: NATO UNCLASSIFIED
+        NATO_UNCLASSIFIED_Releasable_to_EU:
+          value: NATO_UNCLASSIFIED_Releasable_to_EU
+          label: NATO UNCLASSIFIED Releasable to EU
 
   report:
     attachments:
       label: Attachment
-      classification:
-        - UNDEFINED
-        - NATO UNCLASSIFIED
-        - NATO UNCLASSIFIED Releasable to EU
     canUnpublishReports: true
     intent: Engagement purpose
     atmosphere: Atmospherics

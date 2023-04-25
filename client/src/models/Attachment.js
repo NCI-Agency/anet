@@ -21,11 +21,20 @@ export default class Attachment extends Model {
     description: yup.string().default(""),
     mimeType: yup.string().default(""),
     content: yup.string().url().default(""),
-    attachmentRelatedObjects: yup.object().nullable().default({}),
+    attachmentRelatedObjects: yup
+      .array()
+      .nullable()
+      .default([
+        {
+          relatedObjectType: yup.string().default(null),
+          relatedObjectUuid: yup.string().default(null)
+        }
+      ]),
     classification: yup.string().default("")
   })
 
-  static autocompleteQuery = "uuid, fileName, description"
+  static autocompleteQuery =
+    "uuid, fileName, description, content, classification, mimeType, attachmentRealtedObjects"
 
   static _resourceOverride = ["attachments"].join("/")
 
@@ -55,7 +64,8 @@ export default class Attachment extends Model {
       this.description ||
       this.mimeType ||
       this.content ||
-      this.classification
+      this.classification ||
+      this.attachmentRelatedObjects
     )
   }
 }

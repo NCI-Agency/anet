@@ -1,28 +1,43 @@
-import { gql } from "@apollo/client"
-import API from "api"
+import Messages from "components/Messages"
 import PropTypes from "prop-types"
-import React from "react"
+import React, { useEffect, useState } from "react"
+import "./Attachment.css"
+import AttachmentCard from "./AttachmentCard"
 
-const GQL_GET_RELATED_ATTACHMENTS = gql`
-  query ($uuid: String!) {
-    getAttachmentsForRelatedObject(uuid: $uuid) {
-      uuid
-      fileName
-      content
+const ShowUplaodedAttachments = ({ attachmentList }) => {
+  const [uploadedList, setUploadedList] = useState([])
+  const [error, setError] = useState(null)
+  const [remove, setRemove] = useState(false)
+
+  useEffect(() => {
+    if (attachmentList.length > 0) {
+      setUploadedList(attachmentList)
     }
-  }
-`
+    if (remove) {
+      setUploadedList(uploadedList)
+    }
+  }, [attachmentList, uploadedList, remove])
 
-const ShowUplaodedAttachments = ({ relatedObjectUuid }) => {
-  const { data } = API.useApiQuery(GQL_GET_RELATED_ATTACHMENTS, {
-    relatedObjectUuid
-  })
-  console.log(data)
-  return <div>file</div>
+  return (
+    <React.Fragment>
+      {error && <Messages error={error} />}
+      {uploadedList?.map((file, index) => (
+        <AttachmentCard
+          file={file}
+          key={index}
+          remove={remove}
+          setError={setError}
+          setRemove={setRemove}
+          uploadedList={uploadedList}
+          setUploadedList={setUploadedList}
+        />
+      ))}
+    </React.Fragment>
+  )
 }
 
 ShowUplaodedAttachments.propTypes = {
-  relatedObjectUuid: PropTypes.string
+  attachmentList: PropTypes.array
 }
 
 export default ShowUplaodedAttachments

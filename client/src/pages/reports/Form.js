@@ -12,8 +12,7 @@ import {
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
-import FormAttachment from "components/Attachment/FormAttachment"
-import ShowUploadedAttachments from "components/Attachment/ShowUploadedAttachments"
+import UploadMultipleAttachment from "components/Attachment/UploadMultipleAttachment"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import CustomDateInput from "components/CustomDateInput"
 import {
@@ -919,63 +918,49 @@ const ReportForm = ({
 
                 <FastField
                   name="reportText"
-                  label={Settings.fields.report.reportText}
                   component={FieldHelper.SpecialField}
+                  label={Settings.fields.report.reportText}
+                  widget={<RichTextEditor className="reportTextField" />}
                   onChange={value => {
-                    // prevent initial unnecessary render of RichTextEditor
                     if (!_isEqual(values.reportText, value)) {
                       setFieldValue("reportText", value, true)
                     }
                   }}
                   onHandleBlur={() => {
-                    // validation will be done by setFieldValue
                     setFieldTouched("reportText", true, false)
                   }}
-                  widget={<RichTextEditor className="reportTextField" />}
                 />
 
                 <FastField
-                  name="attachments"
-                  label={Settings.fields.attachment.shortLabel}
+                  name="uploadAttachments"
                   component={FieldHelper.SpecialField}
-                  onHandleBlur={() => {
-                    // validation will be done by setFieldValue
-                    setFieldTouched("attachments", true, false)
-                  }}
+                  label={Settings.fields.attachment.shortLabel}
                   widget={
-                    <FormAttachment
+                    <UploadMultipleAttachment
+                      edit={edit}
                       className="attachmentField"
-                      attachmentFunc={attachmentFunc}
+                      loadingError={loadingError}
                       type={Report.relatedObjectType}
                       setIsAttachment={setIsAttachment}
                       setLoadingError={setLoadingError}
-                      loadingError={loadingError}
+                      attachmentFunc={attachmentFunc}
+                      relatedObjectUuid={values.uuid ? values.uuid : undefined}
                     />
                   }
+                  onHandleBlur={() => {
+                    setFieldTouched("uploadAttachments", true, false)
+                  }}
                 />
-
-                {edit && (
-                  <FastField
-                    name="uploaded-attachments"
-                    label="Uploaded Attachment(s)"
-                    component={FieldHelper.ReadonlyField}
-                    humanValue={
-                      <ShowUploadedAttachments
-                        relatedObjectUuid={values.uuid}
-                      />
-                    }
-                  />
-                )}
 
                 <div style={{ textAlign: "center" }}>
                   <Button
-                    variant="outline-secondary"
-                    className="center-block toggle-section-button"
                     style={{
                       marginBottom: "1rem"
                     }}
-                    onClick={toggleReportText}
                     id="toggleSensitiveInfo"
+                    onClick={toggleReportText}
+                    variant="outline-secondary"
+                    className="center-block toggle-section-button"
                   >
                     {showSensitiveInfo ? "Hide" : "Add"} sensitive information
                   </Button>

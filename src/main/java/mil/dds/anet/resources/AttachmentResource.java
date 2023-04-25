@@ -56,7 +56,7 @@ public class AttachmentResource {
   @GraphQLMutation(name = "createAttachment")
   public String createAttachment(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "attachment") Attachment attachment) {
-    if (attachment.getClassification() != null) {
+    if (DaoUtils.getEnumId(attachment.getClassification()) != 0) {
       // classification is not "undefined"
       throw new WebApplicationException("Classification cannot be set", Status.FORBIDDEN);
     }

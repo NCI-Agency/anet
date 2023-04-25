@@ -8,6 +8,7 @@ import {
 import API from "api"
 import AppContext from "components/AppContext"
 import InstantAssessmentsContainerField from "components/assessments/instant/InstantAssessmentsContainerField"
+import AttachmentCard from "components/Attachment/AttachmentCard"
 import ConfirmDestructive from "components/ConfirmDestructive"
 import { ReadonlyCustomFields } from "components/CustomFields"
 import * as FieldHelper from "components/FieldHelper"
@@ -234,6 +235,9 @@ const GQL_GET_REPORT = gql`
         uuid
         fileName
         mimeType
+        content
+        description
+        classification
       }
       customFields
       ${GRAPHQL_NOTES_FIELDS}
@@ -674,10 +678,13 @@ const ReportShow = ({ setSearchQuery, pageDispatchers }) => {
                   component={FieldHelper.ReadonlyField}
                   humanValue={
                     <>
-                      {report.attachments.map(attach => (
-                        <p key={attach.uuid}>
-                          <LinkTo modelType="Attachment" model={attach} />
-                        </p>
+                      {report.attachments.map((file, index) => (
+                        <AttachmentCard
+                          key={index}
+                          file={file}
+                          index={index}
+                          show={false}
+                        />
                       ))}
                     </>
                   }

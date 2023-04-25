@@ -2,6 +2,8 @@ import { gql } from "@apollo/client"
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from "actions"
 import API from "api"
 import AppContext from "components/AppContext"
+import "components/Attachment/Attachment.css"
+import AttachmentRelatedObjectsTable from "components/Attachment/AttachmentRelatedObjectsTable"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -29,6 +31,38 @@ const GQL_GET_ATTACHMENT = gql`
       content
       classification
       description
+      author {
+        name
+        uuid
+        avatar
+      }
+      attachmentRelatedObjects {
+        relatedObject {
+          ... on AuthorizationGroup {
+            name
+          }
+          ... on Location {
+            name
+          }
+          ... on Organization {
+            shortName
+          }
+          ... on Person {
+            name
+          }
+          ... on Position {
+            name
+          }
+          ... on Report {
+            intent
+          }
+          ... on Task {
+            shortName
+          }
+        }
+        relatedObjectUuid
+        relatedObjectType
+      }
     }
   }
 `
@@ -55,25 +89,37 @@ const AttachmentShow = ({ pageDispatchers }) => {
   const attachment = new Attachment(data ? data.attachment : {})
   const stateSuccess = routerLocation.state && routerLocation.state.success
   const stateError = routerLocation.state && routerLocation.state.error
-  const canEdit = currentUser.isSuperuser()
+  const canEdit = currentUser.isAdmin() || (currentUser.uuid === attachment.author.uuid)
   return (
     <Formik enableReinitialize initialValues={attachment}>
       {({ values }) => {
-        const action = canEdit && (
+        const action =
           <>
-            <a href={`/api/attachment/download/${attachment.uuid}`}>
-              <Button className="me-3">Download</Button>
-            </a>
-            <LinkTo
-              modelType="Attachment"
-              model={attachment}
-              edit
-              button="primary"
-            >
-              Edit
-            </LinkTo>
+            <Button className="d-flex p-0 align-items-center">
+              <a
+                href={`/api/attachment/download/${attachment.uuid}`}
+                style={{
+                  color: "white",
+                  padding: "6px 12px",
+                  textDecoration: "none"
+                }}
+              >
+                Download
+              </a>
+            </Button>
+            {canEdit &&
+              <LinkTo
+                modelType="Attachment"
+                model={attachment}
+                edit
+                style={{ marginLeft: "10px" }}
+                button="primary"
+              >
+                Edit
+              </LinkTo>
+            }
           </>
-        )
+
         return (
           <div>
             <Messages success={stateSuccess} error={stateError} />
@@ -87,14 +133,21 @@ const AttachmentShow = ({ pageDispatchers }) => {
                   <Col xs={12} sm={3} className="label-align">
                     <img
                       alt="file"
+                      className="attachmentImage"
                       src={`data:${attachment.mimeType};base64,${attachment.content}`}
-                      style={{ width: "100%", borderRadius: "5px" }}
                     />
                   </Col>
                   <Col xs={12} sm={3} lg={8}>
                     <Field
                       name="fileName"
                       component={FieldHelper.ReadonlyField}
+                    />
+                    <Field
+                      name="owner"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <LinkTo modelType="Person" model={attachment.author} />
+                      }
                     />
                     <Field
                       name="description"
@@ -104,12 +157,20 @@ const AttachmentShow = ({ pageDispatchers }) => {
                       }
                     />
                     <Field
-                      name="mimeType"
-                      component={FieldHelper.ReadonlyField}
-                    />
-                    <Field
                       name="classification"
                       component={FieldHelper.ReadonlyField}
+                      humanValue={Attachment.humanNameOfStatus(
+                        attachment.classification
+                      ).toUpperCase()}
+                    />
+                    <Field
+                      name="used in"
+                      component={FieldHelper.ReadonlyField}
+                      humanValue={
+                        <AttachmentRelatedObjectsTable
+                          relatedObjects={values.attachmentRelatedObjects}
+                        />
+                      }
                     />
                   </Col>
                 </div>

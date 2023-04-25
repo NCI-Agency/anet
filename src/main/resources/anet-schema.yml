@@ -527,7 +527,7 @@ properties:
       attachment:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, description]
+        required: [shortLabel, shortName, description, classification]
         properties:
           shortLabel:
             type: string
@@ -539,6 +539,9 @@ properties:
             type: string
             title: The label for a attachment's description
             description: Used in the UI where a attachment's description is shown.
+          classification:
+            "$ref": "#/$defs/customField"
+
       report:
         type: object
         additionalProperties: false
@@ -547,19 +550,11 @@ properties:
           attachments:
             type: object
             additionalProperties: false
+            required: [label]
             properties:
               label:
                 type: string
                 title: The label of the attachments
-              classification:
-                type: array
-                uniqueItems: true
-                items:
-                  type: string
-                  enum:
-                    - UNDEFINED
-                    - NATO UNCLASSIFIED
-                    - NATO UNCLASSIFIED Releasable to EU
             title: Whether reports have attachments
             description: Used for attachments in reports
           canUnpublishReports:

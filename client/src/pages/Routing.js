@@ -10,7 +10,6 @@ import MergePositions from "pages/admin/merge/MergePositions"
 import UserActivitiesOverTime from "pages/admin/useractivities/UserActivitiesOverTime"
 import UserActivitiesPerPeriod from "pages/admin/useractivities/UserActivitiesPerPeriod"
 import AttachmentEdit from "pages/attachments/Edit"
-import AttachmentNew from "pages/attachments/New"
 import AttachmentShow from "pages/attachments/Show"
 import BoardDashboard from "pages/dashboards/BoardDashboard"
 import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
@@ -76,7 +75,6 @@ const Routing = () => {
         </Route>
       </Route>
       <Route path={PAGE_URLS.ATTACHMENTS}>
-        <Route path="new" element={<AttachmentNew />} />
         <Route path=":uuid">
           <Route index element={<AttachmentShow />} />
           <Route path="edit" element={<AttachmentEdit />} />
