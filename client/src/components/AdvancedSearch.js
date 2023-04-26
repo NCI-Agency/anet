@@ -12,7 +12,6 @@ import {
 import { Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
 import _cloneDeep from "lodash/cloneDeep"
-import { Organization, Position } from "models"
 import PropTypes from "prop-types"
 import React, { useState } from "react"
 import {
@@ -25,23 +24,6 @@ import {
 } from "react-bootstrap"
 import { connect } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { POSITION_POSITION_TYPE_FILTER_KEY } from "searchUtils"
-
-const ORG_QUERY_PARAM_TYPES = {
-  NONE: {},
-  PRINCIPAL: { type: Organization.TYPE.PRINCIPAL_ORG },
-  ADVISOR: { type: Organization.TYPE.ADVISOR_ORG }
-}
-
-function getOrgQueryParams(positionType) {
-  if (positionType === Position.TYPE.PRINCIPAL) {
-    return ORG_QUERY_PARAM_TYPES.PRINCIPAL
-  } else if (positionType === Position.TYPE.ADVISOR) {
-    return ORG_QUERY_PARAM_TYPES.ADVISOR
-  } else {
-    return ORG_QUERY_PARAM_TYPES.NONE
-  }
-}
 
 const AdvancedSearch = ({
   onSearch,
@@ -57,10 +39,6 @@ const AdvancedSearch = ({
   const [objectType, setObjectType] = useState(searchQuery.objectType)
   const [filters, setFilters] = useState(
     searchQuery.filters ? searchQuery.filters.slice() : []
-  )
-  // Keep orgFilterQueryParams as it depends on the value selected for the positionTypeFilter
-  const [orgFilterQueryParams, setOrgFilterQueryParams] = useState(
-    getOrgQueryParams(null)
   )
   const ALL_FILTERS = searchFilters()
   const commonFiltersForAllObjectTypes = findCommonFiltersForAllObjectTypes(
@@ -139,8 +117,6 @@ const AdvancedSearch = ({
               </ButtonGroupContainerS>
             </FormGroup>
 
-            {/* <FormControl defaultValue={text} className="hidden" /> */}
-
             <div
               className="advanced-search-content"
               style={{ paddingLeft: "15px" }}
@@ -153,8 +129,6 @@ const AdvancedSearch = ({
                       filter={filter}
                       onRemove={removeFilter}
                       element={filterDefs[filter.key]}
-                      updateOrgFilterQueryParams={setOrgFilterQueryParams}
-                      orgFilterQueryParams={orgFilterQueryParams}
                     />
                   )
               )}
@@ -262,7 +236,6 @@ const AdvancedSearch = ({
         // Add defaults as well
         .concat(defaultFiltersForObjectType)
     )
-    setOrgFilterQueryParams(getOrgQueryParams(null))
   }
 
   function clearObjectType() {
@@ -281,10 +254,6 @@ const AdvancedSearch = ({
     const newFilters = filters.slice()
     newFilters.splice(newFilters.indexOf(filter), 1)
     setFilters(newFilters)
-
-    if (filter.key === POSITION_POSITION_TYPE_FILTER_KEY) {
-      setOrgFilterQueryParams(getOrgQueryParams(null))
-    }
   }
 
   function onSubmit(event) {
@@ -333,13 +302,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdvancedSearch)
 
-const SearchFilter = ({
-  onRemove,
-  filter,
-  element,
-  orgFilterQueryParams,
-  updateOrgFilterQueryParams
-}) => {
+const SearchFilter = ({ onRemove, filter, element }) => {
   const dictProps = element.dictProps
   const label = dictProps?.label || filter.key
   const ChildComponent = dictProps
@@ -359,7 +322,6 @@ const SearchFilter = ({
             <ChildComponent
               value={filter.value || ""}
               onChange={onChange}
-              orgFilterQueryParams={orgFilterQueryParams}
               {...additionalProps}
               {...element.props}
             />
@@ -377,18 +339,12 @@ const SearchFilter = ({
 
   function onChange(value) {
     filter.value = value
-    if (filter.key === POSITION_POSITION_TYPE_FILTER_KEY) {
-      const positionType = filter.value.value || ""
-      updateOrgFilterQueryParams(getOrgQueryParams(positionType))
-    }
   }
 }
 
 SearchFilter.propTypes = {
   onRemove: PropTypes.func,
   filter: PropTypes.object,
-  orgFilterQueryParams: PropTypes.object,
-  updateOrgFilterQueryParams: PropTypes.func,
   element: PropTypes.shape({
     component: PropTypes.func.isRequired,
     dictProps: PropTypes.object,

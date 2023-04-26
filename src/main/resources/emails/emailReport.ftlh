@@ -339,12 +339,12 @@ ${sender.name} sent you a report from ANET:
       </div>
 
       <div class="form-group">
-        <label for="principalOrg" class="col-sm-2 control-label">${fields.principal.org.name}</label>
+        <label for="interlocutorOrg" class="col-sm-2 control-label">${fields.interlocutor.org.name}</label>
         <div class="col-sm-7">
-          <div id="principalOrg" class="form-control-static">
-            <#if report.loadPrincipalOrg(context).get()??>
-              <#assign principalOrg = report.getPrincipalOrg()>
-              <a href="/organizations/${principalOrg.uuid}">${(principalOrg.shortName)!(principalOrg.longName)!(principalOrg.identificationCode)!}</a>
+          <div id="interlocutorOrg" class="form-control-static">
+            <#if report.loadInterlocutorOrg(context).get()??>
+              <#assign interlocutorOrg = report.getInterlocutorOrg()>
+              <a href="/organizations/${interlocutorOrg.uuid}">${(interlocutorOrg.shortName)!(interlocutorOrg.longName)!(interlocutorOrg.identificationCode)!}</a>
             </#if>
           </div>
         </div>
@@ -373,11 +373,6 @@ ${sender.name} sent you a report from ANET:
         </thead>
 
         <#macro renderAttendee attendee>
-          <#if attendee.role == "ADVISOR">
-            <#assign roleImg = "/assets/img/rs_small.png">
-          <#else>
-            <#assign roleImg = "/assets/img/afg_small.png">
-          </#if>
           <tr>
             <td class="primary-attendee">
               <div class="checkbox">
@@ -385,7 +380,7 @@ ${sender.name} sent you a report from ANET:
               </div>
             </td>
             <td>
-              <img src="${roleImg}" alt="${attendee.role?capitalize}" class="person-icon" height="20" width="20"><a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
+              <img src="/assets/img/people.png" alt="attendee" class="person-icon" height="20" width="20"><a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
             </td>
             <td>
               <#if attendee.loadPosition()??>
@@ -399,7 +394,7 @@ ${sender.name} sent you a report from ANET:
         <tbody>
           <#assign attendees = (report.loadAttendees(context).get())!>
           <#list attendees as attendee>
-            <#if attendee.role == "ADVISOR">
+            <#if !attendee.interlocutor>
               <@renderAttendee attendee />
             </#if>
           </#list>
@@ -409,7 +404,7 @@ ${sender.name} sent you a report from ANET:
             </td>
           </tr>
           <#list attendees as attendee>
-            <#if attendee.role == "PRINCIPAL">
+            <#if attendee.interlocutor>
               <@renderAttendee attendee />
             </#if>
           </#list>

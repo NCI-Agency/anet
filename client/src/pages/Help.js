@@ -14,7 +14,6 @@ import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { connect } from "react-redux"
 import TOUR_SCREENSHOT from "resources/tour-screenshot.png"
-import Settings from "settings"
 
 const GQL_GET_ORGANIZATION = gql`
   query ($uuid: String) {
@@ -26,7 +25,6 @@ const GQL_GET_ORGANIZATION = gql`
             uuid
             name
             rank
-            role
             avatarUuid
             emailAddress
           }
@@ -158,8 +156,8 @@ const HelpConditional = ({
         <h4>2. Email your superuser</h4>
         <p>
           Your organization's superusers are able to modify a lot of data in the
-          system regarding how your organization, position, profile, and{" "}
-          {Settings.fields.principal.person.name} are set up.
+          system regarding how your organization, position and profile are set
+          up.
         </p>
         <p>Your superusers:</p>
         <ul>

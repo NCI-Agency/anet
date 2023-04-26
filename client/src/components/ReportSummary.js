@@ -39,14 +39,12 @@ const GQL_GET_REPORT_LIST = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
-        primaryPrincipal {
+        primaryInterlocutor {
           uuid
           name
           rank
-          role
           avatarUuid
         }
         advisorOrg {
@@ -55,7 +53,7 @@ const GQL_GET_REPORT_LIST = gql`
           longName
           identificationCode
         }
-        principalOrg {
+        interlocutorOrg {
           uuid
           shortName
           longName
@@ -96,7 +94,6 @@ const GQL_GET_REPORT_LIST = gql`
                 uuid
                 name
                 rank
-                role
                 avatarUuid
               }
             }
@@ -105,7 +102,6 @@ const GQL_GET_REPORT_LIST = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
         }
@@ -275,13 +271,17 @@ const ReportSummaryRow = ({ report }) => {
             {" "}
             (<LinkTo modelType="Organization" model={report.advisorOrg} />)
           </span>
-          {report.primaryPrincipal && (
+          {report.primaryInterlocutor && (
             <>
               <span className="people-separator">&#x25B6;</span>
-              <LinkTo modelType="Person" model={report.primaryPrincipal} />
+              <LinkTo modelType="Person" model={report.primaryInterlocutor} />
               <span>
                 {" "}
-                (<LinkTo modelType="Organization" model={report.principalOrg} />
+                (
+                <LinkTo
+                  modelType="Organization"
+                  model={report.interlocutorOrg}
+                />
                 )
               </span>
             </>

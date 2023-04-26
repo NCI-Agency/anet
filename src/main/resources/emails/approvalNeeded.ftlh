@@ -53,7 +53,7 @@ Dear ${approvalStepName},
   <strong>Advisor attendees:</strong>
   <ul>
     <#list attendees as attendee>
-      <#if attendee.role == "ADVISOR">
+      <#if !attendee.interlocutor>
         <li>
           ${(attendee.name)!}
           <#if attendee.loadPosition()??>
@@ -73,14 +73,14 @@ Dear ${approvalStepName},
 </div>
 
 <div>
-  <strong>Principal organization:</strong> ${(report.loadPrincipalOrg(context).get().shortName)!}
+  <strong>Interlocutor organization:</strong> ${(report.loadInterlocutorOrg(context).get().shortName)!}
 </div>
 
 <div>
-  <strong>Principal attendees:</strong>
+  <strong>Interlocutor attendees:</strong>
   <ul>
     <#list attendees as attendee>
-      <#if attendee.role == "PRINCIPAL">
+      <#if attendee.interlocutor>
          <li>
           ${(attendee.name)!}
           <#if attendee.loadPosition()??>

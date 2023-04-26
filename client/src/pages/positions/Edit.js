@@ -42,7 +42,6 @@ const GQL_GET_POSITION = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -51,13 +50,11 @@ const GQL_GET_POSITION = gql`
         shortName
         longName
         identificationCode
-        type
       }
       person {
         uuid
         name
         rank
-        role
         avatarUuid
       }
       customFields

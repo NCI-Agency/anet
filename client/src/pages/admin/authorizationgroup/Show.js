@@ -41,7 +41,6 @@ const GQL_GET_AUTHORIZATION_GROUP = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
           ... on Position {

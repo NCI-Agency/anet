@@ -6,12 +6,12 @@ const taskShortLabelSingular = Settings.fields.task.shortLabel
 const taskShortLabelPlural = pluralize(taskShortLabelSingular)
 const subLevelTaskShortLabelSingular = Settings.fields.task.subLevel.shortLabel
 const subLevelTaskShortLabelPlural = pluralize(subLevelTaskShortLabelSingular)
+const personSingular = Settings.fields.regular.person.name
 const advisorSingular = Settings.fields.advisor.person.name
 const advisorPlural = pluralize(advisorSingular)
-const principalSingular = Settings.fields.principal.person.name
-const principalPlural = pluralize(principalSingular)
-const advisorPositionSingular = Settings.fields.advisor.position.name
-const principalPositionSingular = Settings.fields.principal.position.name
+const interlocutorSingular = Settings.fields.interlocutor.person.name
+const interlocutorPlural = pluralize(interlocutorSingular)
+const positionSingular = Settings.fields.regular.position.name
 const positionCode = Settings.fields.position.code.label
 
 const userTour = (currentUser, navigate) => {
@@ -131,7 +131,7 @@ const reportTour = (currentUser, navigate) => {
     steps: [
       {
         title: Settings.fields.report.intent,
-        content: `Use this section to tell readers why you met with your ${principalSingular}. Were you working on a specific goal or problem with them? This will be part of your report's summary, so use this space to tell readers the high-level purpose of your engagement.`,
+        content: `Use this section to tell readers why you met with your ${interlocutorSingular}. Were you working on a specific goal or problem with them? This will be part of your report's summary, so use this space to tell readers the high-level purpose of your engagement.`,
         target: "intent",
         placement: "bottom"
       },
@@ -157,7 +157,7 @@ const reportTour = (currentUser, navigate) => {
       },
       {
         title: "Attendee(s)",
-        content: `Start typing the name of everyone who was at the meeting, including ${principalPlural} and ${advisorPlural}. Select one of the options available or ask your superuser to add it.`,
+        content: `Start typing the name of everyone who was at the meeting, including ${interlocutorPlural} and ${advisorPlural}. Select one of the options available or ask your superuser to add it.`,
         target: "#attendees",
         placement: "right"
       },
@@ -168,8 +168,8 @@ const reportTour = (currentUser, navigate) => {
         placement: "bottom"
       },
       {
-        title: `Primary ${advisorSingular} and ${principalSingular}`,
-        content: `Use these check boxes to indicate who the primary ${advisorSingular} and primary ${principalSingular} was. The people you choose will display on your report's summary as the main individuals involved in your engagement.`,
+        title: `Primary ${advisorSingular} and ${interlocutorSingular}`,
+        content: `Use these check boxes to indicate who the primary ${advisorSingular} and primary ${interlocutorSingular} was. The people you choose will display on your report's summary as the main individuals involved in your engagement.`,
         target: "#reportPeopleContainer",
         placement: "bottom"
       },
@@ -248,7 +248,7 @@ const orgTour = (currentUser, navigate) => {
       },
       {
         title: "Supported positions",
-        content: `This section shows positions in your organization that currently have people assigned to them. The ${advisorPositionSingular} column tells you the name and ${positionCode} of the position. To update this information, click on the position and select the "Edit" option.`,
+        content: `This section shows positions in your organization that currently have people assigned to them. The ${positionSingular} column tells you the name and ${positionCode} of the position. To update this information, click on the position and select the "Edit" option.`,
         target: "#supportedPositions h4",
         placement: "top"
       },
@@ -315,7 +315,7 @@ const positionTour = (currentUser, navigate) => {
       },
       {
         title: "Type of user",
-        content: `There are three types of users: user, superuser, and administrator. Superusers can give other positions either user or superuser privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Superusers are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations. This section isn't visible if you're looking at a ${principalPositionSingular} position.`,
+        content: `There are three types of users: user, superuser, and administrator. Superusers can give other positions either user or superuser privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Superusers are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations.`,
         target: "#type",
         placement: "bottom"
       },
@@ -328,14 +328,15 @@ const positionTour = (currentUser, navigate) => {
       },
       {
         title: "Current assigned person",
-        content: `This section shows you who is currently assigned to this position. For ${advisorPositionSingular} positions, you'll see the ${advisorSingular} in this position. For ${principalPositionSingular} positions, you'll see the current ${principalSingular} in that position. You can click the "Change assigned person" button to quickly change who is in this position.`,
-        target: "#assigned-advisor h4",
+        content:
+          'This section shows you who is currently assigned to this position. You can click the "Change assigned person" button to quickly change who is in this position.',
+        target: "#assigned-person h4",
         placement: "top"
       },
       {
-        title: `Assigned ${principalSingular} or ${advisorSingular}`,
-        content: `If you're looking at a ${advisorPositionSingular} position, you'll see the people this position is responisble for advising. If you're looking at a ${principalPositionSingular} position, you'll see the ${advisorPlural} advising that ${principalPositionSingular} here. You can update this information by clicking the "Change assigned ${advisorSingular}" or "Change assigned ${principalSingular}" button, depending on what type of position you're looking at.`,
-        target: "#assigned-principal h4",
+        title: `Assigned ${personSingular}`,
+        content: `You'll see the people this position is assigned to. You can update this information by clicking the "Change assigned ${personSingular}".`,
+        target: "#assigned-person h4",
         placement: "top"
       },
       {
@@ -361,7 +362,7 @@ const personTour = (currentUser, navigate) => {
     steps: [
       {
         title: "Information about this person",
-        content: `You can review this person's basic information, including their contact information, and see if they are "Active". A superuser should change a person to "Inactive" when they are no longer in a job as a ${advisorSingular} or ${principalSingular}. Setting them as inactive keeps them from being added to reports as attendees.`,
+        content: `You can review this person's basic information, including their contact information, and see if they are "Active". A superuser should change a person to "Inactive" when they are no longer in a job as a ${personSingular}. Setting them as inactive keeps them from being added to reports as attendees.`,
         target: "#phoneNumber",
         placement: "bottom"
       },
@@ -374,7 +375,8 @@ const personTour = (currentUser, navigate) => {
       },
       {
         title: "Authored reports",
-        content: `If this person has authored any reports, you'll be able to see them displayed here. If you're looking at an ${principalSingular}'s page, you won't see this section.`,
+        content:
+          "If this person has authored any reports, you'll be able to see them displayed here.",
         target: "#reports-authored h4",
         placement: "top"
       },

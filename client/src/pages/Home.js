@@ -131,7 +131,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     } else if (currentUser.position && currentUser.position.isApprover) {
       return approverQueries(currentUser)
     } else {
-      return advisorQueries(currentUser)
+      return regularUserQueries(currentUser)
     }
   }
 
@@ -156,7 +156,7 @@ const HomeTiles = ({ currentUser, setSearchQuery, pageDispatchers }) => {
     ]
   }
 
-  function advisorQueries(currentUser) {
+  function regularUserQueries(currentUser) {
     return [
       myDraft(currentUser),
       myPending(currentUser),
@@ -345,11 +345,10 @@ const Home = ({ pageDispatchers, setSearchQuery, clearSearchQuery }) => {
 
       {!currentUser.hasAssignedPosition() && (
         <div className="alert alert-warning" style={alertStyle}>
-          You are not assigned to a {Settings.fields.advisor.position.name}{" "}
-          position.
+          You are not assigned to a position.
           <br />
-          Please contact your organization's superuser(s) to assign you to a{" "}
-          {Settings.fields.advisor.position.name} position.
+          Please contact your organization's superuser(s) to assign you to a
+          position.
           <br />
           If you are unsure, you can also contact the support team{" "}
           {supportEmailMessage}.
@@ -358,8 +357,7 @@ const Home = ({ pageDispatchers, setSearchQuery, clearSearchQuery }) => {
       {currentUser.hasAssignedPosition() &&
         !currentUser.hasActivePosition() && (
           <div className="alert alert-warning" style={alertStyle}>
-            Your {Settings.fields.advisor.position.name} position has an
-            inactive status.
+            Your position has an inactive status.
             <br />
             Please contact your organization's superusers to change your
             position to an active status.

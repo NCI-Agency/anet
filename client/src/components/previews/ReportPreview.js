@@ -40,19 +40,18 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
       }
       reportPeople {
         uuid
         name
         rank
-        role
         avatarUuid
         status
         author
         primary
         attendee
+        interlocutor
         position {
           uuid
           name
@@ -83,19 +82,17 @@ const GQL_GET_REPORT = gql`
         }
         customFields
       }
-      principalOrg {
+      interlocutorOrg {
         uuid
         shortName
         longName
         identificationCode
-        type
       }
       advisorOrg {
         uuid
         shortName
         longName
         identificationCode
-        type
       }
     }
   }
@@ -240,9 +237,9 @@ const ReportPreview = ({ className, uuid }) => {
 
         <PreviewField
           extraColForValue
-          label={Settings.fields.principal.org.name}
+          label={Settings.fields.interlocutor.org.name}
           value={
-            <LinkTo modelType="Organization" model={report.principalOrg} />
+            <LinkTo modelType="Organization" model={report.interlocutorOrg} />
           }
         />
 

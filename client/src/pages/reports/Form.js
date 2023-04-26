@@ -249,7 +249,6 @@ const ReportForm = ({
   const alertStyle = { marginBottom: "1rem", textAlign: "center", zIndex: "-1" }
   const supportEmail = Settings.SUPPORT_EMAIL_ADDR
   const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ""
-  const advisorPositionSingular = Settings.fields.advisor.position.name
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
   const attachmentEditEnabled =
     attachmentsEnabled &&
@@ -327,25 +326,12 @@ const ReportForm = ({
           all: {
             label: "All",
             queryVars: { matchPositionName: true, pendingVerification: false }
-          },
-          activeAdvisors: {
-            label: "All advisors",
-            queryVars: {
-              role: Person.ROLE.ADVISOR,
-              matchPositionName: true,
-              pendingVerification: false
-            }
-          },
-          activePrincipals: {
-            label: "All principals",
-            queryVars: { role: Person.ROLE.PRINCIPAL }
           }
         }
         if (currentOrg) {
           reportPeopleFilters.myColleagues = {
             label: "My colleagues",
             queryVars: {
-              role: Person.ROLE.ADVISOR,
               matchPositionName: true,
               pendingVerification: false,
               orgUuid: currentOrg.uuid
@@ -390,7 +376,7 @@ const ReportForm = ({
           }
         }
         const primaryAdvisors = values.reportPeople.filter(
-          a => a.role === Person.ROLE.ADVISOR && a.primary && a.attendee
+          a => !a.interlocutor && a.primary && a.attendee
         )
         const primaryAdvisor = primaryAdvisors.length
           ? primaryAdvisors[0]
@@ -452,11 +438,10 @@ const ReportForm = ({
 
             {showAssignedPositionWarning && (
               <div className="alert alert-warning" style={alertStyle}>
-                You cannot submit a report: you are not assigned to a{" "}
-                {advisorPositionSingular} position.
+                You cannot submit a report: you are not assigned to a position.
                 <br />
                 Please contact your organization's superuser(s) and request to
-                be assigned to a {advisorPositionSingular} position.
+                be assigned to a position.
                 <br />
                 If you are unsure, you can also contact the support team{" "}
                 {supportEmailMessage}.
@@ -465,11 +450,11 @@ const ReportForm = ({
 
             {showActivePositionWarning && (
               <div className="alert alert-warning" style={alertStyle}>
-                You cannot submit a report: your assigned{" "}
-                {advisorPositionSingular} position has an inactive status.
+                You cannot submit a report: your assigned position has an
+                inactive status.
                 <br />
                 Please contact your organization's superusers and request them
-                to assign you to an active {advisorPositionSingular} position.
+                to assign you to an active position.
                 <br />
                 If you are unsure, you can also contact the support team{" "}
                 {supportEmailMessage}.
@@ -1199,18 +1184,17 @@ const ReportForm = ({
 
     newPeopleList.forEach(rp => {
       // After selecting a person, default to attending, unless it is intentionally set to false (by attendee checkbox)
-      // Do strict equality, attendee field may be undefined
-      if (rp.attendee !== false) {
-        rp.attendee = true
-      }
+      rp.attendee = rp.attendee ?? true
       // Similarly, if not intentionally made author, default is not an author
-      if (rp.author !== true) {
-        rp.author = false
-      }
+      rp.author = rp.author ?? false
 
       // Set default primary flag to false unless set
       // Make sure field is 'controlled' by defining a value
-      rp.primary = rp.primary || false
+      rp.primary = rp.primary ?? false
+
+      // Set default interlocutor flag to true unless set
+      // Make sure field is 'controlled' by defining a value
+      rp.interlocutor = rp.interlocutor ?? true
     })
 
     // if no one else is primary, set that person primary if attending
@@ -1456,6 +1440,7 @@ const ReportForm = ({
       )
       rp.author = !!reportPerson.author
       rp.attendee = !!reportPerson.attendee
+      rp.interlocutor = !!reportPerson.interlocutor
       return rp
     })
     // strip tasks fields not in data model
@@ -1548,8 +1533,8 @@ const cancelledReasonOptions = [
     label: `Cancelled by ${Settings.fields.advisor.person.name}`
   },
   {
-    value: "CANCELLED_BY_PRINCIPAL",
-    label: `Cancelled by ${Settings.fields.principal.person.name}`
+    value: "CANCELLED_BY_INTERLOCUTOR",
+    label: `Cancelled by ${Settings.fields.interlocutor.person.name}`
   },
   {
     value: "CANCELLED_DUE_TO_TRANSPORTATION",

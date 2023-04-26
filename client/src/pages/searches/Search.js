@@ -80,7 +80,6 @@ const GQL_GET_ORGANIZATION_LIST = gql`
         shortName
         longName
         identificationCode
-        type
       }
     }
   }
@@ -95,7 +94,6 @@ const GQL_GET_PERSON_LIST = gql`
         uuid
         name
         rank
-        role
         avatarUuid
         emailAddress
         position {
@@ -146,7 +144,6 @@ const GQL_GET_POSITION_LIST = gql`
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -261,7 +258,6 @@ const Organizations = ({
           <thead>
             <tr>
               <th>Name</th>
-              <th>Type</th>
             </tr>
           </thead>
           <tbody>
@@ -270,7 +266,6 @@ const Organizations = ({
                 <td>
                   <LinkTo modelType="Organization" model={org} />
                 </td>
-                <td>{org.humanNameOfType()}</td>
               </tr>
             ))}
           </tbody>

@@ -110,12 +110,7 @@ SidebarContainer.propTypes = {
   setIsMenuLinksOpened: PropTypes.func
 }
 
-const Navigation = ({
-  advisorOrganizations,
-  principalOrganizations,
-  resetPages,
-  clearSearchQuery
-}) => {
+const Navigation = ({ allOrganizations, resetPages, clearSearchQuery }) => {
   const { appSettings, currentUser, notifications } = useContext(AppContext)
   const [isMenuLinksOpened, setIsMenuLinksOpened] = useState(false)
   useEffect(() => scrollSpy.update(), [])
@@ -148,10 +143,8 @@ const Navigation = ({
   const inDashboards = path.startsWith("/dashboards")
   const inMySavedSearches = path.startsWith("/search/mine")
 
-  const advisorOrganizationUuids = advisorOrganizations.map(o => o.uuid)
-  const principalOrganizationUuids = principalOrganizations.map(o => o.uuid)
+  const allOrganizationUuids = allOrganizations.map(o => o.uuid)
 
-  const isAdvisor = currentUser.isAdvisor()
   const taskShortLabel = Settings.fields.task.shortLabel
 
   useEffect(() => {
@@ -220,7 +213,7 @@ const Navigation = ({
 
           <Nav id="reports-nav" style={{ lineHeight: "10px" }} />
 
-          {isAdvisor && currentUser.position?.uuid && (
+          {currentUser.position?.uuid && (
             <>
               <SidebarLink
                 id="my-tasks-nav"
@@ -278,11 +271,11 @@ const Navigation = ({
       </Collapse>
 
       <NavDropdown
-        title={Settings.fields.advisor.org.allOrgName}
-        id="advisor-organizations"
-        active={inOrg && advisorOrganizationUuids.includes(orgUuid) && !inMyOrg}
+        title={Settings.fields.regular.org.allOrgName}
+        id="all-organizations"
+        active={inOrg && allOrganizationUuids.includes(orgUuid) && !inMyOrg}
       >
-        {Organization.map(advisorOrganizations, org => (
+        {Organization.map(allOrganizations, org => (
           <SidebarContainer
             key={org.uuid}
             linkTo={Organization.pathFor(org)}
@@ -294,28 +287,7 @@ const Navigation = ({
         ))}
       </NavDropdown>
 
-      <Nav id="advisor-org-nav" style={{ lineHeight: "10px" }} />
-
-      <NavDropdown
-        title={Settings.fields.principal.org.allOrgName}
-        id="principal-organizations"
-        active={
-          inOrg && principalOrganizationUuids.includes(orgUuid) && !inMyOrg
-        }
-      >
-        {Organization.map(principalOrganizations, org => (
-          <SidebarContainer
-            key={org.uuid}
-            linkTo={Organization.pathFor(org)}
-            handleOnClick={clearSearchQuery}
-            setIsMenuLinksOpened={() => setIsMenuLinksOpened(false)}
-          >
-            {org.shortName}
-          </SidebarContainer>
-        ))}
-      </NavDropdown>
-
-      <Nav id="principal-org-nav" style={{ lineHeight: "10px" }} />
+      <Nav id="all-org-nav" style={{ lineHeight: "10px" }} />
 
       <SidebarLink
         id="daily-rollup-nav"
@@ -448,15 +420,13 @@ const Navigation = ({
 }
 
 Navigation.propTypes = {
-  advisorOrganizations: PropTypes.array,
-  principalOrganizations: PropTypes.array,
+  allOrganizations: PropTypes.array,
   clearSearchQuery: PropTypes.func.isRequired,
   resetPages: PropTypes.func.isRequired
 }
 
 Navigation.defaultProps = {
-  advisorOrganizations: [],
-  principalOrganizations: []
+  allOrganizations: []
 }
 
 const mapDispatchToProps = (dispatch, ownProps) =>

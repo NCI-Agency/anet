@@ -28,7 +28,6 @@ const GQL_GET_CHART_DATA = gql`
       shortName
       longName
       identificationCode
-      type
       positions {
         name
         uuid
@@ -52,7 +51,6 @@ const GQL_GET_CHART_DATA = gql`
         shortName
         longName
         identificationCode
-        type
         childrenOrgs(query: { status: ACTIVE }) {
           uuid
         }
@@ -287,12 +285,8 @@ const OrganizationalChart = ({
           element => element.value === positions?.[0]?.person?.rank
         )?.app6Modifier
 
-        const sym = new ms.Symbol(
-          `S${
-            d.data.type === Organization.TYPE.ADVISOR_ORG ? "F" : "N"
-          }GPU------${unitcode || "-"}`,
-          { size: 22 }
-        )
+        // FIXME: should we use "F" or "N" here as the second character?
+        const sym = new ms.Symbol(`SFGPU------${unitcode || "-"}`, { size: 22 })
         this.appendChild(sym.asDOM())
       })
 

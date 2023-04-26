@@ -42,8 +42,6 @@ export default class Location extends Model {
     PHYSICAL_LOCATION: "PHYSICAL_LOCATION",
     GEOGRAPHICAL_AREA: "GEOGRAPHICAL_AREA",
     POINT_LOCATION: "POINT_LOCATION",
-    ADVISOR_LOCATION: "ADVISOR_LOCATION",
-    PRINCIPAL_LOCATION: "PRINCIPAL_LOCATION",
     VIRTUAL_LOCATION: "VIRTUAL_LOCATION"
   }
 
@@ -154,7 +152,7 @@ export default class Location extends Model {
     .concat(Location.customFieldsSchema)
     .concat(Model.yupSchema)
 
-  static autocompleteQuery = "uuid, name, type"
+  static autocompleteQuery = "uuid name type"
 
   static autocompleteQueryWithNotes = `${this.autocompleteQuery} ${GRAPHQL_NOTES_FIELDS}`
 
@@ -178,7 +176,6 @@ export default class Location extends Model {
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }
@@ -193,7 +190,6 @@ export default class Location extends Model {
           uuid
           name
           rank
-          role
           avatarUuid
         }
       }

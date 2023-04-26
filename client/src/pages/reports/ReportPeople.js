@@ -9,10 +9,12 @@ import PlanningConflictForPerson from "components/PlanningConflictForPerson"
 import RemoveButton from "components/RemoveButton"
 import { Person } from "models"
 import Report from "models/Report"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { useContext } from "react"
 import { Badge, Form, OverlayTrigger, Table, Tooltip } from "react-bootstrap"
 import { toast } from "react-toastify"
+import Settings from "settings"
 import "./ReportPeople.css"
 
 const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
@@ -23,14 +25,15 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
       <Table responsive>
         <tbody>
           <tr>
-            <th style={{ border: "none" }}>Advisors</th>
+            <th style={{ border: "none" }}>
+              {pluralize(Settings.fields.advisor.person.name)}
+            </th>
             <td style={{ padding: "0" }}>
               <TableContainer className="advisorAttendeesTable">
                 <TableHeader showDelete={showDelete} />
                 <TableBody
                   reportPeople={report.reportPeople}
-                  filterCb={person =>
-                    person.role === Person.ROLE.ADVISOR && person.attendee}
+                  filterCb={person => !person.interlocutor && person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
                   showDelete={showDelete}
                 />
@@ -38,14 +41,13 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             </td>
           </tr>
           <tr>
-            <th>Principals</th>
+            <th>{pluralize(Settings.fields.interlocutor.person.name)}</th>
             <td style={{ padding: "0" }}>
-              <TableContainer className="principalAttendeesTable">
+              <TableContainer className="interlocutorAttendeesTable">
                 <TableHeader hide showDelete={showDelete} />
                 <TableBody
                   reportPeople={report.reportPeople}
-                  filterCb={person =>
-                    person.role === Person.ROLE.PRINCIPAL && person.attendee}
+                  filterCb={person => person.interlocutor && person.attendee}
                   handleAttendeeRow={renderAttendeeRow}
                   enableDivider
                   showDelete={showDelete}
@@ -88,8 +90,17 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
               disabled={disabled}
             />
           )}
+          {/* // authors 0r non-attendees can't be interlocutors */}
+          {!person.author && person.attendee && (
+            <ReportInterlocutorCheckbox
+              person={person}
+              handleOnChange={setReportInterlocutor}
+              disabled={disabled}
+              isCurrentEditor={isCurrentEditor}
+            />
+          )}
           {/* // only advisors can be non-attending */}
-          {Person.isAdvisor(person) && (
+          {!person.interlocutor && (
             <ReportAttendeeCheckbox
               person={person}
               handleOnChange={setReportAttendee}
@@ -97,7 +108,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
             />
           )}
           {/* // only advisors can be authors */}
-          {Person.isAdvisor(person) && (
+          {!person.interlocutor && (
             <ReportAuthorCheckbox
               person={person}
               handleOnChange={setReportAuthor}
@@ -160,7 +171,7 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
     newPeopleList.forEach(np => {
       if (Person.isEqual(np, person)) {
         np.primary = true
-      } else if (np.role === person.role) {
+      } else if (np.interlocutor === person.interlocutor) {
         np.primary = false
       }
     })
@@ -185,11 +196,23 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
       newPeopleList.forEach(rp => {
         if (Person.isEqual(rp, person)) {
           rp.attendee = !rp.attendee
+          rp.primary = false
         }
       })
       forceOnlyAttendingPersonPerRoleToPrimary(newPeopleList)
       onChange(newPeopleList)
     }
+  }
+
+  function setReportInterlocutor(person) {
+    const newPeopleList = report.reportPeople.map(rp => new Person(rp))
+    newPeopleList.forEach(rp => {
+      if (Person.isEqual(rp, person)) {
+        rp.interlocutor = !rp.interlocutor
+        rp.primary = false
+      }
+    })
+    onChange(newPeopleList)
   }
 
   function passesAuthorValidationSteps(person) {
@@ -236,20 +259,20 @@ const ReportPeople = ({ report, disabled, onChange, showDelete, onDelete }) => {
 export function forceOnlyAttendingPersonPerRoleToPrimary(peopleList) {
   // After setting attendees, check for primaries
   // if no one else is primary and attending in that role, set that person primary
-  const [advisors, principals] = [[], []]
+  const [advisors, interlocutors] = [[], []]
   peopleList.forEach(p => {
-    if (p.role === Person.ROLE.ADVISOR && p.attendee) {
+    if (!p.interlocutor && p.attendee) {
       advisors.push(p)
-    } else if (p.role === Person.ROLE.PRINCIPAL && p.attendee) {
-      principals.push(p)
+    } else if (p.interlocutor && p.attendee) {
+      interlocutors.push(p)
     }
   })
 
   if (advisors.length === 1) {
     advisors[0].primary = true
   }
-  if (principals.length === 1) {
-    principals[0].primary = true
+  if (interlocutors.length === 1) {
+    interlocutors[0].primary = true
   }
 }
 
@@ -329,6 +352,9 @@ TableBody.defaultProps = {
   reportPeople: []
 }
 
+const getAttendeeType = person =>
+  person.interlocutor ? "INTERLOCUTOR" : "ADVISOR"
+
 const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) =>
   disabled ? (
     person.primary && <Badge bg="primary">Primary</Badge>
@@ -336,7 +362,8 @@ const PrimaryAttendeeRadioButton = ({ person, disabled, handleOnChange }) =>
     <Form.Check
       type="radio"
       label={<Badge bg="primary">Primary</Badge>}
-      name={`primaryAttendee${person.role}`}
+      id={`primaryAttendee-${person.uuid}`}
+      name={`primaryAttendee${getAttendeeType(person)}`}
       className={`primary${!person.primary ? " inActive" : ""}`}
       checked={person.primary}
       onChange={() => handleOnChange(person)}
@@ -368,7 +395,8 @@ const ReportAuthorCheckbox = ({
           <Icon size={IconSize.LARGE} icon={IconNames.EDIT} />
         </OverlayTrigger>
       }
-      name={`authorAttendee${person.role}`}
+      id={`reportAuthor-${person.uuid}`}
+      name={`reportAuthor${getAttendeeType(person)}`}
       className={`primary${isCurrentEditor ? " isCurrentEditor" : ""}${
         !person.author ? " inActive" : ""
       }`}
@@ -403,13 +431,46 @@ const ReportAttendeeCheckbox = ({ person, disabled, handleOnChange }) =>
           <Icon size={IconSize.LARGE} icon={IconNames.PEOPLE} />
         </OverlayTrigger>
       }
-      name={`authorAttendee${person.role}`}
+      id={`reportAttendee-${person.uuid}`}
+      name={`reportAttendee${getAttendeeType(person)}`}
       className={`primary${!person.attendee ? " inActive" : ""}`}
       checked={!!person.attendee}
       onChange={() => handleOnChange(person)}
     />
   )
 ReportAttendeeCheckbox.propTypes = {
+  person: PropTypes.object,
+  disabled: PropTypes.bool,
+  handleOnChange: PropTypes.func
+}
+
+const ReportInterlocutorCheckbox = ({ person, disabled, handleOnChange }) =>
+  disabled ? (
+    !!person.interlocutor && (
+      <OverlayTrigger
+        overlay={<Tooltip id="interlocutor-tooltip">Interlocutor</Tooltip>}
+      >
+        <Icon size={IconSize.LARGE} icon={IconNames.THIRD_PARTY} />
+      </OverlayTrigger>
+    )
+  ) : (
+    <Form.Check
+      type="checkbox"
+      label={
+        <OverlayTrigger
+          overlay={<Tooltip id="interlocutor-tooltip">Interlocutor</Tooltip>}
+        >
+          <Icon size={IconSize.LARGE} icon={IconNames.THIRD_PARTY} />
+        </OverlayTrigger>
+      }
+      id={`reportInterlocutor-${person.uuid}`}
+      name={`reportInterlocutor${getAttendeeType(person)}`}
+      className={`primary${!person.interlocutor ? " inActive" : ""}`}
+      checked={!!person.interlocutor}
+      onChange={() => handleOnChange(person)}
+    />
+  )
+ReportInterlocutorCheckbox.propTypes = {
   person: PropTypes.object,
   disabled: PropTypes.bool,
   handleOnChange: PropTypes.func

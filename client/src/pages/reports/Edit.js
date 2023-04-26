@@ -42,7 +42,6 @@ const GQL_GET_REPORT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
       }
       reportPeople {
@@ -55,6 +54,7 @@ const GQL_GET_REPORT = gql`
         author
         primary
         attendee
+        interlocutor
         endOfTourDate
         position {
           uuid

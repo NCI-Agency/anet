@@ -5,6 +5,10 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 
 public class RollupGraph {
 
+  public enum RollupGraphType {
+    ADVISOR, INTERLOCUTOR
+  }
+
   @GraphQLQuery
   @GraphQLInputField
   Organization org;

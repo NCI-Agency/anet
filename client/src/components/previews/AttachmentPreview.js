@@ -19,7 +19,6 @@ const GQL_GET_ATTACHMENT = gql`
         uuid
         name
         rank
-        role
         avatarUuid
       }
     }

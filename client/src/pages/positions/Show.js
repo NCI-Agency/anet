@@ -99,14 +99,9 @@ const PositionShow = ({ pageDispatchers }) => {
   const position = new Position(data ? data.position : {})
   const DictField = DictionaryField(Field)
 
-  const isPrincipal = position.type === Position.TYPE.PRINCIPAL
   const isSuperuser = position.type === Position.TYPE.SUPERUSER
-  const assignedRole = isPrincipal
-    ? Settings.fields.advisor.person.name
-    : Settings.fields.principal.person.name
-  const positionSettings = isPrincipal
-    ? Settings.fields.principal.position
-    : Settings.fields.advisor.position
+  const assignedRole = Settings.fields.regular.person.name
+  const positionSettings = Settings.fields.regular.position
 
   const canEdit =
     // Admins can edit anybody
@@ -263,7 +258,7 @@ const PositionShow = ({ pageDispatchers }) => {
 
               <Fieldset
                 title="Current assigned person"
-                id="assigned-advisor"
+                id="assigned-person"
                 className={
                   !position.person || !position.person.uuid
                     ? "warning"
@@ -318,7 +313,7 @@ const PositionShow = ({ pageDispatchers }) => {
 
               <Fieldset
                 title={`Assigned ${assignedRole}`}
-                id="assigned-principal"
+                id="assigned-counterpart"
                 action={
                   canEdit && (
                     <Button
@@ -361,7 +356,6 @@ const PositionShow = ({ pageDispatchers }) => {
                       currentlyOccupyingEntity={position.person}
                       midColTitle="New History"
                       showEditButton
-                      parentEntityType={position.type}
                       parentEntityUuid1={position.uuid}
                       showModal={showEditHistoryModal}
                       setShowModal={setShowEditHistoryModal}

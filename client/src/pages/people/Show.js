@@ -64,7 +64,6 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       rank
-      role
       avatarUuid
       status
       pendingVerification
@@ -99,7 +98,6 @@ const GQL_GET_PERSON = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
           organization {
@@ -177,10 +175,7 @@ const PersonShow = ({ pageDispatchers }) => {
   const person = new Person(data ? data.person : {})
   // The position for this person's counterparts
   const position = person.position
-  const assignedRole =
-    position.type === Position.TYPE.PRINCIPAL
-      ? Settings.fields.advisor.person.name
-      : Settings.fields.principal.person.name
+  const assignedRole = Settings.fields.regular.person.name
 
   // User can always edit themselves
   // Admins can always edit anybody
@@ -198,13 +193,12 @@ const PersonShow = ({ pageDispatchers }) => {
   // When the person is not in a position, any superuser can assign them.
   const canAssignPosition = currentUser.isSuperuser()
   const canAddPeriodicAssessment =
-    Position.isAdvisor(position) ||
-    (Position.isPrincipal(position) &&
-      (isAdmin ||
-        currentUser.position.associatedPositions
-          .filter(ap => ap.person)
-          .map(ap => ap.person.uuid)
-          .includes(person.uuid)))
+    Position.isRegular(position) &&
+    (isAdmin ||
+      currentUser.position.associatedPositions
+        .filter(ap => ap.person)
+        .map(ap => ap.person.uuid)
+        .includes(person.uuid))
   const canAddOndemandAssessment = isAdmin
   const attachmentsEnabled = !Settings.fields.attachment.featureDisabled
 
@@ -389,24 +383,21 @@ const PersonShow = ({ pageDispatchers }) => {
                   initialHistory={person.previousPositions}
                   currentlyOccupyingEntity={person.position}
                   historyEntityType="position"
-                  parentEntityType={person.role}
                   parentEntityUuid1={person.uuid}
                   showModal={showHistoryModal}
                   setShowModal={setShowHistoryModal}
                   setHistory={history => onSavePreviousPositions(history)}
                 />
               )}
-              {person.isAdvisor() && (
-                <Fieldset title="Reports authored" id="reports-authored">
-                  <ReportCollection
-                    paginationKey={`r_authored_${uuid}`}
-                    queryParams={{
-                      authorUuid: uuid
-                    }}
-                    mapId="reports-authored"
-                  />
-                </Fieldset>
-              )}
+              <Fieldset title="Reports authored" id="reports-authored">
+                <ReportCollection
+                  paginationKey={`r_authored_${uuid}`}
+                  queryParams={{
+                    authorUuid: uuid
+                  }}
+                  mapId="reports-authored"
+                />
+              </Fieldset>
               <Fieldset
                 title={`Reports attended by ${person.name}`}
                 id="reports-attended"
@@ -517,7 +508,6 @@ const PersonShow = ({ pageDispatchers }) => {
         ),
       position: getPositionHumanValue(),
       prevPositions: getPrevPositionsHumanValue(),
-      role: Person.humanNameOfRole(person.role),
       status: Person.humanNameOfStatus(person.status)
     }
     return person.getNormalFieldsOrdered().reduce((accum, key) => {
@@ -646,12 +636,10 @@ const PersonShow = ({ pageDispatchers }) => {
   }
 
   function renderCounterparts(position) {
-    const assocTitle =
-      position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <FormGroup controlId="counterparts">
         <Col sm={4}>
-          <FormLabel>{assocTitle}</FormLabel>
+          <FormLabel>Counterpart of</FormLabel>
         </Col>
         <Col sm={12}>
           <Table striped hover responsive>

@@ -22,7 +22,6 @@ const GQL_GET_PERSON = gql`
       uuid
       name
       rank
-      role
       avatarUuid
       status
       pendingVerification
@@ -54,7 +53,6 @@ const GQL_GET_PERSON = gql`
             uuid
             name
             rank
-            role
             avatarUuid
           }
           organization {
@@ -101,10 +99,7 @@ const PersonPreview = ({ className, uuid }) => {
 
   // The position for this person's counterparts
   const position = person.position
-  const assignedRole =
-    position.type === Position.TYPE.PRINCIPAL
-      ? Settings.fields.advisor.person.name
-      : Settings.fields.principal.person.name
+  const assignedRole = Settings.fields.regular.person.name
 
   // User can always edit themselves
   // Admins can always edit anybody
@@ -130,11 +125,6 @@ const PersonPreview = ({ className, uuid }) => {
             <DictPreviewField
               dictProps={Settings.fields.person.rank}
               value={person.rank}
-            />
-
-            <DictPreviewField
-              dictProps={Settings.fields.person.role}
-              value={Person.humanNameOfRole(person.role)}
             />
 
             {isAdmin && (
@@ -237,12 +227,10 @@ const PersonPreview = ({ className, uuid }) => {
   }
 
   function renderCounterparts(position) {
-    const assocTitle =
-      position.type === Position.TYPE.PRINCIPAL ? "Is advised by" : "Advises"
     return (
       <Form.Group controlId="counterparts">
         <Col sm={4}>
-          <Form.Label>{assocTitle}</Form.Label>
+          <Form.Label>Counterpart of</Form.Label>
         </Col>
         <Col sm={12}>
           <Table striped hover responsive>
