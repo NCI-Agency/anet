@@ -13,7 +13,7 @@ describe("When unpublishing a report", () => {
   })
   describe("When on the show page of a report", () => {
     it("Should unpublish the report successfully", async() => {
-      const unpublishedReportUuid = ShowReport.uuid
+      const unpublishedReportUuid = await ShowReport.getUuid()
       await EditReport.unpublishReport(unpublishedReportUuid)
       await expect(
         await (await EditReport.getAlertSuccess()).getText()
