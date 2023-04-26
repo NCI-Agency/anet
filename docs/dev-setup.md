@@ -65,13 +65,13 @@ Provided with the ANET source code is the file `insertBaseData-psql.sql`.  This 
 
 | User | username | organization | position | role |
 |------|----------|--------------|----------|------|
-| Erin Erinson | erin | EF2.2 | EF2.2 Advisor D | Advisor who can also approve their own reports
-| Rebecca Beccabon | rebecca | EF2.2 | EF2.2 Final Reviewer | Superuser
-| Arthur Dmin | arthur | ANET Admins | ANET Administrator | Administrator
-| Jack Jackson | jack | EF2.1 | EF2.1 Advisor B | Advisor
-| Henry Henderson | henry | EF2.1 | EF2.1 Superuser | Superuser
-| Steve Steveson |-| MoD | Cost Adder | Principal
-| Ihave Noposition| nopos |-| - | Advisor
+| Erin Erinson | erin | EF2.2 | EF2.2 Advisor D | Advisor who can also approve their own reports |
+| Rebecca Beccabon | rebecca | EF2.2 | EF2.2 Final Reviewer | Superuser |
+| Arthur Dmin | arthur | ANET Admins | ANET Administrator | Administrator |
+| Jack Jackson | jack | EF2.1 | EF2.1 Advisor B | Advisor |
+| Henry Henderson | henry | EF2.1 | EF2.1 Superuser | Superuser |
+| Steve Steveson |-| MoD | Cost Adder | Principal |
+| Ihave Noposition| nopos |-| - | Advisor |
 
 To log in as one of the base data users, when prompted for a username and password, enter their username as both the username and the password. See [Users defined locally in the realm](keycloak.md#dev-users) for other possible users.
 

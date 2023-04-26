@@ -639,7 +639,7 @@ const CompactWorkflowRowS = styled(CompactRowS)`
     flex-direction: row;
     justify-content: flex-start;
     flex-wrap: wrap;
-    align items: center;
+    align-items: center;
     text-align: center;
     & > div {
       position: relative;
