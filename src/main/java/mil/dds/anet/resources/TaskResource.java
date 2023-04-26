@@ -60,7 +60,7 @@ public class TaskResource {
     try {
       created = dao.insert(t);
     } catch (UnableToExecuteStatementException e) {
-      throw createDuplicateException(e);
+      throw createDuplicateException(e, t.getShortName(), t.getParentTaskUuid());
     }
     if (t.getPlanningApprovalSteps() != null) {
       // Create the planning approval steps
@@ -162,12 +162,12 @@ public class TaskResource {
       DaoUtils.saveCustomSensitiveInformation(user, TaskDao.TABLE_NAME, t.getUuid(),
           t.getCustomSensitiveInformation());
 
-      AnetAuditLogger.log("Task {} updatedby {}", t, user);
+      AnetAuditLogger.log("Task {} updated by {}", t, user);
 
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;
     } catch (UnableToExecuteStatementException e) {
-      throw createDuplicateException(e);
+      throw createDuplicateException(e, t.getShortName(), t.getParentTaskUuid());
     }
   }
 
@@ -178,8 +178,13 @@ public class TaskResource {
     return dao.search(query);
   }
 
-  private WebApplicationException createDuplicateException(UnableToExecuteStatementException e) {
+  private WebApplicationException createDuplicateException(UnableToExecuteStatementException e,
+      String shortName, String parentTaskUuid) {
     final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortName.label");
-    return ResponseUtils.handleSqlException(e, String.format("Duplicate %s", taskShortLabel));
+    final String msg =
+        parentTaskUuid == null ? String.format("Duplicate %s \"%s\"", taskShortLabel, shortName)
+            : String.format("Duplicate %s \"%s\" for parent #%s", taskShortLabel, shortName,
+                parentTaskUuid);
+    return ResponseUtils.handleSqlException(e, msg);
   }
 }

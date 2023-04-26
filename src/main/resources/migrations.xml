@@ -4458,4 +4458,17 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="alter-unique-tasks_shortName-constraint" author="gjvoosten">
+		<dropUniqueConstraint tableName="tasks" constraintName="UQ_TaskShortName" />
+		<sql>
+			CREATE UNIQUE INDEX "UQ_TaskShortNameParentTaskUuid"
+			ON tasks ("shortName", "parentTaskUuid")
+			WHERE "parentTaskUuid" IS NOT NULL;
+
+			CREATE UNIQUE INDEX "UQ_TaskShortNameNoParentTask"
+			ON tasks ("shortName")
+			WHERE "parentTaskUuid" IS NULL;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
