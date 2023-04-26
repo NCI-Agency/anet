@@ -30,7 +30,6 @@ import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionInput;
 import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionType;
-import mil.dds.anet.test.client.Role;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.resources.AbstractResourceTest;
 import mil.dds.anet.test.utils.UtilsTest;
@@ -43,15 +42,14 @@ public class PersonMergeTest extends AbstractResourceTest {
   public void testMerge()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a person
-    PersonInput loserInput =
-        PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
+    PersonInput loserInput = PersonInput.builder().withName("Loser for Merging").build();
     Person loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
     assertThat(loser).isNotNull();
     assertThat(loser.getUuid()).isNotNull();
 
     // Create a Position
     final PositionInput testInput = PositionInput.builder()
-        .withName("A Test Position created by mergePeopleTest").withType(PositionType.ADVISOR)
+        .withName("A Test Position created by mergePeopleTest").withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE).build();
 
     // Assign to an AO
@@ -70,7 +68,7 @@ public class PersonMergeTest extends AbstractResourceTest {
         adminMutationExecutor.putPersonInPosition("", getPersonInput(loser), created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
-    final PositionInput testInput1 = PositionInput.builder().withType(PositionType.ADVISOR)
+    final PositionInput testInput1 = PositionInput.builder().withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withName("Test Position for person history edit  1")
         .withOrganization(getOrganizationInput(ao))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
@@ -80,7 +78,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(createdPos1.getUuid()).isNotNull();
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
     final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
-    final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
+    final PositionInput testInput2 = PositionInput.builder().withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(ao))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
@@ -116,8 +114,7 @@ public class PersonMergeTest extends AbstractResourceTest {
 
     // Create a person
     final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).withPreviousPositions(historyList)
-        .withPosition(posInput2)
+        .withStatus(Status.ACTIVE).withPreviousPositions(historyList).withPosition(posInput2)
         // set HTML of biography
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
@@ -163,7 +160,7 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(winnerPos.getPerson()).isNull();
 
     // Re-create loser and put into the position.
-    loserInput = PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
+    loserInput = PersonInput.builder().withName("Loser for Merging").build();
     loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
     assertThat(loser).isNotNull();
     assertThat(loser.getUuid()).isNotNull();
@@ -191,14 +188,13 @@ public class PersonMergeTest extends AbstractResourceTest {
   public void testMergeNoHistory()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create a person
-    final PersonInput loserInput =
-        PersonInput.builder().withRole(Role.ADVISOR).withName("Loser for Merging").build();
+    final PersonInput loserInput = PersonInput.builder().withName("Loser for Merging").build();
     final Person loser = adminMutationExecutor.createPerson(FIELDS, loserInput);
     assertThat(loser).isNotNull();
     assertThat(loser.getUuid()).isNotNull();
 
     final PersonInput winnerInput = PersonInput.builder().withName("Winner for merging")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
+        .withStatus(Status.ACTIVE)
         // set HTML of biography
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
@@ -263,17 +259,17 @@ public class PersonMergeTest extends AbstractResourceTest {
   @Test
   public void testMergeDifferentRoles()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    PersonInput principalInput =
-        PersonInput.builder().withRole(Role.PRINCIPAL).withName("Principal for Merging").build();
-    Person principal = adminMutationExecutor.createPerson(FIELDS, principalInput);
-    assertThat(principal).isNotNull();
-    assertThat(principal.getUuid()).isNotNull();
+    PersonInput interlocutorInput =
+        PersonInput.builder().withName("Interlocutor for Merging").build();
+    Person interlocutor = adminMutationExecutor.createPerson(FIELDS, interlocutorInput);
+    assertThat(interlocutor).isNotNull();
+    assertThat(interlocutor.getUuid()).isNotNull();
 
     // Create a Position
     final PositionInput testInput =
         PositionInput.builder().withName("A Test Position created by mergeDifferentRolesTest")
-            .withType(PositionType.PRINCIPAL).withRole(PositionRole.MEMBER)
-            .withStatus(Status.ACTIVE).build();
+            .withType(PositionType.REGULAR).withRole(PositionRole.MEMBER).withStatus(Status.ACTIVE)
+            .build();
 
     // Assign to an AO
     final Organization ao = adminMutationExecutor.createOrganization("{ uuid }",
@@ -287,11 +283,12 @@ public class PersonMergeTest extends AbstractResourceTest {
     assertThat(created.getName()).isEqualTo(testInput.getName());
 
     // Assign the loser into the position
-    Integer nrUpdated =
-        adminMutationExecutor.putPersonInPosition("", getPersonInput(principal), created.getUuid());
+    Integer nrUpdated = adminMutationExecutor.putPersonInPosition("", getPersonInput(interlocutor),
+        created.getUuid());
     assertThat(nrUpdated).isEqualTo(1);
 
-    nrUpdated = adminMutationExecutor.mergePeople("", principal.getUuid(), getPersonInput(admin));
+    nrUpdated =
+        adminMutationExecutor.mergePeople("", interlocutor.getUuid(), getPersonInput(admin));
     assertThat(nrUpdated).isEqualTo(1);
   }
 
@@ -306,7 +303,9 @@ public class PersonMergeTest extends AbstractResourceTest {
       final PersonInput winner = getPersonInput(getRegularUser());
       winner.setPreviousPositions(
           getPersonPositionHistoryInput(occupiedPerson.getPreviousPositions()));
-      winner.setPosition(opt.isPresent() ? getPositionInput(opt.get().getPosition()) : null);
+      winner.setPosition(
+          opt.map(personPositionHistory -> getPositionInput(personPositionHistory.getPosition()))
+              .orElse(null));
       adminMutationExecutor.mergePeople("", admin.getUuid(), winner);
       fail("Expected a WebApplicationException");
     } catch (WebApplicationException expectedException) {

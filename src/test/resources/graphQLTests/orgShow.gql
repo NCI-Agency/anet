@@ -6,7 +6,6 @@ organization(uuid:"${orgUuid}") {
   status
   isSubscribed
   updatedAt
-  type
   parentOrg {
     uuid
     shortName
@@ -29,7 +28,6 @@ organization(uuid:"${orgUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
       status
     }
@@ -43,7 +41,6 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         rank
-        role
         avatarUuid
         status
       }
@@ -59,7 +56,6 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         rank
-        role
         avatarUuid
       }
     }
@@ -74,7 +70,6 @@ organization(uuid:"${orgUuid}") {
         uuid
         name
         rank
-        role
         avatarUuid
       }
     }
@@ -90,7 +85,6 @@ organization(uuid:"${orgUuid}") {
       uuid
       name
       rank
-      role
       avatarUuid
     }
     noteRelatedObjects {
@@ -112,7 +106,6 @@ organization(uuid:"${orgUuid}") {
         ... on Person {
           name
           rank
-          role
           avatarUuid
         }
         ... on Position {

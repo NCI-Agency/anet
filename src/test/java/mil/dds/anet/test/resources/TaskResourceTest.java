@@ -17,7 +17,6 @@ import mil.dds.anet.test.client.AnetBeanList_Organization;
 import mil.dds.anet.test.client.AnetBeanList_Task;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
-import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.Position;
 import mil.dds.anet.test.client.PositionType;
@@ -301,26 +300,25 @@ public class TaskResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     final QueryExecutor userQueryExecutor = getQueryExecutor(user.getDomainUsername());
     final MutationExecutor userMutationExecutor = getMutationExecutor(user.getDomainUsername());
-    final String orgFields = "{ uuid shortName longName status identificationCode type }";
+    final String orgFields = "{ uuid shortName longName status identificationCode }";
     final Position position = user.getPosition();
     final boolean isAdmin = position.getType() == PositionType.ADMINISTRATOR;
     final Organization organization = position.getOrganization();
 
-    // principal organization
-    final OrganizationSearchQueryInput query =
-        OrganizationSearchQueryInput.builder().withType(OrganizationType.PRINCIPAL_ORG).build();
-    final AnetBeanList_Organization principalOrgs =
+    // interlocutor organization
+    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder().build();
+    final AnetBeanList_Organization interlocutorOrgs =
         userQueryExecutor.organizationList(getListFields(orgFields), query);
-    assertThat(principalOrgs).isNotNull();
-    assertThat(principalOrgs.getList()).isNotEmpty();
-    final Organization principalOrg = principalOrgs.getList().get(0);
-    final TaskInput taskPrincipalInput =
-        TestData.createTaskInput("Test task principal " + UUID.randomUUID().toString(),
-            "Test permissions principal org", "Test-PT-Principal");
-    taskPrincipalInput
-        .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(principalOrg)));
+    assertThat(interlocutorOrgs).isNotNull();
+    assertThat(interlocutorOrgs.getList()).isNotEmpty();
+    final Organization interlocutorOrg = interlocutorOrgs.getList().get(0);
+    final TaskInput taskInterlocutorInput =
+        TestData.createTaskInput("Test task interlocutor " + UUID.randomUUID(),
+            "Test permissions interlocutor org", "Test-PT-Interlocutor");
+    taskInterlocutorInput
+        .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(interlocutorOrg)));
     try {
-      final Task createdTask = userMutationExecutor.createTask(FIELDS, taskPrincipalInput);
+      final Task createdTask = userMutationExecutor.createTask(FIELDS, taskInterlocutorInput);
       if (isAdmin) {
         assertThat(createdTask).isNotNull();
         assertThat(createdTask.getUuid()).isNotNull();
@@ -334,9 +332,9 @@ public class TaskResourceTest extends AbstractResourceTest {
     }
 
     // own organization
-    final TaskInput taskOwnInput = TestData.createTaskInput(
-        "Test task own " + UUID.randomUUID().toString(), "Test permissions own org", "Test-PT-Own");
-    taskPrincipalInput
+    final TaskInput taskOwnInput = TestData.createTaskInput("Test task own " + UUID.randomUUID(),
+        "Test permissions own org", "Test-PT-Own");
+    taskInterlocutorInput
         .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(organization)));
     try {
       final Task createdTask = userMutationExecutor.createTask(FIELDS, taskOwnInput);
@@ -353,8 +351,7 @@ public class TaskResourceTest extends AbstractResourceTest {
     }
 
     // other advisor organization
-    final OrganizationSearchQueryInput query2 =
-        OrganizationSearchQueryInput.builder().withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationSearchQueryInput query2 = OrganizationSearchQueryInput.builder().build();
     final AnetBeanList_Organization advisorOrgs =
         userQueryExecutor.organizationList(getListFields(orgFields), query2);
     assertThat(advisorOrgs).isNotNull();
@@ -363,9 +360,8 @@ public class TaskResourceTest extends AbstractResourceTest {
         .filter(o -> !organization.getUuid().equals(o.getUuid())).findFirst();
     assertThat(foundOrg.isPresent()).isTrue();
     final Organization advisorOrg = foundOrg.get();
-    final TaskInput taskOtherInput =
-        TestData.createTaskInput("Test task other " + UUID.randomUUID().toString(),
-            "Test permissions other org", "Test-PT-Other");
+    final TaskInput taskOtherInput = TestData.createTaskInput(
+        "Test task other " + UUID.randomUUID(), "Test permissions other org", "Test-PT-Other");
     taskOtherInput
         .setTaskedOrganizations(Collections.singletonList(getOrganizationInput(advisorOrg)));
     try {

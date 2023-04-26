@@ -312,7 +312,7 @@ public class SubscriptionResourceTest extends AbstractResourceTest {
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
     // Create position
     final PositionInput positionInput =
-        PositionInput.builder().withStatus(Status.INACTIVE).withType(PositionType.ADVISOR)
+        PositionInput.builder().withStatus(Status.INACTIVE).withType(PositionType.REGULAR)
             .withRole(PositionRole.MEMBER).withName("Test position for deleting subscribed object")
             .withOrganization(getOrganizationInput(admin.getPosition().getOrganization())).build();
     final Position position = adminMutationExecutor.createPosition("{ uuid }", positionInput);

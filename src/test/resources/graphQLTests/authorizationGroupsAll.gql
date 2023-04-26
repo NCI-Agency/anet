@@ -16,7 +16,6 @@ authorizationGroupList(query:{pageSize:0}) {
 	  uuid
 	  name
 	  rank
-	  role
 	  avatarUuid
 	}
 	... on Position {

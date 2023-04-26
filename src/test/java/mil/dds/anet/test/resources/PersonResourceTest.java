@@ -30,7 +30,6 @@ import mil.dds.anet.test.client.CustomSensitiveInformation;
 import mil.dds.anet.test.client.CustomSensitiveInformationInput;
 import mil.dds.anet.test.client.Organization;
 import mil.dds.anet.test.client.OrganizationSearchQueryInput;
-import mil.dds.anet.test.client.OrganizationType;
 import mil.dds.anet.test.client.Person;
 import mil.dds.anet.test.client.PersonInput;
 import mil.dds.anet.test.client.PersonPositionHistory;
@@ -43,7 +42,6 @@ import mil.dds.anet.test.client.PositionRole;
 import mil.dds.anet.test.client.PositionSearchQueryInput;
 import mil.dds.anet.test.client.PositionType;
 import mil.dds.anet.test.client.RecurseStrategy;
-import mil.dds.anet.test.client.Role;
 import mil.dds.anet.test.client.SortOrder;
 import mil.dds.anet.test.client.Status;
 import mil.dds.anet.test.client.util.MutationExecutor;
@@ -62,7 +60,7 @@ public class PersonResourceTest extends AbstractResourceTest {
   private static final String _POSITION_FIELDS =
       "uuid name code type role status organization { uuid }";
   private static final String _PERSON_FIELDS =
-      "uuid name status role emailAddress phoneNumber rank biography country avatarUuid code"
+      "uuid name status emailAddress phoneNumber rank biography country avatarUuid code"
           + " gender endOfTourDate domainUsername openIdSubject pendingVerification createdAt updatedAt"
           + " customFields";
   public static final String PERSON_FIELDS_ONLY_HISTORY =
@@ -83,7 +81,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(retPerson.getUuid()).isEqualTo(jack.getUuid());
 
     final PersonInput newPersonInput = PersonInput.builder().withName("testCreatePerson Person")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
+        .withStatus(Status.ACTIVE)
         // set HTML of biography
         .withBiography(UtilsTest.getCombinedHtmlTestCase().getInput())
         // set JSON of customFields
@@ -125,25 +123,25 @@ public class PersonResourceTest extends AbstractResourceTest {
         .isEqualTo(UtilsTest.getCombinedJsonTestCase().getOutput());
 
     // Test creating a person with a position already set.
-    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
-        .withText("EF 6").withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationSearchQueryInput query =
+        OrganizationSearchQueryInput.builder().withText("EF 6").build();
     final AnetBeanList_Organization orgs =
         jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), query);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 
     final PositionInput newPosInput =
-        PositionInput.builder().withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER)
+        PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
             .withName("Test Position").withOrganization(getOrganizationInput(org))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position newPos = adminMutationExecutor.createPosition(POSITION_FIELDS, newPosInput);
     assertThat(newPos).isNotNull();
     assertThat(newPos.getUuid()).isNotNull();
 
-    final PersonInput newPerson2Input = PersonInput.builder().withName("Namey McNameface")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE).withDomainUsername("testcreateperson")
-        .withPosition(getPositionInput(newPos)).build();
+    final PersonInput newPerson2Input =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE)
+            .withDomainUsername("testcreateperson").withPosition(getPositionInput(newPos)).build();
     final Person newPerson2 = adminMutationExecutor.createPerson(FIELDS, newPerson2Input);
     assertThat(newPerson2).isNotNull();
     assertThat(newPerson2.getUuid()).isNotNull();
@@ -153,7 +151,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Change this person w/ a new position, and ensure it gets changed.
 
     final PositionInput newPos2Input =
-        PositionInput.builder().withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER)
+        PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
             .withName("A Second Test Position").withOrganization(getOrganizationInput(org))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position newPos2 = adminMutationExecutor.createPosition(POSITION_FIELDS, newPos2Input);
@@ -205,15 +203,15 @@ public class PersonResourceTest extends AbstractResourceTest {
     PersonSearchQueryInput query = PersonSearchQueryInput.builder().withText("bob").build();
 
     AnetBeanList_Person searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
-    assertThat(searchResults.getTotalCount()).isGreaterThan(0);
+    assertThat(searchResults.getTotalCount()).isPositive();
     assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob"))
         .findFirst()).isNotEmpty();
 
-    final OrganizationSearchQueryInput queryOrgs = OrganizationSearchQueryInput.builder()
-        .withText("EF 1").withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationSearchQueryInput queryOrgs =
+        OrganizationSearchQueryInput.builder().withText("EF 1").build();
     final AnetBeanList_Organization orgs =
         jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), queryOrgs);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
 
@@ -243,9 +241,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList()).isNotEmpty();
     final Set<String> srUuids =
-        searchResults.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+        searchResults.getList().stream().map(Person::getUuid).collect(Collectors.toSet());
     final Set<String> poUuids =
-        parentOnlyResults.getList().stream().map(p -> p.getUuid()).collect(Collectors.toSet());
+        parentOnlyResults.getList().stream().map(Person::getUuid).collect(Collectors.toSet());
     assertThat(srUuids).containsAll(poUuids);
 
     query.setOrgRecurseStrategy(RecurseStrategy.CHILDREN);
@@ -254,11 +252,9 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     query.setOrgUuid(null);
     query.setText(null);
-    query.setRole(Role.ADVISOR);
     searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     assertThat(searchResults.getList().size()).isGreaterThan(1);
 
-    query.setRole(null);
     query.setText("e");
     query.setSortBy(PersonSearchSortBy.NAME);
     query.setSortOrder(SortOrder.DESC);
@@ -268,13 +264,13 @@ public class PersonResourceTest extends AbstractResourceTest {
     String prevName = null;
     for (final Person p : searchResults.getList()) {
       if (prevName != null) {
-        assertThat(collator.compare(p.getName(), prevName)).isLessThanOrEqualTo(0);
+        assertThat(collator.compare(p.getName(), prevName)).isNotPositive();
       }
       prevName = p.getName();
     }
 
     // Search for a person with the name "A Dvisor"
-    query = PersonSearchQueryInput.builder().withText("Dvisor").withRole(Role.ADVISOR).build();
+    query = PersonSearchQueryInput.builder().withText("Dvisor").build();
     searchResults = jackQueryExecutor.personList(getListFields(FIELDS), query);
     long matchCount =
         searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
@@ -311,27 +307,26 @@ public class PersonResourceTest extends AbstractResourceTest {
   @Test
   public void testInactivatePerson()
       throws GraphQLRequestExecutionException, GraphQLRequestPreparationException {
-    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
-        .withText("EF 6").withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationSearchQueryInput query =
+        OrganizationSearchQueryInput.builder().withText("EF 6").build();
     final AnetBeanList_Organization orgs =
         jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), query);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     final Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
     assertThat(org.getUuid()).isNotNull();
 
     final PositionInput newPosInput =
-        PositionInput.builder().withType(PositionType.ADVISOR).withRole(PositionRole.MEMBER)
+        PositionInput.builder().withType(PositionType.REGULAR).withRole(PositionRole.MEMBER)
             .withName("Test Position").withOrganization(getOrganizationInput(org))
             .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
     final Position retPos = adminMutationExecutor.createPosition(POSITION_FIELDS, newPosInput);
     assertThat(retPos).isNotNull();
     assertThat(retPos.getUuid()).isNotNull();
 
-    final PersonInput newPersonInput =
-        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
-            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
-            .withPosition(getPositionInput(retPos)).build();
+    final PersonInput newPersonInput = PersonInput.builder().withName("Namey McNameface")
+        .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+        .withPosition(getPositionInput(retPos)).build();
     final Person retPerson = adminMutationExecutor.createPerson(FIELDS, newPersonInput);
     assertThat(retPerson).isNotNull();
     assertThat(retPerson.getUuid()).isNotNull();
@@ -418,13 +413,13 @@ public class PersonResourceTest extends AbstractResourceTest {
     final boolean isSuperuser = position.getType() == PositionType.SUPERUSER;
     final Organization organization = position.getOrganization();
 
-    // principal
-    final PersonInput principalInput = PersonInput.builder().withName("Namey McNameface")
-        .withRole(Role.PRINCIPAL).withStatus(Status.ACTIVE)
-        .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
+    // interlocutor
+    final PersonInput interlocutorInput =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE)
+            .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
 
     try {
-      final Person p = userMutationExecutor.createPerson(FIELDS, principalInput);
+      final Person p = userMutationExecutor.createPerson(FIELDS, interlocutorInput);
       if (isSuperuser) {
         assertThat(p).isNotNull();
         assertThat(p.getUuid()).isNotNull();
@@ -438,9 +433,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     }
 
     // advisor with no position
-    final PersonInput advisorNoPositionInput = PersonInput.builder().withName("Namey McNameface")
-        .withRole(Role.ADVISOR).withStatus(Status.ACTIVE)
-        .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
+    final PersonInput advisorNoPositionInput =
+        PersonInput.builder().withName("Namey McNameface").withStatus(Status.ACTIVE)
+            .withDomainUsername("namey_" + Instant.now().toEpochMilli()).build();
 
     try {
       final Person anp = userMutationExecutor.createPerson(FIELDS, advisorNoPositionInput);
@@ -465,10 +460,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(searchObjects.getList()).isNotEmpty();
     final Position freePos = searchObjects.getList().get(0);
 
-    final PersonInput advisorPositionInput =
-        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
-            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
-            .withPosition(getPositionInput(freePos)).build();
+    final PersonInput advisorPositionInput = PersonInput.builder().withName("Namey McNameface")
+        .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+        .withPosition(getPositionInput(freePos)).build();
 
     try {
       final Person ap = userMutationExecutor.createPerson(FIELDS, advisorPositionInput);
@@ -486,7 +480,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // advisor with position in other organization
     final List<PositionType> positionTypes = new ArrayList<>();
-    positionTypes.add(PositionType.ADVISOR);
+    positionTypes.add(PositionType.REGULAR);
     final PositionSearchQueryInput query2 =
         PositionSearchQueryInput.builder().withType(positionTypes).withIsFilled(false).build();
     final AnetBeanList_Position searchObjects2 =
@@ -498,10 +492,9 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(foundPos2.isPresent()).isTrue();
     final Position freePos2 = foundPos2.get();
 
-    final PersonInput advisorPosition2Input =
-        PersonInput.builder().withName("Namey McNameface").withRole(Role.ADVISOR)
-            .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
-            .withPosition(getPositionInput(freePos2)).build();
+    final PersonInput advisorPosition2Input = PersonInput.builder().withName("Namey McNameface")
+        .withStatus(Status.ACTIVE).withDomainUsername("namey_" + Instant.now().toEpochMilli())
+        .withPosition(getPositionInput(freePos2)).build();
 
     try {
       userMutationExecutor.createPerson(FIELDS, advisorPosition2Input);
@@ -539,22 +532,22 @@ public class PersonResourceTest extends AbstractResourceTest {
 
   @Test
   public void testUpdatePersonHistory() throws Exception {
-    final OrganizationSearchQueryInput query = OrganizationSearchQueryInput.builder()
-        .withText("EF 6").withType(OrganizationType.ADVISOR_ORG).build();
+    final OrganizationSearchQueryInput query =
+        OrganizationSearchQueryInput.builder().withText("EF 6").build();
     final AnetBeanList_Organization orgs =
         jackQueryExecutor.organizationList(getListFields("{ uuid shortName }"), query);
-    assertThat(orgs.getList().size()).isGreaterThan(0);
+    assertThat(orgs.getList().size()).isPositive();
     final Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
     assertThat(org.getUuid()).isNotNull();
 
-    final PersonInput persInput = PersonInput.builder().withRole(Role.ADVISOR)
-        .withName("Test person for edit history").build();
+    final PersonInput persInput =
+        PersonInput.builder().withName("Test person for edit history").build();
     final Person person = adminMutationExecutor.createPerson(FIELDS, persInput);
     assertThat(person).isNotNull();
     assertThat(person.getUuid()).isNotNull();
     // Create a Position
-    final PositionInput testInput1 = PositionInput.builder().withType(PositionType.ADVISOR)
+    final PositionInput testInput1 = PositionInput.builder().withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withName("Test Position for person history edit  1")
         .withOrganization(getOrganizationInput(org))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
@@ -564,7 +557,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(createdPos1.getUuid()).isNotNull();
     assertThat(createdPos1.getName()).isEqualTo(testInput1.getName());
     final PositionInput posInput1 = PositionInput.builder().withUuid(createdPos1.getUuid()).build();
-    final PositionInput testInput2 = PositionInput.builder().withType(PositionType.ADVISOR)
+    final PositionInput testInput2 = PositionInput.builder().withType(PositionType.REGULAR)
         .withRole(PositionRole.MEMBER).withName("Test Position for person history edit 2")
         .withOrganization(getOrganizationInput(org))
         .withLocation(getLocationInput(getGeneralHospital())).withStatus(Status.ACTIVE).build();
@@ -594,7 +587,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(personUpdated).isNotNull();
     final List<PersonPositionHistory> previousPositions = personUpdated.getPreviousPositions();
     assertThat(previousPositions).isNotNull();
-    assertThat(previousPositions.size() == 2);
+    assertThat(previousPositions.size()).isEqualTo(2);
   }
 
   @Test
@@ -647,9 +640,8 @@ public class PersonResourceTest extends AbstractResourceTest {
           .collect(Collectors.toList());
       personInput.setCustomSensitiveInformation(csiInput);
     } else {
-      personInput.getCustomSensitiveInformation().stream()
-          .forEach(csiInput -> csiInput.setCustomFieldValue(
-              getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
+      personInput.getCustomSensitiveInformation().forEach(csiInput -> csiInput.setCustomFieldValue(
+          getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
     }
     final Integer nrUpdated = mutationExecutor.updatePerson("", personInput);
     assertThat(nrUpdated).isEqualTo(1);
@@ -677,9 +669,8 @@ public class PersonResourceTest extends AbstractResourceTest {
     } else {
       // Restore previous values
       final PersonInput personInputRestore = getInput(person, PersonInput.class);
-      personInput.getCustomSensitiveInformation().stream()
-          .forEach(csiInput -> csiInput.setCustomFieldValue(
-              getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
+      personInput.getCustomSensitiveInformation().forEach(csiInput -> csiInput.setCustomFieldValue(
+          getCustomFieldValue(csiInput.getCustomFieldName(), UUID.randomUUID().toString())));
       final Integer nrUpdatedRestore = mutationExecutor.updatePerson("", personInputRestore);
       assertThat(nrUpdatedRestore).isEqualTo(1);
     }
@@ -740,13 +731,13 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     // Test with non-existing UUID
     PersonInput personInput = getInput(person, PersonInput.class);
-    personInput.getCustomSensitiveInformation().stream()
+    personInput.getCustomSensitiveInformation()
         .forEach(csiInput -> csiInput.setUuid(UUID.randomUUID().toString()));
     checkIllegalSensitiveInformation(person, personInput, personInput);
 
     // Test with wrong customFieldName
     personInput = getInput(person, PersonInput.class);
-    personInput.getCustomSensitiveInformation().stream()
+    personInput.getCustomSensitiveInformation()
         .forEach(csiInput -> csiInput.setCustomFieldName(
             BIRTHDAY_FIELD.equals(csiInput.getCustomFieldName()) ? POLITICAL_POSITION_FIELD
                 : BIRTHDAY_FIELD));

@@ -2,7 +2,6 @@ me {
   uuid
   name
   rank
-  role
   avatarUuid
   status
   emailAddress
@@ -49,7 +48,6 @@ me {
         uuid
         name
         rank
-        role
         avatarUuid
         position {
           uuid
@@ -116,28 +114,11 @@ adminSettings {
   value
 }
 
-topLevelAdvisorOrgs: organizationList(
+topLevelOrgs: organizationList(
   query: {
     pageSize: 0
     hasParentOrg: false
     status: ACTIVE
-    type: ADVISOR_ORG
-  }
-) {
-  list {
-    uuid
-    shortName
-    longName
-    identificationCode
-  }
-}
-
-topLevelPrincipalOrgs: organizationList(
-  query: {
-    pageSize: 0
-    hasParentOrg: false
-    status: ACTIVE
-    type: PRINCIPAL_ORG
   }
 ) {
   list {

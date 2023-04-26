@@ -3,7 +3,6 @@ personList(query:{pageSize:0}) {
     uuid
     name
     rank
-    role
     avatarUuid
     emailAddress
     position {
