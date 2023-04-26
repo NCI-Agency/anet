@@ -7,7 +7,6 @@ const moment = require("moment")
 const _includes = require("lodash/includes")
 const _isRegExp = require("lodash/isRegExp")
 const chalk = require("chalk")
-const fetch = require("cross-fetch")
 
 let capabilities
 const testEnv =
@@ -108,7 +107,6 @@ test.beforeEach(t => {
        */
       .setChromeService(new chrome.ServiceBuilder())
   } else {
-    capabilities.name = t.title.replace(/^beforeEach hook for /, "")
     builder = builder
       .usingServer("http://hub.browserstack.com/wd/hub")
       .withCapabilities(capabilities)
@@ -437,28 +435,29 @@ test.beforeEach(t => {
   }
 })
 
+test.beforeEach(async t => {
+  if (t.context.driver) {
+    if (testEnv !== "local") {
+      // Set test title on BrowserStack
+      const body = JSON.stringify({
+        action: "setSessionName",
+        arguments: { name: t.title.replace(/^beforeEach hook for /, "") }
+      })
+      await t.context.driver.executeScript(`browserstack_executor: ${body}`)
+    }
+  }
+})
+
 // Shut down the browser when we are done.
 test.afterEach.always(async t => {
   if (t.context.driver) {
     if (testEnv !== "local") {
       // Send back test result to BrowserStack
-      const session = await t.context.driver.getSession()
-      const url = `https://api.browserstack.com/automate/sessions/${session.getId()}.json`
-      const options = {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization:
-            "Basic " +
-            Buffer.from(
-              `${capabilities["bstack:options"].userName}:${capabilities["bstack:options"].accessKey}`
-            ).toString("base64")
-        },
-        body: JSON.stringify({
-          status: t.passed ? "passed" : "failed"
-        })
-      }
-      await fetch(url, options)
+      const body = JSON.stringify({
+        action: "setSessionStatus",
+        arguments: { status: t.passed ? "passed" : "failed" }
+      })
+      await t.context.driver.executeScript(`browserstack_executor: ${body}`)
     }
 
     await t.context.driver.quit()
@@ -467,7 +466,7 @@ test.afterEach.always(async t => {
 
 /**
  * Technically speaking, everything should be wrapped in a wait() block to give
- * the the browser time to run JS to update the page. In practice, this does not
+ * the browser time to run JS to update the page. In practice, this does not
  * always seem to be necessary, since the JS can run very fast. If the tests are flaky,
  * this would be a good thing to investigate.
  *
