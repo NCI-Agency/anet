@@ -144,7 +144,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
       // Setify based on uuid to prevent violations of unique key constraint.
       Map<String, ReportPerson> reportPeopleMap = new HashMap<>();
       r.getReportPeople().stream().forEach(rp -> reportPeopleMap.put(rp.getUuid(), rp));
-      rb.insertReportPeople(r.getUuid(), new ArrayList<ReportPerson>(reportPeopleMap.values()));
+      rb.insertReportPeople(r.getUuid(), new ArrayList<>(reportPeopleMap.values()));
     }
 
     if (r.getAuthorizationGroups() != null) {
@@ -157,7 +157,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
   }
 
   public interface ReportBatch {
-    @SqlBatch("INSERT INTO \"reportPeople\" (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\") VALUES (:reportUuid, :uuid, :primary, :author)")
+    @SqlBatch("INSERT INTO \"reportPeople\""
+        + " (\"reportUuid\", \"personUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\")"
+        + " VALUES (:reportUuid, :uuid, :primary, :author, :attendee)")
     void insertReportPeople(@Bind("reportUuid") String reportUuid,
         @BindBean List<ReportPerson> reportPeople);
 
@@ -259,10 +261,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
     return getDbHandle()
         .createUpdate("/* addReportPerson */ INSERT INTO \"reportPeople\" "
             + "(\"personUuid\", \"reportUuid\", \"isPrimary\", \"isAuthor\", \"isAttendee\")"
-            + " VALUES (:personUuid, :reportUuid, :isPrimary, :isAuthor, :isAttendee)")
-        .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid())
-        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor())
-        .bind("isAttendee", rp.isAttendee()).execute();
+            + " VALUES (:personUuid, :reportUuid, :primary, :author, :attendee)")
+        .bind("personUuid", rp.getUuid()).bind("reportUuid", r.getUuid()).bindBean(rp).execute();
   }
 
   @InTransaction
@@ -275,12 +275,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report, ReportSearchQue
 
   @InTransaction
   public int updatePersonOnReport(ReportPerson rp, Report r) {
-    return getDbHandle().createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
-        + "SET \"isPrimary\" = :isPrimary, \"isAuthor\" = :isAuthor, \"isAttendee\" = :isAttendee"
-        + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
-        .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid())
-        .bind("isPrimary", rp.isPrimary()).bind("isAuthor", rp.isAuthor())
-        .bind("isAttendee", rp.isAttendee()).execute();
+    return getDbHandle()
+        .createUpdate("/* updatePersonOnReport*/ UPDATE \"reportPeople\" "
+            + "SET \"isPrimary\" = :primary, \"isAuthor\" = :author, \"isAttendee\" = :attendee"
+            + " WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
+        .bind("reportUuid", r.getUuid()).bind("personUuid", rp.getUuid()).bindBean(rp).execute();
   }
 
   @InTransaction
